@@ -15,6 +15,8 @@ import {
   getDetailBatch,
   getDownloadFailed,
   getListApprovalById,
+  updateSingleUsage,
+  deleteSingleUsage,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import CardContainer from "../../../../../components/CardContainer";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -164,34 +166,84 @@ const DetailMonitoringUsage = () => {
   };
 
   const handleSaveUpdateUsage = async (formValue) => {
-    const newDataTable = [...dataTable];
-    const index = newDataTable.findIndex((item) => recordId === item.recordId);
-    const item = newDataTable[index];
-    const updatedRow = {
-      ...item,
-      ...formValue,
-      billingPeriod:
-        formValue?.billingPeriod === false
-          ? null
-          : moment(formValue?.billingPeriod).format(dateFormatting.datePeriod),
-      fdate:
-        formValue?.fdate === false
-          ? null
-          : moment(formValue?.fdate).format(dateFormatting.date),
-      fhour: hasValue(formValue?.fhour)
-        ? moment(formValue?.fhour).format(dateFormatting.hour_format)
-        : null,
-      measDate:
-        formValue?.measDate === false
-          ? null
-          : moment(formValue?.measDate).format(dateFormatting.dateTime),
-      status: "SUCCESS",
-      recordId: recordId,
-    };
-    newDataTable.splice(index, 1, updatedRow);
-    setDataTable(newDataTable);
-    setOpenUpdateUsage(false);
-    dispatch(addUpdatedData(updatedRow));
+    try {
+      // Prepare request body sesuai format backend
+      const requestBody = {
+        accountNumber: formValue?.accountNumber || null,
+        accountName: formValue?.accountName || null,
+        costCenter: formValue?.costCenter || null,
+        billingPeriod:
+          formValue?.billingPeriod || null,
+        assetSerialNum: formValue?.assetSerialNum || null,
+        assetType: formValue?.assetType || null,
+        fdate:
+          formValue?.fdate === false
+            ? null
+            : moment(formValue?.fdate).format(dateFormatting.dateFormal),
+        fhour: hasValue(formValue?.fhour)
+          ? moment(formValue?.fhour).format(dateFormatting.fhour)
+          : null,
+        measDate:
+          formValue?.measDate || null ,
+        streamId: formValue?.streamId || null,
+        temperature: formValue?.temperature || null,
+        pressure: formValue?.pressure || null,
+        correctionFactor: formValue?.correctionFactor || null,
+        calorie: formValue?.calorie || null,
+        beginStand: formValue?.beginStand || null,
+        endStand: formValue?.endStand || null,
+        volMeasured27: formValue?.volMeasured27 || null,
+        volMeasured60: formValue?.volMeasured60 || null,
+        engMeasured: formValue?.engMeasured || null,
+        ghv: formValue?.ghv || null,
+        volMscf: formValue?.volMscf || null,
+        uncorrectedValue: formValue?.uncorrectedValue || null,
+        taxationRowId: formValue?.taxationRowId || null,
+        source: formValue?.source || null,
+        description: formValue?.description || null,
+      };
+
+      // Dispatch update ke API
+      const resultAction = await dispatch(
+        updateSingleUsage({
+          recordId: recordId,
+          data: requestBody,
+        })
+      );
+
+      if (updateSingleUsage.fulfilled.match(resultAction)) {
+        // Update local state setelah API berhasil
+        const newDataTable = [...dataTable];
+        const index = newDataTable.findIndex(
+          (item) => recordId === item.recordId
+        );
+
+        if (index !== -1) {
+          const item = newDataTable[index];
+          const updatedRow = {
+            ...item,
+            ...formValue,
+            billingPeriod: requestBody.billingPeriod,
+            fdate: requestBody.fdate,
+            fhour: requestBody.fhour,
+            measDate: requestBody.measDate,
+            status: "SUCCESS",
+            recordId: recordId,
+          };
+          newDataTable.splice(index, 1, updatedRow);
+          setDataTable(newDataTable);
+        }
+
+        setOpenUpdateUsage(false);
+
+        // Refresh data dari server
+        dispatch(
+          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        );
+      }
+    } catch (error) {
+      console.error("Error updating usage:", error);
+    }
   };
 
   // change tabs
@@ -211,11 +263,25 @@ const DetailMonitoringUsage = () => {
   const handleClear = () => {};
 
   // handle delete usage list
-  const handleDeleteOk = () => {
-    const newData = dataTable.filter((item) => item.recordId !== recordId);
-    setDataTable(newData);
-    dispatch(addDeletedData(deletedRecord));
-    setModalDelete(false);
+  const handleDeleteOk = async () => {
+    try {
+      const resultAction = await dispatch(deleteSingleUsage(recordId));
+
+      if (deleteSingleUsage.fulfilled.match(resultAction)) {
+        // Update local state setelah API berhasil
+        const newData = dataTable.filter((item) => item.recordId !== recordId);
+        setDataTable(newData);
+        setModalDelete(false);
+
+        // Refresh data dari server
+        dispatch(
+          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting usage:", error);
+      setModalDelete(false);
+    }
   };
 
   // change page

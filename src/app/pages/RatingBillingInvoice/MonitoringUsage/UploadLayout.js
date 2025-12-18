@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
 import {
-  addDeletedData,
+  deleteSingleUsage, 
   getFormatUsageType,
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
@@ -38,10 +38,8 @@ const UploadLayout = ({
   id,
   dataHeader,
   type,
+  refreshData = () => {}, 
 }) => {
-  // const [page, setPage] = useState(1)
-  // const [pageSize, setPageSize] = useState(10);
-  // const [sort, setSort] = useState('');
   const [format, setFormat] = useState();
   const [urlLink, setUrlLink] = useState("");
   const [fileList, setFileList] = useState([]);
@@ -50,6 +48,7 @@ const UploadLayout = ({
   const [dataSource, setDataSource] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [deletedRecord, setDeletedRecord] = useState(null);
+  const [recordId, setRecordId] = useState(""); 
   const [isFileUploadEnabled, setFileUploadEnabled] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
@@ -87,9 +86,6 @@ const UploadLayout = ({
       "UNCORRECTED_VALUE",
       "SOURCE",
     ],
-    // Anda bisa menambahkan mapping berdasarkan calculationType jika berbeda
-    // 1: ["kolom1", "kolom2", ...],
-    // 2: ["kolom1", "kolom2", ...],
   };
   const { loading } = useSelector((state) => state.monitoring_usage);
   const { columns, page, setPage, pageSize, setPageSize, onSort } =
@@ -97,31 +93,17 @@ const UploadLayout = ({
   const [tableDataSource, setTableDataSource] = useState([]);
   const dispatch = useDispatch();
 
-  const { list_usage_type, updatedData, deletedData } = useSelector(
+  const { list_usage_type } = useSelector(
     (state) => state.monitoring_usage
   );
+
   useEffect(() => {
     try {
       dispatch(getFormatUsageType());
-      // setTableDataSource(data?.usageList?.result)
     } catch (error) {
       console.log("Error", error);
     }
   }, [dispatch]);
-
-  // useEffect(() => {
-  //     if (updatedData.length > 0 || deletedData.length > 0) {
-  //         const updatedTableDataSource = tableDataSource?.map((item) => {
-  //             const updatedItem = updatedData?.find((updated) => updated.recordId === item.recordId);
-  //             return updatedItem ? { ...item, ...updatedItem } : item;
-  //         });
-
-  //         const finalTableDataSource = updatedTableDataSource?.filter(
-  //             (item) => !deletedData?.some((deleted) => deleted.recordId === item.recordId)
-  //         );
-  //         setTableDataSource(finalTableDataSource);
-  //     }
-  // }, [tableDataSource, updatedData, deletedData]);
 
   // onChange Size
   const onChangeSize = (page, pageSize) => {
@@ -139,12 +121,33 @@ const UploadLayout = ({
     setSelectedRecord(null);
   };
 
-  const handleDeleteOk = (record) => {
-    setModalDelete(false);
-    dispatch(addDeletedData(deletedRecord));
+  const handleDeleteOk = async () => {
+    try {
+      if (!recordId) {
+        console.error("No recordId found");
+        return;
+      }
+
+      const resultAction = await dispatch(deleteSingleUsage(recordId));
+      
+      if (deleteSingleUsage.fulfilled.match(resultAction)) {
+        // Update local state setelah API berhasil
+        const newData = dataTable.filter((item) => item.recordId !== recordId);
+        setDataTable(newData);
+        setModalDelete(false);
+        
+        // Refresh data dari parent component jika ada
+        if (refreshData && typeof refreshData === 'function') {
+          refreshData();
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting usage:", error);
+      setModalDelete(false);
+    }
   };
 
-  // column
+  // column action dengan recordId
   const action = [
     {
       title: "ACTION",
@@ -176,6 +179,7 @@ const UploadLayout = ({
                   onClick={() => {
                     setModalDelete(true);
                     setDeletedRecord(record);
+                    setRecordId(record?.recordId);
                   }}
                 />
               </div>
@@ -193,7 +197,6 @@ const UploadLayout = ({
 
   // handle format change
   const handleFormat = (value) => {
-    // console.log(value)
     setFormat(value);
     setFileUploadEnabled(!!value);
   };
@@ -207,7 +210,6 @@ const UploadLayout = ({
 
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    // Tidak langsung upload, tunggu konfirmasi user
   };
 
   // Validate Excel columns
@@ -300,7 +302,7 @@ const UploadLayout = ({
               isValid: false,
               message: errorMessage,
               columnsWithEmptyCells,
-              emptyRowNumbers: emptyRowNumbers.slice(0, 10), // Show first 10 rows with empty cells
+              emptyRowNumbers: emptyRowNumbers.slice(0, 10),
             });
             return;
           }
@@ -398,6 +400,11 @@ const UploadLayout = ({
       };
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
+      
+      // ✅ Refresh data setelah upload berhasil
+      if (refreshData && typeof refreshData === 'function') {
+        refreshData();
+      }
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
@@ -410,6 +417,7 @@ const UploadLayout = ({
     }
     setLoadingUpload(false);
   };
+
   // handle upload by link
   const handleUploadLink = async () => {
     try {
@@ -420,6 +428,11 @@ const UploadLayout = ({
         onProgress: (progress) => setFileProgress(progress),
       };
       await dispatch(uploadMonitoringUsage(body)).unwrap();
+      
+      // ✅ Refresh data setelah upload berhasil
+      if (refreshData && typeof refreshData === 'function') {
+        refreshData();
+      }
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
@@ -437,14 +450,6 @@ const UploadLayout = ({
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
-
-  // const onSort = (_, __, sort) => {
-  //     const dataSort =
-  //         sort.order !== undefined
-  //             ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-  //             : "";
-  //     setSort(dataSort);
-  // };
 
   // update link files
   const updateLink = (e) => {
@@ -543,6 +548,7 @@ const UploadLayout = ({
               onChange={handleChangePage}
               tableScrolled={{ x: 10000, y: 600 }}
               onSort={onSort}
+              loading={loading} 
             />
           </div>
         </div>
@@ -693,6 +699,7 @@ const UploadLayout = ({
       );
     }
   };
+
   return (
     <>
       {renderLayout(type)}

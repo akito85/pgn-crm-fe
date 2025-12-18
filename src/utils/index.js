@@ -49,6 +49,7 @@ export const dateFormatting = {
   dateForm: "DD-MM-YYYY",
   period: "YYYY-MM",
   month: "MMM",
+  fhour: "HH:mm:ss",
 };
 
 export const formMessageRequired = (input, isRequired = true) => {
