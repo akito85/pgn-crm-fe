@@ -15,7 +15,8 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
-import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+// import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -86,7 +87,7 @@ const columnAttachmentData = (
       title: "NO",
       width: 30,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      dataIndex: "no",
     },
     {
       title: "CATEGORY",
@@ -334,7 +335,7 @@ const AttachmentSectionForm = ({
               </div>
             </div>
           ) : null}
-          <TablePaginationNew
+          {/* <TablePaginationNew
             type="FE"
             dataSource={data}
             totalData={data.length}
@@ -353,6 +354,27 @@ const AttachmentSectionForm = ({
               type,
               handleShow
             )}
+          /> */}
+          <TablePaginationNew
+            type="FE"
+            dataSource={data.map((item, index) => ({
+              ...item,
+              no: (page - 1) * pageSize + index + 1,
+            }))}
+            tableScrolled={{ y: 300, x: 1500 }}
+            onChange={handleChangeSize}
+            columns={columnAttachmentData(
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handleDelete,
+              type,
+              handleShow
+            )}
+            enableDragColumn={true}
           />
           <ModalAttachment
             openUpload={modalUpload}
