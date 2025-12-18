@@ -363,7 +363,7 @@ export default function InfoInvoiceRelation({
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    setAccount(r?.accountId, r?.customerNumber, r?.customerName)
+                    setAccount(r?.accountId, r?.accountNumber, r?.accountName)
                     setIsOpen(false);
                   }}
                 />
