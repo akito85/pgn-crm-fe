@@ -432,7 +432,7 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Upload Date">
                       {detail_batch?.batchInformation?.uploadDate}
                     </DetailText>
-                    <DetailText label="Total Invoice">
+                    <DetailText label="Total Usage">
                       {detail_batch?.batchInformation?.totalUsage}
                     </DetailText>
                     <DetailText label="Total Succeed">
@@ -465,21 +465,21 @@ const DetailMonitoringUsage = () => {
                 >
                   <div className="grid grid-cols-5 gap-x-8 gap-y-4">
                     <DetailText label="Record ID">
-                      {detail_batch?.batchInformation?.batchId || "-"}
+                      {detail_batch?.batchInformation?.batchId}
                     </DetailText>
                     <DetailText label="Created Date">
-                      {detail_batch?.batchInformation?.uploadDate || "-"}
+                      {detail_batch?.batchInformation?.uploadDate}
                     </DetailText>
                     <DetailText label="Created By">
-                      {detail_batch?.batchInformation?.uploadBy || "-"}
+                      {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                     <DetailText label="Updated Date">
                       {/* Tambahkan field updated date jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedDate || "-"}
+                      {detail_batch?.batchInformation?.updatedDate}
                     </DetailText>
                     <DetailText label="Updated By">
                       {/* Tambahkan field updated by jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedBy || "-"}
+                      {detail_batch?.batchInformation?.updatedBy}
                     </DetailText>
                   </div>
                 </BaseContainer>

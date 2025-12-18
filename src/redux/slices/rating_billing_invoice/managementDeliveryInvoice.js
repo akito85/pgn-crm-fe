@@ -21,7 +21,7 @@ export const getDeliveryList = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
 
-      const url = `/rbi/v1/dbs/api/rbi/delivery/list?page=${page}&size=${pageSize}`;
+      const url = `/v1/dbs/api/rbi/delivery/list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
@@ -35,7 +35,7 @@ export const getDeliverySummary = createAsyncThunk(
   "DELIVERY/GET_SUMMARY",
   async (_, thunkAPI) => {
     try {
-      const url = `/rbi/v1/dbs/api/rbi/delivery/summary`;
+      const url = `/v1/dbs/api/rbi/delivery/summary`;
       const response = await ratingBillingHttpService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -48,7 +48,7 @@ export const createDeliveryJob = createAsyncThunk(
   "DELIVERY/CREATE_JOB",
   async (body, thunkAPI) => {
     try {
-      const url = `/rbi/v1/dbs/api/rbi/delivery/create-job-delivery`;
+      const url = `/v1/dbs/api/rbi/delivery/create-job-delivery`;
 
       const response = await ratingBillingHttpService.createData(url, body);
 
@@ -83,7 +83,7 @@ export const getBillingPeriod = createAsyncThunk(
   "DELIVERY/GET_BILLING_PERIOD",
   async (_, thunkAPI) => {
     try {
-      const url = `/rbi/v1/dbs/api/rbi/delivery/list-billPeriod`;
+      const url = `/v1/dbs/api/rbi/delivery/list-billPeriod`;
       const response = await ratingBillingHttpService.getAll(url);
       return response?.data;
     } catch (error) {
