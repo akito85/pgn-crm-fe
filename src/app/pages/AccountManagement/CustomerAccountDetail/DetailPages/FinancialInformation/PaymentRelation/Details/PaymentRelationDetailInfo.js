@@ -30,8 +30,8 @@ const PaymentRelationDetailInfo = ({
           <DetailText label="Record Id">{dataDetail?.id}</DetailText>
           <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
           <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-          <DetailText label="Updated Date">{dataDetail?.updatedDate}</DetailText>
-          <DetailText label="Updated By">{dataDetail?.updatedBy ? moment(dataDetail.updatedBy, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+          <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+          <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
         </div>
       </BaseContainer>
     </Fragment>
