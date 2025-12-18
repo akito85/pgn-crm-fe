@@ -127,10 +127,13 @@ export const getAllBillingPaginate = createAsyncThunk(
 
 export const getAllBillingRequestPaginate = createAsyncThunk(
   "GET_ALL_BILLING_REQUEST_PAGINATE",
-  async (thunkAPI) => {
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/billing/request-billing-list`;
-      const response = await ratingBillingHttpService.getAll(url);
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/billing/request-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
       const message =
@@ -154,10 +157,13 @@ export const getAllBillingRequestPaginate = createAsyncThunk(
 
 export const getAllBillingApprovePaginate = createAsyncThunk(
   "GET_ALL_BILLING_APPROVE_PAGINATE",
-  async (thunkAPI) => {
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/billing/approval-billing-list`;
-      const response = await ratingBillingHttpService.getAll(url);
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/billing/approval-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
       const message =
