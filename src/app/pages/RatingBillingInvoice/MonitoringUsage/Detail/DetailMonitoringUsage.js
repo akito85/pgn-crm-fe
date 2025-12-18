@@ -32,12 +32,8 @@ import StatusComponent from "../../../../../components/StatusComponent";
 
 const DetailMonitoringUsage = () => {
   // Selector
-  const {
-    detail_batch,
-    loading,
-    list_approval_by_id,
-    list_approval,
-  } = useSelector((state) => state.monitoring_usage);
+  const { detail_batch, loading, list_approval_by_id, list_approval } =
+    useSelector((state) => state.monitoring_usage);
 
   // Declaration
   const navigate = useNavigate();
@@ -75,7 +71,7 @@ const DetailMonitoringUsage = () => {
   const [body, setBody] = useState({});
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["status","action"],
+    right: ["status", "action"],
   }));
 
   // assert function
@@ -159,10 +155,10 @@ const DetailMonitoringUsage = () => {
 
   // handle save
   const handleSave = (formValue) => {
-    setBody({ 
-      ...detail_batch, 
-      usageList: dataTable, 
-      isSubmit: flag === 1 ? false : true 
+    setBody({
+      ...detail_batch,
+      usageList: dataTable,
+      isSubmit: flag === 1 ? false : true,
     });
     setOpenConfirmation(true);
   };
@@ -254,7 +250,8 @@ const DetailMonitoringUsage = () => {
       align: "center",
       width: 100,
       render: (id, record, index) => {
-        const isComplete = detail_batch?.batchInformation?.status === "COMPLETE";
+        const isComplete =
+          detail_batch?.batchInformation?.status === "COMPLETE";
         return (
           <div className="flex w-full justify-center gap-3">
             <Tooltip title="Update">
@@ -312,11 +309,13 @@ const DetailMonitoringUsage = () => {
 
   // All columns with keys
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...filteredColumns, ...actionColumns].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-      width: col.width || 150,
-    }));
+    const columnsWithKeys = [...filteredColumns, ...actionColumns].map(
+      (col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+        width: col.width || 150,
+      })
+    );
     return columnsWithKeys;
   }, [filteredColumns, actionColumns]);
 
@@ -335,11 +334,7 @@ const DetailMonitoringUsage = () => {
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSave}
-        >
+        <Form layout="vertical" form={form} onFinish={handleSave}>
           <CardContainer
             header={
               <div className="flex justify-between items-center -my-4">
@@ -367,53 +362,58 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Upload Type">
                       {detail_batch?.batchInformation?.uploadType}
                     </DetailText>
-                    
+
                     <DetailText label="Upload Date">
                       {detail_batch?.batchInformation?.uploadDate}
-                    </DetailText>                    
-                    <DetailText label="Total Invoice">
+                    </DetailText>
+                    <DetailText label="Total Usage">
                       {detail_batch?.batchInformation?.totalUsage}
                     </DetailText>
                     <DetailText label="Total Succeed">
                       {detail_batch?.batchInformation?.totalSucceed}
                     </DetailText>
-                    
+
                     <DetailText label="Total Progress">
                       {detail_batch?.batchInformation?.totalProgress}
                     </DetailText>
                     <DetailText label="Total Failed">
                       {detail_batch?.batchInformation?.totalFailed}
                     </DetailText>
-                    
+
                     <DetailText label="Generate Date">
                       {detail_batch?.batchInformation?.generateDate}
                     </DetailText>
                     <DetailText label="Status">
-                      <StatusComponent colour={detail_batch?.batchInformation?.status}>
+                      <StatusComponent
+                        colour={detail_batch?.batchInformation?.status}
+                      >
                         {detail_batch?.batchInformation?.status}
                       </StatusComponent>
                     </DetailText>
                   </div>
                 </BaseContainer>
 
-                <BaseContainer header={"History Log Information"} className="mt-1">
+                <BaseContainer
+                  header={"History Log Information"}
+                  className="mt-1"
+                >
                   <div className="grid grid-cols-5 gap-x-8 gap-y-4">
                     <DetailText label="Record ID">
-                      {detail_batch?.batchInformation?.batchId || "-"}
+                      {detail_batch?.batchInformation?.batchId}
                     </DetailText>
                     <DetailText label="Created Date">
-                      {detail_batch?.batchInformation?.uploadDate || "-"}
+                      {detail_batch?.batchInformation?.uploadDate}
                     </DetailText>
                     <DetailText label="Created By">
-                      {detail_batch?.batchInformation?.uploadBy || "-"}
+                      {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                     <DetailText label="Updated Date">
                       {/* Tambahkan field updated date jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedDate || "-"}
+                      {detail_batch?.batchInformation?.updatedDate}
                     </DetailText>
                     <DetailText label="Updated By">
                       {/* Tambahkan field updated by jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedBy || "-"}
+                      {detail_batch?.batchInformation?.updatedBy}
                     </DetailText>
                   </div>
                 </BaseContainer>
