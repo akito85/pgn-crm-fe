@@ -79,7 +79,7 @@ const PrabillingPage = () => {
         dataIndex: "initCode",
         sorter: true,
         align: "left",
-        width: 250,
+        width: 150,
         filteredValue: [search?.initCode] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -107,7 +107,7 @@ const PrabillingPage = () => {
         dataIndex: "sor",
         align: "left",
         sorter: true,
-        width: 300,
+        width: 200,
         filteredValue: [search?.sor] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
@@ -189,6 +189,7 @@ const PrabillingPage = () => {
         title: "PROCESS NAME",
         dataIndex: "processName",
         align: "left",
+        width: 200,
         sorter: true,
         filteredValue: [search?.processName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -216,6 +217,7 @@ const PrabillingPage = () => {
         title: "CREATED BY",
         dataIndex: "createdBy",
         align: "center",
+        width: 130,
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(

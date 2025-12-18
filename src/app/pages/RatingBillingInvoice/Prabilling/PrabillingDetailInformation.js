@@ -336,17 +336,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         render: (text) => text || "",
       },
       {
-        key: "fullPriceCode",
-        title: "FULL PRICE CODE",
-        dataIndex: "fullPriceCode",
-        width: 250,
-        sorter: true,
-        ellipsis: {
-          showTitle: false,
-        },
-        render: (text) => <Tooltip title={text}>{text || ""}</Tooltip>,
-      },
-      {
         key: "minUsage",
         title: "MIN USAGE",
         dataIndex: "minUsage",

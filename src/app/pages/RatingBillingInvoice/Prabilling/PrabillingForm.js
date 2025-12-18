@@ -643,6 +643,7 @@ const PrabillingForm = ({ type }) => {
                   label={"SOR"}
                   name={"sor"}
                   rules={formMessageRequired("SOR")}
+                  style={{ marginBottom: 0 }}
                 >
                   <SelectComponent
                     onChange={handleChangeSOR}
@@ -656,7 +657,7 @@ const PrabillingForm = ({ type }) => {
                   />
                 </Form.Item>
               </div>
-              <Form.Item label={"Cost Center"} name={"costCenter"}>
+              <Form.Item label={"Cost Center"} name={"costCenter"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -669,7 +670,7 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Meter Reading Code"} name={"meterReading"}>
+              <Form.Item label={"Meter Reading Code"} name={"meterReading"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleMeterReadingRoute}
@@ -685,7 +686,7 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Segment"} name={"accountSegment"}>
+              <Form.Item label={"Account Segment"} name={"accountSegment"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
@@ -697,7 +698,7 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Group Type"} name={"accountGroupType"}>
+              <Form.Item label={"Account Group Type"} name={"accountGroupType"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
@@ -717,7 +718,7 @@ const PrabillingForm = ({ type }) => {
                 <Form.Item
                   label={"Specific Customer Account"}
                   name={"specificCustomer"}
-                  style={{ marginBottom: 4 }}
+                  style={{ marginBottom: 0 }}
                   help={
                     specific_customer_message && (
                       <span className="text-blue-600 text-xs">
@@ -854,6 +855,7 @@ const PrabillingForm = ({ type }) => {
               label={"Type"}
               name={"type"}
               rules={formMessageRequired("Type")}
+              style={{ marginBottom: 0 }}
             >
               <SelectComponent
                 onChange={handleScheduleTypeChange}
@@ -873,6 +875,7 @@ const PrabillingForm = ({ type }) => {
                 <Form.Item
                   label={"Schedule"}
                   name={"scheduleDateTime"}
+                  style={{ marginBottom: 0 }}
                   rules={[
                     {
                       required: true,
@@ -896,6 +899,7 @@ const PrabillingForm = ({ type }) => {
               label={"Remark"}
               name={"remark"}
               rules={formMessageRequired("Remark")}
+              style={{ marginBottom: 0 }}
             >
               <InputComponent
                 type="textarea"
