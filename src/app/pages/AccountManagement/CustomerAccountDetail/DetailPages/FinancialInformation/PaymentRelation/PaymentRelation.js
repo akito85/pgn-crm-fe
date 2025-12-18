@@ -127,7 +127,7 @@ const PaymentRelation = ({
         page,
         size: pageSize,
         sort,
-        searches: search,
+        searchs: search,
         inputFields: tempFilters,
       }
 
@@ -176,7 +176,7 @@ const PaymentRelation = ({
         page,
         size: pageSize,
         sort,
-        searches: search,
+        searchs: search,
         inputFields: tempFilters,
       }
 
@@ -374,7 +374,7 @@ const PaymentRelation = ({
       page,
       size: pageSize,
       sort,
-      searches: search,
+      searchs: search,
       inputFields: tempFilters,
     }
 
