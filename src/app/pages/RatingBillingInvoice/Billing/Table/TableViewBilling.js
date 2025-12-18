@@ -480,7 +480,7 @@ export const columnsBilling = (
    {
     key: "meterReadingCode",
     title: "METER READING CODE",
-    width: 120,
+    width: 100,
     isClassification: true,
     dataIndex: "meterReadingCode",
     sorter: true,
@@ -2103,7 +2103,7 @@ export const columnsBilling = (
   {
     key: "paymentStatus",
     title: "PAYMENT STATUS",
-    width: 100,
+    width: 60,
     dataIndex: "paymentStatus",
     sorter: true,
     isClassification: true,
@@ -2156,7 +2156,7 @@ export const columnsBilling = (
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     fixed: "right",
-    width: 90,
+    width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
