@@ -20,6 +20,7 @@ export const columnsUsage = (
   {
     key: "billingPeriod",
     title: "PERIOD",
+    width: 100,
     sorter: true,
     align: "center",
     dataIndex: "billingPeriod",

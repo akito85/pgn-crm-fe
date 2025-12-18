@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin } from "antd";
 import { 
   getDetailCalculationJob,
-  getDetailCalculationLog // ← TAMBAHKAN INI
+  getDetailCalculationLog
 } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 
 const CalculationDetail = () => {
@@ -39,7 +39,6 @@ const CalculationDetail = () => {
     }
   }, [dispatch, calJobId]);
 
-  // ← TAMBAHKAN INI: Fetch Calculation Log saat pertama kali load
   useEffect(() => {
     if (detail_calculation_job?.calCode) {
       dispatch(

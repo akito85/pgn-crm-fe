@@ -676,17 +676,17 @@ const DetailInformation = ({ data, tabHeader }) => {
         {/* History Log Information Section */}
         <CardContainer subHeader={"history log information"}>
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Action"}>{latestLog?.action || "-"}</DetailText>
-            <DetailText label={"Type"}>{latestLog?.calType || "-"}</DetailText>
+            <DetailText label={"Action"}>{latestLog?.action || ""}</DetailText>
+            <DetailText label={"Type"}>{latestLog?.calType || ""}</DetailText>
             <DetailText label={"Calculate At"}>
               {latestLog?.calDate
                 ? moment(latestLog.calDate).format("DD MMM YYYY HH:mm:ss")
-                : "-"}
+                : ""}
             </DetailText>
             <DetailText label={"Calculate By"}>
-              {latestLog?.createdBy || "-"}
+              {latestLog?.createdBy || ""}
             </DetailText>
-            <DetailText label={"Remark"}>{latestLog?.remark || "-"}</DetailText>
+            <DetailText label={"Remark"}>{latestLog?.remark || ""}</DetailText>
           </div>
         </CardContainer>
 
