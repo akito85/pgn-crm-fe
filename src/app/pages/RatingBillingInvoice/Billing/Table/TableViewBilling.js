@@ -24,7 +24,7 @@ export const columnsBilling = (
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
-    width: 110,
+    width: 90,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "calculationCode",
@@ -90,7 +90,7 @@ export const columnsBilling = (
     key: "billingCode",
     title: "BILLING CODE",
     dataIndex: "billingCode",
-    width: 100,
+    width: 90,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "billingCode",
@@ -123,6 +123,7 @@ export const columnsBilling = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
+    width: 100,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "saNumber",
@@ -155,7 +156,7 @@ export const columnsBilling = (
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
-    width: 90,
+    width: 70,
     sorter: true,
     isClassification: true,
     // ...getColumnSearchPropsPaging(
@@ -188,7 +189,7 @@ export const columnsBilling = (
   {
     key: "billingPeriod",
     title: "BILLING PERIOD",
-    width: 100,
+    width: 70,
     sorter: true,
     isClassification: true,
     dataIndex: "billingPeriod",
@@ -247,7 +248,7 @@ export const columnsBilling = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
-    width: 110,
+    width: 100,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "customerNumber",

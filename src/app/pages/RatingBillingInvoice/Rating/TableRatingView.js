@@ -22,6 +22,7 @@ export const columnsRating = (
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -37,6 +38,7 @@ export const columnsRating = (
     key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -52,6 +54,7 @@ export const columnsRating = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -67,6 +70,7 @@ export const columnsRating = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
+    width: 130,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -82,6 +86,7 @@ export const columnsRating = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -109,25 +114,10 @@ export const columnsRating = (
     render: (text) => renderColumn('accountName', hasValue(search['accountName']), searchText, text, false, 'input', search)
   },
   {
-    key: "accGroupType",
-    title: "ACCOUNT GROUP TYPE",
-    dataIndex: "accGroupType",
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accGroupType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) => renderColumn('accGroupType', hasValue(search['accGroupType']), searchText, text, false, 'input', search)
-  },
-  {
     key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
+    width: 110,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -144,6 +134,8 @@ export const columnsRating = (
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
+    width: 170,
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -158,7 +150,9 @@ export const columnsRating = (
   {
     key: "costCenter",
     title: "COST CENTER",
+    width: 110,
     dataIndex: "costCenter",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -174,6 +168,7 @@ export const columnsRating = (
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
+    width: 120,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -186,10 +181,12 @@ export const columnsRating = (
     ),
     render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
   },
-  {
+   {
     key: "mreadingCode",
     title: "METER READING CODE",
     dataIndex: "mreadingCode",
+    width: 130,
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -201,10 +198,29 @@ export const columnsRating = (
     ),
     render: (text) => renderColumn('mreadingCode', hasValue(search['mreadingCode']), searchText, text, false, 'input', search)
   },
+    {
+    key: "accGroupType",
+    title: "ACCOUNT GROUP TYPE",
+    dataIndex: "accGroupType",
+    width: 130,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accGroupType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) => renderColumn('accGroupType', hasValue(search['accGroupType']), searchText, text, false, 'input', search)
+  },
   {
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
+    width: 100,
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -219,6 +235,7 @@ export const columnsRating = (
   {
     key: "billingPeriod",
     title: "BILLING PERIOD",
+    width: 100,
     sorter: true,
     isClassification: true,
     dataIndex: "billingPeriod",
@@ -268,6 +285,7 @@ export const columnsRating = (
   {
     key: "minContract",
     title: "MIN CONTRACT",
+    width: 100,
     dataIndex: "minContract",
     sorter: true,
     isNumber: true,
@@ -284,6 +302,7 @@ export const columnsRating = (
   {
     key: "maxContract",
     title: "MAX CONTRACT",
+    width: 100,
     dataIndex: "maxContract",
     sorter: true,
     isNumber: true,
@@ -301,6 +320,7 @@ export const columnsRating = (
     key: "uom",
     title: "UOM",
     dataIndex: "uom",
+    width: 60,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -317,6 +337,7 @@ export const columnsRating = (
     key: "timeUnitContract",
     title: "CONTRACT TIME UNIT",
     dataIndex: "timeUnitContract",
+    width: 120,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -332,6 +353,7 @@ export const columnsRating = (
   {
     key: "usage",
     title: "USAGE",
+    width: 70,
     dataIndex: "usage",
     sorter: true,
     isNumber: true,
@@ -348,6 +370,7 @@ export const columnsRating = (
   {
     key: "convUsageM3",
     title: "CONVERTED USAGE M3",
+    width: 130,
     dataIndex: "convUsageM3",
     sorter: true,
     isNumber: true,
@@ -381,6 +404,7 @@ export const columnsRating = (
     key: "discountUsage",
     title: "DISCOUNT USAGE",
     dataIndex: "discountUsage",
+    width: 120,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -396,6 +420,7 @@ export const columnsRating = (
   {
     key: "totalUsage",
     title: "TOTAL USAGE",
+    width: 100,
     dataIndex: "totalUsage",
     sorter: true,
     isNumber: true,
@@ -428,6 +453,7 @@ export const columnsRating = (
   {
     key: "convTotalUsageMmbtu",
     title: "CONVERTED TOTAL USAGE MMBTU",
+    width: 170,
     dataIndex: "convTotalUsageMmbtu",
     sorter: true,
     isNumber: true,
@@ -444,6 +470,7 @@ export const columnsRating = (
   {
     key: "minimumUsage",
     title: "MINIMUM USAGE",
+    width: 170,
     dataIndex: "minimumUsage",
     sorter: true,
     isNumber: true,
@@ -460,6 +487,7 @@ export const columnsRating = (
   {
     key: "convMinimumUsageM3",
     title: "CONVERTED MINIMUM USAGE M3",
+    width: 170,
     dataIndex: "convMinimumUsageM3",
     sorter: true,
     isNumber: true,
@@ -477,6 +505,7 @@ export const columnsRating = (
     key: "convMinimumUsageMmbtu",
     title: "CONVERTED MINIMUM USAGE MMBTU",
     dataIndex: "convMinimumUsageMmbtu",
+    width: 180,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -492,6 +521,7 @@ export const columnsRating = (
   {
     key: "normalUsage",
     title: "NORMAL USAGE",
+    width: 100,
     dataIndex: "normalUsage",
     sorter: true,
     isNumber: true,
@@ -508,6 +538,7 @@ export const columnsRating = (
   {
     key: "convNormalUsageM3",
     title: "CONVERTED NORMAL USAGE M3",
+    width: 170,
     dataIndex: "convNormalUsageM3",
     sorter: true,
     isNumber: true,
@@ -524,6 +555,7 @@ export const columnsRating = (
   {
     key: "convNormalUsageMmbtu",
     title: "CONVERTED NORMAL USAGE MMBTU",
+    width: 180,
     dataIndex: "convNormalUsageMmbtu",
     sorter: true,
     isNumber: true,
@@ -541,6 +573,7 @@ export const columnsRating = (
     key: "oup",
     title: "OUP",
     dataIndex: "oup",
+    width: 60,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -557,6 +590,7 @@ export const columnsRating = (
     key: "convOupM3",
     title: "CONVERTED OUP M3",
     dataIndex: "convOupM3",
+    width: 120,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -572,6 +606,7 @@ export const columnsRating = (
   {
     key: "convOupMmbtu",
     title: "CONVERTED OUP MMBTU",
+    width: 130,
     dataIndex: "convOupMmbtu",
     sorter: true,
     isNumber: true,
@@ -588,6 +623,7 @@ export const columnsRating = (
   {
     key: "calculatedUsage",
     title: "CALCULATED USAGE",
+    width: 110,
     dataIndex: "calculatedUsage",
     sorter: true,
     isNumber: true,
