@@ -273,6 +273,33 @@ const ViewPaymentChannel = () => {
         ),
     },
     {
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsPaging(
+        "category",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false
+      ),
+      render: (text) =>
+        renderColumn(
+          "category",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
       key: "statusApproval",
