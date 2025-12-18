@@ -319,17 +319,11 @@ const InvoiceRelation = ({
   }
 
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadInvoiceRelation({ page, pageSize, sort, search: tempSearch }));
+    const body = {
+      inputFields: tempFilters,
+    } 
+
+    dispatch(downloadInvoiceRelation({ page, size: pageSize, sort, searchs: search, body, id }));
   };
 
   /**

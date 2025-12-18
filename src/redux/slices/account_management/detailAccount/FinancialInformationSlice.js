@@ -1261,13 +1261,21 @@ export const inactivateInvoiceRelation = createAsyncThunk(
 
 export const downloadInvoiceRelation = createAsyncThunk(
   "DOWNLOAD_INVOICE_RELATION",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ searchs, page, size, sort, id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/invoice-relation/export-excel?search=${search}&page=
-      ${page}&size=${pageSize}&sort=${sort}`;
-      const response = await accountManagementService.downloadData(url, {
-        headers: { "Accept": "application/json" }
-      });
+      const queryParams = new URLSearchParams;
+
+      if (page)
+        queryParams.append("page", page);
+      if (size)
+        queryParams.append("size", size);
+      if (sort)
+        queryParams.append("sort", sort);
+      if (searchs)
+        queryParams.append("searchs", searchs);
+
+      const url = `/v1/dbs/api/invoice-relation/export-excel/${id}`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_INVOICE_RELATION", back: false }));
