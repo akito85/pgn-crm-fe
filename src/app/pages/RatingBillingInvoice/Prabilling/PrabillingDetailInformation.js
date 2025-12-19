@@ -402,7 +402,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         key: "action",
         title: "ACTION",
         width: 60,
-        isClassification:true,
+        isClassification: true,
         fixed: "right",
         render: (text, record) => (
           <Link
@@ -477,17 +477,22 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const resultData = detail_prabilling_result?.result || [];
   const pageInfo = detail_prabilling_result?.page || {};
 
+  // Gabungkan account numbers dan names dari details
+  const accountNumbers = detailsData
+    .map((detail) => detail.accountNumber)
+    .filter(Boolean)
+    .join(", ");
+  
+  const accountNames = detailsData
+    .map((detail) => detail.accoutnName)
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <Spin spinning={loading}>
       {/* Prabilling Information Section */}
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING INFORMATION</p>
-          </div>
-        }
-      >
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
+      <CardContainer subHeader={"Prabilling Information"}>
+        <div className={"w-full grid grid-cols-4 gap-2"}>
           <DetailText label={"Init Code"}>{prabillData?.initCode || ""}</DetailText>
           <DetailText label={"Process Name"}>
             {prabillData?.processName || ""}
@@ -498,53 +503,58 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           <DetailText label={"Billing Period"}>
             {prabillData?.billPeriod || ""}
           </DetailText>
-          <DetailText label={"SOR"}>{prabillData?.sor || ""}</DetailText>
-          <DetailText label={"Schedule Type"}>
-            {prabillData?.shceduleType || ""}
-          </DetailText>
+
           <DetailText label={"Total Customer"}>
             {prabillData?.totalCustomer || 0}
           </DetailText>
+          <DetailText label={"Schedule Type"}>
+            {prabillData?.shceduleType || ""}
+          </DetailText>
           <DetailText label={"Status"}>{renderStatus(prabillData?.status)}</DetailText>
           <DetailText label={"Message"}>{prabillData?.message || ""}</DetailText>
-          <DetailText label={"Remark"} className="col-span-2">
-            {prabillData?.remark || ""}
-          </DetailText>
+        </div>
+      </CardContainer>
 
-          {/* Filter Details dari details array */}
-          {detailsData && detailsData.length > 0 && detailsData.map((detail, index) => (
-            <React.Fragment key={index}>
+      {/* Parameter Information Section */}
+      <CardContainer subHeader={"Parameter Information"}>
+        <div className={"w-full grid grid-cols-4 gap-2"}>
+          <DetailText label={"SOR"}>{prabillData?.sor || ""}</DetailText>
+          {detailsData && detailsData.length > 0 && (
+            <>
               <DetailText label={"Cost Center"}>
-                {detail.costCenterName || detail.costCenter || ""}
+                {detailsData[0]?.costCenterName || detailsData[0]?.costCenter || ""}
               </DetailText>
               <DetailText label={"Meter Reading Code"}>
-                {detail.meterReadingCodeName || detail.meterReadingCode || ""}
+                {detailsData[0]?.meterReadingCodeName || detailsData[0]?.meterReadingCode || ""}
               </DetailText>
               <DetailText label={"Account Segment"}>
-                {detail.accountSegmentName || detail.accountSegment || ""}
+                {detailsData[0]?.accountSegmentName || detailsData[0]?.accountSegment || ""}
               </DetailText>
               <DetailText label={"Account Group Type"}>
-                {detail.accountGroupTypeName || detail.accountGroupType || ""}
+                {detailsData[0]?.accountGroupTypeName || detailsData[0]?.accountGroupType || ""}
               </DetailText>
-              <DetailText label={"Account Numbers"} className="col-span-5">
-                {detail.accountNumber || ""}
-              </DetailText>
-              <DetailText label={"Account Names"} className="col-span-5">
-                {detail.accoutnName || ""}
-              </DetailText>
-            </React.Fragment>
-          ))}
+            </>
+          )}
+          <div className="col-span-4">
+            <DetailText label={"Specific Customer"}>
+              {accountNumbers ? `${accountNumbers} - ${accountNames}` : ""}
+            </DetailText>
+          </div>
+        </div>
+      </CardContainer>
+
+      {/* Schedule Information Section */}
+      <CardContainer subHeader={"Schedule Information"}>
+        <div className={"w-full grid grid-cols-4"}>
+          <DetailText label={"Type"}>{prabillData?.shceduleType || ""}</DetailText>
+          <div className="col-span-3">
+            <DetailText label={"Remark"}>{prabillData?.remark || ""}</DetailText>
+          </div>
         </div>
       </CardContainer>
 
       {/* History Log Information Section */}
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
-          </div>
-        }
-      >
+      <CardContainer subHeader={"History Log Information"}>
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
           <DetailText label={"Record ID"}>
             {prabillData?.initId || ""}
@@ -568,16 +578,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         </div>
       </CardContainer>
 
-
-
       {/* Prabilling Result Table Section */}
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING RESULT</p>
-          </div>
-        }
-      >
+      <CardContainer subHeader={"Prabilling Result"}>
         <div className="my-5">
           <TableRBI
             dataSource={resultData}

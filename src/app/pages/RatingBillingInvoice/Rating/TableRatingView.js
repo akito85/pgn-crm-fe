@@ -164,23 +164,6 @@ export const columnsRating = (
     ),
     render: (text) => renderColumn('costCenter', hasValue(search['costCenter']), searchText, text, false, 'input', search)
   },
-  {
-    key: "accountSegment",
-    title: "ACCOUNT SEGMENT",
-    dataIndex: "accountSegment",
-    width: 120,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accountSegment",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
-  },
    {
     key: "mreadingCode",
     title: "METER READING CODE",
@@ -197,6 +180,23 @@ export const columnsRating = (
       handleSearch
     ),
     render: (text) => renderColumn('mreadingCode', hasValue(search['mreadingCode']), searchText, text, false, 'input', search)
+  },
+  {
+    key: "accountSegment",
+    title: "ACCOUNT SEGMENT",
+    dataIndex: "accountSegment",
+    width: 120,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accountSegment",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
   },
     {
     key: "accGroupType",

@@ -545,7 +545,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "date"
+          "datetime"
         ),
         render: (text) =>
           renderDateColumn(
@@ -553,7 +553,7 @@ const CalculationPage = () => {
             hasValue(search["generateDate"]),
             searchText,
             text,
-            "date",
+            "datetime",
             search
           ),
       },

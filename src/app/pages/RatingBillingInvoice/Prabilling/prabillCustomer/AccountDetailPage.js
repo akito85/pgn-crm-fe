@@ -63,8 +63,8 @@ const AccountDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState("0"); // Start with SA tab
-  const [loadedTabs, setLoadedTabs] = useState(new Set(["0"])); // SA tab loaded by default
+  const [activeTab, setActiveTab] = useState("0"); 
+  const [loadedTabs, setLoadedTabs] = useState(new Set(["0"]));
   const [pagination, setPagination] = useState({
     "0": { current: 1, pageSize: 10 },
     "1": { current: 1, pageSize: 10 },
@@ -82,7 +82,7 @@ const AccountDetailPage = () => {
   );
 
   // Fixed columns states
-  const [fixedColumnsUsage, setFixedColumnsUsage] = useState(() => createFixedColumnsState(["no", "measDate"]));
+  const [fixedColumnsUsage, setFixedColumnsUsage] = useState(() => createFixedColumnsState(["no"]));
   const [fixedColumnsTax, setFixedColumnsTax] = useState(() => createFixedColumnsState());
   const [fixedColumnsPrice, setFixedColumnsPrice] = useState(() => createFixedColumnsState());
   const [fixedColumnsSaTos, setFixedColumnsSaTos] = useState(() => createFixedColumnsState());

@@ -247,6 +247,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
+      width: 190,
       // sorter: true,
       sorter: (a, b) => sorter("customerNumber", a, b),
       filteredValue: search?.["customerNumber"]
@@ -355,66 +356,6 @@ export const useMonitoringList = (tabs, batchId) => {
         ),
     },
     {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accountSegment",
-      // sorter: true,
-      sorter: (a, b) => sorter("accountSegment", a, b),
-      filteredValue: search?.["accountSegment"]
-        ? [search?.["accountSegment"]]
-        : null,
-      // filteredValue: [search?.accountSegment] || null,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        "accountSegment",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "accountSegment",
-          hasValue(search["accountSegment"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      // sorter: true,
-      sorter: (a, b) => sorter("accountGroupType", a, b),
-      filteredValue: search?.["accountGroupType"]
-        ? [search?.["accountGroupType"]]
-        : null,
-      // filteredValue: [search?.accountGroupType] || null,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        "accountGroupType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "accountGroupType",
-          hasValue(search["accountGroupType"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
       title: "SERVICE TYPE",
       dataIndex: "serviceType",
       align: "center",
@@ -505,6 +446,8 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "SOR",
       dataIndex: "sor",
+      width:220,
+      isClassification:true,
       // sorter: true,
       sorter: (a, b) => sorter("sor", a, b),
       filteredValue: search?.["sor"] ? [search?.["sor"]] : null,
@@ -536,6 +479,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "COST CENTER",
       dataIndex: "costCenter",
+      isClassification:true,
       // sorter: true,
       sorter: (a, b) => sorter("costCenter", a, b),
       filteredValue: search?.["costCenter"] ? [search?.["costCenter"]] : null,
@@ -563,6 +507,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
+      isClassification:true,
       width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("meterReadingCode", a, b),
@@ -583,6 +528,70 @@ export const useMonitoringList = (tabs, batchId) => {
         renderColumn(
           "meterReadingCode",
           hasValue(search["meterReadingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+     {
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      isClassification:true,
+      width:160,
+      // sorter: true,
+      sorter: (a, b) => sorter("accountSegment", a, b),
+      filteredValue: search?.["accountSegment"]
+        ? [search?.["accountSegment"]]
+        : null,
+      // filteredValue: [search?.accountSegment] || null,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "accountSegment",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountSegment",
+          hasValue(search["accountSegment"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      isClassification:true,
+      width:190,
+      // sorter: true,
+      sorter: (a, b) => sorter("accountGroupType", a, b),
+      filteredValue: search?.["accountGroupType"]
+        ? [search?.["accountGroupType"]]
+        : null,
+      // filteredValue: [search?.accountGroupType] || null,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "accountGroupType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountGroupType",
+          hasValue(search["accountGroupType"]),
           searchText,
           text,
           false,
@@ -680,6 +689,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "MEASUREMENT DATE",
       dataIndex: "measDate",
+      width: 200,
       align: "center",
       // sorter: true,
       sorter: (a, b) => sorter("measDate", a, b),
@@ -1291,7 +1301,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "STATUS",
       dataIndex: "status",
       fixed: "right",
-      width: 100,
+      width: 150,
       // sorter: true,
       sorter: (a, b) => sorter("status", a, b),
       filteredValue: search?.["status"] ? [search?.["status"]] : null,
@@ -1324,6 +1334,30 @@ export const useMonitoringList = (tabs, batchId) => {
       width: 50,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+     {
+      title: "File Source",
+      dataIndex: "fileSource",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.fileSource] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "fileSource",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "fileSource",
+          hasValue(search["fileSource"]),
+          searchText,
+          text,
+          false,
+          search
+        ),
     },
     {
       title: "BATCHID",
