@@ -19,7 +19,8 @@ const ConfirmationModalTabs = ({
   hierarchyTableData,
   dispatch,
   dataAttachment,
-  data = {}
+  data = {},
+  service,
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -44,6 +45,7 @@ const ConfirmationModalTabs = ({
         return <ConfirmationModalAttachment
           data={dataAttachment}
           dispatch={dispatch}
+          service={service}
         />;
       default:
         return "Payment Relation Information";
