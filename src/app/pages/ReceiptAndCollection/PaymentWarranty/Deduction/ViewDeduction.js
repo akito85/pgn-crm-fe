@@ -6,14 +6,12 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
-import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
-import TableRBI from "../../../../../components/TableRBI";
 import {
-  EyeOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import {
   renderColumn,
@@ -25,20 +23,24 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
 import {
   getApprovalHistory,
-  getDownloadPaymentChannel,
-  getPaginatePaymentChannel,
-} from "../../../../../redux/slices/receipt_collection/paymentChannel";
-import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
+  getDownloadSetting,
+  getPaginateSetting,
+  inactiveSetting,
+  getAllApprovalList,
+  getListApprovalById
+} from "../../../../../redux/slices/receipt_collection/setting";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import { disabledActionByStatus } from "../../../../../utils";
 
-const ViewPaymentChannel = () => {
+const ViewSettings = () => {
   // Selector
   const { loading, data, dataApprovalHistory } = useSelector(
-    (state) => state.paymentChannel
+    (state) => state.receiptSetting
   );
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -57,10 +59,15 @@ const ViewPaymentChannel = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [status, setStatus] = useState("");
+  const [id, setId] = useState("");
+  const [settingNameCombined, setSettingNameCombined] = useState("");
+  const [openModalInactivate, setOpenModalInactivate] = useState(false);
+
 
   const handleFetch = useCallback(() => {
     dispatch(
-      getPaginatePaymentChannel({
+      getPaginateSetting({
         page,
         pageSize,
         sort,
@@ -81,8 +88,12 @@ const ViewPaymentChannel = () => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL,
-      breadcrumbName: "Payment Channel",
+      path: "",
+      breadcrumbName: "Payment Warranty",
+    },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
+      breadcrumbName: "Deduction List",
     },
   ];
 
@@ -116,14 +127,14 @@ const ViewPaymentChannel = () => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.PAYMENT_CHANNEL || [],
-          // inactive:
-          //   dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_METHOD || [],
+          create: dataApprovalHistory?.dataApprover?.RECEIPT_SETTING || [],
+          inactive:
+            dataApprovalHistory?.dataApprover?.INACTIVE_RECEIPT_SETTING || [],
         },
         dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.PAYMENT_CHANNEL || [],
-          // inactive:
-          //   dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_METHOD || [],
+          create: dataApprovalHistory?.dataHistory?.RECEIPT_SETTING || [],
+          inactive:
+            dataApprovalHistory?.dataHistory?.INACTIVE_RECEIPT_SETTING || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -152,7 +163,55 @@ const ViewPaymentChannel = () => {
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "PAYMENT CHANNEL CODE",
+      title: "PARTNER CODE",
+      dataIndex: "partnerCode",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "partnerCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "partnerCode",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Collection Agent CODE",
+      dataIndex: "caCode",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "caCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "caCode",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Payment Channel CODE",
       dataIndex: "ciCode",
       sorter: true,
       ...getColumnSearchPropsPaging(
@@ -174,87 +233,108 @@ const ViewPaymentChannel = () => {
           search
         ),
     },
+
     {
-      title: "NAME",
-      dataIndex: "name",
-      key: "name",
-      align: "",
+      title: "DATE START",
+      dataIndex: "dateStart",
+      align: "center",
       sorter: true,
       ...getColumnSearchPropsPaging(
-        "name",
+        "dateStart",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        false
       ),
-      render: (text) =>
-        renderColumn(
-          "name",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
+      render: (text) => renderColumn("dateStart", searchedColumn, searchText, text),
     },
+
     {
-      title: "EFF START DATE",
+      title: "DATE END",
+      dataIndex: "dateEnd",
+      align: "center",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "dateEnd",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false
+      ),
+      render: (text) => renderColumn("dateEnd", searchedColumn, searchText, text),
+    },
+
+    {
+      title: "HOUR START",
+      dataIndex: "hourStart",
       sorter: true,
       align: "center",
-      dataIndex: "effStartDate",
       ...getColumnSearchPropsPaging(
-        "effStartDate",
+        "hourStart",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false,
-        "date"
+        false
       ),
-      render: (v) =>
-        renderDateColumn(
-          "effStartDate",
-          searchedColumn,
-          searchText,
-          v,
-          "date",
-          search
-        ),
+      render: (text) => text ?? "-",
     },
+
     {
-      title: "EFF END DATE",
+      title: "HOUR END",
+      dataIndex: "hourEnd",
       sorter: true,
       align: "center",
-      dataIndex: "effEndDate",
       ...getColumnSearchPropsPaging(
-        "effEndDate",
+        "hourEnd",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false,
-        "date"
+        false
       ),
-      render: (v) =>
-        renderDateColumn(
-          "effEndDate",
-          searchedColumn,
-          searchText,
-          v,
-          "date",
-          search
-        ),
+      render: (text) => text ?? "-",
     },
+
+    {
+      title: "MINUTE START",
+      dataIndex: "minuteStart",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "minuteStart",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false
+      ),
+      render: (text) => text ?? "-",
+    },
+
+    {
+      title: "MINUTE END",
+      dataIndex: "minuteEnd",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "minuteEnd",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false
+      ),
+      render: (text) => text ?? "-",
+    },
+
     {
       title: "TYPE",
       dataIndex: "type",
-      key: "type",
       sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       ...getColumnSearchPropsPaging(
         "type",
         searchInput,
@@ -274,16 +354,15 @@ const ViewPaymentChannel = () => {
           search
         ),
     },
+
     {
-      title: "Category",
-      dataIndex: "category",
-      key: "category",
+      title: "STATUS",
+      dataIndex: "status",
       sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
+      width: 150,
+      fixed: "right",
       ...getColumnSearchPropsPaging(
-        "category",
+        "status",
         searchInput,
         searchedColumn,
         searchText,
@@ -291,15 +370,7 @@ const ViewPaymentChannel = () => {
         false
       ),
       render: (text) =>
-        renderColumn(
-          "category",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
+        renderColumn("status", searchedColumn, searchText, text, false, "status"),
     },
     {
       title: "STATUS APPROVAL",
@@ -336,10 +407,14 @@ const ViewPaymentChannel = () => {
     setSort(dataSort);
   };
 
+  
+
+  
+
   // handle download
   const handleDownload = () => {
     dispatch(
-      getDownloadPaymentChannel({
+      getDownloadSetting({
         search: encodeURIComponent(JSON.stringify(search)),
         // search: tempSearch,
         page,
@@ -349,20 +424,34 @@ const ViewPaymentChannel = () => {
     );
   };
 
+  const combineSettingName = (pCode, ci, ca, typeVal) => {
+    return `${pCode || ""}-${ci || ""}-${ca || ""}-${typeVal || ""}`;
+  };
+
   const itemActions = [
     // toolbar items
     {
       action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
     },
     {
       action: "Create",
       render: (
-        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_PAYMENT_CHANNEL}>
+        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION}>
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Payment Channel
+            Create Deduction
           </ButtonComponent>
         </NavLink>
       ),
@@ -376,7 +465,7 @@ const ViewPaymentChannel = () => {
         return (
           <Tooltip title={"Detail"}>
             <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PAYMENT_CHANNEL}
+              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_SETTINGS}
               state={{ id: record?.id }}
             >
               {/* <ButtonComponent
@@ -384,10 +473,7 @@ const ViewPaymentChannel = () => {
                   icon={<SVGIcon name="IconDetail" width={24} />}
                   border={false}
                 /> */}
-              {/* <SVGIcon name="IconDetail" width={24} /> */}
-              <EyeOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                />
+              <SVGIcon name="IconDetail" width={24} />
             </Link>
           </Tooltip>
         );
@@ -397,24 +483,24 @@ const ViewPaymentChannel = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
-        const isEditable = record.statusApproval === "Rejected" 
-          // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
-          // (record.status !== "Active" && record.statusApproval !== "Approved") 
 
+        // console.log({
+        //   disabled: disabledActionByStatus('update', record?.status, record?.statusApproval),
+        //   to: !disabledActionByStatus('update', record?.status, record?.statusApproval) ? RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS : undefined
+        // });
+        const isDisabled = disabledActionByStatus('update', record?.status, record?.statusApproval);
         return (
           data_length > 3 ? (
             <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_CHANNEL}
-              state={{ id: record?.id }}
+              to={!isDisabled ? RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS : undefined}
+              state={!isDisabled ? { id: record?.id } : undefined}
             >
               <ButtonComponent
                 className="gap-5 w-full"
                 icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"} />
+                  <SVGIcon name="IconEdit" width={24} color={"#0075BF"} />
                 }
                 border={false}
-                disabled={!isEditable}
-
               >
                 <span
                   className={"text-black gap-2 text-xl text-center w-full"}
@@ -424,28 +510,74 @@ const ViewPaymentChannel = () => {
               </ButtonComponent>
             </Link>
           ) : (
-            <Tooltip title="Update" >
-              <div
-                onClick={(e) => {
-                  if (!isEditable) e.preventDefault();
-                }}
-                className={!isEditable ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+            <Tooltip title="Update" className={
+              disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
+            }>
+              <Link
+                to={
+                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
+                  RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS}
+                state={
+                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
+                  { id: record?.id }
+                }
               >
-                {isEditable ? (
-                  <Link
-                    to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_CHANNEL}
-                    state={{ id: record?.id }}
-                  >
-                    <SVGIcon name="IconEdit" color="#ACC424" width={24} />
-                  </Link>
-                ) : (
-                  <SVGIcon name="IconEdit" color="#8D91A0" width={24}  className={"cursor-not-allowed"}/>
-                )}
-              </div>
+                <div border={false}>
+                  <SVGIcon name="IconEdit"
+                    color={disabledActionByStatus('update', record?.status, record?.statusApproval) ? "#d3d3d3" : "#ACC424"} width={24}
+                    className={
+                      disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
+                    } />
+                </div>
+              </Link>
             </Tooltip>
           )
         );
       },
+    },
+
+    {
+      action: "Activate",
+      type: "table",
+      render: (record, data_length) => {
+        const statusLowerCase = record?.status?.toLowerCase()
+
+        return (
+          data_length > 3 ?
+            <div className="w-full">
+              <ButtonComponent
+                border={false}
+                className={'gap-5 w-full'}
+                onClick={() => handleInactive(record)}
+                disabled={
+                  disabledActionByStatus('activate', record?.status, record?.statusApproval)
+                }
+              >
+                <Checkbox
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+                <span
+                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
+                >
+                  {record?.status === "Active" ? "Inactivate" : "Activate"}
+                </span>
+              </ButtonComponent>
+            </div>
+            :
+            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
+              <div >
+                <Checkbox
+                  border={false}
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+              </div>
+            </Tooltip>
+        );
+      }
     },
     {
       action: "history",
@@ -478,19 +610,66 @@ const ViewPaymentChannel = () => {
     },
   ];
 
+  const handleInactive = (r) => {
+    setOpenModalInactivate(true);
+    setId(r?.id);
+    setSettingNameCombined(
+      combineSettingName(
+        r?.partnerCode,
+        r?.ciCode,
+        r?.caCode,
+        r?.type
+      )
+    );
+    setStatus(r?.status);
+  };
+
   // handle retry modal error
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
-      if (bodyError?.action === "GET_APPROVAL_PAYMENT_CHANNEL") {
+      if (bodyError?.action === "INACTIVE_RECEIPT_SETTING") {
+        dispatch(inactiveSetting(body));
+      }else if (bodyError?.action === "GET_APPROVAL_SETTINGS") {
         dispatch(getApprovalHistory(body));
-      } else if (bodyError?.action === "DOWNLOAD_PAYMENT_CHANNEL") {
+      } else if (bodyError?.action === "DOWNLOAD_SETTINGS") {
         handleDownload();
       }
       handleFetch();
     } catch (error) {
       handleFetch();
     }
+  };
+
+  const handleCancelModalInactivate = () => {
+    setOpenModalInactivate(false);
+  };
+
+  const handleSubmitModalInactivate = (res, handleClear) => {
+    const body = {
+      id: id,
+      appHierId: res.approvalHierarchy,
+      status: status === "Inactive" ? "Active" : "Inactive",
+      remark: res.remark,
+    };
+    setBody({ body });
+    dispatch(inactiveSetting({ body }))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancelModalInactivate();
+        let tempSearch = "";
+        for (const dataIndex in search) {
+          if (Object.hasOwnProperty.call(search, dataIndex)) {
+            const tempSearchText = search[dataIndex];
+            if (tempSearchText) {
+              tempSearch += `${dataIndex}~${tempSearchText},`;
+            }
+          }
+        }
+        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+        dispatch(getPaginateSetting({ search: tempSearch, page, pageSize, sort }));
+      });
   };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
@@ -500,16 +679,15 @@ const ViewPaymentChannel = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
-        <CardContainer header={"PAYMENT CHANNEL LIST"}>
-          <TableRBI
+        <BaseContainer header={"DEDUCTION LIST"}>
+          <TablePagination
             dataSource={data?.result}
             pageSize={pageSize}
-            handleDownload={handleDownload}
             // columns={columns}
             columns={[
               ...columns,
               ...useColumnActionPermission(
-                ["view", "update","history"],
+                ["view", "history", "update", 'activate'],
                 itemActions
               ),
             ]}
@@ -523,7 +701,25 @@ const ViewPaymentChannel = () => {
               y: 525,
             }}
           />
-        </CardContainer>
+        </BaseContainer>
+
+        <ModalActiveInactive
+          dispatch={dispatch}
+          getAPIOption={getAllApprovalList}
+          getAPIDetail={getListApprovalById}
+          selector={"receiptSetting"}
+          alertMessage={`Are you sure you want to inactivate this Setting with Setting Code ${settingNameCombined}?`}
+          openModalInactivate={openModalInactivate}
+          handleCloseModalInactivate={handleCancelModalInactivate}
+          onFinish={handleSubmitModalInactivate}
+        />
+
+        {/* <ModalInactivate
+          alertMessage={`Are you sure you want to inactivate this Setting with Setting Code ${settingNameCombined}?`}
+          openModalInactivate={openModalInactivate}
+          handleCloseModalInactivate={handleCancelModalInactivate}
+          onFinish={handleSubmitModalInactivate}
+        /> */}
 
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}
@@ -541,4 +737,4 @@ const ViewPaymentChannel = () => {
   );
 };
 
-export default ViewPaymentChannel;
+export default ViewSettings;
