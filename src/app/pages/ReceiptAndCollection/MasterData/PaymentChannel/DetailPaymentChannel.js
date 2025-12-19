@@ -45,6 +45,9 @@ const DetailPaymentChannel = ({ data_detail,  data_req }) => {
           <DetailText label="Status Approval">
             {data_detail?.statusApproval}
           </DetailText>
+            <DetailText label="Category">
+              {data_detail?.category}
+            </DetailText>
           <div className="col-span-3">
             <DetailText label="Type">
               {data_detail?.type}

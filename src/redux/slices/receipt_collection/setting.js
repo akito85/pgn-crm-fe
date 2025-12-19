@@ -521,6 +521,62 @@ export const getPaymentChannelList = createAsyncThunk(
 );
 
 
+export const getPaymentChannelListByCa = createAsyncThunk(
+  "GET_LIST_PAYMENT_CHANNEL_BY_CA",
+  async (caCode,thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-channel/list-by-ca/${caCode}`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+
+export const getPartnerListByCa = createAsyncThunk(
+  "GET_LIST_PARTNER_BY_CA",
+  async (caCode,thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner/list-by-ca/${caCode}`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+
 const settingSlice = createSlice({
   name: "setting",
   initialState,
@@ -733,6 +789,19 @@ const settingSlice = createSlice({
       state.loading = false;
     },
 
+    [getPartnerListByCa.pending]: (state, action) => {
+      state.loading = true;
+      state.dataPartnerList = action.payload;
+    },
+    [getPartnerListByCa.fulfilled]: (state, action) => {
+      state.dataPartnerList = action.payload;
+      state.loading = false;
+    },
+    [getPartnerListByCa.rejected]: (state, action) => {
+      state.dataPartnerList = action.payload;
+      state.loading = false;
+    },
+
     [getCollectionAgentList.pending]: (state, action) => {
       state.loading = true;
       state.dataCollectionAgentList = action.payload;
@@ -755,6 +824,19 @@ const settingSlice = createSlice({
       state.loading = false;
     },
     [getPaymentChannelList.rejected]: (state, action) => {
+      state.dataPaymentChannelList = action.payload;
+      state.loading = false;
+    },
+
+    [getPaymentChannelListByCa.pending]: (state, action) => {
+      state.loading = true;
+      state.dataPaymentChannelList = action.payload;
+    },
+    [getPaymentChannelListByCa.fulfilled]: (state, action) => {
+      state.dataPaymentChannelList = action.payload;
+      state.loading = false;
+    },
+    [getPaymentChannelListByCa.rejected]: (state, action) => {
       state.dataPaymentChannelList = action.payload;
       state.loading = false;
     },

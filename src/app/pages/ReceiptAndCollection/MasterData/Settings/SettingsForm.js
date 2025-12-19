@@ -9,6 +9,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DateComponent from "../../../../../components/DateComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 
+import {
+  getPartnerListByCa,
+  getPaymentChannelListByCa
+} from "../../../../../redux/slices/receipt_collection/setting";
+
 const SettingsForm = (props) => {
   const {
     dataType,
@@ -17,6 +22,7 @@ const SettingsForm = (props) => {
     dataCollectionAgentList,
     dataPaymentChannelList
   } = props;
+
 
   // console.log("dataCollectionAgentList", dataCollectionAgentList);
   // console.log("dataType", dataType);
@@ -36,6 +42,30 @@ const SettingsForm = (props) => {
     } else {
       return current && current < moment(form.getFieldValue("effStartDate"));
     }
+  };
+
+  const caCode = Form.useWatch("caCode", form);
+
+
+  const handleCaChange = (caCode) => {
+    if (!caCode) {
+      // kalau CA di-clear
+      form.setFieldsValue({
+        partnerCode: null,
+        ciCode: null,
+      });
+      return;
+    }
+
+    // reset field yang tergantung CA
+    form.setFieldsValue({
+      partnerCode: null,
+      ciCode: null,
+    });
+
+    // hit redux
+    dispatch(getPartnerListByCa(caCode));
+    dispatch(getPaymentChannelListByCa(caCode));
   };
 
   const handleStartDate = (date) => {
@@ -58,6 +88,8 @@ const SettingsForm = (props) => {
     return false
   };
 
+  
+
   return (
     <div>
       <BaseContainer header={"PARTNER"}>
@@ -71,11 +103,28 @@ const SettingsForm = (props) => {
           </Form.Item> */}
 
           <Form.Item
+            label={"Collection Agent Code"}
+            name={"caCode"}
+            rules={formMessageRequired("Collection Agent Code")}
+          >
+            <SelectComponent onChange={handleCaChange}>
+              {/* {dataCollectionAgentList?.data?.length > 0 && (
+                <Select.Option value={"All"}>All</Select.Option>
+              )} */}
+              {dataCollectionAgentList?.data?.map((data) => (
+                <Select.Option key={data.caCode} value={data.caCode}>
+                  {data.caCode} - {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
             label={"Partner Code"}
             name={"partnerCode"}
             rules={formMessageRequired("partnerCode")}
           >
-            <SelectComponent>
+            <SelectComponent disabled={!caCode}>
               {dataPartnerList?.data?.map((data) => (
                 <Select.Option key={data.partnerCode} value={data.partnerCode}>
                   {data.partnerCode} - {data.partnerName}
@@ -92,22 +141,7 @@ const SettingsForm = (props) => {
             <Input allowClear maxLength={10} />
           </Form.Item> */}
 
-          <Form.Item
-            label={"Collection Agent Code"}
-            name={"caCode"}
-            rules={formMessageRequired("Collection Agent Code")}
-          >
-            <SelectComponent>
-              {/* {dataCollectionAgentList?.data?.length > 0 && (
-                <Select.Option value={"All"}>All</Select.Option>
-              )} */}
-              {dataCollectionAgentList?.data?.map((data) => (
-                <Select.Option key={data.caCode} value={data.caCode}>
-                  {data.caCode} - {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
+          
 
           {/* <Form.Item
             label={"Payment Channel Code"}
@@ -121,7 +155,7 @@ const SettingsForm = (props) => {
             name={"ciCode"}
             rules={formMessageRequired("Payment Channel Code")}
           >
-            <SelectComponent>
+            <SelectComponent disabled={!caCode}>
               {/* {dataPaymentChannelList?.data?.length > 0 && (
                 <Select.Option value={"All"}>All</Select.Option>
               )} */}

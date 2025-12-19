@@ -19,6 +19,7 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: [],
   dataType: [],
+  dataCategory: []
 };
 
 export  const getPaginatePaymentChannel = createAsyncThunk(
@@ -368,6 +369,34 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
+
+export const getCategoryPayment = createAsyncThunk(
+  "GET_LIST_CATEGORY_PAYMENT",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-channel/list-category`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 const paymentChannelSlice = createSlice({
   name: "paymentChannel",
   initialState,
@@ -397,6 +426,19 @@ const paymentChannelSlice = createSlice({
     },
     [getTypeDDL.rejected]: (state, action) => {
       state.dataType = action.payload;
+      state.loading = false;
+    },
+
+    [getCategoryPayment.pending]: (state, action) => {
+      state.loading = true;
+      state.dataCategory = action.payload;
+    },
+    [getCategoryPayment.fulfilled]: (state, action) => {
+      state.dataCategory = action.payload;
+      state.loading = false;
+    },
+    [getCategoryPayment.rejected]: (state, action) => {
+      state.dataCategory = action.payload;
       state.loading = false;
     },
 
