@@ -256,6 +256,7 @@ const InvoiceRelationDetails = ({
             handleChangeOption={handleDetailSection}
             dataDetail={detail_invoiceRelation?.result}
             dataAttachment={data_invoiceRelationAttachment.result}
+            subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
           />
         </div>
 

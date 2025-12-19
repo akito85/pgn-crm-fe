@@ -664,13 +664,14 @@ export const updateInvoiceRelation = createAsyncThunk(
       const updateUrl = `/v1/dbs/api/invoice-relation/${id}`;
       const response = await accountManagementService.updateData(updateUrl, updateBody);
 
-      const uploadUrl = `v1/dbs/api/invoice-relation/upload-attachment/${id}`;
+      const uploadUrl = `/v1/dbs/api/invoice-relation/upload-attachment`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
           file:  attachment.file,
           category: attachment.fileCategoryId,
+          refId: id,
         }
       ));
 
