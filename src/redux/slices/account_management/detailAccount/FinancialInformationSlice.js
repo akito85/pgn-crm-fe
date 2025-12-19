@@ -669,7 +669,7 @@ export const updateInvoiceRelation = createAsyncThunk(
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
-          file:  attachment.file,
+          files:  attachment.file,
           category: attachment.fileCategoryId,
           refId: id,
         }
