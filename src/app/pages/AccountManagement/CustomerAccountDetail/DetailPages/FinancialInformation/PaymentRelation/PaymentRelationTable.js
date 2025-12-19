@@ -95,7 +95,6 @@ const PaymentRelationTable = ({
           </div>
         );
       },
-      hidden: isApproval,
     },
     {
       title: "STATUS",
@@ -120,8 +119,6 @@ const PaymentRelationTable = ({
       },
     },
   ];
-
-  const visibleColumns = columns.filter(column => !column.hidden);
 
   const itemActions = [
     {
@@ -340,7 +337,7 @@ const PaymentRelationTable = ({
         tableScrolled={{ y: 400, x: 2000 }}
         onSort={onSort}
         columns={[
-          ...visibleColumns,
+          ...columns,
           ...useColumnActionPermission(
             ["Inactivate", "View", "Update", "History"],
             itemActions,
@@ -358,7 +355,7 @@ const PaymentRelationTable = ({
         onChange={handleChangeSize}
         tableScrolled={{ y: 400, x: 2000 }}
         columns={[
-          ...visibleColumns,
+          ...columns,
           ...useColumnActionPermission(
             ["Inactivate", "View", "Update", "History"],
             itemActions,
