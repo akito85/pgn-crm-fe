@@ -2,13 +2,13 @@ import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Input, Space, Tooltip } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { NumericFormat } from "react-number-format";
@@ -222,9 +222,9 @@ const ViewSynchronizeReceipt = () => {
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
-      <BaseContainer header={"SYNCRONIZE RECEIPT LIST"}>
+      <CardContainer header={"SYNCRONIZE RECEIPT LIST"}>
         <div className="w-full">
-          <TablePagination
+          <TableRBI
             dataSource={data}
             columns={columns}
             current={page}
@@ -239,7 +239,7 @@ const ViewSynchronizeReceipt = () => {
             }}
           />
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* </Spin> */}
     </LayoutMenu>

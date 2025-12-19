@@ -76,7 +76,7 @@ export const columns = (
       key: "billAmount",
       title: "Bill Amount",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "billAmount",
       ...getColumnSearchPropsPaging(
         search,
@@ -128,7 +128,7 @@ export const columns = (
       key: "usage",
       title: "Usage",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "usage",
       ...getColumnSearchPropsPaging(
         search,
@@ -180,7 +180,7 @@ export const columns = (
       key: "totalBillPeriod",
       title: "Total Bill Period",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "totalBillPeriod",
       ...getColumnSearchPropsPaging(
         search,
@@ -232,7 +232,7 @@ export const columns = (
       key: "billCycle",
       title: "Bill Cycle",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "billCycle",
       ...getColumnSearchPropsPaging(
         search,
@@ -336,7 +336,7 @@ export const columns = (
       key: "paidAmount",
       title: "Paid Amount",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "paidAmount",
       ...getColumnSearchPropsPaging(
         search,
@@ -726,7 +726,7 @@ export const columns = (
       key: "gasInvAmount",
       title: "Gas Inv Amount",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "gasInvAmount",
       ...getColumnSearchPropsPaging(
         search,
@@ -752,7 +752,7 @@ export const columns = (
       key: "guaranteeInvAmount",
       title: "Guarantee Inv Amount",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "guaranteeInvAmount",
       ...getColumnSearchPropsPaging(
         search,
@@ -778,7 +778,7 @@ export const columns = (
       key: "othersInvAmount",
       title: "Others Inv Amount",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "othersInvAmount",
       ...getColumnSearchPropsPaging(
         search,
@@ -804,7 +804,7 @@ export const columns = (
       key: "totalAmount",
       title: "Total Amount",
       sorter: true,
-      align: "left",
+      align: "right",
       dataIndex: "totalAmount",
       ...getColumnSearchPropsPaging(
         search,
