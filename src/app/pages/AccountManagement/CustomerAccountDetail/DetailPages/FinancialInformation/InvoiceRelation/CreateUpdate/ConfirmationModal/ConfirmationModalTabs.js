@@ -22,6 +22,7 @@ const ConfirmationModalTabs = ({
   dataAttachment,
   data = {},
   service,
+  configApplication,
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -47,6 +48,7 @@ const ConfirmationModalTabs = ({
           data={dataAttachment}
           dispatch={dispatch}
           service={service}
+          configApplication={configApplication}
         />;
       default:
         return "Invoice Relation Information";
