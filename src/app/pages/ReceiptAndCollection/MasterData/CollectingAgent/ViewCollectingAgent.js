@@ -3,13 +3,14 @@ import {
     Tooltip,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
     DownloadOutlined,
+    EyeOutlined,
 } from "@ant-design/icons";
 import {
     renderColumn,
@@ -287,7 +288,7 @@ const ViewCollectingAgent = () => {
             dataIndex: "statusApproval",
             key: "statusApproval",
             sorter: true,
-            width: 200,
+            width: 100,
             fixed: "right",
             ...getColumnSearchPropsPaging(
                 "statusApproval",
@@ -295,7 +296,7 @@ const ViewCollectingAgent = () => {
                 searchedColumn,
                 searchText,
                 handleSearch,
-                true
+                false
             ),
             render: (text) =>
                 renderColumn(
@@ -308,6 +309,11 @@ const ViewCollectingAgent = () => {
                 ),
         },
     ];
+
+    const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["statusApproval", "action"],
+    }));
 
     const onSort = (_, __, sort) => {
         const dataSort =
@@ -330,20 +336,6 @@ const ViewCollectingAgent = () => {
     };
 
     const itemActions = [
-        // toolbar items
-        {
-            action: "Download",
-            render: (
-                <ButtonComponent
-                    onClick={handleDownload}
-                    type={"submit"}
-                    border={false}
-                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-                >
-                    Download List
-                </ButtonComponent>
-            ),
-        },
         {
             action: "Create",
             render: (
@@ -369,7 +361,8 @@ const ViewCollectingAgent = () => {
                             to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_COLLECTING_AGENT}
                             state={{ id: record?.id }}
                         >
-                            <SVGIcon name="IconDetail" width={24} />
+                            {/* <SVGIcon name="IconDetail" width={24} /> */}
+                            <EyeOutlined />
                         </Link>
                     </Tooltip>
                 );
@@ -479,8 +472,10 @@ const ViewCollectingAgent = () => {
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <Toolbar items={itemActions} />
-                <BaseContainer header={"Collecting Agent List"}>
-                    <TablePagination
+                <CardContainer header={"Collecting Agent List"}>
+                    <TableRBI
+                        showExport={true}
+                        handleDownload={handleDownload}
                         dataSource={data?.result}
                         pageSize={pageSize}
                         columns={[
@@ -499,8 +494,10 @@ const ViewCollectingAgent = () => {
                             x: 2500,
                             y: 525,
                         }}
+                        fixedColumns={fixedColumns}
+                        setFixedColumns={setFixedColumns}
                     />
-                </BaseContainer>
+                </CardContainer>
 
                 <ModalHistory
                     isOpen={openModalHistory && dataApprovalHistoryFix}

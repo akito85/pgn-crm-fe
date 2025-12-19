@@ -8,7 +8,9 @@ import {
   getInvoicePagging,downloadInvoice
 } from "../../../../../redux/slices/receipt_collection/invoice";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -46,8 +48,19 @@ const ViewInvoice = () => {
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const { data: dataUser = {} } = useSelector((state) => state.profile);
+  const [fixedColumns, setFixedColumns] = useState({
+    left: ["no"], 
+    right: ["action"],
+  });
 
-  
+  const handleChangePage = (paginationPage) => {
+    setPage(paginationPage);
+  };
+
+  const handleSizeChange = (current, size) => {
+    setPage(1); // Reset ke hal 1 jika size berubah
+    setPageSize(size);
+  };
 
   const handleDownload = () => {
       dispatch(
@@ -63,18 +76,8 @@ const ViewInvoice = () => {
 
   const itemsActionView = () => [
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+      action: "Download"
+    }
   ];
 
   useEffect(() => {
@@ -117,7 +120,6 @@ const ViewInvoice = () => {
     setPageSize(pageSizeChange);
   };
   
-  
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -125,12 +127,6 @@ const ViewInvoice = () => {
     setSort(dataSort);
   };
 
-  
-
-  
-  
-
-  
   return (
     <LayoutMenu>
       <Spin
@@ -145,36 +141,47 @@ const ViewInvoice = () => {
               dataUser,
             )}
           />
-          <BaseContainer header={"Invoice List"}>
-            <TablePaginationNew
+          <CardContainer header={"Invoice List"}>
+            <TableRBI
+              idTable="invoice-table"
               dataSource={dataTable}
               totalData={totalElements}
               current={page}
               pageSize={pageSize}
-              tableScrolled={{ y: 525, x: 2300 }}
-              onChange={handleChangeSize}
+              loading={loading}
+              tableScrolled={{ y: 525, x: "max-content" }}
+              
+              onChange={handleChangePage}
+              onSizeChanger={handleSizeChange}
               onSort={onSort}
-              columns={[...columns(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                dataUser
-              ), ...useColumnActionPermission(
-                ["view"],
-                itemsActionView(
-                  dataUser,
-                )
-              )]}
-              useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-              }}
+
+              handleDownload={handleDownload}
+              showExport={true}
+
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+
+              columns={[
+                ...columns(
+                  search,
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch,
+                  dataUser
+                ),
+                ...useColumnActionPermission(
+                  ["view"],
+                  itemsActionView(dataUser)
+                ),
+              ]}
+              
+              // Tambahan: Jika ingin menggunakan Advance Search
+              onAdvanceSearch={(searchData) => setSearch(searchData)}
             />
-          </BaseContainer>
+          </CardContainer>
         </div>
         
       </Spin>

@@ -11,11 +11,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
-  EllipsisOutlined,
-  EditOutlined,
-  RedoOutlined,
   EyeOutlined,
-  FileProtectOutlined,
 } from "@ant-design/icons";
 import {
   renderColumn,
@@ -150,6 +146,7 @@ const ViewPartner = () => {
     {
       title: "NO",
       width: 60,
+      key: "no",
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -157,6 +154,7 @@ const ViewPartner = () => {
       title: "PARTNER CODE",
       dataIndex: "partnerCode",
       sorter: true,
+      key: "partnerCode",
       ...getColumnSearchPropsPaging(
         "partnerCode",
         searchInput,
@@ -205,6 +203,7 @@ const ViewPartner = () => {
       title: "EFF START DATE",
       sorter: true,
       align: "center",
+      key: "effStartDate",
       dataIndex: "effStartDate",
       ...getColumnSearchPropsPaging(
         "effStartDate",
@@ -229,6 +228,7 @@ const ViewPartner = () => {
       title: "EFF END DATE",
       sorter: true,
       align: "center",
+      key: "effEndDate",
       dataIndex: "effEndDate",
       ...getColumnSearchPropsPaging(
         "effEndDate",

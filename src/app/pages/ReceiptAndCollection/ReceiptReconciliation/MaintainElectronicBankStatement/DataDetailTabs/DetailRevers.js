@@ -514,7 +514,6 @@ const DetailRevers = (props) => {
               />
             </div>
           ),
-          disabled: listDataAttachment.length === 0,
         },
         {
           title: "Confirmation",
