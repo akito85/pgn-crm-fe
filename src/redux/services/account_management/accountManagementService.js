@@ -46,7 +46,7 @@ const getDetailByIdBody = async (url, id) => {
     throw error;
   }
 };
-const downloadData = async (url, options) => {
+const downloadData = async (url, options = {}) => {
   const { headers = {} } = options;
   try {
     const response = await axios.get(configApp.ACCOUNT_SERVICE + url, {
@@ -100,7 +100,7 @@ const updateData = async (url, data) => {
   }
 };
 
-const updateDataWithMethodPost = async (url, data, options) => {
+const updateDataWithMethodPost = async (url, data, options = {}) => {
   const { headers = {} } = options;
 
   try {
