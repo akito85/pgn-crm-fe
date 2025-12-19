@@ -38,6 +38,7 @@ import {
 } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import { configApp } from "../../../../../../../../constants/configApp";
 
 const CreateUpdateInvoiceRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -309,6 +310,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           key={`invoice-relation-tab-2`}
           getAPICategory={getIrAttachmentCategory}
           service={accountManagementService}
+          configApplication={configApp.ACCOUNT_SERVICE}
         />
       ),
       disabled: false
@@ -643,6 +645,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           dataAttachment={dataAttachment}
           data={formCreate.getFieldsValue()}
           service={accountManagementService}
+          configApplication={configApp.ACCOUNT_SERVICE}
         />
       </div>
     </LayoutMenu>

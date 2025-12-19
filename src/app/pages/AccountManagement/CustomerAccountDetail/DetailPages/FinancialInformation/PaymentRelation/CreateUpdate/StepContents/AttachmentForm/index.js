@@ -11,6 +11,7 @@ export default function AttachmentForm({
   mandatory,
   className,
   service,
+  configApplication,
 }){
   return(
     <Form.Item
@@ -26,6 +27,7 @@ export default function AttachmentForm({
         getAPICategory={getAPICategory}
         data={data}
         service={service}
+        configApplication={configApplication}
       />
     </Form.Item>
   )
