@@ -9,11 +9,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DateComponent from "../../../../../components/DateComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 
-const PaymentChannelForm = (props) => {
+const SettingsForm = (props) => {
   const {
     dataType,
     form,
-    dataCategory
   } = props;
 
   const dispatch = useDispatch();
@@ -31,8 +30,6 @@ const PaymentChannelForm = (props) => {
       return current && current < moment(form.getFieldValue("effStartDate"));
     }
   };
-
-  // console.log("dataCategory",dataCategory)
 
   const handleStartDate = (date) => {
     if (!date) {
@@ -56,61 +53,111 @@ const PaymentChannelForm = (props) => {
 
   return (
     <div>
-      <BaseContainer header={"PAYMENT CHANNEL"}>
+      <BaseContainer header={"DEDUCTION"}>
         <div className="w-full grid grid-cols-2 gap-5">
+          <Form.Item
+            label={"Partner Code"}
+            name={"partnerCode"}
+            rules={formMessageRequired("Partner Code")}
+          >
+            <Input allowClear maxLength={11} />
+          </Form.Item>
+
+          <Form.Item
+            label={"Collection Agent Code"}
+            name={"caCode"}
+            rules={formMessageRequired("CA Code")}
+          >
+            <Input allowClear maxLength={10} />
+          </Form.Item>
+
           <Form.Item
             label={"Payment Channel Code"}
             name={"ciCode"}
-            rules={formMessageRequired("Payment Channel Code")}
           >
-            <Input allowClear maxLength={4} />
+            <Input allowClear maxLength={10} />
           </Form.Item>
+
           <Form.Item
-            label={"Name"}
-            name={"name"}
-            rules={formMessageRequired("Name")}
+            label={"Date Start"}
+            name={"dateStart"}
+            rules={formMessageRequired("Date Start")}
           >
-            <InputComponent />
-          </Form.Item>
-          <Form.Item
-            label={"Eff Start Date"}
-            name={"effStartDate"}
-            rules={[
-              {
-                required: true,
-                message: "Please input your Start Date!",
-              },
-            ]}
-          >
-            <DateComponent
-              dateDisable={disabledStartDate}
-              onChange={handleStartDate}
+            <InputNumber
+              type="number"
+              controls={false}
+              style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item 
-            label={"Eff End Date"} 
-            name={"effEndDate"}
-            rules={formMessageRequired("Eff End Date")}
-          >
-            <DateComponent dateDisable={disabledDate} />
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-1">
+
           <Form.Item
-            label={"Category"}
-            name={"category"}
-            rules={formMessageRequired("Category")}
+            label={"Date End"}
+            name={"dateEnd"}
+            rules={formMessageRequired("Date End")}
           >
-            <SelectComponent>
-              {dataCategory?.data?.map((data) => (
-                <Select.Option key={data.name} value={data.name}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
+            <InputNumber
+              type="number"
+              controls={false}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-1">
+
+          <Form.Item
+            label={"Hour Start"}
+            name={"hourStart"}
+            rules={formMessageRequired("Hour Start")}
+          >
+            <InputNumber
+              type="number"
+              controls={false}
+              min={0}
+              max={23}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={"Hour End"}
+            name={"hourEnd"}
+            rules={formMessageRequired("Hour End")}
+          >
+            <InputNumber
+              type="number"
+              controls={false}
+              min={0}
+              max={23}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={"Minute Start"}
+            name={"minuteStart"}
+            rules={formMessageRequired("Minute Start")}
+          >
+            <InputNumber
+              type="number"
+              controls={false}
+              min={0}
+              max={59}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={"Minute End"}
+            name={"minuteEnd"}
+            rules={formMessageRequired("Minute End")}
+          >
+            <InputNumber
+              type="number"
+              controls={false}
+              min={0}
+              max={59}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+
           <Form.Item
             label={"Type"}
             name={"type"}
@@ -131,4 +178,4 @@ const PaymentChannelForm = (props) => {
   );
 };
 
-export default PaymentChannelForm;
+export default SettingsForm;

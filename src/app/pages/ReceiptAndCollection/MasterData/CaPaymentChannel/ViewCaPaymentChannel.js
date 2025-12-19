@@ -3,13 +3,13 @@ import {
     Tooltip,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
-    DownloadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import {
     renderColumn,
@@ -332,6 +332,11 @@ const ViewCaPaymentChannel = () => {
         },
     ];
 
+    const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["statusApproval", "action"],
+    }));
+
     const onSort = (_, __, sort) => {
         const dataSort =
             sort.order !== undefined
@@ -354,19 +359,7 @@ const ViewCaPaymentChannel = () => {
 
     const itemActions = [
         // toolbar items
-        {
-            action: "Download",
-            render: (
-                <ButtonComponent
-                    onClick={handleDownload}
-                    type={"submit"}
-                    border={false}
-                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-                >
-                    Download List
-                </ButtonComponent>
-            ),
-        },
+        
         {
             action: "Create",
             render: (
@@ -392,7 +385,7 @@ const ViewCaPaymentChannel = () => {
                             to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_CA_PAYMENT_CHANNEL}
                             state={{ id: record?.id }}
                         >
-                            <SVGIcon name="IconDetail" width={24} />
+                            <EyeOutlined />
                         </Link>
                     </Tooltip>
                 );
@@ -502,8 +495,8 @@ const ViewCaPaymentChannel = () => {
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <Toolbar items={itemActions} />
-                <BaseContainer header={"CA PAYMENT CHANNEL LIST"}>
-                    <TablePagination
+                <CardContainer header={"CA PAYMENT CHANNEL LIST"}>
+                    <TableRBI
                         dataSource={data?.result}
                         pageSize={pageSize}
                         columns={[
@@ -522,8 +515,12 @@ const ViewCaPaymentChannel = () => {
                             x: 2500,
                             y: 525,
                         }}
+                        showExport={true}
+                        handleDownload={handleDownload}
+                        fixedColumns={fixedColumns}
+                        setFixedColumns={setFixedColumns}
                     />
-                </BaseContainer>
+                </CardContainer>
 
                 <ModalHistory
                     isOpen={openModalHistory && dataApprovalHistoryFix}

@@ -23,21 +23,45 @@ const ContentModalConfirm = ({
       case tabData[0].value:
         return (
           <div className="grid grid-cols-2 w-full">
-            <DetailText label={"Payment Channel Code"}>
+            <DetailText label={"Date Start"}>
+              {data?.dateStart}
+            </DetailText>
+
+            <DetailText label={"Date End"}>
+              {data?.dateEnd}
+            </DetailText>
+
+            <DetailText label={"Hour Start"}>
+              {data?.hourStart}
+            </DetailText>
+
+            <DetailText label={"Hour End"}>
+              {data?.hourEnd}
+            </DetailText>
+
+            <DetailText label={"Minute Start"}>
+              {data?.minuteStart}
+            </DetailText>
+
+            <DetailText label={"Minute End"}>
+              {data?.minuteEnd}
+            </DetailText>
+
+            <DetailText label={"CA Code"}>
+              {data?.caCode}
+            </DetailText>
+
+
+            <DetailText label={"Partner Code"}>
+              {data?.partnerCode}
+            </DetailText>
+
+            <DetailText label={"CI Code"}>
               {data?.ciCode}
             </DetailText>
-            <DetailText label={"Name"}>{data?.name}</DetailText>
-            <DetailText label={"Eff Start Date"}>
-              {moment(data?.effStartDate).format(dateFormatting.date)}
-            </DetailText>
-            <DetailText label={"End Date"}>
-              {data?.effEndDate
-                ? moment(data?.effEndDate).format(dateFormatting.date)
-                : ""}
-            </DetailText>
-            <DetailText label={"Type"}>{data?.type}</DetailText>
-            <DetailText label="Category">
-              {data?.category}
+
+            <DetailText label={"Type"}>
+              {data?.type}
             </DetailText>
           </div>
         );

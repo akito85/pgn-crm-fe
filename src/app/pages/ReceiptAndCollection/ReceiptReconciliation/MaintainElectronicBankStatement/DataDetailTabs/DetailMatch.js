@@ -5,7 +5,7 @@ import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
 import DetailText from "../../../../../../components/DetailText";
 import StatusComponent from "../../../../../../components/StatusComponent";
-import TablePagination from "../../../../../../components/TablePagination";
+import TableRBI from "../../../../../../components/TableRBI";
 import { getTableMatch } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
 import { dateFormatting } from "../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
@@ -19,12 +19,14 @@ const columns = (
   handleSearch = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
     width: 60,
     align: "center",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "sor",
     title: "SOR",
     dataIndex: "sor",
     align: "",
@@ -40,10 +42,7 @@ const columns = (
     render: (text) =>
       searchedColumn === "sor" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -57,6 +56,7 @@ const columns = (
       ),
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
     align: "",
@@ -69,16 +69,11 @@ const columns = (
       handleSearch,
       true
     ),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "costCenter" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -92,6 +87,7 @@ const columns = (
       ),
   },
   {
+    key: "customerName",
     title: "CUSTOMER",
     dataIndex: "customerName",
     align: "left",
@@ -104,16 +100,11 @@ const columns = (
       handleSearch,
       true
     ),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "customerName" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -127,6 +118,7 @@ const columns = (
       ),
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT",
     dataIndex: "accountNumber",
     align: "left",
@@ -139,16 +131,11 @@ const columns = (
       handleSearch,
       true
     ),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "accountNumber" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -162,6 +149,7 @@ const columns = (
       ),
   },
   {
+    key: "receiptCode",
     title: "RECEIPT CODE",
     dataIndex: "receiptCode",
     align: "left",
@@ -170,10 +158,7 @@ const columns = (
     render: (text) =>
       searchedColumn === "receiptCode" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -187,6 +172,7 @@ const columns = (
       ),
   },
   {
+    key: "receiptNumber",
     title: "RECEIPT NUMBER",
     dataIndex: "receiptNumber",
     align: "left",
@@ -199,16 +185,11 @@ const columns = (
       handleSearch,
       true
     ),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "receiptNumber" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -222,6 +203,7 @@ const columns = (
       ),
   },
   {
+    key: "receiptDate",
     title: "RECEIPT DATE",
     dataIndex: "receiptDate",
     align: "center",
@@ -238,10 +220,7 @@ const columns = (
     render: (text) =>
       searchedColumn === "receiptDate" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[
             searchText
               ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
@@ -257,6 +236,7 @@ const columns = (
       ),
   },
   {
+    key: "amount",
     title: "RECEIPT AMOUNT",
     dataIndex: "amount",
     align: "right",
@@ -269,16 +249,11 @@ const columns = (
       handleSearch,
       true
     ),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "amount" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -292,11 +267,12 @@ const columns = (
       ),
   },
   {
+    key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     align: "center",
     sorter: true,
-    fixed:'right',
+    fixed: "right",
     ...getColumnSearchPropsPaging(
       "statusApproval",
       searchInput,
@@ -321,30 +297,29 @@ const columns = (
             : approvalStatus;
           break;
       }
+
       if (searchedColumn === "statusApproval") {
         return (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         );
-      } else {
-        return text ? (
-          <div className={"flex justify-center"}>
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          text
-        );
       }
+
+      return text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text}>{text}</StatusComponent>
+        </div>
+      ) : (
+        text
+      );
     },
   },
 ];
+
 
 const DetailMatch = ({
   searchTextMatch,
@@ -366,6 +341,11 @@ const DetailMatch = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+      left: ["no"],
+      right: [],
+    }));
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -430,7 +410,7 @@ const DetailMatch = ({
         </DetailText>
       </div>
       <div className="my-5">
-        <TablePagination
+        <TableRBI
           dataSource={data_match?.result}
           totalData={data_match?.page?.totalElements}
           columns={columns(
@@ -450,6 +430,9 @@ const DetailMatch = ({
             x: 3500,
             y: 300,
           }}
+          showExport={false}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
         />
       </div>
     </div>

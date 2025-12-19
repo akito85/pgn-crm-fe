@@ -13,18 +13,17 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
-  createPaymentChannel,
-  createValidasiPaymentChannel,
+  createSetting,
+  createValidasiSetting,
   getAllApprovalList,
-  getDetailPaymentChannel,
+  getDetailSetting,
   getListApprovalById,
   getListCategory,
-  updatePaymentChannel,
-  getCategoryPayment
-} from "../../../../../redux/slices/receipt_collection/paymentChannel";
+  updateSetting,
+} from "../../../../../redux/slices/receipt_collection/setting";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
-import PaymentChannelForm from "./PaymentChannelForm";
+import TransferToReceiptForm from "./TransferToReceiptForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -40,7 +39,7 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
-const ListFormPaymentChannel = (props) => {
+const ListFormSettings = (props) => {
   const { type } = props;
   const {
     data_detail,
@@ -48,8 +47,7 @@ const ListFormPaymentChannel = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
-    dataCategory
-  } = useSelector((state) => state.paymentChannel);
+  } = useSelector((state) => state.receiptSetting);
 
   // Declaration
   const navigate = useNavigate();
@@ -74,7 +72,7 @@ const ListFormPaymentChannel = (props) => {
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailPaymentChannel(id));
+      dispatch(getDetailSetting(id));
     }
   }, [dispatch, id, type]);
 
@@ -84,7 +82,6 @@ const ListFormPaymentChannel = (props) => {
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getTypeDDL());
-    dispatch(getCategoryPayment());
   }, [dispatch]);
 
   useEffect(() => {
@@ -135,23 +132,21 @@ const ListFormPaymentChannel = (props) => {
     if (id  && data_detail) {
 
       form.setFieldsValue({
-        id: data_detail?.peOpCi?.id,
-        ciCode: data_detail?.peOpCi?.ciCode,
-        name: data_detail?.peOpCi?.name,
-        effStartDate:
-          data_detail?.peOpCi?.effStartDate === null
-            ? moment()
-            : moment(data_detail?.peOpCi?.effStartDate).clone(),
-        effEndDate:
-          data_detail?.peOpCi?.effEndDate === null
-            ? ""
-            : moment(data_detail?.peOpCi?.effEndDate).clone(),
-        type: data_detail?.peOpCi?.type,
-        appHierId: data_detail?.peOpCi?.appHierId,
-        category: data_detail?.peOpCi?.category,
+        id: data_detail?.settings.id,
+        dateStart: data_detail?.settings?.dateStart ?? "",
+        dateEnd: data_detail?.settings?.dateEnd ?? "",
+        hourStart: data_detail?.settings?.hourStart ?? "",
+        hourEnd: data_detail?.settings?.hourEnd ?? "",
+        minuteStart: data_detail?.settings?.minuteStart ?? "",
+        minuteEnd: data_detail?.settings?.minuteEnd ?? "",
+        caCode: data_detail?.settings?.caCode ?? "",
+        partnerCode: data_detail?.settings?.partnerCode ?? "",
+        ciCode: data_detail?.settings?.ciCode ?? "",
+        type: data_detail?.settings?.type,
+        apphierId: data_detail?.settings?.appHierId,
       });
 
-      setSelectedHierarchy(data_detail?.peOpCi?.appHierId);
+      setSelectedHierarchy(data_detail?.settings?.appHierId);
 
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
@@ -166,12 +161,16 @@ const ListFormPaymentChannel = (props) => {
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Payment Channel", paramValue: ["ciCode", 
-                                      "name",
-                                      "effStartDate",
-                                      "effEndDate",
-                                      "type",
-                                      "category"
+    { value: "Transfer to Receipt", paramValue: ["dateStart",
+                                      "dateEnd",
+                                      "hourStart",
+                                      "hourEnd",
+                                      "minuteStart",
+                                      "minuteEnd",
+                                      "caCode",
+                                      "partnerCode",
+                                      "ciCode",
+                                      "type"
                                      ] },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -197,25 +196,26 @@ const ListFormPaymentChannel = (props) => {
 
   const handleSubmitForm = (formValue) => {
       const dataValue = {
-        // id: id,
+        dateStart: formValue.dateStart,
+        dateEnd: formValue.dateEnd,
+        hourStart: formValue.hourStart,
+        hourEnd: formValue.hourEnd,
+        minuteStart: formValue.minuteStart,
+        minuteEnd: formValue.minuteEnd,
+        caCode: formValue.caCode,
+        partnerCode: formValue.partnerCode,
         ciCode: formValue.ciCode,
-        name: formValue.name,
         type: formValue.type,
-        effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
-        effEndDate: formValue.effEndDate
-          ? moment(formValue.effEndDate).format(dateFormatting.date)
-          : null,
-        appHierId: formValue.apphierId,
-        category: formValue.category,
+        apphierId: formValue.apphierId,
       };
 
       setSendBody(dataValue);
       const bodyValidasiUpdate = {
         ...dataValue,
-        id: data_detail?.peOpCi?.id,
+        id: data_detail?.settings?.id,
       };
       if (type !== "update") {
-        dispatch(createValidasiPaymentChannel(dataValue))
+        dispatch(createValidasiSetting(dataValue))
           .unwrap()
           .then(async (data) => {
             const sukses = data?.success;
@@ -225,7 +225,7 @@ const ListFormPaymentChannel = (props) => {
             setModalConfirm(true);
           });
       }else{
-        dispatch(createValidasiPaymentChannel(bodyValidasiUpdate))
+        dispatch(createValidasiSetting(bodyValidasiUpdate))
           .unwrap()
           .then(async (data) => {
             const sukses = data?.success;
@@ -262,7 +262,7 @@ const ListFormPaymentChannel = (props) => {
       setSelectedHierarchy("");
       setListDataAttachment([]);
     } else {
-      dispatch(getDetailPaymentChannel(id));
+      dispatch(getDetailSetting(id));
     }
   };
 
@@ -298,11 +298,15 @@ const ListFormPaymentChannel = (props) => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL,
-      breadcrumbName: "Payment Channel",
+      path: "",
+      breadcrumbName: "Payment Warranty",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PAYMENT_CHANNEL,
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
+      breadcrumbName: "Deduction",
+    },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION,
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
@@ -324,10 +328,10 @@ const ListFormPaymentChannel = (props) => {
     };
 
     if (type === "update") {
-      dispatch(updatePaymentChannel(sendBody))
+      dispatch(updateSetting(sendBody))
         .unwrap()
         .then(async () => {
-          const id = data_detail?.peOpCi?.id;
+          const id = data_detail?.settings?.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
@@ -335,9 +339,9 @@ const ListFormPaymentChannel = (props) => {
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
-              referensiId: data_detail?.peOpCi?.id,
+              referensiId: data_detail?.settings?.id,
               files: element.file,
-              category: "PAYMENT_CHANNEL",
+              category: "RECEIPT_SETTING",
               fileCategoryId: element.fileCategoryId,
             };
             const response = await receiptCollectionHttpService.uploadImage(
@@ -365,7 +369,7 @@ const ListFormPaymentChannel = (props) => {
           }
         });
     } else {
-      dispatch(createPaymentChannel(sendBody))
+      dispatch(createSetting(sendBody))
         .unwrap()
         .then(async (data) => {
           let id = data.id;
@@ -377,7 +381,7 @@ const ListFormPaymentChannel = (props) => {
               files: element.file,
               fileCategoryId: element.fileCategoryId,
               referensiId: id,
-              category: "PAYMENT_CHANNEL",
+              category: "RECEIPT_SETTING",
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
@@ -423,10 +427,9 @@ const ListFormPaymentChannel = (props) => {
               display: valuePage !== tabData[0].value ? "none" : undefined,
             }}
           >
-            <PaymentChannelForm
+            <TransferToReceiptForm
               dataType={dataType}
               form={form}
-              dataCategory={dataCategory}
             />
           </div>
           <div
@@ -453,7 +456,7 @@ const ListFormPaymentChannel = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="paymentChannel"
+                typeSelector="receiptSetting"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}
@@ -550,4 +553,4 @@ const ListFormPaymentChannel = (props) => {
   );
 };
 
-export default ListFormPaymentChannel;
+export default ListFormSettings;

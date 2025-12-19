@@ -3,14 +3,14 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 
-const DetailPaymentChannel = ({ data_detail,  data_req }) => {
+const DetailSettings = ({ data_detail,  data_req }) => {
 
   
   return (
     <div>
       {data_req?.isApprover &&
       data_req?.approvalType &&
-      data_req?.approvalType === "INACTIVE_PAYMENT_METHOD" ? (
+      data_req?.approvalType === "INACTIVE_RECEIPT_SETTING" ? (
         <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
           <div className="grid grid-cols-4 w-full">
             <DetailText label={"Requested Date"}>
@@ -25,34 +25,52 @@ const DetailPaymentChannel = ({ data_detail,  data_req }) => {
           </div>
         </BaseContainer>
       ) : null}
-      <BaseContainer header={"PAYMENT CHANNEL INFORMATION"}>
+      <BaseContainer header={"SETTING INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Payment Channel Code">
+          <DetailText label={"Date Start"}>
+            {data_detail?.dateStart}
+          </DetailText>
+
+          <DetailText label={"Date End"}>
+            {data_detail?.dateEnd}
+          </DetailText>
+
+          <DetailText label={"Hour Start"}>
+            {data_detail?.hourStart}
+          </DetailText>
+
+          <DetailText label={"Hour End"}>
+            {data_detail?.hourEnd}
+          </DetailText>
+
+          <DetailText label={"Minute Start"}>
+            {data_detail?.minuteStart}
+          </DetailText>
+
+          <DetailText label={"Minute End"}>
+            {data_detail?.minuteEnd}
+          </DetailText>
+
+          <DetailText label={"CA Code"}>
+            {data_detail?.caCode}
+          </DetailText>
+
+
+          <DetailText label={"Partner Code"}>
+            {data_detail?.partnerCode}
+          </DetailText>
+
+          <DetailText label={"CI Code"}>
             {data_detail?.ciCode}
           </DetailText>
-          <DetailText label="Name">
-            {data_detail?.name}
+
+          <DetailText label={"Type"}>
+            {data_detail?.type}
           </DetailText>
-          <DetailText label="Eff Start Date">
-            {moment(data_detail?.effStartDate).format(dateFormatting.date)}
-          </DetailText>
-          <DetailText label="Eff End Date">
-            {data_detail?.effEndDate
-              ? moment(data_detail?.effEndDate).format(dateFormatting.date)
-              : ""}
-          </DetailText>
-          {/* <DetailText label="Status">{data_detail?.status}</DetailText> */}
+          <DetailText label="Status">{data_detail?.status}</DetailText>
           <DetailText label="Status Approval">
             {data_detail?.statusApproval}
           </DetailText>
-            <DetailText label="Category">
-              {data_detail?.category}
-            </DetailText>
-          <div className="col-span-3">
-            <DetailText label="Type">
-              {data_detail?.type}
-            </DetailText>
-          </div>
         </div>
       </BaseContainer>
 
@@ -75,4 +93,4 @@ const DetailPaymentChannel = ({ data_detail,  data_req }) => {
   );
 };
 
-export default DetailPaymentChannel;
+export default DetailSettings;

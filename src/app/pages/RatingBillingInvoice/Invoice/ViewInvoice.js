@@ -448,7 +448,7 @@ const ViewInvoice = () => {
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 7000 }}
+              tableScrolled={{ y: 525, x: 10000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
