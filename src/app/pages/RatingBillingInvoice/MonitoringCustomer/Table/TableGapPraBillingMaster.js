@@ -20,7 +20,7 @@ export const getColumnsGapPraBillingMaster = (
       key: "no",
       title: "NO",
       width: 60,
-      align: "center",
+      isClassification: true,
       render: (text, record, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -28,7 +28,6 @@ export const getColumnsGapPraBillingMaster = (
       title: "CUSTOMER ID",
       dataIndex: "customerId",
       sorter: true,
-      align: "left",
       width: 150,
       filteredValue: [search?.customerId] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -56,7 +55,6 @@ export const getColumnsGapPraBillingMaster = (
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       sorter: true,
-      align: "left",
       width: 250,
       filteredValue: [search?.customerName] || null,
       ellipsis: {
@@ -87,7 +85,7 @@ export const getColumnsGapPraBillingMaster = (
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 150,
       filteredValue: [search?.billingPeriod] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -115,7 +113,6 @@ export const getColumnsGapPraBillingMaster = (
       title: "FIELD MISMATCH",
       dataIndex: "fieldMismatch",
       sorter: true,
-      align: "left",
       width: 200,
       filteredValue: [search?.fieldMismatch] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -143,7 +140,6 @@ export const getColumnsGapPraBillingMaster = (
       title: "PRA-BILLING VALUE",
       dataIndex: "praBillingValue",
       sorter: true,
-      align: "left",
       width: 220,
       filteredValue: [search?.praBillingValue] || null,
       ellipsis: {
@@ -177,7 +173,6 @@ export const getColumnsGapPraBillingMaster = (
       title: "MASTER VALUE",
       dataIndex: "masterValue",
       sorter: true,
-      align: "left",
       width: 220,
       filteredValue: [search?.masterValue] || null,
       ellipsis: {
@@ -211,7 +206,7 @@ export const getColumnsGapPraBillingMaster = (
       title: "AREA",
       dataIndex: "area",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 130,
       filteredValue: [search?.area] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -239,7 +234,7 @@ export const getColumnsGapPraBillingMaster = (
       title: "STATUS",
       dataIndex: "status",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 150,
       filteredValue: [search?.status] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -266,7 +261,7 @@ export const getColumnsGapPraBillingMaster = (
       key: "action",
       title: "ACTION",
       width: 120,
-      align: "center",
+      isClassification: true,
       render: (record) => (
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
           <Tooltip title="Sync dengan Master Data">

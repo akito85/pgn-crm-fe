@@ -17,7 +17,7 @@ export const columnsCalculationUsage = (
   {
     key: "no",
     title: "NO",
-    align: "center",
+    isClassification: true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -40,7 +40,7 @@ export const columnsCalculationUsage = (
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
-    align: "center",
+    isClassification: true,
     width: 100,
     ...getColumnSearchPropsPaging(
       "uom",
@@ -55,7 +55,7 @@ export const columnsCalculationUsage = (
     title: "USAGE",
     dataIndex: "usage",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 150,
     ...getColumnSearchPropsPaging(
       "usage",
@@ -70,7 +70,7 @@ export const columnsCalculationUsage = (
     title: "CONVERTED USAGE M3",
     dataIndex: "convUsageM3",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 180,
     ...getColumnSearchPropsPaging(
       "convUsageM3",
@@ -85,7 +85,7 @@ export const columnsCalculationUsage = (
     title: "CONVERTED USAGE MMBTU",
     dataIndex: "convUsageMmbtu",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 200,
     ...getColumnSearchPropsPaging(
       "convUsageMmbtu",
@@ -100,7 +100,7 @@ export const columnsCalculationUsage = (
     title: "DISCOUNT USAGE",
     dataIndex: "discountUsage",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 150,
     ...getColumnSearchPropsPaging(
       "discountUsage",
@@ -115,7 +115,7 @@ export const columnsCalculationUsage = (
     title: "DISCOUNT USAGE M3",
     dataIndex: "discountUsageM3",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 180,
     ...getColumnSearchPropsPaging(
       "discountUsageM3",
@@ -130,7 +130,7 @@ export const columnsCalculationUsage = (
     title: "DISCOUNT USAGE MMBTU",
     dataIndex: "discountUsageMmbtu",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 200,
     ...getColumnSearchPropsPaging(
       "discountUsageMmbtu",
@@ -145,7 +145,7 @@ export const columnsCalculationUsage = (
     title: "TOTAL USAGE",
     dataIndex: "totalUsage",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 150,
     ...getColumnSearchPropsPaging(
       "totalUsage",
@@ -160,7 +160,7 @@ export const columnsCalculationUsage = (
     title: "CONVERTED TOTAL USAGE M3",
     dataIndex: "convTotalUsageM3",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 220,
     ...getColumnSearchPropsPaging(
       "convTotalUsageM3",
@@ -175,7 +175,7 @@ export const columnsCalculationUsage = (
     title: "CONVERTED TOTAL USAGE MMBTU",
     dataIndex: "convTotalUsageMmbtu",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 240,
     ...getColumnSearchPropsPaging(
       "convTotalUsageMmbtu",
@@ -204,7 +204,7 @@ export const columnsCalculationUsage = (
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    align: "center",
+    isClassification: true,
     width: 100,
     ...getColumnSearchPropsPaging(
       "currency",
@@ -219,7 +219,7 @@ export const columnsCalculationUsage = (
     title: "PRICE",
     dataIndex: "price",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 150,
     ...getColumnSearchPropsPaging(
       "price",
@@ -234,7 +234,7 @@ export const columnsCalculationUsage = (
     title: "AMOUNT",
     dataIndex: "amount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 150,
     ...getColumnSearchPropsPaging(
       "amount",
@@ -249,7 +249,7 @@ export const columnsCalculationUsage = (
     title: "AMOUNT EQV IDR",
     dataIndex: "amountEqvIdr",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 180,
     ...getColumnSearchPropsPaging(
       "amountEqvIdr",
@@ -264,7 +264,7 @@ export const columnsCalculationUsage = (
     title: "AMOUNT EQV USD",
     dataIndex: "amountEqvUsd",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 180,
     ...getColumnSearchPropsPaging(
       "amountEqvUsd",
@@ -279,7 +279,7 @@ export const columnsCalculationUsage = (
     title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 180,
     ...getColumnSearchPropsPaging(
       "discountAmount",
@@ -294,7 +294,7 @@ export const columnsCalculationUsage = (
     title: "DISCOUNT AMOUNT EQV IDR",
     dataIndex: "discountAmountEqvIdr",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 220,
     ...getColumnSearchPropsPaging(
       "discountAmountEqvIdr",
@@ -309,7 +309,7 @@ export const columnsCalculationUsage = (
     title: "DISCOUNT AMOUNT EQV USD",
     dataIndex: "discountAmountEqvUsd",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 220,
     ...getColumnSearchPropsPaging(
       "discountAmountEqvUsd",
@@ -324,7 +324,7 @@ export const columnsCalculationUsage = (
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     width: 180,
     ...getColumnSearchPropsPaging(
       "totalAmount",
@@ -338,7 +338,7 @@ export const columnsCalculationUsage = (
     key: "createdDate",
     title: "CREATED DATE",
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "createdDate",
     width: 150,
     ...getColumnSearchPropsPaging(
@@ -405,8 +405,8 @@ export const columnsCalculationUsage = (
   {
     key: "action",
     title: "ACTION",
+    isClassification: true,
     width: 100,
-    align: "center",
     render: (record) => {
       return (
         <Tooltip title="Detail">

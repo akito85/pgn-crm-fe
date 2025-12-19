@@ -11,6 +11,9 @@ import {
   Alert,
   Steps,
   Input,
+  Select,
+  Spin,
+  Table,
 } from "antd";
 import {
   CloseOutlined,
@@ -18,8 +21,13 @@ import {
   DownloadOutlined,
   UploadOutlined,
   InboxOutlined,
+  InfoCircleFilled,
 } from "@ant-design/icons";
-import { previewOriginalInvoice } from "../../../../../redux/slices/rating_billing_invoice/emeterai";
+import {
+  downloadOriginalInvoice,
+  getApprovalHierarchyList,
+  getApphierDetail,
+} from "../../../../../redux/slices/rating_billing_invoice/emeterai";
 
 const { Dragger } = Upload;
 const { Step } = Steps;
@@ -33,12 +41,15 @@ const StampingRequestModal = ({
   loading: externalLoading = false,
 }) => {
   const dispatch = useDispatch();
-  const { previewLoading } = useSelector((state) => state.emeterai);
+  const { downloadLoading, data_approval_hierarchy, data_apphier_detail } =
+    useSelector((state) => state.emeterai);
 
   const [stampingMethod, setStampingMethod] = useState("e-stamping");
   const [currentStep, setCurrentStep] = useState(0);
   const [fileList, setFileList] = useState([]);
   const [remark, setRemark] = useState("");
+  const [selectedApproval, setSelectedApproval] = useState(null);
+  const [approvalDetail, setApprovalDetail] = useState([]);
 
   const invoice = React.useMemo(() => {
     if (!invoiceData) {
@@ -61,8 +72,28 @@ const StampingRequestModal = ({
       setFileList([]);
       setCurrentStep(0);
       setRemark("");
+      setSelectedApproval(null);
+      setApprovalDetail([]);
+      // Fetch approval hierarchy list
+      dispatch(getApprovalHierarchyList());
     }
-  }, [visible]);
+  }, [visible, dispatch]);
+
+  useEffect(() => {
+    if (data_apphier_detail && Array.isArray(data_apphier_detail)) {
+      const data = data_apphier_detail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: Array.isArray(a.employeeDetail)
+          ? a.employeeDetail.map((b, idx) => ({
+              ...b,
+              key: idx + 1,
+            }))
+          : [],
+      }));
+      setApprovalDetail(data || []);
+    }
+  }, [data_apphier_detail]);
 
   const formatAmount = (amount) => {
     if (typeof amount === "number") {
@@ -71,19 +102,21 @@ const StampingRequestModal = ({
     return amount;
   };
 
-  const handlePreviewFile = async () => {
+  const handleDownloadFile = async () => {
     try {
       await dispatch(
-        previewOriginalInvoice({ invoiceNumber: invoice.invoiceNumber })
+        downloadOriginalInvoice({ invoiceNumber: invoice.invoiceNumber })
       ).unwrap();
+      // Success message already handled in slice
     } catch (error) {
-      console.error("❌ Error previewing document:", error);
-      console.error("=".repeat(80));
+      console.error("❌ Error downloading document:", error);
+      // Error message already handled in slice
     }
   };
 
   const uploadProps = {
     fileList,
+    multiple: true,
     beforeUpload: (file) => {
       const isPDF = file.type === "application/pdf";
       const isJPG = file.type === "image/jpeg";
@@ -104,12 +137,13 @@ const StampingRequestModal = ({
       return false;
     },
     onChange: (info) => {
-      let newFileList = [...info.fileList];
-      newFileList = newFileList.slice(-1);
-      setFileList(newFileList);
+      setFileList(info.fileList);
     },
-    onRemove: () => {
-      setFileList([]);
+    onRemove: (file) => {
+      const index = fileList.indexOf(file);
+      const newFileList = fileList.slice();
+      newFileList.splice(index, 1);
+      setFileList(newFileList);
     },
   };
 
@@ -117,23 +151,55 @@ const StampingRequestModal = ({
     if (stampingMethod === "e-stamping") {
       handleSubmit();
     } else {
-      setCurrentStep(1);
+      // For manual, validate step before going to next
+      if (currentStep === 0) {
+        // Step 0: Select Method - no validation needed, just go to next step
+        setCurrentStep(1);
+      } else if (currentStep === 1) {
+        // Step 1: Attachment - validate file upload and remark
+        if (fileList.length === 0) {
+          message.error("Please upload at least one file!");
+          return;
+        }
+        if (!remark || remark.trim() === "") {
+          message.error("Please provide a remark!");
+          return;
+        }
+        setCurrentStep(2);
+      } else if (currentStep === 2) {
+        // Step 2: Approval - validate approval selection
+        if (!selectedApproval) {
+          message.error("Please select approval hierarchy!");
+          return;
+        }
+        setCurrentStep(3);
+      }
     }
   };
 
   const handleBack = () => {
-    setCurrentStep(0);
-    setFileList([]);
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleApprovalSelect = (value) => {
+    setSelectedApproval(value);
+    dispatch(getApphierDetail({ id: value }));
   };
 
   const handleSubmit = async () => {
     if (stampingMethod === "manual") {
       if (fileList.length === 0) {
-        message.error("Please upload the stamped invoice file!");
+        message.error("Please upload at least one file!");
         return;
       }
       if (!remark || remark.trim() === "") {
         message.error("Please provide a remark!");
+        return;
+      }
+      if (!selectedApproval) {
+        message.error("Please select approval hierarchy!");
         return;
       }
     }
@@ -145,11 +211,12 @@ const StampingRequestModal = ({
           customer: invoice.customer,
           amount: invoice.amount,
           stampingMethod: stampingMethod,
-          file:
+          files:
             stampingMethod === "manual"
-              ? fileList[0].originFileObj || fileList[0]
+              ? fileList.map((file) => file.originFileObj || file)
               : null,
           remark: stampingMethod === "manual" ? remark : "Test stamp",
+          apphierId: stampingMethod === "manual" ? selectedApproval : null,
           submittedAt: new Date().toISOString(),
         };
 
@@ -160,7 +227,7 @@ const StampingRequestModal = ({
         message.success(
           stampingMethod === "e-stamping"
             ? "E-Stamping request submitted successfully!"
-            : "Stamped invoice uploaded successfully!"
+            : "Physical stamp request with approval submitted successfully!"
         );
         onClose();
       }
@@ -169,6 +236,8 @@ const StampingRequestModal = ({
       setFileList([]);
       setCurrentStep(0);
       setRemark("");
+      setSelectedApproval(null);
+      setApprovalDetail([]);
     } catch (error) {
       console.error("❌ Error in handleSubmit:", error);
     }
@@ -179,6 +248,8 @@ const StampingRequestModal = ({
     setFileList([]);
     setCurrentStep(0);
     setRemark("");
+    setSelectedApproval(null);
+    setApprovalDetail([]);
     onClose();
   };
 
@@ -188,19 +259,59 @@ const StampingRequestModal = ({
     setFileList([]);
     setCurrentStep(0);
     setRemark("");
+    setSelectedApproval(null);
+    setApprovalDetail([]);
   };
+
+  const columnsApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "HIERARCHY",
+      dataIndex: "hierarchy",
+      key: "hierarchy",
+      width: 150,
+    },
+    {
+      title: "POSITION",
+      dataIndex: "position",
+      key: "position",
+      width: 200,
+    },
+  ];
+
+  const columnsExpandApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+      key: "employeeName",
+      width: 250,
+    },
+    {
+      title: "EMAIL",
+      dataIndex: "email",
+      key: "email",
+      width: 250,
+    },
+  ];
 
   const renderStep1 = () => (
     <>
       <div style={{ marginBottom: "32px" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "200px 1fr",
-            gap: "16px",
-          }}
-        >
-          <div>
+        <div className="flex flex-col w-full gap-2">
+          <div className="w-full">
             <label
               style={{
                 display: "block",
@@ -210,7 +321,7 @@ const StampingRequestModal = ({
                 color: "#262626",
               }}
             >
-              Invoice #:
+              Invoice:
             </label>
             <div
               style={{
@@ -350,27 +461,39 @@ const StampingRequestModal = ({
       </div>
 
       {stampingMethod === "e-stamping" && (
-        <Alert
-          message="E-Stamping Process"
-          description="Your invoice will be automatically stamped digitally through PJAP (Penyedia Jasa Aplikasi Perpajakan) system. This process typically takes 1-2 business days."
-          type="info"
-          showIcon
-          style={{ marginTop: "16px" }}
-        />
+        <div className="flex gap-3 bg-[#F5F5F5] p-3 rounded-[10px]">
+          <InfoCircleFilled
+            style={{ paddingTop: "2px", color: "#0175BF", fontSize: "20px" }}
+          />
+          <div className="flex flex-col">
+            <p style={{ fontWeight: 600 }}>E-Stamping Process</p>
+            <p>
+              Your invoice will be automatically stamped digitally through PJAP
+              (Penyedia Jasa Aplikasi Perpajakan) system. This process typically
+              takes 1-2 business days.
+            </p>
+          </div>
+        </div>
       )}
 
       {stampingMethod === "manual" && (
-        <Alert
-          message="Manual Stamping Process"
-          description="You will need to download, print, stamp, and upload the invoice. Instructions will be provided in the next step."
-          type="warning"
-          showIcon
-          style={{ marginTop: "16px" }}
-        />
+        <div className="flex gap-3 bg-[#F5F5F5] p-3 rounded-[10px]">
+          <InfoCircleFilled
+            style={{ paddingTop: "2px", color: "#0175BF", fontSize: "20px" }}
+          />
+          <div className="flex flex-col">
+            <p style={{ fontWeight: 600 }}>Manual (Physical Stamp)</p>
+            <p>
+              Your invoice requires manual stamping. Please allow up to 3–5
+              business days for processing after submission.
+            </p>
+          </div>
+        </div>
       )}
     </>
   );
 
+  // Step 2: Attachment (for manual only)
   const renderStep2 = () => (
     <>
       <div
@@ -404,7 +527,7 @@ const StampingRequestModal = ({
           <li>Download the original invoice file.</li>
           <li>Print and affix a valid physical stamp.</li>
           <li>Scan the document into PDF format.</li>
-          <li>Upload the scanned file below.</li>
+          <li>Upload the scanned file(s) below.</li>
         </ol>
       </div>
 
@@ -413,9 +536,9 @@ const StampingRequestModal = ({
           type="default"
           size="large"
           icon={<DownloadOutlined />}
-          onClick={handlePreviewFile}
-          loading={previewLoading}
-          disabled={previewLoading}
+          onClick={handleDownloadFile}
+          loading={downloadLoading}
+          disabled={downloadLoading}
           style={{
             width: "100%",
             height: "48px",
@@ -424,7 +547,9 @@ const StampingRequestModal = ({
             borderWidth: "2px",
           }}
         >
-          {previewLoading ? "Loading..." : "Download Original Invoice (.pdf)"}
+          {downloadLoading
+            ? "Downloading..."
+            : "Download Stamped Invoice (.PDF)"}
         </Button>
       </div>
 
@@ -438,10 +563,10 @@ const StampingRequestModal = ({
             fontSize: "15px",
             fontWeight: "600",
             color: "#262626",
+            textTransform: "uppercase",
           }}
         >
-          Scanned File (PDF/JPG/PNG, max 5MB):{" "}
-          <span style={{ color: "red" }}>*</span>
+          Scanned File <span style={{ color: "red" }}>*</span>
         </label>
         <Dragger {...uploadProps}>
           <p className="ant-upload-drag-icon">
@@ -463,15 +588,46 @@ const StampingRequestModal = ({
       </div>
 
       {fileList.length > 0 && (
-        <Alert
-          message="File Ready"
-          description={`${fileList[0].name} (${(
-            fileList[0].size / 1024
-          ).toFixed(2)} KB)`}
-          type="success"
-          showIcon
-          style={{ marginBottom: "24px" }}
-        />
+        <div style={{ marginBottom: "24px" }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "12px",
+              fontSize: "15px",
+              fontWeight: "600",
+              color: "#262626",
+              textTransform: "uppercase",
+            }}
+          >
+            Files Upload
+          </label>
+          <div
+            style={{
+              background: "#f5f5f5",
+              border: "1px solid #d9d9d9",
+              borderRadius: "6px",
+              padding: "16px",
+            }}
+          >
+            {fileList.map((file, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px 0",
+                  borderBottom:
+                    index < fileList.length - 1 ? "1px solid #e8e8e8" : "none",
+                }}
+              >
+                <span style={{ fontSize: "14px", color: "#262626" }}>
+                  {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       <div>
@@ -484,7 +640,7 @@ const StampingRequestModal = ({
             color: "#262626",
           }}
         >
-          Remark: <span style={{ color: "red" }}>*</span>
+          Remark <span style={{ color: "red" }}>*</span>
         </label>
         <TextArea
           rows={4}
@@ -501,124 +657,409 @@ const StampingRequestModal = ({
     </>
   );
 
+  // Step 3: Approval (for manual only)
+  const renderStep3 = () => (
+    <>
+      <div style={{ marginBottom: "24px" }}>
+        <p
+          style={{
+            fontSize: "14px",
+            fontWeight: "600",
+            color: "#0175BF",
+            textTransform: "uppercase",
+            marginBottom: "16px",
+          }}
+        >
+          Approval Information
+        </p>
+
+        <div style={{ marginBottom: "24px" }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "8px",
+              fontSize: "14px",
+              fontWeight: "500",
+              color: "#262626",
+            }}
+          >
+            Approval Hierarchy <span style={{ color: "red" }}>*</span>
+          </label>
+          <Select
+            value={selectedApproval}
+            onChange={handleApprovalSelect}
+            placeholder="Select approval hierarchy"
+            style={{ width: "100%" }}
+            size="large"
+            showSearch
+            filterOption={(input, option) =>
+              (option?.children ?? "")
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            }
+          >
+            {data_approval_hierarchy &&
+              data_approval_hierarchy.map((data) => (
+                <Select.Option value={data.appHierId} key={data.appHierId}>
+                  {data.approvalName}
+                </Select.Option>
+              ))}
+          </Select>
+        </div>
+
+        {selectedApproval && approvalDetail.length > 0 && (
+          <Table
+            dataSource={approvalDetail}
+            columns={columnsApproval}
+            pagination={false}
+            size="small"
+            expandable={{
+              expandedRowRender: (record) => (
+                <div style={{ padding: "16px 0" }}>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      color: "#0175BF",
+                      textTransform: "uppercase",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Employee Information
+                  </p>
+                  <Table
+                    dataSource={record?.employeeDetail || []}
+                    columns={columnsExpandApproval}
+                    pagination={false}
+                    size="small"
+                  />
+                </div>
+              ),
+            }}
+          />
+        )}
+      </div>
+    </>
+  );
+
+  // Step 4: Confirmation (for manual only)
+  const renderStep4 = () => {
+    const selectedApprovalName = data_approval_hierarchy?.find(
+      (a) => a.appHierId === selectedApproval
+    )?.approvalName;
+
+    return (
+      <>
+        <div style={{ marginBottom: "32px" }}>
+          <h3
+            style={{
+              fontSize: "16px",
+              fontWeight: "600",
+              color: "#262626",
+              marginBottom: "24px",
+            }}
+          >
+            Please review your submission
+          </h3>
+
+          <div style={{ marginBottom: "24px" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "8px",
+              }}
+            >
+              Remark
+            </p>
+            <p style={{ fontSize: "15px", color: "#262626" }}>{remark}</p>
+          </div>
+
+          <div style={{ marginBottom: "24px" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "8px",
+              }}
+            >
+              Approval Hierarchy
+            </p>
+            <p style={{ fontSize: "15px", color: "#262626" }}>
+              {selectedApprovalName || "-"}
+            </p>
+          </div>
+
+          <div style={{ marginBottom: "24px" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "12px",
+              }}
+            >
+              Approvers
+            </p>
+            <div
+              style={{
+                background: "#f5f5f5",
+                border: "1px solid #d9d9d9",
+                borderRadius: "6px",
+                padding: "16px",
+              }}
+            >
+              {approvalDetail.length > 0 ? (
+                approvalDetail.map((approval, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      marginBottom:
+                        idx < approvalDetail.length - 1 ? "16px" : "0",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#262626",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {approval.hierarchy} - {approval.position}
+                    </p>
+                    {approval.employeeDetail &&
+                      approval.employeeDetail.length > 0 && (
+                        <div style={{ paddingLeft: "16px" }}>
+                          {approval.employeeDetail.map((emp, empIdx) => (
+                            <p
+                              key={empIdx}
+                              style={{
+                                fontSize: "14px",
+                                color: "#595959",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              • {emp.employeeName} ({emp.email})
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                ))
+              ) : (
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#8c8c8c",
+                    fontStyle: "italic",
+                  }}
+                >
+                  No approvers selected
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "12px",
+              }}
+            >
+              Files ({fileList.length})
+            </p>
+            <div
+              style={{
+                background: "#f5f5f5",
+                border: "1px solid #d9d9d9",
+                borderRadius: "6px",
+                padding: "16px",
+              }}
+            >
+              {fileList.map((file, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "8px 0",
+                    borderBottom:
+                      index < fileList.length - 1
+                        ? "1px solid #e8e8e8"
+                        : "none",
+                  }}
+                >
+                  <span style={{ fontSize: "14px", color: "#262626" }}>
+                    {index + 1}. {file.name} ({(file.size / 1024).toFixed(2)}{" "}
+                    KB)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  const getModalTitle = () => {
+    if (stampingMethod === "e-stamping") {
+      return "Stamping Process Request";
+    }
+    // For manual
+    if (currentStep === 0) return "Stamping Process Request";
+    if (currentStep === 1) return "Upload Invoice with Physical Stamp";
+    if (currentStep === 2) return "Select Approval";
+    if (currentStep === 3) return "Confirmation";
+    return "Stamping Process Request";
+  };
+
+  const getStepTitles = () => {
+    if (stampingMethod === "manual") {
+      return [
+        { title: "Select Method" },
+        { title: "Attachment" },
+        { title: "Approval" },
+        { title: "Confirmation" },
+      ];
+    }
+    return [];
+  };
+
   return (
     <Modal
       visible={visible}
       onCancel={handleCancel}
-      width={750}
+      width={850}
       footer={null}
       closeIcon={<CloseOutlined />}
       bodyStyle={{ padding: 0 }}
     >
-      <div
-        style={{
-          padding: "20px 24px",
-          borderBottom: "2px solid #e8e8e8",
-          background: "#0175BF",
-        }}
-      >
-        <h2
+      <Spin spinning={externalLoading}>
+        <div
           style={{
-            margin: 0,
-            fontSize: "20px",
-            fontWeight: "600",
-            color: "#ffffff",
+            padding: "20px 24px",
+            borderBottom: "2px solid #e8e8e8",
+            background: "#efefef",
           }}
         >
-          {stampingMethod === "manual" && currentStep === 1
-            ? "Upload Invoice with Physical Stamp"
-            : "Stamping Process Request"}
-        </h2>
-      </div>
-
-      {stampingMethod === "manual" && (
-        <div style={{ padding: "24px 32px 0" }}>
-          <Steps current={currentStep} size="small">
-            <Step title="Select Method" />
-            <Step title="Upload Document" />
-          </Steps>
-        </div>
-      )}
-
-      <div style={{ padding: "32px" }}>
-        {currentStep === 0 ? renderStep1() : renderStep2()}
-      </div>
-
-      <div
-        style={{
-          padding: "16px 32px",
-          borderTop: "1px solid #e8e8e8",
-          background: "#fafafa",
-          display: "flex",
-          justifyContent: currentStep === 1 ? "space-between" : "flex-end",
-          gap: "12px",
-        }}
-      >
-        {currentStep === 1 && (
-          <Button
-            onClick={handleBack}
-            size="large"
+          <h2
             style={{
-              minWidth: "120px",
-              height: "44px",
-              fontSize: "15px",
+              margin: 0,
+              fontSize: "20px",
+              fontWeight: "600",
+              color: "#0175BF",
             }}
           >
-            Back
-          </Button>
+            {getModalTitle()}
+          </h2>
+        </div>
+
+        {stampingMethod === "manual" && (
+          <div style={{ padding: "24px 32px 0" }}>
+            <Steps current={currentStep} size="small">
+              {getStepTitles().map((step, index) => (
+                <Step key={index} title={step.title} />
+              ))}
+            </Steps>
+          </div>
         )}
 
-        <div style={{ display: "flex", gap: "12px" }}>
-          <Button
-            onClick={handleCancel}
-            size="large"
-            style={{
-              minWidth: "120px",
-              height: "44px",
-              fontSize: "15px",
-            }}
-          >
-            Cancel
-          </Button>
+        <div style={{ padding: "32px" }}>
+          {currentStep === 0 && renderStep1()}
+          {currentStep === 1 && stampingMethod === "manual" && renderStep2()}
+          {currentStep === 2 && stampingMethod === "manual" && renderStep3()}
+          {currentStep === 3 && stampingMethod === "manual" && renderStep4()}
+        </div>
 
-          {currentStep === 0 ? (
+        <div
+          style={{
+            padding: "16px 32px",
+            borderTop: "1px solid #e8e8e8",
+            background: "#fafafa",
+            display: "flex",
+            justifyContent: currentStep > 0 ? "space-between" : "flex-end",
+            gap: "12px",
+          }}
+        >
+          {currentStep > 0 && stampingMethod === "manual" && (
             <Button
-              type="primary"
+              onClick={handleBack}
               size="large"
-              icon={<CheckOutlined />}
-              onClick={handleNext}
-              loading={externalLoading}
               style={{
-                minWidth: "160px",
+                minWidth: "120px",
                 height: "44px",
                 fontSize: "15px",
-                fontWeight: "500",
               }}
             >
-              {stampingMethod === "e-stamping" ? "Submit Request" : "Next"}
-            </Button>
-          ) : (
-            <Button
-              type="primary"
-              size="large"
-              icon={<UploadOutlined />}
-              onClick={handleSubmit}
-              loading={externalLoading}
-              disabled={
-                fileList.length === 0 || !remark || remark.trim() === ""
-              }
-              style={{
-                minWidth: "160px",
-                height: "44px",
-                fontSize: "15px",
-                fontWeight: "500",
-              }}
-            >
-              Submit File
+              Back
             </Button>
           )}
+
+          <div style={{ display: "flex", gap: "12px" }}>
+            <Button
+              onClick={handleCancel}
+              size="large"
+              style={{
+                minWidth: "120px",
+                height: "44px",
+                fontSize: "15px",
+              }}
+            >
+              Cancel
+            </Button>
+
+            {currentStep === 0 ? (
+              <Button
+                type="primary"
+                size="large"
+                icon={<CheckOutlined />}
+                onClick={handleNext}
+                loading={externalLoading}
+                style={{
+                  minWidth: "160px",
+                  height: "44px",
+                  fontSize: "15px",
+                  fontWeight: "500",
+                }}
+              >
+                {stampingMethod === "e-stamping" ? "Submit Request" : "Next"}
+              </Button>
+            ) : currentStep < 3 ? (
+              <Button
+                type="primary"
+                size="large"
+                onClick={handleNext}
+                loading={externalLoading}
+                style={{
+                  minWidth: "160px",
+                  height: "44px",
+                  fontSize: "15px",
+                  fontWeight: "500",
+                }}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                type="primary"
+                size="large"
+                icon={<UploadOutlined />}
+                onClick={handleSubmit}
+                loading={externalLoading}
+                style={{
+                  minWidth: "160px",
+                  height: "44px",
+                  fontSize: "15px",
+                  fontWeight: "500",
+                }}
+              >
+                Submit Request
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      </Spin>
     </Modal>
   );
 };

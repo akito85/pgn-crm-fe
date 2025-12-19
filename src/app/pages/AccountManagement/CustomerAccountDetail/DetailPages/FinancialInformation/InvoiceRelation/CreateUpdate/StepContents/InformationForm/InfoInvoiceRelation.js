@@ -12,13 +12,14 @@ import moment from "moment";
 import DateComponent from "../../../../../../../../../../components/DateComponent";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 
 export default function InfoInvoiceRelation({
   setAccount,
   className,
+  accountId,
 }) {
   const dispatch = useDispatch();
 
@@ -40,7 +41,7 @@ export default function InfoInvoiceRelation({
 
   const [isOpen, setIsOpen] = useState(false);
   
-  const { data_prAccountStandard } = useSelector(
+  const { data_irAccountStandard } = useSelector(
     (state) => state.financialInformation
   );
   
@@ -153,24 +154,24 @@ export default function InfoInvoiceRelation({
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
+    dispatch(getIrAccountStandard({ page, pageSize, sort, search: reqSearch, id: accountId }));
   }, [page, pageSize, sort, search]);
 
   useEffect(() => {
     if (
-      data_prAccountStandard && 
-      data_prAccountStandard.result &&
-      data_prAccountStandard.result.length > 0
+      data_irAccountStandard && 
+      data_irAccountStandard.result &&
+      data_irAccountStandard.result.length > 0
     ) {
-      setTotalElement(data_prAccountStandard?.page?.totalElements);
+      setTotalElement(data_irAccountStandard?.page?.totalElements);
     }
-  }, [data_prAccountStandard]);
+  }, [data_irAccountStandard]);
 
   // Sanitize pagination values to prevent NaN
   // Modify
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_prAccountStandard?.result?.length || 0);
+  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_irAccountStandard?.result?.length || 0);
 
   const columnMain = [
     {
@@ -188,10 +189,10 @@ export default function InfoInvoiceRelation({
     },
     {
       title: "IDENTIFICATION TYPE",
-      dataIndex: "identificationType",
+      dataIndex: "customerIdentificationType",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("identificationType"),
+      ...getColumnSearchProps("customerIdentificationType"),
     },
     {
       title: "CUSTOMER IDENTIFICATION NUMBER",
@@ -215,47 +216,137 @@ export default function InfoInvoiceRelation({
       ...getColumnSearchProps("customerType"),
     },
     {
-      title: "DESCRIPTION",
-      dataIndex: "description",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
       width: 250,
       sorter: true,
-      ...getColumnSearchProps("description"),
+      ...getColumnSearchProps("accountNumber"),
     },
     {
-      title: "BIRTH/FOUNDED DATE",
-      dataIndex: "birthFoundedDate",
-      width: 150,
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      width: 250,
       sorter: true,
-      ...getColumnSearchProps("birthFoundedDate"),
-      render: (date) => renderDate(date) || "-",
+      ...getColumnSearchProps("accountName"),
     },
     {
-      title: "BIRTH/FOUNDED PLACE",
-      dataIndex: "birthFoundedPlace",
+      title: "CATEGORY",
+      dataIndex: "accountCategory",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("birthFoundedPlace"),
+      ...getColumnSearchProps("accountCategory"),
     },
     {
-      title: "SEX",
-      dataIndex: "sex",
+      title: "SOR",
+      dataIndex: "sor",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("sex"),
+      ...getColumnSearchProps("sor"),
     },
     {
-      title: "MARITAL STATUS",
-      dataIndex: "maritalStatus",
+      title: "COST CENTER",
+      dataIndex: "costCenter",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("maritalStatus"),
+      ...getColumnSearchProps("costCenter"),
     },
     {
-      title: "SEARCH KEY",
-      dataIndex: "searchKey",
+      title: "METER READING CODES",
+      dataIndex: "meterReadingCode",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("searchKey"),
+      ...getColumnSearchProps("meterReadingCode"),
+    },
+    {
+      title: "CUSTOMER MANAGEMENT",
+      dataIndex: "customerManagement",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("customerManagement"),
+    },
+    {
+      title: "CLASSIFICATION TYPE",
+      dataIndex: "classificationType",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("classificationType"),
+    },
+    {
+      title: "SEGMENT",
+      dataIndex: "accountSegment",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("accountSegment"),
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("accountGroupType"),
+    },
+    {
+      title: "PREMISE ADDRESS",
+      dataIndex: "premiseAddress",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("premiseAddress"),
+    },
+    {
+      title: "SUBDISTRICT",
+      dataIndex: "subdistrict",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("subdistrict"),
+    },
+    {
+      title: "DISTRICT",
+      dataIndex: "district",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("district"),
+    },
+    {
+      title: "CITY",
+      dataIndex: "city",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("city"),
+    },
+    {
+      title: "COUNTRY",
+      dataIndex: "country",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("country"),
+    },
+    {
+      title: "LONGITUDE",
+      dataIndex: "longitude",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("longitude"),
+    },
+    {
+      title: "LATITUDE",
+      dataIndex: "latitude",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("latitude"),
+    },
+    {
+      title: "START DATE",
+      dataIndex: "startDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("startDate"),
+    },
+    {
+      title: "END DATE",
+      dataIndex: "endDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("endDate"),
     },
     {
       title: "ACTION",
@@ -272,7 +363,7 @@ export default function InfoInvoiceRelation({
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    setAccount(r?.accountId, r?.customerNumber, r?.customerName)
+                    setAccount(r?.accountId, r?.accountNumber, r?.accountName)
                     setIsOpen(false);
                   }}
                 />
@@ -403,7 +494,7 @@ export default function InfoInvoiceRelation({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        header={"CHOOSE SERVICE REQUEST REFERENCE"}
+        header={"CHOOSE ACCOUNT"}
         width={1100}
         type={"custom"}
         footer={[
@@ -413,7 +504,7 @@ export default function InfoInvoiceRelation({
         ]}
       >
         <TablePaginationNew
-          dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
+          dataSource={data_irAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
           }))}

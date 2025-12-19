@@ -6,14 +6,6 @@ import { dateFormatting } from "../../../../../../../../../utils";
 const ConfirmationModalInfo = ({
   data = {},
 }) => {
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
-
   return (
     <Fragment>
       <div className="text-primary text-xs font-bold uppercase">
@@ -23,8 +15,8 @@ const ConfirmationModalInfo = ({
         <DetailText label="Account Number">{data.accountNumber}</DetailText>
         <DetailText label="Account Name">{data.accountName}</DetailText>
         <DetailText label="Priority">{data.priority}</DetailText>
-        <DetailText label="Start Date">{renderDate(data.startDate)}</DetailText>
-        <DetailText label="End Date">{renderDate(data.endDate)}</DetailText>
+        <DetailText label="Start Date">{moment(data.startDate, dateFormatting.f_date).format(dateFormatting.date)}</DetailText>
+        <DetailText label="End Date">{data.endDate ? moment(data.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
       </div>
       <div className="w-full">
         <DetailText label="Description">{data.description}</DetailText>

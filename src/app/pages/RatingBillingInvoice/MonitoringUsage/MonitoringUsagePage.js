@@ -17,6 +17,7 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import { EyeOutlined } from "@ant-design/icons";
 
 const MonitoringUsagePage = () => {
   // Selector
@@ -132,7 +133,7 @@ const MonitoringUsagePage = () => {
     if (tabHeader === "Usage List") {
       return { x: 8000, y: 525 };
     } else {
-      return { x: 1000, y: 525 };
+      return { x: 800, y: 525 };
     }
   };
 
@@ -202,7 +203,7 @@ const MonitoringUsagePage = () => {
             state={{ id: record?.batchId }}
           >
             <Tooltip title="Detail">
-                <SVGIcon name="IconDetail" width={20} />
+                <EyeOutlined style={{ fontSize: "20px" }} />
             </Tooltip>
           </Link>
         );

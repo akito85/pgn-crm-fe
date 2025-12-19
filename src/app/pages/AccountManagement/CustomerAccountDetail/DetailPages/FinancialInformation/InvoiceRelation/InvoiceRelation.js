@@ -51,6 +51,7 @@ const InvoiceRelation = ({
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateIrId, setInactivateIrId] = useState(0);
   const [inactivateIrAppHierId, setInactivateIrAppHierId] = useState(0);
+  const [inactivateIrAccountNumber, setInactivateIrAccountNumber] = useState(0);
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
@@ -123,14 +124,10 @@ const InvoiceRelation = ({
       handleIsApproval(false)
 
       const body = {
-        page,
-        size: pageSize,
-        sort,
-        searches: search,
         inputFields: tempFilters,
       }
 
-      dispatch(getInvoiceRelation({ id, body }))
+      dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
     })
     .catch(() => {});
   }
@@ -141,14 +138,16 @@ const InvoiceRelation = ({
    * @param {number} prId 
    * @param {number} prAppHierId 
    */
-  const handleInactiveModal = (show, irId = 0, irAppHierId = 0) => {
+  const handleInactiveModal = (show, newIrId = 0, newIrAppHierId = 0, newIrAccountNumber) => {
     if (show) {
-      setInactivateIrId(irId);
-      setInactivateIrAppHierId(irAppHierId);
+      setInactivateIrId(newIrId);
+      setInactivateIrAppHierId(newIrAppHierId);
+      setInactivateIrAccountNumber(newIrAccountNumber)
       setShowInactiveModal(true);
     } else {
       setInactivateIrId(0);
       setInactivateIrAppHierId(0);
+      setInactivateIrAccountNumber("")
       setShowInactiveModal(false);
     }
   }
@@ -170,14 +169,10 @@ const InvoiceRelation = ({
     .unwrap()
     .then(() => {
       const body = {
-        page,
-        size: pageSize,
-        sort,
-        searches: search,
         inputFields: tempFilters,
       }
 
-      dispatch(getInvoiceRelation({ id, body }));
+      dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
       setShowInactiveModal(false);
       handleClear();
     })
@@ -302,21 +297,17 @@ const InvoiceRelation = ({
    */
   const handleIsApproval = (newIsApproval) => {
     if (newIsApproval) {
-      setSearchText("WAITING APPROVAL");
-      setSearchedColumn("approvalStatus");
       setPage(1);
       setSearch((prevState) => ({
         ...prevState,
-        approvalStatus: "WAITING_APPROVAL",
+        statusApproval: "WAITING_APPROVAL",
       }));
       setIsApproval(true);
     } else {
-      setSearchText("");
-      setSearchedColumn("");
       setPage(1)
       setSearch((prevState) => ({
         ...prevState,
-        approvalStatus: undefined,
+        statusApproval: undefined,
       }));
       setIsApproval(false);
       setSelectedRowKeys([]);
@@ -328,17 +319,11 @@ const InvoiceRelation = ({
   }
 
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadInvoiceRelation({ page, pageSize, sort, search: tempSearch }));
+    const body = {
+      inputFields: tempFilters,
+    } 
+
+    dispatch(downloadInvoiceRelation({ page, size: pageSize, sort, searchs: search, body, id }));
   };
 
   /**
@@ -372,14 +357,15 @@ const InvoiceRelation = ({
 
   useEffect(() => {
     const body = {
-      page,
-      size: pageSize,
-      sort,
-      searches: search,
       inputFields: tempFilters,
     }
+    
+    console.log("search", search);
+    console.log("search JSON", JSON.stringify(search));
+    console.log("search encoded", JSON.stringify(search))
 
-    dispatch(getInvoiceRelation({ id, body }));
+
+    dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
   }, [page, pageSize, sort, search, tempFilters]);
 
   useEffect(() => {
@@ -503,7 +489,7 @@ const InvoiceRelation = ({
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactiveModal(false)}
-          customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrId}?`}
+          customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrAccountNumber}?`}
           onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
         />
 

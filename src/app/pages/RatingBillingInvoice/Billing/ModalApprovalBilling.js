@@ -33,7 +33,7 @@ const ModalApprovalBilling = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = data_list_billing_approval;
+  const dataSource = data_list_billing_approval?.result || [];
 
   // State
   const [current, setCurrent] = useState(0);
@@ -42,8 +42,8 @@ const ModalApprovalBilling = ({
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
   const [remark, setRemark] = useState("");
   const [generateInvoice, setGenerateInvoice] = useState(false);
   const [action, setAction] = useState("");
@@ -53,42 +53,55 @@ const ModalApprovalBilling = ({
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-   const [fixedColumns, setFixedColumns] = useState({
+  const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
     right: [] 
   });
 
-  // Use State
+  // Use Effect - Fetch data dengan pagination setiap ada perubahan
   useEffect(() => {
-    dispatch(getAllBillingApprovePaginate());
-  }, [dispatch]);
+    if (isOpen) {
+      dispatch(
+        getAllBillingApprovePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [dispatch, isOpen, search, page, pageSize, sort]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
 
   // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
   // Sort Table
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
@@ -164,6 +177,11 @@ const ModalApprovalBilling = ({
     setGenerateInvoice(false);
     setRemark("");
     setCurrent(0);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
     form.resetFields();
   };
 
@@ -202,6 +220,11 @@ const ModalApprovalBilling = ({
         handleCancel();
         setSelectedRowKeys([]);
         setDataTableSelect([]);
+        setSearch({});
+        setPage(1);
+        setSort("");
+        setSearchText("");
+        setSearchedColumn("");
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
@@ -225,14 +248,6 @@ const ModalApprovalBilling = ({
     handleSave();
     setModalError(false);
     setBodyError({});
-  };
-
-  const filterDataByPage = (type = "data") => {
-    let result = [...dataSource].map((a, index) => ({
-      ...a,
-      key: index + 1,
-    }));
-    return type === "data" ? result : result.length;
   };
 
   const baseColumns = useMemo(
@@ -260,13 +275,19 @@ const ModalApprovalBilling = ({
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
-
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
   }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item, index) => ({
+      ...item,
+      key: index + 1,
+    }));
+  }, [dataSource]);
 
   return (
     <div>
@@ -362,17 +383,24 @@ const ModalApprovalBilling = ({
             onFinish={handleSave}
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold mb-4">
-                Billing List - Ready to Approve
-              </p>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-primary uppercase font-bold">
+                  Billing List - Ready to Approve
+                </p>
+                {selectedRowKeys.length > 0 && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedRowKeys.length} {selectedRowKeys.length === 1 ? 'row' : 'rows'} selected
+                  </p>
+                )}
+              </div>
               <TableRBI
-                dataSource={filterDataByPage("data")}
+                dataSource={dataSourceWithKeys}
                 columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={filterDataByPage("length")}
+                totalData={data_list_billing_approval?.page?.totalElements || 0}
                 tableScrolled={{ y: 525, x: 15000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
@@ -408,6 +436,14 @@ const ModalApprovalBilling = ({
           className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-primary uppercase font-bold">
+                Confirmation
+              </p>
+              <p className="text-sm font-semibold text-blue-600">
+                {dataTableSelect.length} {dataTableSelect.length === 1 ? 'row' : 'rows'} will be {action === 'APPROVE' ? 'approved' : action === 'REJECT' ? 'rejected' : 'processed'}
+              </p>
+            </div>
             <TableRBI
               dataSource={dataTableSelect}
               columns={processedColumns}

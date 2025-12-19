@@ -358,9 +358,9 @@ export const getCustomerSegment = createAsyncThunk(
 
 export const updateContentManagement = createAsyncThunk(
   "UPDATE_CONTENT_MANAGEMENT",
-  async ({ body }, thunkApi) => {
+  async ({ body, id }, thunkApi) => {
     try {
-      const url = `/v1/dbs/api/content/update`;
+      const url = `/v1/dbs/api/content/update/${id || body.id}`;
       const response = await ratingBillingHttpService.updateData(url, body);
       const successMessage = {
         title: "Successful",

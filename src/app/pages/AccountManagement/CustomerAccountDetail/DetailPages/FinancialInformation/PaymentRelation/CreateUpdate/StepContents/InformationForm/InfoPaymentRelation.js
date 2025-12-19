@@ -14,9 +14,11 @@ import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { useDispatch, useSelector } from "react-redux";
-import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+// import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 
 export default function InfoPaymentRelation({
+  accountId,
   setAccount,
   className,
 }) {
@@ -153,7 +155,7 @@ export default function InfoPaymentRelation({
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
+    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch, id: accountId }));
   }, [page, pageSize, sort, search]);
 
   useEffect(() => {
@@ -177,7 +179,7 @@ export default function InfoPaymentRelation({
       title: "NO",
       width: 80,
       align: "center",
-      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+      dataIndex: "no",
     },
     {
       title: "CUSTOMER NUMBER",
@@ -188,10 +190,10 @@ export default function InfoPaymentRelation({
     },
     {
       title: "IDENTIFICATION TYPE",
-      dataIndex: "identificationType",
+      dataIndex: "customerIdentificationType",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("identificationType"),
+      ...getColumnSearchProps("customerIdentificationType"),
     },
     {
       title: "CUSTOMER IDENTIFICATION NUMBER",
@@ -215,47 +217,137 @@ export default function InfoPaymentRelation({
       ...getColumnSearchProps("customerType"),
     },
     {
-      title: "DESCRIPTION",
-      dataIndex: "description",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
       width: 250,
       sorter: true,
-      ...getColumnSearchProps("description"),
+      ...getColumnSearchProps("accountNumber"),
     },
     {
-      title: "BIRTH/FOUNDED DATE",
-      dataIndex: "birthFoundedDate",
-      width: 150,
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      width: 250,
       sorter: true,
-      ...getColumnSearchProps("birthFoundedDate"),
-      render: (date) => renderDate(date) || "-",
+      ...getColumnSearchProps("accountName"),
     },
     {
-      title: "BIRTH/FOUNDED PLACE",
-      dataIndex: "birthFoundedPlace",
+      title: "CATEGORY",
+      dataIndex: "accountCategory",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("birthFoundedPlace"),
+      ...getColumnSearchProps("accountCategory"),
     },
     {
-      title: "SEX",
-      dataIndex: "sex",
+      title: "SOR",
+      dataIndex: "sor",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("sex"),
+      ...getColumnSearchProps("sor"),
     },
     {
-      title: "MARITAL STATUS",
-      dataIndex: "maritalStatus",
+      title: "COST CENTER",
+      dataIndex: "costCenter",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("maritalStatus"),
+      ...getColumnSearchProps("costCenter"),
     },
     {
-      title: "SEARCH KEY",
-      dataIndex: "searchKey",
+      title: "METER READING CODES",
+      dataIndex: "meterReadingCode",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("searchKey"),
+      ...getColumnSearchProps("meterReadingCode"),
+    },
+    {
+      title: "CUSTOMER MANAGEMENT",
+      dataIndex: "customerManagement",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("customerManagement"),
+    },
+    {
+      title: "CLASSIFICATION TYPE",
+      dataIndex: "classificationType",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("classificationType"),
+    },
+    {
+      title: "SEGMENT",
+      dataIndex: "accountSegment",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("accountSegment"),
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("accountGroupType"),
+    },
+    {
+      title: "PREMISE ADDRESS",
+      dataIndex: "premiseAddress",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("premiseAddress"),
+    },
+    {
+      title: "SUBDISTRICT",
+      dataIndex: "subdistrict",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("subdistrict"),
+    },
+    {
+      title: "DISTRICT",
+      dataIndex: "district",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("district"),
+    },
+    {
+      title: "CITY",
+      dataIndex: "city",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("city"),
+    },
+    {
+      title: "COUNTRY",
+      dataIndex: "country",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("country"),
+    },
+    {
+      title: "LONGITUDE",
+      dataIndex: "longitude",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("longitude"),
+    },
+    {
+      title: "LATITUDE",
+      dataIndex: "latitude",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("latitude"),
+    },
+    {
+      title: "START DATE",
+      dataIndex: "startDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("startDate"),
+    },
+    {
+      title: "END DATE",
+      dataIndex: "endDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("endDate"),
     },
     {
       title: "ACTION",
@@ -272,7 +364,7 @@ export default function InfoPaymentRelation({
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    setAccount(r?.accountId, r?.customerNumber, r?.customerName)
+                    setAccount(r?.accountId, r?.accountNumber, r?.accountName)
                     setIsOpen(false);
                   }}
                 />
@@ -403,7 +495,7 @@ export default function InfoPaymentRelation({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        header={"CHOOSE SERVICE REQUEST REFERENCE"}
+        header={"CHOOSE ACCOUNT"}
         width={1100}
         type={"custom"}
         footer={[
@@ -412,7 +504,7 @@ export default function InfoPaymentRelation({
           </Button>,
         ]}
       >
-        <TablePaginationNew
+        {/* <TablePaginationNew
           dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
@@ -424,6 +516,21 @@ export default function InfoPaymentRelation({
           tableScrolled={{ y: 525, x: 3000 }}
           columns={columnMain}
           onChange={handleChangeSize}
+        /> */}
+        <TablePaginationNew
+          dataSource={data_prAccountStandard?.result?.map((item, index) => ({
+            ...item,
+            key: item.id || index,
+            no: (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+          }))}
+          totalData={sanitizedTotalElement}
+          current={sanitizedPage}
+          pageSize={sanitizedPageSize}
+          onChange={handleChangeSize}
+          onSort={onSort}
+          columns={columnMain}
+          tableScrolled={{ y: 525, x: 3000 }}
+          enableDragColumn={true}
         />
       </ModalCustom>
     </div>

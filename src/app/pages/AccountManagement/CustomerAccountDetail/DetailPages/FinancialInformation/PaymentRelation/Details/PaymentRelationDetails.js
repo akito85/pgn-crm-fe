@@ -127,9 +127,10 @@ const PaymentRelationDetails = ({
         description,
       }];
 
-      if (!result.approvalType) {
+      if (result.approvalType === "PAYMENT_RELATION") {
         dispatch(approveOrRejectPaymentRelation({
           body,
+          action,
         }))
         .unwrap()
         .then(() => {
@@ -138,9 +139,10 @@ const PaymentRelationDetails = ({
           handleApprovalModal(false);
         })
         .catch(() => {});
-      } else if (result.approvalType) {
+      } else if (result.approvalType === "INACTIVE_PAYMENT_RELATION") {
         dispatch(approveOrRejectInactivePaymentRelation({
           body,
+          action,
         }))
         .unwrap()
         .then(() => {
@@ -296,7 +298,7 @@ const PaymentRelationDetails = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${detail_paymentRelation?.result?.id}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${detail_paymentRelation?.result?.relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
     </LayoutMenu>

@@ -37,6 +37,69 @@ import ModalBack from "../../../../../components/Modal/ModalBack";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ConfirmationContentManagement from "./Modal/ConfirmationContentManagement";
 
+// ✅ Helper function untuk transform data dari API ke format form
+const transformApiDataToForm = (apiData) => {
+  if (!apiData) return null;
+
+  const contentTemplate = apiData.contentTemplate;
+  const contentCriteria = apiData.contentCriteria || [];
+  
+  return {
+    information: {
+      id: contentTemplate?.id,
+      name: contentTemplate?.templateName,
+      format: contentTemplate?.formatType,
+      category: contentTemplate?.category,
+      media: contentTemplate?.mediaChannel,
+      startDate: contentTemplate?.startDate,
+      endDate: contentTemplate?.endDate,
+      description: contentTemplate?.description,
+      apphierId: contentTemplate?.approvalId,
+      status: contentTemplate?.status,
+      statusApproval: contentTemplate?.statusApproval,
+    },
+    content: {
+      subject: contentTemplate?.contentSubject,
+      body: contentTemplate?.contentBody,
+    },
+    criteria: contentCriteria.map(item => ({
+      contentCriteriaId: item.id,
+      criteria: item.criteriaId || null,
+    })),
+    criteriaData: contentCriteria
+      .filter(item => item.allCriteria !== 'Y')
+      .map(item => ({
+        id: item.id,
+        budget: item.budget,
+        subDistrict: item.subDistrict,
+        district: item.district,
+        city: item.city,
+        province: item.province,
+        area: item.area,
+        costCenter: item.area,
+        sor: item.sor,
+        industrialSector: item.industrialSector,
+        gsizes: item.gsizes,
+        customerSegment: item.customerSegment,
+        accountGroup: item.accountGroupType,
+        accountClass: item.accountClass,
+        accountCategory: item.accountCategory,
+        serviceType: item.serviceType,
+        customer: item.customer,
+        product: item.product,
+        accountNumber: item.accountNumber,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        allCriteria: item.allCriteria === 'Y',
+      })),
+    mattachmentLists: apiData.mattachmentLists || [],
+    listCriteria: contentCriteria.map(item => ({
+      contentCriteriaId: item.id,
+      criteria: item.criteriaId || null,
+    })),
+  };
+};
+
 const ContentManagementForm = ({ type }) => {
   // Selector
   const {
@@ -144,187 +207,178 @@ const ContentManagementForm = ({ type }) => {
     }
   }, [data_criteria]);
 
+  // ✅ useEffect untuk populate form - DENGAN TRANSFORM
   useEffect(() => {
+    // Transform data dari API
+    const transformedDetail = data_detail ? transformApiDataToForm(data_detail) : null;
+    const transformedDraft = data_detail_draft ? transformApiDataToForm(data_detail_draft) : null;
+
     if (
       id &&
-      data_detail_draft?.information?.id === id &&
-      data_detail?.information?.id === id
+      transformedDraft?.information?.id === id &&
+      transformedDetail?.information?.id === id
     ) {
-      // Data Draft Content Management
-      const criteriaSelect = data_detail_draft?.criteria?.map((item) => {
-        return {
-          contentCriteriaId: item.contentCriteriaId,
-          criteria: item.criteria,
-        };
-      });
+      // ✅ SKENARIO: Ada draft dan detail
+      const criteriaSelect = transformedDraft?.criteria?.map((item) => ({
+        contentCriteriaId: item.contentCriteriaId,
+        criteria: item.criteria,
+      }));
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
-      // Data Draft Attachment Information
-      const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
-          return {
-            id: item.id,
-            size: item.size,
-            fileName: item.fileName,
-            fileSize: item.fileSize,
-            fileType: item.fileType,
-            fileCategoryId: item.fileCategoryId,
-            fileCategoryName: item.fileCategoryName,
-            pathFile: item.pathFile,
-            urlFile1: item.urlFile1,
-            urlFile2: item.urlFile2,
-            uploadBy: item.createdBy,
-            uploadDate: item.createdDate
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        }
+      const dataDraftAttachment = (transformedDetail?.mattachmentLists || []).map(
+        (item) => ({
+          id: item.id,
+          size: item.size,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          pathFile: item.pathFile,
+          urlFile1: item.urlFile1,
+          urlFile2: item.urlFile2,
+          uploadBy: item.createdBy,
+          uploadDate: item.createdDate
+            ? moment(item.createdDate).format("DD MMM YYYY")
+            : "",
+          dataType: "exist",
+        })
       );
 
-      const dataDraftCriteriaList = (data_detail_draft?.criteriaData || [])
+      const dataDraftCriteriaList = (transformedDraft?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
-        .map((item, index) => {
-          return {
-            id: item.id,
-            budget: item.budget,
-            subDistrict: item.subDistrict,
-            district: item.district,
-            city: item.city,
-            province: item.province,
-            area: item.costCenter,
-            sor: item.sor,
-            industrialSector: item.industrialSector,
-            gsizes: item.gsizes,
-            customerSegment: item.customerSegment,
-            accountGroup: item.accountGroup,
-            accountClass: item.accountClass,
-            accountCategory: item.accountCategory,
-            serviceType: item.serviceType,
-            customer: item.customer,
-            product: item.product,
-            accountNumber: item.accountNumber,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            key: index + 1,
-            type: "exist",
-          };
-        });
+        .map((item, index) => ({
+          id: item.id,
+          budget: item.budget ? { value: item.budget, label: item.budget } : null,
+          subDistrict: item.subDistrict ? { value: item.subDistrict, label: item.subDistrict } : null,
+          district: item.district ? { value: item.district, label: item.district } : null,
+          city: item.city ? { value: item.city, label: item.city } : null,
+          province: item.province ? { value: item.province, label: item.province } : null,
+          area: item.area ? { value: item.area, label: item.area } : null,
+          sor: item.sor ? { value: item.sor, label: item.sor } : null,
+          industrialSector: item.industrialSector ? { value: item.industrialSector, label: item.industrialSector } : null,
+          gsizes: item.gsizes ? { value: item.gsizes, label: item.gsizes } : null,
+          customerSegment: item.customerSegment ? { value: item.customerSegment, label: item.customerSegment } : null,
+          accountGroup: item.accountGroup ? { value: item.accountGroup, label: item.accountGroup } : null,
+          accountClass: item.accountClass ? { value: item.accountClass, label: item.accountClass } : null,
+          accountCategory: item.accountCategory ? { value: item.accountCategory, label: item.accountCategory } : null,
+          serviceType: item.serviceType ? { value: item.serviceType, label: item.serviceType } : null,
+          customer: item.customer ? { value: item.customer, label: item.customer } : null,
+          product: item.product ? { value: item.product, label: item.product } : null,
+          accountNumber: item.accountNumber ? { value: item.accountNumber, label: item.accountNumber } : null,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          key: index + 1,
+          type: "exist",
+        }));
 
       form.setFieldsValue({
-        name: data_detail_draft?.information?.name,
-        format: data_detail_draft?.information?.format,
-        category: data_detail_draft?.information?.category,
-        media: data_detail_draft?.information?.media,
-        startDate: moment(data_detail_draft?.information?.startDate),
-        endDate: data_detail_draft?.information?.endDate
-          ? moment(data_detail_draft?.information?.endDate)
+        name: transformedDraft?.information?.name,
+        format: transformedDraft?.information?.format,
+        category: transformedDraft?.information?.category,
+        media: transformedDraft?.information?.media,
+        startDate: moment(transformedDraft?.information?.startDate),
+        endDate: transformedDraft?.information?.endDate
+          ? moment(transformedDraft?.information?.endDate)
           : undefined,
         criteria: mappingCriteria,
-        description: data_detail_draft?.information?.description,
-        subject: data_detail_draft?.content?.subject,
-        body: data_detail_draft?.content?.body,
-        apphierId: data_detail_draft?.information?.apphierId,
+        description: transformedDraft?.information?.description,
+        subject: transformedDraft?.content?.subject,
+        body: transformedDraft?.content?.body,
+        apphierId: transformedDraft?.information?.apphierId,
       });
 
-      setStartDate(moment(data_detail_draft?.information?.startDate));
-      setSelectedHierarchy(data_detail_draft?.information?.apphierId);
+      setStartDate(moment(transformedDraft?.information?.startDate));
+      setSelectedHierarchy(transformedDraft?.information?.apphierId);
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataDraftCriteriaList);
-      setSubjectValue(data_detail_draft?.content?.subject || "");
-      setBodyValue(data_detail_draft?.content?.body || "");
+      setSubjectValue(transformedDraft?.content?.subject || "");
+      setBodyValue(transformedDraft?.content?.body || "");
     } else if (
       id &&
-      !data_detail_draft?.information?.id &&
-      data_detail?.information?.id === id
+      !transformedDraft?.information?.id &&
+      transformedDetail?.information?.id === id
     ) {
-      // Data Content Management
-      const criteriaSelect = data_detail?.criteria?.map((item) => {
-        return {
-          contentCriteriaId: item.contentCriteriaId,
-          criteria: item.criteria,
-        };
-      });
+      // ✅ SKENARIO: Hanya ada detail (tidak ada draft)
+      const criteriaSelect = transformedDetail?.criteria?.map((item) => ({
+        contentCriteriaId: item.contentCriteriaId,
+        criteria: item.criteria,
+      }));
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
-      // Data Attachment Information
-      const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
-          return {
-            id: item.id,
-            size: item.size,
-            fileName: item.fileName,
-            fileSize: item.fileSize,
-            fileType: item.fileType,
-            fileCategoryId: item.fileCategoryId,
-            fileCategoryName: item.fileCategoryName,
-            pathFile: item.pathFile,
-            urlFile1: item.urlFile1,
-            urlFile2: item.urlFile2,
-            uploadBy: item.createdBy,
-            uploadDate: item.createdDate
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        }
+      const dataAttachment = (transformedDetail?.mattachmentLists || []).map(
+        (item) => ({
+          id: item.id,
+          size: item.size,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          pathFile: item.pathFile,
+          urlFile1: item.urlFile1,
+          urlFile2: item.urlFile2,
+          uploadBy: item.createdBy,
+          uploadDate: item.createdDate
+            ? moment(item.createdDate).format("DD MMM YYYY")
+            : "",
+          dataType: "exist",
+        })
       );
 
-      const dataCriteriaList = (data_detail?.criteriaData || [])
+      const dataCriteriaList = (transformedDetail?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
-        .map((item, index) => {
-          return {
-            id: item.id,
-            budget: item.budget,
-            subDistrict: item.subDistrict,
-            district: item.district,
-            city: item.city,
-            province: item.province,
-            area: item.costCenter,
-            sor: item.sor,
-            industrialSector: item.industrialSector,
-            product: item.product,
-            gsizes: item.gsizes,
-            customerSegment: item.customerSegment,
-            accountGroup: item.accountGroup,
-            accountClass: item.accountClass,
-            accountCategory: item.accountCategory,
-            serviceType: item.serviceType,
-            customer: item.customer,
-            accountNumber: item.accountNumber,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            key: index + 1,
-            type: "exist",
-          };
-        });
+        .map((item, index) => ({
+          id: item.id,
+          budget: item.budget ? { value: item.budget, label: item.budget } : null,
+          subDistrict: item.subDistrict ? { value: item.subDistrict, label: item.subDistrict } : null,
+          district: item.district ? { value: item.district, label: item.district } : null,
+          city: item.city ? { value: item.city, label: item.city } : null,
+          province: item.province ? { value: item.province, label: item.province } : null,
+          area: item.area ? { value: item.area, label: item.area } : null,
+          sor: item.sor ? { value: item.sor, label: item.sor } : null,
+          industrialSector: item.industrialSector ? { value: item.industrialSector, label: item.industrialSector } : null,
+          product: item.product ? { value: item.product, label: item.product } : null,
+          gsizes: item.gsizes ? { value: item.gsizes, label: item.gsizes } : null,
+          customerSegment: item.customerSegment ? { value: item.customerSegment, label: item.customerSegment } : null,
+          accountGroup: item.accountGroup ? { value: item.accountGroup, label: item.accountGroup } : null,
+          accountClass: item.accountClass ? { value: item.accountClass, label: item.accountClass } : null,
+          accountCategory: item.accountCategory ? { value: item.accountCategory, label: item.accountCategory } : null,
+          serviceType: item.serviceType ? { value: item.serviceType, label: item.serviceType } : null,
+          customer: item.customer ? { value: item.customer, label: item.customer } : null,
+          accountNumber: item.accountNumber ? { value: item.accountNumber, label: item.accountNumber } : null,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          key: index + 1,
+          type: "exist",
+        }));
 
       form.setFieldsValue({
-        name: data_detail?.information?.name,
-        format: data_detail?.information?.format,
-        category: data_detail?.information?.category,
-        media: data_detail?.information?.media,
-        startDate: moment(data_detail?.information?.startDate),
-        endDate: data_detail?.information?.endDate
-          ? moment(data_detail?.information?.endDate)
+        name: transformedDetail?.information?.name,
+        format: transformedDetail?.information?.format,
+        category: transformedDetail?.information?.category,
+        media: transformedDetail?.information?.media,
+        startDate: moment(transformedDetail?.information?.startDate),
+        endDate: transformedDetail?.information?.endDate
+          ? moment(transformedDetail?.information?.endDate)
           : undefined,
         criteria: mappingCriteria,
-        description: data_detail?.information?.description,
-        subject: data_detail?.content?.subject,
-        body: data_detail?.content?.body,
-        apphierId: data_detail?.information?.apphierId,
+        description: transformedDetail?.information?.description,
+        subject: transformedDetail?.content?.subject,
+        body: transformedDetail?.content?.body,
+        apphierId: transformedDetail?.information?.apphierId,
       });
 
-      setStartDate(moment(data_detail?.information?.startDate));
-      setSelectedHierarchy(data_detail?.information?.apphierId);
+      setStartDate(moment(transformedDetail?.information?.startDate));
+      setSelectedHierarchy(transformedDetail?.information?.apphierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataCriteriaList);
-      setSubjectValue(data_detail?.content?.subject || "");
-      setBodyValue(data_detail?.content?.body || "");
+      setSubjectValue(transformedDetail?.content?.subject || "");
+      setBodyValue(transformedDetail?.content?.body || "");
     }
   }, [id, type, form, data_detail, data_detail_draft]);
 
@@ -589,6 +643,7 @@ const ContentManagementForm = ({ type }) => {
     console.log("Subject:", formValue.subject);
     console.log("Body:", formValue.body);
     let errorBody = {};
+    
     if (!subjectValue || subjectValue.trim() === "") {
       errorBody = {
         title: "Failed",
@@ -606,6 +661,7 @@ const ContentManagementForm = ({ type }) => {
       dispatch(showModalError(errorBody));
       return;
     }
+    
     const hasOverlapping = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
       listDataCriteria
@@ -675,6 +731,7 @@ const ContentManagementForm = ({ type }) => {
     }
   };
 
+  // ✅ handleConfirm untuk CREATE dan UPDATE
   const handleConfirm = () => {
     setModalConfirm(false);
 
@@ -749,23 +806,11 @@ const ContentManagementForm = ({ type }) => {
           }
         });
     } else {
-      // Di handleConfirm() - bagian UPDATE
-      dispatch(updateContentManagement({ body: body }))
+      // ✅ UPDATE - Pass ID ke action
+      dispatch(updateContentManagement({ body: body, id: id }))
         .unwrap()
         .then(async (dataForm) => {
-          const templateId =
-            dataForm?.updatedId ||
-            dataForm?.createdId ||
-            dataForm?.data?.updatedId ||
-            dataForm?.data?.createdId ||
-            id;
-
-          if (!templateId) {
-            console.error("Template ID not found:", dataForm);
-            setModalError(true);
-            setBodyError({ message: "Failed to get template ID" });
-            return;
-          }
+          const templateId = id; // ✅ Gunakan ID dari state
 
           console.log("Template updated with ID:", templateId);
 

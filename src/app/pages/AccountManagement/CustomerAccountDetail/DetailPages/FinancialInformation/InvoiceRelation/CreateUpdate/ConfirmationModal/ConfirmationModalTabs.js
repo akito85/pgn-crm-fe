@@ -3,6 +3,7 @@ import RadioTabs from "../../../../../../../../../components/RadioTabs";
 import ConfirmationModalInfo from "./ConfirmationModalInfo";
 import ConfirmationModalApproval from "./ConfirmationModalApproval";
 import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
+import { data } from "autoprefixer";
 
 const dataTabs = {
   info: "Invoice Relation Information",
@@ -19,6 +20,7 @@ const ConfirmationModalTabs = ({
   hierarchyTableData,
   dispatch,
   dataAttachment,
+  data = {},
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -30,7 +32,7 @@ const ConfirmationModalTabs = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.info:
-        return <ConfirmationModalInfo />;
+        return <ConfirmationModalInfo data={data} />;
       case dataTabs.apprv:
         return (
         <ConfirmationModalApproval

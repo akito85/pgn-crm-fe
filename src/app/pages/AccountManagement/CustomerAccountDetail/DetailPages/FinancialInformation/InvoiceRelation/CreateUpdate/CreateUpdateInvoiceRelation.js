@@ -113,7 +113,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   useEffect(() => {
     if (
       type === "update" &&
-      detail_invoiceRelation &&
+      detail_invoiceRelation?.result &&
       data_irApprovalHierarchy?.length
     ) {
       const {
@@ -124,15 +124,15 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_invoiceRelation;
+      } = detail_invoiceRelation.result;
 
-      const { accountNumber, accountName } = detail_invoiceRelation;
+      const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation.result;
 
       formCreate.setFieldsValue({
         subjectId,
         objectId,
-        accountName,
-        accountNumber,
+        accountName: relatedAccountName,
+        accountNumber: relatedAccountNumber,
         priority,
         startDate,
         endDate,
@@ -271,6 +271,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           setAccount={setAccount}
           className={`${current !== 0 ? "hidden" : ""}`}
           key={`invoice-relation-tab-0`}
+          accountId={idAccount}
         />
       ),
       disabled: false
@@ -379,8 +380,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       appHierId,
     } = formCreate.getFieldsValue();
 
-    console.log("startDate", startDate);
-
     const body = {
       id: idIr,
       subjectId: data_accountDetail?.accountInformation?.accountId, 
@@ -428,6 +427,63 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         })
         .catch((error) => {});;
   };
+
+  const handleClear = () => {
+    if (type === "create") {
+      setDataAttachment([]);
+      setSelectedAppHierId();
+      setSelectedApprovalName();
+      formCreate.resetFields();
+      setCurrent(0);
+    } else if (type === "update") {
+      if (
+        detail_invoiceRelation?.result &&
+        data_irApprovalHierarchy?.length
+      ) {
+        const {
+          subjectId,
+          objectId,
+          priority,
+          startDate,
+          endDate,
+          description,
+          appHierId,
+        } = detail_invoiceRelation.result;
+
+        const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation.result;
+
+        formCreate.setFieldsValue({
+          subjectId,
+          objectId,
+          accountName: relatedAccountName,
+          accountNumber: relatedAccountNumber,
+          priority,
+          startDate,
+          endDate,
+          description,
+          appHierId,
+        });
+
+        const appHierOption = data_irApprovalHierarchy.find((option) => option.appHierId === appHierId)
+
+        if (appHierOption)
+          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+      }
+
+      if (data_invoiceRelationAttachment?.result) {
+        const result = data_invoiceRelationAttachment.result?.map((item, index) => ({
+          ...item,
+          key: `invoice-relation-attachment-${item.id}`,
+          dataType: "exist"
+        }));
+        setDataAttachment([
+          ...result,
+        ])
+      }
+
+      setCurrent(0);
+    }
+  }
 
   return (
     <LayoutMenu>
@@ -506,17 +562,17 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             <ButtonComponent
               type={"submit"}
               icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD)}}
+              onClick={()=>{navigate(-1)}}
             >
               Back
             </ButtonComponent>
             <div className="flex w-full justify-end gap-x-4">
               <ButtonComponent
-                onClick={() => {}}
+                onClick={handleClear}
                 type={"submit"}
                 icon={<SVGIcon name="IconButtonClear" width={24} />}
               >
-                Clear
+                { type === "update" ? "Reset" : "Clear" }
               </ButtonComponent>
               {current > 0 && current !== (steps.length-1) && (
                 <ButtonComponent
@@ -531,21 +587,22 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
                 </ButtonComponent>
               )}
               {current < steps.length - 1 && (
-                <Button
+                <ButtonComponent
                   onClick={handleButtonNext}
-                  type="primary"
-                  className="ant-btn ant-btn-submit flex w-full justify-center"
+                  type={"submit"}
                   disabled={steps[current].disabled}
                 >
-                  <span className="p-1 text-[18px] text-center">Next</span>
-                  <RightOutlined
-                    style={{
-                      justifyItems: "center",
-                      fontSize: "18px",
-                      color: "#fff",
-                    }}
-                  />
-                </Button>
+                  <div className="flex gap-x-2 items-center">
+                    <span>Next</span>
+                    <RightOutlined
+                      style={{
+                        justifyItems: "center",
+                        fontSize: "18px",
+                        color: "#fff",
+                      }}
+                    />
+                  </div>
+                </ButtonComponent>
               )}
               {current === steps.length - 1 && (
                 <>

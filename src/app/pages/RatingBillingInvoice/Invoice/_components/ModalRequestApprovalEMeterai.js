@@ -648,11 +648,13 @@ const ModalRequestApprovalEMeterai = ({
                         setSelectedRowKeys([]);
                         setSelectedRows([]);
                       }}
-                      style={{ width: 200 }}
+                      style={{ width: 250 }}
                       className="filter-type-select"
                     >
-                      <Select.Option value="emeterai">E-Meterai</Select.Option>
-                      <Select.Option value="esign">E-Sign</Select.Option>
+                      <Select.Option value="emeterai">E-Meterai (Digital)</Select.Option>
+                      <Select.Option value="esign">E-Sign (Digital)</Select.Option>
+                      <Select.Option value="meterai">Manual Meterai (Physical Stamp)</Select.Option>
+                      <Select.Option value="sign">Manual Sign (Wet Ink Signature)</Select.Option>
                     </Select>
                   </div>
 

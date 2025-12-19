@@ -186,7 +186,32 @@ const AccountDetailInformation = ({
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.ras);
-    } else {
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/update"
+        ) 
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.fi);
+    }
+    else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     }
   }, [path]);
@@ -319,7 +344,7 @@ const AccountDetailInformation = ({
           <GasUtilization idAccount={id} idCustomer={idCustomer} type={type} />
         );
       case dataTabs.promo:
-        return <AccountPromo />;
+        return <AccountPromo id={id} />;
       default:
         return <></>;
     }

@@ -147,10 +147,19 @@ const TableRBI = ({
     // Apply fixed property and resizable width
     const applyColumnProps = (col, fixedPos) => {
       const colKey = col.key || col.dataIndex || col.title;
+
+      // Determine text alignment based on column properties
+      let textAlign = "left"; // default: rata kiri
+      if (col.isNumber || col.align === "right") {
+        textAlign = "right"; // jika isNumber: rata kanan
+      } else if (col.isClassification) {
+        textAlign = "center"; // jika isClassification: rata tengah
+      }
+
       const newCol = {
         ...col,
         width: columnWidths[colKey] || col.width || 150,
-        align: "center",
+        align: textAlign,
         ellipsis: {
           showTitle: true,
         },
@@ -161,7 +170,7 @@ const TableRBI = ({
         }),
         onCell: () => ({
           style: {
-            textAlign: "center",
+            textAlign: textAlign,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",

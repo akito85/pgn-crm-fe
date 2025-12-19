@@ -51,6 +51,7 @@ const PaymentRelation = ({
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivatePrId, setInactivatePrId] = useState(0);
   const [inactivatePrAppHierId, setInactivatePrAppHierId] = useState(0);
+  const [inactivatePrAccountNumber, setInactivatePrAccountNumber] = useState(0);
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
@@ -141,14 +142,16 @@ const PaymentRelation = ({
    * @param {number} prId 
    * @param {number} prAppHierId 
    */
-  const handleInactivateModal = (show, prId = 0, prAppHierId = 0) => {
+  const handleInactivateModal = (show, newPrId = 0, newPrAppHierId = 0, newPrAccountNumber = "") => {
     if (show) {
-      setInactivatePrId(prId);
-      setInactivatePrAppHierId(prAppHierId);
+      setInactivatePrId(newPrId);
+      setInactivatePrAppHierId(newPrAppHierId);
+      setInactivatePrAccountNumber(newPrAccountNumber)
       setShowInactiveModal(true);
     } else {
       setInactivatePrId(0);
       setInactivatePrAppHierId(0);
+      setInactivatePrAccountNumber("");
       setShowInactiveModal(false);
     }
   }
@@ -302,12 +305,10 @@ const PaymentRelation = ({
    */
   const handleIsApproval = (newIsApproval) => {
     if (newIsApproval) {
-      setSearchText("WAITING APPROVAL");
-      setSearchedColumn("approvalStatus");
       setPage(1);
       setSearch((prevState) => ({
         ...prevState,
-        approvalStatus: "WAITING_APPROVAL",
+        statusApproval: "WAITING_APPROVAL",
       }));
       setIsApproval(true);
     } else {
@@ -316,7 +317,7 @@ const PaymentRelation = ({
       setPage(1)
       setSearch((prevState) => ({
         ...prevState,
-        approvalStatus: undefined,
+        statusApproval: undefined,
       }));
       setIsApproval(false);
       setSelectedRowKeys([]);
@@ -444,6 +445,7 @@ const PaymentRelation = ({
         <PaymentRelationTable
           data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
             ...paymentRelation,
+            no: index + 1 + ( page - 1) * pageSize,
             key: `payment-relation-${paymentRelation.id}-${index}`
           }))}
           idAccount={id}
@@ -503,7 +505,7 @@ const PaymentRelation = ({
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
-          customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrId}?`}
+          customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrAccountNumber}?`}
           onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
         />
 

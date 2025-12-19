@@ -126,13 +126,13 @@ const CreatePaymentRelation = ({ type }) => {
         appHierId,
       } = detail_paymentRelation.result;
 
-      const { accountNumber, accountName } = detail_paymentRelation.result;
+      const { relatedAccountNumber, relatedAccountName } = detail_paymentRelation.result;
 
       formCreate.setFieldsValue({
         subjectId,
         objectId,
-        accountName,
-        accountNumber,
+        accountName: relatedAccountName,
+        accountNumber: relatedAccountNumber,
         priority,
         startDate,
         endDate,
@@ -270,6 +270,7 @@ const CreatePaymentRelation = ({ type }) => {
         <InformationForm
           setAccount={setAccount}
           className={`${current !== 0 ? "hidden" : ""}`}
+          accountId={idAccount}
           key={`payment-relation-tab-0`}
         />
       ),
@@ -427,6 +428,63 @@ const CreatePaymentRelation = ({ type }) => {
         .catch((error) => {});;
   };
 
+  const handleClear = () => {
+    if (type === "create") {
+      setDataAttachment([]);
+      setSelectedAppHierId();
+      setSelectedApprovalName();
+      formCreate.resetFields();
+      setCurrent(0);
+    } else if (type === "update") {
+      if (
+        detail_paymentRelation?.result &&
+        data_prApprovalHierarchy?.length
+      ) {
+        const {
+          subjectId,
+          objectId,
+          priority,
+          startDate,
+          endDate,
+          description,
+          appHierId,
+        } = detail_paymentRelation.result;
+
+        const { relatedAccountNumber, relatedAccountName } = detail_paymentRelation.result;
+
+        formCreate.setFieldsValue({
+          subjectId,
+          objectId,
+          accountName: relatedAccountName,
+          accountNumber: relatedAccountNumber,
+          priority,
+          startDate,
+          endDate,
+          description,
+          appHierId,
+        });
+
+        const appHierOption = data_prApprovalHierarchy.find((option) => option.appHierId === appHierId)
+
+        if (appHierOption)
+          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+      }
+
+      if (data_paymentRelationAttachment?.result) {
+        const result = data_paymentRelationAttachment.result?.map((item, index) => ({
+          ...item,
+          key: `payment-relation-attachment-${item.id}`,
+          dataType: "exist"
+        }));
+        setDataAttachment([
+          ...result,
+        ])
+      }
+
+      setCurrent(0);
+    }
+  }
+
   return (
     <LayoutMenu>
       <div className="flex flex-col gap-y-5">
@@ -504,17 +562,17 @@ const CreatePaymentRelation = ({ type }) => {
             <ButtonComponent
               type={"submit"}
               icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD)}}
+              onClick={()=>{navigate(-1)}}
             >
               Back
             </ButtonComponent>
             <div className="flex w-full justify-end gap-x-4">
               <ButtonComponent
-                onClick={() => {}}
+                onClick={handleClear}
                 type={"submit"}
                 icon={<SVGIcon name="IconButtonClear" width={24} />}
               >
-                Clear
+                { type === "update" ? "Reset" : "Clear" }
               </ButtonComponent>
               {current > 0 && current !== (steps.length-1) && (
                 <ButtonComponent
@@ -529,21 +587,22 @@ const CreatePaymentRelation = ({ type }) => {
                 </ButtonComponent>
               )}
               {current < steps.length - 1 && (
-                <Button
+                <ButtonComponent
                   onClick={handleButtonNext}
-                  type="primary"
-                  className="ant-btn ant-btn-submit flex w-full justify-center"
+                  type={"submit"}
                   disabled={steps[current].disabled}
                 >
-                  <span className="p-1 text-[18px] text-center">Next</span>
-                  <RightOutlined
-                    style={{
-                      justifyItems: "center",
-                      fontSize: "18px",
-                      color: "#fff",
-                    }}
-                  />
-                </Button>
+                  <div className="flex gap-x-2 items-center">
+                    <span>Next</span>
+                    <RightOutlined
+                      style={{
+                        justifyItems: "center",
+                        fontSize: "18px",
+                        color: "#fff",
+                      }}
+                    />
+                  </div>
+                </ButtonComponent>
               )}
               {current === steps.length - 1 && (
                 <>

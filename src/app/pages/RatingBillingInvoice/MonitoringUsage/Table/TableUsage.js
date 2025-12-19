@@ -15,7 +15,6 @@ export const tableUsage = (
     {
       title: "NO",
       width: 60,
-      align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
       // render: (text, object, index) => index + 1,
     },
@@ -163,7 +162,6 @@ export const tableUsage = (
       title: "ACCOUNT SEGMENT",
       dataIndex: "accountSegment",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "accountSegment",
@@ -181,7 +179,6 @@ export const tableUsage = (
       title: "ACCOUNT GROUP TYPE",
       dataIndex: "accountGroupType",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "accountGroupType",
@@ -198,7 +195,6 @@ export const tableUsage = (
     {
       title: "SERVICE TYPE",
       dataIndex: "serviceType",
-      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -217,7 +213,6 @@ export const tableUsage = (
       title: "BILLING CYCLE",
       dataIndex: "billingCycleValue",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "billingCycleValue",
@@ -234,7 +229,6 @@ export const tableUsage = (
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "billingPeriod",
@@ -252,7 +246,6 @@ export const tableUsage = (
       title: "SOR",
       dataIndex: "sor",
       sorter: true,
-      align: "left",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "sor",
@@ -339,7 +332,6 @@ export const tableUsage = (
     {
       title: "ASSET TYPE",
       dataIndex: "assetType",
-      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -376,7 +368,6 @@ export const tableUsage = (
     {
       title: "MEASUREMENT DATE",
       dataIndex: "measDate",
-      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -395,7 +386,6 @@ export const tableUsage = (
       title: " DATE",
       dataIndex: "fdate",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "fdate",
@@ -413,7 +403,6 @@ export const tableUsage = (
       title: "HOUR",
       dataIndex: "fhour",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "hour",
@@ -516,7 +505,6 @@ export const tableUsage = (
       title: "BEGIN STAND",
       dataIndex: "beginStand",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "beginStand",
@@ -533,7 +521,6 @@ export const tableUsage = (
     {
       title: "END STAND",
       dataIndex: "endStand",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -551,7 +538,6 @@ export const tableUsage = (
       title: "VOLUME 27",
       dataIndex: "volMeasured27",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "volMeasured27",
@@ -568,7 +554,6 @@ export const tableUsage = (
       title: "VOLUME 60",
       dataIndex: "volMeasured60",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "volMeasured60",
@@ -585,7 +570,6 @@ export const tableUsage = (
     {
       title: "VOLUME MSCF",
       dataIndex: "volMscf",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -602,7 +586,6 @@ export const tableUsage = (
     {
       title: "GHV",
       dataIndex: "ghv",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -619,7 +602,6 @@ export const tableUsage = (
     {
       title: "CALORIE",
       dataIndex: "calorie",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -637,7 +619,6 @@ export const tableUsage = (
       title: "ENG MEASURED",
       dataIndex: "engMeasured",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "engMeasured",
@@ -721,7 +702,6 @@ export const tableUsage = (
       title: "SOURCE",
       dataIndex: "source",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "source",
@@ -737,7 +717,6 @@ export const tableUsage = (
     {
       title: "DESCRIPTION",
       dataIndex: "description",
-      align: "left",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "description",

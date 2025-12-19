@@ -16,8 +16,8 @@ export const getColumnsGapRatingBilling = (
     {
       key: "no",
       title: "NO",
+    isClassification: true,
       width: 60,
-      align: "center",
       render: (text, record, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -25,7 +25,6 @@ export const getColumnsGapRatingBilling = (
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       sorter: true,
-      align: "left",
       width: 180,
       filteredValue: [search?.accountNumber] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -53,7 +52,6 @@ export const getColumnsGapRatingBilling = (
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       sorter: true,
-      align: "left",
       width: 250,
       filteredValue: [search?.customerName] || null,
       ellipsis: {
@@ -84,7 +82,7 @@ export const getColumnsGapRatingBilling = (
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
       sorter: true,
-      align: "center",
+    isClassification: true,
       width: 150,
       filteredValue: [search?.billingPeriod] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -112,7 +110,6 @@ export const getColumnsGapRatingBilling = (
       title: "RATING CODE",
       dataIndex: "ratingCode",
       sorter: true,
-      align: "center",
       width: 130,
       filteredValue: [search?.ratingCode] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -140,7 +137,7 @@ export const getColumnsGapRatingBilling = (
       title: "RATING VALUE",
       dataIndex: "ratingValue",
       sorter: true,
-      align: "right",
+    isNumber: true,
       width: 170,
       filteredValue: [search?.ratingValue] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -174,7 +171,6 @@ export const getColumnsGapRatingBilling = (
       title: "BILLING CODE",
       dataIndex: "billingCode",
       sorter: true,
-      align: "center",
       width: 130,
       filteredValue: [search?.billingCode] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -202,7 +198,7 @@ export const getColumnsGapRatingBilling = (
       title: "BILLING VALUE",
       dataIndex: "billingValue",
       sorter: true,
-      align: "right",
+    isNumber: true,
       width: 170,
       filteredValue: [search?.billingValue] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -236,7 +232,6 @@ export const getColumnsGapRatingBilling = (
       title: "GAP AMOUNT",
       dataIndex: "gap",
       sorter: true,
-      align: "right",
       width: 170,
       filteredValue: [search?.gap] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -278,7 +273,6 @@ export const getColumnsGapRatingBilling = (
       title: "GAP (%)",
       dataIndex: "gapPercentage",
       sorter: true,
-      align: "center",
       width: 120,
       filteredValue: [search?.gapPercentage] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -308,7 +302,6 @@ export const getColumnsGapRatingBilling = (
       title: "DETECTED AT",
       dataIndex: "detectedAt",
       sorter: true,
-      align: "center",
       width: 180,
       filteredValue: [search?.detectedAt] || null,
       ...getColumnSearchPropsUseFilteredValue(

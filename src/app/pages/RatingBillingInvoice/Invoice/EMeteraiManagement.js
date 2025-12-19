@@ -83,44 +83,6 @@ const EMeteraiManagement = () => {
     );
   };
 
-  // Transform API data to match table format
-  // const getTransformedData = () => {
-  //   return data.map((invoice, index) => ({
-  //     ...invoice,
-  //     key: invoice.invoiceNumber || index,
-  //     invoiceNumber: invoice.invoiceNumber,
-  //     customer: invoice.customerName,
-  //     customerNumber: invoice.customerNumber,
-  //     accountNumber: invoice.accountNumber,
-  //     accountName: invoice.accountName,
-  //     issueDate: invoice.billingPeriod || "-",
-  //     amount: invoice.totalAmountEqvIdr,
-  //     stampingStatus: invoice.stampStatus || "Not Processed",
-  //     stampType: invoice.stampType,
-  //     stampRequestDate: invoice.stampRequestDate,
-  //     stampCompletionDate: invoice.stampCompletionDate,
-  //     stampRemark: invoice.stampRemark,
-  //     signingStatus: invoice.signStatus || "Not Processed",
-  //     signType: invoice.signType,
-  //     signRequestDate: invoice.signRequestDate,
-  //     signCompletionDate: invoice.signCompletionDate,
-  //     signRemark: invoice.signRemark,
-  //     stamping: {
-  //       status: invoice.stampStatus || "Not Processed",
-  //       method: invoice.stampType,
-  //       requested: invoice.stampRequestDate,
-  //       completed: invoice.stampCompletionDate,
-  //       remark: invoice.stampRemark,
-  //     },
-  //     signing: {
-  //       status: invoice.signStatus || "Not Processed",
-  //       requested: invoice.signRequestDate,
-  //       completed: invoice.signCompletionDate,
-  //       remark: invoice.signRemark,
-  //     },
-  //   }));
-  // };
-
   // Handlers
   const handleDetails = (record) => {
     if (record) {
@@ -160,6 +122,7 @@ const EMeteraiManagement = () => {
 
   // Handle stamping submission
   const handleStampingSubmit = async (submissionData) => {
+    console.log(submissionData.stampingMethod);
     try {
       if (submissionData.stampingMethod === "e-stamping") {
         const payload = {
@@ -181,8 +144,9 @@ const EMeteraiManagement = () => {
       } else if (submissionData.stampingMethod === "manual") {
         const payload = {
           invoiceNumber: submissionData.invoiceNumber,
-          file: submissionData.file,
+          file: submissionData.files?.[0] || submissionData.file,
           remark: submissionData.remark,
+          apphierId: submissionData.apphierId,
         };
 
         await dispatch(uploadManualStamping(payload)).unwrap();
@@ -204,10 +168,10 @@ const EMeteraiManagement = () => {
 
   // Handle signing submission
   const handleSigningSubmit = async (signingData) => {
-    const { invoiceNumber, signingMethod, file, remark } = signingData;
+    const { invoiceNumber, signingMethod, file, remark, apphierId } = signingData;
 
     try {
-      if (signingMethod === "e-signing") {
+      if (signingMethod === "digital") {
         await dispatch(
           createStampingRequest({
             invoiceNumber,
@@ -220,6 +184,7 @@ const EMeteraiManagement = () => {
             invoiceNumber,
             file,
             remark: remark || "Manual signing upload",
+            apphierId,
           })
         ).unwrap();
       }
@@ -290,31 +255,31 @@ const EMeteraiManagement = () => {
         header={
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px] font-bold">E-Meterai Management</p>
-            <div className="mt-[15px] flex gap-2">
+            <div className="flex gap-2">
               <Dropdown
                 menu={{
                   items: [
-                    {
-                      key: "approval",
-                      label: "Approval",
-                      icon: <CheckOutlined style={{ color: "#1890ff" }} />,
-                      onClick: handleBulkApproval,
-                    },
-                    {
-                      type: "divider",
-                    },
                     {
                       key: "request",
                       label: "Request Approval",
                       icon: <PlusOutlined style={{ color: "#52c41a" }} />,
                       onClick: handleBulkRequest,
                     },
+                    {
+                      type: "divider",
+                    },
+                    {
+                      key: "approval",
+                      label: "Approval",
+                      icon: <CheckOutlined style={{ color: "#1890ff" }} />,
+                      onClick: handleBulkApproval,
+                    },
                   ],
                 }}
                 trigger={["click"]}
               >
                 <ButtonComponent type="default">
-                  Action <DownOutlined />
+                  Approval Configuration <DownOutlined />
                 </ButtonComponent>
               </Dropdown>
             </div>
