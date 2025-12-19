@@ -514,7 +514,7 @@ export const columnsInvoice = (
       title: "TAX RATE",
       sorter: true,
       isNumber: true,
-      width: 150,
+      width: 100,
       dataIndex: "taxRate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -914,7 +914,7 @@ export const columnsInvoice = (
       key: "status",
       title: "STATUS",
       dataIndex: "status",
-      width: 150,
+      width: 100,
       isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
