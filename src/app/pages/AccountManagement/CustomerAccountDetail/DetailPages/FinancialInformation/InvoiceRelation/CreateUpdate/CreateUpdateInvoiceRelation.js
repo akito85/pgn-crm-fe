@@ -642,6 +642,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           type={confirmationType}
           dataAttachment={dataAttachment}
           data={formCreate.getFieldsValue()}
+          service={accountManagementService}
         />
       </div>
     </LayoutMenu>
