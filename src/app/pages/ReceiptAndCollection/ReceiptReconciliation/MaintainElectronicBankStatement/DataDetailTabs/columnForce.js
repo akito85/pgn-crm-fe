@@ -20,12 +20,14 @@ export const columnForce = (
   handleSearch = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
     width: 60,
     align: "center",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "sor",
     title: "SOR",
     dataIndex: "sor",
     align: "left",
@@ -43,10 +45,7 @@ export const columnForce = (
     render: (text) =>
       searchedColumn === "sor" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -60,6 +59,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
     align: "left",
@@ -77,16 +77,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "costCenter" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -100,6 +95,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "customerName",
     title: "CUSTOMER",
     dataIndex: "customerName",
     align: "left",
@@ -117,16 +113,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "customerName" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -140,6 +131,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     align: "left",
@@ -157,16 +149,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "accountNumber" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -180,6 +167,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "receiptNumber",
     title: "RECEIPT NUMBER",
     dataIndex: "receiptNumber",
     align: "left",
@@ -197,16 +185,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "receiptNumber" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -220,6 +203,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "receiptDate",
     title: "RECEIPT DATE",
     dataIndex: "receiptDate",
     align: "center",
@@ -241,10 +225,7 @@ export const columnForce = (
     render: (text) =>
       searchedColumn === "receiptDate" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[
             searchText
               ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
@@ -260,6 +241,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     align: "center",
@@ -277,16 +259,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "currency" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -300,6 +277,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "amount",
     title: "RECEIPT AMOUNT",
     dataIndex: "amount",
     align: "right",
@@ -314,16 +292,11 @@ export const columnForce = (
     ),
     onFilter: (value, record) =>
       record["amount"]?.toString().toLowerCase().includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "amount" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -337,9 +310,9 @@ export const columnForce = (
       ),
   },
   {
+    key: "statusApproval",
     title: "APPROVAL STATUS",
     dataIndex: "statusApproval",
-    key: "statusApproval",
     fixed: "right",
     sorter: (a, b) => a?.statusApproval?.localeCompare(b?.statusApproval),
     ...getColumnSearchPropsPaging(
@@ -371,27 +344,25 @@ export const columnForce = (
             : approvalStatus;
           break;
       }
+
       if (searchedColumn === "statusApproval") {
         return (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         );
-      } else {
-        return text ? (
-          <div className={"flex justify-center"}>
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          text
-        );
       }
+
+      return text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text}>{text}</StatusComponent>
+        </div>
+      ) : (
+        text
+      );
     },
   },
 ];
