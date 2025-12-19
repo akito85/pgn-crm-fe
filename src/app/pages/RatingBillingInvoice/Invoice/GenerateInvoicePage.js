@@ -299,6 +299,12 @@ const GenerateInvoicePage = () => {
         {/* ===================== TABLE ===================== */}
         <CardContainer header="Select billing">
           <div className="w-full">
+            {selectedRowKeys.length > 0 && (
+              <p className="text-sm font-semibold text-blue-600">
+                {selectedRowKeys.length}{" "}
+                {selectedRowKeys.length === 1 ? "row" : "rows"} selected
+              </p>
+            )}
             <TableRBI
               idTable="generate-invoice"
               dataSource={dataTable}
