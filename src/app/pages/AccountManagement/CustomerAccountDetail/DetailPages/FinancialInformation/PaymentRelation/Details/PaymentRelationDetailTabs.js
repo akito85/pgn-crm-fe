@@ -9,6 +9,7 @@ const dataTabs = {
 };
 
 const PaymentRelationDetailTabs = ({
+  subjectAccountNumber,
   dataDetail = {},
   dataAttachment = [],
   section = "",
@@ -42,7 +43,7 @@ const PaymentRelationDetailTabs = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.pri:
-        return <PaymentRelationDetailInfo dataDetail={dataDetail} type={AccountType}/>;
+        return <PaymentRelationDetailInfo subjectAccountNumber={subjectAccountNumber} dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
         return <PaymentRelationDetailAttch dataAttachment={dataAttachment} />;
       default:
