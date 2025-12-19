@@ -5,13 +5,13 @@ import {
   Tooltip,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
-  DownloadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import {
   renderColumn,
@@ -155,12 +155,14 @@ const ViewSettings = () => {
     {
       title: "NO",
       width: 60,
+      key: "no",
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "PARTNER CODE",
       dataIndex: "partnerCode",
+      key: "partnerCode",
       sorter: true,
       ...getColumnSearchPropsPaging(
         "partnerCode",
@@ -185,6 +187,7 @@ const ViewSettings = () => {
     {
       title: "Collection Agent CODE",
       dataIndex: "caCode",
+      key: "partnerCode",
       sorter: true,
       ...getColumnSearchPropsPaging(
         "caCode",
@@ -209,6 +212,7 @@ const ViewSettings = () => {
     {
       title: "Payment Channel CODE",
       dataIndex: "ciCode",
+      key: "ciCode",
       sorter: true,
       ...getColumnSearchPropsPaging(
         "ciCode",
@@ -234,6 +238,8 @@ const ViewSettings = () => {
       title: "DATE START",
       dataIndex: "dateStart",
       align: "center",
+      key: "dateStart",
+      isNumber:true,
       sorter: true,
       ...getColumnSearchPropsPaging(
         "dateStart",
@@ -250,6 +256,8 @@ const ViewSettings = () => {
       title: "DATE END",
       dataIndex: "dateEnd",
       align: "center",
+      isNumber:true,
+      key: "dateEnd",
       sorter: true,
       ...getColumnSearchPropsPaging(
         "dateEnd",
@@ -266,7 +274,9 @@ const ViewSettings = () => {
       title: "HOUR START",
       dataIndex: "hourStart",
       sorter: true,
+      isNumber:true,
       align: "center",
+      key: "hourStart",
       ...getColumnSearchPropsPaging(
         "hourStart",
         searchInput,
@@ -282,7 +292,9 @@ const ViewSettings = () => {
       title: "HOUR END",
       dataIndex: "hourEnd",
       sorter: true,
+      isNumber:true,
       align: "center",
+      key: "hourEnd",
       ...getColumnSearchPropsPaging(
         "hourEnd",
         searchInput,
@@ -298,7 +310,9 @@ const ViewSettings = () => {
       title: "MINUTE START",
       dataIndex: "minuteStart",
       sorter: true,
+      isNumber:true,
       align: "center",
+      key: "minuteStart",
       ...getColumnSearchPropsPaging(
         "minuteStart",
         searchInput,
@@ -314,7 +328,9 @@ const ViewSettings = () => {
       title: "MINUTE END",
       dataIndex: "minuteEnd",
       sorter: true,
+      isNumber:true,
       align: "center",
+      key: "minuteEnd",
       ...getColumnSearchPropsPaging(
         "minuteEnd",
         searchInput,
@@ -330,6 +346,7 @@ const ViewSettings = () => {
       title: "TYPE",
       dataIndex: "type",
       sorter: true,
+      key: "type",
       ellipsis: { showTitle: false },
       ...getColumnSearchPropsPaging(
         "type",
@@ -357,6 +374,7 @@ const ViewSettings = () => {
       sorter: true,
       width: 150,
       fixed: "right",
+      key: "status",
       ...getColumnSearchPropsPaging(
         "status",
         searchInput,
@@ -395,6 +413,11 @@ const ViewSettings = () => {
     },
   ];
 
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "statusApproval", "action"],
+  }));
+
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -427,19 +450,6 @@ const ViewSettings = () => {
   const itemActions = [
     // toolbar items
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "Create",
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_SETTINGS}>
@@ -466,10 +476,10 @@ const ViewSettings = () => {
             >
               {/* <ButtonComponent
                   className="gap-5"
-                  icon={<SVGIcon name="IconDetail" width={24} />}
+                  icon={<EyeOutlined />}
                   border={false}
                 /> */}
-              <SVGIcon name="IconDetail" width={24} />
+              <EyeOutlined />
             </Link>
           </Tooltip>
         );
@@ -675,8 +685,8 @@ const ViewSettings = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
-        <BaseContainer header={"PARTNER LIST"}>
-          <TablePagination
+        <CardContainer header={"PARTNER LIST"}>
+          <TableRBI
             dataSource={data?.result}
             pageSize={pageSize}
             // columns={columns}
@@ -696,8 +706,12 @@ const ViewSettings = () => {
               x: 2500,
               y: 525,
             }}
+            showExport={true}
+            handleDownload={handleDownload}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
-        </BaseContainer>
+        </CardContainer>
 
         <ModalActiveInactive
           dispatch={dispatch}

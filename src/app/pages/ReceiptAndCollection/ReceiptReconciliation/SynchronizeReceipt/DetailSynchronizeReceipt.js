@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { Input } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import DetailText from "../../../../../components/DetailText";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import moment from "moment";
 import { NumericFormat } from "react-number-format";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -295,7 +295,7 @@ const DetailSynchronizeReceipt = () => {
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
-      <BaseContainer header={"SYNCHRONIZE INFORMATION"}>
+      <CardContainer header={"SYNCHRONIZE INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-3">
           <DetailText label="SYNC ID">{data_detail?.syncId}</DetailText>
           <DetailText label="Sync Date Time">{data_detail?.syncDateTime
@@ -316,11 +316,11 @@ const DetailSynchronizeReceipt = () => {
             />
           </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"RECEIPT INFORMATION"}>
+      <CardContainer header={"RECEIPT INFORMATION"}>
         <div className="w-full">
-          <TablePagination
+          <TableRBI
             dataSource={data_receipt}
             columns={columns}
             current={page}
@@ -335,7 +335,7 @@ const DetailSynchronizeReceipt = () => {
             }}
           />
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       <div className="flex mt-[30px]">
         <ButtonComponent
