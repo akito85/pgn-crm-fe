@@ -589,7 +589,7 @@ const PrabillingForm = ({ type }) => {
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-1 gap-2"}>
+            <div className={"w-full grid grid-cols-2 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
                 name={"billing_cycle"}
@@ -610,7 +610,7 @@ const PrabillingForm = ({ type }) => {
                 label={"Billing Period"}
                 name={"billing_period"}
                 rules={formMessageRequired("Billing Period")}
-                style={{ marginBottom: 4 }}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   disabled={!billingCycle}

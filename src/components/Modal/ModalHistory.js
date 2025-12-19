@@ -421,7 +421,7 @@ const ModalHistory = (props) => {
       footer={
         <div className="w-full flex justify-end gap-5">
           <ButtonComponent onClick={handleClose} type="default">
-            Cancel
+            Back
           </ButtonComponent>
         </div>
       }
