@@ -410,7 +410,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       })
       .catch((error) => {});
     else if (type === "update")
-      dispatch(updateInvoiceRelation({ id: idIr, body }))
+      dispatch(updateInvoiceRelation({ id: idIr, body, attachments: dataAttachment.filter((attachment => attachment.dataType !== "exist")) }))
       .unwrap()
         .then((data) => {
           setTimeout(() => {
