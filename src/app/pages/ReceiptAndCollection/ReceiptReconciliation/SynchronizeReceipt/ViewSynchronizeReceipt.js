@@ -5,7 +5,10 @@ import { Input, Space, Tooltip } from "antd";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import { FilterOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined, 
+  FilterOutlined
+} from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import TableRBI from "../../../../../components/TableRBI";
@@ -127,6 +130,7 @@ const ViewSynchronizeReceipt = () => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -134,12 +138,14 @@ const ViewSynchronizeReceipt = () => {
     {
       title: "SYNC ID",
       dataIndex: "syncId",
+      key: "syncId",
       sorter: true,
       ...getColumnSearchProps("syncId"),
     },
     {
       title: "SYNC DATE TIME",
       dataIndex: "syncDateTime",
+      key: "syncDateTime",
       align: "center",
       sorter: true,
       ...getColumnSearchProps("syncDateTime"),
@@ -148,6 +154,7 @@ const ViewSynchronizeReceipt = () => {
     {
       title: "TOTAL RECEIPT",
       dataIndex: "totalReceipt",
+      key: "totalReceipt",
       align: "center",
       sorter: true,
       ...getColumnSearchProps("totalReceipt"),
@@ -155,6 +162,7 @@ const ViewSynchronizeReceipt = () => {
     {
       title: "CURRENCY",
       dataIndex: "currency",
+      key: "currency",
       align: "center",
       sorter: true,
       ...getColumnSearchProps("currency"),
@@ -162,6 +170,7 @@ const ViewSynchronizeReceipt = () => {
     {
       title: "TOTAL AMOUNT",
       dataIndex: "totalAmount",
+      key: "totalAmount",
       align: "right",
       sorter: true,
       ...getColumnSearchProps("totalAmount"),
@@ -182,6 +191,7 @@ const ViewSynchronizeReceipt = () => {
       title: "ACTION",
       align: "center",
       dataIndex: "syncId",
+      key: "action",
       fixed: "right",
       width: 100,
       render: (id, record) => {
@@ -193,7 +203,10 @@ const ViewSynchronizeReceipt = () => {
                 state={{ id: id }}
               >
                 <ButtonComponent
-                  icon={<SVGIcon name="IconDetail" width={24} />}
+                  icon={
+                  // <SVGIcon name="IconDetail" width={24} />
+                  <EyeOutlined />
+                }
                   border={false}
                 />
               </Link>
@@ -208,6 +221,11 @@ const ViewSynchronizeReceipt = () => {
     setPage(page);
     setPageSize(pageSize);
   };
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -237,6 +255,8 @@ const ViewSynchronizeReceipt = () => {
               x: 1300,
               y: 300,
             }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
         </div>
       </CardContainer>

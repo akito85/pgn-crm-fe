@@ -10,6 +10,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
     DownloadOutlined,
+    EyeOutlined,
 } from "@ant-design/icons";
 import {
     renderColumn,
@@ -360,7 +361,8 @@ const ViewCollectingAgent = () => {
                             to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_COLLECTING_AGENT}
                             state={{ id: record?.id }}
                         >
-                            <SVGIcon name="IconDetail" width={24} />
+                            {/* <SVGIcon name="IconDetail" width={24} /> */}
+                            <EyeOutlined />
                         </Link>
                     </Tooltip>
                 );

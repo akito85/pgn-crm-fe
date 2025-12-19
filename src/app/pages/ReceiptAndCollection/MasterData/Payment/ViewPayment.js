@@ -104,6 +104,10 @@ const ViewPayment = () => {
     setPageSize(pageSizeChange);
   };
   
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
   
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
@@ -162,9 +166,8 @@ const ViewPayment = () => {
                   )
                 )]}
               useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-              }}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </CardContainer>
         </div>
