@@ -243,7 +243,7 @@ const AttachmentSectionForm = ({
   useEffect(() => {
     if (data_irAttachmentCategory && data_irAttachmentCategory.length > 0) {
       const tempCategory = data_irAttachmentCategory.map((category) => ({
-        id: category.code,
+        id: category.id,
         text: category.text,
       }));
       setCategoryOptions(tempCategory);

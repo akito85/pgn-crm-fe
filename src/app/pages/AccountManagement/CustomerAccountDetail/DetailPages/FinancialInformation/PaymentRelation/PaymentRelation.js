@@ -127,7 +127,7 @@ const PaymentRelation = ({
         page,
         size: pageSize,
         sort,
-        searches: search,
+        searchs: search,
         inputFields: tempFilters,
       }
 
@@ -176,7 +176,7 @@ const PaymentRelation = ({
         page,
         size: pageSize,
         sort,
-        searches: search,
+        searchs: search,
         inputFields: tempFilters,
       }
 
@@ -329,17 +329,15 @@ const PaymentRelation = ({
   }
 
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
+    const body = {
+      page,
+      size: pageSize,
+      sort,
+      inputFields: tempFilters,
+      searchs: search
     }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadPaymentRelation({ page, pageSize, sort, search: tempSearch }));
+
+    dispatch(downloadPaymentRelation({ body, id, }));
   };
 
   /**
@@ -376,7 +374,7 @@ const PaymentRelation = ({
       page,
       size: pageSize,
       sort,
-      searches: search,
+      searchs: search,
       inputFields: tempFilters,
     }
 
