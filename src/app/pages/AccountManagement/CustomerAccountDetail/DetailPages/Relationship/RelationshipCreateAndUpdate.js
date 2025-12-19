@@ -560,7 +560,7 @@ const RelationshipCreateAndUpdate = ({
           </Form>
         </Spin>
 
-        {/* create tax relation */}
+        {/* create tax relation - COMMENTED OUT: Duplicate modal causing double popup
         <ModalCustom
           isOpen={modalConfirm}
           type={"confirmation"}
@@ -592,6 +592,7 @@ const RelationshipCreateAndUpdate = ({
         >
           <RelationshipConfirm data={dataConfirm} />
         </ModalCustom>
+        */}
       </LayoutMenu>
       
       {/* Modal Confirmation */}
