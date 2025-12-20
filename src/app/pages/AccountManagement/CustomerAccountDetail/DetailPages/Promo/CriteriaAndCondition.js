@@ -60,13 +60,11 @@ const selectedRender = (selectedTab, handleClickDetail, setDetailData) => {
             <Col span={3}>
               <HeaderText text="Criteria List" />
             </Col>
-            <Col span={3} offset={14}>
-              <FilterButton />
-            </Col>
-            <Col span={3} offset={1}>
-              <ExportButton />
-            </Col>
           </Row>
+          <div className="flex justify-between">
+            <FilterButton />
+            <ExportButton />
+          </div>
           <div style={{ width: "100%", overflowX: "auto" }}>
             <TablePaginationNew
               enableDragColumn={true}
