@@ -11,7 +11,7 @@ import { Form } from "antd";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CustomerQuery from "../../../Customer/Component/CustomerQuesry";
 import { getGlobalSearchColumn, getGlobalSearchCondition, getGlobalSearchOperator } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import { CheckOutlined } from "@ant-design/icons";
+import { CheckOutlined, DownloadOutlined } from "@ant-design/icons";
 
 const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   const dispatch = useDispatch();
@@ -101,14 +101,36 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
         {!approvalMode ? (
           <div className="w-full flex justify-between mb-[30px]">
             <ButtonComponent
-              icon={<SVGIcon name="IconFilter" width={24} />}
-              type="default"
+              icon={<SVGIcon name="IconFilter" width={24} style={{ color: "#fff" }} />}
+              type="submit"
               onClick={handleOpenFilter}
             >
               Filters
             </ButtonComponent>
 
             <div className="flex gap-3">
+              <ButtonComponent
+                type={"submit"}
+                // onClick={handleDownload}
+                icon={
+                  <DownloadOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px"
+                }}
+              >
+                Download List
+              </ButtonComponent>
               <ButtonComponent
                 type={"submit"}
                 onClick={() => handleIsApproval(true)}
