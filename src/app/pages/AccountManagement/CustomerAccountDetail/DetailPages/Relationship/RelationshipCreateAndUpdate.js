@@ -14,6 +14,7 @@ import RelationshipApproval from "./RelationshipApproval";
 import RelationshipAttachment from "./RelationshipAttachment";
 import ModalAttachment from "./RelationshipAttachment/ModalAttachment";
 import RelationshipInformation from "./RelationshipInformation";
+import RelatedDetailCard from "./RelationshipInformation/RelatedDetailCard";
 import {
   createRelationship,
   downloadAttachment,
@@ -89,6 +90,7 @@ const RelationshipCreateAndUpdate = ({
   const [approvalObj, setApprovalObj] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [dataDetailApproval, setDataDetailApproval] = useState([]);
+  const [allAccountData, setAllAccountData] = useState([]);
 
   // Step State
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -158,6 +160,11 @@ const RelationshipCreateAndUpdate = ({
       // Load approval hierarchy detail if appHierId exists
       if (detail.appHierId) {
         dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
+      }
+
+      // Populate Related Detail data for update mode
+      if (detail.relatedDetail && detail.relatedDetail.length > 0) {
+        setAllAccountData(detail.relatedDetail);
       }
     }
   }, [data_relationshipDetail, type, form, idAccount, dispatch]);
@@ -494,15 +501,22 @@ const RelationshipCreateAndUpdate = ({
     {
       title: "Relationship Information",
       content: (
-        <RelationshipInformation
-          form={form}
-          relationshipObj={relationshipObj}
-          handleRelationshipObj={handleRelationshipObj}
-          initialRelationshipType={data_relationshipDetail?.relationshipType}
-          initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
-          key={`relationship-tab-0`}
-          className={`${current !== 0 ? "hidden" : ""}`}
-        />
+        <>
+          <RelationshipInformation
+            form={form}
+            relationshipObj={relationshipObj}
+            handleRelationshipObj={handleRelationshipObj}
+            initialRelationshipType={data_relationshipDetail?.relationshipType}
+            initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
+            key={`relationship-tab-0`}
+            className={`${current !== 0 ? "hidden" : ""}`}
+            onAllAccountChange={(data) => setAllAccountData(data)}
+          />
+          <RelatedDetailCard
+            data={allAccountData}
+            className={`${current !== 0 ? "hidden" : ""} mt-4`}
+          />
+        </>
       ),
       disabled: false,
     },

@@ -11,7 +11,7 @@ import { Form } from "antd";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CustomerQuery from "../../../Customer/Component/CustomerQuesry";
 import { getGlobalSearchColumn, getGlobalSearchCondition, getGlobalSearchOperator } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import { CheckOutlined, DownloadOutlined } from "@ant-design/icons";
+import { CheckOutlined, DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 
 const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   const dispatch = useDispatch();
@@ -101,7 +101,14 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
         {!approvalMode ? (
           <div className="w-full flex justify-between mb-[30px]">
             <ButtonComponent
-              icon={<SVGIcon name="IconFilter" width={24} style={{ color: "#fff" }} />}
+              icon={
+                <FilterOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
               type="submit"
               onClick={handleOpenFilter}
             >

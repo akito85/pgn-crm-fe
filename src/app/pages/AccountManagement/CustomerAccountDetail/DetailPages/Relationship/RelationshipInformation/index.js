@@ -21,6 +21,7 @@ const RelationshipInformation = ({
   className = "",
   initialRelationshipType = null,
   initialRelationshipCategory = null,
+  onAllAccountChange = () => { },
 }) => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -77,6 +78,13 @@ const RelationshipInformation = ({
                 const selectedType = data_relationshipType?.find(item => item.id === val);
                 setSelectedRelationType(selectedType?.text || null);
                 handleRelationshipObj(val, "relationshipType");
+                // Clear allAccount data when relationship type changes
+                onAllAccountChange([]);
+                // Also clear related name/number fields
+                form.setFieldsValue({
+                  relatedName: undefined,
+                  relatedNumber: undefined,
+                });
               }}
             >
               {data_relationshipType?.map((item) => (
@@ -219,6 +227,11 @@ const RelationshipInformation = ({
             handleRelationshipObj(selected.objectId, "objectId");
             handleRelationshipObj(displayName, "objectName");
             handleRelationshipObj(displayNumber, "objectValue");
+
+            // Pass allAccount data to parent for display in RelatedDetailCard
+            if (isCustomer && selected.allAccount) {
+              onAllAccountChange(selected.allAccount);
+            }
           }}
         />
       </NxPanel>
