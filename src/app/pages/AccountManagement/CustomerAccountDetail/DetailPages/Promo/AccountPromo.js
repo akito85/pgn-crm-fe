@@ -27,6 +27,7 @@ const HeaderAccountPromo = ({ onChangeTab, isPromoHistory }) => {
       keys={keys}
       selectedTab={isPromoHistory ? "promoHistory" : "promo"}
       onChangeTab={onChangeTab}
+      isPromo
     />
   );
 };
