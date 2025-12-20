@@ -19,6 +19,7 @@ const renderHistoryLogContent = (historyLog) => {
     <Fragment>
       <HeaderText text="HISTORY LOG INFORMATION" />
       <Row className="mt-4">
+        <Col span={6}>{renderHistoryData("Record Id", log.id)}</Col>
         <Col span={6}>{renderHistoryData("Created Date", log.createdDate)}</Col>
         <Col span={6}>{renderHistoryData("Created By", log.createdBy)}</Col>
         <Col span={6}>
