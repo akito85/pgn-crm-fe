@@ -132,6 +132,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "logMsg",
         title: "LOG MESSAGE",
         dataIndex: "logMsg",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.logMsg] || null,
         ellipsis: { showTitle: false },
@@ -159,6 +160,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "procName",
         title: "PROCESS NAME",
         dataIndex: "procName",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.procName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -185,6 +187,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "billCycle",
         title: "BILL CYCLE",
         dataIndex: "billCycle",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.billCycle] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -211,6 +214,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "billPeriod",
         title: "BILL PERIOD",
         dataIndex: "billPeriod",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.billPeriod] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -237,6 +241,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "countNo",
         title: "COUNTER NO",
         dataIndex: "countNo",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.countNo] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -263,6 +268,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "logDate",
         title: "LOG DATE",
         dataIndex: "logDate",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.logDate] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -289,6 +295,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "createdBy",
         title: "CREATED BY",
         dataIndex: "createdBy",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(

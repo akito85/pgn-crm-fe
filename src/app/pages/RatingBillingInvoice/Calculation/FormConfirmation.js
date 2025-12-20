@@ -24,12 +24,12 @@ const FormConfirmation = ({ data }) => {
       list_billing_period?.data &&
       list_billing_period?.data?.filter((item) => item?.id === val);
     if (periodName === undefined) {
-      return "-";
+      return "";
     }
     if (periodName.length !== 0) {
       return periodName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getBillingCycleName = (val) => {
@@ -37,12 +37,12 @@ const FormConfirmation = ({ data }) => {
       list_billing_cycle &&
       list_billing_cycle?.filter((item) => item?.id === val);
     if (billingCycleName === undefined) {
-      return "-";
+      return "";
     }
     if (billingCycleName.length !== 0) {
       return billingCycleName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getCalculationTypeName = (val) => {
@@ -50,12 +50,12 @@ const FormConfirmation = ({ data }) => {
       list_calculation_type &&
       list_calculation_type?.filter((item) => item?.id === val);
     if (calculationTypeName === undefined) {
-      return "-";
+      return "";
     }
     if (calculationTypeName.length !== 0) {
       return calculationTypeName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getGroupTypeName = (val) => {
@@ -64,9 +64,9 @@ const FormConfirmation = ({ data }) => {
     );
     
     if (groupTypeName) {
-      return groupTypeName.glbValue || groupTypeName.name || "-";
+      return groupTypeName.glbValue || groupTypeName.name || "";
     }
-    return "-";
+    return "";
   };
 
   const getCustomerName = (val) => {
@@ -76,12 +76,12 @@ const FormConfirmation = ({ data }) => {
         (item) => item?.code === val || item?.accountNumber === val
       );
     if (customerName === undefined) {
-      return "-";
+      return "";
     }
     if (customerName.length !== 0) {
       return customerName[0].name || customerName[0].accountName;
     }
-    return "-";
+    return "";
   };
 
   const getCostCenterName = (val) => {
@@ -89,12 +89,12 @@ const FormConfirmation = ({ data }) => {
       list_cost_center?.data &&
       list_cost_center?.data?.filter((item) => item?.id === val);
     if (costCenterName === undefined) {
-      return "-";
+      return "";
     }
     if (costCenterName.length !== 0) {
       return costCenterName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getMrcName = (val) => {
@@ -105,12 +105,12 @@ const FormConfirmation = ({ data }) => {
     const mrcName =
       mergeMrcDto && mergeMrcDto?.filter((item) => item?.id === val);
     if (mrcName === undefined) {
-      return "-";
+      return "";
     }
     if (mrcName.length !== 0) {
       return mrcName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getAccSegmentName = (val) => {
@@ -118,12 +118,12 @@ const FormConfirmation = ({ data }) => {
       list_customer_segment?.Data &&
       list_customer_segment?.Data?.filter((item) => item?.id === val);
     if (accSegmentName === undefined) {
-      return "-";
+      return "";
     }
     if (accSegmentName.length !== 0) {
       return accSegmentName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getServicecTypeName = (val) => {
@@ -131,24 +131,24 @@ const FormConfirmation = ({ data }) => {
       list_service_type &&
       list_service_type?.filter((item) => item?.id === val);
     if (serviceTypeName === undefined) {
-      return "-";
+      return "";
     }
     if (serviceTypeName.length !== 0) {
       return serviceTypeName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getSorName = (val) => {
     const sorName =
       list_sor?.data && list_sor?.data?.filter((item) => item?.id === val);
     if (sorName === undefined) {
-      return "-";
+      return "";
     }
     if (sorName.length !== 0) {
       return sorName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getScheduleTypeName = (val) => {
@@ -156,12 +156,12 @@ const FormConfirmation = ({ data }) => {
       list_scheduler_type &&
       list_scheduler_type?.filter((item) => item?.id === val);
     if (scheduleTypeName === undefined) {
-      return "-";
+      return "";
     }
     if (scheduleTypeName.length !== 0) {
       return scheduleTypeName[0].name;
     }
-    return "-";
+    return "";
   };
 
   return (
