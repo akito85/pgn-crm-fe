@@ -85,6 +85,9 @@ const RelationshipCreateAndUpdate = ({
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [dataDetailApproval, setDataDetailApproval] = useState([]);
 
+  // Step State
+  const [scrollLeft, setScrollLeft] = useState(0);
+
   useEffect(() => {
     console.log("relationshipObj => ", relationshipObj);
   }, [relationshipObj]);
@@ -307,7 +310,7 @@ const RelationshipCreateAndUpdate = ({
         );
       });
   };
-  
+
   const routes = [
     {
       path: "",
@@ -335,8 +338,29 @@ const RelationshipCreateAndUpdate = ({
     },
   ];
 
+  const formFields = [
+    [
+      "relationshipType",
+      "relationshipCategory",
+      "relatedName",
+      "relatedNumber",
+      "startDate",
+      "endDate",
+    ],
+    [
+      "appHierId",
+    ],
+    []
+  ];
+
   // Navigation handlers
-  const next = () => {
+  const next = async () => {
+    try {
+      await form.validateFields(formFields[current]);
+    } catch (err) {
+      return;
+    }
+
     setCurrent(current + 1);
   };
 
@@ -349,6 +373,19 @@ const RelationshipCreateAndUpdate = ({
       containerRef.current.scrollLeft += 250;
     }
   };
+
+  const handleSetCurrent = async (newCurrent) => {
+    for (let i = current; i < newCurrent; i++) {
+      try {
+        await form.validateFields(formFields[i]);
+      } catch (err) {
+        setCurrent(i);
+        return;
+      }
+    }
+
+    setCurrent(newCurrent);
+  }
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -369,16 +406,9 @@ const RelationshipCreateAndUpdate = ({
     }
   };
 
-  const handleButtonNext = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        next();
-        scrollRightHandler();
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-      });
+  const handleButtonNext = async () => {
+    await next();
+    scrollRightHandler();
   };
 
   // Steps Configuration
@@ -390,6 +420,8 @@ const RelationshipCreateAndUpdate = ({
           form={form}
           relationshipObj={relationshipObj}
           handleRelationshipObj={handleRelationshipObj}
+          key={`relationship-tab-0`}
+          className={`${current !== 0 ? "hidden" : ""}`}
         />
       ),
       disabled: false,
@@ -405,6 +437,8 @@ const RelationshipCreateAndUpdate = ({
           dataDetailApproval={dataDetailApproval}
           handleDetailApproval={handleDetailApproval}
           loading={loadingApprovalHierarchyDetail}
+          key={`relationship-tab-1`}
+          className={`${current !== 1 ? "hidden" : ""}`}
         />
       ),
       disabled: false,
@@ -420,6 +454,8 @@ const RelationshipCreateAndUpdate = ({
           onDownload={(file) =>
             dispatch(downloadAttachment({ idAccount, idFile: file.key }))
           }
+          key={`relationship-tab-2`}
+          className={`${current !== 2 ? "hidden" : ""}`}
         />
       ),
       disabled: false,
@@ -430,6 +466,12 @@ const RelationshipCreateAndUpdate = ({
     key: item.title,
     title: item.title,
   }));
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      setScrollLeft(containerRef.current.scrollLeft);
+    }
+  };
 
   return (
     <>
@@ -458,24 +500,17 @@ const RelationshipCreateAndUpdate = ({
             }}
           >
             {/* Steps Content */}
-            <BaseContainer>
-              <div className="flex justify-center py-4">
-                <Steps
-                  current={current}
-                  items={items.map((item, index) => ({
-                    ...item,
-                    status:
-                      index < current
-                        ? "finish"
-                        : index === current
-                          ? "process"
-                          : "wait",
-                  }))}
-                  labelPlacement="vertical"
-                />
+
+            <div className="flex flex-row gap-x-6 justify-center my-6">
+              <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
               </div>
-              <div className="steps-content my-6">{steps[current].content}</div>
-            </BaseContainer>
+            </div>
+            <div className="steps-content my-6">
+              {
+                steps.map((step) => step.content)
+              }
+            </div>
 
             {/* Section Action Steps */}
             <div className="steps-action my-8 flex w-full justify-between gap-x-2">
@@ -507,52 +542,45 @@ const RelationshipCreateAndUpdate = ({
                   </ButtonComponent>
                 )}
                 {current < steps.length - 1 && (
-                  <Button
+                  <ButtonComponent
                     onClick={handleButtonNext}
-                    type="primary"
-                    className="ant-btn ant-btn-submit flex w-full justify-center"
+                    type={"submit"}
                     disabled={steps[current].disabled}
                   >
-                    <span className="p-1 text-[18px] text-center">Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </Button>
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
+                  </ButtonComponent>
                 )}
                 {current === steps.length - 1 && (
                   <>
-                    <Button
-                      type="primary"
-                      htmlType="button"
-                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                    <ButtonComponent
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleSaveAsDraft();
                       }}
+                      type={"submit"}
                     >
-                      <span className="p-1 text-[18px] text-center">
-                        Save as Draft
-                      </span>
-                    </Button>
-                    <Button
-                      type="primary"
-                      htmlType="button"
-                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                      Save as Draft
+                    </ButtonComponent>
+                    <ButtonComponent
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleSaveAndSubmit();
                       }}
+                      type={"submit"}
                     >
-                      <span className="p-1 text-[18px] text-center">
-                        Save & Submit
-                      </span>
-                    </Button>
+                      Save & Submit
+                    </ButtonComponent>
                   </>
                 )}
               </div>
@@ -594,7 +622,7 @@ const RelationshipCreateAndUpdate = ({
         </ModalCustom>
         */}
       </LayoutMenu>
-      
+
       {/* Modal Confirmation */}
       <ModalCustom
         isOpen={modalConfirm}

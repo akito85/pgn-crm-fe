@@ -6,6 +6,7 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import DateComponent from "../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../components/SelectComponent";
+import NxPanel from "../../../../../../../components/Nx/NxPanel";
 import {
   getRelationshipCategory,
   getRelationshipType,
@@ -17,6 +18,7 @@ const RelationshipInformation = ({
   form,
   relationshipObj = {},
   handleRelationshipObj = () => { },
+  className = "",
 }) => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -39,14 +41,10 @@ const RelationshipInformation = ({
   }, [dispatch, idAccount]);
 
   return (
-    <div>
-      <h3 className="text-primary text-xs font-bold uppercase pb-4 pt-0">
-        RELATIONSHIP INFORMATION
-      </h3>
-
-      <div className="flex flex-col gap-3">
-        {/* First Row - Type, Category & Related Name*/}
-        <div className="w-full grid grid-cols-3 gap-3">
+    <div className={className}>
+      <NxPanel title={"RELATIONSHIP INFORMATION"} removeBottomMargin>
+        <div className="w-full grid grid-cols-3 gap-4">
+          {/* Row 1 - Col 1: Relationship Type */}
           <Form.Item
             name="relationshipType"
             rules={[
@@ -72,6 +70,7 @@ const RelationshipInformation = ({
             </SelectComponent>
           </Form.Item>
 
+          {/* Row 1 - Col 2: Relationship Category */}
           <Form.Item
             name="relationshipCategory"
             rules={[
@@ -100,7 +99,8 @@ const RelationshipInformation = ({
             </SelectComponent>
           </Form.Item>
 
-          <div className="flex gap-2">
+          {/* Row 1 - Col 3: Related Name with Select Button */}
+          <div className="flex gap-2 items-end">
             <Form.Item
               name="relatedName"
               rules={[
@@ -114,21 +114,17 @@ const RelationshipInformation = ({
                 disabled
               />
             </Form.Item>
-            <div className="flex items-end">
-              <ButtonComponent
-                type="submit"
-                onClick={() => setModalChoose(true)}
-                size="small"
-                disabled={!selectedRelationType || !selectedRelationCategory}
-              >
-                Select
-              </ButtonComponent>
-            </div>
+            <ButtonComponent
+              type="submit"
+              onClick={() => setModalChoose(true)}
+              size="small"
+              disabled={!selectedRelationType || !selectedRelationCategory}
+            >
+              Select
+            </ButtonComponent>
           </div>
-        </div>
 
-        {/* Second Row - Related Name, Start Date & End Date */}
-        <div className="w-full grid grid-cols-3 gap-3">
+          {/* Row 2 - Col 1: Related Number */}
           <Form.Item
             name="relatedNumber"
             rules={[
@@ -143,6 +139,7 @@ const RelationshipInformation = ({
             />
           </Form.Item>
 
+          {/* Row 2 - Col 2: Start Date */}
           <Form.Item
             name="startDate"
             rules={[{ message: requiredMessage("Start Date"), required: true }]}
@@ -155,6 +152,7 @@ const RelationshipInformation = ({
             />
           </Form.Item>
 
+          {/* Row 2 - Col 3: End Date */}
           <Form.Item
             name="endDate"
             rules={[{ message: requiredMessage("End Date"), required: true }]}
@@ -169,42 +167,45 @@ const RelationshipInformation = ({
         </div>
 
         {/* Description - Full width */}
-        <Form.Item
-          name="description"
-          rules={[{ message: requiredMessage("Description"), required: false }]}
-        >
-          <InputComponent
-            label="Description"
-            type="textarea"
-            onChange={(e) => handleRelationshipObj(e.target.value, "description")}
-          />
-        </Form.Item>
-      </div>
-      {/* Modal Choose Related */}
-      <ModalChooseRelated
-        isOpen={modalChoose}
-        idAccount={idAccount}
-        relationshipType={selectedRelationType}
-        relationshipCategory={selectedRelationCategory}
-        handleCancel={() => setModalChoose(false)}
-        handleSelect={(selected) => {
-          // Handle different data structure based on source
-          const isCustomer = selected.source === "CUSTOMER";
-          const displayName = isCustomer ? selected.customerName : selected.accountName;
-          const displayNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+        <div className="w-full my-5">
+          <Form.Item
+            name="description"
+            rules={[{ message: requiredMessage("Description"), required: false }]}
+            className="no-margin-form"
+          >
+            <InputComponent
+              label="Description"
+              type="textarea"
+              onChange={(e) => handleRelationshipObj(e.target.value, "description")}
+            />
+          </Form.Item>
+        </div>
+        {/* Modal Choose Related */}
+        <ModalChooseRelated
+          isOpen={modalChoose}
+          idAccount={idAccount}
+          relationshipType={selectedRelationType}
+          relationshipCategory={selectedRelationCategory}
+          handleCancel={() => setModalChoose(false)}
+          handleSelect={(selected) => {
+            // Handle different data structure based on source
+            const isCustomer = selected.source === "CUSTOMER";
+            const displayName = isCustomer ? selected.customerName : selected.accountName;
+            const displayNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
 
-          form.setFieldsValue({
-            relatedName: displayName,
-            relatedNumber: displayNumber,
-          });
+            form.setFieldsValue({
+              relatedName: displayName,
+              relatedNumber: displayNumber,
+            });
 
-          handleRelationshipObj(displayName, "relatedName");
-          handleRelationshipObj(displayNumber, "relatedNumber");
-          handleRelationshipObj(selected.objectId, "objectId");
-          handleRelationshipObj(displayName, "objectName");
-          handleRelationshipObj(displayNumber, "objectValue");
-        }}
-      />
+            handleRelationshipObj(displayName, "relatedName");
+            handleRelationshipObj(displayNumber, "relatedNumber");
+            handleRelationshipObj(selected.objectId, "objectId");
+            handleRelationshipObj(displayName, "objectName");
+            handleRelationshipObj(displayNumber, "objectValue");
+          }}
+        />
+      </NxPanel>
     </div>
   );
 };

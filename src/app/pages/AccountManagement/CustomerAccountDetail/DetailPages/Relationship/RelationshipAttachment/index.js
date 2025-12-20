@@ -4,6 +4,7 @@ import { useState } from "react";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
+import NxPanel from "../../../../../../../components/Nx/NxPanel";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../utils/previewFileAttachment";
 
@@ -15,6 +16,7 @@ const RelationshipAttachment = ({
   hideActions = false,
   showUploadButton = true,
   onDownload = () => { },
+  className = "",
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -126,43 +128,42 @@ const RelationshipAttachment = ({
   };
 
   return (
-    <div>
-      <h3 className="text-primary text-xs font-bold uppercase py-4">
-        ATTACHMENT
-      </h3>
-      <div className="flex flex-col w-full gap-2">
-        {showUploadButton && (
-          <div className="flex justify-between items-center mb-3">
-            <p className="text-[13px] mb-0 text-dg-grey-dark">
-              Attach File:
-            </p>
-            <div className="flex flex-row gap-2 items-center">
-              <ButtonComponent
-                size="small"
-                type="default"
-                onClick={() => setModalUpload(true)}
-              >
-                Choose File
-              </ButtonComponent>
-              <p className="text-[11px] text-dg-grey-dark mb-0">
-                {data.length === 0 ? "[No file choosen]" : ""}
+    <div className={className}>
+      <NxPanel title={"ATTACHMENT"} removeBottomMargin>
+        <div className="flex flex-col w-full gap-2">
+          {showUploadButton && (
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-[13px] mb-0 text-dg-grey-dark">
+                Attach File:
               </p>
+              <div className="flex flex-row gap-2 items-center">
+                <ButtonComponent
+                  size="small"
+                  type="default"
+                  onClick={() => setModalUpload(true)}
+                >
+                  Choose File
+                </ButtonComponent>
+                <p className="text-[11px] text-dg-grey-dark mb-0">
+                  {data.length === 0 ? "[No file choosen]" : ""}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="pt-[10px]">
-          <TablePagination
-            dataSource={data.slice((page - 1) * pageSize, page * pageSize)}
-            totalData={data?.length}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            onShowSizeChange={handleChange}
-            columns={columns}
-          />
+          <div className="pt-[10px]">
+            <TablePagination
+              dataSource={data.slice((page - 1) * pageSize, page * pageSize)}
+              totalData={data?.length}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              onShowSizeChange={handleChange}
+              columns={columns}
+            />
+          </div>
         </div>
-      </div>
+      </NxPanel>
     </div>
   );
 };
