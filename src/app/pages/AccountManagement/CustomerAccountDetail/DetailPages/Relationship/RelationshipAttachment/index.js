@@ -1,18 +1,21 @@
 import { EyeOutlined } from "@ant-design/icons";
-import { Tooltip } from "antd";
-import { useState } from "react";
+import { Tooltip, Spin } from "antd";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
 import NxPanel from "../../../../../../../components/Nx/NxPanel";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../utils/previewFileAttachment";
+import ModalAttachmentRelationship from "./ModalAttachmentRelationship";
 
 const RelationshipAttachment = ({
   data = [],
   updateData = () => { },
   type,
-  setModalUpload = () => { },
+  dispatch = () => { },
+  getAPICategory = () => { },
   hideActions = false,
   showUploadButton = true,
   onDownload = () => { },
@@ -20,6 +23,21 @@ const RelationshipAttachment = ({
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [modalUpload, setModalUpload] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+
+  // Get attachment category from Redux
+  const { data_attachmentCategory } = useSelector((state) => state.relationship);
+
+  useEffect(() => {
+    if (data_attachmentCategory && data_attachmentCategory.length > 0) {
+      const tempCategory = data_attachmentCategory.map((category) => ({
+        id: category.id,
+        text: category.text,
+      }));
+      setCategoryOptions(tempCategory);
+    }
+  }, [data_attachmentCategory]);
 
   const handleDelete = (record) => {
     updateData((prevState) => {
@@ -32,12 +50,17 @@ const RelationshipAttachment = ({
     if (r.dataType === "exist") {
       onDownload(r);
     } else {
-      if (r.fileType.includes("application/vnd")) {
+      if (r.fileType && r.fileType.includes("application/vnd")) {
         // FileSaver.saveAs(r.base64, r.fileName);
       } else {
         previewFileAttachment(r.base64);
       }
     }
+  };
+
+  const handleOpenModal = () => {
+    setModalUpload(true);
+    dispatch(getAPICategory());
   };
 
   const columns = [
@@ -51,9 +74,10 @@ const RelationshipAttachment = ({
     },
     {
       sorter: true,
-      title: "TYPE",
-      dataIndex: "type",
+      title: "CATEGORY",
+      dataIndex: "fileCategoryName",
       width: 180,
+      render: (val, record) => val || record.type || "-",
     },
     {
       sorter: true,
@@ -105,7 +129,8 @@ const RelationshipAttachment = ({
                   <SVGIcon
                     name="IconDelete"
                     width={18}
-                    className="cursor-pointer"
+                    className={r.dataType === "exist" ? "cursor-not-allowed" : "cursor-pointer"}
+                    color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
                     onClick={
                       r.dataType !== "exist"
                         ? () => handleDelete(r)
@@ -140,12 +165,12 @@ const RelationshipAttachment = ({
                 <ButtonComponent
                   size="small"
                   type="default"
-                  onClick={() => setModalUpload(true)}
+                  onClick={handleOpenModal}
                 >
                   Choose File
                 </ButtonComponent>
                 <p className="text-[11px] text-dg-grey-dark mb-0">
-                  {data.length === 0 ? "[No file choosen]" : ""}
+                  {data.length === 0 ? "[No file choosen]" : `${data.length} file(s) selected`}
                 </p>
               </div>
             </div>
@@ -163,9 +188,19 @@ const RelationshipAttachment = ({
             />
           </div>
         </div>
+
+        {/* Modal for attachment upload */}
+        <ModalAttachmentRelationship
+          openUpload={modalUpload}
+          updateData={updateData}
+          categoryOptions={categoryOptions}
+          handleCancel={() => setModalUpload(false)}
+          withLink
+        />
       </NxPanel>
     </div>
   );
 };
 
 export default RelationshipAttachment;
+

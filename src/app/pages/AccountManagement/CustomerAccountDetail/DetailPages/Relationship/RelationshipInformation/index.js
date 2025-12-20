@@ -155,11 +155,10 @@ const RelationshipInformation = ({
           {/* Row 2 - Col 3: End Date */}
           <Form.Item
             name="endDate"
-            rules={[{ message: requiredMessage("End Date"), required: true }]}
+            rules={[{ message: requiredMessage("End Date"), required: false }]}
             className="no-margin-form"
           >
             <DateComponent
-              mandatory
               label="End Date"
               onChange={(val) => handleRelationshipObj(val, "endDate")}
             />

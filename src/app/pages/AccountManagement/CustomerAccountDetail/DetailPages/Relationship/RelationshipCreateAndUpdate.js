@@ -65,6 +65,8 @@ const RelationshipCreateAndUpdate = ({
     data_attachmentList,
     data_approvalHierarchies,
     data_approvalHierarchyDetail,
+    data_relationshipType,
+    data_relationshipCategory,
     loadingApprovalHierarchies,
     loadingApprovalHierarchyDetail
   } = useSelector(
@@ -208,19 +210,42 @@ const RelationshipCreateAndUpdate = ({
         ...value,
         relationshipCategory: value?.relationshipCategory?.toString(),
         relationshipType: value?.relationshipType?.toString(),
-        ...(type === "create" && { action: isDraft ? "DRAFT" : "SUBMIT" }),
+        action: isDraft ? "DRAFT" : "SUBMIT",
       };
 
+      // Filter only new attachments (not existing ones)
+      const newAttachments = listDataAttachment.filter(a => a.dataType !== "exist");
+
       if (type === "create") {
-        await dispatch(createRelationship({ idAccount, payload })).unwrap();
+        await dispatch(createRelationship({
+          idAccount,
+          payload,
+          attachments: newAttachments
+        })).unwrap();
       } else {
         await dispatch(
-          updateRelationship({ idAccount, idRelationship: id, payload })
+          updateRelationship({
+            idAccount,
+            idRelationship: id,
+            payload,
+            attachments: newAttachments
+          })
         ).unwrap();
       }
 
       setLoading(false);
-      navigate(-1);
+      // Navigate back to Account Detail page after success
+      setTimeout(() => {
+        navigate(
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+          {
+            state: {
+              idAccount,
+              idCustomer,
+            }
+          }
+        );
+      }, 2000);
     } catch (error) {
       console.error("Error submitting data:", error);
       setLoading(false);
@@ -280,20 +305,32 @@ const RelationshipCreateAndUpdate = ({
     form
       .validateFields()
       .then((values) => {
+        // Get display names for type and category
+        const typeId = values.relationshipType || relationshipObj.relationshipType;
+        const categoryId = values.relationshipCategory || relationshipObj.relationshipCategory;
+
+        const typeName = data_relationshipType?.find(t => t.id === typeId)?.text || typeId;
+        const categoryName = data_relationshipCategory?.find(c => c.id === categoryId)?.text || categoryId;
+
         // Convert moment objects to strings
+        const startDateValue = values.startDate || relationshipObj.startDate;
+        const endDateValue = values.endDate || relationshipObj.endDate;
+
         const valueForm = {
           subjectId: idAccount,
-          relationshipType: values.relationshipType || relationshipObj.relationshipType,
-          relationshipCategory: values.relationshipCategory || relationshipObj.relationshipCategory,
+          relationshipType: typeId,
+          relationshipTypeName: typeName,
+          relationshipCategory: categoryId,
+          relationshipCategoryName: categoryName,
           objectId: relationshipObj.objectId,
           objectName: relationshipObj.objectName || values.relatedName,
           objectValue: relationshipObj.objectValue || values.relatedNumber,
-          startDate: (values.startDate || relationshipObj.startDate)
-            ? moment(values.startDate || relationshipObj.startDate).format("YYYY-MM-DD")
-            : "",
-          endDate: (values.endDate || relationshipObj.endDate)
-            ? moment(values.endDate || relationshipObj.endDate).format("YYYY-MM-DD")
-            : "",
+          relatedName: relationshipObj.objectName || values.relatedName,
+          relatedNumber: relationshipObj.objectValue || values.relatedNumber,
+          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+          startDateDisplay: startDateValue ? moment(startDateValue).format("DD MMM YYYY") : "-",
+          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+          endDateDisplay: endDateValue ? moment(endDateValue).format("DD MMM YYYY") : "-",
           description: values.description || relationshipObj.description || "",
           appHierId: values.appHierId || approvalObj.appHierId,
         };
@@ -345,7 +382,6 @@ const RelationshipCreateAndUpdate = ({
       "relatedName",
       "relatedNumber",
       "startDate",
-      "endDate",
     ],
     [
       "appHierId",
@@ -450,10 +486,8 @@ const RelationshipCreateAndUpdate = ({
           data={listDataAttachment}
           updateData={setListDataAttachment}
           type={type}
-          setModalUpload={setModalUpload}
-          onDownload={(file) =>
-            dispatch(downloadAttachment({ idAccount, idFile: file.key }))
-          }
+          dispatch={dispatch}
+          getAPICategory={() => getAttachmentCategory({ idAccount })}
           key={`relationship-tab-2`}
           className={`${current !== 2 ? "hidden" : ""}`}
         />
@@ -517,7 +551,15 @@ const RelationshipCreateAndUpdate = ({
               <ButtonComponent
                 type="submit"
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                onClick={() => navigate(-1)}
+                onClick={() => navigate(
+                  ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+                  {
+                    state: {
+                      idAccount,
+                      idCustomer,
+                    }
+                  }
+                )}
               >
                 Back
               </ButtonComponent>

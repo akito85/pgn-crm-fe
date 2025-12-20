@@ -300,13 +300,31 @@ export const toggleRelationshipStatus = createAsyncThunk(
 // Create Relationship
 export const createRelationship = createAsyncThunk(
   "CREATE_RELATIONSHIP",
-  async ({ idAccount, payload }, thunkAPI) => {
+  async ({ idAccount, payload, attachments = [] }, thunkAPI) => {
     try {
+      // 1. Create relationship first
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships/create`;
       const response = await accountManagementService.createData(url, payload);
+
+      // 2. Get ID from response
+      const { id } = response?.data || {};
+
+      // 3. Upload all attachments with refId
+      if (id && attachments.length > 0) {
+        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadPromises = attachments.map((attachment) =>
+          accountManagementService.uploadAttachment(uploadUrl, {
+            files: attachment.file,
+            category: attachment.fileCategoryId,
+            refId: id,
+          })
+        );
+        await Promise.all(uploadPromises);
+      }
+
       const successMessage = {
         title: "Successful",
-        description: "Relationship has been created successfully.",
+        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -319,7 +337,7 @@ export const createRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Failed to create relationship: ${message}`,
+        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
@@ -330,13 +348,28 @@ export const createRelationship = createAsyncThunk(
 // Update Relationship
 export const updateRelationship = createAsyncThunk(
   "UPDATE_RELATIONSHIP",
-  async ({ idAccount, idRelationship, payload }, thunkAPI) => {
+  async ({ idAccount, idRelationship, payload, attachments = [] }, thunkAPI) => {
     try {
+      // 1. Update relationship first
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}`;
       const response = await accountManagementService.updateData(url, payload);
+
+      // 2. Upload new attachments only (filter out existing ones)
+      if (attachments.length > 0) {
+        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadPromises = attachments.map((attachment) =>
+          accountManagementService.uploadAttachment(uploadUrl, {
+            files: attachment.file,
+            category: attachment.fileCategoryId,
+            refId: idRelationship,
+          })
+        );
+        await Promise.all(uploadPromises);
+      }
+
       const successMessage = {
         title: "Successful",
-        description: "Relationship has been updated successfully.",
+        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -349,7 +382,7 @@ export const updateRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Failed to update relationship: ${message}`,
+        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
