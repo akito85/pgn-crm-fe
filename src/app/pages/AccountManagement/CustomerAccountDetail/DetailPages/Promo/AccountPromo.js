@@ -271,12 +271,6 @@ const PromoHistoryViewData = ({
         width: 130,
       },
       {
-        title: "Criteria",
-        dataIndex: "criteria",
-        key: "criteria",
-        width: 150,
-      },
-      {
         title: "Billing Date",
         dataIndex: "billingDate",
         key: "billingDate",
