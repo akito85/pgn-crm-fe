@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import { Spin, Tooltip, Alert } from "antd";
+import { Spin, Tooltip, Alert, Menu, Dropdown } from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
-import TablePagination from "../../../../components/TablePagination";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 import {
   getApprovalHistory,
   getDownloadReceipt,
@@ -23,7 +23,7 @@ import {
 import ModalHoldReceipt from "./Table/ModalHoldReceipt";
 import ModalRefundReceipt from "./Table/ModalRefundReceipt";
 import ModalReleaseReceipt from "./Table/ModalReleaseReceipt";
-import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
+import { DownloadOutlined, WarningOutlined, DownOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -59,28 +59,14 @@ const ViewReceipt = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
 
-  // Handle row selection (Removed as per user request)
-  // const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
-  //   setSelectedRowKeys(newSelectedRowKeys);
-  //   setSelectedData(newSelectedRows);
-  // };
-
-  // const rowSelection = {
-  //   selectedRowKeys,
-  //   onChange: onSelectChange,
-  // };
-
   const handleHold = (record) => {
     if (record) {
       setSelectedData([record]);
-      setOpenModalHold(true);
     }
+    setOpenModalHold(true);
   };
 
   const handleSubmitHold = (data) => {
-    console.log("Submit Hold Data:", data);
-    // Here you would dispatch an action to save the hold status
-    // dispatch(holdReceipt(data))...
     setOpenModalHold(false);
     setSelectedRowKeys([]);
     setSelectedData([]);
@@ -92,9 +78,7 @@ const ViewReceipt = () => {
   };
 
   const handleSubmitRefund = (data) => {
-    console.log("Submit Refund Data:", data);
     setOpenModalRefund(false);
-    // dispatch action...
   };
 
   const handleRelease = () => {
@@ -102,8 +86,17 @@ const ViewReceipt = () => {
   };
 
   const handleSubmitRelease = (data) => {
-    console.log("Submit Release Data:", data);
     setOpenModalRelease(false);
+  };
+
+  const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+    setSelectedData(newSelectedRows);
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
   };
 
   // Breadcrumbs
@@ -163,7 +156,6 @@ const ViewReceipt = () => {
     });
   };
 
-  console.log(search);
   // handle change page
   const handleChange = (page, pageSize) => {
     setPage(page);
@@ -241,7 +233,6 @@ const ViewReceipt = () => {
   // handle close modal
   const handleCloseModalError = () => {
     setOpenModalDelete(false);
-    // setBodyError({});
   };
 
   const handleDownload = () => {
@@ -255,70 +246,52 @@ const ViewReceipt = () => {
     );
   };
 
+  const moreMenu = (
+    <Menu>
+      <Menu.Item key="Release" onClick={handleRelease}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconSend" color={"#000000"} width={16} />
+          <span>Release</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="Hold" onClick={() => handleHold(null)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconHold" color={"#000000"} width={16} />
+          <span>Hold</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="Refund" onClick={handleRefund}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconRefund" color={"#000000"} width={16} />
+          <span>Refund</span>
+        </div>
+      </Menu.Item>
+    </Menu>
+  );
+
   const itemActions = [
     // toolbar items
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Release",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconSend" color={"#ffffff"} width={24} />}
-          type="submit"
-          onClick={handleRelease}
-          disabled={false}
-        >
-          Release
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Hold",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconHold" color={"#ffffff"} width={24} />}
-          type="submit"
-          onClick={handleHold}
-        >
-          Hold
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Refund",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconRefund" color={"#ffffff"} width={22} />}
-          type="submit"
-          onClick={handleRefund}
-          disabled={false}
-        >
-          Refund
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "Create",
       render: (
-        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_RECEIPT}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
+        <React.Fragment>
+          <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_RECEIPT}>
+            <ButtonComponent
+              icon={<SVGIcon name="IconButtonCreate" width={24} />}
+              type="submit"
+            >
+              Create
+            </ButtonComponent>
+          </NavLink>
+          <Dropdown overlay={moreMenu} trigger={['click']}>
+            <ButtonComponent
+              type="filter" // Using filter type for secondary/white look often used
+              icon={<DownOutlined />}
+            >
+              More Actions
+            </ButtonComponent>
+          </Dropdown>
+        </React.Fragment>
       ),
     },
 
@@ -336,15 +309,6 @@ const ViewReceipt = () => {
               <div>
                 <SVGIcon name="IconDetail" width={24} />
               </div>
-              {/* <ButtonComponent
-                className="gap-5"
-                icon={<SVGIcon name="IconDetail" width={24} />}
-                border={false}
-              > */}
-              {/* <span className={"text-black gap-2 text-xl text-center"}>
-                  Detail
-                </span> */}
-              {/* </ButtonComponent> */}
             </Link>
           </Tooltip>
         );
@@ -357,8 +321,6 @@ const ViewReceipt = () => {
         return (
           <Tooltip title={"Update"}>
             <Link
-            // to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT}
-            // state={{ id: id }}
             >
               <ButtonComponent
                 className="gap-5"
@@ -366,9 +328,6 @@ const ViewReceipt = () => {
                 border={false}
                 disabled={true}
               >
-                <span className={"text-black gap-2 text-xl text-center"}>
-                  Update
-                </span>
               </ButtonComponent>
             </Link>
           </Tooltip>
@@ -389,9 +348,6 @@ const ViewReceipt = () => {
               border={false}
               disabled={true}
             >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Transfer
-              </span>
             </ButtonComponent>
           </Tooltip>
         );
@@ -410,9 +366,6 @@ const ViewReceipt = () => {
               border={false}
               disabled={true}
             >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Reverse
-              </span>
             </ButtonComponent>
           </Tooltip>
         );
@@ -431,9 +384,6 @@ const ViewReceipt = () => {
               border={false}
               disabled={true}
             >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Refund
-              </span>
             </ButtonComponent>
           </Tooltip>
         );
@@ -453,9 +403,6 @@ const ViewReceipt = () => {
               disabled={false}
               onClick={() => handleHold(r)}
             >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Hold
-              </span>
             </ButtonComponent>
           </Tooltip>
         );
@@ -468,8 +415,6 @@ const ViewReceipt = () => {
         return (
           <Tooltip title={"Release"}>
             <Link
-            // to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT}
-            // state={{ id: id }}
             >
               <ButtonComponent
                 className="gap-5"
@@ -477,9 +422,6 @@ const ViewReceipt = () => {
                 border={false}
                 disabled={true}
               >
-                <span className={"text-black gap-2 text-xl text-center"}>
-                  Release
-                </span>
               </ButtonComponent>
             </Link>
           </Tooltip>
@@ -499,9 +441,6 @@ const ViewReceipt = () => {
             border={false}
             onClick={() => handleModalApprovalHistory(record?.id)}
           >
-            <span className={"text-black gap-2 text-xl text-center"}>
-              Approval History
-            </span>
           </ButtonComponent>
         );
       },
@@ -515,12 +454,6 @@ const ViewReceipt = () => {
       if (bodyError?.action === "APPROVAL_HISTORY_RECEIPT") {
         dispatch(getApprovalHistory(body));
       }
-      // else if (bodyError?.action === "GET_APPROVAL_BANK") {
-      //   dispatch(getApprovalHistory(body));
-      // }
-      // else if (bodyError?.action === "DOWNLOAD_MASTER_BANK") {
-      //   handleDownload();
-      // }
       handleFetch();
     } catch (error) {
       handleFetch();
@@ -533,10 +466,10 @@ const ViewReceipt = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"receipt list"}>
+        <CardContainer header={"receipt list"}>
+          <Toolbar items={itemActions} />
           <div className="w-full">
-            <TablePagination
+            <TableRBI
               dataSource={dataSource}
               columns={[
                 ...columnsReceipt(
@@ -567,16 +500,19 @@ const ViewReceipt = () => {
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              onShowSizeChange={handleChange}
+              onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
               onSort={onSort}
               tableScrolled={{
-                x: 12500,
-                y: 2000,
+                x: 10000,
+                y: 500,
               }}
+              handleDownload={handleDownload} // For Export button in TableRBI
+              showExport={true}
+              rowSelection={rowSelection} // Added Row Selection
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Hold Receipt Modal */}
         <ModalHoldReceipt

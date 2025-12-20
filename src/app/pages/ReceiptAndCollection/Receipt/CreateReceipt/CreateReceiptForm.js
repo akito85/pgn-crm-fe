@@ -69,8 +69,8 @@ const CreateReceiptForm = ({
   };
 
   // handle change amount
-  const handleChangeAmount = (e) => {
-    setAmount(e?.target?.value);
+  const handleChangeAmount = (value) => {
+    setAmount(value);
   };
 
   // handleChange currency
