@@ -15,7 +15,6 @@ const RelationshipAttachment = ({
   updateData = () => { },
   type,
   dispatch = () => { },
-  getAPICategory = () => { },
   hideActions = false,
   showUploadButton = true,
   onDownload = () => { },
@@ -31,11 +30,18 @@ const RelationshipAttachment = ({
 
   useEffect(() => {
     if (data_attachmentCategory && data_attachmentCategory.length > 0) {
-      const tempCategory = data_attachmentCategory.map((category) => ({
-        id: category.id,
-        text: category.text,
-      }));
-      setCategoryOptions(tempCategory);
+      setCategoryOptions(prevOptions => {
+        // Only update if data has actually changed
+        const newOptions = data_attachmentCategory.map((category) => ({
+          id: category.id,
+          text: category.text,
+        }));
+        // Simple check to avoid unnecessary updates
+        if (JSON.stringify(prevOptions) !== JSON.stringify(newOptions)) {
+          return newOptions;
+        }
+        return prevOptions;
+      });
     }
   }, [data_attachmentCategory]);
 
@@ -60,7 +66,6 @@ const RelationshipAttachment = ({
 
   const handleOpenModal = () => {
     setModalUpload(true);
-    dispatch(getAPICategory());
   };
 
   const columns = [

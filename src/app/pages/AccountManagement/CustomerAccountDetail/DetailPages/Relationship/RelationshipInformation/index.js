@@ -19,6 +19,8 @@ const RelationshipInformation = ({
   relationshipObj = {},
   handleRelationshipObj = () => { },
   className = "",
+  initialRelationshipType = null,
+  initialRelationshipCategory = null,
 }) => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -39,6 +41,21 @@ const RelationshipInformation = ({
       dispatch(getRelationshipCategory({ idAccount }));
     }
   }, [dispatch, idAccount]);
+
+  // Set selected values from initial props (for update mode)
+  useEffect(() => {
+    if (initialRelationshipType && data_relationshipType?.length > 0) {
+      const typeObj = data_relationshipType.find(t => t.id === initialRelationshipType);
+      setSelectedRelationType(typeObj?.text || initialRelationshipType);
+    }
+  }, [initialRelationshipType, data_relationshipType]);
+
+  useEffect(() => {
+    if (initialRelationshipCategory && data_relationshipCategory?.length > 0) {
+      const catObj = data_relationshipCategory.find(c => c.id === initialRelationshipCategory);
+      setSelectedRelationCategory(catObj?.text || initialRelationshipCategory);
+    }
+  }, [initialRelationshipCategory, data_relationshipCategory]);
 
   return (
     <div className={className}>

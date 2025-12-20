@@ -34,17 +34,32 @@ const ModalAttachmentRelationship = ({
     const [dataGuard, setDataGuard] = useState({});
 
     useEffect(() => {
-        const tempFileExt = (valueGuard?.fileExt || "")
-            .split(",")
-            .reduce((prev, current, index) => {
-                return `.${current}${index !== 0 ? ", " : ""}${prev}`;
-            }, "");
-        const tempSize = parseInt(valueGuard?.size || "0") * 1000000;
-        setDataGuard({
-            fileExt: tempFileExt === "." ? ExtensionFile : tempFileExt,
-            size: tempSize || MAX_FILE_SIZE,
+        // Only update if valueGuard values actually changed
+        const fileExtValue = valueGuard?.fileExt || "";
+        const sizeValue = valueGuard?.size || "0";
+
+        setDataGuard(prev => {
+            const tempFileExt = fileExtValue
+                .split(",")
+                .reduce((prevVal, current, index) => {
+                    return `.${current}${index !== 0 ? ", " : ""}${prevVal}`;
+                }, "");
+            const tempSize = parseInt(sizeValue) * 1000000;
+
+            const newFileExt = tempFileExt === "." ? ExtensionFile : tempFileExt;
+            const newSize = tempSize || MAX_FILE_SIZE;
+
+            // Only update if values actually changed
+            if (prev.fileExt === newFileExt && prev.size === newSize) {
+                return prev;
+            }
+
+            return {
+                fileExt: newFileExt,
+                size: newSize,
+            };
         });
-    }, [valueGuard]);
+    }, [valueGuard?.fileExt, valueGuard?.size]);
 
     const getFileExtension = (file) => {
         return file.slice(((file.lastIndexOf(".") - 1) >>> 0) + 2)?.toLowerCase();
@@ -73,6 +88,34 @@ const ModalAttachmentRelationship = ({
             return updatedFileList;
         });
     };
+
+    // Memoized beforeUpload handler - moved outside property object to prevent recreation
+    const handleBeforeUpload = useCallback(
+        async (file) => {
+            const base64 = await getBase64(file);
+            const file_extension = getFileExtension(file?.name);
+            if (dataGuard.fileExt && dataGuard.fileExt.includes(file_extension)) {
+                setFileList((prevState) => {
+                    const res = {
+                        file: file,
+                        size: file.size,
+                        fileName: file.name,
+                        fileSize: bytesConverter(file.size),
+                        fileType: file.type,
+                        fileStatus: file.status,
+                        percent: 100,
+                        dataType: "new",
+                        base64: base64,
+                    };
+                    return [...prevState, res];
+                });
+                setSubmit(true);
+            }
+            return false;
+        },
+        [dataGuard.fileExt]
+    );
+
     const property = {
         name: "file",
         multiple: true,
@@ -80,31 +123,7 @@ const ModalAttachmentRelationship = ({
         showUploadList: false,
         accept: dataGuard.fileExt,
         disabled: !category,
-        beforeUpload: useCallback(
-            async (file) => {
-                const base64 = await getBase64(file);
-                const file_extension = getFileExtension(file?.name);
-                if (dataGuard.fileExt.includes(file_extension)) {
-                    setFileList((prevState) => {
-                        const res = {
-                            file: file,
-                            size: file.size,
-                            fileName: file.name,
-                            fileSize: bytesConverter(file.size),
-                            fileType: file.type,
-                            fileStatus: file.status,
-                            percent: 100,
-                            dataType: "new",
-                            base64: base64,
-                        };
-                        return [...prevState, res];
-                    });
-                    setSubmit(true);
-                }
-                return false;
-            },
-            [category]
-        ),
+        beforeUpload: handleBeforeUpload,
     };
 
     const handleUpload = (value) => {

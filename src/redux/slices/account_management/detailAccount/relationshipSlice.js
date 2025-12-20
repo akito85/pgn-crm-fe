@@ -760,7 +760,8 @@ const relationshipSlice = createSlice({
       state.loading = true;
     },
     [getAttachmentList.fulfilled]: (state, action) => {
-      state.data_attachmentList = action.payload?.data?.result || [];
+      const payload = action.payload;
+      state.data_attachmentList = payload?.data?.result || payload?.result || payload || [];
       state.loading = false;
     },
     [getAttachmentList.rejected]: (state) => {

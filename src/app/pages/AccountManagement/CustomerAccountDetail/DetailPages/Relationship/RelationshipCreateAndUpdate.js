@@ -21,6 +21,7 @@ import {
   getApprovalHierarchyDetail,
   getAttachmentCategory,
   getAttachmentList,
+  getRelationshipDetail,
   updateRelationship
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,6 +68,8 @@ const RelationshipCreateAndUpdate = ({
     data_approvalHierarchyDetail,
     data_relationshipType,
     data_relationshipCategory,
+    data_relationshipDetail,
+    loadingDetail,
     loadingApprovalHierarchies,
     loadingApprovalHierarchyDetail
   } = useSelector(
@@ -113,27 +116,66 @@ const RelationshipCreateAndUpdate = ({
     }
     if (type === "update" && id) {
       dispatch(getAttachmentList({ idAccount, idRelationship: id }));
-    }
-    if (obj && obj.id && type === "update") {
-      form.setFieldsValue({
-        relationshipType: 1,
-        relationshipCategory: 1,
-        relatedName: 1,
-        relatedNumber: 1,
-      });
+      dispatch(getRelationshipDetail({ idAccount, idRelationship: id }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [obj, type, idAccount, id]);
+  }, [type, idAccount, id]);
+
+  // Populate form and relationshipObj when data_relationshipDetail is loaded (update mode)
+  useEffect(() => {
+    if (data_relationshipDetail && data_relationshipDetail.id && type === "update") {
+      const detail = data_relationshipDetail;
+
+      // Set form values
+      form.setFieldsValue({
+        relationshipType: detail.relationshipType,
+        relationshipCategory: detail.relationshipCategory,
+        relatedName: detail.objectName,
+        relatedNumber: detail.objectNumber,
+        startDate: detail.startDate ? moment(detail.startDate) : null,
+        endDate: detail.endDate ? moment(detail.endDate) : null,
+        description: detail.description || "",
+        appHierId: detail.appHierId,
+      });
+
+      // Set relationshipObj for submit
+      setRelationshipObj({
+        objectId: detail.objectId,
+        objectName: detail.objectName,
+        objectValue: detail.objectNumber,
+        relationshipType: detail.relationshipType,
+        relationshipCategory: detail.relationshipCategory,
+        startDate: detail.startDate,
+        endDate: detail.endDate,
+        description: detail.description,
+      });
+
+      // Set approvalObj
+      setApprovalObj({
+        appHierId: detail.appHierId,
+      });
+
+      // Load approval hierarchy detail if appHierId exists
+      if (detail.appHierId) {
+        dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
+      }
+    }
+  }, [data_relationshipDetail, type, form, idAccount, dispatch]);
 
   useEffect(() => {
-    if (data_attachmentList && type === "update") {
+    if (data_attachmentList && data_attachmentList.length > 0 && type === "update") {
       const mapped = data_attachmentList.map((item) => ({
         key: item.id,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
         type: item.fileCategoryName,
         fileName: item.fileName,
         fileSize: item.fileSize,
-        dataType: "exist",
         fileType: item.fileType,
+        urlFile1: item.urlFile1,
+        createdBy: item.createdBy,
+        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
+        dataType: "exist",
       }));
       setListDataAttachment(mapped);
     }
@@ -456,6 +498,8 @@ const RelationshipCreateAndUpdate = ({
           form={form}
           relationshipObj={relationshipObj}
           handleRelationshipObj={handleRelationshipObj}
+          initialRelationshipType={data_relationshipDetail?.relationshipType}
+          initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
           key={`relationship-tab-0`}
           className={`${current !== 0 ? "hidden" : ""}`}
         />
@@ -487,7 +531,6 @@ const RelationshipCreateAndUpdate = ({
           updateData={setListDataAttachment}
           type={type}
           dispatch={dispatch}
-          getAPICategory={() => getAttachmentCategory({ idAccount })}
           key={`relationship-tab-2`}
           className={`${current !== 2 ? "hidden" : ""}`}
         />
@@ -510,7 +553,7 @@ const RelationshipCreateAndUpdate = ({
   return (
     <>
       <LayoutMenu>
-        <Spin spinning={loading}>
+        <Spin spinning={loading || loadingDetail}>
           <BreadCrumb routes={routes} />
           <div className="w-full">
             <HeaderDetail
