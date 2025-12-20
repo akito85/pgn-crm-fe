@@ -11,7 +11,10 @@ const ModalCustom = (props) => {
     width,
     type,
     footer = [],
-    centered = true
+    centered = true,
+    closable,
+    title,
+    maxHeight,
   } = props;
 
   const typeModal = (type) => {
@@ -86,6 +89,9 @@ const ModalCustom = (props) => {
       centered={centered}
       width={width}
       maskClosable={false}
+      closable={closable}
+      title={title}
+      maxHeight={maxHeight}
     >
       {typeModal(type)}
     </Modal>
