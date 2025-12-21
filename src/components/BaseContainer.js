@@ -34,8 +34,8 @@ const BaseContainer = ({
           </div>
         </>
       )}
-      {type === "tabs" && <div className="p-0">{element}</div>}
-      <div className="p-0">{children}</div>
+      {type === "tabs" && <div className="p-4">{element}</div>}
+      <div className="p-4">{children}</div>
     </div>
   );
 };
