@@ -208,9 +208,9 @@ export const fetchPromoHistoryList = createAsyncThunk(
 
 export const fetchPromoHistoryDetail = createAsyncThunk(
   'promo/fetchPromoHistoryDetail',
-  async (invoiceNumber, { rejectWithValue }) => {
+  async ({ billingCode, accountId }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getDetailPromoHistoryById(invoiceNumber);
+      const response = await promoService.getDetailPromoHistoryById(billingCode, accountId);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

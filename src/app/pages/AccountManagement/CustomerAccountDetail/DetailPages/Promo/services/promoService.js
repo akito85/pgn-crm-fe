@@ -225,11 +225,12 @@ export const promoService = {
   },
 
   /**
-   * Get detail of promo history by invoice number
+   * Get detail of promo history by billing code
    */
-  async getDetailPromoHistoryById(invoiceNumber) {
+  async getDetailPromoHistoryById(billingCode, accountId) {
     try {
-      const response = await promoRepository.getDetailPromoHistoryById(invoiceNumber);
+      console.log('Service layer - billingCode:', billingCode, 'accountId:', accountId);
+      const response = await promoRepository.getDetailPromoHistoryById(billingCode, accountId);
       return response;
     } catch (error) {
       console.error('Error fetching promo history detail:', error);

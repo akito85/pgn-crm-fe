@@ -181,8 +181,8 @@ export const usePromo = () => {
    * Load promo history detail
    */
   const loadPromoHistoryDetail = useCallback(
-    (invoiceNumber) => {
-      dispatch(fetchPromoHistoryDetail(invoiceNumber));
+    (billingCode, accountId) => {
+      dispatch(fetchPromoHistoryDetail({ billingCode, accountId }));
     },
     [dispatch]
   );

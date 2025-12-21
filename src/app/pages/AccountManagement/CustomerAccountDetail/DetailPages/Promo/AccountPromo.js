@@ -60,7 +60,6 @@ const PromoViewData = ({
   // Handle view detail - fetch detail from API
   const handleViewDetail = (record) => {
     if (record?.id) {
-      console.log('Fetching detail for promo ID:', record.id);
       loadValidPromoDetail(record.id);
     }
   };
@@ -95,7 +94,6 @@ const PromoViewData = ({
   // Update detail promo data when validPromoDetail changes and open modal
   useEffect(() => {
     if (validPromoDetail?.data?.data && !validPromoDetail.loading) {
-      console.log('Setting detail promo data:', validPromoDetail.data.data);
       setDetailPromoData(validPromoDetail.data.data);  // Access nested data
       // Open modal only after data is loaded
       setIsModalPromoVisible(true);
@@ -249,8 +247,8 @@ const PromoHistoryViewData = ({
   // Handle view detail - fetch detail from API
   const handleViewDetail = (record) => {
     if (record?.billingCode) {
-      console.log('Fetching detail for billing code:', record.billingCode);
-      loadPromoHistoryDetail(record.billingCode);
+      console.log('Fetching detail for billing code:', record.billingCode, 'accountId:', accountId);
+      loadPromoHistoryDetail(record.billingCode, accountId);
     }
   };
 
@@ -524,9 +522,6 @@ const formatDate = (dateString) => {
 };
 
 const renderLabelDataValue = (label, value) => {
-
-  console.log(`Rendering label-value pair: ${label} - ${value}`);
-
   return (
     <Space direction="vertical" size={"small"}>
       <strong>{label}</strong>

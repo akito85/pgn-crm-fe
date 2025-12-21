@@ -366,17 +366,29 @@ const promoRepository = {
   },
 
   /**
-   * Get detail of promo history by invoice number
-   * GET /v1/dbs/api/promo/history/{invoiceNumber}
-   * @param {string} invoiceNumber - Invoice number
+   * Get detail of promo history by billing code
+   * GET /v1/dbs/api/promo/history/{billingCode}?accountId={accountId}
+   * @param {string} billingCode - Billing code
+   * @param {string} accountId - Account ID
    */
-  getDetailPromoHistoryById: async (invoiceNumber) => {
+  getDetailPromoHistoryById: async (billingCode, accountId) => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/history/${invoiceNumber}`, {
+      console.log('API Call - billingCode:', billingCode, 'accountId:', accountId);
+
+      const config = {
         headers: tokenHeader(),
-      });
+        params: {}
+      };
+
+      if (accountId) {
+        config.params.accountId = accountId;
+      }
+
+      console.log('API Config:', config);
+      const response = await axios.get(`${BASE_URL}${API_PATH}/history/${billingCode}`, config);
       return response?.data;
     } catch (error) {
+      console.error('API Error:', error);
       throw error;
     }
   },
