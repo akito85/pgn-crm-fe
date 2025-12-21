@@ -46,10 +46,14 @@ const getDetailByIdBody = async (url, id) => {
     throw error;
   }
 };
-const downloadData = async (url) => {
+const downloadData = async (url, options) => {
+  const { headers = {} } = options;
   try {
     const response = await axios.get(configApp.ACCOUNT_SERVICE + url, {
-      headers: tokenHeader(),
+      headers: {
+        ...headers,
+        ...tokenHeader(),
+      },
       responseType: "blob",
     });
     if(hasValue(response.headers?.get("content-disposition"))){
@@ -96,10 +100,15 @@ const updateData = async (url, data) => {
   }
 };
 
-const updateDataWithMethodPost = async (url, data) => {
+const updateDataWithMethodPost = async (url, data, options) => {
+  const { headers = {} } = options;
+
   try {
     const response = await axios.post(configApp.ACCOUNT_SERVICE + url, data, {
-      headers: tokenHeader(),
+      headers: {
+        ...headers,
+        ...tokenHeader(),
+      }
     });
     return response?.data;
   } catch (error) {
@@ -118,10 +127,15 @@ const deleteData = async (url) => {
   }
 };
 
-const activationWithRemark = async (url, body) => {
+const activationWithRemark = async (url, body, opt = {}) => {
+  const headers = opt.headers;
+
   try {
     const response = await axios.post(configApp.ACCOUNT_SERVICE + url, body, {
-      headers: tokenHeader(),
+      headers: {
+        ...tokenHeader(),
+        ...headers,
+      },
     });
     return response?.data;
   } catch (error) {

@@ -2,7 +2,7 @@ import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
 import React, { useEffect } from "react";
 import AccountInformation from "./DetailPages/AccountInformation/AccountInformation";
 import LastActivity from "./DetailPages/LastActivity";
-import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
+// import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
 import RadioTabs from "../../../../components/RadioTabs";
 import DistributionMedia from "./DetailPages/DistributionMedia/DistributionMedia";
 import GasSourceInformation from "./DetailPages/GasSource/GasSourceInformation";
@@ -20,6 +20,9 @@ import EquipmentPage from "./DetailPages/Equipment/Equipment";
 import ProductDistribution from "./DetailPages/ProductDistribution/ProductDistribution";
 import RawMaterialSource from "./DetailPages/RawMaterialSource/RawMaterialSource";
 import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
+import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
+import { Switch } from "antd";
+import AccountPromo from "./DetailPages/Promo/AccountPromo";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -44,21 +47,26 @@ const dataTabs = {
   pd: "Product Distribution",
   ras: "Raw Material Source",
   gu: "Gas Utilization",
+  promo: "Promo",
 };
 const AccountDetailInformation = ({
   id = 0,
   section = "",
   options = [],
   handleChangeOption = () => {},
+  idAccount = 0,
   idCustomer = 0,
   type = "",
   setTypeAccountInfoDetailSection = () => {},
   dispatch,
   // handleChangeInteraction = () => {},
+  isApproval = false,
+  setIsApproval = () => {},
+  setShowApprovalButton = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
 }) => {
   const { path } = usePrevLocContext();
-  console.log(path);
-
   // useEffect(() => {
   //   switch (section) {
   //     case dataTabs.adi:
@@ -178,7 +186,32 @@ const AccountDetailInformation = ({
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.ras);
-    } else {
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/update"
+        ) 
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.fi);
+    }
+    else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     }
   }, [path]);
@@ -233,7 +266,8 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.sr:
-        return <ServiceRequest />;
+        return <></>;
+        // return <ServiceRequest />;
       case dataTabs.dm:
         return (
           <DistributionMedia
@@ -259,7 +293,17 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.fi:
-        return <FinancialInformation id={id} />;
+        return (
+          <FinancialInformation
+            id={id}
+            idCustomer={idCustomer}
+            isApproval={isApproval}
+            setIsApproval={setIsApproval}
+            setShowApprovalButton={setShowApprovalButton}
+            submitApprovalCondition={submitApprovalCondition}
+            setSubmitApprovalCondition={setSubmitApprovalCondition}
+          />
+        )
       case dataTabs.accountAddress:
         return <AccountAddress id={id} idCustomer={idCustomer} type={type} />;
       case dataTabs.accountContact:
@@ -276,7 +320,8 @@ const AccountDetailInformation = ({
         return (
           <Relationship
             id={id}
-            // handleChangeInteraction={handleChangeInteraction}
+            type={type}
+            idCustomer={idCustomer}
           />
         );
       case dataTabs.adi:
@@ -298,6 +343,8 @@ const AccountDetailInformation = ({
         return (
           <GasUtilization idAccount={id} idCustomer={idCustomer} type={type} />
         );
+      case dataTabs.promo:
+        return <AccountPromo id={id} />;
       default:
         return <></>;
     }

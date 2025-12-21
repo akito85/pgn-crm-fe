@@ -43,7 +43,7 @@ const QueryParams = ({
           {...restField}
           label={"Condition"}
           name={[name, "condition"]}
-          rules={[{ message: requiredMessage("condition"), required: true }]}
+          rules={index === 0 ? [] : [{ message: requiredMessage("condition"), required: true }]}
         >
           <SelectComponent
             // value={index === 0 ? 1311 : null}

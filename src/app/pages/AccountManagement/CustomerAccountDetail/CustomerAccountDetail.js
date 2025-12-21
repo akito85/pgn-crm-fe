@@ -26,10 +26,11 @@ const data = [
   { value: "Financial Information" }, //
   { value: "Premise" },
   { value: "Service Agreement" },
+  { value: "Relationship" },
   { value: "Gas Source" },
   { value: "Gas Deposit", disabled: true },
   { value: "Compensation", disabled: true },
-  { value: "Promo", disabled: true },
+  { value: "Promo", disabled: false },
   { value: "Multi Destination", disabled: true },
   { value: "Additional Information", disabled: true  },
   { value: "Gas Utilization", disabled: true  },
@@ -52,6 +53,9 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
 
   //state
   const [tabs, setTabs] = useState([]);
+  const [isApproval, setIsApproval] = useState(false);
+  const [showApprovalButton, setShowApprovalButton] = useState(false);
+  const [submitApprovalCondition, setSubmitApprovalCondition] = useState("");
 
   useEffect(() => {
     if (type != "standard") {
@@ -63,6 +67,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             item.value === "Account Contact" ||
             item.value === "Distribution Media" ||
             item.value === "Financial Information" ||
+            item.value === "Relationship" ||
             item.value === "Last Activity" ||
             item.value === "Billing" ||
             item.value === "Receipt" ||
@@ -80,6 +85,10 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
     useState(section || data[0].value);
 
   const handleAccountInfoDetailSection = (e) => {
+    console.log("e.target.value", e.target.value);
+    console.log("typeAccountInfoDetailSection", typeAccountInfoDetailSection);
+    console.log("section", section);
+    console.log("data", data);
     setTypeAccountInfoDetailSection(e.target.value);
   };
 
@@ -130,21 +139,18 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               type={type}
               setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
               dispatch = {dispatch}
+              isApproval={isApproval}
+              setIsApproval={setIsApproval}
+              setShowApprovalButton={setShowApprovalButton}
+              submitApprovalCondition={submitApprovalCondition}
+              setSubmitApprovalCondition={setSubmitApprovalCondition}
               // handleChangeInteraction={handleSetType}
             />
-            <div className="my-5 flex">
-              <Link
-                to={
-                  type === "standard"
-                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                }
-              >
+            <div className="my-5 flex justify-between">
+              {isApproval ? (
                 <ButtonComponent
                   type={"submit"}
-                  // onClick={() => {
-                  //   navigate(-1)
-                  // }}
+                  onClick={() => setIsApproval(false)}
                   icon={
                     <LeftOutlined
                       style={{
@@ -157,12 +163,57 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 >
                   Back
                 </ButtonComponent>
-              </Link>
+              ) : (
+                <Link
+                  to={
+                    type === "standard"
+                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
+                  }
+                >
+                  <ButtonComponent
+                    type={"submit"}
+                    // onClick={() => {
+                    //   navigate(-1)
+                    // }}
+                    icon={
+                      <LeftOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 24,
+                          justifyItems: "center",
+                        }}
+                      />
+                    }
+                  >
+                    Back
+                  </ButtonComponent>
+                </Link>
+              )}
+
+              {showApprovalButton && (
+              <div className={"w-full flex justify-end gap-5"}>
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => setSubmitApprovalCondition("reject")}
+                  disabled={!!submitApprovalCondition}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => setSubmitApprovalCondition("approve")}
+                  disabled={!!submitApprovalCondition}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            )}
             </div>
           </div>
           {/* ) : (
-           <UpdatePageInformation 
-          type={type} 
+           <UpdatePageInformation
+          type={type}
           handleChangeInteraction={handleSetType}
           />
         )} */}
