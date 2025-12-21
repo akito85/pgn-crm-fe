@@ -268,7 +268,7 @@ const CriteriaAndCondition = ({
   useEffect(() => {
     if (promoId && selectedTab === 'criteria') {
       loadPromoCriteriaList({
-        page: 0,
+        page: 1,
         size: 10,
         promoId,
         sort: 'createdDate~desc'
@@ -280,7 +280,7 @@ const CriteriaAndCondition = ({
   useEffect(() => {
     if (promoId && selectedTab === 'conditions') {
       loadPromoConditionList({
-        page: 0,
+        page: 1,
         size: 10,
         promoId,
         sort: 'createdDate~desc'
@@ -390,34 +390,48 @@ const CriteriaAndCondition = ({
     setIsVisible(true);
   };
 
-  const handleCriteriaTableChange = (paginationParams) => {
-    const { current, pageSize } = paginationParams;
+  const handleCriteriaTableChange = (current, pageSize) => {
     if (promoId) {
+      const advancedSearch = {
+        inputFields: criteriaActiveFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
       loadPromoCriteriaList({
-        page: current - 1,
+        page: current,
         size: pageSize,
         promoId,
         sort: 'createdDate~desc'
-      });
+      }, advancedSearch);
     }
   };
 
-  const handleConditionTableChange = (paginationParams) => {
-    const { current, pageSize } = paginationParams;
+  const handleConditionTableChange = (current, pageSize) => {
     if (promoId) {
+      const advancedSearch = {
+        inputFields: conditionActiveFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
       loadPromoConditionList({
-        page: current - 1,
+        page: current,
         size: pageSize,
         promoId,
         sort: 'createdDate~desc'
-      });
+      }, advancedSearch);
     }
   };
 
   const handleDownloadCriteria = async () => {
     if (promoId) {
       const params = {
-        page: criteriaPagination.current - 1,
+        page: criteriaPagination.current,
         size: criteriaPagination.pageSize,
         promoId,
       };
@@ -438,7 +452,7 @@ const CriteriaAndCondition = ({
   const handleDownloadCondition = async () => {
     if (promoId) {
       const params = {
-        page: conditionPagination.current - 1,
+        page: conditionPagination.current,
         size: conditionPagination.pageSize,
         promoId,
       };
@@ -476,7 +490,7 @@ const CriteriaAndCondition = ({
 
       loadPromoCriteriaList(
         {
-          page: 0,
+          page: 1,
           size: criteriaPagination.pageSize,
           promoId,
           sort: 'createdDate~desc'
@@ -506,7 +520,7 @@ const CriteriaAndCondition = ({
 
       loadPromoConditionList(
         {
-          page: 0,
+          page: 1,
           size: conditionPagination.pageSize,
           promoId,
           sort: 'createdDate~desc'

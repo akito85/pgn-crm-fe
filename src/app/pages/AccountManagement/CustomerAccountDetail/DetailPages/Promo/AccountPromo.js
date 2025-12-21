@@ -70,7 +70,7 @@ const PromoViewData = ({
   useEffect(() => {
     // Load promo list on mount with accountId
     if (accountId) {
-      loadValidPromoList({ page: 0, size: 10, accountId, sort: 'id~desc' });
+      loadValidPromoList({ page: 1, size: 10, accountId, sort: 'id~desc' });
     }
   }, [accountId, loadValidPromoList]);
 
@@ -120,7 +120,7 @@ const PromoViewData = ({
     if (accountId) {
       try {
         const params = {
-          page: pagination.current - 1,
+          page: pagination.current,
           size: pagination.pageSize,
           accountId: accountId,
         };
@@ -143,9 +143,7 @@ const PromoViewData = ({
     }
   };
 
-  const handleTableChange = (paginationParams) => {
-    const { current, pageSize } = paginationParams;
-
+  const handleTableChange = (current, pageSize) => {
     if (accountId) {
       const advancedSearch = {
         inputFields: activeFilters.map(q => ({
@@ -155,9 +153,9 @@ const PromoViewData = ({
           value: q.value || ""
         }))
       };
-      // API uses 0-based page index
+      // API uses 1-based page index (same as PaymentRelation)
       loadValidPromoList({
-        page: current - 1,
+        page: current,
         size: pageSize,
         accountId,
         sort: 'id~desc'
@@ -185,7 +183,7 @@ const PromoViewData = ({
 
       loadValidPromoList(
         {
-          page: 0,
+          page: 1,
           size: pagination.pageSize,
           accountId,
           sort: 'id~desc'
@@ -276,7 +274,7 @@ const PromoHistoryViewData = ({
   useEffect(() => {
     // Load promo history on mount with customerId
     if (accountId) {
-      loadPromoHistoryList({ page: 0, size: 10, accountId, sort: 'id~desc' });
+      loadPromoHistoryList({ page: 1, size: 10, accountId, sort: 'id~desc' });
     }
   }, [accountId, loadPromoHistoryList]);
 
@@ -323,7 +321,7 @@ const PromoHistoryViewData = ({
     if (accountId) {
       try {
         const params = {
-          page: pagination.current - 1,
+          page: pagination.current,
           size: pagination.pageSize,
           accountId: accountId,
         };
@@ -346,9 +344,7 @@ const PromoHistoryViewData = ({
     }
   };
 
-  const handleTableChange = (paginationParams) => {
-    const { current, pageSize } = paginationParams;
-
+  const handleTableChange = (current, pageSize) => {
     if (accountId) {
       const advancedSearch = {
         inputFields: activeFilters.map(q => ({
@@ -359,7 +355,7 @@ const PromoHistoryViewData = ({
         }))
       };
       loadPromoHistoryList({
-        page: current - 1,
+        page: current,
         size: pageSize,
         accountId,
         sort: 'id~desc'
@@ -387,7 +383,7 @@ const PromoHistoryViewData = ({
 
       loadPromoHistoryList(
         {
-          page: 0,
+          page: 1,
           size: pagination.pageSize,
           accountId,
           sort: 'id~desc'

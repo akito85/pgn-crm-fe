@@ -310,7 +310,7 @@ export const transformValidPromoResponse = (apiResponse) => {
 
   // Transform pagination
   const pagination = {
-    current: (page.number || 0) + 1, // API uses 0-based index
+    current: (page.number || 0) + 1, // API returns 0-based, convert to 1-based for UI
     pageSize: page.size || 10,
     total: page.totalElements || 0,
     totalPages: page.totalPages || 0,
@@ -531,7 +531,7 @@ export const transformPromoHistoryResponse = (apiResponse) => {
 
   // Transform pagination
   const pagination = {
-    current: (page.number || 0) + 1, // API uses 0-based index
+    current: (page.number || 0) + 1, // API returns 0-based, convert to 1-based for UI
     pageSize: page.size || 10,
     total: page.totalElements || 0,
     totalPages: page.totalPages || 0,
