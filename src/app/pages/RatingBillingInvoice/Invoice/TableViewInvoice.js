@@ -514,7 +514,7 @@ export const columnsInvoice = (
       title: "TAX RATE",
       sorter: true,
       isNumber: true,
-      width: 150,
+      width: 100,
       dataIndex: "taxRate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -873,10 +873,48 @@ export const columnsInvoice = (
         ),
     },
     {
+      key: "remarkPaymentGw",
+      sorter: true,
+      title: "REMARK PAYMENT GW",
+      dataIndex: "remarkPaymentGw",
+      width: 250,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(search, "remark"),
+      render: (text) =>
+        renderColumn(
+          "remarkPaymentGw",
+          hasValue(search["remarkPaymentGw"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "statusPaymentGw",
+      title: "STATUS PAYMENT GW",
+      dataIndex: "statusPaymentGw",
+      width: 150,
+      isClassification: true,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusPaymentGw",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) => <StatusComponent colour={text}>{text}</StatusComponent>,
+    },
+    {
       key: "status",
       title: "STATUS",
       dataIndex: "status",
-      width: 150,
+      width: 100,
       isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(

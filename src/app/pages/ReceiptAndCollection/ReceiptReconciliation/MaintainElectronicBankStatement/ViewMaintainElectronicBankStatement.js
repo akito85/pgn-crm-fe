@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import {
-  DownloadOutlined,
+  EyeOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -20,11 +20,13 @@ import {
 import { getEceletricBankPaging } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 // import { getColumnSearchProps } from "../../../../../utils/getColumnSearchPropsPaging";
 import { getDownloadBankStatement } from "../../../../../redux/slices/receipt_collection/bankSlice";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../components/Toolbar";
+
+
 
 const ViewMaintainElectronicBankStatement = () => {
   // Selector
@@ -61,6 +63,7 @@ const ViewMaintainElectronicBankStatement = () => {
   const columnsStatement = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -68,6 +71,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "BANK NAME",
       dataIndex: "bankName",
+      key: "bankName",
       align: "left",
       sorter: true,
       ellipsis: {
@@ -96,6 +100,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "BANK ACCOUNT NUMBER",
       dataIndex: "bankAccountNumber",
+      key: "bankAccountNumber",
       align: "left",
       sorter: true,
       ellipsis: {
@@ -124,6 +129,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "COLLECTING AGENT",
       dataIndex: "collectingAgent",
+      key: "collectingAgent",
       align: "left",
       sorter: true,
       ellipsis: {
@@ -152,6 +158,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "TYPE",
       dataIndex: "paymentType",
+      key: "paymentType",
       align: "center",
       sorter: true,
       ellipsis: {
@@ -180,6 +187,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "BANK STATEMENT DATE",
       dataIndex: "bankStatementDate",
+      key: "bankStatementDate",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -205,6 +213,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "UPLOAD DATE",
       dataIndex: "uploadDate",
+      key: "uploadDate",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -223,6 +232,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "FILENAME",
       dataIndex: "filename",
+      key: "filename",
       align: "left",
       sorter: true,
       ellipsis: {
@@ -251,6 +261,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "TOTAL TRANSACTION",
       dataIndex: "totalTransaction",
+      key: "totalTransaction",
       align: "center",
       sorter: true,
       ellipsis: {
@@ -279,6 +290,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "TOTAL MATCH",
       dataIndex: "totalMatch",
+      key: "totalMatch",
       align: "center",
       sorter: true,
       ellipsis: {
@@ -307,6 +319,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "TOTAL FORCE",
       dataIndex: "totalForce",
+      key: "totalForce",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -336,6 +349,7 @@ const ViewMaintainElectronicBankStatement = () => {
       title: "TOTAL REVERSE",
       dataIndex: "totalReverse",
       align: "center",
+      key: "totalReverse",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -360,6 +374,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "TOTAL SUNDRY",
       dataIndex: "totalSundry",
+      key: "totalSundry",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -385,6 +400,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "CURRENCY",
       dataIndex: "currency",
+      key: "currency",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -413,6 +429,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "TOTAL AMOUNT",
       dataIndex: "totalAmount",
+      key: "totalAmount",
       align: "right",
       sorter: true,
       ellipsis: {
@@ -442,6 +459,7 @@ const ViewMaintainElectronicBankStatement = () => {
     {
       title: "ERROR MESSAGE",
       dataIndex: "errorMessage",
+      key: "errorMessage",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -494,6 +512,11 @@ const ViewMaintainElectronicBankStatement = () => {
         ),
     },
   ];
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["statusBankStatement",  "action"],
+  }));
 
   //dispatch
   const handleFetch = useCallback(() => {
@@ -555,19 +578,6 @@ const ViewMaintainElectronicBankStatement = () => {
   const itemActions = [
     // toolbar items
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "Upload",
       render: (
         <NavLink
@@ -597,7 +607,7 @@ const ViewMaintainElectronicBankStatement = () => {
               }
               state={{ id: record?.id }}
             >
-              <SVGIcon name="IconDetail" width={24} />
+              <EyeOutlined />
             </Link>
           </Tooltip>
         );
@@ -666,8 +676,8 @@ const ViewMaintainElectronicBankStatement = () => {
           </NavLink>
         </div> */}
 
-        <BaseContainer header={"BANK STATEMENT LIST"}>
-          <TablePaginationNew
+        <CardContainer header={"BANK STATEMENT LIST"}>
+          <TableRBI
             dataSource={data?.result}
             columns={[
               ...columnsStatement,
@@ -686,8 +696,12 @@ const ViewMaintainElectronicBankStatement = () => {
               x: 3700,
               y: 525,
             }}
+            showExport={true}
+            handleDownload={handleDownload}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
-        </BaseContainer>
+        </CardContainer>
       </Spin>
       {renderModal}
     </LayoutMenu>

@@ -13,6 +13,7 @@ const PaymentChannelForm = (props) => {
   const {
     dataType,
     form,
+    dataCategory
   } = props;
 
   const dispatch = useDispatch();
@@ -30,6 +31,8 @@ const PaymentChannelForm = (props) => {
       return current && current < moment(form.getFieldValue("effStartDate"));
     }
   };
+
+  // console.log("dataCategory",dataCategory)
 
   const handleStartDate = (date) => {
     if (!date) {
@@ -90,6 +93,21 @@ const PaymentChannelForm = (props) => {
             rules={formMessageRequired("Eff End Date")}
           >
             <DateComponent dateDisable={disabledDate} />
+          </Form.Item>
+        </div>
+        <div className="w-full grid grid-cols-1">
+          <Form.Item
+            label={"Category"}
+            name={"category"}
+            rules={formMessageRequired("Category")}
+          >
+            <SelectComponent>
+              {dataCategory?.data?.map((data) => (
+                <Select.Option key={data.name} value={data.name}>
+                  {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
           </Form.Item>
         </div>
         <div className="w-full grid grid-cols-1">

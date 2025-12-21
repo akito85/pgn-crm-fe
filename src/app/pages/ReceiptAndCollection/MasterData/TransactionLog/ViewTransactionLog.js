@@ -8,13 +8,15 @@ import {
     getTransactionLogPaging,
     downloadTransactionLog,
 } from "../../../../../redux/slices/receipt_collection/transactionLog";
-import BaseContainer from "../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import CardContainer from "../../../../../components/CardContainer";
+import TableRBI from "../../../../../components/TableRBI";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { columns } from "./Column";
-import { DownloadOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+} from "@ant-design/icons";
 
 // Breadcrumbs
 const routes = [
@@ -44,6 +46,11 @@ const ViewTransactionLog = () => {
     const [sort, setSort] = useState("");
     const { data: dataUser = {} } = useSelector((state) => state.profile);
 
+    const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["statusApproval", "action"],
+      }));
+
     const handleDownload = () => {
         dispatch(
             downloadTransactionLog({
@@ -56,19 +63,7 @@ const ViewTransactionLog = () => {
     };
 
     const itemsActionView = () => [
-        {
-            action: "Download",
-            render: (
-                <ButtonComponent
-                    onClick={handleDownload}
-                    type={"submit"}
-                    border={false}
-                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-                >
-                    Download List
-                </ButtonComponent>
-            ),
-        },
+        
     ];
 
     useEffect(() => {
@@ -129,8 +124,8 @@ const ViewTransactionLog = () => {
                 <BreadCrumb routes={routes} />
                 <div className="flex flex-col w-full">
                     <Toolbar items={itemsActionView(dataUser)} />
-                    <BaseContainer header={"Transaction Log List"}>
-                        <TablePaginationNew
+                    <CardContainer header={"Transaction Log List"}>
+                        <TableRBI
                             dataSource={dataTable}
                             totalData={totalElements}
                             current={page}
@@ -154,12 +149,12 @@ const ViewTransactionLog = () => {
                                     itemsActionView(dataUser)
                                 ),
                             ]}
-                            useFixColumn={true}
-                            defaultFixedColumns={{
-                                no: "left",
-                            }}
+                            showExport={true}
+                            handleDownload={handleDownload}
+                            fixedColumns={fixedColumns}
+                            setFixedColumns={setFixedColumns}
                         />
-                    </BaseContainer>
+                    </CardContainer>
                 </div>
             </Spin>
         </LayoutMenu>

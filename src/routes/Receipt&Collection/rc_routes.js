@@ -83,11 +83,12 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   CREATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/create",
   UPDATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/update",
 
-
+  // Settings
   VIEW_SETTINGS: "/receipt-and-collection/settings",
   DETAIL_SETTINGS: "/receipt-and-collection/settings/view",
   CREATE_SETTINGS: "/receipt-and-collection/settings/create",
   UPDATE_SETTINGS: "/receipt-and-collection/settings/update",
+  
   // Collection Agent
   VIEW_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent",
   DETAIL_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/view",
@@ -102,4 +103,16 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   
   // Accounting
   VIEW_ACCOUNTING: "/receipt-and-collection/accounting",
+
+  // Deduction
+  VIEW_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list",
+  DETAIL_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/view",
+  CREATE_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/create",
+  UPDATE_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/update",
+  
+  // Transfer to Receipt
+  VIEW_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt",
+  DETAIL_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/view",
+  CREATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/create",
+  UPDATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/update",
 };

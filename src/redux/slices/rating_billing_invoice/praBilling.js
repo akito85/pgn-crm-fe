@@ -34,6 +34,28 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  customer_account_detail: {
+    headerData: null,
+    usageData: { result: [], page: {} },
+    taxData: { result: [], page: {} },
+    pricingData: { result: [], page: {} },
+    saTosDet: { result: [], page: {} },
+    tosSubDet: { result: [], page: {} },
+    billingBucketData: { result: [], page: {} },
+    billingItemData: { result: [], page: {} },
+    saPrcRuleDetData: { result: [], page: {} },
+  },
+  loading_customer_detail: {
+    header: false,
+    usage: false,
+    tax: false,
+    pricing: false,
+    saTos: false,
+    tosSub: false,
+    billingBucket: false,
+    billingItem: false,
+    saPrcRuleDet: false,
+  },
   loading_list_prabilling: false,
   list_log_activities: [],
   loading_log: false,
@@ -1020,10 +1042,441 @@ export const downloadPrabillingResult = createAsyncThunk(
   }
 );
 
+// Get Header Data (Customer & Account Info)
+export const getCustomerHeaderData = createAsyncThunk(
+  "GET_CUSTOMER_HEADER_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const { customerNumber, billPeriod, inSor, accNumber, saNumber } = params;
+
+      if (!customerNumber || !billPeriod || !inSor) {
+        throw new Error("Missing required parameters");
+      }
+
+      let url = `/v1/dbs/api/customer-data?customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const responseData = response.data?.data || response.data;
+
+      // Return first item as header data
+      return Array.isArray(responseData) && responseData.length > 0 
+        ? responseData[0] 
+        : null;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get Usage Data
+export const getCustomerUsageData = createAsyncThunk(
+  "GET_CUSTOMER_USAGE_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        inSor,
+        accNumber,
+        saNumber,
+        page = 0,
+        size = 10,
+        sort = "measDate~desc"
+      } = params;
+
+      let url = `/v1/dbs/api/data-usage?page=${page}&size=${size}&sort=${sort}&customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+      };
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get Tax Data
+export const getCustomerTaxData = createAsyncThunk(
+  "GET_CUSTOMER_TAX_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        inSor,
+        accNumber,
+        saNumber,
+        page = 0,
+        size = 10,
+      } = params;
+
+      let url = `/v1/dbs/api/data-tax-imp?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+      };
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA TOS Detail Data
+export const getCustomerSaTosData = createAsyncThunk(
+  "GET_CUSTOMER_SA_TOS_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        inSor,
+        accNumber,
+        saNumber,
+        page = 0,
+        size = 10,
+      } = params;
+
+      let url = `/v1/dbs/api/data-sa-tos-detail?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+      };
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get TOS Sub Detail Data
+export const getCustomerTosSubData = createAsyncThunk(
+  "GET_CUSTOMER_TOS_SUB_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        inSor,
+        accNumber,
+        saNumber,
+        page = 0,
+        size = 10,
+      } = params;
+
+      let url = `/v1/dbs/api/data-tos-sub-det?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+      };
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get Billing Bucket Data
+export const getCustomerBillingBucketData = createAsyncThunk(
+  "GET_CUSTOMER_BILLING_BUCKET_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        inSor,
+        accNumber,
+        saNumber,
+        page = 0,
+        size = 10,
+      } = params;
+
+      let url = `/v1/dbs/api/data-billing-bucket?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+      };
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get Billing Item Data
+export const getCustomerBillingItemData = createAsyncThunk(
+  "GET_CUSTOMER_BILLING_ITEM_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        inSor,
+        accNumber,
+        saNumber,
+        page = 0,
+        size = 10,
+      } = params;
+
+      let url = `/v1/dbs/api/data-billing-item?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+      };
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA PRC Rule Detail Data
+export const getCustomerSaPrcRuleDetData = createAsyncThunk(
+  "GET_CUSTOMER_SA_PRC_RULE_DET_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        inSor,
+        accNumber,
+        saNumber,
+        page = 0,
+        size = 10,
+      } = params;
+
+      let url = `/v1/dbs/api/data-sa-prcrule-det?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&inSor=${encodeURIComponent(inSor)}`;
+
+      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
+      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+      };
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const prabillingSlice = createSlice({
   name: "prabilling",
   initialState,
+  reducers: {
+    resetCustomerDetail: (state) => {
+      state.customer_account_detail = {
+        headerData: null,
+        usageData: { result: [], page: {} },
+        taxData: { result: [], page: {} },
+        pricingData: { result: [], page: {} },
+        saTosDet: { result: [], page: {} },
+        tosSubDet: { result: [], page: {} },
+        billingBucketData: { result: [], page: {} },
+        billingItemData: { result: [], page: {} },
+        saPrcRuleDetData: { result: [], page: {} },
+      };
+      state.loading_customer_detail = {
+        header: false,
+        usage: false,
+        tax: false,
+        pricing: false,
+        saTos: false,
+        tosSub: false,
+        billingBucket: false,
+        billingItem: false,
+        saPrcRuleDet: false,
+      };
+    },
+  },
   extraReducers: {
+    // Header Data
+    [getCustomerHeaderData.pending]: (state) => {
+      state.loading_customer_detail.header = true;
+    },
+    [getCustomerHeaderData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.header = false;
+      state.customer_account_detail.headerData = action.payload;
+    },
+    [getCustomerHeaderData.rejected]: (state) => {
+      state.loading_customer_detail.header = false;
+      state.customer_account_detail.headerData = null;
+    },
+
+    // Usage Data
+    [getCustomerUsageData.pending]: (state) => {
+      state.loading_customer_detail.usage = true;
+    },
+    [getCustomerUsageData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.usage = false;
+      state.customer_account_detail.usageData = action.payload;
+    },
+    [getCustomerUsageData.rejected]: (state) => {
+      state.loading_customer_detail.usage = false;
+      state.customer_account_detail.usageData = { result: [], page: {} };
+    },
+
+    // Tax Data
+    [getCustomerTaxData.pending]: (state) => {
+      state.loading_customer_detail.tax = true;
+    },
+    [getCustomerTaxData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.tax = false;
+      state.customer_account_detail.taxData = action.payload;
+    },
+    [getCustomerTaxData.rejected]: (state) => {
+      state.loading_customer_detail.tax = false;
+      state.customer_account_detail.taxData = { result: [], page: {} };
+    },
+
+    // SA TOS Data
+    [getCustomerSaTosData.pending]: (state) => {
+      state.loading_customer_detail.saTos = true;
+    },
+    [getCustomerSaTosData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.saTos = false;
+      state.customer_account_detail.saTosDet = action.payload;
+    },
+    [getCustomerSaTosData.rejected]: (state) => {
+      state.loading_customer_detail.saTos = false;
+      state.customer_account_detail.saTosDet = { result: [], page: {} };
+    },
+
+    // TOS Sub Data
+    [getCustomerTosSubData.pending]: (state) => {
+      state.loading_customer_detail.tosSub = true;
+    },
+    [getCustomerTosSubData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.tosSub = false;
+      state.customer_account_detail.tosSubDet = action.payload;
+    },
+    [getCustomerTosSubData.rejected]: (state) => {
+      state.loading_customer_detail.tosSub = false;
+      state.customer_account_detail.tosSubDet = { result: [], page: {} };
+    },
+
+    // Billing Bucket Data
+    [getCustomerBillingBucketData.pending]: (state) => {
+      state.loading_customer_detail.billingBucket = true;
+    },
+    [getCustomerBillingBucketData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.billingBucket = false;
+      state.customer_account_detail.billingBucketData = action.payload;
+    },
+    [getCustomerBillingBucketData.rejected]: (state) => {
+      state.loading_customer_detail.billingBucket = false;
+      state.customer_account_detail.billingBucketData = { result: [], page: {} };
+    },
+
+    // Billing Item Data
+    [getCustomerBillingItemData.pending]: (state) => {
+      state.loading_customer_detail.billingItem = true;
+    },
+    [getCustomerBillingItemData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.billingItem = false;
+      state.customer_account_detail.billingItemData = action.payload;
+    },
+    [getCustomerBillingItemData.rejected]: (state) => {
+      state.loading_customer_detail.billingItem = false;
+      state.customer_account_detail.billingItemData = { result: [], page: {} };
+    },
+
+    // SA PRC Rule Det Data
+    [getCustomerSaPrcRuleDetData.pending]: (state) => {
+      state.loading_customer_detail.saPrcRuleDet = true;
+    },
+    [getCustomerSaPrcRuleDetData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.saPrcRuleDet = false;
+      state.customer_account_detail.saPrcRuleDetData = action.payload;
+    },
+    [getCustomerSaPrcRuleDetData.rejected]: (state) => {
+      state.loading_customer_detail.saPrcRuleDet = false;
+      state.customer_account_detail.saPrcRuleDetData = { result: [], page: {} };
+    },
+
     [getCustomerAccountDetail.pending]: (state) => {
       state.loading_customer_detail = true;
       state.customer_account_detail = {
@@ -1374,5 +1827,6 @@ const prabillingSlice = createSlice({
   },
 });
 
+export const { resetCustomerDetail } = prabillingSlice.actions;
 const { reducer } = prabillingSlice;
 export default reducer;
