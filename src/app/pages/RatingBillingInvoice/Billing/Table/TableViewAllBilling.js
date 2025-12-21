@@ -197,6 +197,7 @@ export const columnsAllBilling = (
     key: "remark",
     sorter: true,
     title: "REMARK",
+    isClassification:true,
     dataIndex: "remark",
     width: 250,
     ellipsis: {

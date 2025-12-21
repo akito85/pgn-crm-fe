@@ -22,6 +22,7 @@ export const columnsRating = (
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
+    isClassification:true,
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -38,6 +39,7 @@ export const columnsRating = (
     key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
+    isClassification:true,
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -54,6 +56,7 @@ export const columnsRating = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
+    isClassification:true,
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -70,6 +73,7 @@ export const columnsRating = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
+    isClassification:true,
     width: 130,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -86,6 +90,7 @@ export const columnsRating = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
+    isClassification:true,
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -102,6 +107,7 @@ export const columnsRating = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    isClassification:true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -164,23 +170,6 @@ export const columnsRating = (
     ),
     render: (text) => renderColumn('costCenter', hasValue(search['costCenter']), searchText, text, false, 'input', search)
   },
-  {
-    key: "accountSegment",
-    title: "ACCOUNT SEGMENT",
-    dataIndex: "accountSegment",
-    width: 120,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accountSegment",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
-  },
    {
     key: "mreadingCode",
     title: "METER READING CODE",
@@ -197,6 +186,23 @@ export const columnsRating = (
       handleSearch
     ),
     render: (text) => renderColumn('mreadingCode', hasValue(search['mreadingCode']), searchText, text, false, 'input', search)
+  },
+  {
+    key: "accountSegment",
+    title: "ACCOUNT SEGMENT",
+    dataIndex: "accountSegment",
+    width: 120,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accountSegment",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
   },
     {
     key: "accGroupType",
@@ -255,6 +261,7 @@ export const columnsRating = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
+    isClassification:true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,

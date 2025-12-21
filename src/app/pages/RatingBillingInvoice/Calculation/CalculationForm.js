@@ -616,7 +616,7 @@ const CalculationForm = ({ type }) => {
                 label={"Billing Period"}
                 name={"billing_period"}
                 rules={formMessageRequired("Billing Period")}
-                style={{ marginBottom: 4 }}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   disabled={!billingCycle}
@@ -630,7 +630,6 @@ const CalculationForm = ({ type }) => {
                         })
                       : []
                   }
-                  l
                 />
               </Form.Item>
             </div>

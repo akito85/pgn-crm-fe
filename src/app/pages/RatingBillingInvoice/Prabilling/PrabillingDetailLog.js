@@ -93,7 +93,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         title: "SEQUENCE",
         dataIndex: "seq",
         width: 100,
-        align: "center",
+        isNumber:true,
         sorter: true,
         filteredValue: [search?.seq] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -110,7 +110,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
             "seq",
             hasValue(search["seq"]),
             searchText,
-            text != null ? text : "-",
+            text != null ? text : "",
             false,
             "input",
             search
@@ -137,7 +137,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
             "processName",
             hasValue(search["processName"]),
             searchText,
-            text || "-",
+            text || "",
             false,
             "input",
             search
@@ -164,7 +164,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
             "activityName",
             hasValue(search["activityName"]),
             searchText,
-            text || "-",
+            text || "",
             false,
             "input",
             search
@@ -188,7 +188,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           true
         ),
         render: (status) => {
-          // Mapping status text to match the Prabilling page format
           const statusUpper = status ? status.toUpperCase() : "INFO";
 
           // Map status to the same format as Prabilling page
@@ -244,7 +243,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
             "message",
             hasValue(search["message"]),
             searchText,
-            text || "-",
+            text || "",
             true,
             "input",
             search
@@ -304,7 +303,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
             "createdBy",
             hasValue(search["createdBy"]),
             searchText,
-            text || "-",
+            text || "",
             false,
             "input",
             search

@@ -47,7 +47,6 @@ const DetailMonitoringUsage = () => {
     (item) =>
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "batchId" &&
-      item?.dataIndex !== "accountGroupType" &&
       item?.dataIndex !== "serviceType" &&
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "fileSource" &&
@@ -447,10 +446,9 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Total Failed">
                       {detail_batch?.batchInformation?.totalFailed}
                     </DetailText>
-
-                    <DetailText label="Generate Date">
+                    {/* <DetailText label="Generate Date">
                       {detail_batch?.batchInformation?.generateDate}
-                    </DetailText>
+                    </DetailText> */}
                     <DetailText label="Status">
                       <StatusComponent
                         colour={detail_batch?.batchInformation?.status}
