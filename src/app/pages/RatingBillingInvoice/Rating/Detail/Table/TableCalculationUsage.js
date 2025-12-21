@@ -40,6 +40,7 @@ export const columnsCalculationUsage = (
     key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
+    isClassification:true,
     sorter: true,
     width: 180,
     ...getColumnSearchPropsPaging(
@@ -54,6 +55,7 @@ export const columnsCalculationUsage = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
+    isClassification:true,
     sorter: true,
     width: 150,
     ...getColumnSearchPropsPaging(
@@ -68,6 +70,7 @@ export const columnsCalculationUsage = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    isClassification:true,
     sorter: true,
     width: 200,
     ...getColumnSearchPropsPaging(
@@ -82,6 +85,7 @@ export const columnsCalculationUsage = (
     key: "billPeriod",
     title: "BILL PERIOD",
     dataIndex: "billPeriod",
+    isClassification:true,
     sorter: true,
     width: 120,
     ...getColumnSearchPropsPaging(
@@ -96,6 +100,7 @@ export const columnsCalculationUsage = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
+    isClassification:true,
     sorter: true,
     width: 200,
     ...getColumnSearchPropsPaging(
@@ -322,6 +327,7 @@ export const columnsCalculationUsage = (
     key: "createdBy",
     title: "CREATED BY",
     dataIndex: "createdBy",
+    isClassification:true,
     sorter: true,
     width: 150,
     ...getColumnSearchPropsPaging(

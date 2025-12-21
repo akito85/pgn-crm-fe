@@ -23,7 +23,7 @@ export const columnsTermOfService = (
     title: "TERM OF SERVICE",
     dataIndex: "tosName",
     sorter: true,
-    align: "left",
+    isClassification:true,
     ...getColumnSearchPropsPaging(
       "tosName",
       searchInput,
@@ -35,7 +35,7 @@ export const columnsTermOfService = (
   {
     title: "START DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "startDate",
     ...getColumnSearchPropsPaging(
       "startDate",
@@ -70,7 +70,7 @@ export const columnsTermOfService = (
   {
     title: "END DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "endDate",
     ...getColumnSearchPropsPaging(
       "startDate",
@@ -163,7 +163,7 @@ export const columnsDetailTermOfService = (
     title: "VALUE",
     dataIndex: "value",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsPaging(
       "Value",
       searchInput,
