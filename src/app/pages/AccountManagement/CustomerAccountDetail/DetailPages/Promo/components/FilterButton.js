@@ -3,7 +3,7 @@ import { FilterOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import ModalQueryCustom from "./ModalQueryCustom";
 
-const FilterButton = ({ onApplyFilter, columnType = "promo" }) => {
+const FilterButton = ({ onApplyFilter, columnType = "promo", activeFilters }) => {
   const [open, setOpen] = useState(false);
 
   const handleFilterClick = () => {
@@ -58,6 +58,7 @@ const FilterButton = ({ onApplyFilter, columnType = "promo" }) => {
         setIsOpen={setOpen}
         onSaveQuery={handleSaveQuery}
         columnType={columnType}
+        activeFilters={activeFilters}
       />
     </Fragment>
   );

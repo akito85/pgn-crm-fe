@@ -11,6 +11,7 @@ const ModalQueryCustom = ({
   setIsOpen,
   onSaveQuery = () => {},
   columnType = "promo", // "promo" | "criteria" | "condition" | "history"
+  activeFilters,
 }) => {
   const [form] = Form.useForm();
   const { advancedSearchMetadata, loadAdvancedSearchMetadata } = usePromo();
@@ -19,6 +20,12 @@ const ModalQueryCustom = ({
     // Load advanced search metadata (conditions, operators, columns)
     loadAdvancedSearchMetadata();
   }, [loadAdvancedSearchMetadata]);
+
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue({ query: activeFilters || [] });
+    }
+  }, [isOpen, activeFilters, form]);
 
   // Select columns based on type
   const getColumns = () => {
@@ -59,7 +66,7 @@ const ModalQueryCustom = ({
         form={form}
         name="formQuery"
         onFinish={handleFinish}
-        initialValues={{ query: [] }}
+        initialValues={{ query: activeFilters || [] }}
       >
         <div>
           <Form.List name="query">

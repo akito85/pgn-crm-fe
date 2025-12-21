@@ -125,7 +125,16 @@ const PromoViewData = ({
           accountId: accountId,
         };
 
-        await downloadValidPromo(params);
+        const advancedSearch = {
+          inputFields: activeFilters.map(q => ({
+            condition: q.condition || "",
+            column: q.column || "",
+            operator: q.operator || "",
+            value: q.value || ""
+          }))
+        };
+
+        await downloadValidPromo(params, advancedSearch);
       } catch (error) {
         console.error('Download failed:', error);
       }
@@ -138,13 +147,21 @@ const PromoViewData = ({
     const { current, pageSize } = paginationParams;
 
     if (accountId) {
+      const advancedSearch = {
+        inputFields: activeFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
       // API uses 0-based page index
       loadValidPromoList({
         page: current - 1,
         size: pageSize,
         accountId,
         sort: 'id~desc'
-      });
+      }, advancedSearch);
     }
   };
 
@@ -193,6 +210,7 @@ const PromoViewData = ({
             <FilterButton
               columnType="promo"
               onApplyFilter={handleFilterPromo}
+              activeFilters={activeFilters}
             />
           </Badge>
         </Col>
@@ -310,7 +328,16 @@ const PromoHistoryViewData = ({
           accountId: accountId,
         };
 
-        await downloadPromoHistory(params);
+        const advancedSearch = {
+          inputFields: activeFilters.map(q => ({
+            condition: q.condition || "",
+            column: q.column || "",
+            operator: q.operator || "",
+            value: q.value || ""
+          }))
+        };
+
+        await downloadPromoHistory(params, advancedSearch);
       } catch (error) {
         console.error('Download failed:', error);
       }
@@ -323,12 +350,20 @@ const PromoHistoryViewData = ({
     const { current, pageSize } = paginationParams;
 
     if (accountId) {
+      const advancedSearch = {
+        inputFields: activeFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
       loadPromoHistoryList({
         page: current - 1,
         size: pageSize,
         accountId,
         sort: 'id~desc'
-      });
+      }, advancedSearch);
     }
   };
 
@@ -452,6 +487,7 @@ const PromoHistoryViewData = ({
             <FilterButton
               columnType="history"
               onApplyFilter={handleFilterPromoHistory}
+              activeFilters={activeFilters}
             />
           </Badge>
         </Col>

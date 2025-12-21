@@ -55,7 +55,7 @@ const selectedRender = ({
           </Row>
           <div className="flex justify-between">
             <Badge count={criteriaActiveFilters.length}>
-              <FilterButton onApplyFilter={handleFilterCriteria} columnType="criteria" />
+              <FilterButton onApplyFilter={handleFilterCriteria} columnType="criteria" activeFilters={criteriaActiveFilters} />
             </Badge>
             <ExportButton onClick={handleDownloadCriteria} />
           </div>
@@ -86,7 +86,7 @@ const selectedRender = ({
           </Row>
           <div className="flex justify-between">
             <Badge count={conditionActiveFilters.length}>
-              <FilterButton onApplyFilter={handleFilterCondition} columnType="condition" />
+              <FilterButton onApplyFilter={handleFilterCondition} columnType="condition" activeFilters={conditionActiveFilters} />
             </Badge>
             <ExportButton onClick={handleDownloadCondition} />
           </div>
@@ -416,21 +416,43 @@ const CriteriaAndCondition = ({
 
   const handleDownloadCriteria = async () => {
     if (promoId) {
-      await downloadPromoCriteria({
+      const params = {
         page: criteriaPagination.current - 1,
         size: criteriaPagination.pageSize,
         promoId,
-      });
+      };
+
+      const advancedSearch = {
+        inputFields: criteriaActiveFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
+
+      await downloadPromoCriteria(params, advancedSearch);
     }
   };
 
   const handleDownloadCondition = async () => {
     if (promoId) {
-      await downloadPromoCondition({
+      const params = {
         page: conditionPagination.current - 1,
         size: conditionPagination.pageSize,
         promoId,
-      });
+      };
+
+      const advancedSearch = {
+        inputFields: conditionActiveFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
+
+      await downloadPromoCondition(params, advancedSearch);
     }
   };
 
