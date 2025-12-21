@@ -7,13 +7,26 @@ const ExportButton = ({ onClick, loading = false }) => {
     <Fragment>
       <ButtonComponent
         type="submit"
-        size="small"
-        fullButton
         onClick={onClick}
         loading={loading}
+        icon={
+          <DownloadOutlined
+            style={{
+              color: "#fff",
+              fontSize: 20,
+            }}
+          />
+        }
+        style={{
+          backgroundColor: "#0075bf",
+          color: "#fff",
+          borderColor: "#0075bf",
+          border: "1px solid #0075bf",
+          borderRadius: "5px",
+          height: "48px"
+        }}
       >
-        <DownloadOutlined className="mr-0 sm:mr-2" />
-        <span className="hidden sm:inline text-xs sm:text-sm truncate">Download List</span>
+        Download List
       </ButtonComponent>
     </Fragment>
   );

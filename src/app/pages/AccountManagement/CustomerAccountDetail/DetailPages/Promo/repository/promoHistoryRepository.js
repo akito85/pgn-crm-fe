@@ -704,7 +704,7 @@ const promoHistoryRepository = {
       promo_key: 38,
     },
   ],
-  getColumns: (setIsModalHistoryVisible, setDetailHistoryData) => [
+  getColumns: (handleViewDetail) => [
     {
       title: "No",
       dataIndex: "no",
@@ -715,16 +715,22 @@ const promoHistoryRepository = {
       disableSorter: true,
     },
     {
-      title: "Invoice Number",
-      dataIndex: "invoiceNumber",
-      key: "invoiceNumber",
+      title: "Billing No.",
+      dataIndex: "billingCode",
+      key: "billingCode",
       width: 180,
+    },
+    {
+      title: "Billing Period",
+      dataIndex: "billingPeriod",
+      key: "billingPeriod",
+      width: 150,
     },
     {
       title: "Billing Cycle",
       dataIndex: "billingCycle",
       key: "billingCycle",
-      width: 180,
+      width: 150,
     },
     {
       title: "Promo Applied",
@@ -745,10 +751,7 @@ const promoHistoryRepository = {
         <Col span={24} className="text-center">
           <UnorderedListOutlined
             style={{ cursor: "pointer" }}
-            onClick={() => {
-              setIsModalHistoryVisible(true);
-              setDetailHistoryData(record);
-            }}
+            onClick={() => handleViewDetail(record)}
           />
         </Col>
       ),

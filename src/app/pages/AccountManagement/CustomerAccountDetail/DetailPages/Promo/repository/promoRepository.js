@@ -420,14 +420,14 @@ const promoRepository = {
 
   /**
    * Get table columns configuration for Valid Promo List
-   * @param {Function} setIsModalVisible - Function to show modal
-   * @param {Function} setDetailData - Function to set detail data
+   * @param {Function} handleViewDetail - Function to handle view detail action
    * @returns {Array} - Array of column definitions
    */
-  getColumns: (setIsModalVisible, setDetailData) => {
+  getColumns: (handleViewDetail) => {
     const { UnorderedListOutlined } = require("@ant-design/icons");
     const { Col } = require("antd");
-    const TagStatus = require("../components/TagStatus").default;
+    const StatusComponent = require("../../../../../../../components/StatusComponent").default;
+    const { toTitleCase } = require("../../../../../../../utils");
 
     return [
       {
@@ -495,7 +495,22 @@ const promoRepository = {
         dataIndex: "status",
         key: "status",
         width: 100,
-        render: (status) => <TagStatus status={status === "ACTIVE" ? "Active" : status} />,
+        render: (status) => {
+          const displayText = {
+            "ACTIVE": "Active",
+            "INACTIVE": "Inactive",
+            "active": "Active",
+            "inactive": "Inactive",
+          };
+
+          return (
+            <div className=" flex justify-center">
+              <StatusComponent colour={status?.toLowerCase()}>
+                {displayText[status] || toTitleCase(String(status || "")) || "-"}
+              </StatusComponent>
+            </div>
+          );
+        },
       },
       {
         title: "Action",
@@ -509,10 +524,7 @@ const promoRepository = {
           <Col span={24} className="text-center">
             <UnorderedListOutlined
               style={{ cursor: "pointer" }}
-              onClick={() => {
-                setIsModalVisible(true);
-                setDetailData(record);
-              }}
+              onClick={() => handleViewDetail(record)}
             />
           </Col>
         ),

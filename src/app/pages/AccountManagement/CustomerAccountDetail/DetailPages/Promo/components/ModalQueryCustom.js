@@ -9,10 +9,10 @@ import { usePromo } from "../hooks/usePromo";
 const ModalQueryCustom = ({
   isOpen,
   setIsOpen,
-  handleFirstQuery = () => {},
-  handleCancelQuery = () => {},
+  onSaveQuery = () => {},
   columnType = "promo", // "promo" | "criteria" | "condition" | "history"
 }) => {
+  const [form] = Form.useForm();
   const { advancedSearchMetadata, loadAdvancedSearchMetadata } = usePromo();
 
   useEffect(() => {
@@ -34,15 +34,35 @@ const ModalQueryCustom = ({
     }
   };
 
+  const handleFirstQuery = () => {
+    console.log('First query triggered');
+  };
+
+  const handleCancelQuery = () => {
+    form.resetFields();
+    setIsOpen(false);
+  };
+
+  const handleFinish = (values) => {
+    console.log('ModalQueryCustom - Form submitted with values:', values);
+    onSaveQuery(values);
+  };
+
   return (
-    <ModalCustomPromo 
+    <ModalCustomPromo
       title="Query"
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       width={1200}
     >
-      <div>
-        <Form.List name="query">
+      <Form
+        form={form}
+        name="formQuery"
+        onFinish={handleFinish}
+        initialValues={{ query: [] }}
+      >
+        <div>
+          <Form.List name="query">
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }, index) => (
@@ -100,7 +120,6 @@ const ModalQueryCustom = ({
                     <ButtonComponent
                       type="submit"
                       htmlType={"submit"}
-                      form={"formQuery"}
                     >
                       Save
                     </ButtonComponent>
@@ -110,7 +129,8 @@ const ModalQueryCustom = ({
             </>
           )}
         </Form.List>
-      </div>
+        </div>
+      </Form>
     </ModalCustomPromo>
   );
 };
