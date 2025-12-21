@@ -270,31 +270,6 @@ const ViewReceipt = () => {
   );
 
   const itemActions = [
-    // toolbar items
-    {
-      action: "Create",
-      render: (
-        <React.Fragment>
-          <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_RECEIPT}>
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-            >
-              Create
-            </ButtonComponent>
-          </NavLink>
-          <Dropdown overlay={moreMenu} trigger={['click']}>
-            <ButtonComponent
-              type="filter" // Using filter type for secondary/white look often used
-              icon={<DownOutlined />}
-            >
-              More Actions
-            </ButtonComponent>
-          </Dropdown>
-        </React.Fragment>
-      ),
-    },
-
     // column action
     {
       action: "View",
@@ -466,8 +441,30 @@ const ViewReceipt = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <CardContainer header={"receipt list"}>
-          <Toolbar items={itemActions} />
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold uppercase">receipt list</p>
+              <div className="flex gap-2">
+                <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_RECEIPT}>
+                  <ButtonComponent
+                    icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                    type="submit"
+                  >
+                    Create
+                  </ButtonComponent>
+                </NavLink>
+                <Dropdown overlay={moreMenu} trigger={['click']}>
+                  <ButtonComponent
+                    type="default"
+                  >
+                    More Actions <DownOutlined />
+                  </ButtonComponent>
+                </Dropdown>
+              </div>
+            </div>
+          }
+        >
           <div className="w-full">
             <TableRBI
               dataSource={dataSource}
