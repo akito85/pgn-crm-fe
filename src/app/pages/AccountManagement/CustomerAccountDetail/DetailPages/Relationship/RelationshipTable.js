@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getRelationshipListAdvanced,
   toggleRelationshipStatus,
+  approveOrRejectRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 
 // Utility imports
@@ -39,6 +40,104 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_mana
 
 // Library imports
 import moment from "moment";
+
+// Import TablePagination for nested table in expandable rows
+import TablePagination from "../../../../../../components/TablePagination";
+
+// Expandable row renderer for Related Detail
+const expandedRowRender = (record) => {
+  const relatedDetailData = record?.relatedDetail || [];
+
+  const nestedColumns = [
+    {
+      title: "NO",
+      align: "center",
+      width: 60,
+      render: (text, object, index) => (
+        <div style={{ padding: "8px 0" }}>{index + 1}</div>
+      ),
+    },
+    {
+      title: () => (
+        <div className="flex items-center justify-between w-full">
+          <span>ACCOUNT NUMBER</span>
+        </div>
+      ),
+      dataIndex: "accountNumber",
+      align: "left",
+      sorter: (a, b) => (a.accountNumber || "").localeCompare(b.accountNumber || ""),
+      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+    },
+    {
+      title: () => (
+        <div className="flex items-center justify-between w-full">
+          <span>ACCOUNT NAME</span>
+        </div>
+      ),
+      dataIndex: "accountName",
+      align: "left",
+      sorter: (a, b) => (a.accountName || "").localeCompare(b.accountName || ""),
+      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+    },
+    {
+      title: () => (
+        <div className="flex items-center justify-between w-full">
+          <span>ACCOUNT CATEGORY</span>
+        </div>
+      ),
+      dataIndex: "accountCategory",
+      align: "left",
+      sorter: (a, b) => (a.accountCategory || "").localeCompare(b.accountCategory || ""),
+      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+    },
+    {
+      title: () => (
+        <div className="flex items-center justify-between w-full">
+          <span>SOR</span>
+        </div>
+      ),
+      dataIndex: "sor",
+      align: "left",
+      sorter: (a, b) => (a.sor || "").localeCompare(b.sor || ""),
+      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+    },
+    {
+      title: () => (
+        <div className="flex items-center justify-between w-full">
+          <span>COST CENTER</span>
+        </div>
+      ),
+      dataIndex: "costCenter",
+      align: "left",
+      sorter: (a, b) => (a.costCenter || "").localeCompare(b.costCenter || ""),
+      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+    },
+    {
+      title: () => (
+        <div className="flex items-center justify-between w-full">
+          <span>METER READING CODE</span>
+        </div>
+      ),
+      dataIndex: "meterReadingCode",
+      align: "left",
+      sorter: (a, b) => (a.meterReadingCode || "").localeCompare(b.meterReadingCode || ""),
+      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+    },
+  ];
+
+  return (
+    <div className="bg-blue-50 -mx-2 pl-6 py-2">
+      <h4 className="text-[#0075bf] font-semibold text-sm my-2">RELATED DETAIL</h4>
+      <TablePagination
+        useSelect={false}
+        usePagination={false}
+        dataSource={relatedDetailData}
+        columns={nestedColumns}
+        className="related-detail-nested-table"
+      />
+    </div>
+  );
+};
 
 // Column definition function (outside component)
 const columns = (
@@ -326,6 +425,7 @@ const RelationshipTable = ({
   search = {},
   setSearch = () => { },
   approvalMode = false,
+  handleIsApproval = () => { },
   type = "standard",
   idCustomer = null,
   inputFields = [],
@@ -380,7 +480,10 @@ const RelationshipTable = ({
           pageSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-          body: { inputFields: tempInputFields },
+          body: {
+            inputFields: tempInputFields,
+            searchs: search,  // Add search filter to body for statusApproval filtering
+          },
         })
       );
     }
@@ -390,7 +493,12 @@ const RelationshipTable = ({
   useEffect(() => {
     if (data_relationship && data_relationship.result) {
       const totalData = data_relationship.page.totalElements;
-      setDataTable(data_relationship.result);
+      // Add key to each row for proper row selection
+      const dataWithKeys = data_relationship.result.map((item, index) => ({
+        ...item,
+        key: item.id || `relationship-${index}`,
+      }));
+      setDataTable(dataWithKeys);
       setTotalElements(totalData || 0);
     }
   }, [data_relationship]);
@@ -483,19 +591,51 @@ const RelationshipTable = ({
   };
 
   const handleConfirmApprove = (remark) => {
-    console.log("Approving:", selectedRows, "with remark:", remark);
-    // Call API here
-    setModalConfirmApprove(false);
-    setSelectedRowKeys([]);
-    setSelectedRows([]);
+    const action = "APPROVE";
+
+    const body = selectedRows.map((row) => ({
+      id: row.id,
+      approvalId: row.approvalId || row.tappId,
+      action,
+      description: remark,
+    }));
+
+    dispatch(approveOrRejectRelationship({ idAccount, body, action }))
+      .unwrap()
+      .then(() => {
+        setModalConfirmApprove(false);
+        setSelectedRowKeys([]);
+        setSelectedRows([]);
+        // Stay in approval mode and refresh data
+        handleIsApproval(true);
+      })
+      .catch(() => {
+        // Error already handled in thunk
+      });
   };
 
   const handleConfirmReject = (remark) => {
-    console.log("Rejecting:", selectedRows, "with remark:", remark);
-    // Call API here
-    setModalConfirmReject(false);
-    setSelectedRowKeys([]);
-    setSelectedRows([]);
+    const action = "REJECT";
+
+    const body = selectedRows.map((row) => ({
+      id: row.id,
+      approvalId: row.approvalId || row.tappId,
+      action,
+      description: remark,
+    }));
+
+    dispatch(approveOrRejectRelationship({ idAccount, body, action }))
+      .unwrap()
+      .then(() => {
+        setModalConfirmReject(false);
+        setSelectedRowKeys([]);
+        setSelectedRows([]);
+        // Stay in approval mode and refresh data
+        handleIsApproval(true);
+      })
+      .catch(() => {
+        // Error already handled in thunk
+      });
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -756,6 +896,8 @@ const RelationshipTable = ({
     ? {
       selectedRowKeys,
       onChange: onSelectChange,
+      type: "checkbox",
+      preserveSelectedRowKeys: true,
       getCheckboxProps: (record) => ({
         style: {
           cursor: "pointer",
@@ -794,6 +936,10 @@ const RelationshipTable = ({
               ? "bg-blue-50"
               : ""
           }
+          expandable={{
+            expandedRowRender,
+            rowExpandable: (record) => record?.relatedDetail && record.relatedDetail.length > 0,
+          }}
         />
       </Spin>
 

@@ -10,6 +10,7 @@ import { useColumnActionPermission } from "../../../../../../../components/Colum
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
 import { CheckOutlined, DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { TablePaginationNew } from "poc-table-dragandrop";
 
 const PaymentRelationTable = ({
   data = [],
@@ -36,9 +37,9 @@ const PaymentRelationTable = ({
   const columns = [
     {
       title: "NO",
-      width: 100,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      dataIndex: "no",
+      width: 100,
     },
     {
       title: "ACCOUNT NUMBER",
@@ -94,7 +95,6 @@ const PaymentRelationTable = ({
           </div>
         );
       },
-      hidden: isApproval,
     },
     {
       title: "STATUS",
@@ -119,8 +119,6 @@ const PaymentRelationTable = ({
       },
     },
   ];
-
-  const visibleColumns = columns.filter(column => !column.hidden);
 
   const itemActions = [
     {
@@ -329,7 +327,7 @@ const PaymentRelationTable = ({
           <Toolbar items={itemActions} type="detail" />
         </div>
       )}
-      <TablePagination
+      {/* <TablePagination
         dataSource={data}
         totalData={totalElement}
         current={page}
@@ -339,7 +337,7 @@ const PaymentRelationTable = ({
         tableScrolled={{ y: 400, x: 2000 }}
         onSort={onSort}
         columns={[
-          ...visibleColumns,
+          ...columns,
           ...useColumnActionPermission(
             ["Inactivate", "View", "Update", "History"],
             itemActions,
@@ -348,6 +346,25 @@ const PaymentRelationTable = ({
           )
         ]}
         rowSelection={rowSelection}
+      /> */}
+      <TablePaginationNew
+        dataSource={data}
+        totalData={totalElement}
+        current={page}
+        pageSize={pageSize}
+        onChange={handleChangeSize}
+        tableScrolled={{ y: 400, x: 2000 }}
+        columns={[
+          ...columns,
+          ...useColumnActionPermission(
+            ["Inactivate", "View", "Update", "History"],
+            itemActions,
+            "View",
+            "detail"
+          )
+        ]}
+        rowSelection={rowSelection}
+        enableDragColumn={!isApproval}
       />
     </div>
   );

@@ -19,6 +19,8 @@ const ConfirmationModal = ({
   dataAttachment,
   type = "",
   data = {},
+  service,
+  configApplication,
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
@@ -89,6 +91,8 @@ const ConfirmationModal = ({
         hierarchyTableData={hierarchyTableData}
         dataAttachment={dataAttachment}
         data={data}
+        service={service}
+        configApplication={configApplication}
       />
     </ModalCustom>
   )

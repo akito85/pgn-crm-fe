@@ -6,14 +6,6 @@ import { dateFormatting } from "../../../../../../../../../utils";
 const ConfirmationModalInfo = ({
   data = {},
 }) => {
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
-
   return (
     <Fragment>
       <div className="text-primary text-xs font-bold uppercase">

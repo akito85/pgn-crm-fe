@@ -38,6 +38,7 @@ import {
 } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import { configApp } from "../../../../../../../../constants/configApp";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -309,6 +310,7 @@ const CreatePaymentRelation = ({ type }) => {
           key={`payment-relation-tab-2`}
           getAPICategory={getPrAttachmentCategory}
           service={accountManagementService}
+          configApplication={configApp.ACCOUNT_SERVICE}
         />
       ),
       disabled: false
@@ -587,21 +589,22 @@ const CreatePaymentRelation = ({ type }) => {
                 </ButtonComponent>
               )}
               {current < steps.length - 1 && (
-                <Button
+                <ButtonComponent
                   onClick={handleButtonNext}
-                  type="primary"
-                  className="ant-btn ant-btn-submit flex w-full justify-center"
+                  type={"submit"}
                   disabled={steps[current].disabled}
                 >
-                  <span className="p-1 text-[18px] text-center">Next</span>
-                  <RightOutlined
-                    style={{
-                      justifyItems: "center",
-                      fontSize: "18px",
-                      color: "#fff",
-                    }}
-                  />
-                </Button>
+                  <div className="flex gap-x-2 items-center">
+                    <span>Next</span>
+                    <RightOutlined
+                      style={{
+                        justifyItems: "center",
+                        fontSize: "18px",
+                        color: "#fff",
+                      }}
+                    />
+                  </div>
+                </ButtonComponent>
               )}
               {current === steps.length - 1 && (
                 <>
@@ -641,6 +644,8 @@ const CreatePaymentRelation = ({ type }) => {
           type={confirmationType}
           dataAttachment={dataAttachment}
           data={formCreate.getFieldsValue()}
+          service={accountManagementService}
+          configApplication={configApp.ACCOUNT_SERVICE}
         />
       </div>
     </LayoutMenu>

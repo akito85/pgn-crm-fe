@@ -1,11 +1,10 @@
 import { Form, Modal, Progress, Select, Typography } from "antd";
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import SelectComponent from "../../../../../../../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import {
   CloseOutlined,
   FileOutlined,
-  InboxOutlined,
   UndoOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
@@ -15,7 +14,6 @@ import { bytesConverter } from "../../../../../../../../../../utils/bytesConvert
 import { getBase64 } from "../../../../../../../../../../utils/getBase64";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 import ExtensionFile from "../../../../../../../../../../utils/ExtensionFile";
-import productPromoHttpService from "../../../../../../../../../../redux/services/productPromoHttpService";
 
 const MAX_FILE_SIZE = 5000000;
 const ModalAttachment = ({
