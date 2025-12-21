@@ -21,32 +21,28 @@ const RelationshipConfirm = ({
               RELATIONSHIP INFORMATION
             </div>
             <div className="w-full grid grid-cols-3 gap-4">
-              <DetailText label="Direction Flag">
-                {data?.directionFlag || "Forward"}
-              </DetailText>
               <DetailText label="Relationship Type">
-                {data?.relationshipType || "PARTNER OF"}
+                {data?.relationshipTypeName || "-"}
               </DetailText>
               <DetailText label="Relationship Category">
-                {data?.relationshipCategory || "CUSTOMER"}
+                {data?.relationshipCategoryName || "-"}
               </DetailText>
               <DetailText label="Related Name">
-                {data?.relatedName || "PT XYZ"}
+                {data?.relatedName || data?.objectName || "-"}
               </DetailText>
               <DetailText label="Related Number">
-                {data?.relatedNumber || "00899849211"}
+                {data?.relatedNumber || data?.objectValue || "-"}
               </DetailText>
               <DetailText label="Start Date">
-                {data?.startDate || "22 Aug 2022"}
+                {data?.startDateDisplay || "-"}
               </DetailText>
               <DetailText label="End Date">
-                {data?.endDate || "22 Aug 2022"}
+                {data?.endDateDisplay || "-"}
               </DetailText>
             </div>
             <div className="w-full mt-4">
               <DetailText label="Description">
-                {data?.description ||
-                  "Lorem ipsum dolor sit amet consectetur. Malesuada turpis arcu morbi elit sed lorem at adipiscing imperdiet. Aliquam quis tempus feugiat amet. Viverra metus tincidunt nibh mauris nisl. At et etiam non dignissim ultricies tellus in lacus fermentum. Sollicitudin purus viverra tincidunt proin."}
+                {data?.description || "-"}
               </DetailText>
             </div>
           </div>

@@ -14,6 +14,7 @@ import RelationshipApproval from "./RelationshipApproval";
 import RelationshipAttachment from "./RelationshipAttachment";
 import ModalAttachment from "./RelationshipAttachment/ModalAttachment";
 import RelationshipInformation from "./RelationshipInformation";
+import RelatedDetailCard from "./RelationshipInformation/RelatedDetailCard";
 import {
   createRelationship,
   downloadAttachment,
@@ -21,6 +22,7 @@ import {
   getApprovalHierarchyDetail,
   getAttachmentCategory,
   getAttachmentList,
+  getRelationshipDetail,
   updateRelationship
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -65,6 +67,10 @@ const RelationshipCreateAndUpdate = ({
     data_attachmentList,
     data_approvalHierarchies,
     data_approvalHierarchyDetail,
+    data_relationshipType,
+    data_relationshipCategory,
+    data_relationshipDetail,
+    loadingDetail,
     loadingApprovalHierarchies,
     loadingApprovalHierarchyDetail
   } = useSelector(
@@ -84,6 +90,10 @@ const RelationshipCreateAndUpdate = ({
   const [approvalObj, setApprovalObj] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [dataDetailApproval, setDataDetailApproval] = useState([]);
+  const [allAccountData, setAllAccountData] = useState([]);
+
+  // Step State
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   useEffect(() => {
     console.log("relationshipObj => ", relationshipObj);
@@ -108,27 +118,71 @@ const RelationshipCreateAndUpdate = ({
     }
     if (type === "update" && id) {
       dispatch(getAttachmentList({ idAccount, idRelationship: id }));
-    }
-    if (obj && obj.id && type === "update") {
-      form.setFieldsValue({
-        relationshipType: 1,
-        relationshipCategory: 1,
-        relatedName: 1,
-        relatedNumber: 1,
-      });
+      dispatch(getRelationshipDetail({ idAccount, idRelationship: id }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [obj, type, idAccount, id]);
+  }, [type, idAccount, id]);
+
+  // Populate form and relationshipObj when data_relationshipDetail is loaded (update mode)
+  useEffect(() => {
+    if (data_relationshipDetail && data_relationshipDetail.id && type === "update") {
+      const detail = data_relationshipDetail;
+
+      // Set form values
+      form.setFieldsValue({
+        relationshipType: detail.relationshipType,
+        relationshipCategory: detail.relationshipCategory,
+        relatedName: detail.objectName,
+        relatedNumber: detail.objectNumber,
+        startDate: detail.startDate ? moment(detail.startDate) : null,
+        endDate: detail.endDate ? moment(detail.endDate) : null,
+        description: detail.description || "",
+        appHierId: detail.appHierId,
+      });
+
+      // Set relationshipObj for submit
+      setRelationshipObj({
+        objectId: detail.objectId,
+        objectName: detail.objectName,
+        objectValue: detail.objectNumber,
+        relationshipType: detail.relationshipType,
+        relationshipCategory: detail.relationshipCategory,
+        startDate: detail.startDate,
+        endDate: detail.endDate,
+        description: detail.description,
+      });
+
+      // Set approvalObj
+      setApprovalObj({
+        appHierId: detail.appHierId,
+      });
+
+      // Load approval hierarchy detail if appHierId exists
+      if (detail.appHierId) {
+        dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
+      }
+
+      // Populate Related Detail data for update mode
+      if (detail.relatedDetail && detail.relatedDetail.length > 0) {
+        setAllAccountData(detail.relatedDetail);
+      }
+    }
+  }, [data_relationshipDetail, type, form, idAccount, dispatch]);
 
   useEffect(() => {
-    if (data_attachmentList && type === "update") {
+    if (data_attachmentList && data_attachmentList.length > 0 && type === "update") {
       const mapped = data_attachmentList.map((item) => ({
         key: item.id,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
         type: item.fileCategoryName,
         fileName: item.fileName,
         fileSize: item.fileSize,
-        dataType: "exist",
         fileType: item.fileType,
+        urlFile1: item.urlFile1,
+        createdBy: item.createdBy,
+        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
+        dataType: "exist",
       }));
       setListDataAttachment(mapped);
     }
@@ -205,19 +259,42 @@ const RelationshipCreateAndUpdate = ({
         ...value,
         relationshipCategory: value?.relationshipCategory?.toString(),
         relationshipType: value?.relationshipType?.toString(),
-        ...(type === "create" && { action: isDraft ? "DRAFT" : "SUBMIT" }),
+        action: isDraft ? "DRAFT" : "SUBMIT",
       };
 
+      // Filter only new attachments (not existing ones)
+      const newAttachments = listDataAttachment.filter(a => a.dataType !== "exist");
+
       if (type === "create") {
-        await dispatch(createRelationship({ idAccount, payload })).unwrap();
+        await dispatch(createRelationship({
+          idAccount,
+          payload,
+          attachments: newAttachments
+        })).unwrap();
       } else {
         await dispatch(
-          updateRelationship({ idAccount, idRelationship: id, payload })
+          updateRelationship({
+            idAccount,
+            idRelationship: id,
+            payload,
+            attachments: newAttachments
+          })
         ).unwrap();
       }
 
       setLoading(false);
-      navigate(-1);
+      // Navigate back to Account Detail page after success
+      setTimeout(() => {
+        navigate(
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+          {
+            state: {
+              idAccount,
+              idCustomer,
+            }
+          }
+        );
+      }, 2000);
     } catch (error) {
       console.error("Error submitting data:", error);
       setLoading(false);
@@ -277,20 +354,32 @@ const RelationshipCreateAndUpdate = ({
     form
       .validateFields()
       .then((values) => {
+        // Get display names for type and category
+        const typeId = values.relationshipType || relationshipObj.relationshipType;
+        const categoryId = values.relationshipCategory || relationshipObj.relationshipCategory;
+
+        const typeName = data_relationshipType?.find(t => t.id === typeId)?.text || typeId;
+        const categoryName = data_relationshipCategory?.find(c => c.id === categoryId)?.text || categoryId;
+
         // Convert moment objects to strings
+        const startDateValue = values.startDate || relationshipObj.startDate;
+        const endDateValue = values.endDate || relationshipObj.endDate;
+
         const valueForm = {
           subjectId: idAccount,
-          relationshipType: values.relationshipType || relationshipObj.relationshipType,
-          relationshipCategory: values.relationshipCategory || relationshipObj.relationshipCategory,
+          relationshipType: typeId,
+          relationshipTypeName: typeName,
+          relationshipCategory: categoryId,
+          relationshipCategoryName: categoryName,
           objectId: relationshipObj.objectId,
           objectName: relationshipObj.objectName || values.relatedName,
           objectValue: relationshipObj.objectValue || values.relatedNumber,
-          startDate: (values.startDate || relationshipObj.startDate)
-            ? moment(values.startDate || relationshipObj.startDate).format("YYYY-MM-DD")
-            : "",
-          endDate: (values.endDate || relationshipObj.endDate)
-            ? moment(values.endDate || relationshipObj.endDate).format("YYYY-MM-DD")
-            : "",
+          relatedName: relationshipObj.objectName || values.relatedName,
+          relatedNumber: relationshipObj.objectValue || values.relatedNumber,
+          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+          startDateDisplay: startDateValue ? moment(startDateValue).format("DD MMM YYYY") : "-",
+          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+          endDateDisplay: endDateValue ? moment(endDateValue).format("DD MMM YYYY") : "-",
           description: values.description || relationshipObj.description || "",
           appHierId: values.appHierId || approvalObj.appHierId,
         };
@@ -307,7 +396,7 @@ const RelationshipCreateAndUpdate = ({
         );
       });
   };
-  
+
   const routes = [
     {
       path: "",
@@ -335,8 +424,28 @@ const RelationshipCreateAndUpdate = ({
     },
   ];
 
+  const formFields = [
+    [
+      "relationshipType",
+      "relationshipCategory",
+      "relatedName",
+      "relatedNumber",
+      "startDate",
+    ],
+    [
+      "appHierId",
+    ],
+    []
+  ];
+
   // Navigation handlers
-  const next = () => {
+  const next = async () => {
+    try {
+      await form.validateFields(formFields[current]);
+    } catch (err) {
+      return;
+    }
+
     setCurrent(current + 1);
   };
 
@@ -349,6 +458,19 @@ const RelationshipCreateAndUpdate = ({
       containerRef.current.scrollLeft += 250;
     }
   };
+
+  const handleSetCurrent = async (newCurrent) => {
+    for (let i = current; i < newCurrent; i++) {
+      try {
+        await form.validateFields(formFields[i]);
+      } catch (err) {
+        setCurrent(i);
+        return;
+      }
+    }
+
+    setCurrent(newCurrent);
+  }
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -369,16 +491,9 @@ const RelationshipCreateAndUpdate = ({
     }
   };
 
-  const handleButtonNext = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        next();
-        scrollRightHandler();
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-      });
+  const handleButtonNext = async () => {
+    await next();
+    scrollRightHandler();
   };
 
   // Steps Configuration
@@ -386,11 +501,22 @@ const RelationshipCreateAndUpdate = ({
     {
       title: "Relationship Information",
       content: (
-        <RelationshipInformation
-          form={form}
-          relationshipObj={relationshipObj}
-          handleRelationshipObj={handleRelationshipObj}
-        />
+        <>
+          <RelationshipInformation
+            form={form}
+            relationshipObj={relationshipObj}
+            handleRelationshipObj={handleRelationshipObj}
+            initialRelationshipType={data_relationshipDetail?.relationshipType}
+            initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
+            key={`relationship-tab-0`}
+            className={`${current !== 0 ? "hidden" : ""}`}
+            onAllAccountChange={(data) => setAllAccountData(data)}
+          />
+          <RelatedDetailCard
+            data={allAccountData}
+            className={`${current !== 0 ? "hidden" : ""} mt-4`}
+          />
+        </>
       ),
       disabled: false,
     },
@@ -405,6 +531,8 @@ const RelationshipCreateAndUpdate = ({
           dataDetailApproval={dataDetailApproval}
           handleDetailApproval={handleDetailApproval}
           loading={loadingApprovalHierarchyDetail}
+          key={`relationship-tab-1`}
+          className={`${current !== 1 ? "hidden" : ""}`}
         />
       ),
       disabled: false,
@@ -416,10 +544,9 @@ const RelationshipCreateAndUpdate = ({
           data={listDataAttachment}
           updateData={setListDataAttachment}
           type={type}
-          setModalUpload={setModalUpload}
-          onDownload={(file) =>
-            dispatch(downloadAttachment({ idAccount, idFile: file.key }))
-          }
+          dispatch={dispatch}
+          key={`relationship-tab-2`}
+          className={`${current !== 2 ? "hidden" : ""}`}
         />
       ),
       disabled: false,
@@ -431,10 +558,16 @@ const RelationshipCreateAndUpdate = ({
     title: item.title,
   }));
 
+  const handleScroll = () => {
+    if (containerRef.current) {
+      setScrollLeft(containerRef.current.scrollLeft);
+    }
+  };
+
   return (
     <>
       <LayoutMenu>
-        <Spin spinning={loading}>
+        <Spin spinning={loading || loadingDetail}>
           <BreadCrumb routes={routes} />
           <div className="w-full">
             <HeaderDetail
@@ -458,31 +591,32 @@ const RelationshipCreateAndUpdate = ({
             }}
           >
             {/* Steps Content */}
-            <BaseContainer>
-              <div className="flex justify-center py-4">
-                <Steps
-                  current={current}
-                  items={items.map((item, index) => ({
-                    ...item,
-                    status:
-                      index < current
-                        ? "finish"
-                        : index === current
-                          ? "process"
-                          : "wait",
-                  }))}
-                  labelPlacement="vertical"
-                />
+
+            <div className="flex flex-row gap-x-6 justify-center my-6">
+              <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
               </div>
-              <div className="steps-content my-6">{steps[current].content}</div>
-            </BaseContainer>
+            </div>
+            <div className="steps-content my-6">
+              {
+                steps.map((step) => step.content)
+              }
+            </div>
 
             {/* Section Action Steps */}
             <div className="steps-action my-8 flex w-full justify-between gap-x-2">
               <ButtonComponent
                 type="submit"
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                onClick={() => navigate(-1)}
+                onClick={() => navigate(
+                  ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+                  {
+                    state: {
+                      idAccount,
+                      idCustomer,
+                    }
+                  }
+                )}
               >
                 Back
               </ButtonComponent>
@@ -507,52 +641,45 @@ const RelationshipCreateAndUpdate = ({
                   </ButtonComponent>
                 )}
                 {current < steps.length - 1 && (
-                  <Button
+                  <ButtonComponent
                     onClick={handleButtonNext}
-                    type="primary"
-                    className="ant-btn ant-btn-submit flex w-full justify-center"
+                    type={"submit"}
                     disabled={steps[current].disabled}
                   >
-                    <span className="p-1 text-[18px] text-center">Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </Button>
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
+                  </ButtonComponent>
                 )}
                 {current === steps.length - 1 && (
                   <>
-                    <Button
-                      type="primary"
-                      htmlType="button"
-                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                    <ButtonComponent
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleSaveAsDraft();
                       }}
+                      type={"submit"}
                     >
-                      <span className="p-1 text-[18px] text-center">
-                        Save as Draft
-                      </span>
-                    </Button>
-                    <Button
-                      type="primary"
-                      htmlType="button"
-                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                      Save as Draft
+                    </ButtonComponent>
+                    <ButtonComponent
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleSaveAndSubmit();
                       }}
+                      type={"submit"}
                     >
-                      <span className="p-1 text-[18px] text-center">
-                        Save & Submit
-                      </span>
-                    </Button>
+                      Save & Submit
+                    </ButtonComponent>
                   </>
                 )}
               </div>
@@ -560,7 +687,7 @@ const RelationshipCreateAndUpdate = ({
           </Form>
         </Spin>
 
-        {/* create tax relation */}
+        {/* create tax relation - COMMENTED OUT: Duplicate modal causing double popup
         <ModalCustom
           isOpen={modalConfirm}
           type={"confirmation"}
@@ -592,8 +719,9 @@ const RelationshipCreateAndUpdate = ({
         >
           <RelationshipConfirm data={dataConfirm} />
         </ModalCustom>
+        */}
       </LayoutMenu>
-      
+
       {/* Modal Confirmation */}
       <ModalCustom
         isOpen={modalConfirm}
