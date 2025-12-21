@@ -208,7 +208,7 @@ const FormConfirmation = ({ data }) => {
                     {index < array.length - 1 && ", "}
                   </span>
                 ))
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Meter Reading Code">
@@ -221,7 +221,7 @@ const FormConfirmation = ({ data }) => {
                     </span>
                   )
                 )
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Account Segment">
@@ -234,7 +234,7 @@ const FormConfirmation = ({ data }) => {
                     </span>
                   )
                 )
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Account Group Type">
@@ -247,7 +247,7 @@ const FormConfirmation = ({ data }) => {
                     </span>
                   )
                 )
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Specific Customer Account">

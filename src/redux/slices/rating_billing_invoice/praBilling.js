@@ -1065,10 +1065,11 @@ export const getCustomerHeaderData = createAsyncThunk(
       const response = await ratingBillingHttpService.getAll(url);
       const responseData = response.data?.data || response.data;
 
-      // Return first item as header data
-      return Array.isArray(responseData) && responseData.length > 0 
-        ? responseData[0] 
-        : null;
+      // Return semua data array, bukan hanya item pertama
+      return Array.isArray(responseData) 
+        ? responseData 
+        : (responseData ? [responseData] : []);
+        
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
