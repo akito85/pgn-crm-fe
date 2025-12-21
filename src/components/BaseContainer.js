@@ -20,11 +20,11 @@ const BaseContainer = ({
     <div className={containerClass} style={containerStyle}>
       {type === "profile" || type === "tab" ? (
         <>
-          <div className="p-4">{element}</div>
+          <div className="p-0">{element}</div>
         </>
       ) : (
         <>
-          <div className="p-4">
+          <div className="p-0">
             <div className="text-primary text-xs font-bold uppercase">
               {header}
             </div>

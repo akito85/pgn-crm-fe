@@ -1,6 +1,6 @@
 import React from "react";
 import { Tooltip, Dropdown } from "antd";
-import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
+import { EllipsisOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
 import StatusComponent from "../../../../../components/StatusComponent";
@@ -598,7 +598,6 @@ export const getEFakturColumns = ({
   ];
 };
 
-// Action Column untuk Approval History
 export const getActionColumn = ({
   navigate,
   handleApprovalHistory,
@@ -606,28 +605,10 @@ export const getActionColumn = ({
   handleLogAktivitas,
 }) => {
   return [
-    // Approval History
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Approval History">
-            <div
-              className="cursor-pointer"
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-
-    // More Actions
     {
       action: "Update",
       type: "table",
+      width: 40,
       render: (record) => {
         const menuItems = [
           {
@@ -642,6 +623,12 @@ export const getActionColumn = ({
               </Link>
             ),
             icon: <SVGIcon name="IconDetail" width={16} />,
+          },
+          {
+            key: "approval-history",
+            label: "Approval History",
+            icon: <SVGIcon name="IconLogHistory" width={16} color="#0075bf" />,
+            onClick: () => handleApprovalHistory(record),
           },
           {
             key: "log",
@@ -666,6 +653,7 @@ export const getActionColumn = ({
             onClick: () => handleLogAktivitas(record),
           },
         ];
+
         return (
           <Tooltip title="Aksi Lainnya">
             <Dropdown
@@ -674,7 +662,7 @@ export const getActionColumn = ({
               placement="bottomRight"
             >
               <div className="cursor-pointer">
-                <MoreOutlined style={{ fontSize: 20, color: "#595959" }} />
+                <EllipsisOutlined style={{ fontSize: 20, color: "#595959" }} />
               </div>
             </Dropdown>
           </Tooltip>

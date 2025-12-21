@@ -356,10 +356,9 @@ const ViewInvoice = () => {
             trigger={["click"]}
             placement="bottomRight"
           >
-            <Button
-              type="text"
-              icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}
-            />
+            <span className="cursor-pointer">
+              <EllipsisOutlined style={{ fontSize: "18px" }} />
+            </span>
           </Dropdown>
         );
       },

@@ -66,7 +66,7 @@ const PrabillingForm = ({ type }) => {
   const [form] = Form.useForm();
   const formValue = form.getFieldsValue();
 
-  const DEFAULT_SEARCH_LIMIT = 99999;
+  const DEFAULT_SEARCH_LIMIT = 10;
   const MAX_SEARCH_LENGTH = 50;
 
   const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
@@ -589,7 +589,7 @@ const PrabillingForm = ({ type }) => {
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-1 gap-2"}>
+            <div className={"w-full grid grid-cols-2 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
                 name={"billing_cycle"}
@@ -610,7 +610,7 @@ const PrabillingForm = ({ type }) => {
                 label={"Billing Period"}
                 name={"billing_period"}
                 rules={formMessageRequired("Billing Period")}
-                style={{ marginBottom: 4 }}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   disabled={!billingCycle}
@@ -638,26 +638,31 @@ const PrabillingForm = ({ type }) => {
             }
           >
             <div className={"w-full grid grid-cols-2 gap-2"}>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"SOR"}
-                  name={"sor"}
-                  rules={formMessageRequired("SOR")}
-                  style={{ marginBottom: 0 }}
-                >
-                  <SelectComponent
-                    onChange={handleChangeSOR}
-                    options={list_sor?.data?.map((item) => {
-                      return {
-                        label: item?.name,
-                        value: item?.id,
-                      };
-                    })}
-                    disabled={defaultData?.sor}
-                  />
-                </Form.Item>
-              </div>
-              <Form.Item label={"Cost Center"} name={"costCenter"} style={{ marginBottom: 0 }}>
+              {/* SOR - Left column */}
+              <Form.Item
+                label={"SOR"}
+                name={"sor"}
+                rules={formMessageRequired("SOR")}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  onChange={handleChangeSOR}
+                  options={list_sor?.data?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })}
+                  disabled={defaultData?.sor}
+                />
+              </Form.Item>
+
+              {/* Cost Center - Right column */}
+              <Form.Item
+                label={"Cost Center"}
+                name={"costCenter"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -670,7 +675,13 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Meter Reading Code"} name={"meterReading"} style={{ marginBottom: 0 }}>
+
+              {/* Meter Reading Code - Right column */}
+              <Form.Item
+                label={"Meter Reading Code"}
+                name={"meterReading"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleMeterReadingRoute}
@@ -686,7 +697,13 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Segment"} name={"accountSegment"} style={{ marginBottom: 0 }}>
+
+              {/* Account Segment - Left column */}
+              <Form.Item
+                label={"Account Segment"}
+                name={"accountSegment"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
@@ -698,7 +715,13 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Group Type"} name={"accountGroupType"} style={{ marginBottom: 0 }}>
+
+              {/* Account Group Type - Left column */}
+              <Form.Item
+                label={"Account Group Type"}
+                name={"accountGroupType"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
@@ -714,7 +737,9 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <div className="col-span-2">
+
+              {/* Specific Customer Account - Right column */}
+              <div>
                 <Form.Item
                   label={"Specific Customer Account"}
                   name={"specificCustomer"}
@@ -758,14 +783,13 @@ const PrabillingForm = ({ type }) => {
                     }}
                     allowClear
                     placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
-                    // ============ INI YANG PENTING: tagRender ============
                     tagRender={(props) => {
                       const { value, closable, onClose } = props;
                       const customerData = selectedCustomersMap[value];
 
                       const displayText = customerData
                         ? `${customerData.accountName} - ${customerData.accountNumber}`
-                        : value; // Fallback ke account number saja
+                        : value;
 
                       return (
                         <span
