@@ -171,8 +171,7 @@ const DetailMonitoringUsage = () => {
         accountNumber: formValue?.accountNumber || null,
         accountName: formValue?.accountName || null,
         costCenter: formValue?.costCenter || null,
-        billingPeriod:
-          formValue?.billingPeriod || null,
+        billingPeriod: formValue?.billingPeriod || null,
         assetSerialNum: formValue?.assetSerialNum || null,
         assetType: formValue?.assetType || null,
         fdate:
@@ -182,8 +181,7 @@ const DetailMonitoringUsage = () => {
         fhour: hasValue(formValue?.fhour)
           ? moment(formValue?.fhour).format(dateFormatting.fhour)
           : null,
-        measDate:
-          formValue?.measDate || null ,
+        measDate: formValue?.measDate || null,
         streamId: formValue?.streamId || null,
         temperature: formValue?.temperature || null,
         pressure: formValue?.pressure || null,
@@ -417,10 +415,14 @@ const DetailMonitoringUsage = () => {
               className="tabs-compact"
               style={{ marginBottom: 0 }}
             >
-              <Tabs.TabPane tab="Upload" key="Upload">
-                <BaseContainer header={"Batch List"} className="-mt-4">
+              <Tabs.TabPane
+                tab="Upload"
+                key="Upload"
+                className="flex flex-col gap-3"
+              >
+                <BaseContainer header={"Batch List"} border className="-mt-4">
                   {/* Two Column Layout */}
-                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-0">
                     <DetailText label="Batch ID">
                       {detail_batch?.batchInformation?.batchId}
                     </DetailText>
@@ -460,6 +462,7 @@ const DetailMonitoringUsage = () => {
                 <BaseContainer
                   header={"History Log Information"}
                   className="mt-1"
+                  border
                 >
                   <div className="grid grid-cols-5 gap-x-8 gap-y-4">
                     <DetailText label="Record ID">
@@ -482,7 +485,7 @@ const DetailMonitoringUsage = () => {
                   </div>
                 </BaseContainer>
 
-                <BaseContainer header={"Usage List"} className="mt-1">
+                <BaseContainer header={"Usage List"} border className="mt-1">
                   <div className="my-5">
                     <TableRBI
                       dataSource={dataTable}

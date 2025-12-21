@@ -7,6 +7,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getCo
 import TableRBI from "../../../../../components/TableRBI";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import TableCalculateLog from "./Table/TableCalculateLog";
+import CardContainer from "../../../../../components/CardContainer";
 
 const DetailLog = ({ data, tabHeader }) => {
   const { list_calculation_result, loading } = useSelector(
@@ -244,7 +245,7 @@ const DetailLog = ({ data, tabHeader }) => {
   };
 
   return (
-    <BaseContainer subHeader={"calculation log"}>
+    <CardContainer subHeader={"calculation log"}>
       <TableRBI
         columns={processedColumns}
         dataSource={list_calculation_result?.result}
@@ -262,7 +263,7 @@ const DetailLog = ({ data, tabHeader }) => {
         loading={loading}
       />
       <TableCalculateLog calculationCode={calculationCode} />
-    </BaseContainer>
+    </CardContainer>
   );
 };
 

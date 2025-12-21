@@ -495,7 +495,7 @@ const PrabillingPage = () => {
             </div>
           }
         >
-          <div className="my-5">
+          <div>
             <TableRBI
               dataSource={list_prabilling_init}
               columns={processedColumns}

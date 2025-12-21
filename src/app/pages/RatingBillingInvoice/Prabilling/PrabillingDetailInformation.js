@@ -54,7 +54,15 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         })
       );
     }
-  }, [tabHeader, dispatch, prabillData?.initCode, page, pageSize, sort, search]);
+  }, [
+    tabHeader,
+    dispatch,
+    prabillData?.initCode,
+    page,
+    pageSize,
+    sort,
+    search,
+  ]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
