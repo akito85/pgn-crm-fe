@@ -54,7 +54,15 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         })
       );
     }
-  }, [tabHeader, dispatch, prabillData?.initCode, page, pageSize, sort, search]);
+  }, [
+    tabHeader,
+    dispatch,
+    prabillData?.initCode,
+    page,
+    pageSize,
+    sort,
+    search,
+  ]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -402,7 +410,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         key: "action",
         title: "ACTION",
         width: 60,
-        isClassification:true,
+        isClassification: true,
         fixed: "right",
         render: (text, record) => (
           <Link
@@ -488,7 +496,9 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         }
       >
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
-          <DetailText label={"Init Code"}>{prabillData?.initCode || ""}</DetailText>
+          <DetailText label={"Init Code"}>
+            {prabillData?.initCode || ""}
+          </DetailText>
           <DetailText label={"Process Name"}>
             {prabillData?.processName || ""}
           </DetailText>
@@ -505,35 +515,41 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           <DetailText label={"Total Customer"}>
             {prabillData?.totalCustomer || 0}
           </DetailText>
-          <DetailText label={"Status"}>{renderStatus(prabillData?.status)}</DetailText>
-          <DetailText label={"Message"}>{prabillData?.message || ""}</DetailText>
-          <DetailText label={"Remark"} className="col-span-2">
-            {prabillData?.remark || ""}
+          <DetailText label={"Status"}>
+            {renderStatus(prabillData?.status)}
+          </DetailText>
+          <DetailText label={"Message"}>
+            {prabillData?.message || ""}
           </DetailText>
 
           {/* Filter Details dari details array */}
-          {detailsData && detailsData.length > 0 && detailsData.map((detail, index) => (
-            <React.Fragment key={index}>
-              <DetailText label={"Cost Center"}>
-                {detail.costCenterName || detail.costCenter || ""}
-              </DetailText>
-              <DetailText label={"Meter Reading Code"}>
-                {detail.meterReadingCodeName || detail.meterReadingCode || ""}
-              </DetailText>
-              <DetailText label={"Account Segment"}>
-                {detail.accountSegmentName || detail.accountSegment || ""}
-              </DetailText>
-              <DetailText label={"Account Group Type"}>
-                {detail.accountGroupTypeName || detail.accountGroupType || ""}
-              </DetailText>
-              <DetailText label={"Account Numbers"} className="col-span-5">
-                {detail.accountNumber || ""}
-              </DetailText>
-              <DetailText label={"Account Names"} className="col-span-5">
-                {detail.accoutnName || ""}
-              </DetailText>
-            </React.Fragment>
-          ))}
+          {detailsData &&
+            detailsData.length > 0 &&
+            detailsData.map((detail, index) => (
+              <React.Fragment key={index}>
+                <DetailText label={"Cost Center"}>
+                  {detail.costCenterName || detail.costCenter || ""}
+                </DetailText>
+                <DetailText label={"Meter Reading Code"}>
+                  {detail.meterReadingCodeName || detail.meterReadingCode || ""}
+                </DetailText>
+                <DetailText label={"Account Segment"}>
+                  {detail.accountSegmentName || detail.accountSegment || ""}
+                </DetailText>
+                <DetailText label={"Account Group Type"}>
+                  {detail.accountGroupTypeName || detail.accountGroupType || ""}
+                </DetailText>
+                <DetailText label={"Account Numbers"} className="">
+                  {detail.accountNumber || ""}
+                </DetailText>
+                <DetailText label={"Account Names"} className="">
+                  {detail.accoutnName || ""}
+                </DetailText>
+              </React.Fragment>
+            ))}
+          <DetailText label={"Remark"} className="col-span-2">
+            {prabillData?.remark || ""}
+          </DetailText>
         </div>
       </CardContainer>
 
@@ -567,8 +583,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           </DetailText>
         </div>
       </CardContainer>
-
-
 
       {/* Prabilling Result Table Section */}
       <CardContainer

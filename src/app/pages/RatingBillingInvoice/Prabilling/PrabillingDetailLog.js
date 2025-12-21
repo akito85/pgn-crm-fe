@@ -16,10 +16,10 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  
+
   // Destructure data dengan benar - sama seperti di PrabillingDetailInformation
   const prabillData = data?.prabillInitPopulate || {};
-  
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -45,7 +45,15 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         })
       );
     }
-  }, [tabHeader, dispatch, prabillData?.initCode, page, pageSize, sort, search]);
+  }, [
+    tabHeader,
+    dispatch,
+    prabillData?.initCode,
+    page,
+    pageSize,
+    sort,
+    search,
+  ]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -67,7 +75,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
       sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
-    
+
     setSort(dataSort);
   };
 
@@ -182,25 +190,25 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         render: (status) => {
           // Mapping status text to match the Prabilling page format
           const statusUpper = status ? status.toUpperCase() : "INFO";
-          
+
           // Map status to the same format as Prabilling page
           const statusConfig = {
-            "SUCCESS": { text: "Success", type: "status" },
-            "ERROR": { text: "Failed", type: "status" },
-            "FAILED": { text: "Failed", type: "status" },
-            "WARNING": { text: "In Progress", type: "status" },
-            "PROCESSING": { text: "In Progress", type: "status" },
-            "IN_PROGRESS": { text: "In Progress", type: "status" },
-            "INFO": { text: "Open", type: "status" },
+            SUCCESS: { text: "Success", type: "status" },
+            ERROR: { text: "Failed", type: "status" },
+            FAILED: { text: "Failed", type: "status" },
+            WARNING: { text: "In Progress", type: "status" },
+            PROCESSING: { text: "In Progress", type: "status" },
+            IN_PROGRESS: { text: "In Progress", type: "status" },
+            INFO: { text: "Open", type: "status" },
           };
-          
+
           const config = statusConfig[statusUpper] || {
             text: "Unknown",
             type: "status",
           };
-          
+
           const displayText = config.text;
-          
+
           return renderColumn(
             "status",
             hasValue(search["status"]),
@@ -331,8 +339,8 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     setPageSize(pageSizeChange);
   };
 
-  const logData = Array.isArray(detail_prabilling_log?.content) 
-    ? detail_prabilling_log.content 
+  const logData = Array.isArray(detail_prabilling_log?.content)
+    ? detail_prabilling_log.content
     : [];
   const totalElements = detail_prabilling_log?.totalElements || 0;
 
@@ -345,7 +353,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           </div>
         }
       >
-        <div className="my-5">
+        <div className="my-0">
           <TableRBI
             dataSource={logData}
             columns={processedColumns}

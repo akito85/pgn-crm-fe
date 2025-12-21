@@ -108,6 +108,10 @@ const BillingPage = () => {
 
   const tabBilling = [
     {
+      label: "All",
+      value: "All",
+    },
+    {
       label: "Billing Gas",
       value: "Billing Gas",
     },
@@ -115,10 +119,6 @@ const BillingPage = () => {
       label: "Billing Non Gas",
       value: "Billing Non Gas",
       disabled: true,
-    },
-    {
-      label: "All",
-      value: "All",
     },
   ];
 
@@ -308,7 +308,7 @@ const BillingPage = () => {
     itemGrantAccess
   ).map((col) => ({
     ...col,
-    width: 30,
+    width: 100,
     align: "center",
   }));
 
@@ -370,39 +370,8 @@ const BillingPage = () => {
   }, [dataSource]);
 
   const dataSourceForTab = useMemo(() => {
-    if (valueTab === "All") {
-      return [
-        {
-          key: "INV-2024-001",
-          invoiceNumber: "INV-2024-001",
-          billingType: "Gas",
-          quantity: 1500,
-          totalAmountIdr: 75000000,
-          transactionDate: "2024-01-15",
-          remark: "Regular monthly billing for gas supply",
-        },
-        {
-          key: "INV-2024-002",
-          invoiceNumber: "INV-2024-002",
-          billingType: "Non Gas",
-          quantity: 500,
-          totalAmountIdr: 25000000,
-          transactionDate: "2024-01-20",
-          remark: "Additional service charges",
-        },
-        {
-          key: "INV-2024-003",
-          invoiceNumber: "INV-2024-003",
-          billingType: "Gas",
-          quantity: 2000,
-          totalAmountIdr: 100000000,
-          transactionDate: "2024-02-01",
-          remark: "Peak season billing",
-        },
-      ];
-    }
     return dataSourceWithKeys;
-  }, [valueTab, dataSourceWithKeys]);
+  }, [dataSourceWithKeys]);
 
   return (
     <LayoutMenu>
@@ -413,7 +382,7 @@ const BillingPage = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Billing List</p>
-              <div className="mt-[15px] flex gap-[20px]">
+              <div className="flex gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
             </div>
@@ -426,11 +395,11 @@ const BillingPage = () => {
               value={valueTab}
               optionType="button"
               buttonStyle="solid"
-              style={{ gap: 12, display: "flex" }}
+              style={{ gap: 5, display: "flex" }}
             />
           }
         >
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               dataSource={dataSourceForTab}
               columns={processedColumns}
@@ -438,10 +407,8 @@ const BillingPage = () => {
               pageSize={pageSize}
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
-              totalData={
-                valueTab === "All" ? 3 : data?.page?.totalElements || 0
-              }
-              tableScrolled={{ x: valueTab === "All" ? 1500 : 16000, y: 525 }}
+              totalData={data?.page?.totalElements || 0}
+              tableScrolled={{ x: valueTab === "All" ? 1300 : 16000, y: 525 }}
               onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
