@@ -595,7 +595,7 @@ const CalculationForm = ({ type }) => {
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-1 gap-2"}>
+            <div className={"w-full grid grid-cols-2 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
                 name={"billing_cycle"}
@@ -644,8 +644,8 @@ const CalculationForm = ({ type }) => {
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-2 gap-2"}>
-              <div className="col-span-2">
+            <div className={"w-full grid grid-cols-3 gap-2"}>
+              <div className="">
                 <Form.Item
                   label={"Calculation Type"}
                   name={"calculation_type"}
@@ -663,7 +663,7 @@ const CalculationForm = ({ type }) => {
                 </Form.Item>
               </div>
 
-              <div className="col-span-2">
+              <div className="">
                 <Form.Item
                   label={"Service Type"}
                   name={"serviceType"}
@@ -681,7 +681,7 @@ const CalculationForm = ({ type }) => {
                 </Form.Item>
               </div>
 
-              <div className="col-span-2">
+              <div className="">
                 <Form.Item
                   label={"SOR"}
                   name={"sor"}
@@ -701,7 +701,11 @@ const CalculationForm = ({ type }) => {
                 </Form.Item>
               </div>
 
-              <Form.Item label={"Cost Center"} name={"costCenter"} style={{ marginBottom: 0 }}>
+              <Form.Item
+                label={"Cost Center"}
+                name={"costCenter"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -715,7 +719,11 @@ const CalculationForm = ({ type }) => {
                 />
               </Form.Item>
 
-              <Form.Item label={"Meter Reading Code"} name={"meterReading"} style={{ marginBottom: 0 }}>
+              <Form.Item
+                label={"Meter Reading Code"}
+                name={"meterReading"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleMeterReadingRoute}
@@ -732,7 +740,11 @@ const CalculationForm = ({ type }) => {
                 />
               </Form.Item>
 
-              <Form.Item label={"Account Segment"} name={"accountSegment"} style={{ marginBottom: 0 }}>
+              <Form.Item
+                label={"Account Segment"}
+                name={"accountSegment"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
@@ -745,7 +757,11 @@ const CalculationForm = ({ type }) => {
                 />
               </Form.Item>
 
-              <Form.Item label={"Account Group Type"} name={"accountGroupType"} style={{ marginBottom: 0 }}>
+              <Form.Item
+                label={"Account Group Type"}
+                name={"accountGroupType"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
@@ -944,7 +960,11 @@ const CalculationForm = ({ type }) => {
                 </Form.Item>
               )}
 
-            <Form.Item label={"Remark"} name={"remark"} rules={formMessageRequired("Remark")}>
+            <Form.Item
+              label={"Remark"}
+              name={"remark"}
+              rules={formMessageRequired("Remark")}
+            >
               <InputComponent
                 type="textarea"
                 style={{ marginBottom: 0 }}
