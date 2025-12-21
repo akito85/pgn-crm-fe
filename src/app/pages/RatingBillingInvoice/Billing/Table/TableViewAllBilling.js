@@ -22,6 +22,7 @@ export const columnsAllBilling = (
     key: "invoiceNumber",
     title: "INVOICE NUMBER",
     dataIndex: "invoiceNumber",
+    isClassification:true,
     sorter: true,
     width: 200,
     ...getColumnSearchPropsUseFilteredValue(
@@ -49,7 +50,7 @@ export const columnsAllBilling = (
     title: "BILLING TYPE",
     dataIndex: "billingType",
     sorter: true,
-    align: "center",
+    isClassification:true,
     width: 150,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -81,7 +82,7 @@ export const columnsAllBilling = (
     title: "QUANTITY",
     dataIndex: "quantity",
     sorter: true,
-    align: "right",
+    isNumber:true,
     width: 150,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -108,7 +109,7 @@ export const columnsAllBilling = (
     title: "TOTAL AMOUNT (IDR)",
     dataIndex: "totalAmountIdr",
     sorter: true,
-    align: "right",
+    isNumber:true,
     width: 200,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -134,7 +135,7 @@ export const columnsAllBilling = (
     key: "transactionDate",
     title: "TRANSACTION DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     width: 180,
     dataIndex: "transactionDate",
     ...getColumnSearchPropsUseFilteredValue(
@@ -161,6 +162,7 @@ export const columnsAllBilling = (
     key: "remark",
     sorter: true,
     title: "REMARK",
+    isClassification:true,
     dataIndex: "remark",
     width: 300,
     ellipsis: {
