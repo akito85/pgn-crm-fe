@@ -7,8 +7,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getPaymentPagging,downloadPayment
 } from "../../../../../redux/slices/receipt_collection/payment";
-import BaseContainer from "../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import CardContainer from "../../../../../components/CardContainer";
+import TableRBI from "../../../../../components/TableRBI";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -62,19 +62,6 @@ const ViewPayment = () => {
   
 
   const itemsActionView = () => [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
   ];
 
   useEffect(() => {
@@ -117,6 +104,10 @@ const ViewPayment = () => {
     setPageSize(pageSizeChange);
   };
   
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
   
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
@@ -145,36 +136,40 @@ const ViewPayment = () => {
               dataUser,
             )}
           />
-          <BaseContainer header={"Payment List"}>
-            <TablePaginationNew
+          <CardContainer header={"Payment List"}>
+            <TableRBI
+              showExport={true}
+              handleDownload={handleDownload}
               dataSource={dataTable}
+              pageSize={pageSize}
               totalData={totalElements}
               current={page}
-              pageSize={pageSize}
-              tableScrolled={{ y: 525, x: 2300 }}
+              tableScrolled={{ y: 525, x: 10000 }}
               onChange={handleChangeSize}
+              onSizeChanger={handleChangeSize}
               onSort={onSort}
-              columns={[...columns(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                dataUser
-              ), ...useColumnActionPermission(
-                ["view"],
-                itemsActionView(
-                  dataUser,
-                )
-              )]}
+              columns={[
+                ...columns(
+                  search,
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch,
+                  dataUser
+                ), 
+                ...useColumnActionPermission(
+                  ["view"],
+                  itemsActionView(
+                    dataUser,
+                  )
+                )]}
               useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-              }}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
-          </BaseContainer>
+          </CardContainer>
         </div>
         
       </Spin>

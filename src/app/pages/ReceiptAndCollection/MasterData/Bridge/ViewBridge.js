@@ -7,8 +7,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getBridgePagging,downloadBridge
 } from "../../../../../redux/slices/receipt_collection/bridge";
-import BaseContainer from "../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import CardContainer from "../../../../../components/CardContainer";
+import TableRBI from "../../../../../components/TableRBI";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -62,19 +62,7 @@ const ViewBridge = () => {
   
 
   const itemsActionView = () => [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+    
   ];
 
   useEffect(() => {
@@ -145,14 +133,16 @@ const ViewBridge = () => {
               dataUser,
             )}
           />
-          <BaseContainer header={"Bridge List"}>
-            <TablePaginationNew
+          <CardContainer header={"Bridge List"}>
+            <TableRBI
+              showExport={true}
               dataSource={dataTable}
               totalData={totalElements}
               current={page}
               pageSize={pageSize}
-              tableScrolled={{ y: 525, x: 2300 }}
+              tableScrolled={{ y: 525, x: 1500 }}
               onChange={handleChangeSize}
+              handleDownload={handleDownload}
               onSort={onSort}
               columns={[...columns(
                 search,
@@ -174,7 +164,7 @@ const ViewBridge = () => {
                 no: "left",
               }}
             />
-          </BaseContainer>
+          </CardContainer>
         </div>
         
       </Spin>

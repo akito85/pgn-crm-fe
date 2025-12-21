@@ -650,6 +650,7 @@ const CalculationForm = ({ type }) => {
                   label={"Calculation Type"}
                   name={"calculation_type"}
                   rules={formMessageRequired("Calculation Type")}
+                  style={{ marginBottom: 0 }}
                 >
                   <SelectComponent
                     options={list_calculation_type?.map((item) => {
@@ -667,6 +668,7 @@ const CalculationForm = ({ type }) => {
                   label={"Service Type"}
                   name={"serviceType"}
                   rules={formMessageRequired("Service Type")}
+                  style={{ marginBottom: 0 }}
                 >
                   <SelectComponent
                     options={list_service_type?.map((item) => {
@@ -684,6 +686,7 @@ const CalculationForm = ({ type }) => {
                   label={"SOR"}
                   name={"sor"}
                   rules={formMessageRequired("SOR")}
+                  style={{ marginBottom: 0 }}
                 >
                   <SelectComponent
                     onChange={handleChangeSOR}
@@ -698,7 +701,7 @@ const CalculationForm = ({ type }) => {
                 </Form.Item>
               </div>
 
-              <Form.Item label={"Cost Center"} name={"costCenter"}>
+              <Form.Item label={"Cost Center"} name={"costCenter"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -712,7 +715,7 @@ const CalculationForm = ({ type }) => {
                 />
               </Form.Item>
 
-              <Form.Item label={"Meter Reading Code"} name={"meterReading"}>
+              <Form.Item label={"Meter Reading Code"} name={"meterReading"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleMeterReadingRoute}
@@ -729,7 +732,7 @@ const CalculationForm = ({ type }) => {
                 />
               </Form.Item>
 
-              <Form.Item label={"Account Segment"} name={"accountSegment"}>
+              <Form.Item label={"Account Segment"} name={"accountSegment"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
@@ -742,7 +745,7 @@ const CalculationForm = ({ type }) => {
                 />
               </Form.Item>
 
-              <Form.Item label={"Account Group Type"} name={"accountGroupType"}>
+              <Form.Item label={"Account Group Type"} name={"accountGroupType"} style={{ marginBottom: 0 }}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
@@ -763,7 +766,7 @@ const CalculationForm = ({ type }) => {
                 <Form.Item
                   label={"Specific Customer Account"}
                   name={"specificCustomer"}
-                  style={{ marginBottom: 4 }}
+                  style={{ marginBottom: 0 }}
                   help={
                     specific_customer_message && (
                       <span className="text-blue-600 text-xs">
@@ -901,6 +904,7 @@ const CalculationForm = ({ type }) => {
               label={"Type"}
               name={"type"}
               rules={formMessageRequired("Type")}
+              style={{ marginBottom: 0 }}
             >
               <SelectComponent
                 onChange={handleScheduleTypeChange}
@@ -920,6 +924,7 @@ const CalculationForm = ({ type }) => {
                 <Form.Item
                   label={"Schedule"}
                   name={"scheduleDateTime"}
+                  style={{ marginBottom: 0 }}
                   rules={[
                     {
                       required: true,
@@ -939,9 +944,10 @@ const CalculationForm = ({ type }) => {
                 </Form.Item>
               )}
 
-            <Form.Item label={"Remark"} name={"remark"}>
+            <Form.Item label={"Remark"} name={"remark"} rules={formMessageRequired("Remark")}>
               <InputComponent
                 type="textarea"
+                style={{ marginBottom: 0 }}
                 value={remark}
                 onChange={(e) => setRemark(e.target.value)}
               />

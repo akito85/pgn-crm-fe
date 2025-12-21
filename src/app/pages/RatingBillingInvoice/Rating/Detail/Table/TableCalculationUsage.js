@@ -4,6 +4,7 @@ import { Tooltip } from "antd";
 import { dateFormatting } from "../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";
+import { EyeOutlined } from "@ant-design/icons";
 
 export const columnsCalculationUsage = (
   page = 1,
@@ -411,11 +412,7 @@ export const columnsCalculationUsage = (
       return (
         <Tooltip title="Detail">
           <div className="pt-1 cursor-pointer">
-            <SVGIcon
-              name="IconDetail"
-              width={24}
-              onClick={() => handleDetail(record)}
-            />
+            <EyeOutlined onClick={() => handleDetail(record)} style={{ fontSize: "20px" }} />
           </div>
         </Tooltip>
       );

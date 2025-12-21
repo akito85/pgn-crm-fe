@@ -335,7 +335,15 @@ const ModalApprovalUsage = ({
             onFinish={handleSave}
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold">Usage List</p>
+              <div className="flex gap-2 justify-between">
+                <p className="text-primary uppercase font-bold">Usage List</p>
+                {selectedRowKeys.length > 0 && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedRowKeys.length}{" "}
+                    {selectedRowKeys.length === 1 ? "row" : "rows"} selected
+                  </p>
+                )}
+              </div>
               <TableRBI
                 type="FE"
                 dataSource={dataApproval?.map((a, index) => ({
@@ -357,7 +365,7 @@ const ModalApprovalUsage = ({
                 rowSelection={rowSelection}
                 loading={false}
               />
-              
+
               <div className="pt-[30px]">
                 <Form.Item
                   label={"Remark"}
@@ -387,7 +395,8 @@ const ModalApprovalUsage = ({
               <p className="text-primary uppercase font-bold">Usage List</p>
               <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-md border border-blue-200">
                 <span className="text-blue-600 font-semibold">
-                  {dataTableSelect.length} record{dataTableSelect.length > 1 ? 's' : ''} selected
+                  {dataTableSelect.length} record
+                  {dataTableSelect.length > 1 ? "s" : ""} selected
                 </span>
               </div>
             </div>

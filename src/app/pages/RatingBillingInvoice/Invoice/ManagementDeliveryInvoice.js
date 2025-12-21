@@ -38,8 +38,20 @@ const ManagementDeliveryInvoice = () => {
   // Fixed column settings
   const [fixedColumns, setFixedColumns] = useState({
     left: [],
-    right: [],
+    right: ["actions", "status"],
   });
+
+  /* ----------------------------------------------------------
+     FORMAT DATE HELPER
+  ------------------------------------------------------------*/
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
 
   /* ----------------------------------------------------------
      FETCH DATA LIST + SUMMARY
@@ -78,16 +90,121 @@ const ManagementDeliveryInvoice = () => {
       width: 180,
     },
     {
+      key: "customerNumber",
+      title: "CUSTOMER NUMBER",
+      dataIndex: "customerNumber",
+      width: 180,
+    },
+    {
       key: "customerName",
-      title: "CUSTOMER",
+      title: "CUSTOMER NAME",
+      dataIndex: "customerName",
+      width: 220,
+    },
+    {
+      key: "accountNumber",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      width: 180,
+    },
+    {
+      key: "accountName",
+      title: "ACCOUNT NAME",
       dataIndex: "accountName",
       width: 220,
     },
     {
-      key: "deliveryChannel",
-      title: "DELIVERY CHANNEL",
-      dataIndex: "deliveryChannel",
+      key: "sor",
+      title: "SOR",
+      dataIndex: "sor",
+      width: 120,
+    },
+    {
+      key: "costCenter",
+      title: "COST CENTER",
+      dataIndex: "costCenter",
       width: 150,
+    },
+    {
+      key: "accountSegment",
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      width: 180,
+    },
+    {
+      key: "accountGroupType",
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      width: 200,
+    },
+    {
+      key: "meterReadingCode",
+      title: "METER READING CODE",
+      dataIndex: "meterReadingCode",
+      width: 200,
+    },
+    {
+      key: "accountType",
+      title: "ACCOUNT TYPE",
+      dataIndex: "accountType",
+      width: 150,
+    },
+    {
+      key: "accountStatus",
+      title: "ACCOUNT STATUS",
+      dataIndex: "accountStatus",
+      width: 180,
+    },
+    {
+      key: "customerManagement",
+      title: "CUSTOMER MANAGEMENT",
+      dataIndex: "customerManagement",
+      width: 200,
+    },
+    {
+      key: "corporateCustomer",
+      title: "CORPORATE CUSTOMER",
+      dataIndex: "corporateCustomer",
+      width: 200,
+    },
+    {
+      key: "channel",
+      title: "CHANNEL",
+      dataIndex: "deliveryChannel",
+      width: 120,
+    },
+    {
+      key: "billingPeriod",
+      title: "BILLING PERIOD",
+      dataIndex: "billingPeriod",
+      width: 150,
+    },
+    {
+      key: "deliveryDate",
+      title: "DELIVERY DATE",
+      dataIndex: "deliveryDate",
+      width: 150,
+      render: (date) => formatDate(date),
+    },
+    {
+      key: "dateSent",
+      title: "DATE SENT",
+      dataIndex: "sentDtm",
+      width: 150,
+      render: (date) => formatDate(date),
+    },
+    {
+      key: "createdBy",
+      title: "CREATED BY",
+      dataIndex: "createdBy",
+      width: 150,
+    },
+    {
+      key: "createdAt",
+      title: "CREATED AT",
+      dataIndex: "createdAt",
+      width: 180,
+      render: (date) => formatDate(date),
     },
     {
       key: "status",
@@ -191,6 +308,7 @@ const ManagementDeliveryInvoice = () => {
           failed={data_summary?.failed ?? 0}
           pending={data_summary?.awaitingDelivery ?? 0}
           notProcessed={data_summary?.open ?? 0}
+          summaryChannel={data_summary?.summaryChannel}
         />
 
         {/* Main Table */}

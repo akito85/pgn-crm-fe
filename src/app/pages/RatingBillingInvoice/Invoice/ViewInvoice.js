@@ -69,7 +69,7 @@ const ViewInvoice = () => {
         ? JSON.parse(saved)
         : {
             left: ["no"], // default left fixed column keys if any
-            right: ["actions"], // default right fixed column keys - actions column
+            right: ["status", "statusPaymentGw", "actions"], // default right fixed column keys - actions column
           };
     } catch (e) {
       return { left: ["no"], right: ["actions"] };
@@ -79,10 +79,7 @@ const ViewInvoice = () => {
   // ✅ Save to localStorage when fixedColumns change
   useEffect(() => {
     try {
-      localStorage.setItem(
-        "invoiceFixedColumns",
-        JSON.stringify(fixedColumns)
-      );
+      localStorage.setItem("invoiceFixedColumns", JSON.stringify(fixedColumns));
     } catch (e) {
       // ignore storage errors
     }
@@ -354,7 +351,11 @@ const ViewInvoice = () => {
         ];
 
         return (
-          <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
+          <Dropdown
+            menu={{ items: menuItems }}
+            trigger={["click"]}
+            placement="bottomRight"
+          >
             <Button
               type="text"
               icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}
@@ -447,7 +448,7 @@ const ViewInvoice = () => {
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 7000 }}
+              tableScrolled={{ y: 525, x: 10000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}

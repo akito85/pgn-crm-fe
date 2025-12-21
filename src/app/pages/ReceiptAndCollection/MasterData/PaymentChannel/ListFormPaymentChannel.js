@@ -20,6 +20,7 @@ import {
   getListApprovalById,
   getListCategory,
   updatePaymentChannel,
+  getCategoryPayment
 } from "../../../../../redux/slices/receipt_collection/paymentChannel";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -47,6 +48,7 @@ const ListFormPaymentChannel = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
+    dataCategory
   } = useSelector((state) => state.paymentChannel);
 
   // Declaration
@@ -82,6 +84,7 @@ const ListFormPaymentChannel = (props) => {
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getTypeDDL());
+    dispatch(getCategoryPayment());
   }, [dispatch]);
 
   useEffect(() => {
@@ -145,6 +148,7 @@ const ListFormPaymentChannel = (props) => {
             : moment(data_detail?.peOpCi?.effEndDate).clone(),
         type: data_detail?.peOpCi?.type,
         appHierId: data_detail?.peOpCi?.appHierId,
+        category: data_detail?.peOpCi?.category,
       });
 
       setSelectedHierarchy(data_detail?.peOpCi?.appHierId);
@@ -166,7 +170,8 @@ const ListFormPaymentChannel = (props) => {
                                       "name",
                                       "effStartDate",
                                       "effEndDate",
-                                      "type"
+                                      "type",
+                                      "category"
                                      ] },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -201,6 +206,7 @@ const ListFormPaymentChannel = (props) => {
           ? moment(formValue.effEndDate).format(dateFormatting.date)
           : null,
         appHierId: formValue.apphierId,
+        category: formValue.category,
       };
 
       setSendBody(dataValue);
@@ -420,6 +426,7 @@ const ListFormPaymentChannel = (props) => {
             <PaymentChannelForm
               dataType={dataType}
               form={form}
+              dataCategory={dataCategory}
             />
           </div>
           <div

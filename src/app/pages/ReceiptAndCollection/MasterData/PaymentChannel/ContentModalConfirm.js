@@ -36,6 +36,9 @@ const ContentModalConfirm = ({
                 : ""}
             </DetailText>
             <DetailText label={"Type"}>{data?.type}</DetailText>
+            <DetailText label="Category">
+              {data?.category}
+            </DetailText>
           </div>
         );
       case tabData[1].value:

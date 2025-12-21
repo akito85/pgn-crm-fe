@@ -66,7 +66,7 @@ const ModalRequestApproval = ({
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
-    right: [] 
+    right: [],
   });
 
   // Use Effect - Fetch approval list sekali saja
@@ -401,9 +401,17 @@ const ModalRequestApproval = ({
             }`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
-              <p className="text-primary uppercase font-bold mb-4">
-                Billing List
-              </p>
+              <div className="flex gap-2 justify-between">
+                <p className="text-primary uppercase font-bold mb-4">
+                  Billing List
+                </p>
+                {selectedRowKeys.length > 0 && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedRowKeys.length}{" "}
+                    {selectedRowKeys.length === 1 ? "row" : "rows"} selected
+                  </p>
+                )}
+              </div>
               <TableRBI
                 dataSource={dataSourceWithKeys}
                 columns={processedColumns}
@@ -411,7 +419,9 @@ const ModalRequestApproval = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_list_billing_request_approval?.page?.totalElements || 0}
+                totalData={
+                  data_list_billing_request_approval?.page?.totalElements || 0
+                }
                 tableScrolled={{ y: 525, x: 15000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
