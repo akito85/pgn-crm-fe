@@ -187,7 +187,7 @@ export const columns = (
     key: "actionButtons",
     width: 80,
     fixed: "right",
-    align: "center",
+    isClassification: true,
     render: (_, record) => (
       <Tooltip title="Preview File">
         <DownloadOutlined
@@ -303,7 +303,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
   return (
     <BaseContainer
       header={
-        <div className="flex justify-between">
+        <div className="flex justify-between h-9">
           <p>Invoice Log Information</p>
           <p className="text-primary font-semibold">{invoiceNumber}</p>
         </div>
