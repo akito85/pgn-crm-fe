@@ -1,7 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Fragment } from "react";
-import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../components/BaseContainer";
