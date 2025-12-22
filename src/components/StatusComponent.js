@@ -23,6 +23,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     let bgColor = "bg-slate-600";
     let tColor = "text-white";
 
+    console.log("status: ", colour);
+
     switch (lowerColour) {
       // ===== SUCCESS STATUSES =====
       case "active":
@@ -59,7 +61,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "failed billing":
       case "fail":
       case "not_paid":
-      case "cancelled": 
+      case "cancelled":
       case "CANCELLED":
         bgColor = "status-inactive";
         tColor = "text-white";
@@ -69,7 +71,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "partial payment":
       case "waiting to release":
       case "need review": // ✅ Billing status
-
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
@@ -80,7 +81,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "awaiting_approval":
       case "awaiting approval":
       case "processing":
-      case "submitted": 
+      case "submitted":
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
@@ -220,7 +221,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-red-800";
         break;
 
-      case "manual_upload": 
+      case "manual_upload":
       case "manual upload":
         bgColor = "bg-purple-100";
         tColor = "text-purple-800";
@@ -275,7 +276,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "not paid":
       case "not_paid":
       case "rejected":
-        case "cancelled":
+      case "cancelled":
         return <CloseCircleFilled style={{ fontSize: "15px" }} />;
 
       // ===== PENDING/SCHEDULED ICONS =====
