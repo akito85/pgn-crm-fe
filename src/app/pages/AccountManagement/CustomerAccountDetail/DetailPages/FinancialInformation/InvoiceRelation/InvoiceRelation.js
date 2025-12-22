@@ -41,6 +41,7 @@ const InvoiceRelation = ({
   //state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [listType, setListType] = useState("all");
   const [totalElement, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -124,14 +125,10 @@ const InvoiceRelation = ({
       handleIsApproval(false)
 
       const body = {
-        page,
-        size: pageSize,
-        sort,
-        searches: search,
         inputFields: tempFilters,
       }
 
-      dispatch(getInvoiceRelation({ id, body }))
+      dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
     })
     .catch(() => {});
   }
@@ -173,14 +170,10 @@ const InvoiceRelation = ({
     .unwrap()
     .then(() => {
       const body = {
-        page,
-        size: pageSize,
-        sort,
-        searches: search,
         inputFields: tempFilters,
       }
 
-      dispatch(getInvoiceRelation({ id, body }));
+      dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
       setShowInactiveModal(false);
       handleClear();
     })
@@ -305,22 +298,12 @@ const InvoiceRelation = ({
    */
   const handleIsApproval = (newIsApproval) => {
     if (newIsApproval) {
-      setSearchText("WAITING APPROVAL");
-      setSearchedColumn("approvalStatus");
       setPage(1);
-      setSearch((prevState) => ({
-        ...prevState,
-        approvalStatus: "WAITING_APPROVAL",
-      }));
+      setListType("approval");
       setIsApproval(true);
     } else {
-      setSearchText("");
-      setSearchedColumn("");
       setPage(1)
-      setSearch((prevState) => ({
-        ...prevState,
-        approvalStatus: undefined,
-      }));
+      setListType("all");
       setIsApproval(false);
       setSelectedRowKeys([]);
       setSelectedRows([]);
@@ -331,17 +314,11 @@ const InvoiceRelation = ({
   }
 
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadInvoiceRelation({ page, pageSize, sort, search: tempSearch }));
+    const body = {
+      inputFields: tempFilters,
+    } 
+
+    dispatch(downloadInvoiceRelation({ page, size: pageSize, sort, searchs: search, body, id }));
   };
 
   /**
@@ -375,15 +352,15 @@ const InvoiceRelation = ({
 
   useEffect(() => {
     const body = {
-      page,
-      size: pageSize,
-      sort,
-      searches: search,
       inputFields: tempFilters,
     }
+    
+    console.log("search", search);
+    console.log("search JSON", JSON.stringify(search));
+    console.log("search encoded", JSON.stringify(search))
 
-    dispatch(getInvoiceRelation({ id, body }));
-  }, [page, pageSize, sort, search, tempFilters]);
+    dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), listType, body }));
+  }, [page, pageSize, sort, search, tempFilters, listType]);
 
   useEffect(() => {
     if (

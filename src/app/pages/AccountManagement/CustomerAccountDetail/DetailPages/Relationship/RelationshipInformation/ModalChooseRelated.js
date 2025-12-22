@@ -37,8 +37,8 @@ const ModalChooseRelated = ({
   // Determine if showing Customer or Account based on relationshipType
   // IMPORTANT: BRANCH_OF, HEAD_QUARTER_OF, COMPANY_GROUP = ACCOUNT
   //            CHILD_OF, PARENT_OF = CUSTOMER
-  const isAccountType = normalizedRelationType && ["BRANCH_OF", "HEAD_QUARTER_OF", "COMPANY_GROUP"].includes(normalizedRelationType);
-  const isCustomerType = normalizedRelationType && ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
+  const isAccountType = normalizedRelationType && ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
+  const isCustomerType = normalizedRelationType && ["BRANCH_OF", "HEAD_QUARTER_OF", "COMPANY_GROUP"].includes(normalizedRelationType);
 
   // Debug logging
   useEffect(() => {

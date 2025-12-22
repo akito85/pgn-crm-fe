@@ -26,11 +26,11 @@ const InvoiceRelationDetailAttch = ({
       setLoadingDownload(true);
       try {
         const response = await axios.get(configApp.ACCOUNT_SERVICE + r.urlFile1, {
-        headers: tokenHeader(),
-        responseType: "blob",
-      });
-      const base64 = await getBase64(response.data);
-      previewFileAttachment(base64);
+          headers: tokenHeader(),
+          responseType: "blob",
+        });
+        const base64 = await getBase64(response.data);
+        previewFileAttachment(base64);
       } catch (error) {
         console.error("Failed to download file", error);
       } finally {

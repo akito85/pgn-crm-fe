@@ -3,7 +3,8 @@ import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../utils";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+// import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 
 const ModalConfirmationApprovalPaymentRelation = ({
   dataSource,
@@ -25,9 +26,9 @@ const ModalConfirmationApprovalPaymentRelation = ({
   const columns = [
     {
       title: "NO",
+      dataIndex: "no",
       width: 50,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "ACCOUNT NUMBER",
@@ -118,13 +119,24 @@ const ModalConfirmationApprovalPaymentRelation = ({
       customMessage={"Are you sure you want to approve selected data?"}
       header={"CONFIRMATION"}
     >
-      <TablePaginationNew
+      {/* <TablePaginationNew
         dataSource={dataSource}
         totalData={dataSource.length}
         columns={columns}
         onChange={handleChangeDetail}
         current={page}
         tableScrolled={{ y: 200, x: 1500 }}
+        type="FE"
+      /> */}
+      <TablePaginationNew
+        dataSource={dataSource.map((data, index) => ({
+          ...data,
+          no: (page - 1) * pageSize + index + 1,
+        }))}
+        onChange={handleChangeDetail}
+        tableScrolled={{ y: 400, x: 2000 }}
+        columns={columns}
+        enableDragColumn={true}
         type="FE"
       />
     </ModalApproveOrReject>

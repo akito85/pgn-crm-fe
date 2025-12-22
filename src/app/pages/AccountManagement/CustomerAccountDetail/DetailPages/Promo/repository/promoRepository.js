@@ -21,14 +21,16 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria: { inputFields: [{condition, column, operator, value}] }
    */
-  getListValidPromo: async (params, advancedSearch = null) => {
+  getListValidPromo: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
         headers: tokenHeader(),
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/valid`, body, config);
       return response?.data;
     } catch (error) {
@@ -58,7 +60,7 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  downloadListValidPromo: async (params, advancedSearch = null) => {
+  downloadListValidPromo: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
@@ -66,7 +68,9 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/download-valid`, body, config);
 
       console.log('Download response:', response);
@@ -110,14 +114,16 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  getListValidPromoCriteriaByPromoId: async (params, advancedSearch = null) => {
+  getListValidPromoCriteriaByPromoId: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
         headers: tokenHeader(),
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/criteria`, body, config);
       return response?.data;
     } catch (error) {
@@ -147,7 +153,7 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  downloadListValidPromoCriteria: async (params, advancedSearch = null) => {
+  downloadListValidPromoCriteria: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
@@ -155,7 +161,9 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/download-criteria`, body, config);
 
       if (hasValue(response.headers?.get("content-disposition"))) {
@@ -184,14 +192,16 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  getListValidPromoConditionByPromoId: async (params, advancedSearch = null) => {
+  getListValidPromoConditionByPromoId: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
         headers: tokenHeader(),
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/condition`, body, config);
       return response?.data;
     } catch (error) {
@@ -221,7 +231,7 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  downloadListValidPromoCondition: async (params, advancedSearch = null) => {
+  downloadListValidPromoCondition: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
@@ -229,7 +239,9 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/download-condition`, body, config);
 
       if (hasValue(response.headers?.get("content-disposition"))) {
@@ -350,14 +362,16 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria: { inputFields: [{condition, column, operator, value}] }
    */
-  getListPromoHistory: async (params, advancedSearch = null) => {
+  getListPromoHistory: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
         headers: tokenHeader(),
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/history`, body, config);
       return response?.data;
     } catch (error) {
@@ -366,17 +380,29 @@ const promoRepository = {
   },
 
   /**
-   * Get detail of promo history by invoice number
-   * GET /v1/dbs/api/promo/history/{invoiceNumber}
-   * @param {string} invoiceNumber - Invoice number
+   * Get detail of promo history by billing code
+   * GET /v1/dbs/api/promo/history/{billingCode}?accountId={accountId}
+   * @param {string} billingCode - Billing code
+   * @param {string} accountId - Account ID
    */
-  getDetailPromoHistoryById: async (invoiceNumber) => {
+  getDetailPromoHistoryById: async (billingCode, accountId) => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/history/${invoiceNumber}`, {
+      console.log('API Call - billingCode:', billingCode, 'accountId:', accountId);
+
+      const config = {
         headers: tokenHeader(),
-      });
+        params: {}
+      };
+
+      if (accountId) {
+        config.params.accountId = accountId;
+      }
+
+      console.log('API Config:', config);
+      const response = await axios.get(`${BASE_URL}${API_PATH}/history/${billingCode}`, config);
       return response?.data;
     } catch (error) {
+      console.error('API Error:', error);
       throw error;
     }
   },
@@ -387,7 +413,7 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  downloadListPromoHistory: async (params, advancedSearch = null) => {
+  downloadListPromoHistory: async (params, advancedSearch = {}) => {
     try {
       const config = {
         params: params,
@@ -395,7 +421,9 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
+        ? advancedSearch
+        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/download-history`, body, config);
 
       if (hasValue(response.headers?.get("content-disposition"))) {
@@ -420,14 +448,14 @@ const promoRepository = {
 
   /**
    * Get table columns configuration for Valid Promo List
-   * @param {Function} setIsModalVisible - Function to show modal
-   * @param {Function} setDetailData - Function to set detail data
+   * @param {Function} handleViewDetail - Function to handle view detail action
    * @returns {Array} - Array of column definitions
    */
-  getColumns: (setIsModalVisible, setDetailData) => {
+  getColumns: (handleViewDetail) => {
     const { UnorderedListOutlined } = require("@ant-design/icons");
     const { Col } = require("antd");
-    const TagStatus = require("../components/TagStatus").default;
+    const StatusComponent = require("../../../../../../../components/StatusComponent").default;
+    const { toTitleCase } = require("../../../../../../../utils");
 
     return [
       {
@@ -495,7 +523,22 @@ const promoRepository = {
         dataIndex: "status",
         key: "status",
         width: 100,
-        render: (status) => <TagStatus status={status === "ACTIVE" ? "Active" : status} />,
+        render: (status) => {
+          const displayText = {
+            "ACTIVE": "Active",
+            "INACTIVE": "Inactive",
+            "active": "Active",
+            "inactive": "Inactive",
+          };
+
+          return (
+            <div className=" flex justify-center">
+              <StatusComponent colour={status?.toLowerCase()}>
+                {displayText[status] || toTitleCase(String(status || "")) || "-"}
+              </StatusComponent>
+            </div>
+          );
+        },
       },
       {
         title: "Action",
@@ -509,10 +552,7 @@ const promoRepository = {
           <Col span={24} className="text-center">
             <UnorderedListOutlined
               style={{ cursor: "pointer" }}
-              onClick={() => {
-                setIsModalVisible(true);
-                setDetailData(record);
-              }}
+              onClick={() => handleViewDetail(record)}
             />
           </Col>
         ),

@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tabs, Tooltip } from "antd";
+import { Spin, Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import SVGIcon from "../../../../assets/Icon/index";
 import CardContainer from "../../../../components/CardContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {

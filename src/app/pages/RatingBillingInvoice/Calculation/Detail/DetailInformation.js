@@ -113,6 +113,22 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   }, [dispatch, segmentedPage, data]);
 
+  // use Effect - Fetch Calculation Log for latest log
+  useEffect(() => {
+    if (tabHeader === "Calculation Information" && data?.calCode) {
+      console.log("KESINI");
+      dispatch(
+        getDetailCalculationLog({
+          calCode: data?.calCode,
+          sort: "calDate~desc",
+          page: 1,
+          pageSize: 1,
+          search: encodeURIComponent(JSON.stringify({})),
+        })
+      );
+    }
+  }, [dispatch, data?.calCode, tabHeader]);
+
   useEffect(() => {
     if (data?.calType === 621) {
       setSegmentedPage("Rating Result");
@@ -142,7 +158,7 @@ const DetailInformation = ({ data, tabHeader }) => {
 
   const tempTabs = useMemo(
     () => <RadioTabs data={tabData} onChange={handleSegmentedPage} />,
-    [segmentedPage, handleSegmentedPage, tabData]
+    [segmentedPage, tabData]
   );
 
   const renderSection = (segmentedPage) => {
@@ -544,6 +560,16 @@ const DetailInformation = ({ data, tabHeader }) => {
             calType: segmentedPage === "Rating Result" ? 621 : 623,
           })
         );
+        // Refresh calculation log after recalculate
+        dispatch(
+          getDetailCalculationLog({
+            calCode: data?.calCode,
+            sort: "calDate~desc",
+            page: 1,
+            pageSize: 1,
+            search: encodeURIComponent(JSON.stringify({})),
+          })
+        );
         handleClear();
       });
   };
@@ -579,6 +605,16 @@ const DetailInformation = ({ data, tabHeader }) => {
             search: reqSearch,
           })
         );
+        // Refresh calculation log after retry
+        dispatch(
+          getDetailCalculationLog({
+            calCode: data?.calCode,
+            sort: "calDate~desc",
+            page: 1,
+            pageSize: 1,
+            search: encodeURIComponent(JSON.stringify({})),
+          })
+        );
         clearRetry();
         handleClear();
       });
@@ -603,9 +639,10 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   };
 
-  // Get latest calculation log data
+  // Get latest calculation log data from Redux state
   const latestLog = list_calculation_result?.result?.[0] || {};
 
+  console.log("log: ", latestLog);
   return (
     <>
       <Spin spinning={loadingModal}>
@@ -635,7 +672,9 @@ const DetailInformation = ({ data, tabHeader }) => {
               {data?.generateDate}
             </DetailText>
             <DetailText label={"Compeletion Date"}>
-              21 Nov 2025 17:49:31
+              {latestLog?.logDate
+                ? moment(latestLog.logDate).format("DD MMM YYYY HH:mm:ss")
+                : ""}
             </DetailText>
             <DetailText label={"Status"}>
               {renderStatus(data?.status)}
@@ -676,17 +715,25 @@ const DetailInformation = ({ data, tabHeader }) => {
         {/* History Log Information Section */}
         <CardContainer subHeader={"history log information"}>
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Action"}>{latestLog?.action || ""}</DetailText>
-            <DetailText label={"Type"}>{latestLog?.calType || ""}</DetailText>
-            <DetailText label={"Calculate At"}>
-              {latestLog?.calDate
-                ? moment(latestLog.calDate).format("DD MMM YYYY HH:mm:ss")
+            <DetailText label={"Record ID"}>
+              {latestLog?.calLogId || ""}
+            </DetailText>
+            <DetailText label={"Created Date"}>
+              {latestLog?.createdDate
+                ? moment(latestLog.createdDate).format("DD MMM YYYY HH:mm:ss")
                 : ""}
             </DetailText>
-            <DetailText label={"Calculate By"}>
+            <DetailText label={"Created By"}>
               {latestLog?.createdBy || ""}
             </DetailText>
-            <DetailText label={"Remark"}>{latestLog?.remark || ""}</DetailText>
+            <DetailText label={"Updated Date"}>
+              {latestLog?.updatedDate
+                ? moment(latestLog.updatedDate).format("DD MMM YYYY HH:mm:ss")
+                : ""}
+            </DetailText>
+            <DetailText label={"Updated By"}>
+              {latestLog?.createdBy || ""}
+            </DetailText>
           </div>
         </CardContainer>
 

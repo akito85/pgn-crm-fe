@@ -41,6 +41,7 @@ const PaymentRelation = ({
   //state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [listType, setListType] = useState("all");
   const [totalElement, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -127,7 +128,7 @@ const PaymentRelation = ({
         page,
         size: pageSize,
         sort,
-        searches: search,
+        searchs: search,
         inputFields: tempFilters,
       }
 
@@ -176,7 +177,7 @@ const PaymentRelation = ({
         page,
         size: pageSize,
         sort,
-        searches: search,
+        searchs: search,
         inputFields: tempFilters,
       }
 
@@ -304,23 +305,14 @@ const PaymentRelation = ({
    * @param {boolean} newIsApproval 
    */
   const handleIsApproval = (newIsApproval) => {
+    setPage(1);
     if (newIsApproval) {
-      setSearchText("WAITING APPROVAL");
-      setSearchedColumn("approvalStatus");
-      setPage(1);
-      setSearch((prevState) => ({
-        ...prevState,
-        approvalStatus: "WAITING_APPROVAL",
-      }));
+      setListType("approval");
       setIsApproval(true);
     } else {
       setSearchText("");
       setSearchedColumn("");
-      setPage(1)
-      setSearch((prevState) => ({
-        ...prevState,
-        approvalStatus: undefined,
-      }));
+      setListType("all");
       setIsApproval(false);
       setSelectedRowKeys([]);
       setSelectedRows([]);
@@ -331,17 +323,15 @@ const PaymentRelation = ({
   }
 
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
+    const body = {
+      page,
+      size: pageSize,
+      sort,
+      inputFields: tempFilters,
+      searchs: search
     }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadPaymentRelation({ page, pageSize, sort, search: tempSearch }));
+
+    dispatch(downloadPaymentRelation({ body, id, }));
   };
 
   /**
@@ -378,12 +368,13 @@ const PaymentRelation = ({
       page,
       size: pageSize,
       sort,
-      searches: search,
+      searchs: search,
       inputFields: tempFilters,
+      listType,
     }
 
     dispatch(getPaymentRelation({ id, body }));
-  }, [page, pageSize, sort, search, tempFilters]);
+  }, [page, pageSize, sort, search, tempFilters, listType]);
 
   useEffect(() => {
     if (
@@ -447,6 +438,7 @@ const PaymentRelation = ({
         <PaymentRelationTable
           data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
             ...paymentRelation,
+            no: index + 1 + ( page - 1) * pageSize,
             key: `payment-relation-${paymentRelation.id}-${index}`
           }))}
           idAccount={id}

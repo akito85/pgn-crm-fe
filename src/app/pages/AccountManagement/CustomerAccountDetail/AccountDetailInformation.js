@@ -23,6 +23,7 @@ import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { Switch } from "antd";
 import AccountPromo from "./DetailPages/Promo/AccountPromo";
+import MultiDestination from "./DetailPages/MultiDestination/MultiDestination";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -48,6 +49,7 @@ const dataTabs = {
   ras: "Raw Material Source",
   gu: "Gas Utilization",
   promo: "Promo",
+  md: "Multi Destination",
 };
 const AccountDetailInformation = ({
   id = 0,
@@ -190,6 +192,30 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
+          "/account-management/account-standard/relationship/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/relationship/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/relationship/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/details"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.rs);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
           "/account-management/account-standard/financial-information/payment-relation/details"
         ) ||
         path.pathname.includes(
@@ -206,7 +232,7 @@ const AccountDetailInformation = ({
         ) ||
         path.pathname.includes(
           "/account-management/account-standard/financial-information/invoice-relation/update"
-        ) 
+        )
       )
     ) {
       setTypeAccountInfoDetailSection(dataTabs.fi);
@@ -252,7 +278,7 @@ const AccountDetailInformation = ({
             ]}
             idCustomer={idCustomer}
             type={type}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.la:
@@ -267,12 +293,12 @@ const AccountDetailInformation = ({
         );
       case dataTabs.sr:
         return <></>;
-        // return <ServiceRequest />;
+      // return <ServiceRequest />;
       case dataTabs.dm:
         return (
           <DistributionMedia
             id={id}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.premise:
@@ -281,7 +307,7 @@ const AccountDetailInformation = ({
             id={id}
             idCustomer={idCustomer}
             type={type}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.gs:
@@ -328,7 +354,7 @@ const AccountDetailInformation = ({
         return (
           <AdditionalInformation
             idAccount={id}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.eq:
@@ -345,6 +371,16 @@ const AccountDetailInformation = ({
         );
       case dataTabs.promo:
         return <AccountPromo id={id} />;
+      case dataTabs.md:
+        return <MultiDestination
+          id={id}
+          idCustomer={idCustomer}
+          isApproval={isApproval}
+          setIsApproval={setIsApproval}
+          setShowApprovalButton={setShowApprovalButton}
+          submitApprovalCondition={submitApprovalCondition}
+          setSubmitApprovalCondition={setSubmitApprovalCondition}
+        />
       default:
         return <></>;
     }

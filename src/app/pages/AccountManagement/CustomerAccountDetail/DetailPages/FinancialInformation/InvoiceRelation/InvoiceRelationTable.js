@@ -94,7 +94,6 @@ const InvoiceRelationTable = ({
           </div>
         );
       },
-      hidden: isApproval,
     },
     {
       title: "STATUS",
@@ -119,8 +118,6 @@ const InvoiceRelationTable = ({
       },
     },
   ];
-
-  const visibleColumns = columns.filter(column => !column.hidden)
 
   const itemActions = [
     {
@@ -339,7 +336,7 @@ const InvoiceRelationTable = ({
         tableScrolled={{ y: 400, x: 2000 }}
         onSort={onSort}
         columns={[
-          ...visibleColumns,
+          ...columns,
           ...useColumnActionPermission(
             ["Inactivate", "View", "Update", "History"],
             itemActions,

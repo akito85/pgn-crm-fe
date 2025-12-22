@@ -15,7 +15,8 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
-import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+// import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -86,7 +87,7 @@ const columnAttachmentData = (
       title: "NO",
       width: 30,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      dataIndex: "no",
     },
     {
       title: "CATEGORY",
@@ -289,13 +290,18 @@ const AttachmentSectionForm = ({
         dispatch(service.downloadData(r.urlFile1));
       } else {
         setLoadingDownload(true);
-        const response = await axios.get(configApplication + r.urlFile1, {
-          headers: tokenHeader(),
-          responseType: "blob",
-        });
-        const base64 = await getBase64(response.data);
-        setLoadingDownload(false);
-        previewFileAttachment(base64);
+        try {
+          const response = await axios.get(configApplication + r.urlFile1, {
+            headers: tokenHeader(),
+            responseType: "blob",
+          });
+          const base64 = await getBase64(response.data);
+          previewFileAttachment(base64);  
+        } catch (error) {
+          console.error("Failed to download file", error);
+        } finally {
+          setLoadingDownload(false);
+        }
       }
     }
   };
@@ -334,7 +340,7 @@ const AttachmentSectionForm = ({
               </div>
             </div>
           ) : null}
-          <TablePaginationNew
+          {/* <TablePaginationNew
             type="FE"
             dataSource={data}
             totalData={data.length}
@@ -353,6 +359,27 @@ const AttachmentSectionForm = ({
               type,
               handleShow
             )}
+          /> */}
+          <TablePaginationNew
+            type="FE"
+            dataSource={data.map((item, index) => ({
+              ...item,
+              no: (page - 1) * pageSize + index + 1,
+            }))}
+            tableScrolled={{ y: 300, x: 1500 }}
+            onChange={handleChangeSize}
+            columns={columnAttachmentData(
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handleDelete,
+              type,
+              handleShow
+            )}
+            enableDragColumn={true}
           />
           <ModalAttachment
             openUpload={modalUpload}

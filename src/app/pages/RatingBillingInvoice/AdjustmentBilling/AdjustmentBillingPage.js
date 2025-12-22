@@ -356,11 +356,16 @@ const AdjustmentBillingPage = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <CardContainer header={"Adjustment Billing List"}>
+        <CardContainer
+          header={
+            <div className="flex w-full h-9">
+              <p className="w-full font-bold">Adjustment Billing List</p>
+              <div className="w-full flex justify-end gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
+            </div>
+          }
+        >
           <div className="w-full">
             <TableRBI
               showExport={false}

@@ -1,11 +1,11 @@
 import { Col, Row } from "antd";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 
-const HeadersTabs = ({ keys, selectedTab, onChangeTab, isModal = false }) => {
+const HeadersTabs = ({ keys, selectedTab, onChangeTab, isModal = false, isPromo = false }) => {
   return (
     <Row>
       {keys.map((key, index) => (
-        <Col span={isModal ? 4 : 3} key={index} offset={index === 0 ? 0 : 1}>
+        <Col span={isModal ? 4 : 3} key={index} style={{ marginLeft: (isPromo && index) ? "12px" : undefined }} offset={isPromo ? undefined : index === 0 ? 0 : 1}>
           <ButtonComponent
             type={selectedTab === key.value ? "submit" : "default"}
             size="small"

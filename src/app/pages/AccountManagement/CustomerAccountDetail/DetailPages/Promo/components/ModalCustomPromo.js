@@ -1,4 +1,4 @@
-import { Modal } from "antd";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 
 const ModalCustomPromo = ({
   children,
@@ -12,10 +12,10 @@ const ModalCustomPromo = ({
   maxHeight = "80vh",
 }) => {
   return (
-    <Modal
-      title={title.toLocaleUpperCase()}
-      open={isOpen}
-      onCancel={onCancel}
+    <ModalCustom
+      header={title.toLocaleUpperCase()}
+      isOpen={isOpen}
+      handleCancel={onCancel}
       footer={footer}
       width={width}
       closable={closable}
@@ -23,7 +23,7 @@ const ModalCustomPromo = ({
       className="custom-modal-header"
     >
       {children}
-    </Modal>
+    </ModalCustom>
   );
 };
 

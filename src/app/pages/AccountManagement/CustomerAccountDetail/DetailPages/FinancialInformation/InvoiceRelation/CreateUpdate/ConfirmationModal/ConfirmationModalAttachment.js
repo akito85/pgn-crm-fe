@@ -5,6 +5,8 @@ const ConfirmationModalAttachment = ({
   data = [],
   type,
   dispatch,
+  service,
+  configApplication,
 }) => {
   return (
     <Fragment>
@@ -15,6 +17,8 @@ const ConfirmationModalAttachment = ({
         type={type}
         data={data}
         dispatch={dispatch}
+        service={service}
+        configApplication={configApplication}
       />
     </Fragment>
   );

@@ -255,6 +255,7 @@ const PaymentRelationDetails = ({
             handleChangeOption={handleDetailSection}
             dataDetail={detail_paymentRelation?.result}
             dataAttachment={data_paymentRelationAttachment?.result}
+            subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
           />
         </div>
 

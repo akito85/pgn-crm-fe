@@ -9,6 +9,7 @@ const dataTabs = {
 };
 
 const InvoiceRelationDetailTabs = ({
+  subjectAccountNumber,
   dataDetail = {},
   dataAttachment = [],
   section = "",
@@ -42,7 +43,7 @@ const InvoiceRelationDetailTabs = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.iri:
-        return <InvoiceRelationDetailInfo dataDetail={dataDetail} type={AccountType}/>;
+        return <InvoiceRelationDetailInfo subjectAccountNumber={subjectAccountNumber} dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
         return <InvoiceRelationDetailAttch dataAttachment={dataAttachment} />;
       default:

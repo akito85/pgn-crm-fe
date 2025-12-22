@@ -5,6 +5,7 @@ import moment from "moment";
 import { dateFormatting } from "../../../../../../../../utils";
 
 const PaymentRelationDetailInfo = ({
+  subjectAccountNumber,
   dataDetail = {},
 }) => {
   return (
@@ -12,8 +13,8 @@ const PaymentRelationDetailInfo = ({
       <BaseContainer header={"PAYMENT RELATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Payment Relation Information */}
-          <DetailText label="Account Number">{dataDetail?.accountNumber}</DetailText>
-          <DetailText label="Account Name">{dataDetail?.accountName}</DetailText>
+          <DetailText label="Account Number">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountNumber : dataDetail?.accountNumber}</DetailText>
+          <DetailText label="Account Name">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountName : dataDetail?.accountName}</DetailText>
           <DetailText label="Priority">{dataDetail?.priority}</DetailText>
           <DetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
           <DetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
@@ -30,8 +31,8 @@ const PaymentRelationDetailInfo = ({
           <DetailText label="Record Id">{dataDetail?.id}</DetailText>
           <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
           <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-          <DetailText label="Updated Date">{dataDetail?.updatedDate}</DetailText>
-          <DetailText label="Updated By">{dataDetail?.updatedBy ? moment(dataDetail.updatedBy, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+          <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+          <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
         </div>
       </BaseContainer>
     </Fragment>

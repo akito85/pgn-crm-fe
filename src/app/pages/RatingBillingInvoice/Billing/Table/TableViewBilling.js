@@ -24,6 +24,7 @@ export const columnsBilling = (
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
+    isClassification:true,
     width: 90,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -57,6 +58,7 @@ export const columnsBilling = (
     key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
+    isClassification:true,
     width: 100,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -90,6 +92,7 @@ export const columnsBilling = (
     key: "billingCode",
     title: "BILLING CODE",
     dataIndex: "billingCode",
+    isClassification:true,
     width: 90,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -123,6 +126,7 @@ export const columnsBilling = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
+    isClassification:true,
     width: 100,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -248,6 +252,7 @@ export const columnsBilling = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
+    isClassification:true,
     width: 100,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -281,6 +286,7 @@ export const columnsBilling = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
+    isClassification:true,
     width: 140,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -315,6 +321,7 @@ export const columnsBilling = (
     title: "ACCOUNT NUMBER",
     width: 110,
     dataIndex: "accountNumber",
+    isClassification:true,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "accountNumber",
@@ -347,6 +354,7 @@ export const columnsBilling = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    isClassification:true,
     width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -2155,6 +2163,7 @@ export const columnsBilling = (
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
+    isClassification:true,
     fixed: "right",
     width: 70,
     sorter: true,

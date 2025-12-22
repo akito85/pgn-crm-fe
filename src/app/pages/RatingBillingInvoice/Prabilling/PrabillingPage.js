@@ -78,7 +78,7 @@ const PrabillingPage = () => {
         title: "INIT CODE",
         dataIndex: "initCode",
         sorter: true,
-        align: "left",
+        isClassification:true,
         width: 150,
         filteredValue: [search?.initCode] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -105,7 +105,7 @@ const PrabillingPage = () => {
         key: "sor",
         title: "SOR",
         dataIndex: "sor",
-        align: "left",
+        isClassification:true,
         sorter: true,
         width: 200,
         filteredValue: [search?.sor] || null,
@@ -134,7 +134,7 @@ const PrabillingPage = () => {
         key: "billingCycle",
         title: "BILLING CYCLE",
         dataIndex: "billingCycle",
-        align: "center",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.billingCycle] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -161,7 +161,7 @@ const PrabillingPage = () => {
         key: "billPeriod",
         title: "BILLING PERIOD",
         dataIndex: "billPeriod",
-        align: "center",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.billPeriod] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -216,7 +216,7 @@ const PrabillingPage = () => {
         key: "createdBy",
         title: "CREATED BY",
         dataIndex: "createdBy",
-        align: "center",
+        isClassification:true,
         width: 130,
         sorter: true,
         filteredValue: [search?.createdBy] || null,
@@ -244,7 +244,7 @@ const PrabillingPage = () => {
         key: "createdDtm",
         title: "CREATED DATE",
         dataIndex: "createdDtm",
-        align: "center",
+        isClassification:true,
         sorter: true,
         filteredValue: [search?.createdDtm] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -260,7 +260,7 @@ const PrabillingPage = () => {
         render: (text) => {
           const formattedDate = text
             ? moment(text).format("DD MMM YYYY HH:mm:ss")
-            : "-";
+            : "";
           return renderDateColumn(
             "createdDtm",
             hasValue(search["createdDtm"]),
@@ -316,7 +316,7 @@ const PrabillingPage = () => {
           true
         ),
         render: (text) => {
-          const displayText = text?.toLocaleString() || "-";
+          const displayText = text?.toLocaleString() || "";
           return renderColumn(
             "totalCustomer",
             hasValue(search["totalCustomer"]),
@@ -495,7 +495,7 @@ const PrabillingPage = () => {
             </div>
           }
         >
-          <div className="my-5">
+          <div>
             <TableRBI
               dataSource={list_prabilling_init}
               columns={processedColumns}

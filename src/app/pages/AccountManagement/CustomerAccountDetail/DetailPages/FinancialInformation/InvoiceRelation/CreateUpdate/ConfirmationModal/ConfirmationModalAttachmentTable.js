@@ -238,13 +238,18 @@ const ConfirmationModalAttachmentTable = ({
         dispatch(service.downloadData(r.urlFile1));
       } else {
         setLoadingDownload(true);
-        const response = await axios.get(configApplication + r.urlFile1, {
-          headers: tokenHeader(),
-          responseType: "blob",
-        });
-        const base64 = await getBase64(response.data);
-        setLoadingDownload(false);
-        previewFileAttachment(base64);
+        try {
+          const response = await axios.get(configApplication + r.urlFile1, {
+            headers: tokenHeader(),
+            responseType: "blob",
+          });
+          const base64 = await getBase64(response.data);
+          previewFileAttachment(base64);  
+        } catch (error) {
+          console.error("Failed to download file", error);
+        } finally {
+          setLoadingDownload(false);
+        }
       }
     }
   };

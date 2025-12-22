@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import SelectComponent from "../../../../../../../components/SelectComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
+import NxPanel from "../../../../../../../components/Nx/NxPanel";
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.employeeDetail || [];
@@ -51,6 +52,7 @@ const RelationshipApproval = ({
   loading = false,
   hideSelector = false, // Tambahan prop untuk hide selector di summary
   approvalHierarchyLabel = "", // Tambahan prop untuk display selected hierarchy name
+  className = "", // Tambahan prop untuk tambahan class
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -170,64 +172,63 @@ const RelationshipApproval = ({
   };
 
   return (
-    <div>
-      <div className="pt-8 pb-4">
-        <h3 className="text-primary text-xs font-bold uppercase">APPROVAL</h3>
-      </div>
-      {!hideSelector ? (
-        <div className="w-full grid grid-cols-1 gap-2">
-          <div className="w-1/3">
-            <Form.Item
-              label="Approval Hierarchy"
-              name="appHierId"
-              rules={[
-                {
-                  message: "Please input your Approval Hierarchy",
-                  required: true,
-                },
-              ]}
-              className="pb-6"
-            >
-              <SelectComponent onChange={handleHierarchyChange}>
-                {dataApprovalList.map((data, index) => (
-                  <Select.Option key={index} value={data?.appHierId}>
-                    {data?.approvalName}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
-          </div>
-        </div>
-      ) : (
-        approvalHierarchyLabel && (
-          <div className="mb-4">
-            <p className="text-[13px] mb-1 text-dg-grey-dark">
-              Approval Hierarchy
-            </p>
-            <p className="text-[14px] font-medium">{approvalHierarchyLabel}</p>
-          </div>
-        )
-      )}
-
-      {/* Table */}
-      <Spin spinning={loading}>
-        {((hideSelector && appHierDataDetail.length > 0) ||
-          (isApprovalId && isApprovalId.appHierId !== undefined)) && (
-            <div className="mb-6">
-              <TablePagination
-                useSelect={false}
-                usePagination={false}
-                dataSource={appHierDataDetail}
-                columns={columns}
-                expandable={{
-                  expandedRowRender,
-                  defaultExpandAllRows: true,
-                  columnWidth: 50,
-                }}
-              />
+    <div className={className}>
+      <NxPanel title={"APPROVAL"} removeBottomMargin>
+        {!hideSelector ? (
+          <div className="w-full grid grid-cols-1 gap-2">
+            <div className="w-1/3">
+              <Form.Item
+                label="Approval Hierarchy"
+                name="appHierId"
+                rules={[
+                  {
+                    message: "Please input your Approval Hierarchy",
+                    required: true,
+                  },
+                ]}
+                className="pb-6"
+              >
+                <SelectComponent onChange={handleHierarchyChange}>
+                  {dataApprovalList.map((data, index) => (
+                    <Select.Option key={index} value={data?.appHierId}>
+                      {data?.approvalName}
+                    </Select.Option>
+                  ))}
+                </SelectComponent>
+              </Form.Item>
             </div>
-          )}
-      </Spin>
+          </div>
+        ) : (
+          approvalHierarchyLabel && (
+            <div className="mb-4">
+              <p className="text-[13px] mb-1 text-dg-grey-dark">
+                Approval Hierarchy
+              </p>
+              <p className="text-[14px] font-medium">{approvalHierarchyLabel}</p>
+            </div>
+          )
+        )}
+
+        {/* Table */}
+        <Spin spinning={loading}>
+          {((hideSelector && appHierDataDetail.length > 0) ||
+            (isApprovalId && isApprovalId.appHierId !== undefined)) && (
+              <div className="mb-6">
+                <TablePagination
+                  useSelect={false}
+                  usePagination={false}
+                  dataSource={appHierDataDetail}
+                  columns={columns}
+                  expandable={{
+                    expandedRowRender,
+                    defaultExpandAllRows: true,
+                    columnWidth: 50,
+                  }}
+                />
+              </div>
+            )}
+        </Spin>
+      </NxPanel>
     </div>
   );
 };

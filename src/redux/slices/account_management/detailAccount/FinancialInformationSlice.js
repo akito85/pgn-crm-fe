@@ -564,9 +564,26 @@ export const getDetailPaymentRelation = createAsyncThunk(
 
 export const getInvoiceRelation = createAsyncThunk(
   "GET_INVOICE_RELATION",
-  async ({ id, body }, thunkAPI) => {
+  async ({ id, body, page, size, sort, searchs, listType }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
+      const queryParams = new URLSearchParams;
+
+      if (page)
+        queryParams.append("page", page);
+      if (size)
+        queryParams.append("size", size);
+      if (sort)
+        queryParams.append("sort", sort);
+      if (searchs)
+        queryParams.append("searchs", searchs);
+      if (listType)
+        queryParams.append("listType", listType);
+
+      let url = `/v1/dbs/api/invoice-relation/list/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
         headers: { "Accept": "application/json, text/plain, */*" }
       });
@@ -599,13 +616,14 @@ export const createInvoiceRelation = createAsyncThunk(
 
       const { id } = response.data;
 
-      const uploadUrl = `v1/dbs/api/invoice-relation/upload-attachment/${id}`;
+      const uploadUrl = `/v1/dbs/api/invoice-relation/upload-attachment`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
-          file:  attachment.file,
+          files:  attachment.file,
           category: attachment.fileCategoryId,
+          refId: id,
         }
       ));
 
@@ -648,13 +666,14 @@ export const updateInvoiceRelation = createAsyncThunk(
       const updateUrl = `/v1/dbs/api/invoice-relation/${id}`;
       const response = await accountManagementService.updateData(updateUrl, updateBody);
 
-      const uploadUrl = `v1/dbs/api/invoice-relation/upload-attachment/${id}`;
+      const uploadUrl = `/v1/dbs/api/invoice-relation/upload-attachment`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
-          file:  attachment.file,
+          files:  attachment.file,
           category: attachment.fileCategoryId,
+          refId: id,
         }
       ));
 
@@ -1012,14 +1031,11 @@ export const inactivatePaymentRelation = createAsyncThunk(
 
 export const downloadPaymentRelation = createAsyncThunk(
   "DOWNLOAD_PAYMENT_RELATION",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ body, id, }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/export-excel?search=${search}&page=
-      ${page}&size=${pageSize}&sort=${sort}`;
-      const response = await accountManagementService.downloadData(url, {
-        headers: { "Accept": "application/json" }
-      });
-      return response.data;
+      const url = `/v1/dbs/api/payment-relation/export-excel/${id}`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
+      return response;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_PAYMENT_RELATION", back: false }));
       return thunkAPI.rejectWithValue(response.response.data);
@@ -1246,14 +1262,22 @@ export const inactivateInvoiceRelation = createAsyncThunk(
 
 export const downloadInvoiceRelation = createAsyncThunk(
   "DOWNLOAD_INVOICE_RELATION",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ searchs, page, size, sort, id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/invoice-relation/export-excel?search=${search}&page=
-      ${page}&size=${pageSize}&sort=${sort}`;
-      const response = await accountManagementService.downloadData(url, {
-        headers: { "Accept": "application/json" }
-      });
-      return response.data;
+      const queryParams = new URLSearchParams;
+
+      if (page)
+        queryParams.append("page", page);
+      if (size)
+        queryParams.append("size", size);
+      if (sort)
+        queryParams.append("sort", sort);
+      if (searchs)
+        queryParams.append("searchs", searchs);
+
+      const url = `/v1/dbs/api/invoice-relation/export-excel/${id}`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
+      return response;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_INVOICE_RELATION", back: false }));
       return thunkAPI.rejectWithValue(response.response.data);
