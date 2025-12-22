@@ -41,6 +41,7 @@ const InvoiceRelation = ({
   //state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [listType, setListType] = useState("all");
   const [totalElement, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -298,17 +299,11 @@ const InvoiceRelation = ({
   const handleIsApproval = (newIsApproval) => {
     if (newIsApproval) {
       setPage(1);
-      setSearch((prevState) => ({
-        ...prevState,
-        statusApproval: "WAITING_APPROVAL",
-      }));
+      setListType("approval");
       setIsApproval(true);
     } else {
       setPage(1)
-      setSearch((prevState) => ({
-        ...prevState,
-        statusApproval: undefined,
-      }));
+      setListType("all");
       setIsApproval(false);
       setSelectedRowKeys([]);
       setSelectedRows([]);
@@ -359,14 +354,9 @@ const InvoiceRelation = ({
     const body = {
       inputFields: tempFilters,
     }
-    
-    console.log("search", search);
-    console.log("search JSON", JSON.stringify(search));
-    console.log("search encoded", JSON.stringify(search))
 
-
-    dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
-  }, [page, pageSize, sort, search, tempFilters]);
+    dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), listType, body }));
+  }, [page, pageSize, sort, search, tempFilters, listType]);
 
   useEffect(() => {
     if (

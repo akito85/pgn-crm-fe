@@ -564,7 +564,7 @@ export const getDetailPaymentRelation = createAsyncThunk(
 
 export const getInvoiceRelation = createAsyncThunk(
   "GET_INVOICE_RELATION",
-  async ({ id, body, page, size, sort, searchs }, thunkAPI) => {
+  async ({ id, body, page, size, sort, searchs, listType }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams;
 
@@ -576,6 +576,8 @@ export const getInvoiceRelation = createAsyncThunk(
         queryParams.append("sort", sort);
       if (searchs)
         queryParams.append("searchs", searchs);
+      if (listType)
+        queryParams.append("listType", listType);
 
       let url = `/v1/dbs/api/invoice-relation/list/${id}`;
 
