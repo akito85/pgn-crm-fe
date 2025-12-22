@@ -139,11 +139,11 @@ const TablePaginationNew = ({
                 alignItems: "center",
                 gap: "5px",
                 border: "1px solid #BDBDBD",
-                height: "40px",
+                height: "30px",
                 color: "black",
               }}
             >
-              Show / Hide Column <DownOutlined style={{ fontSize: "15px" }} />
+              Show / Hide Column <DownOutlined style={{ fontSize: "10px" }} />
             </Button>
           </Dropdown>
         )}

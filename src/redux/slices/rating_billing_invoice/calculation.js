@@ -27,7 +27,6 @@ const initialState = {
   list_calculation_result: [],
   list_calculation_no_paging: [],
   data_user_calculation: {},
-  list_calculation_result: [],
 };
 
 // pagination slice
@@ -88,7 +87,6 @@ export const getHistoryCalculationPaginate = createAsyncThunk(
     }
   }
 );
-
 
 // downlaod slice
 export const donwloadedExcel = createAsyncThunk(

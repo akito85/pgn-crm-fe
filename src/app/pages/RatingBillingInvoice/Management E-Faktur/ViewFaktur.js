@@ -336,8 +336,21 @@ const ViewFaktur = () => {
   }, [baseColumns, actionCols]);
 
   const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
+  const columnsWithFixed = applyFixedColumns(allColumns, fixedColumns);
+  
+  // Cari dan update width untuk action column
+  return columnsWithFixed.map((col) => {
+    // Jika ini adalah action column, set width yang lebih kecil
+    if (col.key === 'action' || col.title === 'ACTION' || col.dataIndex === 'action') {
+      return {
+        ...col,
+        width: 80, // Sesuaikan ukuran yang diinginkan: 60, 70, 80, atau 100
+        align: 'center',
+      };
+    }
+    return col;
+  });
+}, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({

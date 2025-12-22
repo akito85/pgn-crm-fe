@@ -159,40 +159,6 @@ export const tableUsage = (
         // ),
     },
     {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accountSegment",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountSegment",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-
-      ),
-      render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
-      
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountGroupType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-
-      ),
-      render: (text) => renderColumn('accountGroupType', hasValue(search['accountGroupType']), searchText, text, false, 'input', search)
-      
-    },
-    {
       title: "SERVICE TYPE",
       dataIndex: "serviceType",
       sorter: true,
@@ -310,6 +276,40 @@ export const tableUsage = (
 
       ),
       render: (text) => renderColumn('meterReadingCode', hasValue(search['meterReadingCode']), searchText, text, false, 'input', search)
+      
+    },
+     {
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountSegment",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+
+      ),
+      render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
+      
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountGroupType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+
+      ),
+      render: (text) => renderColumn('accountGroupType', hasValue(search['accountGroupType']), searchText, text, false, 'input', search)
       
     },
     {

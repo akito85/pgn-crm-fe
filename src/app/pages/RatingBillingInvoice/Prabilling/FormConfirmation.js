@@ -22,12 +22,12 @@ const FormConfirmation = ({ data }) => {
       list_billing_period?.data &&
       list_billing_period?.data?.filter((item) => item?.id === val);
     if (periodName === undefined) {
-      return "-";
+      return "";
     }
     if (periodName.length !== 0) {
       return periodName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getBillingCycleName = (val) => {
@@ -35,12 +35,12 @@ const FormConfirmation = ({ data }) => {
       list_billing_cycle &&
       list_billing_cycle?.filter((item) => item?.id === val);
     if (billingCycleName === undefined) {
-      return "-";
+      return "";
     }
     if (billingCycleName.length !== 0) {
       return billingCycleName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getGroupTypeName = (val) => {
@@ -49,9 +49,9 @@ const FormConfirmation = ({ data }) => {
     );
 
     if (groupTypeName) {
-      return groupTypeName.glbValue || groupTypeName.name || "-"; 
+      return groupTypeName.glbValue || groupTypeName.name || ""; 
     }
-    return "-";
+    return "";
   };
 
   const getCustomerName = (val) => {
@@ -61,7 +61,7 @@ const FormConfirmation = ({ data }) => {
     if (customerName) {
       return `${customerName.accountName} - ${customerName.accountNumber}`;
     }
-    return val || "-";
+    return val || "";
   };
 
   const getCostCenterName = (val) => {
@@ -69,12 +69,12 @@ const FormConfirmation = ({ data }) => {
       list_cost_center?.data &&
       list_cost_center?.data?.filter((item) => item?.id === val);
     if (costCenterName === undefined) {
-      return "-";
+      return "";
     }
     if (costCenterName.length !== 0) {
       return costCenterName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getMrcName = (val) => {
@@ -85,12 +85,12 @@ const FormConfirmation = ({ data }) => {
     const mrcName =
       mergeMrcDto && mergeMrcDto?.filter((item) => item?.id === val);
     if (mrcName === undefined) {
-      return "-";
+      return "";
     }
     if (mrcName.length !== 0) {
       return mrcName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getAccSegmentName = (val) => {
@@ -98,24 +98,24 @@ const FormConfirmation = ({ data }) => {
       list_customer_segment?.Data &&
       list_customer_segment?.Data?.filter((item) => item?.id === val);
     if (accSegmentName === undefined) {
-      return "-";
+      return "";
     }
     if (accSegmentName.length !== 0) {
       return accSegmentName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getSorName = (val) => {
     const sorName =
       list_sor?.data && list_sor?.data?.filter((item) => item?.id === val);
     if (sorName === undefined) {
-      return "-";
+      return "";
     }
     if (sorName.length !== 0) {
       return sorName[0].name;
     }
-    return "-";
+    return "";
   };
 
   const getScheduleTypeName = (val) => {
@@ -123,7 +123,7 @@ const FormConfirmation = ({ data }) => {
     if (scheduleType) {
       return scheduleType.name;
     }
-    return "-";
+    return "";
   };
 
   const renderSpecificCustomer = () => {
@@ -208,7 +208,7 @@ const FormConfirmation = ({ data }) => {
                     {index < array.length - 1 && ", "}
                   </span>
                 ))
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Meter Reading Code">
@@ -221,7 +221,7 @@ const FormConfirmation = ({ data }) => {
                     </span>
                   )
                 )
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Account Segment">
@@ -234,7 +234,7 @@ const FormConfirmation = ({ data }) => {
                     </span>
                   )
                 )
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Account Group Type">
@@ -247,7 +247,7 @@ const FormConfirmation = ({ data }) => {
                     </span>
                   )
                 )
-              : "-"}
+              : ""}
           </DetailText>
 
           <DetailText label="Specific Customer Account">
@@ -278,7 +278,7 @@ const FormConfirmation = ({ data }) => {
           )}
 
           <div className="col-span-2">
-            <DetailText label="Remark">{data?.remark || "-"}</DetailText>
+            <DetailText label="Remark">{data?.remark || ""}</DetailText>
           </div>
         </div>
       </CardContainer>

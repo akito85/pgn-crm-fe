@@ -355,14 +355,15 @@ const UploadLayout = ({
     } else {
       return (
         <Form>
-          <div className={"w-full flex flex-col gap-4"}>
-            <span className={"text-xl"}>Upload Usage List</span>
-            <div className={"w-full flex no-margin-form justify-end"}>
+          <div className={"w-full flex flex-col"}>
+            {/* <span className={"text-xl"}>Upload Usage List</span> */}
+            <div className={"w-full flex no-margin-form"}>
               <Form.Item className="w-1/4">
                 <SelectComponent
                   allowClear={false}
                   mandatory
                   label={"Format Usage Type"}
+                  placeholder={"Choose Usage Type"}
                   onChange={handleFormat}
                   labelInValue
                 >
@@ -401,12 +402,16 @@ const UploadLayout = ({
                     </p>
                     <div className="flex my-5 justify-center items-center">
                       <div className="flex gap-3 justify-center items-center">
-                        <InputComponent onChange={updateLink} />
+                        <InputComponent
+                          onChange={updateLink}
+                          disabled={!isFileUploadEnabled}
+                        />
                         <ButtonComponent
                           icon={<UploadOutlined />}
                           type={"submit"}
                           border={false}
                           onClick={handleUploadLink}
+                          disabled={!isFileUploadEnabled}
                         />
                       </div>
                     </div>

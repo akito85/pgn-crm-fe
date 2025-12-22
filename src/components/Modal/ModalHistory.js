@@ -1,10 +1,10 @@
 import {
   CheckCircleFilled,
-  CloseCircleFilled,
-  ClockCircleOutlined,
-  DownOutlined,
+  LeftCircleFilled,
+  RightCircleFilled,
+  RightOutlined,
 } from "@ant-design/icons";
-import { Modal, Collapse } from "antd";
+import { Avatar, Divider, List, Modal, Tooltip } from "antd";
 import React, { Fragment, useEffect, useState } from "react";
 import SVGIcon from "../../assets/Icon/index";
 import { dateFormatting } from "../../utils";
@@ -12,7 +12,66 @@ import moment from "moment";
 import ButtonComponent from "../ButtonComponent";
 import RadioTabs from "../RadioTabs";
 
-const { Panel } = Collapse;
+const defaultValueHistory = [
+  {
+    type: "SUBMIT",
+    icon: <SVGIcon name="IconSubmitApprover" width={24} />,
+    textColor: "#0063A2",
+    style: {
+      backgroundColor: "#C2DEF0",
+      lineHeight: "50px",
+    },
+  },
+  {
+    type: "APPROVE",
+    icon: <CheckCircleFilled width={24} style={{ color: "#ACC424" }} />,
+    textColor: "#92A71F",
+    style: {
+      backgroundColor: "#EBF1CA",
+    },
+  },
+  {
+    type: "REJECT",
+    icon: <SVGIcon name="IconCross" width={24} style={{ color: "#FF0000" }} />,
+    textColor: "#D90000",
+    style: {
+      backgroundColor: "#FFC2C2",
+      lineHeight: "50px",
+    },
+  },
+  {
+    type: "Released",
+    icon: <SVGIcon name="IconReleaseApprover" width={24} />,
+    textColor: "#118B76",
+    style: {
+      backgroundColor: "rgba(17, 139, 118, 0.25)",
+      lineHeight: "50px",
+    },
+  },
+];
+
+const styleBackgroundAvatar = (dataApprover) => {
+  const dataBackground = defaultValueHistory.filter((valueHistory) =>
+    dataApprover?.status?.includes(valueHistory.type)
+  );
+  return dataBackground.length > 0 ? dataBackground[0].style : undefined;
+};
+
+const handleIconAvatar = (dataApprover) => {
+  const dataIcon = defaultValueHistory.filter((valueHistory) =>
+    dataApprover?.status?.includes(valueHistory.type)
+  );
+  return dataIcon.length > 0 ? dataIcon[0].icon : undefined;
+};
+
+const handleTextColor = (dataHistory) => {
+  const dataIcon = defaultValueHistory.filter((valueHistory) =>
+    dataHistory?.status?.includes(valueHistory.type)
+  );
+  return dataIcon.length > 0 ? dataIcon[0].textColor : "white";
+};
+
+// const tabOptions = ["Create", "Inactive"];
 
 const ModalHistory = (props) => {
   const {
@@ -27,72 +86,24 @@ const ModalHistory = (props) => {
 
   const [tabActive, setTabActive] = useState("");
   const [dataApproverFinal, setDataApproverFinal] = useState([]);
-  const [submitterData, setSubmitterData] = useState(null);
-  const [approverStatus, setApproverStatus] = useState("WAITING");
-  const [activeKeys, setActiveKeys] = useState([]);
+  const [dataHistoryFinal, setDataHistoryFinal] = useState([]);
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
 
   useEffect(() => {
-    const hasValidData = dataApprover && 
-                        dataHistory && 
-                        Object.keys(dataApprover).length > 0 && 
-                        Object.keys(dataHistory).length > 0;
-    
-    if (isOpen && hasValidData) {
+    if (isOpen && dataApprover && dataHistory) {
       const useTabs = tabOptions && (tabOptions?.length > 0 || false);
-      let historyData = [];
-      let approverData = [];
-      
       if (useTabs) {
         const tempTab = tabOptions[0].value.toLowerCase();
         setTabActive(tabOptions[0].value);
-        
-        if (Array.isArray(dataApprover)) {
-          approverData = dataApprover;
-        } else if (dataApprover && typeof dataApprover === 'object') {
-          const tabData = dataApprover[tempTab];
-          approverData = Array.isArray(tabData) ? tabData : [];
-        } else {
-          approverData = [];
-        }
-        
-        if (Array.isArray(dataHistory)) {
-          historyData = dataHistory;
-        } else if (dataHistory && typeof dataHistory === 'object') {
-          const tabData = dataHistory[tempTab];
-          historyData = Array.isArray(tabData) ? tabData : [];
-        } else {
-          historyData = [];
-        }
+        setDataApproverFinal(dataApprover[tempTab]);
+        setDataHistoryFinal(dataHistory[tempTab]);
       } else {
-        approverData = Array.isArray(dataApprover) ? dataApprover : [];
-        historyData = Array.isArray(dataHistory) ? dataHistory : [];
+        setDataApproverFinal(dataApprover || []);
+        setDataHistoryFinal(dataHistory || []);
       }
-      
-      const submitData = Array.isArray(historyData) 
-        ? historyData.find(h => h && h.status === "SUBMIT")
-        : null;
-      setSubmitterData(submitData);
-      
-      setDataApproverFinal(approverData);
-      
-      const hasWaiting = Array.isArray(approverData) && approverData.some(a => a && (a.status === null || a.status === undefined));
-      const hasReject = Array.isArray(approverData) && approverData.some(a => a && a.status === "REJECT");
-      
-      if (hasReject) {
-        setApproverStatus("REJECTED");
-      } else if (hasWaiting) {
-        setApproverStatus("WAITING");
-      } else {
-        setApproverStatus("APPROVED");
-      }
-      
-      setActiveKeys(['0']);
     } else {
       setDataApproverFinal([]);
-      setSubmitterData(null);
-      setApproverStatus("WAITING");
-      setActiveKeys([]);
-      setTabActive("");
+      setDataHistoryFinal([]);
     }
   }, [isOpen, tabOptions, dataApprover, dataHistory]);
 
@@ -100,314 +111,25 @@ const ModalHistory = (props) => {
     const value = e.target.value;
     const tempTab = value.toLowerCase();
     setTabActive(value);
-    
-    let approverData = [];
-    let historyData = [];
-    
-    if (Array.isArray(dataApprover)) {
-      approverData = dataApprover;
-    } else if (dataApprover && typeof dataApprover === 'object') {
-      const tabData = dataApprover[tempTab];
-      approverData = Array.isArray(tabData) ? tabData : [];
-    }
-    
-    if (Array.isArray(dataHistory)) {
-      historyData = dataHistory;
-    } else if (dataHistory && typeof dataHistory === 'object') {
-      const tabData = dataHistory[tempTab];
-      historyData = Array.isArray(tabData) ? tabData : [];
-    }
-    
-    const submitData = Array.isArray(historyData)
-      ? historyData.find(h => h && h.status === "SUBMIT")
-      : null;
-    setSubmitterData(submitData);
-    
-    setDataApproverFinal(approverData);
-    
-    const hasWaiting = Array.isArray(approverData) && approverData.some(a => a && (a.status === null || a.status === undefined));
-    const hasReject = Array.isArray(approverData) && approverData.some(a => a && a.status === "REJECT");
-    
-    if (hasReject) {
-      setApproverStatus("REJECTED");
-    } else if (hasWaiting) {
-      setApproverStatus("WAITING");
-    } else {
-      setApproverStatus("APPROVED");
-    }
-    
-    setActiveKeys(['0']);
+    setDataApproverFinal(tabActive ? dataApprover[tempTab] : dataApprover);
+    setDataHistoryFinal(tabActive ? dataHistory[tempTab] : dataHistory);
   };
 
-  const formatDate = (date) => {
-    if (!date) return "-";
-    return moment(date).format(dateFormatting.dateTime);
+  const sliderLeft = () => {
+    const slider = document.getElementById("sliderModalHistory");
+    slider.scrollLeft = slider.scrollLeft - 250;
   };
 
-  const renderApproverTable = () => {
-    if (!dataApproverFinal || !Array.isArray(dataApproverFinal) || dataApproverFinal.length === 0) {
-      return (
-        <div className="p-4 text-center text-gray-500">
-          No approver data available
-        </div>
-      );
-    }
-
-    const approversWithoutSubmit = dataApproverFinal.filter(
-      approver => approver.status !== "SUBMIT"
-    );
-    if (approversWithoutSubmit.length === 0) {
-      return (
-        <div className="p-4 text-center text-gray-500">
-          No approver data available
-        </div>
-      );
-    }
-
-    const getStatusBadge = (status) => {
-      if (status === "APPROVE") {
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-            <CheckCircleFilled style={{ fontSize: 12 }} />
-            Approved
-          </span>
-        );
-      }
-      if (status === "REJECT") {
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">
-            <CloseCircleFilled style={{ fontSize: 12 }} />
-            Rejected
-          </span>
-        );
-      }
-      if (status === "SUBMIT") {
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-            <CheckCircleFilled style={{ fontSize: 12 }} />
-            Submitted
-          </span>
-        );
-      }
-      return (
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
-          <ClockCircleOutlined style={{ fontSize: 12 }} />
-          Waiting
-        </span>
-      );
-    };
-
-    const enrichedApprovers = approversWithoutSubmit.map((approver, idx) => {
-      let historyMatch = null;
-      
-      let historyData = [];
-      
-      if (tabActive && dataHistory && typeof dataHistory === 'object') {
-        const tempTab = tabActive.toLowerCase();
-        const tabData = dataHistory[tempTab];
-        historyData = Array.isArray(tabData) ? tabData : [];
-      } else if (Array.isArray(dataHistory)) {
-        historyData = dataHistory;
-      }
-      
-      if (Array.isArray(historyData) && historyData.length > 0) {
-        historyMatch = historyData.find(
-          h => h && h.name === approver.name && h.status === approver.status
-        );
-      }
-      
-      return {
-        ...approver,
-        taskDate: historyMatch?.taskDate || submitterData?.taskDate || null,
-        actionDate: historyMatch?.actionDate || null,
-        hierarchy: historyMatch?.hierarchy || "-",
-        description: historyMatch?.description || "-", // TAMBAH DESCRIPTION
-      };
-    });
-
-    return (
-      <div className="p-4">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs border border-gray-200">
-            <thead>
-              <tr className="bg-blue-600 text-white">
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">NO</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">TASK SUBMITTED DATE</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">ACTION DATE</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">HIERARCHY</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">ACTION BY</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">POSITION</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">REMARK</th>
-                <th className="py-2 px-3 text-center font-semibold">STATUS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {enrichedApprovers.map((approver, index) => (
-                <tr 
-                  key={index}
-                  className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
-                >
-                  <td className="py-2 px-3 border-b border-r border-gray-200">{index + 1}</td>
-                  <td className="py-2 px-3 border-b border-r border-gray-200">
-                    {formatDate(approver.taskDate)}
-                  </td>
-                  <td className="py-2 px-3 border-b border-r border-gray-200">
-                    {formatDate(approver.actionDate)}
-                  </td>
-                  <td className="py-2 px-3 border-b border-r border-gray-200">
-                    {approver.hierarchy}
-                  </td>
-                  <td className="py-2 px-3 border-b border-r border-gray-200 font-medium">
-                    {approver.name || "-"}
-                  </td>
-                  <td className="py-2 px-3 border-b border-r border-gray-200">
-                    {approver.role || "-"}
-                  </td>
-                  <td className="py-2 px-3 border-b border-r border-gray-200">
-                    {approver.description}
-                  </td>
-                  <td className="py-2 px-3 border-b text-center">
-                    {getStatusBadge(approver.status)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
+  const sliderRight = () => {
+    const slider = document.getElementById("sliderModalHistory");
+    slider.scrollLeft = slider.scrollLeft + 250;
   };
 
-  const renderSubmitterPanel = () => {
-    if (!submitterData) return null;
-
-    return (
-      <Panel 
-        header={
-          <div className="flex items-center justify-between w-full pr-4">
-            <div className="flex items-center gap-3">
-              <SVGIcon name="IconSubmitApprover" width={20} />
-              <span className="font-semibold text-sm" style={{ color: "#0063A2" }}>
-                SUBMITTER DATA
-              </span>
-            </div>
-            <span className="text-xs font-medium" style={{ color: "#0063A2" }}>
-              SUBMITTED
-            </span>
-          </div>
-        }
-        key="0"
-        style={{
-          marginBottom: 12,
-          border: '1px solid #d9d9d9',
-          borderRadius: 6,
-          overflow: 'hidden',
-          backgroundColor: '#ffffff'
-        }}
-        className="approval-history-panel"
-      >
-        <div className="p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Task Submitted Date</p>
-              <p className="text-sm font-medium">{formatDate(submitterData.taskDate)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Action Date</p>
-              <p className="text-sm font-medium">{formatDate(submitterData.actionDate)}</p>
-            </div>
-            
-            <div className="col-span-2">
-              <p className="text-xs font-semibold text-gray-700 mb-2">DETAIL</p>
-              
-              <div className="space-y-2">
-                <div className="flex">
-                  <span className="text-xs text-gray-600 w-32">Hierarchy</span>
-                  <span className="text-xs font-medium">{submitterData.hierarchy || "-"}</span>
-                </div>
-                
-                <div className="flex">
-                  <span className="text-xs text-gray-600 w-32">Action By</span>
-                  <span className="text-xs font-medium">{submitterData.name || "-"}</span>
-                </div>
-                
-                <div className="flex">
-                  <span className="text-xs text-gray-600 w-32">Position</span>
-                  <span className="text-xs font-medium">{submitterData.role || "-"}</span>
-                </div>
-
-                {/* TAMBAH DESCRIPTION DI SUBMITTER */}
-                <div className="flex">
-                  <span className="text-xs text-gray-600 w-32">Remark</span>
-                  <span className="text-xs font-medium">{submitterData.description || "-"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Panel>
-    );
-  };
-
-  const renderApproverPanel = () => {
-    const approversWithoutSubmit = Array.isArray(dataApproverFinal) 
-      ? dataApproverFinal.filter(a => a.status !== "SUBMIT")
-      : [];
-
-    if (approversWithoutSubmit.length === 0) {
-      return null;
-    }
-
-    const getApproverIcon = () => {
-      if (approverStatus === "APPROVED") {
-        return <CheckCircleFilled style={{ color: "#52C41A", fontSize: 20 }} />;
-      }
-      if (approverStatus === "REJECTED") {
-        return <CloseCircleFilled style={{ color: "#FF4D4F", fontSize: 20 }} />;
-      }
-      return <ClockCircleOutlined style={{ color: "#FAAD14", fontSize: 20 }} />;
-    };
-
-    const getApproverColor = () => {
-      if (approverStatus === "APPROVED") return "#52C41A";
-      if (approverStatus === "REJECTED") return "#FF4D4F";
-      return "#FAAD14";
-    };
-
-    const getApproverText = () => {
-      if (approverStatus === "APPROVED") return "APPROVED";
-      if (approverStatus === "REJECTED") return "REJECTED";
-      return "WAITING FOR APPROVAL";
-    };
-
-    return (
-      <Panel 
-        header={
-          <div className="flex items-center justify-between w-full pr-4">
-            <div className="flex items-center gap-3">
-              {getApproverIcon()}
-              <span className="font-semibold text-sm" style={{ color: getApproverColor() }}>
-                APPROVER
-              </span>
-            </div>
-            <span className="text-xs font-medium" style={{ color: getApproverColor() }}>
-              {getApproverText()}
-            </span>
-          </div>
-        }
-        key="1"
-        style={{
-          marginBottom: 12,
-          border: '1px solid #d9d9d9',
-          borderRadius: 6,
-          overflow: 'hidden',
-          backgroundColor: '#ffffff'
-        }}
-        className="approval-history-panel"
-      >
-        {renderApproverTable()}
-      </Panel>
-    );
+  const toggleDescription = (itemId) => {
+    setExpandedDescriptions((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
   };
 
   return (
@@ -416,12 +138,12 @@ const ModalHistory = (props) => {
       onCancel={handleClose}
       className={"modal-custom"}
       centered={true}
-      width={width || 900}
-      maskClosable={false}
+      width={550}
+      closable={false}
       footer={
-        <div className="w-full flex justify-end gap-5">
+        <div className="w-full flex justify-end">
           <ButtonComponent onClick={handleClose} type="default">
-            Cancel
+            Back
           </ButtonComponent>
         </div>
       }
@@ -430,68 +152,140 @@ const ModalHistory = (props) => {
         {/* header section */}
         <div
           style={{ background: "#E6F1F9" }}
-          className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}
+          className={"rounded-tl-[5px] rounded-tr-[5px] px-3 py-2"}
         >
-          <div className={"flex gap-x-1.5 items-center"}>
-            <span className="text-blue-500 font-semibold text-sm uppercase">
+          <div className={"flex gap-x-1 items-center"}>
+            <span
+              style={{
+                color: "#4B465C",
+                fontWeight: "600",
+                fontSize: "14px",
+                textTransform: "uppercase",
+              }}
+            >
               {header}
             </span>
           </div>
         </div>
 
         {/* content section */}
-        <div className={"flex flex-col w-full gap-4 p-5"}>
+        <div className={"flex flex-col w-full gap-3 p-3"}>
           {tabOptions && tabOptions.length > 0 ? (
             <RadioTabs data={tabOptions} onChange={handleTabs} />
           ) : null}
-          
-          {submitterData || (dataApproverFinal && dataApproverFinal.filter(a => a.status !== "SUBMIT").length > 0) ? (
-            <div className="space-y-3">
-              <Collapse
-                activeKey={activeKeys}
-                onChange={setActiveKeys}
-                expandIconPosition="end"
-                expandIcon={({ isActive }) => (
-                  <DownOutlined 
-                    rotate={isActive ? 180 : 0} 
-                    style={{ fontSize: 12 }}
+          <div className="relative flex justify-center items-center gap-2">
+            {dataApproverFinal.length > 0 ? (
+              <LeftCircleFilled width={32} onClick={sliderLeft} />
+            ) : null}
+            <div
+              id="sliderModalHistory"
+              className={`flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar`}
+            >
+              {dataApproverFinal.map((approver, index) => (
+                <div
+                  className="flex flex-row items-center gap-1.5"
+                  key={`Approver ${index + 1}`}
+                >
+                  <Avatar
+                    shape="square"
+                    size={36}
+                    icon={handleIconAvatar(approver)}
+                    style={styleBackgroundAvatar(approver)}
                   />
-                )}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none'
-                }}
-              >
-                {submitterData && renderSubmitterPanel()}
-                {renderApproverPanel()}
-              </Collapse>
+                  <div className="flex flex-col gap-0.5 max-w-[180px]">
+                    <p className="text-xs m-0 truncate">
+                      {approver?.name || "-"}
+                    </p>
+                    <Tooltip title={approver?.role} className="cursor-pointer">
+                      <p className="text-[10px] font-thin m-0 truncate">
+                        {approver?.role}
+                      </p>
+                    </Tooltip>
+                  </div>
+                  {index !== dataApproverFinal.length - 1 ? (
+                    <RightOutlined className="text-xs" />
+                  ) : null}
+                </div>
+              ))}
             </div>
-          ) : (
-            <div className="text-center py-16 text-gray-400">
-              <p className="text-base">No approval history available</p>
-            </div>
-          )}
+
+            {dataApproverFinal.length > 0 ? (
+              <RightCircleFilled width={32} onClick={sliderRight} />
+            ) : null}
+          </div>
+          <Divider style={{ margin: 0 }} />
+          <div
+            className="shadow-lg h-72 overflow-auto mb-2 p-1.5 rounded-md"
+            style={{ border: "1px solid #DBDADE" }}
+          >
+            <List
+              dataSource={dataHistoryFinal}
+              renderItem={(item) => (
+                <List.Item key={item.id} style={{ padding: "8px 0" }}>
+                  <div className="flex flex-row w-full px-2 py-1 gap-3 justify-between">
+                    <div className="flex flex-col gap-1 w-1/2">
+                      <p
+                        className="text-xs m-0 font-semibold"
+                        style={{ color: handleTextColor(item) }}
+                      >
+                        {item.status}
+                      </p>
+                      <p className="text-[11px] m-0">{`Hierachy: ${item.hierarchy}`}</p>
+                      <p className="text-[11px] m-0">{`Action by: ${item.name}`}</p>
+                      <p className="text-[11px] m-0">{`Position: ${item.role}`}</p>
+                    </div>
+                    <div className="flex flex-col items-end justify-between gap-1 w-1/2">
+                      <div className="flex gap-0.5 items-end">
+                        <p className="text-[10px] m-0 font-light">
+                          {`Task: ${
+                            item.taskDate
+                              ? moment(item.taskDate).format(
+                                  dateFormatting.dateTime
+                                )
+                              : "-"
+                          }`}
+                        </p>
+                        <p className="text-[10px] m-0 font-light">
+                          {`Action: ${
+                            item.actionDate
+                              ? moment(item.actionDate).format(
+                                  dateFormatting.dateTime
+                                )
+                              : "-"
+                          }`}
+                        </p>
+                      </div>
+                      {item.status !== "SUBMIT" && item.description ? (
+                        <p
+                          className={`text-[11px] m-0 w-full font-semibold cursor-pointer break-words ${
+                            expandedDescriptions[item.id]
+                              ? ""
+                              : "overflow-hidden whitespace-nowrap text-ellipsis"
+                          }`}
+                          onClick={() => toggleDescription(item.id)}
+                        >
+                          {/* {item.description} */}
+                          Lorem Ipsum is simply dummy text of the printing and
+                          typesetting industry. Lorem Ipsum has been the
+                          industry's standard dummy text ever since the 1500s,
+                          when an unknown printer took a galley of type and
+                          scrambled it to make a type specimen book. It has
+                          survived not only five centuries, but also the leap
+                          into electronic typesetting, remaining essentially
+                          unchanged. It was popularised in the 1960s with the
+                          release of Letraset sheets containing Lorem Ipsum
+                          passages, and more recently with desktop publishing
+                          software like Aldus PageMaker including versions of
+                          Lorem Ipsum.
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                </List.Item>
+              )}
+            />
+          </div>
         </div>
-
-        <style jsx global>{`
-          .approval-history-panel .ant-collapse-header {
-            padding: 14px 16px !important;
-            background-color: #ffffff !important;
-          }
-          
-          .approval-history-panel .ant-collapse-content-box {
-            padding: 0 !important;
-          }
-
-          .approval-history-panel .ant-collapse-content {
-            border-top: 1px solid #d9d9d9;
-            background-color: #ffffff !important;
-          }
-          
-          .approval-history-panel.ant-collapse-item {
-            background-color: #ffffff !important;
-          }
-        `}</style>
       </Fragment>
     </Modal>
   );

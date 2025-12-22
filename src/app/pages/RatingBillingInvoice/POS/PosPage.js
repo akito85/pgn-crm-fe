@@ -464,11 +464,16 @@ const PosPage = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className={"w-full flex justify-end gap-2"}>
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <CardContainer header={"point of sales list"}>
+        <CardContainer
+          header={
+            <div className="flex w-full h-9">
+              <p className="w-full font-bold">point of sales list</p>
+              <div className={"w-full flex justify-end gap-2"}>
+                <Toolbar items={itemGrantAccess} />
+              </div>
+            </div>
+          }
+        >
           <div className="w-full">
             <TableRBI
               dataSource={dataSource}
