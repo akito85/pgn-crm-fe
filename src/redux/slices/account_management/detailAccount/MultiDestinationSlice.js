@@ -72,7 +72,8 @@ export const createMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      return response.data;
+      // return response.data;
+      return {};
     } catch (error) {
       const message =
         (error.response &&
@@ -124,7 +125,8 @@ export const updateMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      return response.data;
+      // return response.data;
+      return {};
     } catch (error) {
       const message =
         (error.response &&
@@ -444,9 +446,9 @@ export const getMdConditionApi = createAsyncThunk(
   "GET_MD_CONDITION_API",
   async (thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/multi-destination/list-search-condition";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
+      // const url = "/v1/dbs/api/multi-destination/list-search-condition";
+      // const response = await accountManagementService.getAll(url);
+      // return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -520,53 +522,53 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Multi Destination Approval Hierarchy */
-    [getPrApprovalHierarchy.pending]: (state) => {
+    [getMdApprovalHierarchy.pending]: (state) => {
       state.loading = true;
     },
-    [getPrApprovalHierarchy.fulfilled]: (state, action) => {
+    [getMdApprovalHierarchy.fulfilled]: (state, action) => {
       state.data_mdApprovalHierarchy = action.payload;
       state.loading = false;
     },
-    [getPrApprovalHierarchy.rejected]: (state) => {
+    [getMdApprovalHierarchy.rejected]: (state) => {
       state.data_mdApprovalHierarchy = [];
       state.loading = false;
     },
 
     /** Get Multi Destination Detail Approval Hierarchy */
-    [getDetailPrApprovalHierarchy.pending]: (state) => {
+    [getDetailMdApprovalHierarchy.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailPrApprovalHierarchy.fulfilled]: (state, action) => {
+    [getDetailMdApprovalHierarchy.fulfilled]: (state, action) => {
       state.detail_mdApprovalHierarchy = action.payload;
       state.loading = false;
     },
-    [getDetailPrApprovalHierarchy.rejected]: (state) => {
+    [getDetailMdApprovalHierarchy.rejected]: (state) => {
       state.detail_mdApprovalHierarchy = [];
       state.loading = false;
     },
 
     /** Get Multi Destination Attachment Category */
-    [getPrAttachmentCategory.pending]: (state) => {
+    [getMdAttachmentCategory.pending]: (state) => {
       state.loading = true;
     },
-    [getPrAttachmentCategory.fulfilled]: (state, action) => {
+    [getMdAttachmentCategory.fulfilled]: (state, action) => {
       state.data_mdAttachmentCategory = action.payload;
       state.loading = false;
     },
-    [getPrAttachmentCategory.rejected]: (state) => {
+    [getMdAttachmentCategory.rejected]: (state) => {
       state.data_mdAttachmentCategory = [];
       state.loading = false;
     },
 
     /** Get Multi Destination Account Standard */
-    [getPrAccountStandard.pending]: (state) => {
+    [getMdAccountStandard.pending]: (state) => {
       state.loading = true;
     },
-    [getPrAccountStandard.fulfilled]: (state, action) => {
+    [getMdAccountStandard.fulfilled]: (state, action) => {
       state.data_mdAccountStandard = action.payload;
       state.loading = false;
     },
-    [getPrAccountStandard.rejected]: (state) => {
+    [getMdAccountStandard.rejected]: (state) => {
       state.data_mdAccountStandard = [];
       state.loading = false;
     },
@@ -629,50 +631,50 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Multi Destination Approval History */
-    [getPrApprovalHistory.pending]: (state) => {
+    [getMdApprovalHistory.pending]: (state) => {
       state.loading = true;
     },
-    [getPrApprovalHistory.fulfilled]: (state, action) => {
+    [getMdApprovalHistory.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_mdApprovalHistory = action.payload;
     },
-    [getPrApprovalHistory.rejected]: (state) => {
+    [getMdApprovalHistory.rejected]: (state) => {
       state.loading = false;
     },
 
     /** Get Multi Destination Column API  */
-    [getPrColumnApi.pending]: (state) => {
+    [getMdColumnApi.pending]: (state) => {
       state.loading = true;
     },
-    [getPrColumnApi.fulfilled]: (state, action) => {
+    [getMdColumnApi.fulfilled]: (state, action) => {
       state.data_globalTypeColumn = action.payload;
       state.loading = false;
     },
-    [getPrColumnApi.rejected]: (state) => {
+    [getMdColumnApi.rejected]: (state) => {
       state.loading = false;
     },
 
     /** Get Multi Destination Condition API  */
-    [getPrConditionApi.pending]: (state) => {
+    [getMdConditionApi.pending]: (state) => {
       state.loading = true;
     },
-    [getPrConditionApi.fulfilled]: (state, action) => {
+    [getMdConditionApi.fulfilled]: (state, action) => {
       state.data_globalTypeCondition = action.payload;
       state.loading = false;
     },
-    [getPrConditionApi.rejected]: (state) => {
+    [getMdConditionApi.rejected]: (state) => {
       state.loading = false;
     },
 
     /** Get Multi Destination Operator API  */
-    [getPrOperatorApi.pending]: (state) => {
+    [getMdOperatorApi.pending]: (state) => {
       state.loading = true;
     },
-    [getPrOperatorApi.fulfilled]: (state, action) => {
+    [getMdOperatorApi.fulfilled]: (state, action) => {
       state.data_globalTypeOperator = action.payload;
       state.loading = false;
     },
-    [getPrOperatorApi.rejected]: (state) => {
+    [getMdOperatorApi.rejected]: (state) => {
       state.loading = false
     },
   },
