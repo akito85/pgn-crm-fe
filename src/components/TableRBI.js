@@ -259,7 +259,7 @@ const TableRBI = ({
                   }}
                 >
                   <FilterOutlined style={{ fontSize: "20px" }} />
-                  Advance Search
+                  Advanced Search
                 </Button>
               )}
 

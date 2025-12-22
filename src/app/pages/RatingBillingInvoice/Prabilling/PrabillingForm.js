@@ -875,63 +875,68 @@ const PrabillingForm = ({ type }) => {
               </div>
             }
           >
-            <Form.Item
-              label={"Type"}
-              name={"type"}
-              rules={formMessageRequired("Type")}
-              style={{ marginBottom: 0 }}
-            >
-              <SelectComponent
-                onChange={handleScheduleTypeChange}
-                options={(list_scheduler_type || []).map((item) => {
-                  return {
-                    label: item?.name,
-                    value: item?.id,
-                  };
-                })}
-              />
-            </Form.Item>
-
-            {selectedScheduleType &&
-              list_scheduler_type
-                ?.find((item) => item.id === selectedScheduleType)
-                ?.name?.toLowerCase() === "scheduler" && (
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex w-1/2 gap-3">
                 <Form.Item
-                  label={"Schedule"}
-                  name={"scheduleDateTime"}
+                  label={"Type"}
+                  name={"type"}
+                  rules={formMessageRequired("Type")}
                   style={{ marginBottom: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select schedule date and time",
-                    },
-                  ]}
                 >
-                  <DatePicker
-                    showTime
-                    format="DD MMM YYYY HH:mm:ss"
-                    placeholder="Select date and time"
-                    className="w-full"
-                    disabledDate={(current) => {
-                      return current && current < moment().startOf("day");
-                    }}
+                  <SelectComponent
+                    onChange={handleScheduleTypeChange}
+                    options={(list_scheduler_type || []).map((item) => {
+                      return {
+                        label: item?.name,
+                        value: item?.id,
+                      };
+                    })}
                   />
                 </Form.Item>
-              )}
 
-            <Form.Item
-              label={"Remark"}
-              name={"remark"}
-              rules={formMessageRequired("Remark")}
-              style={{ marginBottom: 0 }}
-            >
-              <InputComponent
-                type="textarea"
-                value={remark}
-                style={{ marginBottom: 4 }}
-                onChange={(e) => setRemark(e.target.value)}
-              />
-            </Form.Item>
+                {selectedScheduleType &&
+                  list_scheduler_type
+                    ?.find((item) => item.id === selectedScheduleType)
+                    ?.name?.toLowerCase() === "scheduler" && (
+                    <Form.Item
+                      label={"Schedule"}
+                      name={"scheduleDateTime"}
+                      style={{ marginBottom: 0 }}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select schedule date and time",
+                        },
+                      ]}
+                    >
+                      <DatePicker
+                        showTime
+                        format="DD MMM YYYY HH:mm:ss"
+                        placeholder="Select date and time"
+                        className="w-full"
+                        disabledDate={(current) => {
+                          return current && current < moment().startOf("day");
+                        }}
+                      />
+                    </Form.Item>
+                  )}
+              </div>
+              <div className="w-full">
+                <Form.Item
+                  label={"Remark"}
+                  name={"remark"}
+                  rules={formMessageRequired("Remark")}
+                  style={{ marginBottom: 0 }}
+                >
+                  <InputComponent
+                    type="textarea"
+                    value={remark}
+                    style={{ marginBottom: 4 }}
+                    onChange={(e) => setRemark(e.target.value)}
+                  />
+                </Form.Item>
+              </div>
+            </div>
           </CardContainer>
           <div className={"w-full flex mt-5"}>
             <div className={"w-full justify-start"}>

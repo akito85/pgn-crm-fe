@@ -271,7 +271,16 @@ const FormConfirmation = ({ data }) => {
           <DetailText label="Type">
             {getScheduleTypeName(data?.scheduleType)}
           </DetailText>
-          <DetailText label="Remark">{data?.remark || ""}</DetailText>
+
+          {data?.schedulerTime && (
+            <DetailText label="Schedule Date Time">
+              {data?.schedulerTime}
+            </DetailText>
+          )}
+
+          <div className="col-span-2">
+            <DetailText label="Remark">{data?.remark || ""}</DetailText>
+          </div>
         </div>
       </CardContainer>
     </div>
