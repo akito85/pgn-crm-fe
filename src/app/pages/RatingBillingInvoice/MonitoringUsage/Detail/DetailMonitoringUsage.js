@@ -506,7 +506,6 @@ const DetailMonitoringUsage = () => {
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Approval" key="Approval">
-                {/* Approval Tab - Sesuai Desain Figma */}
                 <div className="bg-white mt-1">
                   <ApprovalComponentGeneral
                     dataTable={appHierDataDetail}

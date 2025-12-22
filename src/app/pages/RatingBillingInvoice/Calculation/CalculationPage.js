@@ -138,114 +138,6 @@ const CalculationPage = () => {
           ),
       },
       {
-        key: "progress",
-        title: "Σ PROGRESS",
-        dataIndex: "progress",
-        isNumber: true,
-        sorter: true,
-        filteredValue: [search?.progress] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "progress",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "progress",
-            hasValue(search["progress"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "succeed",
-        title: "Σ SUCCEED",
-        dataIndex: "succeed",
-        isNumber: true,
-        sorter: true,
-        filteredValue: [search?.succeed] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "succeed",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "succeed",
-            hasValue(search["succeed"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "failed",
-        title: "Σ FAILED",
-        dataIndex: "failed",
-        isNumber: true,
-        sorter: true,
-        filteredValue: [search?.failed] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "failed",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "failed",
-            hasValue(search["failed"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "customer",
-        title: "Σ CUSTOMER",
-        dataIndex: "customer",
-        isNumber: true,
-        sorter: true,
-        filteredValue: [search?.customer] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "customer",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "customer",
-            hasValue(search["customer"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
         key: "billingCycleVal",
         title: "BILLING CYCLE",
         dataIndex: "billingCycleVal",
@@ -555,6 +447,114 @@ const CalculationPage = () => {
             searchText,
             text,
             "datetime",
+            search
+          ),
+      },
+       {
+        key: "progress",
+        title: "Σ PROGRESS",
+        dataIndex: "progress",
+        isNumber:true,
+        sorter: true,
+        filteredValue: [search?.progress] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "progress",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "progress",
+            hasValue(search["progress"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "succeed",
+        title: "Σ SUCCEED",
+        dataIndex: "succeed",
+        isNumber:true,
+        sorter: true,
+        filteredValue: [search?.succeed] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "succeed",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "succeed",
+            hasValue(search["succeed"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "failed",
+        title: "Σ FAILED",
+        dataIndex: "failed",
+        isNumber:true,
+        sorter: true,
+        filteredValue: [search?.failed] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "failed",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "failed",
+            hasValue(search["failed"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "customer",
+        title: "Σ CUSTOMER",
+        dataIndex: "customer",
+        isNumber:true,
+        sorter: true,
+        filteredValue: [search?.customer] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customer",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "customer",
+            hasValue(search["customer"]),
+            searchText,
+            text,
+            false,
+            "input",
             search
           ),
       },
