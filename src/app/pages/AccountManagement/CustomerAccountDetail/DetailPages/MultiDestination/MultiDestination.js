@@ -3,17 +3,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import { DatePicker, Form, Input, Spin } from "antd";
-import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, getPrColumnApi, getPrConditionApi, getPrOperatorApi, inactivatePaymentRelation } from "../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../utils";
-import PaymentRelationTable from "../FinancialInformation/PaymentRelation/PaymentRelationTable";
+import MultiDestinationTable from "./MultiDestinationTable";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import NxFilter from "../../../../../../components/Nx/NxFilter";
 import ModalConfirmationApprovalPaymentRelation from "../FinancialInformation/PaymentRelation/ModalConfirmationApprovalPaymentRelation";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
+import { getMultiDestination, approveOrRejectAllMultiDestination, downloadMultiDestination, getMdApprovalHistory, getMdColumnApi, getMdConditionApi, getMdOperatorApi, inactivateMultiDestination, } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 
 const MultiDestination = ({
   id = 0,
@@ -27,11 +27,11 @@ const MultiDestination = ({
 }) => {
   const dispatch = useDispatch();
 
-  const financialInformationState = useSelector(
-    (state) => state.financialInformation
+  const multiDestinationState = useSelector(
+    (state) => state.multiDestination
   );
 
-  const { data_paymentRelation, loading, data_prApprovalHistory } = financialInformationState;
+  const { data_multiDestination, loading, data_mdApprovalHistory } = multiDestinationState;
 
   //declare
   const searchInput = useRef(null);
@@ -48,9 +48,9 @@ const MultiDestination = ({
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
-  const [inactivatePrId, setInactivatePrId] = useState(0);
-  const [inactivatePrAppHierId, setInactivatePrAppHierId] = useState(0);
-  const [inactivatePrAccountNumber, setInactivatePrAccountNumber] = useState(0);
+  const [inactivateMdId, setInactivateMdId] = useState(0);
+  const [inactivateMdAppHierId, setInactivateMdAppHierId] = useState(0);
+  const [inactivateMdAccountNumber, setInactivateMdAccountNumber] = useState(0);
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
@@ -102,21 +102,21 @@ const MultiDestination = ({
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
     const action = submitApprovalCondition.toUpperCase();
 
-    const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
+    const body = selectedRows.filter(row => row.approvalType === "MULTI_DESTINATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
       description,
     }));
 
-    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
+    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_MULTI_DESTINATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
       description,
     }))
 
-    dispatch(approveOrRejectAllPaymentRelation({ body, inactiveBody, action }))
+    dispatch(approveOrRejectAllMultiDestination({ body, inactiveBody, action }))
     .unwrap()
     .then(() => {
       handleClear();
@@ -130,7 +130,7 @@ const MultiDestination = ({
         inputFields: tempFilters,
       }
 
-      dispatch(getPaymentRelation({ id, body }))
+      dispatch(getMultiDestination({ id, body }))
     })
     .catch(() => {});
   }
@@ -143,14 +143,14 @@ const MultiDestination = ({
    */
   const handleInactivateModal = (show, newPrId = 0, newPrAppHierId = 0, newPrAccountNumber = "") => {
     if (show) {
-      setInactivatePrId(newPrId);
-      setInactivatePrAppHierId(newPrAppHierId);
-      setInactivatePrAccountNumber(newPrAccountNumber)
+      setInactivateMdId(newPrId);
+      setInactivateMdAppHierId(newPrAppHierId);
+      setInactivateMdAccountNumber(newPrAccountNumber)
       setShowInactiveModal(true);
     } else {
-      setInactivatePrId(0);
-      setInactivatePrAppHierId(0);
-      setInactivatePrAccountNumber("");
+      setInactivateMdId(0);
+      setInactivateMdAppHierId(0);
+      setInactivateMdAccountNumber("");
       setShowInactiveModal(false);
     }
   }
@@ -161,12 +161,12 @@ const MultiDestination = ({
    */
   const handleInactivatePr = (remark, handleClear) => {
     const body = {
-      id: inactivatePrId,
-      appHierId: inactivatePrAppHierId,
+      id: inactivateMdId,
+      appHierId: inactivateMdAppHierId,
       remark,
     }
 
-    dispatch(inactivatePaymentRelation({
+    dispatch(inactivateMultiDestination({
       body,
     }))
     .unwrap()
@@ -179,7 +179,7 @@ const MultiDestination = ({
         inputFields: tempFilters,
       }
 
-      dispatch(getPaymentRelation({ id, body }));
+      dispatch(getMultiDestination({ id, body }));
       setShowInactiveModal(false);
       handleClear();
     })
@@ -292,7 +292,7 @@ const MultiDestination = ({
    */
   const handleApprovalHistoryModal = (show, prId = 0) => {
     if (show) {
-      dispatch(getPrApprovalHistory(prId));
+      dispatch(getMdApprovalHistory(prId));
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
@@ -329,7 +329,7 @@ const MultiDestination = ({
       searchs: search
     }
 
-    dispatch(downloadPaymentRelation({ body, id, }));
+    dispatch(downloadMultiDestination({ body, id, }));
   };
 
   /**
@@ -371,18 +371,18 @@ const MultiDestination = ({
       listType,
     }
 
-    dispatch(getPaymentRelation({ id, body }));
+    dispatch(getMultiDestination({ id, body }));
   }, [page, pageSize, sort, search, tempFilters, listType]);
 
   useEffect(() => {
     if (
-      data_paymentRelation && 
-      data_paymentRelation.result &&
-      data_paymentRelation.result.length > 0
+      data_multiDestination && 
+      data_multiDestination.result &&
+      data_multiDestination.result.length > 0
     ) {
-      setTotalElement(data_paymentRelation?.page?.totalElements);
+      setTotalElement(data_multiDestination?.page?.totalElements);
     }
-  }, [data_paymentRelation]);
+  }, [data_multiDestination]);
 
   // Listen to approve or reject button on the parent component
   useEffect(() => {
@@ -408,15 +408,15 @@ const MultiDestination = ({
   }, [isApproval]);
 
   useEffect(() => {
-    if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
+    if (data_mdApprovalHistory && data_mdApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_prApprovalHistory?.dataApprover?.PAYMENT_RELATION || [],
-          inactive: data_prApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_RELATION || [],
+          create: data_mdApprovalHistory?.dataApprover?.MULTI_DESTINATION || [],
+          inactive: data_mdApprovalHistory?.dataApprover?.INACTIVE_MULTI_DESTINATION || [],
         },
         dataHistory: {
-          create: data_prApprovalHistory?.dataHistory?.PAYMENT_RELATION || [],
-          inactive: data_prApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_RELATION || [],
+          create: data_mdApprovalHistory?.dataHistory?.MULTI_DESTINATION || [],
+          inactive: data_mdApprovalHistory?.dataHistory?.INACTIVE_MULTI_DESTINATION || [],
         },
       };
 
@@ -424,16 +424,16 @@ const MultiDestination = ({
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_prApprovalHistory]);
+  }, [data_mdApprovalHistory]);
 
   return (
     <Spin spinning={loading}>
       <BaseContainer header={"MULTI DESTINATION LIST"}>
-        <PaymentRelationTable
-          data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
+        <MultiDestinationTable
+          data={data_multiDestination?.result?.map((paymentRelation, index) => ({
             ...paymentRelation,
             no: index + 1 + ( page - 1) * pageSize,
-            key: `payment-relation-${paymentRelation.id}-${index}`
+            key: `multi-destination-${paymentRelation.id}-${index}`
           }))}
           idAccount={id}
           idCustomer={idCustomer}
@@ -454,7 +454,6 @@ const MultiDestination = ({
           setShowFilterModal={setShowFilterModal}
         />
 
-        {/* Advanced Filter Modal */}
         <ModalCustom
           isOpen={showFilterModal}
           type={"confirmation"}
@@ -467,10 +466,10 @@ const MultiDestination = ({
               form={filterForm}
               onCancel={handleCancelFilter}
               dispatch={dispatch}
-              getColumnApi={getPrColumnApi}
-              getConditionApi={getPrConditionApi}
-              getOperatorApi={getPrOperatorApi}
-              reduxState={financialInformationState}
+              getColumnApi={getMdColumnApi}
+              getConditionApi={getMdConditionApi}
+              getOperatorApi={getMdOperatorApi}
+              reduxState={multiDestinationState}
               maxFilters={5}
               loading={loading}
               formId="prFilterForm"
@@ -487,16 +486,14 @@ const MultiDestination = ({
           onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
         />
 
-        {/* Inactivate Modal */}
         <ModalApproveOrReject
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
-          customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrAccountNumber}?`}
+          customMessage={`Are you sure you want to inactivate payment relation - ${inactivateMdAccountNumber}?`}
           onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
         />
 
-        {/* Approval History Modal */}
         <ModalHistory
           isOpen={showApprovalHistoryModal}
           handleClose={() => handleApprovalHistoryModal(false)}
@@ -506,7 +503,7 @@ const MultiDestination = ({
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
-      </BaseContainer>  
+      </BaseContainer>
     </Spin>
   );
 };

@@ -269,7 +269,7 @@ const MultiDestinationTable = ({
   const itemActions = [
     {
       action: "Download",
-      render: (
+      render: () => (
         <ButtonComponent
           type={"submit"}
           onClick={handleDownload}
@@ -296,7 +296,7 @@ const MultiDestinationTable = ({
     },
     {
       action: "Approve",
-      render: (
+      render: () => (
         <ButtonComponent
           type={"submit"}
           onClick={() => handleIsApproval(true)}
@@ -323,7 +323,7 @@ const MultiDestinationTable = ({
     },
     {
       action: "Create",
-      render: (
+      render: () => (
         <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION} state={{
           idAccount,
           idCustomer,
