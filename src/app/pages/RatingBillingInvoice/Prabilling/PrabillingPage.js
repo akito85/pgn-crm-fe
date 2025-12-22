@@ -260,7 +260,7 @@ const PrabillingPage = () => {
         render: (text) => {
           const formattedDate = text
             ? moment(text).format("DD MMM YYYY HH:mm:ss")
-            : "-";
+            : "";
           return renderDateColumn(
             "createdDtm",
             hasValue(search["createdDtm"]),
@@ -316,7 +316,7 @@ const PrabillingPage = () => {
           true
         ),
         render: (text) => {
-          const displayText = text?.toLocaleString() || "-";
+          const displayText = text?.toLocaleString() || "";
           return renderColumn(
             "totalCustomer",
             hasValue(search["totalCustomer"]),
