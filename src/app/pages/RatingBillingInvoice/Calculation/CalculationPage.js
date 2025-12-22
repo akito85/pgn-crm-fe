@@ -115,7 +115,7 @@ const CalculationPage = () => {
         title: "CALCULATION CODE",
         dataIndex: "calculationCode",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.calculationCode] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -141,7 +141,7 @@ const CalculationPage = () => {
         key: "progress",
         title: "Σ PROGRESS",
         dataIndex: "progress",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.progress] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -168,7 +168,7 @@ const CalculationPage = () => {
         key: "succeed",
         title: "Σ SUCCEED",
         dataIndex: "succeed",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.succeed] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -195,7 +195,7 @@ const CalculationPage = () => {
         key: "failed",
         title: "Σ FAILED",
         dataIndex: "failed",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.failed] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -222,7 +222,7 @@ const CalculationPage = () => {
         key: "customer",
         title: "Σ CUSTOMER",
         dataIndex: "customer",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.customer] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -249,7 +249,7 @@ const CalculationPage = () => {
         key: "billingCycleVal",
         title: "BILLING CYCLE",
         dataIndex: "billingCycleVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.billingCycleVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -276,7 +276,7 @@ const CalculationPage = () => {
         key: "billingPeriodVal",
         title: "BILLING PERIOD",
         dataIndex: "billingPeriodVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.billingPeriodVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -303,7 +303,7 @@ const CalculationPage = () => {
         key: "serviceTypeVal",
         title: "SERVICE TYPE",
         dataIndex: "serviceTypeVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.serviceTypeVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -330,7 +330,7 @@ const CalculationPage = () => {
         key: "sorVal",
         title: "SOR",
         dataIndex: "sorVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.sorVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -357,7 +357,7 @@ const CalculationPage = () => {
         key: "costCenter",
         title: "COST CENTER",
         dataIndex: "costCenter",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.costCenter] || null,
         ellipsis: {
@@ -383,41 +383,12 @@ const CalculationPage = () => {
             search
           ),
       },
-      {
-        key: "meterReadingCode",
-        title: "METER READING CODE",
-        dataIndex: "meterReadingCode",
-        isClassification:true,
-        sorter: true,
-        filteredValue: [search?.meterReadingCode] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "meterReadingCode",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "meterReadingCode",
-            hasValue(search["meterReadingCode"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-      },
+
       {
         key: "customerSegment",
         title: "ACCOUNT SEGMENT",
         dataIndex: "customerSegment",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.customerSegment] || null,
         ellipsis: {
@@ -447,7 +418,7 @@ const CalculationPage = () => {
         key: "accGroupType",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupType",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.accGroupType] || null,
         ellipsis: {
@@ -474,10 +445,40 @@ const CalculationPage = () => {
           ),
       },
       {
+        key: "meterReadingCode",
+        title: "METER READING CODE",
+        dataIndex: "meterReadingCode",
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.meterReadingCode] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "meterReadingCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "meterReadingCode",
+            hasValue(search["meterReadingCode"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
         key: "custNumb",
         title: "SPECIFIC CUSTOMER ACCOUNT",
         dataIndex: "custNumb",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.custNumb] || null,
         ellipsis: {
@@ -507,7 +508,7 @@ const CalculationPage = () => {
         key: "scheduleTypeVal",
         title: "SCHEDULE TYPE",
         dataIndex: "scheduleTypeVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.scheduleTypeVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -534,7 +535,7 @@ const CalculationPage = () => {
         key: "generateDate",
         title: "GENERATE DATE",
         dataIndex: "generateDate",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.generateDate] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -561,7 +562,7 @@ const CalculationPage = () => {
         key: "remark",
         title: "REMARK",
         dataIndex: "remark",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.remark] || null,
         ellipsis: {
@@ -591,7 +592,7 @@ const CalculationPage = () => {
         key: "typeVal",
         title: "TYPE",
         dataIndex: "typeVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.typeVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -618,7 +619,7 @@ const CalculationPage = () => {
         key: "status",
         title: "STATUS",
         dataIndex: "status",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         width: 150,
         filteredValue: [search?.status] || null,
@@ -676,7 +677,7 @@ const CalculationPage = () => {
         key: "calCode",
         title: "CALCULATION CODE",
         dataIndex: "calCode",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.calCode] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -703,7 +704,7 @@ const CalculationPage = () => {
         key: "custNumb",
         title: "CUSTOMER NUMBER",
         dataIndex: "custNumb",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.custNumb] || null,
         ellipsis: {
@@ -733,7 +734,7 @@ const CalculationPage = () => {
         key: "custName",
         title: "CUSTOMER NAME",
         dataIndex: "custName",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.custName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -760,7 +761,7 @@ const CalculationPage = () => {
         key: "accNumb",
         title: "ACCOUNT NUMBER",
         dataIndex: "accNumb",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.accNumb] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -787,7 +788,7 @@ const CalculationPage = () => {
         key: "accName",
         title: "ACCOUNT NAME",
         dataIndex: "accName",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.accName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -814,7 +815,7 @@ const CalculationPage = () => {
         key: "accGroupTypeVal",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupTypeVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.accGroupTypeVal] || null,
         ellipsis: {
@@ -845,7 +846,7 @@ const CalculationPage = () => {
         title: "SERVICE TYPE",
         dataIndex: "serviceTypeVal",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.serviceTypeVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -872,7 +873,7 @@ const CalculationPage = () => {
         title: "SA NUMBER",
         dataIndex: "saNumb",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.saNumb] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -898,7 +899,7 @@ const CalculationPage = () => {
         key: "sorVal",
         title: "SOR",
         dataIndex: "sorVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.sorVal] || null,
         ellipsis: {
@@ -928,7 +929,7 @@ const CalculationPage = () => {
         key: "costCenterVal",
         title: "COST CENTER",
         dataIndex: "costCenterVal",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.costCenterVal] || null,
         ellipsis: {
@@ -959,7 +960,7 @@ const CalculationPage = () => {
         title: "ACCOUNT SEGMENT",
         dataIndex: "accSegmentVal",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.accSegmentVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -986,7 +987,7 @@ const CalculationPage = () => {
         title: "METER READING CODE",
         dataIndex: "meterReadingCodeVal",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.meterReadingCodeVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -1013,7 +1014,7 @@ const CalculationPage = () => {
         title: "BILLING CYCLE",
         dataIndex: "billingCycVal",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.billingCycVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -1040,7 +1041,7 @@ const CalculationPage = () => {
         title: "BILLING PERIODE",
         dataIndex: "billingPeriodVal",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.billingPeriodVal] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -1067,7 +1068,7 @@ const CalculationPage = () => {
         title: "MESSAGE",
         dataIndex: "message",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.message] || null,
         ellipsis: {
           showTitle: false,
@@ -1097,7 +1098,7 @@ const CalculationPage = () => {
         title: "CALCULATE AT",
         dataIndex: "calculateAt",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.calculateAt] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -1124,7 +1125,7 @@ const CalculationPage = () => {
         title: "IS TRY",
         dataIndex: "isTry",
         sorter: true,
-        isClassification:true,
+        isClassification: true,
         filteredValue: [search?.isTry] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -1151,7 +1152,7 @@ const CalculationPage = () => {
         key: "status",
         title: "STATUS",
         dataIndex: "status",
-        isClassification:true,
+        isClassification: true,
         width: 80,
         sorter: true,
         filteredValue: [search?.status] || null,
@@ -1333,7 +1334,7 @@ const CalculationPage = () => {
             activeKey={tabHeader}
             onChange={changeTab}
             type="line"
-            size="small" 
+            size="small"
           >
             <Tabs.TabPane tab="Calculation List" key="Calculation List">
               <div className="my-5">
