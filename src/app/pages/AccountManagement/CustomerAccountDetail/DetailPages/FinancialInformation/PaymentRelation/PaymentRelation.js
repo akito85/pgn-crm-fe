@@ -41,6 +41,7 @@ const PaymentRelation = ({
   //state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [listType, setListType] = useState("all");
   const [totalElement, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -304,21 +305,14 @@ const PaymentRelation = ({
    * @param {boolean} newIsApproval 
    */
   const handleIsApproval = (newIsApproval) => {
+    setPage(1);
     if (newIsApproval) {
-      setPage(1);
-      setSearch((prevState) => ({
-        ...prevState,
-        statusApproval: "WAITING_APPROVAL",
-      }));
+      setListType("approval");
       setIsApproval(true);
     } else {
       setSearchText("");
       setSearchedColumn("");
-      setPage(1)
-      setSearch((prevState) => ({
-        ...prevState,
-        statusApproval: undefined,
-      }));
+      setListType("all");
       setIsApproval(false);
       setSelectedRowKeys([]);
       setSelectedRows([]);
@@ -376,10 +370,11 @@ const PaymentRelation = ({
       sort,
       searchs: search,
       inputFields: tempFilters,
+      listType,
     }
 
     dispatch(getPaymentRelation({ id, body }));
-  }, [page, pageSize, sort, search, tempFilters]);
+  }, [page, pageSize, sort, search, tempFilters, listType]);
 
   useEffect(() => {
     if (
