@@ -23,6 +23,7 @@ import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { Switch } from "antd";
 import AccountPromo from "./DetailPages/Promo/AccountPromo";
+import MultiDestination from "./DetailPages/MultiDestination/MultiDestination";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -48,6 +49,7 @@ const dataTabs = {
   ras: "Raw Material Source",
   gu: "Gas Utilization",
   promo: "Promo",
+  md: "Multi Destination",
 };
 const AccountDetailInformation = ({
   id = 0,
@@ -345,6 +347,16 @@ const AccountDetailInformation = ({
         );
       case dataTabs.promo:
         return <AccountPromo id={id} />;
+      case dataTabs.md:
+        return <MultiDestination
+          id={id}
+          idCustomer={idCustomer}
+          isApproval={isApproval}
+          setIsApproval={setIsApproval}
+          setShowApprovalButton={setShowApprovalButton}
+          submitApprovalCondition={submitApprovalCondition}
+          setSubmitApprovalCondition={setSubmitApprovalCondition}
+        />
       default:
         return <></>;
     }

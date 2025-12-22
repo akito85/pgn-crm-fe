@@ -31,7 +31,7 @@ const data = [
   { value: "Gas Deposit", disabled: true },
   { value: "Compensation", disabled: true },
   { value: "Promo", disabled: false },
-  { value: "Multi Destination", disabled: true },
+  { value: "Multi Destination" },
   { value: "Additional Information", disabled: true  },
   { value: "Gas Utilization", disabled: true  },
   { value: "Equipment", disabled: true  },
@@ -73,7 +73,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             item.value === "Receipt" ||
             item.value === "Account Statement" ||
             item.value === "Promo" ||
-            item.value === "User Access"
+            item.value === "User Access" ||
+            item.value === "Multi Destination"
         )
       );
     } else {
