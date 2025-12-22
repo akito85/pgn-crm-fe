@@ -18,7 +18,7 @@ export const columnsCalculationUsage = (
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 60,
+    width: 20,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -27,7 +27,7 @@ export const columnsCalculationUsage = (
     dataIndex: "ratingType",
     sorter: true,
     isClassification: true,
-    width: 120,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "ratingType",
       searchInput,
@@ -42,7 +42,7 @@ export const columnsCalculationUsage = (
     dataIndex: "ratingCode",
     isClassification:true,
     sorter: true,
-    width: 180,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "ratingCode",
       searchInput,
@@ -57,7 +57,7 @@ export const columnsCalculationUsage = (
     dataIndex: "accountNumber",
     isClassification:true,
     sorter: true,
-    width: 150,
+    width: 90,
     ...getColumnSearchPropsPaging(
       "accountNumber",
       searchInput,
@@ -72,7 +72,7 @@ export const columnsCalculationUsage = (
     dataIndex: "accountName",
     isClassification:true,
     sorter: true,
-    width: 200,
+    width: 100,
     ...getColumnSearchPropsPaging(
       "accountName",
       searchInput,
@@ -87,7 +87,7 @@ export const columnsCalculationUsage = (
     dataIndex: "billPeriod",
     isClassification:true,
     sorter: true,
-    width: 120,
+    width: 60,
     ...getColumnSearchPropsPaging(
       "billPeriod",
       searchInput,
@@ -102,7 +102,7 @@ export const columnsCalculationUsage = (
     dataIndex: "saNumber",
     isClassification:true,
     sorter: true,
-    width: 200,
+    width: 70,
     ...getColumnSearchPropsPaging(
       "saNumber",
       searchInput,
@@ -117,7 +117,7 @@ export const columnsCalculationUsage = (
     dataIndex: "saType",
     sorter: true,
     isClassification: true,
-    width: 100,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "saType",
       searchInput,
@@ -132,7 +132,7 @@ export const columnsCalculationUsage = (
     dataIndex: "calculatedUsage",
     sorter: true,
     isNumber: true,
-    width: 160,
+    width: 100,
     ...getColumnSearchPropsPaging(
       "calculatedUsage",
       searchInput,
@@ -147,7 +147,7 @@ export const columnsCalculationUsage = (
     dataIndex: "usage",
     sorter: true,
     isNumber: true,
-    width: 100,
+    width: 50,
     ...getColumnSearchPropsPaging(
       "usage",
       searchInput,
@@ -162,7 +162,7 @@ export const columnsCalculationUsage = (
     dataIndex: "uom",
     sorter: true,
     isClassification: true,
-    width: 80,
+    width: 40,
     ...getColumnSearchPropsPaging(
       "uom",
       searchInput,
@@ -177,7 +177,7 @@ export const columnsCalculationUsage = (
     dataIndex: "periodicMinUsage",
     sorter: true,
     isNumber: true,
-    width: 180,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "periodicMinUsage",
       searchInput,
@@ -193,7 +193,7 @@ export const columnsCalculationUsage = (
     dataIndex: "periodicMaxUsage",
     sorter: true,
     isNumber: true,
-    width: 180,
+    width: 100,
     ...getColumnSearchPropsPaging(
       "periodicMaxUsage",
       searchInput,
@@ -209,7 +209,7 @@ export const columnsCalculationUsage = (
     dataIndex: "minContract",
     sorter: true,
     isNumber: true,
-    width: 130,
+    width: 60,
     ...getColumnSearchPropsPaging(
       "minContract",
       searchInput,
@@ -224,7 +224,7 @@ export const columnsCalculationUsage = (
     dataIndex: "maxContract",
     sorter: true,
     isNumber: true,
-    width: 130,
+    width: 60,
     ...getColumnSearchPropsPaging(
       "maxContract",
       searchInput,
@@ -239,7 +239,7 @@ export const columnsCalculationUsage = (
     dataIndex: "priceMin",
     sorter: true,
     isNumber: true,
-    width: 120,
+    width: 50,
     ...getColumnSearchPropsPaging(
       "priceMin",
       searchInput,
@@ -254,7 +254,7 @@ export const columnsCalculationUsage = (
     dataIndex: "priceNormal",
     sorter: true,
     isNumber: true,
-    width: 140,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "priceNormal",
       searchInput,
@@ -269,7 +269,7 @@ export const columnsCalculationUsage = (
     dataIndex: "priceOup",
     sorter: true,
     isNumber: true,
-    width: 120,
+    width: 60,
     ...getColumnSearchPropsPaging(
       "priceOup",
       searchInput,
@@ -284,7 +284,7 @@ export const columnsCalculationUsage = (
     dataIndex: "amount",
     sorter: true,
     isNumber: true,
-    width: 150,
+    width: 50,
     ...getColumnSearchPropsPaging(
       "amount",
       searchInput,
@@ -299,7 +299,7 @@ export const columnsCalculationUsage = (
     dataIndex: "totalAmount",
     sorter: true,
     isNumber: true,
-    width: 150,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "totalAmount",
       searchInput,
@@ -314,7 +314,7 @@ export const columnsCalculationUsage = (
     dataIndex: "currency",
     sorter: true,
     isClassification: true,
-    width: 100,
+    width: 60,
     ...getColumnSearchPropsPaging(
       "currency",
       searchInput,
@@ -329,7 +329,7 @@ export const columnsCalculationUsage = (
     dataIndex: "createdBy",
     isClassification:true,
     sorter: true,
-    width: 150,
+    width: 100,
     ...getColumnSearchPropsPaging(
       "createdBy",
       searchInput,
@@ -344,7 +344,7 @@ export const columnsCalculationUsage = (
     sorter: true,
     isClassification: true,
     dataIndex: "createdDate",
-    width: 150,
+    width: 100,
     ...getColumnSearchPropsPaging(
       "createdDate",
       searchInput,
@@ -381,7 +381,7 @@ export const columnsCalculationUsage = (
     key: "action",
     title: "ACTION",
     isClassification: true,
-    width: 100,
+    width: 30,
     fixed: "right",
     render: (record) => {
       return (

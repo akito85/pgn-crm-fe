@@ -18,8 +18,8 @@ export const columnsServiceAgreement = (
   {
     key: "no",
     title: "NO",
-    align: "center",
-    width: 60,
+    isClassification:true,
+    width: 35,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -28,7 +28,7 @@ export const columnsServiceAgreement = (
     dataIndex: "saType",
     sorter: true,
     isClassification:true,
-    width: 120,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "saType",
       searchInput,
