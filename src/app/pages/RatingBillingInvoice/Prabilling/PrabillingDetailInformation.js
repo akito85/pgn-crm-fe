@@ -547,7 +547,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                 </DetailText>
               </React.Fragment>
             ))}
-          <DetailText label={"Remark"} className="col-span-2">
+          <DetailText label={"Remark"} className="col-span-5">
             {prabillData?.remark || ""}
           </DetailText>
         </div>
