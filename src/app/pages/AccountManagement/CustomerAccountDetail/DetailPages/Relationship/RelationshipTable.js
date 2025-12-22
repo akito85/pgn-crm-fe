@@ -430,6 +430,7 @@ const RelationshipTable = ({
   idCustomer = null,
   inputFields = [],
   tempInputFields = [],
+  listType = "all",
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -482,12 +483,13 @@ const RelationshipTable = ({
           search: encodeURIComponent(JSON.stringify(search)),
           body: {
             inputFields: tempInputFields,
-            searchs: search,  // Add search filter to body for statusApproval filtering
+            searchs: search,
+            listType: listType,
           },
         })
       );
     }
-  }, [dispatch, idAccount, page, pageSize, sort, search, tempInputFields]);
+  }, [dispatch, idAccount, page, pageSize, sort, search, tempInputFields, listType]);
 
   // Update table data when API response changes
   useEffect(() => {
@@ -563,7 +565,11 @@ const RelationshipTable = ({
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-            body: { inputFields: tempInputFields },
+            body: {
+              inputFields: tempInputFields,
+              searchs: search,
+              listType: listType,
+            },
           })
         );
       }
@@ -679,21 +685,37 @@ const RelationshipTable = ({
         action: "Update",
         type: "table",
         render: (record, data_length) => {
-          // Show Update only for status Active or Draft
-          const isEditable = ["Active", "Draft", "ACTIVE", "DRAFT"].includes(
-            record?.status
-          );
+
+          // editable only for :
+          // 1. status DRAFT && statusApproval DRAFT
+          // 2. status REJECTED && statusApproval DRAFT
+
+          const isEditable =
+            (record.status === "DRAFT" && record.statusApproval === "DRAFT") ||
+            (record.status === "REJECTED" && record.statusApproval === "DRAFT") ||
+            (record.status === "DRAFT" && record.statusApproval === "REJECTED") ||
+            (record.status === "REJECTED" && record.statusApproval === "REJECTED");
 
           const render =
             data_length > 3 ? (
               <ButtonComponent
-                icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
+                icon={
+                  <SVGIcon
+                    name="IconEdit"
+                    color={!isEditable ? "#8D91A0" : "#0075bf"}
+                    width={24}
+                  />
+                }
                 border={false}
                 disabled={!isEditable}
               >
-                {data_length > 3 && (
-                  <span className="text-black ml-3">Update</span>
-                )}
+                <span
+                  className={`${
+                    !isEditable ? "text-gray-400" : "text-black"
+                  } ml-3`}
+                >
+                  Update
+                </span>
               </ButtonComponent>
             ) : (
               <Tooltip title="Update">
