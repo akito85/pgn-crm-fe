@@ -9,46 +9,39 @@ const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId 
     (state) => state.relationship
   );
 
-  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState(null);
-
-  console.log("ModalApprovalHistory props:", { isOpen, idAccount, relationshipId });
-  console.log("ModalApprovalHistory data:", { data_approvalHistory, loadingApprovalHistory });
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
   useEffect(() => {
     if (isOpen && idAccount && relationshipId) {
-      console.log("Fetching approval history for:", { idAccount, relationshipId });
       dispatch(getApprovalHistory({ idAccount, relationshipId }));
     }
   }, [dispatch, isOpen, idAccount, relationshipId]);
 
   useEffect(() => {
-    if (data_approvalHistory && data_approvalHistory.data) {
-      console.log("Transforming approval history data:", data_approvalHistory);
-      const dataHistory = data_approvalHistory.data.dataHistory || {};
-      const dataApprover = data_approvalHistory.data.dataApprover || {};
-
-      // Transform data for ModalHistory component
-      const transformedData = {
-        dataHistory: {
-          create: dataHistory.ACCOUNT_RELATIONSHIP || [],
-        },
+    if (data_approvalHistory && data_approvalHistory.dataApprover) {
+      const temp = {
         dataApprover: {
-          create: dataApprover.ACCOUNT_RELATIONSHIP || [],
+          create: data_approvalHistory?.dataApprover?.ACCOUNT_RELATIONSHIP || [],
+          inactive: data_approvalHistory?.dataApprover?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
+        },
+        dataHistory: {
+          create: data_approvalHistory?.dataHistory?.ACCOUNT_RELATIONSHIP || [],
+          inactive: data_approvalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
       };
 
-      console.log("Transformed data:", transformedData);
-      setDataApprovalHistoryFix(transformedData);
+      setDataApprovalHistoryFix(temp);
+    } else {
+      setDataApprovalHistoryFix({});
     }
   }, [data_approvalHistory]);
 
-  const handleOptions = () => {
-    return [
-      {
-        label: "Create",
-        value: "Create",
-      },
-    ];
+  const handleApprovalHistoryOptions = () => {
+    const data = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(data);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+    }));
   };
 
   return (
@@ -56,8 +49,8 @@ const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId 
       isOpen={isOpen}
       handleClose={handleCancel}
       header={"Approval History"}
-      width={1000}
-      tabOptions={handleOptions()}
+      width={850}
+      tabOptions={handleApprovalHistoryOptions()}
       dataApprover={dataApprovalHistoryFix?.dataApprover}
       dataHistory={dataApprovalHistoryFix?.dataHistory}
     />

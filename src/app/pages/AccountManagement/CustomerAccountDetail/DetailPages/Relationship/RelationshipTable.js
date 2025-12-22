@@ -454,6 +454,7 @@ const RelationshipTable = ({
   const [selectedRelationshipId, setSelectedRelationshipId] = useState(null);
   const [modalConfirmApprove, setModalConfirmApprove] = useState(false);
   const [modalConfirmReject, setModalConfirmReject] = useState(false);
+  const [openPopoverId, setOpenPopoverId] = useState(null);
 
   // Mock attachment data for approval detail
   const mockAttachmentData = [
@@ -584,6 +585,7 @@ const RelationshipTable = ({
 
   const handleApprovalHistory = (record) => {
     console.log("Opening approval history for record:", record);
+    setOpenPopoverId(null); // Close popover when modal opens
     setModalHistory(true);
     setSelectedRelationshipId(record.id);
   };
@@ -710,9 +712,8 @@ const RelationshipTable = ({
                 disabled={!isEditable}
               >
                 <span
-                  className={`${
-                    !isEditable ? "text-gray-400" : "text-black"
-                  } ml-3`}
+                  className={`${!isEditable ? "text-gray-400" : "text-black"
+                    } ml-3`}
                 >
                   Update
                 </span>
@@ -871,6 +872,8 @@ const RelationshipTable = ({
             <Popover
               trigger="click"
               placement="bottomRight"
+              open={openPopoverId === record.id}
+              onOpenChange={(visible) => setOpenPopoverId(visible ? record.id : null)}
               content={
                 <Space direction="vertical">
                   {items
