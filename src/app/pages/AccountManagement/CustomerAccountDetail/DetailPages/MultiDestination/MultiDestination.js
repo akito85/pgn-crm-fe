@@ -14,6 +14,7 @@ import ModalConfirmationApprovalPaymentRelation from "../FinancialInformation/Pa
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import { getMultiDestination, approveOrRejectAllMultiDestination, downloadMultiDestination, getMdApprovalHistory, getMdColumnApi, getMdConditionApi, getMdOperatorApi, inactivateMultiDestination, } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { useLocation } from "react-router-dom";
 
 const MultiDestination = ({
   id = 0,
@@ -32,6 +33,8 @@ const MultiDestination = ({
   );
 
   const { data_multiDestination, loading, data_mdApprovalHistory } = multiDestinationState;
+
+  const location = useLocation();
 
   //declare
   const searchInput = useRef(null);
@@ -360,6 +363,14 @@ const MultiDestination = ({
       : "";
     setSort(dataSort);
   };
+
+  useEffect(() => {
+    if(location?.pathname.includes('account-standard')) {
+      dispatch(getGrantedAccessAccount('/account-management/account-standard/multi-destination'))
+    } else{
+      dispatch(getGrantedAccessAccount('/account-management/account-onetime/multi-destination'))
+    }
+  }, []);
 
   useEffect(() => {
     const body = {
