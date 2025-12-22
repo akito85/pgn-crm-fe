@@ -266,7 +266,7 @@ const reducer = combineReducers({
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
 
-  multiDestinationn: multiDestinationReducer,
+  multiDestination: multiDestinationReducer,
 });
 
 // add throttle middlewares
