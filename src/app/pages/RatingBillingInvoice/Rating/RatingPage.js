@@ -134,8 +134,8 @@ const RatingPage = () => {
     setValueTab(key);
   };
 
-  const handleDetail = (record) => {
-    const recordKey = record.ratingCode;
+  const handleDetail = (record, rowKey) => {
+    const recordKey = rowKey || record.ratingCode;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
@@ -279,27 +279,9 @@ const RatingPage = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
-              onRow={(record) => ({
-                onClick: () => handleDetail(record),
-                style: {
-                  cursor: "pointer",
-                  backgroundColor:
-                    activeRowKey === record.ratingCode
-                      ? "#bae7ff"
-                      : "transparent",
-                  transition: "background-color 0.2s ease",
-                },
-                onMouseEnter: (e) => {
-                  if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }
-                },
-                onMouseLeave: (e) => {
-                  if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
-                },
-              })}
+              enableRowClick={true}
+              selectedRowKey={activeRowKey}
+              onRowClick={handleDetail}
             />
           </div>
         </CardContainer>

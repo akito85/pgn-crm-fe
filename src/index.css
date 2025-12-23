@@ -70,6 +70,21 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
   background-color: #ffffff !important;
 }
 
+/* Hover effect - kuning pastel soft */
+.ant-table-tbody > tr:hover > td {
+  background-color: #fef9e7 !important;
+}
+
+/* Selected/clicked row - kuning soft */
+.ant-table-tbody > tr.row-selected > td {
+  background-color: #fffbea !important;
+}
+
+/* Hover pada selected row tetap kuning soft */
+.ant-table-tbody > tr.row-selected:hover > td {
+  background-color: #fffbea !important;
+}
+
 .ant-tag {
   border-radius: 4px !important;
   font-weight: 600;

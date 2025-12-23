@@ -107,14 +107,14 @@ export const useMonitoringList = (tabs, batchId) => {
   const dispatch = useDispatch();
 
   // Use State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
 
-  // use effect
+  // use effect - Initial fetch only
   useEffect(() => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -129,18 +129,19 @@ export const useMonitoringList = (tabs, batchId) => {
     const searchRequest = encodeURIComponent(JSON.stringify(search));
     if (hasValue(batchId) && tabs === "Upload") {
       dispatch(
-        getDetailBatch({ batchId, page, pageSize, search: tempSearch, sort })
+        getDetailBatch({ batchId, page: 0, pageSize: 100, search: tempSearch, sort })
       );
     } else if (tabs === "Usage List") {
       dispatch(
-        getListUsagePaginate({ search: searchRequest, page, pageSize, sort })
+        getListUsagePaginate({ search: searchRequest, page: 0, pageSize: 100, sort, isLoadMore: false })
       );
     } else if (tabs === "Batch List") {
       dispatch(
-        getListBatchPaginate({ search: searchRequest, page, pageSize, sort })
+        getListBatchPaginate({ search: searchRequest, page: 0, pageSize: 100, sort, isLoadMore: false })
       );
     }
-  }, [dispatch, search, page, pageSize, sort, tabs, batchId]);
+    setPage(0);
+  }, [dispatch, search, sort, tabs, batchId]);
 
   // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -149,7 +150,7 @@ export const useMonitoringList = (tabs, batchId) => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
@@ -157,6 +158,49 @@ export const useMonitoringList = (tabs, batchId) => {
       };
     });
   };
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const searchRequest = encodeURIComponent(JSON.stringify(search));
+
+    let totalPages = 0;
+    if (tabs === "Usage List") {
+      totalPages = dataUsage?.page?.totalPages || 0;
+      if (nextPage < totalPages) {
+        await dispatch(
+          getListUsagePaginate({
+            search: searchRequest,
+            page: nextPage,
+            pageSize: loadMoreSize,
+            sort,
+            isLoadMore: true,
+          })
+        );
+        setPage(nextPage);
+      }
+    } else if (tabs === "Batch List") {
+      totalPages = dataBatch?.page?.totalPages || 0;
+      if (nextPage < totalPages) {
+        await dispatch(
+          getListBatchPaginate({
+            search: searchRequest,
+            page: nextPage,
+            pageSize: loadMoreSize,
+            sort,
+            isLoadMore: true,
+          })
+        );
+        setPage(nextPage);
+      }
+    }
+  };
+
+  // Calculate if there's more data
+  const hasMoreUsage =
+    (dataUsage?.result?.length || 0) < (dataUsage?.page?.totalElements || 0);
+  const hasMoreBatch =
+    (dataBatch?.result?.length || 0) < (dataBatch?.page?.totalElements || 0);
 
   // onSort
   const onSort = (_, __, sort) => {
@@ -171,7 +215,7 @@ export const useMonitoringList = (tabs, batchId) => {
     try {
       const searchRequest = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getDownloadList({ search: searchRequest, sort, page, pageSize })
+        getDownloadList({ search: searchRequest, sort, page: 1, pageSize: 1000 })
       );
     } catch (error) {
       console.log("Error", error);
@@ -180,7 +224,7 @@ export const useMonitoringList = (tabs, batchId) => {
 
   // onclick approval
   const onClickApproval = async () =>
-    await dispatch(getListApproval({ page, pageSize })).unwrap();
+    await dispatch(getListApproval({ page: 1, pageSize: 1000 })).unwrap();
 
   // columns
   const columns = [
@@ -188,7 +232,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "NO",
       width: 50,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "RECORD ID",
@@ -1377,7 +1421,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "NO",
       width: 50,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
      {
       title: "FileName",
@@ -1674,8 +1718,6 @@ export const useMonitoringList = (tabs, batchId) => {
     loading,
     page,
     setPage,
-    pageSize,
-    setPageSize,
     onSort,
     onClickApproval,
     data_approval,
@@ -1689,5 +1731,9 @@ export const useMonitoringList = (tabs, batchId) => {
     setSort,
     setSearchText,
     setSearchedColumn,
+    handleLoadMore,
+    hasMoreUsage,
+    hasMoreBatch,
+    sort,
   };
 };

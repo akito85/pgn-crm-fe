@@ -25,8 +25,8 @@ const PrabillingPage = () => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -37,16 +37,19 @@ const PrabillingPage = () => {
     right: ["status", "action"],
   }));
 
+  // Initial fetch
   useEffect(() => {
     dispatch(
       getListPrabillingInitPopulate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100, // Initial load 100
         sort,
+        isLoadMore: false,
       })
     );
-  }, [dispatch, search, page, pageSize, sort]);
+    setPage(0);
+  }, [dispatch, search, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -54,7 +57,7 @@ const PrabillingPage = () => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
@@ -63,6 +66,30 @@ const PrabillingPage = () => {
     });
   };
 
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = prabilling_pagination?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage < totalPages) {
+      await dispatch(
+        getListPrabillingInitPopulate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // Calculate if there's more data
+  const hasMore =
+    list_prabilling_init.length < (prabilling_pagination?.totalElements || 0);
+
   const baseColumns = useMemo(
     () => [
       {
@@ -70,7 +97,7 @@ const PrabillingPage = () => {
         title: "NO",
         width: 30,
         isClassification: true,
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         key: "initCode",
@@ -403,19 +430,13 @@ const PrabillingPage = () => {
         },
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn]
   );
 
   const routes = [
     { path: "", breadcrumbName: "Rating Billing" },
     { path: "", breadcrumbName: "Prabilling" },
   ];
-
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
 
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -499,12 +520,9 @@ const PrabillingPage = () => {
         >
           <div>
             <TableRBI
+              idTable="prabilling-table"
               dataSource={list_prabilling_init}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
               totalData={prabilling_pagination?.totalElements || 0}
               tableScrolled={{ x: 2500, y: 525 }}
               onSort={onSort}
@@ -513,6 +531,11 @@ const PrabillingPage = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>
