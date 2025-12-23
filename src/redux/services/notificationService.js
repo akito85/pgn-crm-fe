@@ -32,6 +32,8 @@ class NotificationService {
    */
   connect(userId, callbacks = {}) {
     console.log(`[NotificationService] Connecting to SSE for user: ${userId}`);
+    // Placeholder URL - will be updated with actual backend endpoint
+    const sseBaseUrl = BASE_URL || "http://localhost:8911";
 
     this.userId = userId;
     this.onMessageCallback = callbacks.onMessage;
@@ -49,9 +51,9 @@ class NotificationService {
       const headers = tokenHeader();
       const token = headers.Authorization;
 
-      // Construct SSE URL with auth token as query param
-      // Since EventSource doesn't support custom headers, we pass token via URL
-      const url = `${BASE_URL}/api/notifications/user/${userId}?token=${encodeURIComponent(token)}`;
+      // SSE endpoint: /v1/dbs/api/notifications
+      // EventSource doesn't support custom headers, pass token via query param
+      const url = `${sseBaseUrl}/v1/dbs/api/notifications?token=${encodeURIComponent(token)}`;
 
       // Create EventSource connection
       this.eventSource = new EventSource(url);
@@ -75,17 +77,20 @@ class NotificationService {
         console.log("[NotificationService] Message received:", event.data);
 
         try {
-          const notification = JSON.parse(event.data);
+          const rawNotification = JSON.parse(event.data);
 
-          // Validate notification structure
-          if (!notification.id || !notification.type) {
+          // Transform Oracle schema fields to camelCase
+          const notification = this._transformNotification(rawNotification);
+
+          // Validate required fields
+          if (!notification.id || !notification.notificationType) {
             console.warn("[NotificationService] Invalid notification format:", notification);
             return;
           }
 
           // Determine message direction
-          const isForUser = notification.recipientId === userId;
-          const isForAll = notification.recipientId === "ALL" || notification.broadcast === true;
+          const isForUser = notification.toUserId === userId;
+          const isForAll = notification.toUserId === "ALL" || notification.broadcast === true;
 
           // Enrich notification with metadata
           const enrichedNotification = {
@@ -93,6 +98,7 @@ class NotificationService {
             direction: isForAll ? "broadcast" : "direct",
             isForCurrentUser: isForUser || isForAll,
             receivedAt: new Date().toISOString(),
+            read: notification.status === "read",
           };
 
           console.log("[NotificationService] Processed notification:", enrichedNotification);
@@ -205,6 +211,77 @@ class NotificationService {
         });
       }
     }
+  }
+
+  /**
+   * Transform Oracle schema notification to frontend format
+   * @param {object} raw - Raw notification from Oracle DB
+   * @returns {object} Transformed notification
+   */
+  _transformNotification(raw) {
+    // Parse NAVIGATION_STATE CLOB if it's a JSON string
+    let navigationState = {};
+    if (raw.NAVIGATION_STATE || raw.navigationState) {
+      try {
+        const stateValue = raw.NAVIGATION_STATE || raw.navigationState;
+        navigationState = typeof stateValue === 'string'
+          ? JSON.parse(stateValue)
+          : stateValue;
+      } catch (e) {
+        console.warn("[NotificationService] Failed to parse NAVIGATION_STATE:", e);
+      }
+    }
+
+    // Parse ADDITIONAL_DATA CLOB if present
+    let additionalData = {};
+    if (raw.ADDITIONAL_DATA || raw.additionalData) {
+      try {
+        const dataValue = raw.ADDITIONAL_DATA || raw.additionalData;
+        additionalData = typeof dataValue === 'string'
+          ? JSON.parse(dataValue)
+          : dataValue;
+      } catch (e) {
+        console.warn("[NotificationService] Failed to parse ADDITIONAL_DATA:", e);
+      }
+    }
+
+    // Transform Oracle UPPERCASE fields to camelCase
+    return {
+      id: raw.ID || raw.id,
+      title: raw.TITLE || raw.title,
+      message: raw.MESSAGE || raw.message,
+      notificationType: raw.NOTIFICATION_TYPE || raw.notificationType || raw.type,
+      status: raw.STATUS || raw.status,
+      priority: raw.PRIORITY || raw.priority,
+
+      // User identification
+      fromUserId: raw.FROM_USER_ID || raw.fromUserId,
+      toUserId: raw.TO_USER_ID || raw.toUserId,
+
+      // Navigation fields
+      module: raw.MODULE || raw.module,
+      page: raw.PAGE || raw.page,
+      link: raw.LINK || raw.link,
+
+      // Entity identification
+      entityId: raw.ENTITY_ID || raw.entityId,
+      entityType: raw.ENTITY_TYPE || raw.entityType,
+
+      // Approval fields
+      tappId: raw.TAPP_ID || raw.tappId,
+      appHierId: raw.APP_HIER_ID || raw.appHierId,
+      approvalAction: raw.APPROVAL_ACTION || raw.approvalAction,
+      approvalLevel: raw.APPROVAL_LEVEL || raw.approvalLevel,
+
+      // State and data
+      navigationState,
+      additionalData,
+
+      // Timestamps
+      createdAt: raw.CREATED_AT || raw.createdAt,
+      updatedAt: raw.UPDATED_AT || raw.updatedAt,
+      expiresAt: raw.EXPIRES_AT || raw.expiresAt,
+    };
   }
 
   /**

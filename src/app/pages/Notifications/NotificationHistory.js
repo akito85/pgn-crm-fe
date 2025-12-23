@@ -86,7 +86,7 @@ const NotificationHistory = () => {
 
     // Filter by type
     if (selectedType) {
-      notifications = notifications.filter((n) => n.type === selectedType);
+      notifications = notifications.filter((n) => n.notificationType === selectedType);
     }
 
     // Filter by priority
@@ -110,6 +110,8 @@ const NotificationHistory = () => {
         return <WarningOutlined style={{ color: "#faad14", fontSize: 20 }} />;
       case NOTIFICATION_TYPES.ERROR:
         return <CloseCircleOutlined style={{ color: "#ff4d4f", fontSize: 20 }} />;
+      case NOTIFICATION_TYPES.APPROVAL:
+        return <CheckOutlined style={{ color: "#1890ff", fontSize: 20 }} />;
       case NOTIFICATION_TYPES.MESSAGE:
         return <MessageOutlined style={{ color: "#1890ff", fontSize: 20 }} />;
       case NOTIFICATION_TYPES.SYSTEM:
@@ -148,7 +150,7 @@ const NotificationHistory = () => {
   };
 
   /**
-   * Handle notification click
+   * Handle notification click - State-based navigation
    */
   const handleNotificationClick = (notification) => {
     // Mark as read if not already read
@@ -156,9 +158,34 @@ const NotificationHistory = () => {
       dispatch(markAsRead(notification.id));
     }
 
-    // Navigate to notification detail or related page if URL is provided
-    if (notification.url) {
-      navigate(notification.url);
+    // Navigate using state-based routing pattern
+    if (notification.link) {
+      // Build route state object
+      const routeState = {
+        id: notification.entityId,
+        type: notification.entityType,
+        ...notification.navigationState, // Spread additional state (idAccount, idCustomer, etc.)
+      };
+
+      // Add approval context if present
+      if (notification.tappId) {
+        routeState.tappId = notification.tappId;
+        routeState.appHierId = notification.appHierId;
+        routeState.approvalAction = notification.approvalAction;
+        routeState.approvalLevel = notification.approvalLevel;
+      }
+
+      // Navigate based on presence of entity_id
+      if (notification.entityId) {
+        navigate(notification.link, { state: routeState });
+      } else {
+        // General page navigation (might still have state for bulk operations)
+        navigate(notification.link, {
+          state: Object.keys(notification.navigationState || {}).length > 0
+            ? notification.navigationState
+            : undefined
+        });
+      }
     }
   };
 
@@ -413,10 +440,10 @@ const NotificationHistory = () => {
                   marginBottom: "8px",
                   borderRadius: "4px",
                   border: "1px solid #f0f0f0",
-                  cursor: notification.url ? "pointer" : "default",
+                  cursor: notification.link ? "pointer" : "default",
                 }}
                 onClick={() =>
-                  notification.url && handleNotificationClick(notification)
+                  notification.link && handleNotificationClick(notification)
                 }
                 actions={[
                   <Dropdown
@@ -432,7 +459,7 @@ const NotificationHistory = () => {
                 ]}
               >
                 <List.Item.Meta
-                  avatar={getNotificationIcon(notification.type)}
+                  avatar={getNotificationIcon(notification.notificationType)}
                   title={
                     <div
                       style={{
@@ -465,7 +492,7 @@ const NotificationHistory = () => {
                       </Text>
                       <Space split={<Divider type="vertical" />}>
                         <Text type="secondary" style={{ fontSize: 12 }}>
-                          <strong>Type:</strong> {notification.type}
+                          <strong>Type:</strong> {notification.notificationType}
                         </Text>
                         <Text type="secondary" style={{ fontSize: 12 }}>
                           <strong>Received:</strong>{" "}

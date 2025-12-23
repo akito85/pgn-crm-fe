@@ -72,6 +72,8 @@ const NotificationDropdown = () => {
         return <WarningOutlined style={{ color: "#faad14" }} />;
       case NOTIFICATION_TYPES.ERROR:
         return <CloseCircleOutlined style={{ color: "#ff4d4f" }} />;
+      case NOTIFICATION_TYPES.APPROVAL:
+        return <CheckOutlined style={{ color: "#1890ff" }} />;
       case NOTIFICATION_TYPES.MESSAGE:
         return <MessageOutlined style={{ color: "#1890ff" }} />;
       case NOTIFICATION_TYPES.SYSTEM:
@@ -102,7 +104,7 @@ const NotificationDropdown = () => {
   };
 
   /**
-   * Handle notification click
+   * Handle notification click - State-based navigation
    */
   const handleNotificationClick = (notification) => {
     // Mark as read if not already read
@@ -110,9 +112,34 @@ const NotificationDropdown = () => {
       dispatch(markAsRead(notification.id));
     }
 
-    // Navigate to notification detail or related page if URL is provided
-    if (notification.url) {
-      navigate(notification.url);
+    // Navigate using state-based routing pattern
+    if (notification.link) {
+      // Build route state object
+      const routeState = {
+        id: notification.entityId,
+        type: notification.entityType,
+        ...notification.navigationState, // Spread additional state (idAccount, idCustomer, etc.)
+      };
+
+      // Add approval context if present
+      if (notification.tappId) {
+        routeState.tappId = notification.tappId;
+        routeState.appHierId = notification.appHierId;
+        routeState.approvalAction = notification.approvalAction;
+        routeState.approvalLevel = notification.approvalLevel;
+      }
+
+      // Navigate based on presence of entity_id
+      if (notification.entityId) {
+        navigate(notification.link, { state: routeState });
+      } else {
+        // General page navigation (might still have state for bulk operations)
+        navigate(notification.link, {
+          state: Object.keys(notification.navigationState || {}).length > 0
+            ? notification.navigationState
+            : undefined
+        });
+      }
     }
   };
 
@@ -206,14 +233,14 @@ const NotificationDropdown = () => {
                 onClick={() => handleNotificationClick(notification)}
                 style={{
                   padding: "12px 16px",
-                  cursor: "pointer",
+                  cursor: notification.link ? "pointer" : "default",
                   backgroundColor: notification.read ? "#ffffff" : "#f0f7ff",
                   borderBottom: "1px solid #f0f0f0",
                 }}
                 className="notification-item hover:bg-gray-50"
               >
                 <List.Item.Meta
-                  avatar={getNotificationIcon(notification.type)}
+                  avatar={getNotificationIcon(notification.notificationType)}
                   title={
                     <div
                       style={{

@@ -2,13 +2,14 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import notificationService from "../services/notificationService";
 
 /**
- * Notification Types (extend as needed)
+ * Notification Types (aligned with Oracle schema)
  */
 export const NOTIFICATION_TYPES = {
   INFO: "info",
   SUCCESS: "success",
   WARNING: "warning",
   ERROR: "error",
+  APPROVAL: "approval",
   SYSTEM: "system",
   MESSAGE: "message",
   ALERT: "alert",
@@ -50,6 +51,8 @@ const initialState = {
     priority: null, // Filter by priority
     unreadOnly: false, // Show only unread
     direction: "all", // 'all', 'broadcast', 'direct'
+    module: null, // Filter by module (user-management, account-management, etc.)
+    entityType: null, // Filter by entity type (user, sa, payment-relation, etc.)
   },
 
   // Settings
@@ -410,7 +413,7 @@ export const selectFilteredNotifications = (state) => {
 
   return notifications.filter((notification) => {
     // Filter by type
-    if (filters.type && notification.type !== filters.type) {
+    if (filters.type && notification.notificationType !== filters.type) {
       return false;
     }
 
@@ -429,6 +432,16 @@ export const selectFilteredNotifications = (state) => {
       if (filters.direction !== notification.direction) {
         return false;
       }
+    }
+
+    // Filter by module
+    if (filters.module && notification.module !== filters.module) {
+      return false;
+    }
+
+    // Filter by entity type
+    if (filters.entityType && notification.entityType !== filters.entityType) {
+      return false;
     }
 
     return true;
