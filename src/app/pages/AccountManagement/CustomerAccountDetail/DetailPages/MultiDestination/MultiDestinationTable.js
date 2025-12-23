@@ -358,7 +358,7 @@ const MultiDestinationTable = ({
       render: (r, data_length) => {
         return (
           <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION} state={{
-            idPr: r.id,
+            idMd: r.id,
             idAccount,
             idCustomer,
           }}>
@@ -384,7 +384,7 @@ const MultiDestinationTable = ({
             type="text"
             style={{ padding: 0, height: 'auto', border: 'none' }}
             onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION, { state: {
-              idPr: r.id,
+              idMd: r.id,
               idAccount,
               idCustomer,
             }})}
