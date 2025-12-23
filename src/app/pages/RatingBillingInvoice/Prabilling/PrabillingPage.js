@@ -445,7 +445,7 @@ const PrabillingPage = () => {
           style={{ lineHeight: 0 }}
         >
           <Tooltip title="Detail">
-            <EyeOutlined style={{ fontSize: "20px" }} />
+            <SVGIcon name="IconDetail" width={20} />
           </Tooltip>
         </Link>
       ),

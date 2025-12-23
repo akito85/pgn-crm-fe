@@ -203,7 +203,7 @@ const MonitoringUsagePage = () => {
             state={{ id: record?.batchId }}
           >
             <Tooltip title="Detail">
-                <EyeOutlined style={{ fontSize: "20px" }} />
+                <SVGIcon name="IconDetail" width={20}  />
             </Tooltip>
           </Link>
         );

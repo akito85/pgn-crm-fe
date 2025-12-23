@@ -4,7 +4,6 @@ import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { dateFormatting } from "../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
-import { EyeOutlined } from "@ant-design/icons";
 
 export const columnsServiceAgreement = (
   page = 1,
@@ -278,7 +277,7 @@ export const columnsServiceAgreement = (
         <div className="flex w-full justify-center gap-6">
           <Tooltip title="Detail">
             <div className="pt-1 cursor-pointer">
-              <EyeOutlined onClick={() => handleDetail(record)} style={{ fontSize: "20px" }} />
+              <SVGIcon name="IconDetail" width={20}  onClick={() => handleDetail(record)} />
             </div>
           </Tooltip>
         </div>
