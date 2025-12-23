@@ -262,7 +262,7 @@ const RatingPage = () => {
               activeKey={valueTab}
             />
           </div>
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               size="small"
               dataSource={dataSourceWithKeys}

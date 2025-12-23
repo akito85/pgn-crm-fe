@@ -106,14 +106,15 @@ const CalculationPage = () => {
       {
         key: "no",
         title: "NO",
-        width: 60,
-        align: "center",
+        width: 30,
+        isClassification: true,
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
         key: "calculationCode",
         title: "CALCULATION CODE",
         dataIndex: "calculationCode",
+        width: 130,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.calculationCode] || null,
@@ -141,6 +142,7 @@ const CalculationPage = () => {
         key: "billingCycleVal",
         title: "BILLING CYCLE",
         dataIndex: "billingCycleVal",
+        width: 100,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.billingCycleVal] || null,
@@ -168,6 +170,7 @@ const CalculationPage = () => {
         key: "billingPeriodVal",
         title: "BILLING PERIOD",
         dataIndex: "billingPeriodVal",
+        width: 110,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.billingPeriodVal] || null,
@@ -195,6 +198,7 @@ const CalculationPage = () => {
         key: "serviceTypeVal",
         title: "SERVICE TYPE",
         dataIndex: "serviceTypeVal",
+        width: 100,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.serviceTypeVal] || null,
@@ -222,6 +226,7 @@ const CalculationPage = () => {
         key: "sorVal",
         title: "SOR",
         dataIndex: "sorVal",
+        width: 100,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.sorVal] || null,
@@ -249,6 +254,7 @@ const CalculationPage = () => {
         key: "costCenter",
         title: "COST CENTER",
         dataIndex: "costCenter",
+        width: 130,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.costCenter] || null,
@@ -280,6 +286,7 @@ const CalculationPage = () => {
         key: "customerSegment",
         title: "ACCOUNT SEGMENT",
         dataIndex: "customerSegment",
+        width: 170,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.customerSegment] || null,
@@ -310,6 +317,7 @@ const CalculationPage = () => {
         key: "accGroupType",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupType",
+        width: 200,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accGroupType] || null,
@@ -340,6 +348,7 @@ const CalculationPage = () => {
         key: "meterReadingCode",
         title: "METER READING CODE",
         dataIndex: "meterReadingCode",
+        width: 200,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.meterReadingCode] || null,
@@ -370,6 +379,7 @@ const CalculationPage = () => {
         key: "custNumb",
         title: "SPECIFIC CUSTOMER ACCOUNT",
         dataIndex: "custNumb",
+        width: 240,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.custNumb] || null,
@@ -400,6 +410,7 @@ const CalculationPage = () => {
         key: "scheduleTypeVal",
         title: "SCHEDULE TYPE",
         dataIndex: "scheduleTypeVal",
+        width: 150,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.scheduleTypeVal] || null,
@@ -427,6 +438,7 @@ const CalculationPage = () => {
         key: "generateDate",
         title: "GENERATE DATE",
         dataIndex: "generateDate",
+        width: 160,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.generateDate] || null,
@@ -454,6 +466,7 @@ const CalculationPage = () => {
         key: "progress",
         title: "Σ PROGRESS",
         dataIndex: "progress",
+        width: 120,
         isNumber: true,
         sorter: true,
         filteredValue: [search?.progress] || null,
@@ -481,6 +494,7 @@ const CalculationPage = () => {
         key: "succeed",
         title: "Σ SUCCEED",
         dataIndex: "succeed",
+        width: 120,
         isNumber: true,
         sorter: true,
         filteredValue: [search?.succeed] || null,
@@ -508,6 +522,7 @@ const CalculationPage = () => {
         key: "failed",
         title: "Σ FAILED",
         dataIndex: "failed",
+        width: 110,
         isNumber: true,
         sorter: true,
         filteredValue: [search?.failed] || null,
@@ -535,6 +550,7 @@ const CalculationPage = () => {
         key: "customer",
         title: "Σ CUSTOMER",
         dataIndex: "customer",
+        width: 130,
         isNumber: true,
         sorter: true,
         filteredValue: [search?.customer] || null,
@@ -562,6 +578,7 @@ const CalculationPage = () => {
         key: "remark",
         title: "REMARK",
         dataIndex: "remark",
+        width: 200,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.remark] || null,
@@ -592,6 +609,7 @@ const CalculationPage = () => {
         key: "typeVal",
         title: "TYPE",
         dataIndex: "typeVal",
+        width: 100,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.typeVal] || null,
@@ -677,6 +695,7 @@ const CalculationPage = () => {
         key: "calCode",
         title: "CALCULATION CODE",
         dataIndex: "calCode",
+        width: 180,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.calCode] || null,
@@ -704,6 +723,7 @@ const CalculationPage = () => {
         key: "custNumb",
         title: "CUSTOMER NUMBER",
         dataIndex: "custNumb",
+        width: 170,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.custNumb] || null,
@@ -734,6 +754,7 @@ const CalculationPage = () => {
         key: "custName",
         title: "CUSTOMER NAME",
         dataIndex: "custName",
+        width: 170,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.custName] || null,
@@ -761,6 +782,7 @@ const CalculationPage = () => {
         key: "accNumb",
         title: "ACCOUNT NUMBER",
         dataIndex: "accNumb",
+        width: 160,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accNumb] || null,
@@ -788,6 +810,7 @@ const CalculationPage = () => {
         key: "accName",
         title: "ACCOUNT NAME",
         dataIndex: "accName",
+        width: 150,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accName] || null,
@@ -815,6 +838,7 @@ const CalculationPage = () => {
         key: "accGroupTypeVal",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupTypeVal",
+        width: 200,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accGroupTypeVal] || null,
@@ -845,6 +869,7 @@ const CalculationPage = () => {
         key: "serviceTypeVal",
         title: "SERVICE TYPE",
         dataIndex: "serviceTypeVal",
+        width: 130,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.serviceTypeVal] || null,
@@ -872,6 +897,7 @@ const CalculationPage = () => {
         key: "saNumb",
         title: "SA NUMBER",
         dataIndex: "saNumb",
+        width: 120,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.saNumb] || null,
@@ -899,6 +925,7 @@ const CalculationPage = () => {
         key: "sorVal",
         title: "SOR",
         dataIndex: "sorVal",
+        width: 100,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.sorVal] || null,
@@ -929,6 +956,7 @@ const CalculationPage = () => {
         key: "costCenterVal",
         title: "COST CENTER",
         dataIndex: "costCenterVal",
+        width: 130,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.costCenterVal] || null,
@@ -959,6 +987,7 @@ const CalculationPage = () => {
         key: "accSegmentVal",
         title: "ACCOUNT SEGMENT",
         dataIndex: "accSegmentVal",
+        width: 170,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.accSegmentVal] || null,
@@ -986,6 +1015,7 @@ const CalculationPage = () => {
         key: "meterReadingCodeVal",
         title: "METER READING CODE",
         dataIndex: "meterReadingCodeVal",
+        width: 200,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.meterReadingCodeVal] || null,
@@ -1013,6 +1043,7 @@ const CalculationPage = () => {
         key: "billingCycVal",
         title: "BILLING CYCLE",
         dataIndex: "billingCycVal",
+        width: 140,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.billingCycVal] || null,
@@ -1040,6 +1071,7 @@ const CalculationPage = () => {
         key: "billingPeriodVal",
         title: "BILLING PERIODE",
         dataIndex: "billingPeriodVal",
+        width: 140,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.billingPeriodVal] || null,
@@ -1067,6 +1099,7 @@ const CalculationPage = () => {
         key: "message",
         title: "MESSAGE",
         dataIndex: "message",
+        width: 200,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.message] || null,
@@ -1097,6 +1130,7 @@ const CalculationPage = () => {
         key: "calculateAt",
         title: "CALCULATE AT",
         dataIndex: "calculateAt",
+        width: 140,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.calculateAt] || null,
@@ -1124,6 +1158,7 @@ const CalculationPage = () => {
         key: "isTry",
         title: "IS TRY",
         dataIndex: "isTry",
+        width: 100,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.isTry] || null,
@@ -1153,7 +1188,7 @@ const CalculationPage = () => {
         title: "STATUS",
         dataIndex: "status",
         isClassification: true,
-        width: 80,
+        width: 100,
         sorter: true,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -1338,8 +1373,8 @@ const CalculationPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">CALCULATION JOB LIST</p>
-              <div className="mt-[15px] flex gap-[20px]">
+              <p className="mt-[15px]">CALCULATION JOB LIST</p>
+              <div className="flex gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
             </div>
@@ -1350,9 +1385,10 @@ const CalculationPage = () => {
             onChange={changeTab}
             type="line"
             size="small"
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-2 [&_.ant-tabs-nav]:pt-0"
           >
             <Tabs.TabPane tab="Calculation List" key="Calculation List">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
                   size="small"
                   dataSource={data_calculation.result}
@@ -1373,7 +1409,7 @@ const CalculationPage = () => {
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Calculation History" key="Calculation History">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
                   size="small"
                   dataSource={data_calculation.result} // Pastikan dataSource sesuai dengan history jika berbeda

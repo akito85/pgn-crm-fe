@@ -950,7 +950,7 @@ const ViewLocations = () => {
             </SelectComponent>
           </div>
 
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               dataSource={data?.result}
               columns={processedColumns}

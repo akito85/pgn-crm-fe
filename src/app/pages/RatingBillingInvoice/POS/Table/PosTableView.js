@@ -14,7 +14,10 @@ export const PosTableView = (
   // handleDelete = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
+    dataIndex: "no",
+    fixed: "left",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
