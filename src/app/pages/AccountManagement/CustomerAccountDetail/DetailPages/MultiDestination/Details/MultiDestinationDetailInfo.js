@@ -5,17 +5,28 @@ import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 
 const MultiDestinationDetailInfo = ({
-  subjectAccountNumber,
   dataDetail = {},
 }) => {
   return (
     <Fragment>
-      <BaseContainer header={"MULTI DESTINATION"}>
+      <BaseContainer header={"MULTI DESTINATION INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Multi Destination Information */}
-          <DetailText label="Account Number">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountNumber : dataDetail?.accountNumber}</DetailText>
-          <DetailText label="Account Name">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountName : dataDetail?.accountName}</DetailText>
-          <DetailText label="Priority">{dataDetail?.priority}</DetailText>
+          <DetailText label="Multi Destination ID">{dataDetail.id}</DetailText>
+          <DetailText label="Account">{dataDetail.account}</DetailText>
+          <DetailText label="Account SOR">{dataDetail.accountSor}</DetailText>
+          <DetailText label="Account Cost Center">{dataDetail.accountCostCenter}</DetailText>
+          <DetailText label="Metering Reading Code">{dataDetail.meteringReadingCode}</DetailText>
+          <DetailText label="Account Segment">{dataDetail.accountSegment}</DetailText>
+          <DetailText label="Account Group Type">{dataDetail.accountGroupType}</DetailText>
+          <DetailText label="Account Type">{dataDetail.accountType}</DetailText>
+          <DetailText label="Premise Address">{dataDetail.premiseAddress}</DetailText>
+          <DetailText label="Subdistrict">{dataDetail.subdistrict}</DetailText>
+          <DetailText label="District">{dataDetail.district}</DetailText>
+          <DetailText label="City">{dataDetail.city}</DetailText>
+          <DetailText label="Country">{dataDetail.country}</DetailText>
+          <DetailText label="Longitude">{dataDetail.longitude}</DetailText>
+          <DetailText label="Latitude">{dataDetail.latitude}</DetailText>
           <DetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
           <DetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
           <DetailText label="Status">{dataDetail?.status}</DetailText>
