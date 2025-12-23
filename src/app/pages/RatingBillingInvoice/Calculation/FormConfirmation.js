@@ -170,7 +170,7 @@ const FormConfirmation = ({ data }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold text-primary text-xs uppercase">
+            <p className="mt-[15px] text-primary text-xs uppercase">
               Billing Cycle Information
             </p>
           </div>
@@ -190,7 +190,7 @@ const FormConfirmation = ({ data }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold text-primary text-xs uppercase">
+            <p className="mt-[15px] text-primary text-xs uppercase">
               Input Parameter Information
             </p>
           </div>
@@ -261,7 +261,7 @@ const FormConfirmation = ({ data }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold text-primary text-xs uppercase">
+            <p className="mt-[15px] text-primary text-xs uppercase">
               Schedule Information
             </p>
           </div>

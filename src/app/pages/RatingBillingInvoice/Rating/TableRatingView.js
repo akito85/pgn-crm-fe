@@ -23,7 +23,7 @@ export const columnsRating = (
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
     isClassification: true,
-    width: 120,
+    width: 170,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -49,7 +49,7 @@ export const columnsRating = (
     title: "RATING CODE",
     dataIndex: "ratingCode",
     isClassification: true,
-    width: 120,
+    width: 130,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -75,7 +75,7 @@ export const columnsRating = (
     title: "RATE TYPE",
     dataIndex: "rateType",
     isClassification: true,
-    width: 80,
+    width: 110,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -101,7 +101,7 @@ export const columnsRating = (
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     isClassification: true,
-    width: 120,
+    width: 170,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -153,7 +153,7 @@ export const columnsRating = (
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     isClassification: true,
-    width: 120,
+    width: 160,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -178,6 +178,7 @@ export const columnsRating = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    width: 160,
     isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(

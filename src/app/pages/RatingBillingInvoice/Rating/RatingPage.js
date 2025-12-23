@@ -273,7 +273,7 @@ const RatingPage = () => {
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 16000 }}
+              tableScrolled={{ y: 525, x: 'max-content' }}
               onSort={onSortApi}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
