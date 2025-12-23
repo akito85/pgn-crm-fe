@@ -203,7 +203,6 @@ const PrabillingForm = ({ type }) => {
 
   const handleSelectCustomer = useCallback(
     (value, option) => {
-      // Simpan data customer yang baru dipilih
       const customerData = filteredCustomerList.find(
         (item) => item.accountNumber === value
       );
@@ -218,7 +217,6 @@ const PrabillingForm = ({ type }) => {
         }));
       }
 
-      // Clear search (tapi JANGAN clear selectedCustomersMap!)
       setSearchCustomerValue("");
       setFilteredCustomerList([]);
       setDataSpecificCustomer((prevState) => ({
@@ -282,9 +280,18 @@ const PrabillingForm = ({ type }) => {
         return {
           id: null,
           calCode: null,
-          mreadingCode: id,
+          costCenter: id,
         };
       }),
+      rRbiCalculationMeterReadingCode: (formValue?.meterReading || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            mreadingCode: id,
+          };
+        }
+      ),
       rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
         (id) => {
           return {
@@ -885,6 +892,7 @@ const PrabillingForm = ({ type }) => {
                 >
                   <SelectComponent
                     onChange={handleScheduleTypeChange}
+                    placeholder={"Choose Type..."}
                     options={(list_scheduler_type || []).map((item) => {
                       return {
                         label: item?.name,

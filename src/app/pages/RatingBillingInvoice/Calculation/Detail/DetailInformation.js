@@ -27,6 +27,7 @@ const DetailInformation = ({ data, tabHeader }) => {
   const {
     list_calculation_result,
     list_calculation_no_paging,
+    list_calculation_log,
     loading,
     loadingModal,
   } = useSelector((state) => state.rbi_calculation);
@@ -138,8 +139,8 @@ const DetailInformation = ({ data, tabHeader }) => {
 
   // Get latest calculation log data
   const latestLogData = useMemo(() => {
-    return list_calculation_result?.result?.[0] || null;
-  }, [list_calculation_result]);
+    return list_calculation_log?.result?.[0] || null;
+  }, [list_calculation_log]);
 
   //handleTab
   const handleSegmentedPage = (e) => {
@@ -646,7 +647,7 @@ const DetailInformation = ({ data, tabHeader }) => {
             <DetailText label={"Generate Date"}>
               {data?.generateDate}
             </DetailText>
-            <DetailText label={"Compeletion Date"}>
+            <DetailText label={"Completion Date"}>
               21 Nov 2025 17:49:31
             </DetailText>
             <DetailText label={"Status"}>
