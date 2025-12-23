@@ -28,6 +28,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Spin, Steps } from "antd";
 import { RightOutlined } from "@ant-design/icons";
+import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 
 const obj = {
   id: 1,
@@ -90,7 +92,7 @@ const RelationshipCreateAndUpdate = ({
   const [approvalObj, setApprovalObj] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [dataDetailApproval, setDataDetailApproval] = useState([]);
-  const [allAccountData, setAllAccountData] = useState([]);
+  const [relatedDetailData, setRelatedDetailData] = useState([]);
 
   // Step State
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -138,6 +140,7 @@ const RelationshipCreateAndUpdate = ({
         endDate: detail.endDate ? moment(detail.endDate) : null,
         description: detail.description || "",
         appHierId: detail.appHierId,
+        appHierName: detail.appHierName,
       });
 
       // Set relationshipObj for submit
@@ -164,7 +167,7 @@ const RelationshipCreateAndUpdate = ({
 
       // Populate Related Detail data for update mode
       if (detail.relatedDetail && detail.relatedDetail.length > 0) {
-        setAllAccountData(detail.relatedDetail);
+        setRelatedDetailData(detail.relatedDetail);
       }
     }
   }, [data_relationshipDetail, type, form, idAccount, dispatch]);
@@ -382,10 +385,38 @@ const RelationshipCreateAndUpdate = ({
           endDateDisplay: endDateValue ? moment(endDateValue).format("DD MMM YYYY") : "-",
           description: values.description || relationshipObj.description || "",
           appHierId: values.appHierId || approvalObj.appHierId,
+          appHierName: values.appHierName || approvalObj.appHierName
         };
 
-        setDataConfirm(valueForm);
-        setModalConfirm(true);
+        // Validate before showing confirmation modal
+        // coba hardcode validasi buat trigger error
+        const validateBody = {
+          id: type === "update" ? id : undefined,
+          subjectId: idAccount,
+          relationshipType: typeId,
+          relationshipCategory: categoryId,
+          objectId: relationshipObj.objectId,
+          objectName: relationshipObj.objectName || values.relatedName,
+          objectValue: relationshipObj.objectValue || values.relatedNumber,
+          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+          description: values.description || relationshipObj.description || "",
+          appHierId: values.appHierId || approvalObj.appHierId,
+          action: "SUBMIT",
+        };
+
+        dispatch(validateCreateUpdate({
+          body: validateBody,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
+          type,
+        }))
+          .unwrap()
+          .then(() => {
+            setDataConfirm(valueForm);
+            setModalConfirm(true);
+          })
+          .catch(() => { });
       })
       .catch((error) => {
         console.error("Validation failed:", error);
@@ -510,10 +541,10 @@ const RelationshipCreateAndUpdate = ({
             initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
             key={`relationship-tab-0`}
             className={`${current !== 0 ? "hidden" : ""}`}
-            onAllAccountChange={(data) => setAllAccountData(data)}
+            onRelatedDetailChange={(data) => setRelatedDetailData(data)}
           />
           <RelatedDetailCard
-            data={allAccountData}
+            data={relatedDetailData}
             className={`${current !== 0 ? "hidden" : ""} mt-4`}
           />
         </>
