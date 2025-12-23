@@ -441,7 +441,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             style={{ lineHeight: 0 }}
           >
             <Tooltip title="View Account Detail">
-              <EyeOutlined style={{ fontSize: "20px" }} />
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         ),
@@ -569,37 +569,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         </div>
       </CardContainer>
 
-      {/* History Log Information Section */}
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
-          </div>
-        }
-      >
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-          <DetailText label={"Record ID"}>
-            {prabillData?.initId || ""}
-          </DetailText>
-          <DetailText label={"Created Date"}>
-            {prabillData?.createdDtm
-              ? moment(prabillData.createdDtm).format("DD MMM YYYY HH:mm:ss")
-              : ""}
-          </DetailText>
-          <DetailText label={"Created By"}>
-            {prabillData?.createdBy || ""}
-          </DetailText>
-          <DetailText label={"Updated Date"}>
-            {prabillData?.updateDtm
-              ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
-              : ""}
-          </DetailText>
-          <DetailText label={"Updated By"}>
-            {prabillData?.updatedBy || ""}
-          </DetailText>
-        </div>
-      </CardContainer>
-
       {/* Prabilling Result Table Section */}
       <CardContainer
         header={
@@ -628,6 +597,37 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
               `${record.customerNumber}-${record.accountNumber}-${index}`
             }
           />
+        </div>
+      </CardContainer>
+
+      {/* History Log Information Section */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+          <DetailText label={"Record ID"}>
+            {prabillData?.initId || ""}
+          </DetailText>
+          <DetailText label={"Created Date"}>
+            {prabillData?.createdDtm
+              ? moment(prabillData.createdDtm).format("DD MMM YYYY HH:mm:ss")
+              : ""}
+          </DetailText>
+          <DetailText label={"Created By"}>
+            {prabillData?.createdBy || ""}
+          </DetailText>
+          <DetailText label={"Updated Date"}>
+            {prabillData?.updateDtm
+              ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
+              : ""}
+          </DetailText>
+          <DetailText label={"Updated By"}>
+            {prabillData?.updatedBy || ""}
+          </DetailText>
         </div>
       </CardContainer>
     </Spin>
