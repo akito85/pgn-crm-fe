@@ -11,13 +11,34 @@ const { Option } = Select;
 // Resizable Title Component
 const ResizableTitle = (props) => {
   const { onResize, width, ...restProps } = props;
+  const isResizingRef = React.useRef(false);
 
   if (!width) {
     return <th {...restProps} />;
   }
 
+  // Block click event if we were just resizing
+  const handleClick = (e) => {
+    if (isResizingRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      isResizingRef.current = false;
+    } else if (restProps.onClick) {
+      restProps.onClick(e);
+    }
+  };
+
   return (
-    <th {...restProps} style={{ ...restProps.style, position: "relative" }}>
+    <th
+      {...restProps}
+      onClick={handleClick}
+      style={{ ...restProps.style, position: "relative" }}
+      draggable={restProps.draggable}
+      onDragStart={restProps.onDragStart}
+      onDragOver={restProps.onDragOver}
+      onDrop={restProps.onDrop}
+      onDragEnd={restProps.onDragEnd}
+    >
       {restProps.children}
       <div
         style={{
@@ -30,12 +51,21 @@ const ResizableTitle = (props) => {
           userSelect: "none",
           zIndex: 1,
         }}
+        onClick={(e) => {
+          // Prevent sort when clicking on resize handle
+          e.stopPropagation();
+          e.preventDefault();
+        }}
         onMouseDown={(e) => {
           e.preventDefault();
+          e.stopPropagation();
+          isResizingRef.current = false;
           const startX = e.pageX;
           const startWidth = width;
+          let hasMoved = false;
 
           const handleMouseMove = (e) => {
+            hasMoved = true;
             const newWidth = startWidth + (e.pageX - startX);
             if (newWidth > 50) {
               onResize(newWidth);
@@ -47,6 +77,15 @@ const ResizableTitle = (props) => {
             document.removeEventListener("mouseup", handleMouseUp);
             document.body.style.cursor = "default";
             document.body.style.userSelect = "auto";
+
+            // Set flag if we actually resized (moved the mouse)
+            if (hasMoved) {
+              isResizingRef.current = true;
+              // Reset flag after a short delay
+              setTimeout(() => {
+                isResizingRef.current = false;
+              }, 100);
+            }
           };
 
           document.addEventListener("mousemove", handleMouseMove);
@@ -102,6 +141,18 @@ const TableRBI = ({
   // State untuk menyimpan width setiap column
   const [columnWidths, setColumnWidths] = useState({});
 
+  // State untuk drag and drop column reordering
+  const [draggedColumnKey, setDraggedColumnKey] = useState(null);
+  const [columnOrder, setColumnOrder] = useState([]);
+
+  // Initialize column order when columns change
+  React.useEffect(() => {
+    if (columns && columns.length > 0 && columnOrder.length === 0) {
+      const initialOrder = columns.map((c) => c.key || c.dataIndex || c.title);
+      setColumnOrder(initialOrder);
+    }
+  }, [columns, columnOrder.length]);
+
   // Handler untuk resize column
   const handleResize = useCallback(
     (key) => (newWidth) => {
@@ -113,6 +164,50 @@ const TableRBI = ({
     []
   );
 
+  // Drag and Drop handlers
+  const handleDragStart = useCallback((e, columnKey) => {
+    setDraggedColumnKey(columnKey);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/html", e.currentTarget);
+  }, []);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    return false;
+  }, []);
+
+  const handleDrop = useCallback(
+    (e, targetColumnKey) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (draggedColumnKey && draggedColumnKey !== targetColumnKey) {
+        setColumnOrder((prevOrder) => {
+          const newOrder = [...prevOrder];
+          const draggedIndex = newOrder.indexOf(draggedColumnKey);
+          const targetIndex = newOrder.indexOf(targetColumnKey);
+
+          if (draggedIndex !== -1 && targetIndex !== -1) {
+            // Remove dragged item and insert at target position
+            newOrder.splice(draggedIndex, 1);
+            newOrder.splice(targetIndex, 0, draggedColumnKey);
+          }
+
+          return newOrder;
+        });
+      }
+
+      setDraggedColumnKey(null);
+      return false;
+    },
+    [draggedColumnKey]
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedColumnKey(null);
+  }, []);
+
   // Build visible + fixed-applied columns with resizable feature
   const displayedColumns = useMemo(() => {
     const cols = (columns || []).map((c) => ({
@@ -123,21 +218,36 @@ const TableRBI = ({
     // Filter out hidden columns
     const visible = cols.filter((col) => !optionSelectedCol.includes(col.key));
 
+    // Apply column order if available
+    if (columnOrder.length > 0) {
+      visible.sort((a, b) => {
+        const indexA = columnOrder.indexOf(a.key);
+        const indexB = columnOrder.indexOf(b.key);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+
     // Separate into left, normal, right
     const leftFixed = [];
     const rightFixed = [];
     const normal = [];
 
     visible.forEach((col) => {
-      if (
-        Array.isArray(fixedColumns.left) &&
-        fixedColumns.left.includes(col.key)
-      ) {
+      // Check if column is fixed from ColumnSettings state OR from column's own fixed property
+      const isLeftFixed =
+        (Array.isArray(fixedColumns.left) &&
+          fixedColumns.left.includes(col.key)) ||
+        col.fixed === "left";
+      const isRightFixed =
+        (Array.isArray(fixedColumns.right) &&
+          fixedColumns.right.includes(col.key)) ||
+        col.fixed === "right";
+
+      if (isLeftFixed) {
         leftFixed.push(col);
-      } else if (
-        Array.isArray(fixedColumns.right) &&
-        fixedColumns.right.includes(col.key)
-      ) {
+      } else if (isRightFixed) {
         rightFixed.push(col);
       } else {
         normal.push(col);
@@ -156,6 +266,10 @@ const TableRBI = ({
         textAlign = "center"; // jika isClassification: rata tengah
       }
 
+      // Determine if drag and drop should be enabled
+      // Not for fixed columns (either by fixedPos parameter or by col.fixed property)
+      const isDraggable = !fixedPos && !col.fixed;
+
       const newCol = {
         ...col,
         width: columnWidths[colKey] || col.width || 150,
@@ -163,22 +277,47 @@ const TableRBI = ({
         ellipsis: {
           showTitle: true,
         },
-        onHeaderCell: (column) => ({
-          width: columnWidths[colKey] || col.width || 150,
-          onResize: handleResize(colKey),
-          style: { textTransform: "uppercase" },
-        }),
+        onHeaderCell: (column) => {
+          const baseStyle = {
+            textTransform: "uppercase",
+            fontSize: "10px",
+            cursor: isDraggable ? "move" : "default",
+          };
+
+          // Only add drag-related styles if column is being dragged
+          if (isDraggable && draggedColumnKey === colKey) {
+            baseStyle.opacity = 0.5;
+            baseStyle.backgroundColor = "#f0f0f0";
+          }
+
+          return {
+            width: columnWidths[colKey] || col.width || 150,
+            onResize: handleResize(colKey),
+            style: baseStyle,
+            draggable: isDraggable,
+            onDragStart: isDraggable
+              ? (e) => handleDragStart(e, colKey)
+              : undefined,
+            onDragOver: isDraggable ? handleDragOver : undefined,
+            onDrop: isDraggable ? (e) => handleDrop(e, colKey) : undefined,
+            onDragEnd: isDraggable ? handleDragEnd : undefined,
+          };
+        },
         onCell: () => ({
           style: {
             textAlign: textAlign,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            fontSize: "11px",
           },
         }),
       };
-      if (fixedPos) newCol.fixed = fixedPos;
-      else delete newCol.fixed;
+      if (fixedPos) {
+        newCol.fixed = fixedPos;
+      } else if (!col.fixed) {
+        delete newCol.fixed;
+      }
       return newCol;
     };
 
@@ -189,7 +328,19 @@ const TableRBI = ({
     ];
 
     return finalCols;
-  }, [columns, optionSelectedCol, fixedColumns, columnWidths, handleResize]);
+  }, [
+    columns,
+    optionSelectedCol,
+    fixedColumns,
+    columnWidths,
+    handleResize,
+    columnOrder,
+    handleDragStart,
+    handleDragOver,
+    handleDrop,
+    handleDragEnd,
+    draggedColumnKey,
+  ]);
 
   const handleAdvanceSearch = (searchData) => {
     onAdvanceSearch(searchData);
@@ -213,7 +364,7 @@ const TableRBI = ({
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
-        <div className={"w-full flex mb-5 justify-between items-center"}>
+        <div className={"w-full flex mb-3 justify-between items-center"}>
           {/* BAGIAN KIRI: Column Settings + Custom Header Left */}
           <div className="flex items-center gap-4">
             <ColumnSettings
@@ -223,7 +374,7 @@ const TableRBI = ({
               fixedColumns={fixedColumns}
               onFixedColumnsChange={setFixedColumns}
               buttonText="Column Settings"
-              buttonStyle={{ height: "40px" }}
+              buttonStyle={{ height: "32px", fontSize: "12px" }}
             />
 
             {/* Custom Header Left - untuk Approval Hierarchy dropdown */}
@@ -235,13 +386,14 @@ const TableRBI = ({
             <div className="flex justify-end gap-2">
               {showExport && (
                 <Button
-                  icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+                  icon={<DownloadOutlined style={{ fontSize: "14px" }} />}
                   onClick={handleDownload}
                   style={{
                     border: "1px solid #BDBDBD",
                     color: "black",
                     borderRadius: "8px",
-                    height: "40px",
+                    height: "32px",
+                    fontSize: "12px",
                   }}
                 >
                   Export
@@ -255,11 +407,12 @@ const TableRBI = ({
                     border: "1px solid #BDBDBD",
                     color: "black",
                     borderRadius: "8px",
-                    height: "40px",
+                    height: "32px",
+                    fontSize: "12px",
                   }}
                 >
-                  <FilterOutlined style={{ fontSize: "20px" }} />
-                  Advance Search
+                  <FilterOutlined style={{ fontSize: "14px" }} />
+                  Advanced Search
                 </Button>
               )}
 
@@ -289,12 +442,13 @@ const TableRBI = ({
       />
 
       {usePagination ? (
-        <div className={"w-full flex justify-between mt-5 items-center"}>
+        <div className={"w-full flex justify-between mt-3 items-center"}>
           <div className="flex items-center gap-3">
             <Select
               value={pageSize}
               onChange={(value) => onSizeChanger(current, value)}
-              className="w-20"
+              className="w-15"
+              style={{ fontSize: "12px" }}
               size="small"
             >
               {[10, 20, 50, 100].map((size) => (
@@ -303,7 +457,7 @@ const TableRBI = ({
                 </Option>
               ))}
             </Select>
-            <span>
+            <span style={{ fontSize: "12px" }}>
               Showing {(current - 1) * pageSize + 1} to{" "}
               {Math.min(current * pageSize, totalData)} of {totalData} entries
             </span>

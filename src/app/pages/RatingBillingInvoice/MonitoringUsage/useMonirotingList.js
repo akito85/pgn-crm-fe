@@ -1379,8 +1379,8 @@ export const useMonitoringList = (tabs, batchId) => {
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
-    {
-      title: "File Source",
+     {
+      title: "FileName",
       dataIndex: "fileSource",
       width: 150,
       sorter: true,

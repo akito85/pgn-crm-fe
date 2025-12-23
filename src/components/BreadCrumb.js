@@ -12,7 +12,7 @@ const BreadCrumb = ({ routes }) => {
       itemRender={itemRender}
       routes={routes}
       separator={<RightOutlined />}
-      style={{ marginBottom: "30px" }}
+      style={{ marginBottom: "10px" }}
     />
   );
 };

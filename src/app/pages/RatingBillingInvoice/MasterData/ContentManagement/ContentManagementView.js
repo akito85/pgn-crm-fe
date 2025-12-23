@@ -93,8 +93,7 @@ const ContentManagementView = () => {
         dataHistory: {
           create: data_approval_history?.dataHistory?.CONTENT_TEMPLATE || [],
           inactive:
-            data_approval_history?.dataHistory?.INACTIVE_CONTENT_TEMPLATE ||
-            [],
+            data_approval_history?.dataHistory?.INACTIVE_CONTENT_TEMPLATE || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -241,6 +240,21 @@ const ContentManagementView = () => {
   // Grant Access Item - moved outside useMemo
   const itemGrantAccess = [
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Create",
       render: (
         <NavLink to={RBI_ROUTES.CONTENT_MANAGEMENT_CREATE}>
@@ -316,8 +330,7 @@ const ContentManagementView = () => {
       type: "table",
       render: (record, data) => {
         const isActivateOrInactivate =
-          (record.statusApproval === "APPROVE" &&
-            record.status === "ACTIVE") ||
+          (record.statusApproval === "APPROVE" && record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
           (record.statusApproval === "REJECTED" &&
             record.status === "ACTIVE") ||
@@ -325,16 +338,24 @@ const ContentManagementView = () => {
             record.status === "ACTIVE");
 
         return (
-          <div 
-            className={`flex items-center gap-2 ${!isActivateOrInactivate ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-            onClick={isActivateOrInactivate ? () => handleInactive(record) : undefined}
+          <div
+            className={`flex items-center gap-2 ${
+              !isActivateOrInactivate ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
+            onClick={
+              isActivateOrInactivate ? () => handleInactive(record) : undefined
+            }
           >
             <Checkbox
               className="inactive-check"
               disabled={!isActivateOrInactivate}
               checked={record.status !== "ACTIVE"}
             />
-            <span className={isActivateOrInactivate ? "text-black" : "text-[#8D91A0]"}>
+            <span
+              className={
+                isActivateOrInactivate ? "text-black" : "text-[#8D91A0]"
+              }
+            >
               {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
             </span>
           </div>
@@ -346,7 +367,7 @@ const ContentManagementView = () => {
       type: "table",
       render: (record, data) => {
         return (
-          <div 
+          <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleApprovalHistory(record.id)}
           >
@@ -379,8 +400,10 @@ const ContentManagementView = () => {
         align: "center",
         render: (_, record) => {
           // Filter hanya action dengan type "table"
-          const tableActions = itemGrantAccess.filter(item => item.type === "table");
-          
+          const tableActions = itemGrantAccess.filter(
+            (item) => item.type === "table"
+          );
+
           // Buat menu items untuk dropdown
           const menuItems = tableActions.map((item, idx) => ({
             key: idx,
@@ -388,20 +411,24 @@ const ContentManagementView = () => {
           }));
 
           const menu = <Menu items={menuItems} />;
-          
+
           return (
-            <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
-              <MoreOutlined 
-                style={{ 
-                  fontSize: "20px", 
+            <Dropdown
+              overlay={menu}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <MoreOutlined
+                style={{
+                  fontSize: "20px",
                   cursor: "pointer",
-                  color: "#0075bf"
-                }} 
+                  color: "#0075bf",
+                }}
               />
             </Dropdown>
           );
-        }
-      }
+        },
+      },
     ];
 
     // Add 'key' property to columns that don't have it

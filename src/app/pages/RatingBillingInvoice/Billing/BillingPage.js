@@ -225,18 +225,18 @@ const BillingPage = () => {
   };
 
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
-    //       type="submit"
-    //       onClick={handleDownload}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          type="submit"
+          onClick={handleDownload}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Approval",
       render: (

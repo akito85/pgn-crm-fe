@@ -197,7 +197,7 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
           </ButtonComponent>
         </div>
 
-        <CardContainer 
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">DETAIL - PENDING APPROVALS</p>
@@ -206,7 +206,14 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
         >
           {/* Filters */}
           <div className="w-full mb-4 mt-4">
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 16,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
               <div>
                 <span style={{ marginRight: 8, fontWeight: 500 }}>Period:</span>
                 <Input value={filterPeriod} disabled style={{ width: 120 }} />
@@ -240,7 +247,7 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
           </div>
 
           {/* Table */}
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               dataSource={dataSource}
               columns={processedColumns}

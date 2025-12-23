@@ -12,14 +12,17 @@ import {
   getPendingTransactions,
   downloadPendingTransactions,
   getListBillingPeriod,
-  updateInvestigationFlag
+  updateInvestigationFlag,
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 import { getColumnsPendingTransactions } from "./Table/TablePendingTransactions";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const { Option } = Select;
 
-const DetailPendingTransactions = ({ filterPeriod: initialPeriod, handleBack }) => {
+const DetailPendingTransactions = ({
+  filterPeriod: initialPeriod,
+  handleBack,
+}) => {
   const { loading, pendingTransactionsData, list_billing_period } = useSelector(
     (state) => state.monitoring
   );
@@ -136,7 +139,7 @@ const DetailPendingTransactions = ({ filterPeriod: initialPeriod, handleBack }) 
       onOk: async () => {
         try {
           await dispatch(updateInvestigationFlag(record.id)).unwrap();
-          
+
           dispatch(
             getPendingTransactions({
               period: filterPeriod,
@@ -146,8 +149,10 @@ const DetailPendingTransactions = ({ filterPeriod: initialPeriod, handleBack }) 
               sort,
             })
           );
-          
-          message.success(`Investigation flag updated for ${record.customerId}`);
+
+          message.success(
+            `Investigation flag updated for ${record.customerId}`
+          );
         } catch (error) {
           message.error("Failed to update investigation flag");
         }
@@ -212,16 +217,25 @@ const DetailPendingTransactions = ({ filterPeriod: initialPeriod, handleBack }) 
           </ButtonComponent>
         </div>
 
-        <CardContainer 
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">DETAIL - PENDING TRANSACTIONS</p>
+              <p className="mt-[15px] font-bold">
+                DETAIL - PENDING TRANSACTIONS
+              </p>
             </div>
           }
         >
           {/* Filters */}
           <div className="w-full mb-4 mt-4">
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 16,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
               <div>
                 <span style={{ marginRight: 8, fontWeight: 500 }}>Period:</span>
                 <Select
@@ -233,7 +247,9 @@ const DetailPendingTransactions = ({ filterPeriod: initialPeriod, handleBack }) 
                   style={{ width: 200 }}
                   showSearch
                   filterOption={(input, option) =>
-                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    option.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
                   }
                 >
                   {list_billing_period.map((period) => (
@@ -286,7 +302,7 @@ const DetailPendingTransactions = ({ filterPeriod: initialPeriod, handleBack }) 
           </div>
 
           {/* Table */}
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               dataSource={dataSource}
               columns={processedColumns}

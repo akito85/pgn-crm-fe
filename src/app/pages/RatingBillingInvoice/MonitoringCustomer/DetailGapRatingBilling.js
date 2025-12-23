@@ -18,7 +18,10 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const { Option } = Select;
 
-const DetailGapRatingBilling = ({ filterPeriod: initialPeriod, handleBack }) => {
+const DetailGapRatingBilling = ({
+  filterPeriod: initialPeriod,
+  handleBack,
+}) => {
   const { loading, gapRatingBillingData, list_billing_period } = useSelector(
     (state) => state.monitoring
   );
@@ -174,16 +177,25 @@ const DetailGapRatingBilling = ({ filterPeriod: initialPeriod, handleBack }) => 
           </ButtonComponent>
         </div>
 
-        <CardContainer 
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">DETAIL - GAP RATING VS BILLING</p>
+              <p className="mt-[15px] font-bold">
+                DETAIL - GAP RATING VS BILLING
+              </p>
             </div>
           }
         >
           {/* Filters */}
           <div className="w-full mb-4 mt-4">
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 16,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
               <div>
                 <span style={{ marginRight: 8, fontWeight: 500 }}>Period:</span>
                 <Select
@@ -195,7 +207,9 @@ const DetailGapRatingBilling = ({ filterPeriod: initialPeriod, handleBack }) => 
                   style={{ width: 200 }}
                   showSearch
                   filterOption={(input, option) =>
-                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    option.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
                   }
                 >
                   {list_billing_period.map((period) => (
@@ -206,7 +220,9 @@ const DetailGapRatingBilling = ({ filterPeriod: initialPeriod, handleBack }) => 
                 </Select>
               </div>
               <div>
-                <span style={{ marginRight: 8, fontWeight: 500 }}>Gap Type:</span>
+                <span style={{ marginRight: 8, fontWeight: 500 }}>
+                  Gap Type:
+                </span>
                 <Select
                   value={filterGapType}
                   onChange={setFilterGapType}
@@ -221,7 +237,7 @@ const DetailGapRatingBilling = ({ filterPeriod: initialPeriod, handleBack }) => 
           </div>
 
           {/* Table or Empty State */}
-          <div className="my-5">
+          <div className="my-0">
             {dataSource && dataSource.length > 0 ? (
               <TableRBI
                 dataSource={dataSource}

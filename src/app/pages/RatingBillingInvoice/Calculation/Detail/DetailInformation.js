@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import moment from "moment";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -9,12 +8,13 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { Form, Spin, Steps } from "antd";
 import InputComponent from "../../../../../components/InputComponent";
+import moment from "moment";
 import {
   getDetailCalculationResult,
   getDetailCalculationResultNoPaging,
-  getDetailCalculationLog,
   recalculateData,
   retryData,
+  getDetailCalculationLog,
 } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
@@ -66,7 +66,19 @@ const DetailInformation = ({ data, tabHeader }) => {
     { value: "Billing Result" },
   ]);
 
-  // use Effect - Fetch Calculation Result
+  useEffect(() => {
+    dispatch(
+      getDetailCalculationLog({
+        calCode: data?.calCode,
+        sort: "createdDate~desc",
+        page: 1,
+        pageSize: 1,
+        search: encodeURIComponent(JSON.stringify({})),
+      })
+    );
+  }, [tabHeader, data?.calCode, dispatch]);
+
+  // use Effect
   useEffect(() => {
     if (
       tabHeader === "Calculation Information" &&
@@ -97,7 +109,6 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   }, [segmentedPage, dispatch, data, page, pageSize, search, sort, tabHeader]);
 
-  // use Effect - Fetch Calculation Result No Paging
   useEffect(() => {
     if (
       tabHeader === "Calculation Information" &&
@@ -113,22 +124,6 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   }, [dispatch, segmentedPage, data]);
 
-  // use Effect - Fetch Calculation Log for latest log
-  useEffect(() => {
-    if (tabHeader === "Calculation Information" && data?.calCode) {
-      console.log("KESINI");
-      dispatch(
-        getDetailCalculationLog({
-          calCode: data?.calCode,
-          sort: "calDate~desc",
-          page: 1,
-          pageSize: 1,
-          search: encodeURIComponent(JSON.stringify({})),
-        })
-      );
-    }
-  }, [dispatch, data?.calCode, tabHeader]);
-
   useEffect(() => {
     if (data?.calType === 621) {
       setSegmentedPage("Rating Result");
@@ -141,6 +136,11 @@ const DetailInformation = ({ data, tabHeader }) => {
       setTabData([{ value: "Rating Result" }, { value: "Billing Result" }]);
     }
   }, [data]);
+
+  // Get latest calculation log data
+  const latestLogData = useMemo(() => {
+    return list_calculation_log?.result?.[0] || null;
+  }, [list_calculation_log]);
 
   //handleTab
   const handleSegmentedPage = (e) => {
@@ -158,7 +158,7 @@ const DetailInformation = ({ data, tabHeader }) => {
 
   const tempTabs = useMemo(
     () => <RadioTabs data={tabData} onChange={handleSegmentedPage} />,
-    [segmentedPage, tabData]
+    [segmentedPage, handleSegmentedPage, tabData]
   );
 
   const renderSection = (segmentedPage) => {
@@ -560,16 +560,6 @@ const DetailInformation = ({ data, tabHeader }) => {
             calType: segmentedPage === "Rating Result" ? 621 : 623,
           })
         );
-        // Refresh calculation log after recalculate
-        dispatch(
-          getDetailCalculationLog({
-            calCode: data?.calCode,
-            sort: "calDate~desc",
-            page: 1,
-            pageSize: 1,
-            search: encodeURIComponent(JSON.stringify({})),
-          })
-        );
         handleClear();
       });
   };
@@ -605,16 +595,6 @@ const DetailInformation = ({ data, tabHeader }) => {
             search: reqSearch,
           })
         );
-        // Refresh calculation log after retry
-        dispatch(
-          getDetailCalculationLog({
-            calCode: data?.calCode,
-            sort: "calDate~desc",
-            page: 1,
-            pageSize: 1,
-            search: encodeURIComponent(JSON.stringify({})),
-          })
-        );
         clearRetry();
         handleClear();
       });
@@ -639,10 +619,6 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   };
 
-  // Get latest calculation log data from Redux state
-  const latestLog = list_calculation_result?.result?.[0] || {};
-
-  console.log("log: ", latestLog);
   return (
     <>
       <Spin spinning={loadingModal}>
@@ -671,10 +647,8 @@ const DetailInformation = ({ data, tabHeader }) => {
             <DetailText label={"Generate Date"}>
               {data?.generateDate}
             </DetailText>
-            <DetailText label={"Compeletion Date"}>
-              {latestLog?.logDate
-                ? moment(latestLog.logDate).format("DD MMM YYYY HH:mm:ss")
-                : ""}
+            <DetailText label={"Completion Date"}>
+              21 Nov 2025 17:49:31
             </DetailText>
             <DetailText label={"Status"}>
               {renderStatus(data?.status)}
@@ -712,35 +686,45 @@ const DetailInformation = ({ data, tabHeader }) => {
           </div>
         </CardContainer>
 
-        {/* History Log Information Section */}
-        <CardContainer subHeader={"history log information"}>
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Record ID"}>
-              {latestLog?.calLogId || ""}
-            </DetailText>
-            <DetailText label={"Created Date"}>
-              {latestLog?.createdDate
-                ? moment(latestLog.createdDate).format("DD MMM YYYY HH:mm:ss")
-                : ""}
-            </DetailText>
-            <DetailText label={"Created By"}>
-              {latestLog?.createdBy || ""}
-            </DetailText>
-            <DetailText label={"Updated Date"}>
-              {latestLog?.updatedDate
-                ? moment(latestLog.updatedDate).format("DD MMM YYYY HH:mm:ss")
-                : ""}
-            </DetailText>
-            <DetailText label={"Updated By"}>
-              {latestLog?.createdBy || ""}
-            </DetailText>
-          </div>
-        </CardContainer>
-
         <CardContainer subHeader={"calculation result"}>
           {tempTabs}
 
           {renderSection(segmentedPage)}
+        </CardContainer>
+
+        {/* HISTORY LOG INFORMATION - CARD BARU */}
+        <CardContainer
+          subHeader={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+            </div>
+          }
+        >
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+            <DetailText label={"Record ID"}>
+              {latestLogData?.calLogId || ""}
+            </DetailText>
+            <DetailText label={"Created Date"}>
+              {latestLogData?.createdDate
+                ? moment(latestLogData.createdDate).format(
+                    "DD MMM YYYY HH:mm:ss"
+                  )
+                : ""}
+            </DetailText>
+            <DetailText label={"Created By"}>
+              {latestLogData?.createdBy || ""}
+            </DetailText>
+            <DetailText label={"Updated Date"}>
+              {latestLogData?.updatedDate
+                ? moment(latestLogData.updatedDate).format(
+                    "DD MMM YYYY HH:mm:ss"
+                  )
+                : ""}
+            </DetailText>
+            <DetailText label={"Updated By"}>
+              {latestLogData?.updatedBy || ""}
+            </DetailText>
+          </div>
         </CardContainer>
 
         {/* retry modal */}

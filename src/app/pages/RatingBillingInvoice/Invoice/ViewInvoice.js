@@ -426,6 +426,16 @@ const ViewInvoice = () => {
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Invoice List</p>
               <div className="flex gap-2">
+                <ButtonComponent
+                  type={"submit"}
+                  border={false}
+                  icon={<SVGIcon name="IconButtonDownload" width={24} />}
+                  onClick={() => {
+                    handleDownload();
+                  }}
+                >
+                  Download List
+                </ButtonComponent>
                 <NavLink to={INVOICE_ROUTES.GENERATE_INVOICE_FORM}>
                   <ButtonComponent
                     icon={<SVGIcon name="IconButtonCreate" width={24} />}

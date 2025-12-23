@@ -441,7 +441,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             style={{ lineHeight: 0 }}
           >
             <Tooltip title="View Account Detail">
-              <EyeOutlined style={{ fontSize: "20px" }} />
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         ),
@@ -569,6 +569,47 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         </div>
       </CardContainer>
 
+      {/* Prabilling Result Table Section */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">PRABILLING RESULT</p>
+            <ButtonComponent
+              type={"submit"}
+              border={false}
+              icon={<SVGIcon name="IconButtonDownload" width={24} />}
+              onClick={() => {
+                handleDownload();
+              }}
+            >
+              Download List
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <div className="my-0">
+          <TableRBI
+            dataSource={resultData}
+            columns={processedColumns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={pageInfo?.totalElements || 0}
+            tableScrolled={{ x: 5500, y: 600 }}
+            onSort={onSort}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            rowKey={(record, index) =>
+              `${record.customerNumber}-${record.accountNumber}-${index}`
+            }
+          />
+        </div>
+      </CardContainer>
+
       {/* History Log Information Section */}
       <CardContainer
         header={
@@ -597,37 +638,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           <DetailText label={"Updated By"}>
             {prabillData?.updatedBy || ""}
           </DetailText>
-        </div>
-      </CardContainer>
-
-      {/* Prabilling Result Table Section */}
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING RESULT</p>
-          </div>
-        }
-      >
-        <div className="my-5">
-          <TableRBI
-            dataSource={resultData}
-            columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={pageInfo?.totalElements || 0}
-            tableScrolled={{ x: 5500, y: 600 }}
-            onSort={onSort}
-            handleDownload={handleDownload}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
-            rowKey={(record, index) =>
-              `${record.customerNumber}-${record.accountNumber}-${index}`
-            }
-          />
         </div>
       </CardContainer>
     </Spin>

@@ -1,10 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import { Spin, Tooltip, Tabs } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
 import { useDispatch, useSelector } from "react-redux";
-import { getApprovalHistory, getListUsagePaginate } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import {
+  getApprovalHistory,
+  getListUsagePaginate,
+} from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -17,7 +26,6 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
-import { EyeOutlined } from "@ant-design/icons";
 
 const MonitoringUsagePage = () => {
   // Selector
@@ -50,7 +58,7 @@ const MonitoringUsagePage = () => {
     setSearchText,
     setSearchedColumn,
     setSort,
-    sort
+    sort,
   } = useMonitoringList(tabHeader);
 
   // Use State
@@ -110,9 +118,9 @@ const MonitoringUsagePage = () => {
         setPage(1);
         setPageSize(10);
         setSearch({});
-        setSort('');
+        setSort("");
         setSearchText("");
-        setSearchedColumn('');
+        setSearchedColumn("");
       }
       return key;
     });
@@ -138,6 +146,21 @@ const MonitoringUsagePage = () => {
   };
 
   const grantAccessButton = [
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Approval",
       render: (
@@ -180,12 +203,12 @@ const MonitoringUsagePage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval History">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={20}
-                onClick={() => handleApprovalHistory(record)}
-              />
+            <SVGIcon
+              name="IconLogHistory"
+              color={"#0075bf"}
+              width={20}
+              onClick={() => handleApprovalHistory(record)}
+            />
           </Tooltip>
         );
       },
@@ -203,7 +226,7 @@ const MonitoringUsagePage = () => {
             state={{ id: record?.batchId }}
           >
             <Tooltip title="Detail">
-                <EyeOutlined style={{ fontSize: "20px" }} />
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -231,16 +254,23 @@ const MonitoringUsagePage = () => {
 
   const allColumns = useMemo(() => {
     let baseColumns = tabHeader === "Usage List" ? columnUsage : batchColumns;
-    let actionColumns = tabHeader === "Usage List" ? columnActionUsage : columnActionBatch;
-    
+    let actionColumns =
+      tabHeader === "Usage List" ? columnActionUsage : columnActionBatch;
+
     const columnsWithKeys = [...baseColumns, ...actionColumns].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
       width: col.width || 150,
     }));
-    
+
     return columnsWithKeys;
-  }, [batchColumns, columnActionBatch, columnActionUsage, columnUsage, tabHeader]);
+  }, [
+    batchColumns,
+    columnActionBatch,
+    columnActionUsage,
+    columnUsage,
+    tabHeader,
+  ]);
 
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
@@ -259,16 +289,18 @@ const MonitoringUsagePage = () => {
     } else {
       return dataBatch;
     }
-  }
-  
+  };
+
   const handleListRefresh = () => {
-    dispatch(getListUsagePaginate({ 
-      search: encodeURIComponent(JSON.stringify(search)), 
-      page, 
-      pageSize, 
-      sort 
-    }))
-  }
+    dispatch(
+      getListUsagePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
+  };
 
   return (
     <Spin spinning={loading}>
@@ -292,7 +324,7 @@ const MonitoringUsagePage = () => {
             size="small"
           >
             <Tabs.TabPane tab="Usage List" key="Usage List">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}
@@ -312,7 +344,7 @@ const MonitoringUsagePage = () => {
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Batch List" key="Batch List">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}

@@ -11,7 +11,7 @@ const ButtonComponent = ({
   htmlType,
   size,
   form,
-  fontSizeClassname = "text-[18px]",
+  fontSizeClassname = "text-[12px]",
   className,
   fullButton = false,
   isPrimary = false,
@@ -32,9 +32,11 @@ const ButtonComponent = ({
           ...(fullButton ? { width: "100%" } : {}),
           backgroundColor: isPrimary && "var(--primary)",
           color: isPrimary && "#fff",
+          height: "32px",
+          fontSize: "12px",
         }}
       >
-        <div className={children ? `p-1 ${fontSizeClassname} text-center` : ``}>
+        <div className={children ? `py-0.5 px-1 ${fontSizeClassname} text-center` : ``}>
           {children}
         </div>
       </Button>
