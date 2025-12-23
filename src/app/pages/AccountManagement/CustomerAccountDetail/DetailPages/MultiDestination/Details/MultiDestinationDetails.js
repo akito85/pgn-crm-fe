@@ -30,7 +30,7 @@ const MultiDestinationDetails = ({
   const dispatch = useDispatch();
 
   const { detail_multiDestination, data_multiDestinationAttachment } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.multiDestination
   )
 
   const { data_customerDetail, loading, loadingAccount } = useSelector(
