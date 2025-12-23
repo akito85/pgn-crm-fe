@@ -168,7 +168,11 @@ export const getDetailMultiDestination = createAsyncThunk(
       // const url = `/v1/dbs/api/multi-destination/detail/${id}`;
       // const response = await accountManagementService.getDetail(url);
       // return response.data;
-      return {};
+      return {
+        result: {
+          id: 1
+        },
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
