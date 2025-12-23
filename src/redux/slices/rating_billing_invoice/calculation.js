@@ -24,6 +24,7 @@ const initialState = {
   list_billing_period: [],
   detail_calculation_job: null,
   list_calculation_log: [],
+  list_calculation_logp: [],
   list_calculation_result: [],
   list_calculation_no_paging: [],
   data_user_calculation: {},
@@ -393,7 +394,7 @@ export const getListSpecificCustomer = createAsyncThunk(
   "GET_LIST_SPECIFIC_CUSTOMER",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/customer-accounts`;
+      const url = `/v1/dbs/api/rbi/calculation/customer-accounts`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
         body
@@ -768,7 +769,7 @@ const calculationSlice = createSlice({
     },
     [getCalculateLogPaginate.fulfilled]: (state, action) => {
       state.loading_log = false;
-      state.list_calculation_log = action.payload;
+      state.list_calculation_logp = action.payload;
     },
     [getCalculateLogPaginate.rejected]: (state, action) => {
       state.loading_log = false;

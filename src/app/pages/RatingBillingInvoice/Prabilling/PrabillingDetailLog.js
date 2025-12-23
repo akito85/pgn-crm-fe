@@ -348,7 +348,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING PROCESS LOG</p>
+            <p className="mt-[15px]">PRABILLING PROCESS LOG</p>
           </div>
         }
       >
