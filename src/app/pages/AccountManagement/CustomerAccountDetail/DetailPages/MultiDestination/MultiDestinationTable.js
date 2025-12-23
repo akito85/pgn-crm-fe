@@ -10,6 +10,7 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../components/Toolbar";
 import { CheckOutlined, DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { TablePaginationNew } from "poc-table-dragandrop";
+import { useEffect } from "react";
 
 const MultiDestinationTable = ({
   data = [],
@@ -440,6 +441,10 @@ const MultiDestinationTable = ({
       }
     }
   ];
+
+  useEffect(() => {
+    console.log("data", data);
+  }, [data])
 
   return (
     <div className="flex flex-col gap-y-6">

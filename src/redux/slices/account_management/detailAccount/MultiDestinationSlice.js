@@ -26,7 +26,16 @@ export const getMultiDestination = createAsyncThunk(
       //     headers: { "Accept": "application/json, text/plain, */*" }
       //   });
       // return response.data;
-      return [];
+      return {
+        result: [
+          {
+            id: 1,
+          }
+        ],
+        page: {
+          totalElements: 1,
+        }
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }

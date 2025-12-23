@@ -441,10 +441,10 @@ const MultiDestination = ({
     <Spin spinning={loading}>
       <BaseContainer header={"MULTI DESTINATION LIST"}>
         <MultiDestinationTable
-          data={data_multiDestination?.result?.map((paymentRelation, index) => ({
-            ...paymentRelation,
+          data={data_multiDestination?.result?.map((multiDestination, index) => ({
+            ...multiDestination,
             no: index + 1 + ( page - 1) * pageSize,
-            key: `multi-destination-${paymentRelation.id}-${index}`
+            key: `multi-destination-${multiDestination.id}-${index}`
           }))}
           idAccount={id}
           idCustomer={idCustomer}
