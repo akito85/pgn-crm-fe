@@ -1,4 +1,4 @@
-import { Spin, Tooltip } from "antd";
+import { Badge, Form, Spin, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { useState } from "react";
 import BaseContainer from "../../../../../../../components/BaseContainer";
@@ -10,15 +10,43 @@ import { getBase64 } from "../../../../../../../utils/getBase64";
 import { previewFileAttachment } from "../../../../../../../utils/previewFileAttachment";
 import { configApp } from "../../../../../../../constants/configApp";
 import { TablePaginationNew } from "poc-table-dragandrop";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import NxFilter from "../../../../../../../components/Nx/NxFilter";
+import { useDispatch, useSelector } from "react-redux";
 
 const MultiDestinationDetailAttch = ({
   dataAttachment = [],
   getColumnSearchProps = () => {},
 }) => {
+  const dispatch = useDispatch();
+  
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const [loadingDownload, setLoadingDownload] = useState(false);
+  const [tempFilters, setTempFilters] = useState([]);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
+  const multiDestinationState = useSelector(
+      (state) => state.multiDestination
+    );
+  
+  const { loading } = multiDestinationState;
+
+  const [filterForm] = Form.useForm();
+
+  const handleCancelFilter = () => {
+    setShowFilterModal(false);
+    filterForm.setFieldValue({ query: tempFilters });
+  };
+
+  const handleSaveFilter = (values) => {
+    setTempFilters(values.query);
+    setPage(1);
+    setShowFilterModal(false);
+  };
 
   const handleChangeDetail = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -116,6 +144,55 @@ const MultiDestinationDetailAttch = ({
           onSizeChanger={setPageSize}
           type="FE"
         /> */}
+        <div className="flex justify-between">
+          <Badge count={tempFilters.length}>
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setShowFilterModal(true)}
+              icon={
+                <FilterOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                width: "128px",
+                height: "48px",
+                borderRadius: "5px"
+              }}
+            >
+              Filters
+            </ButtonComponent>
+          </Badge>
+          <ButtonComponent
+            type={"submit"}
+            onClick={() => {}}
+            icon={
+              <DownloadOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 20,
+                }}
+              />
+            }
+            style={{
+              backgroundColor: "#0075bf",
+              color: "#fff",
+              borderColor: "#0075bf",
+              border: "1px solid #0075bf",
+              borderRadius: "5px",
+              height: "48px"
+            }}
+          >
+            Download List
+          </ButtonComponent>
+        </div>
         <TablePaginationNew
           dataSource={dataAttachment.map((item, index) => ({
             ...item,
@@ -128,6 +205,28 @@ const MultiDestinationDetailAttch = ({
           enableDragColumn={true}
           type="FE"
         />
+        <ModalCustom
+          isOpen={showFilterModal}
+          type={"confirmation"}
+          header={"QUERY"}
+          width={1200}
+          handleCancel={handleCancelFilter}
+        >
+          <Form form={filterForm} layout="vertical" onFinish={handleSaveFilter} id={"mdAttachmentFilterForm"}>
+            <NxFilter
+              form={filterForm}
+              onCancel={handleCancelFilter}
+              dispatch={dispatch}
+              // getColumnApi={getMdColumnApi}
+              // getConditionApi={getMdConditionApi}
+              // getOperatorApi={getMdOperatorApi}
+              // reduxState={multiDestinationState}
+              maxFilters={5}
+              loading={loading}
+              formId="mdAttachmentFilterForm"
+            />
+          </Form>
+        </ModalCustom>
       </BaseContainer>
     </Spin>
   );
