@@ -75,7 +75,7 @@ export const columnsRating = (
     title: "RATE TYPE",
     dataIndex: "rateType",
     isClassification: true,
-    width: 120,
+    width: 80,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -1056,6 +1056,7 @@ export const columnsRating = (
     key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
+    width:100,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
