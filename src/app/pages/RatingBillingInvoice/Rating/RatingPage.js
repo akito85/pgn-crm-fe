@@ -15,6 +15,8 @@ import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
   const { data, loading } = useSelector((state) => state.rating);
@@ -162,6 +164,21 @@ const RatingPage = () => {
   };
 
   const itemGrantAccess = [
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     // {
     //   action: "View",
     //   type: "table",
@@ -227,14 +244,14 @@ const RatingPage = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">RATING LIST</p>
+              <p className="w-full mt-[15px] font-bold">RATING LIST</p>
+              <div className="w-full flex justify-end gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
             </div>
           }
         >

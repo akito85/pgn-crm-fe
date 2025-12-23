@@ -574,6 +574,16 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         header={
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px] font-bold">PRABILLING RESULT</p>
+            <ButtonComponent
+              type={"submit"}
+              border={false}
+              icon={<SVGIcon name="IconButtonDownload" width={24} />}
+              onClick={() => {
+                handleDownload();
+              }}
+            >
+              Download List
+            </ButtonComponent>
           </div>
         }
       >

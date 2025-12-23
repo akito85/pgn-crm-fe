@@ -450,11 +450,11 @@ const CalculationPage = () => {
             search
           ),
       },
-       {
+      {
         key: "progress",
         title: "Σ PROGRESS",
         dataIndex: "progress",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.progress] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -481,7 +481,7 @@ const CalculationPage = () => {
         key: "succeed",
         title: "Σ SUCCEED",
         dataIndex: "succeed",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.succeed] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -508,7 +508,7 @@ const CalculationPage = () => {
         key: "failed",
         title: "Σ FAILED",
         dataIndex: "failed",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.failed] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -535,7 +535,7 @@ const CalculationPage = () => {
         key: "customer",
         title: "Σ CUSTOMER",
         dataIndex: "customer",
-        isNumber:true,
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.customer] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -1248,6 +1248,21 @@ const CalculationPage = () => {
   };
 
   const itemGrantAccess = [
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (

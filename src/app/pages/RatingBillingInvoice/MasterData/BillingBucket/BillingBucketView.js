@@ -51,7 +51,6 @@ const BillingBucketView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("billingBucketFixedColumns");
     return saved
@@ -62,7 +61,6 @@ const BillingBucketView = () => {
         };
   });
 
-  // ✅ Save to localStorage when fixedColumns change
   useEffect(() => {
     localStorage.setItem(
       "billingBucketFixedColumns",
@@ -255,18 +253,18 @@ const BillingBucketView = () => {
 
   // Grant Access Item - moved outside useMemo
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       type={"submit"}
-    //       icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-    //       onClick={() => handleDownload()}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          onClick={() => handleDownload()}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (
