@@ -131,6 +131,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       const {
         subjectId,
         objectId,
+        account,
         accountSor,
         accountCostCenter,
         meterReadingCode,
@@ -153,6 +154,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       formCreate.setFieldsValue({
         subjectId,
         objectId,
+        account,
         accountSor,
         accountCostCenter,
         meterReadingCode,
@@ -235,7 +237,20 @@ const CreateUpdateMultiDestination = ({ type }) => {
     if (show) {
       const {
         objectId,
-        priority,
+        account,
+        accountSor,
+        accountCostCenter,
+        meterReadingCode,
+        accountSegment,
+        accountGroupType,
+        accountType,
+        premiseAddress,
+        subdistrict,
+        district,
+        city,
+        country,
+        longitude,
+        latitude,
         description, 
         startDate,
         endDate,
@@ -244,9 +259,22 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
       const body = {
         id: type === "update" ? idMd : undefined,
-        subjectId: data_accountDetail?.accountInformation?.accountId, 
+        subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
-        priority,
+        account,
+        accountSor,
+        accountCostCenter,
+        meterReadingCode,
+        accountSegment,
+        accountGroupType,
+        accountType,
+        premiseAddress,
+        subdistrict,
+        district,
+        city,
+        country,
+        longitude,
+        latitude,
         description, 
         startDate,
         endDate,
@@ -286,6 +314,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const setAccount = (
     {
       objectId,
+      account,
       accountSor,
       accountCostCenter,
       meterReadingCode,
@@ -303,6 +332,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   ) => {
     formCreate.setFieldsValue({
       objectId,
+      account,
       accountSor,
       accountCostCenter,
       meterReadingCode,
