@@ -176,6 +176,7 @@ const RelationshipCreateAndUpdate = ({
     if (data_attachmentList && data_attachmentList.length > 0 && type === "update") {
       const mapped = data_attachmentList.map((item) => ({
         key: item.id,
+        fileId: item.fileId || item.id,
         fileCategoryId: item.fileCategoryId,
         fileCategoryName: item.fileCategoryName,
         type: item.fileCategoryName,
@@ -510,15 +511,90 @@ const RelationshipCreateAndUpdate = ({
   };
 
   const handleClear = () => {
-    if (current === 0) {
-      setRelationshipObj({});
-      form.resetFields();
-    } else if (current === 1) {
-      setApprovalObj({});
-      setDataDetailApproval([]);
-      form.resetFields(["appHierId"]);
-    } else {
-      setListDataAttachment([]);
+    if (type === "create") {
+      // Create mode - clear all data based on current step
+      if (current === 0) {
+        setRelationshipObj({});
+        setRelatedDetailData([]);
+        form.resetFields(["relationshipType", "relationshipCategory", "relatedName", "relatedNumber", "startDate", "endDate", "description"]);
+      } else if (current === 1) {
+        setApprovalObj({});
+        setDataDetailApproval([]);
+        form.resetFields(["appHierId"]);
+      } else {
+        setListDataAttachment([]);
+      }
+    } else if (type === "update") {
+      // Update mode - restore to original API data
+      if (data_relationshipDetail && data_relationshipDetail.id) {
+        const detail = data_relationshipDetail;
+
+        // Restore form values to original
+        form.setFieldsValue({
+          relationshipType: detail.relationshipType,
+          relationshipCategory: detail.relationshipCategory,
+          relatedName: detail.objectName,
+          relatedNumber: detail.objectNumber,
+          startDate: detail.startDate ? moment(detail.startDate) : null,
+          endDate: detail.endDate ? moment(detail.endDate) : null,
+          description: detail.description || "",
+          appHierId: detail.appHierId,
+          appHierName: detail.appHierName,
+        });
+
+        // Restore relationshipObj
+        setRelationshipObj({
+          objectId: detail.objectId,
+          objectName: detail.objectName,
+          objectValue: detail.objectNumber,
+          relationshipType: detail.relationshipType,
+          relationshipCategory: detail.relationshipCategory,
+          startDate: detail.startDate,
+          endDate: detail.endDate,
+          description: detail.description,
+        });
+
+        // Restore approvalObj
+        setApprovalObj({
+          appHierId: detail.appHierId,
+        });
+
+        // Restore approval hierarchy detail
+        if (detail.appHierId) {
+          dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
+        }
+
+        // Restore Related Detail data
+        if (detail.relatedDetail && detail.relatedDetail.length > 0) {
+          setRelatedDetailData(detail.relatedDetail);
+        } else {
+          setRelatedDetailData([]);
+        }
+      }
+
+      // Restore attachment list to original API data
+      if (data_attachmentList && data_attachmentList.length > 0) {
+        const mapped = data_attachmentList.map((item) => ({
+          key: item.id,
+          fileId: item.fileId || item.id,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          type: item.fileCategoryName,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          urlFile1: item.urlFile1,
+          createdBy: item.createdBy,
+          createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
+          dataType: "exist",
+        }));
+        setListDataAttachment(mapped);
+      } else {
+        setListDataAttachment([]);
+      }
+
+      // Reset to first step
+      setCurrent(0);
     }
   };
 
@@ -657,7 +733,7 @@ const RelationshipCreateAndUpdate = ({
                   type="submit"
                   onClick={handleClear}
                 >
-                  Clear
+                  {type === "create" ? "Clear" : "Reset"}
                 </ButtonComponent>
                 {current > 0 && (
                   <ButtonComponent
@@ -790,6 +866,8 @@ const RelationshipCreateAndUpdate = ({
           data={dataConfirm || {}}
           approvalData={dataDetailApproval}
           attachmentData={listDataAttachment}
+          idAccount={idAccount}
+          dispatch={dispatch}
         />
       </ModalCustom>
 

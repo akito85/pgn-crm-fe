@@ -455,9 +455,10 @@ export const getAttachmentList = createAsyncThunk(
 // Download Attachment
 export const downloadAttachment = createAsyncThunk(
   "DOWNLOAD_ATTACHMENT",
-  async ({ idAccount, idFile }, thunkAPI) => {
+  async ({ idAccount, idFile, urlFile1 }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
+      // craft url if urlFile1 is not provided, else use urlFile1
+      const url = urlFile1 || `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
       const response = await accountManagementService.downloadData(url);
       return response;
     } catch (error) {

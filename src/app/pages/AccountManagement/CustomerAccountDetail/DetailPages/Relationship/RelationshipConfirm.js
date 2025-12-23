@@ -3,14 +3,30 @@ import DetailText from "../../../../../../components/DetailText";
 import RelationshipApproval from "./RelationshipApproval";
 import RelationshipAttachment from "./RelationshipAttachment";
 import { Button, Divider } from "antd";
+import { downloadAttachment } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 
 const RelationshipConfirm = ({
   data = {},
   approvalData = [],
   attachmentData = [],
   approvalHierarchyName = "Hierarchy SA 1", // Nama approval hierarchy yang dipilih
+  idAccount,
+  dispatch,
 }) => {
   const [activeTab, setActiveTab] = useState("1");
+
+  // Handle download for existing attachments
+  const handleDownloadAttachment = (record) => {
+    if ((record.urlFile1 || record.fileId) && dispatch) {
+      dispatch(
+        downloadAttachment({
+          idAccount,
+          idFile: record.fileId,
+          urlFile1: record.urlFile1,
+        })
+      );
+    }
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -61,6 +77,7 @@ const RelationshipConfirm = ({
             data={attachmentData}
             hideActions={true}
             showUploadButton={false}
+            onDownload={handleDownloadAttachment}
           />
         );
       default:
@@ -103,3 +120,4 @@ const RelationshipConfirm = ({
 };
 
 export default RelationshipConfirm;
+
