@@ -15,6 +15,7 @@ import { getBase64 } from "../../../../../../../utils/getBase64";
 import { tokenHeader } from "../../../../../../../utils/tokenHeader";
 import { configApp } from "../../../../../../../constants/configApp";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
+import { showModalError } from "../../../../../../../redux/slices/general_slice";
 
 const RelationshipAttachment = ({
   data = [],
@@ -71,7 +72,15 @@ const RelationshipAttachment = ({
       // Existing files - download from API
       if ((r.fileType || r.type || "").includes("application/vnd")) {
         // VND files (Excel, etc.) - download directly using service
-        accountManagementService.downloadData(r.urlFile1);
+        try {
+          await accountManagementService.downloadData(r.urlFile1);
+        } catch (error) {
+          const message = error?.response?.statusText || error?.message || "Unknown error";
+          dispatch(showModalError({
+            title: "Download Failed",
+            description: `Failed to download file "${r.fileName || 'Unknown'}". File ${message}`,
+          }));
+        }
       } else {
         // Non-VND files - preview in browser
         setLoadingDownload(true);
@@ -83,7 +92,11 @@ const RelationshipAttachment = ({
           const base64 = await getBase64(response.data);
           previewFileAttachment(base64);
         } catch (error) {
-          console.error("Error downloading file:", error);
+          const message = error?.response?.statusText || error?.message || "Unknown error";
+          dispatch(showModalError({
+            title: "Preview Failed",
+            description: `Failed to preview file "${r.fileName || 'Unknown'}". File ${message}`,
+          }));
         } finally {
           setLoadingDownload(false);
         }

@@ -455,16 +455,25 @@ export const getAttachmentList = createAsyncThunk(
 // Download Attachment
 export const downloadAttachment = createAsyncThunk(
   "DOWNLOAD_ATTACHMENT",
-  async ({ idAccount, idFile, urlFile1 }, thunkAPI) => {
+  async ({ idAccount, idFile, urlFile1, fileName }, thunkAPI) => {
     try {
       // craft url if urlFile1 is not provided, else use urlFile1
       const url = urlFile1 || `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
       const response = await accountManagementService.downloadData(url);
       return response;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_ATTACHMENT" })
-      );
+      const message =
+        (error.response &&
+          error.response.error &&
+          error.response.error.message) ||
+        error.message ||
+        error.toString();
+
+      const errorBody = {
+        title: "Download Failed",
+        description: `Failed to download file "${fileName || 'Unknown'}". ${error.response.error.message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
     }
   }

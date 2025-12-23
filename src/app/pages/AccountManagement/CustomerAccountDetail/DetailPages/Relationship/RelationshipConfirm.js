@@ -23,6 +23,7 @@ const RelationshipConfirm = ({
           idAccount,
           idFile: record.fileId,
           urlFile1: record.urlFile1,
+          fileName: record.fileName,
         })
       );
     }
