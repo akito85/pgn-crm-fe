@@ -212,6 +212,21 @@ const AccountDetailInformation = ({
       )
     ) {
       setTypeAccountInfoDetailSection(dataTabs.fi);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/update"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.md);
     }
     else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
