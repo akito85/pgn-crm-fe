@@ -439,7 +439,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("accountSor"),
+                message: requiredMessage("Account SOR"),
                 required: true,
               }
             ]}
@@ -454,7 +454,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("accountCostCenter"),
+                message: requiredMessage("Account Cost Center"),
                 required: true,
               }
             ]}
@@ -469,7 +469,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("meterReadingCode"),
+                message: requiredMessage("Meter Reading Code"),
                 required: true,
               }
             ]}
@@ -484,7 +484,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("accountSegment"),
+                message: requiredMessage("Account Segment"),
                 required: true,
               }
             ]}
@@ -499,7 +499,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("accountGroupType"),
+                message: requiredMessage("Account Group Type"),
                 required: true,
               }
             ]}
@@ -514,7 +514,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("accountType"),
+                message: requiredMessage("Account Type"),
                 required: true,
               }
             ]}
@@ -529,7 +529,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("premiseAddress"),
+                message: requiredMessage("Premise Address"),
                 required: true,
               }
             ]}
@@ -544,7 +544,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("subdistrict"),
+                message: requiredMessage("Subdistrict"),
                 required: true,
               }
             ]}
@@ -559,7 +559,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("district"),
+                message: requiredMessage("District"),
                 required: true,
               }
             ]}
@@ -574,7 +574,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("city"),
+                message: requiredMessage("City"),
                 required: true,
               }
             ]}
@@ -589,7 +589,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("country"),
+                message: requiredMessage("Country"),
                 required: true,
               }
             ]}
@@ -604,7 +604,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("longitude"),
+                message: requiredMessage("Longitude"),
                 required: true,
               }
             ]}
@@ -619,7 +619,7 @@ export default function InfoMultiDestination({
             className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("latitude"),
+                message: requiredMessage("Latitude"),
                 required: true,
               }
             ]}

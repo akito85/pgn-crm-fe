@@ -79,9 +79,20 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
   const formFields = [
     [
-      "accountNumber",
-      "accountName",
-      "priority",
+      "account",
+      "accountSor",
+      "accountCostCenter",
+      "meterReadingCode",
+      "accountSegment",
+      "accountGroupType",
+      "accountType",
+      "premiseAddress",
+      "subdistrict",
+      "district",
+      "city",
+      "country",
+      "longitude",
+      "latitude",
       "startDate",
       "endDate",
       "description",
