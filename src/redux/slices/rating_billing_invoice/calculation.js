@@ -27,7 +27,6 @@ const initialState = {
   list_calculation_result: [],
   list_calculation_no_paging: [],
   data_user_calculation: {},
-  list_calculation_result: [],
 };
 
 // pagination slice
@@ -966,8 +965,7 @@ const calculationSlice = createSlice({
     },
     [getDetailCalculationLog.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_calculation_result = action.payload;
-      console.log('bismillah')
+      state.list_calculation_log = action.payload;
     },
     [getDetailCalculationLog.rejected]: (state) => {
       state.loading = false;

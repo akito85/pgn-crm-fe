@@ -8,7 +8,7 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import TableCalculateLog from "./Table/TableCalculateLog";
 
 const DetailLog = ({ data, tabHeader }) => {
-  const { list_calculation_result, loading } = useSelector(
+  const { list_calculation_log, loading } = useSelector(
     (state) => state.rbi_calculation
   );
   const dispatch = useDispatch();
@@ -308,8 +308,8 @@ const DetailLog = ({ data, tabHeader }) => {
     <BaseContainer subHeader={"calculation log"}>
       <TablePaginationNew
         columns={column}
-        dataSource={list_calculation_result?.result}
-        totalData={list_calculation_result?.page?.totalElements || 0}
+        dataSource={list_calculation_log?.result}
+        totalData={list_calculation_log?.page?.totalElements || 0}
         current={page}
         pageSize={pageSize}
         onChange={handleChangePage}
