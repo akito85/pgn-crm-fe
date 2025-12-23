@@ -587,7 +587,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           </div>
         }
       >
-        <div className="my-5">
+        <div className="my-0">
           <TableRBI
             dataSource={resultData}
             columns={processedColumns}

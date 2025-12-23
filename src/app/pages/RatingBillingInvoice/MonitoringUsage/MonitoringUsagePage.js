@@ -324,7 +324,7 @@ const MonitoringUsagePage = () => {
             size="small"
           >
             <Tabs.TabPane tab="Usage List" key="Usage List">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}
@@ -344,7 +344,7 @@ const MonitoringUsagePage = () => {
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Batch List" key="Batch List">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}

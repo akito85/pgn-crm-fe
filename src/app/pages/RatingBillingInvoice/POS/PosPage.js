@@ -4,7 +4,6 @@ import { Alert, Spin, Tooltip } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -23,7 +22,6 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
