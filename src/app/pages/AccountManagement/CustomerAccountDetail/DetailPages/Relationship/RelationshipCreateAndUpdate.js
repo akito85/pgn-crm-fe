@@ -84,6 +84,7 @@ const RelationshipCreateAndUpdate = ({
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalUpload, setModalUpload] = useState(false);
   const [dataConfirm, setDataConfirm] = useState();
+  const [isDraftSubmission, setIsDraftSubmission] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -305,55 +306,14 @@ const RelationshipCreateAndUpdate = ({
     }
   };
 
-  const handleSaveAsDraft = () => {
-    if (listDataAttachment.length === 0) {
-      alert("Please upload at least one attachment");
-      return;
-    }
-    console.log("Current Form Values (Draft):", form.getFieldsValue());
-    console.log("Relationship Obj:", relationshipObj);
-    console.log("Approval Obj:", approvalObj);
-    console.log("Attachment List:", listDataAttachment);
-
-    form
-      .validateFields()
-      .then((values) => {
-        const valueForm = {
-          subjectId: idAccount,
-          relationshipType: values.relationshipType || relationshipObj.relationshipType,
-          relationshipCategory: values.relationshipCategory || relationshipObj.relationshipCategory,
-          objectId: relationshipObj.objectId,
-          objectName: relationshipObj.objectName || values.relatedName,
-          objectValue: relationshipObj.objectValue || values.relatedNumber,
-          startDate: (values.startDate || relationshipObj.startDate)
-            ? moment(values.startDate || relationshipObj.startDate).format("YYYY-MM-DD")
-            : "",
-          endDate: (values.endDate || relationshipObj.endDate)
-            ? moment(values.endDate || relationshipObj.endDate).format("YYYY-MM-DD")
-            : "",
-          description: values.description || relationshipObj.description || "",
-          appHierId: values.appHierId || approvalObj.appHierId,
-        };
-        sendData(valueForm, true);
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-        alert("Please fill all required fields");
-      });
-  };
-
-  const handleSaveAndSubmit = () => {
-
+  // Reusable validation and confirmation handler
+  const handleValidateAndConfirm = (action) => {
     if (listDataAttachment.length === 0) {
       alert("Please upload at least one attachment");
       return;
     }
 
-    console.log("Attachment validation passed");
-    console.log("Current form values:", form.getFieldsValue());
-    console.log("Relationship Obj:", relationshipObj);
-    console.log("Approval Obj:", approvalObj);
-    console.log("Attachment List:", listDataAttachment);
+    const isDraft = action === "DRAFT";
 
     form
       .validateFields()
@@ -390,7 +350,6 @@ const RelationshipCreateAndUpdate = ({
         };
 
         // Validate before showing confirmation modal
-        // coba hardcode validasi buat trigger error
         const validateBody = {
           id: type === "update" ? id : undefined,
           subjectId: idAccount,
@@ -403,7 +362,7 @@ const RelationshipCreateAndUpdate = ({
           endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
           description: values.description || relationshipObj.description || "",
           appHierId: values.appHierId || approvalObj.appHierId,
-          action: "SUBMIT",
+          action,
         };
 
         dispatch(validateCreateUpdate({
@@ -415,6 +374,7 @@ const RelationshipCreateAndUpdate = ({
           .unwrap()
           .then(() => {
             setDataConfirm(valueForm);
+            setIsDraftSubmission(isDraft);
             setModalConfirm(true);
           })
           .catch(() => { });
@@ -427,6 +387,14 @@ const RelationshipCreateAndUpdate = ({
           JSON.stringify(error.errorFields?.map((f) => f.name[0]).join(", "))
         );
       });
+  };
+
+  const handleSaveAsDraft = () => {
+    handleValidateAndConfirm("DRAFT");
+  };
+
+  const handleSaveAndSubmit = () => {
+    handleValidateAndConfirm("SUBMIT");
   };
 
   const routes = [
@@ -833,7 +801,7 @@ const RelationshipCreateAndUpdate = ({
       <ModalCustom
         isOpen={modalConfirm}
         type="confirmation"
-        header="CONFIRMATION RELATIONSHIP"
+        header={isDraftSubmission ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
         width={1000}
         centered={false}
         style={{ top: 20 }}
@@ -853,11 +821,11 @@ const RelationshipCreateAndUpdate = ({
             <ButtonComponent
               type="submit"
               onClick={() => {
-                sendData(dataConfirm, false);
+                sendData(dataConfirm, isDraftSubmission);
                 setModalConfirm(false);
               }}
             >
-              Submit
+              {isDraftSubmission ? "Save as Draft" : "Submit"}
             </ButtonComponent>
           </div>
         }
