@@ -122,6 +122,10 @@ const TableRBI = ({
   className,
   useSelect = true,
   usePagination = true,
+  useInfiniteScroll = false, // PROPS BARU untuk infinite scroll
+  onLoadMore = () => {}, // PROPS BARU callback untuk load more
+  hasMore = false, // PROPS BARU indicator apakah masih ada data
+  loadMoreThreshold = 20, // PROPS BARU jumlah row dari bawah untuk trigger load more
   onSort = () => {},
   handleDownload = () => {},
   columnDefinitions,
@@ -134,9 +138,14 @@ const TableRBI = ({
   showExport = true, // PROPS BARU untuk mengontrol tampilan tombol Export
   showAdvanceSearch = true, // PROPS BARU untuk mengontrol tampilan tombol Advance Search
   showSearchBar = true, // PROPS BARU untuk mengontrol tampilan Search Bar
+  enableRowClick = false, // PROPS BARU untuk mengaktifkan highlight row yang diklik
+  selectedRowKey = null, // PROPS BARU untuk row key yang terpilih dari parent
+  onRowClick = () => {}, // PROPS BARU callback ketika row diklik
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [clickedRowKey, setClickedRowKey] = useState(null);
 
   // State untuk menyimpan width setiap column
   const [columnWidths, setColumnWidths] = useState({});
@@ -145,6 +154,9 @@ const TableRBI = ({
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState([]);
 
+  // Ref untuk table scroll container
+  const tableRef = React.useRef(null);
+
   // Initialize column order when columns change
   React.useEffect(() => {
     if (columns && columns.length > 0 && columnOrder.length === 0) {
@@ -152,6 +164,53 @@ const TableRBI = ({
       setColumnOrder(initialOrder);
     }
   }, [columns, columnOrder.length]);
+
+  // Infinite scroll handler
+  React.useEffect(() => {
+    if (!useInfiniteScroll || !hasMore) return;
+
+    const handleScroll = (e) => {
+      const target = e.target;
+      if (!target) return;
+
+      // Check if we're scrolling in the table body
+      const scrollTop = target.scrollTop;
+      const scrollHeight = target.scrollHeight;
+      const clientHeight = target.clientHeight;
+
+      // Calculate how many pixels from bottom
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+
+      // Trigger load more when we're close to bottom
+      // Estimate: each row is about 40px, so threshold * 40
+      const pixelThreshold = loadMoreThreshold * 40;
+
+      if (distanceFromBottom < pixelThreshold && !isLoadingMore && !loading) {
+        setIsLoadingMore(true);
+        onLoadMore().finally(() => {
+          setIsLoadingMore(false);
+        });
+      }
+    };
+
+    // Find the ant-table-body element
+    const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
+
+    if (tableBody) {
+      tableBody.addEventListener("scroll", handleScroll);
+      return () => {
+        tableBody.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [
+    useInfiniteScroll,
+    hasMore,
+    isLoadingMore,
+    loading,
+    loadMoreThreshold,
+    onLoadMore,
+    idTable,
+  ]);
 
   // Handler untuk resize column
   const handleResize = useCallback(
@@ -361,6 +420,56 @@ const TableRBI = ({
   // Check if any right side controls should be shown
   const hasRightControls = showExport || showAdvanceSearch || showSearchBar;
 
+  // Sync internal state with external selectedRowKey
+  React.useEffect(() => {
+    if (selectedRowKey !== null && selectedRowKey !== clickedRowKey) {
+      setClickedRowKey(selectedRowKey);
+    }
+  }, [selectedRowKey, clickedRowKey]);
+
+  // Handle row click
+  const handleRowClick = useCallback((record) => {
+    const rowKey = record.key || record.recordId || record.id;
+    setClickedRowKey(rowKey);
+    onRowClick(record, rowKey);
+  }, [onRowClick]);
+
+  // Custom onRow handler with hover and click effects
+  const customOnRow = useCallback((record, index) => {
+    const baseOnRow = onRow ? onRow(record, index) : {};
+
+    return {
+      ...baseOnRow,
+      onClick: (event) => {
+        // Call original onClick if exists
+        if (baseOnRow.onClick) {
+          baseOnRow.onClick(event);
+        }
+        // Handle row click for highlighting
+        if (enableRowClick) {
+          handleRowClick(record);
+        }
+      },
+      style: {
+        ...baseOnRow.style,
+        cursor: enableRowClick ? 'pointer' : (baseOnRow.style?.cursor || 'default'),
+        transition: 'background-color 0.2s ease',
+      },
+    };
+  }, [onRow, enableRowClick, handleRowClick]);
+
+  // Custom rowClassName handler
+  const customRowClassName = useCallback((record, index) => {
+    const rowKey = record.key || record.recordId || record.id;
+    const isSelected = enableRowClick && clickedRowKey === rowKey;
+
+    const baseClassName = typeof rowClassName === 'function'
+      ? rowClassName(record, index)
+      : (rowClassName || '');
+
+    return `${baseClassName} ${isSelected ? 'row-selected' : ''}`.trim();
+  }, [rowClassName, enableRowClick, clickedRowKey]);
+
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
@@ -437,11 +546,18 @@ const TableRBI = ({
         id={idTable}
         onChange={onSort}
         rowSelection={rowSelection}
-        onRow={onRow}
-        rowClassName={rowClassName}
+        onRow={customOnRow}
+        rowClassName={customRowClassName}
       />
 
-      {usePagination ? (
+      {useInfiniteScroll ? (
+        <div className={"w-full flex justify-end mt-3 items-center"}>
+          <span style={{ fontSize: "12px", color: "#666" }}>
+            Showing {dataSource?.length || 0} entries
+            {isLoadingMore && " • Loading more..."}
+          </span>
+        </div>
+      ) : usePagination ? (
         <div className={"w-full flex justify-between mt-3 items-center"}>
           <div className="flex items-center gap-3">
             <Select
