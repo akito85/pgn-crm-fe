@@ -12,7 +12,7 @@ import moment from "moment";
 import DateComponent from "../../../../../../../../../components/DateComponent";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { getPrAccountStandard } from "../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getMdAccountStandard } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { useDispatch, useSelector } from "react-redux";
 // import TablePaginationNew from "../../../../../../../../../components/TablePaginationNew";
 import { TablePaginationNew } from "poc-table-dragandrop";
@@ -155,7 +155,7 @@ export default function InfoMultiDestination({
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch, id: accountId }));
+    dispatch(getMdAccountStandard({ page, pageSize, sort, search: reqSearch, id: accountId }));
   }, [page, pageSize, sort, search]);
 
   useEffect(() => {
@@ -394,20 +394,20 @@ export default function InfoMultiDestination({
   return(
     <div className={className}>
       <NxPanel title={"MULTI DESTINATION INFORMATION"} removeBottomMargin>
-        <div className="w-full grid grid-cols-3 gap-4">
+        <div className="w-full grid grid-cols-3 gap-4 mb-4">
           <div className="flex gap-2 items-end">
             <Form.Item name={"objectId"} hidden>
               <Input />
             </Form.Item>
 
             <Form.Item
-              key="accountNumber"
-              name={"accountNumber"}
-              label={"Account Number"}
+              key="account"
+              name={"account"}
+              label={"Account"}
               className="no-margin-form"
               rules={[
                 {
-                  message: requiredMessage("Account Number"),
+                  message: requiredMessage("Account"),
                   required: true,
                 }
               ]}
@@ -433,29 +433,202 @@ export default function InfoMultiDestination({
           </div>
 
           <Form.Item
-            key="accountName"
-            name={"accountName"}
-            label={"Account Name"}
+            key="accountSor"
+            name={"accountSor"}
+            label={"Account SOR"}
             className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("accountSor"),
+                required: true,
+              }
+            ]}
           >
             <InputComponent disabled />
           </Form.Item>
 
           <Form.Item
-            key="priority"
-            name={"priority"}
-            label={"Priority"}
+            key="accountCostCenter"
+            name={"accountCostCenter"}
+            label={"Account Cost Center"}
+            className="no-margin-form"
             rules={[
               {
-                message: requiredMessage("Priority"),
+                message: requiredMessage("accountCostCenter"),
                 required: true,
-              },
+              }
             ]}
-            className="no-margin-form"
           >
-            <InputComponent />
+            <InputComponent disabled />
           </Form.Item>
 
+          <Form.Item
+            key="meterReadingCode"
+            name={"meterReadingCode"}
+            label={"Meter Reading Code"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("meterReadingCode"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="accountSegment"
+            name={"accountSegment"}
+            label={"Account Segment"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("accountSegment"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="accountGroupType"
+            name={"accountGroupType"}
+            label={"Account Group Type"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("accountGroupType"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="accountType"
+            name={"accountType"}
+            label={"Account Type"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("accountType"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="premiseAddress"
+            name={"premiseAddress"}
+            label={"Premise Address"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("premiseAddress"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="subdistrict"
+            name={"subdistrict"}
+            label={"Subdistrict"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("subdistrict"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="district"
+            name={"district"}
+            label={"District"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("district"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="city"
+            name={"city"}
+            label={"City"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("city"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="country"
+            name={"country"}
+            label={"Country"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("country"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="longitude"
+            name={"longitude"}
+            label={"Longitude"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("longitude"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="latitude"
+            name={"latitude"}
+            label={"Latitude"}
+            className="no-margin-form"
+            rules={[
+              {
+                message: requiredMessage("latitude"),
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+        </div>
+
+        <div className="w-full grid grid-cols-3 gap-4">
           <Form.Item
             key="startDate"
             name={"startDate"}
