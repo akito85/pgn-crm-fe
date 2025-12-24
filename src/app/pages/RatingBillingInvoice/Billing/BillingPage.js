@@ -148,7 +148,7 @@ const BillingPage = () => {
     const totalPages = data?.page?.totalPages || 0;
 
     // Check if there's more data to load
-    if (nextPage < totalPages) {
+    if (nextPage <= totalPages) {
       await dispatch(
         getAllBillingPaginate({
           search: encodeURIComponent(JSON.stringify(search)),

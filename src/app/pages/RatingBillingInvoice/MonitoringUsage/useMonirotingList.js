@@ -185,7 +185,7 @@ export const useMonitoringList = (tabs, batchId) => {
     let totalPages = 0;
     if (tabs === "Usage List") {
       totalPages = dataUsage?.page?.totalPages || 0;
-      if (nextPage < totalPages) {
+      if (nextPage <= totalPages) {
         await dispatch(
           getListUsagePaginate({
             search: searchRequest,
@@ -199,7 +199,7 @@ export const useMonitoringList = (tabs, batchId) => {
       }
     } else if (tabs === "Batch List") {
       totalPages = dataBatch?.page?.totalPages || 0;
-      if (nextPage < totalPages) {
+      if (nextPage <= totalPages) {
         await dispatch(
           getListBatchPaginate({
             search: searchRequest,

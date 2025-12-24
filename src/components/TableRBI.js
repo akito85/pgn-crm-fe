@@ -553,8 +553,13 @@ const TableRBI = ({
       {useInfiniteScroll ? (
         <div className={"w-full flex justify-end mt-3 items-center"}>
           <span style={{ fontSize: "12px", color: "#666" }}>
-            Showing {dataSource?.length || 0} entries
-            {isLoadingMore && " • Loading more..."}
+            Showing {dataSource?.length || 0} rows
+            {isLoadingMore && " | Loading..."}
+            {!hasMore && dataSource?.length > 0 && (
+              <span style={{ color: "#52c41a", fontWeight: "500" }}>
+                {" "}| All data showed
+              </span>
+            )}
           </span>
         </div>
       ) : usePagination ? (
