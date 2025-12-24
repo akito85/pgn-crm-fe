@@ -35,8 +35,9 @@ const BillingPage = () => {
   const dataSource = data?.result;
   const detailRef = useRef(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // PERUBAHAN: State untuk infinite scroll
+  const [page, setPage] = useState(0); // Start from 0
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -72,16 +73,19 @@ const BillingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
+  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
       getAllBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100, // Initial load 100 data
         sort,
+        isLoadMore: false, // Flag untuk initial load
       })
     );
-  }, [search, page, pageSize, sort, dispatch]);
+    setPage(0);
+  }, [dispatch, search, sort]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -122,13 +126,14 @@ const BillingPage = () => {
     },
   ];
 
+  // PERUBAHAN: Reset page ke 0 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0); // Reset to 0
       }
       return {
         ...prevState,
@@ -137,11 +142,29 @@ const BillingPage = () => {
     });
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // TAMBAHAN: Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage < totalPages) {
+      await dispatch(
+        getAllBillingPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true, // Flag untuk load more
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore = 
+    (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -152,21 +175,11 @@ const BillingPage = () => {
   };
 
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
       downloadBillingList({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
@@ -202,26 +215,23 @@ const BillingPage = () => {
   const onChangeTab = ({ target: { value } }) => {
     setValueTab(value);
     setSearch({});
-    setPage(1);
+    setPage(0); // Reset to 0
   };
 
   const handleRefresh = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAllBillingPaginate({ search: reqSearch, page, pageSize, sort })
+      getAllBillingPaginate({ 
+        search: reqSearch, 
+        page: 0, 
+        pageSize: 100, 
+        sort,
+        isLoadMore: false 
+      })
     );
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
+    setPage(0);
   };
 
   const itemGrantAccess = [
@@ -261,23 +271,6 @@ const BillingPage = () => {
         </ButtonComponent>
       ),
     },
-    // {
-    //   action: "View",
-    //   type: "table",
-    //   render: (record) => {
-    //     return (
-    //       <Tooltip title="Detail">
-    //         <div className="pt-1">
-    //           <SVGIcon
-    //             name="IconDetail"
-    //             width={24}
-    //             onClick={() => handleDetail(record)}
-    //           />
-    //         </div>
-    //       </Tooltip>
-    //     );
-    //   },
-    // },
     {
       action: "History",
       type: "table",
@@ -315,8 +308,8 @@ const BillingPage = () => {
   const baseColumns = useMemo(() => {
     if (valueTab === "All") {
       return columnsAllBilling(
-        page,
-        pageSize,
+        0, // Tidak digunakan untuk infinite scroll
+        0, // Tidak digunakan untuk infinite scroll
         searchInput,
         searchedColumn,
         searchText,
@@ -325,23 +318,15 @@ const BillingPage = () => {
       );
     }
     return columnsBilling(
-      page,
-      pageSize,
+      0, // Tidak digunakan untuk infinite scroll
+      0, // Tidak digunakan untuk infinite scroll
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       search
     );
-  }, [
-    valueTab,
-    page,
-    pageSize,
-    searchInput,
-    searchedColumn,
-    searchText,
-    search,
-  ]);
+  }, [valueTab, searchInput, searchedColumn, searchText, search]);
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
@@ -401,12 +386,9 @@ const BillingPage = () => {
         >
           <div className="my-0">
             <TableRBI
+              idTable="billing-table"
               dataSource={dataSourceForTab}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
               totalData={data?.page?.totalElements || 0}
               tableScrolled={{ x: valueTab === "All" ? 1300 : 16000, y: 525 }}
               onSort={onSort}
@@ -415,6 +397,13 @@ const BillingPage = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
+              
               onRow={(record) => ({
                 onClick: () => handleDetail(record),
                 style: {

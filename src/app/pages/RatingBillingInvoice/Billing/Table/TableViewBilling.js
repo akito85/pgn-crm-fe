@@ -3,8 +3,8 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getCo
 import { currencyFormatting, numberFormatting } from "../../../../../utils/formatCurrency";
 
 export const columnsBilling = (
-  page = 1,
-  pageSize = 10,
+  page = 0,
+  pageSize = 0,
   searchInput,
   searchedColumn,
   searchText,
@@ -18,7 +18,7 @@ export const columnsBilling = (
     title: "NO",
     isClassification: true,
     width: 60,
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    render: (text, object, index) => index + 1,
   },
   {
     key: "calculationCode",
