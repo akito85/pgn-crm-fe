@@ -25,9 +25,8 @@ const RatingPage = () => {
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  // PERUBAHAN: State untuk infinite scroll
-  const [page, setPage] = useState(0); // Start from 0
-  const [loadMoreSize] = useState(20); // Load 20 data each time
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -59,15 +58,14 @@ const RatingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
       getListRatingGasPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 0,
-        pageSize: 100, // Initial load 100 data
+        pageSize: 100,
         sort,
-        isLoadMore: false, // Flag untuk initial load
+        isLoadMore: false,
       })
     );
     setPage(0);
@@ -98,14 +96,14 @@ const RatingPage = () => {
     },
   ];
 
-  // PERUBAHAN: Reset page ke 0 saat search
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0); // Reset to 0
+        setPage(0);
       }
       return {
         ...prevState,
@@ -114,20 +112,19 @@ const RatingPage = () => {
     });
   };
 
-  // TAMBAHAN: Load more handler
+
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = data?.page?.totalPages || 0;
 
-    // Check if there's more data to load
     if (nextPage < totalPages) {
       await dispatch(
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
+          pageSize: loadMoreSize, 
           sort,
-          isLoadMore: true, // Flag untuk load more
+          isLoadMore: true,
         })
       );
       setPage(nextPage);
