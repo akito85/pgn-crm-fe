@@ -215,7 +215,7 @@ const ColumnSettings = ({
               gap: "6px",
               padding: "6px 4px",
               fontWeight: "600",
-              fontSize: "11px",
+              fontSize: "10px",
               color: "#666",
               borderBottom: "1px solid #eee",
               marginBottom: 6,
@@ -246,8 +246,8 @@ const ColumnSettings = ({
                   style={{
                     display: "grid",
                     gridTemplateColumns: "35px 1fr 55px 110px",
-                    gap: "6px",
-                    padding: "8px 4px",
+                    gap: "3px",
+                    padding: "0px 2px",
                     alignItems: "center",
                     borderBottom: "1px solid #f5f5f5",
                     backgroundColor: isVisible ? "white" : "#fafafa",
@@ -264,7 +264,7 @@ const ColumnSettings = ({
                   {/* Column Name */}
                   <div
                     style={{
-                      fontSize: "12px",
+                      fontSize: "10px",
                       fontWeight: "500",
                       color: isVisible ? "#000" : "#999",
                       overflow: "hidden",
@@ -301,10 +301,10 @@ const ColumnSettings = ({
                         value="left"
                         disabled={!canFixLeft(index) || !isFixed || !isVisible}
                         style={{
-                          fontSize: "11px",
+                          fontSize: "10px",
                           flex: 1,
                           textAlign: "center",
-                          padding: "0 8px",
+                          padding: "0 6px",
                         }}
                       >
                         Left
@@ -313,10 +313,10 @@ const ColumnSettings = ({
                         value="right"
                         disabled={!canFixRight(index) || !isFixed || !isVisible}
                         style={{
-                          fontSize: "11px",
+                          fontSize: "10px",
                           flex: 1,
                           textAlign: "center",
-                          padding: "0 8px",
+                          padding: "0 6px",
                         }}
                       >
                         Right
