@@ -34,8 +34,9 @@ const CalculationPage = () => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // PERUBAHAN: State untuk infinite scroll
+  const [page, setPage] = useState(0); // Start from 0
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -47,35 +48,40 @@ const CalculationPage = () => {
     right: ["status", "action"],
   }));
 
+  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     if (tabHeader === "Calculation List") {
       dispatch(
         getCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 0,
+          pageSize: 100, // Initial load 100 data
           sort,
+          isLoadMore: false, // Flag untuk initial load
         })
       );
     } else {
       dispatch(
         getHistoryCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 0,
+          pageSize: 100, // Initial load 100 data
           sort,
+          isLoadMore: false, // Flag untuk initial load
         })
       );
     }
-  }, [dispatch, search, page, pageSize, sort, tabHeader]);
+    setPage(0);
+  }, [dispatch, search, sort, tabHeader]);
 
+  // PERUBAHAN: Reset page ke 0 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0); // Reset to 0
       }
       let result = selectedKeys[0];
       if (dataIndex === "isTry") {
@@ -99,6 +105,43 @@ const CalculationPage = () => {
     });
   };
 
+  // TAMBAHAN: Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data_calculation?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage < totalPages) {
+      if (tabHeader === "Calculation List") {
+        await dispatch(
+          getCalculationPaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: nextPage,
+            pageSize: loadMoreSize, // Load 20 more
+            sort,
+            isLoadMore: true, // Flag untuk load more
+          })
+        );
+      } else {
+        await dispatch(
+          getHistoryCalculationPaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: nextPage,
+            pageSize: loadMoreSize, // Load 20 more
+            sort,
+            isLoadMore: true, // Flag untuk load more
+          })
+        );
+      }
+      setPage(nextPage);
+    }
+  };
+
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore =
+    (data_calculation.result?.length || 0) <
+    (data_calculation?.page?.totalElements || 0);
+
   const baseColumns = useMemo(
     () => [
       {
@@ -106,7 +149,7 @@ const CalculationPage = () => {
         title: "NO",
         width: 30,
         isClassification: true,
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1, // Tidak digunakan untuk infinite scroll
       },
       {
         key: "calculationCode",
@@ -677,7 +720,7 @@ const CalculationPage = () => {
         },
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn]
   );
 
   const baseColumnHistory = useMemo(
@@ -687,7 +730,7 @@ const CalculationPage = () => {
         title: "NO",
         width: 60,
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1, // Tidak digunakan untuk infinite scroll
       },
       {
         key: "calCode",
@@ -1211,7 +1254,7 @@ const CalculationPage = () => {
         },
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn]
   );
 
   const onSort = (_, __, sorter) => {
@@ -1238,7 +1281,7 @@ const CalculationPage = () => {
       dispatch(
         donwloadedExcel({
           page,
-          pageSize,
+          pageSize: loadMoreSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
         })
@@ -1247,18 +1290,12 @@ const CalculationPage = () => {
       dispatch(
         donwloadedHistoryExcel({
           page,
-          pageSize,
+          pageSize: loadMoreSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
         })
       );
     }
-  };
-
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
   };
 
   const tabs = [
@@ -1269,8 +1306,7 @@ const CalculationPage = () => {
   const changeTab = (key) => {
     setTabHeader((prevState) => {
       if (prevState !== key) {
-        setPage(1);
-        setPageSize(10);
+        setPage(0); // Reset to 0
         setSearch({});
         setSort("");
         setSearchText("");
@@ -1287,7 +1323,7 @@ const CalculationPage = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -1301,7 +1337,7 @@ const CalculationPage = () => {
       render: (
         <NavLink to={RBI_ROUTES.CALCULATION_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type={"submit"}
             border={false}
           >
@@ -1372,7 +1408,7 @@ const CalculationPage = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="w-full mt-[15px]">CALCULATION JOB LIST</p>
-                <Toolbar items={itemGrantAccess} />
+              <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
@@ -1381,18 +1417,15 @@ const CalculationPage = () => {
             onChange={changeTab}
             type="line"
             size="small"
-            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0"
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
           >
             <Tabs.TabPane tab="Calculation List" key="Calculation List">
               <div className="my-0">
                 <TableRBI
+                  idTable="calculation-table"
                   size="small"
                   dataSource={data_calculation.result}
                   columns={processedColumns}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChangePage}
-                  onSizeChanger={handleChangePage}
                   totalData={data_calculation?.page?.totalElements || 0}
                   tableScrolled={{ x: 4000, y: 525 }}
                   onSort={onSort}
@@ -1401,19 +1434,22 @@ const CalculationPage = () => {
                   fixedColumns={fixedColumns}
                   setFixedColumns={setFixedColumns}
                   loading={loading}
+                  showExport={false}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMore}
+                  loadMoreThreshold={20}
                 />
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Calculation History" key="Calculation History">
               <div className="my-0">
                 <TableRBI
+                  idTable="calculation-history-table"
                   size="small"
-                  dataSource={data_calculation.result} // Pastikan dataSource sesuai dengan history jika berbeda
+                  dataSource={data_calculation.result}
                   columns={processedColumns}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChangePage}
-                  onSizeChanger={handleChangePage}
                   totalData={data_calculation?.page?.totalElements || 0}
                   tableScrolled={{ x: 4000, y: 525 }}
                   onSort={onSort}
@@ -1422,6 +1458,12 @@ const CalculationPage = () => {
                   fixedColumns={fixedColumns}
                   setFixedColumns={setFixedColumns}
                   loading={loading}
+                  showExport={false}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMore}
+                  loadMoreThreshold={20}
                 />
               </div>
             </Tabs.TabPane>

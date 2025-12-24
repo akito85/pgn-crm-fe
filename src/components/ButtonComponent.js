@@ -36,7 +36,11 @@ const ButtonComponent = ({
           fontSize: "12px",
         }}
       >
-        <div className={children ? `py-0.5 px-1 ${fontSizeClassname} text-center` : ``}>
+        <div
+          className={
+            children ? `py-0.5 px-1 ${fontSizeClassname} text-center` : ``
+          }
+        >
           {children}
         </div>
       </Button>

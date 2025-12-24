@@ -33,13 +33,18 @@ const initialState = {
 // pagination slice
 export const getCalculationPaginate = createAsyncThunk(
   "GET_CALCULATION_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "generateDate~desc";
       const url = `/v1/dbs/api/rbi/calculation/list-calculationjob?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -62,13 +67,18 @@ export const getCalculationPaginate = createAsyncThunk(
 // pagination history
 export const getHistoryCalculationPaginate = createAsyncThunk(
   "GET_HISTORY_CALCULATION_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "resultId~desc";
       const url = `/v1/dbs/api/rbi/calculation/list-calculationhistory?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -750,26 +760,64 @@ const calculationSlice = createSlice({
   initialState,
   extraReducers: {
     // get pagination calculation
-    [getCalculationPaginate.pending]: (state) => {
-      state.loading = true;
+    [getCalculationPaginate.pending]: (state, action) => {
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getCalculationPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.data = action.payload;
+      }
     },
-    [getCalculationPaginate.rejected]: (state) => {
+    [getCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
     },
     // get pagination calculation history
-    [getHistoryCalculationPaginate.pending]: (state) => {
-      state.loading = true;
+    [getHistoryCalculationPaginate.pending]: (state, action) => {
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getHistoryCalculationPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.data = action.payload;
+      }
     },
-    [getHistoryCalculationPaginate.rejected]: (state) => {
+    [getHistoryCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
     },
     [getCalculateLogPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {

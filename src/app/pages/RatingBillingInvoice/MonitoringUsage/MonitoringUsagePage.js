@@ -167,7 +167,7 @@ const MonitoringUsagePage = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -200,7 +200,7 @@ const MonitoringUsagePage = () => {
       render: (
         <NavLink to={RBI_ROUTES.MONITORING_USAGE_UPLOAD}>
           <ButtonComponent
-            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={24} />}
+            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={17} />}
             type={"submit"}
             border={false}
           >
@@ -353,9 +353,7 @@ const MonitoringUsagePage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
-                MONITORING USAGE
-              </p>
+              <p className="w-full mt-[15px] text-primary">MONITORING USAGE</p>
               <Toolbar items={grantAccessButton} />
             </div>
           }
