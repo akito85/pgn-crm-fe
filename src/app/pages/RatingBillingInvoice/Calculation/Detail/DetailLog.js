@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../components/BaseContainer";
-import { getCalculateLogPaginate, getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
+import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import TableRBI from "../../../../../components/TableRBI";
 import TableCalculateLog from "./Table/TableCalculateLog";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const DetailLog = ({ data, tabHeader }) => {
   const { list_calculation_log, loading } = useSelector(
@@ -14,47 +15,36 @@ const DetailLog = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const calculationCode = data?.calCode;
+  
   // state
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20); // Load 20 data per load more
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
-  // useEffect
+  // Initial fetch - load 100 data pertama
   useEffect(() => {
-    if (tabHeader === "Calculation Log") {
-      let tempSearch = "";
-      for (const dataIndex in search) {
-        if (Object.hasOwnProperty.call(search, dataIndex)) {
-          const tempSearchText = search[dataIndex];
-          if (tempSearchText) {
-            tempSearch += `${dataIndex}~${tempSearchText},`;
-          }
-        }
-      }
-      tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    if (tabHeader === "Calculation Log" && calculationCode) {
       dispatch(
         getDetailCalculationLog({
           calCode: calculationCode,
           sort,
-          page,
-          pageSize,
+          page: 0,
+          pageSize: 100, // Initial load 100
           search: encodeURIComponent(JSON.stringify(search)),
+          isLoadMore: false,
         })
       );
+      setPage(0);
     }
-  }, [
-    tabHeader,
-    data,
-    dispatch,
-    calculationCode,
-    sort,
-    page,
-    pageSize,
-    search,
-  ]);
+  }, [tabHeader, dispatch, calculationCode, sort, search]);
 
   // handle search column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -63,7 +53,7 @@ const DetailLog = ({ data, tabHeader }) => {
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
@@ -72,249 +62,233 @@ const DetailLog = ({ data, tabHeader }) => {
     });
   };
 
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const pageInfo = list_calculation_log?.page || {};
+    const totalPages = pageInfo?.totalPages || 0;
+
+    if (nextPage < totalPages) {
+      await dispatch(
+        getDetailCalculationLog({
+          calCode: calculationCode,
+          sort,
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          search: encodeURIComponent(JSON.stringify(search)),
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
   // onSort
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
   // columns
-  const column = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => index + 1,
-    },
-    {
-      title: "ACTION",
-      dataIndex: "action",
-      sorter: true,
-      // ...getColumnSearchPropsPaging(
-      //   "action",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "action",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "action",
-          hasValue(search["action"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "TYPE",
-      dataIndex: "calType",
-      sorter: true,
-      // ...getColumnSearchPropsPaging(
-      //   "calType",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "calType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "calType",
-          hasValue(search["calType"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "CALCULATE AT",
-      dataIndex: "calDate",
-      align: "center",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "calDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "datetime"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "calDate",
-          hasValue(search["calDate"]),
-          searchText,
-          text,
-          "datetime",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "createdDate",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   false,
-      //   "date"
-      // ),
-      // render: (data) => {
-      //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
-      //   if (searchedColumn === "createdDate") {
-      //     return (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={text ? text.toString() : ""}
-      //       />
-      //     );
-      //   } else {
-      //     return text || "";
-      //   }
-      // },
-    },
-    {
-      title: "CALCULATE BY",
-      dataIndex: "createdBy",
-      sorter: true,
-      // ...getColumnSearchPropsPaging(
-      //   "createdBy",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "createdBy",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "createdBy",
-          hasValue(search["createdBy"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "REMARK",
-      dataIndex: "remark",
-      sorter: true,
-      // ...getColumnSearchPropsPaging(
-      //   "remark",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      ellipsis: {
-        showTitle: false,
+  const baseColumns = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (text, object, index) => index + 1,
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "remark",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "remark",
-          hasValue(search["remark"]),
+      {
+        key: "action",
+        title: "ACTION",
+        dataIndex: "action",
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.action] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "action",
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          true,
-          "input",
-          search
+          handleSearch,
+          true
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "remark") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-  ];
+        render: (text) =>
+          renderColumn(
+            "action",
+            hasValue(search["action"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "calType",
+        title: "TYPE",
+        dataIndex: "calType",
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.calType] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calType",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "calType",
+            hasValue(search["calType"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "calDate",
+        title: "CALCULATE AT",
+        dataIndex: "calDate",
+        isClassification: true,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.calDate] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calDate",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "datetime"
+        ),
+        render: (text) =>
+          renderDateColumn(
+            "calDate",
+            hasValue(search["calDate"]),
+            searchText,
+            text,
+            "datetime",
+            search
+          ),
+      },
+      {
+        key: "createdBy",
+        title: "CALCULATE BY",
+        dataIndex: "createdBy",
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.createdBy] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "createdBy",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "createdBy",
+            hasValue(search["createdBy"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "remark",
+        title: "REMARK",
+        dataIndex: "remark",
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.remark] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "remark",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "remark",
+            hasValue(search["remark"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+    ],
+    [search, searchText, searchedColumn]
+  );
 
-  // change table pagination
-  const handleChangePage = (page, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(pageSize);
-  };
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const resultData = list_calculation_log?.result || [];
+  const pageInfo = list_calculation_log?.page || {};
+  
+  // Calculate if there's more data
+  const hasMore = resultData.length < (pageInfo?.totalElements || 0);
 
   return (
     <BaseContainer subHeader={"calculation log"}>
-      <TablePaginationNew
-        columns={column}
-        dataSource={list_calculation_log?.result}
-        totalData={list_calculation_log?.page?.totalElements || 0}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChangePage}
+      <TableRBI
+        idTable="calculation-log-table"
+        columns={processedColumns}
+        dataSource={resultData}
+        totalData={pageInfo?.totalElements || 0}
         tableScrolled={{ x: 2000, y: 600 }}
         onSort={onSort}
+        showExport={false}
+        columnDefinitions={columnDefinitions}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        loading={loading}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        loadMoreThreshold={20}
       />
       <TableCalculateLog calculationCode={calculationCode} />
     </BaseContainer>
