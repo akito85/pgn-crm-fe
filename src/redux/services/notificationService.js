@@ -1,19 +1,18 @@
-import { BASE_URL } from "../../constants/configApp";
-import { tokenHeader } from "../../utils/tokenHeader";
+import { NOTIFICATION_CONFIG } from "../../constants/configApp";
 
 /**
  * Notification Service
  *
  * Handles SSE (Server-Sent Events) connection for real-time notifications
- * Endpoint: /api/notifications/user/${userId}
+ * Endpoint: /v1/dbs/api/notifications
  */
 
 class NotificationService {
   constructor() {
     this.eventSource = null;
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
-    this.reconnectDelay = 3000; // 3 seconds
+    this.maxReconnectAttempts = NOTIFICATION_CONFIG.MAX_RECONNECT_ATTEMPTS;
+    this.reconnectDelay = NOTIFICATION_CONFIG.RECONNECT_DELAY;
     this.userId = null;
     this.onMessageCallback = null;
     this.onErrorCallback = null;
@@ -32,8 +31,7 @@ class NotificationService {
    */
   connect(userId, callbacks = {}) {
     console.log(`[NotificationService] Connecting to SSE for user: ${userId}`);
-    // Placeholder URL - will be updated with actual backend endpoint
-    const sseBaseUrl = BASE_URL || "http://localhost:8911";
+    const sseBaseUrl = NOTIFICATION_CONFIG.SSE_BASE_URL;
 
     this.userId = userId;
     this.onMessageCallback = callbacks.onMessage;
@@ -47,50 +45,108 @@ class NotificationService {
     }
 
     try {
-      // Get auth token for SSE connection
-      const headers = tokenHeader();
-      const token = headers.Authorization;
+      // Get raw token from localStorage (avoid tokenHeader to prevent any manipulation)
+      const tokenJSON = JSON.parse(
+        localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
+      );
 
-      // SSE endpoint: /v1/dbs/api/notifications
-      // EventSource doesn't support custom headers, pass token via query param
-      const url = `${sseBaseUrl}/v1/dbs/api/notifications?token=${encodeURIComponent(token)}`;
+      // Build URL with manual encoding to preserve token integrity
+      // Use encodeURIComponent only for the token value to ensure proper encoding
+      let url = `${sseBaseUrl}/v1/dbs/api/notifications?`;
+
+      // Add userId only if provided (optional in production)
+      if (userId) {
+        url += `userId=${encodeURIComponent(userId)}`;
+      }
+
+      console.log("[NotificationService] Connecting to SSE");
+      console.log("[NotificationService] SSE URL:", url);
+      console.log("[NotificationService] User ID:", userId);
 
       // Create EventSource connection
       this.eventSource = new EventSource(url);
 
+      console.log("[NotificationService] EventSource created, readyState:", this.eventSource.readyState);
+      console.log("[NotificationService] EventSource.CONNECTING =", EventSource.CONNECTING);
+      console.log("[NotificationService] EventSource.OPEN =", EventSource.OPEN);
+      console.log("[NotificationService] EventSource.CLOSED =", EventSource.CLOSED);
+
+      // Fallback: Check connection state after a delay if onopen doesn't fire
+      // Some SSE servers don't trigger onopen immediately
+      const connectionCheckTimeout = setTimeout(() => {
+        if (this.eventSource && this.eventSource.readyState === EventSource.OPEN) {
+          console.log("[NotificationService] Connection detected via readyState check (onopen may not have fired)");
+          this.reconnectAttempts = 0;
+
+          if (this.onConnectCallback) {
+            console.log("[NotificationService] Calling onConnectCallback via timeout fallback");
+            this.onConnectCallback({
+              userId,
+              timestamp: new Date().toISOString(),
+              status: "connected",
+              readyState: this.eventSource.readyState,
+              connectedVia: "readyState-check"
+            });
+          }
+        } else if (this.eventSource) {
+          console.warn("[NotificationService] Connection check: readyState =", this.eventSource.readyState);
+        }
+      }, 2000); // Check after 2 seconds
+
       // Handle connection opened
       this.eventSource.onopen = (event) => {
-        console.log("[NotificationService] SSE Connection opened", event);
+        clearTimeout(connectionCheckTimeout); // Clear the fallback timeout
+        console.log("[NotificationService] SSE Connection opened via onopen event");
+        console.log("[NotificationService] EventSource readyState after open:", this.eventSource.readyState);
+        console.log("[NotificationService] Event details:", event);
         this.reconnectAttempts = 0; // Reset reconnect attempts on successful connection
 
         if (this.onConnectCallback) {
+          console.log("[NotificationService] Calling onConnectCallback");
           this.onConnectCallback({
             userId,
             timestamp: new Date().toISOString(),
-            status: "connected"
+            status: "connected",
+            readyState: this.eventSource.readyState,
+            connectedVia: "onopen-event"
           });
+        } else {
+          console.warn("[NotificationService] No onConnectCallback registered!");
         }
       };
 
       // Handle incoming messages
       this.eventSource.onmessage = (event) => {
-        console.log("[NotificationService] Message received:", event.data);
+        console.log("[NotificationService] ===== RAW MESSAGE RECEIVED =====");
+        console.log("[NotificationService] Raw event data:", event.data);
+        console.log("[NotificationService] Event type:", event.type);
+        console.log("[NotificationService] Current userId:", userId);
 
         try {
           const rawNotification = JSON.parse(event.data);
+          console.log("[NotificationService] Parsed notification:", rawNotification);
 
           // Transform Oracle schema fields to camelCase
           const notification = this._transformNotification(rawNotification);
+          console.log("[NotificationService] Transformed notification:", notification);
 
           // Validate required fields
           if (!notification.id || !notification.notificationType) {
             console.warn("[NotificationService] Invalid notification format:", notification);
+            console.warn("[NotificationService] Missing id:", !notification.id);
+            console.warn("[NotificationService] Missing notificationType:", !notification.notificationType);
             return;
           }
 
           // Determine message direction
           const isForUser = notification.toUserId === userId;
           const isForAll = notification.toUserId === "ALL" || notification.broadcast === true;
+
+          console.log("[NotificationService] Direction check:");
+          console.log("  - notification.toUserId:", notification.toUserId);
+          console.log("  - current userId:", userId);
+          console.log("  - isForUser:", isForUser);
+          console.log("  - isForAll:", isForAll);
 
           // Enrich notification with metadata
           const enrichedNotification = {
@@ -101,18 +157,27 @@ class NotificationService {
             read: notification.status === "read",
           };
 
-          console.log("[NotificationService] Processed notification:", enrichedNotification);
+          console.log("[NotificationService] Enriched notification:", enrichedNotification);
+          console.log("[NotificationService] Calling onMessageCallback");
 
           if (this.onMessageCallback) {
             this.onMessageCallback(enrichedNotification);
+            console.log("[NotificationService] onMessageCallback executed successfully");
+          } else {
+            console.warn("[NotificationService] No onMessageCallback registered!");
           }
+
+          console.log("[NotificationService] ===== MESSAGE PROCESSING COMPLETE =====");
         } catch (error) {
           console.error("[NotificationService] Failed to parse notification:", error);
+          console.error("[NotificationService] Error stack:", error.stack);
           if (this.onErrorCallback) {
             this.onErrorCallback({
               type: "PARSE_ERROR",
               message: "Failed to parse notification data",
-              error,
+              errorMessage: error.message,
+              errorStack: error.stack,
+              timestamp: new Date().toISOString(),
             });
           }
         }
@@ -121,12 +186,19 @@ class NotificationService {
       // Handle errors
       this.eventSource.onerror = (event) => {
         console.error("[NotificationService] SSE Error:", event);
+        console.error("[NotificationService] EventSource readyState on error:", this.eventSource.readyState);
+        console.error("[NotificationService] Event target:", event.target);
+        console.error("[NotificationService] Event type:", event.type);
 
+        // Serialize error event for Redux (avoid non-serializable values)
         const errorPayload = {
           type: "CONNECTION_ERROR",
           message: "Notification stream error",
-          event,
+          eventType: event.type,
+          timestamp: new Date().toISOString(),
           reconnectAttempts: this.reconnectAttempts,
+          readyState: this.eventSource.readyState,
+          url: this.eventSource.url,
         };
 
         if (this.onErrorCallback) {
@@ -182,6 +254,14 @@ class NotificationService {
           }
         } catch (error) {
           console.error("[NotificationService] Failed to parse notification update:", error);
+          if (this.onErrorCallback) {
+            this.onErrorCallback({
+              type: "PARSE_ERROR",
+              message: "Failed to parse notification update",
+              errorMessage: error.message,
+              timestamp: new Date().toISOString(),
+            });
+          }
         }
       });
 
@@ -198,6 +278,14 @@ class NotificationService {
           }
         } catch (error) {
           console.error("[NotificationService] Failed to parse notification delete:", error);
+          if (this.onErrorCallback) {
+            this.onErrorCallback({
+              type: "PARSE_ERROR",
+              message: "Failed to parse notification delete",
+              errorMessage: error.message,
+              timestamp: new Date().toISOString(),
+            });
+          }
         }
       });
 
@@ -207,9 +295,38 @@ class NotificationService {
         this.onErrorCallback({
           type: "INIT_ERROR",
           message: "Failed to initialize notification stream",
-          error,
+          errorMessage: error.message,
+          errorStack: error.stack,
+          timestamp: new Date().toISOString(),
         });
       }
+    }
+  }
+
+  /**
+   * Normalize priority value to string format
+   * @param {number|string} priority - Priority value (number 1-4 or string)
+   * @returns {string} Normalized priority string
+   */
+  _normalizePriority(priority) {
+    // If already a string, return lowercase version
+    if (typeof priority === 'string') {
+      return priority.toLowerCase();
+    }
+
+    // If number, map to priority string
+    // Assuming: 1=low, 2=normal, 3=high, 4=urgent
+    switch (priority) {
+      case 1:
+        return 'low';
+      case 2:
+        return 'normal';
+      case 3:
+        return 'high';
+      case 4:
+        return 'urgent';
+      default:
+        return 'normal';
     }
   }
 
@@ -245,6 +362,10 @@ class NotificationService {
       }
     }
 
+    // Get and normalize priority
+    const rawPriority = raw.PRIORITY || raw.priority;
+    const normalizedPriority = rawPriority ? this._normalizePriority(rawPriority) : 'normal';
+
     // Transform Oracle UPPERCASE fields to camelCase
     return {
       id: raw.ID || raw.id,
@@ -252,7 +373,7 @@ class NotificationService {
       message: raw.MESSAGE || raw.message,
       notificationType: raw.NOTIFICATION_TYPE || raw.notificationType || raw.type,
       status: raw.STATUS || raw.status,
-      priority: raw.PRIORITY || raw.priority,
+      priority: normalizedPriority,
 
       // User identification
       fromUserId: raw.FROM_USER_ID || raw.fromUserId,

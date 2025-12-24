@@ -17,9 +17,9 @@ import {
   MenuFoldOutlined,
   UserOutlined,
   LogoutOutlined,
-  BellOutlined,
   SwitcherOutlined,
 } from "@ant-design/icons";
+import NotificationDropdown from "../Notifications/NotificationDropdown";
 import { pgnLogo, pgnLogoKecil } from "../../assets/img/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -71,6 +71,7 @@ const LayoutMenu = ({ children }) => {
   const [form] = Form.useForm();
   const [collapsed, setCollapsed] = useState(false);
   const [modalConfirmation, setModalConfirmation] = useState(false);
+  const isIdleTimerEnabled = process.env.REACT_APP_IDLE_TIMER_ENABLED === 'true';
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token")
   );
@@ -420,39 +421,28 @@ const LayoutMenu = ({ children }) => {
                   )}
               </div>
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
-                <Badge>
-                  {/* <Dropdown overlay={menu} trigger={["click"]}> */}
-                  <a onClick={(e) => e.preventDefault()} className="pt-2.5">
-                    <BellOutlined
-                      style={{
-                        fontSize: "24px",
-                        color: "#FFFFFF",
-                      }}
-                    />
-                  </a>
-                  {/* </Dropdown> */}
-                </Badge>
+                <NotificationDropdown />
                 <Dropdown overlay={menu} trigger={["click"]}>
-                  <a onClick={(e) => e.preventDefault()}>
-                    {data_profile?.data?.urlImage2 === null ? (
-                      data_profile?.data?.username === "" ? (
-                        <Avatar size={"middle"} icon={<UserOutlined />} />
+                    <a onClick={(e) => e.preventDefault()}>
+                      {data_profile?.data?.urlImage2 === null ? (
+                        data_profile?.data?.username === "" ? (
+                          <Avatar size={"middle"} icon={<UserOutlined />} />
+                        ) : (
+                          <Avatar size={"middle"}>
+                            <span className={"text-[1rem]"}>
+                              {initialAvatar(data_profile?.data?.username)}
+                            </span>
+                          </Avatar>
+                        )
                       ) : (
-                        <Avatar size={"middle"}>
-                          <span className={"text-[1rem]"}>
-                            {initialAvatar(data_profile?.data?.username)}
-                          </span>
-                        </Avatar>
-                      )
-                    ) : (
-                      <Avatar
-                        size={"middle"}
-                        src={data_profile?.data?.urlImage2}
-                      />
-                    )}
-                  </a>
-                </Dropdown>
-                {/* <IconArrowNarrowLeft
+                        <Avatar
+                          size={"middle"}
+                          src={data_profile?.data?.urlImage2}
+                        />
+                      )}
+                    </a>
+                  </Dropdown>
+                  {/* <IconArrowNarrowLeft
                   name={"IconArrowNarrowLeft"}
                   style={{ fontSize: "24px" }}
                   className="flex items-center text-white hover:text-white"

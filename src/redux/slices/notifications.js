@@ -77,6 +77,8 @@ export const connectNotifications = createAsyncThunk(
       console.log(`[Notifications Slice] Connecting for user: ${userId}`);
 
       return new Promise((resolve, reject) => {
+        console.log("[Notifications Slice] Setting up callbacks");
+
         notificationService.connect(userId, {
           onMessage: (notification) => {
             console.log("[Notifications Slice] Received notification:", notification);
@@ -87,7 +89,8 @@ export const connectNotifications = createAsyncThunk(
             dispatch(setConnectionError(error));
           },
           onConnect: (data) => {
-            console.log("[Notifications Slice] Connected:", data);
+            console.log("[Notifications Slice] onConnect callback triggered with data:", data);
+            console.log("[Notifications Slice] Resolving promise to mark connection as fulfilled");
             resolve(data);
           },
           onDisconnect: (data) => {
@@ -96,6 +99,7 @@ export const connectNotifications = createAsyncThunk(
           },
         });
 
+        console.log("[Notifications Slice] Callbacks registered, dispatching 'connecting' status");
         // Set connecting status immediately
         dispatch(setConnectionStatus("connecting"));
       });
@@ -340,26 +344,29 @@ const notificationsSlice = createSlice({
     // Connect notifications
     builder
       .addCase(connectNotifications.pending, (state) => {
+        console.log("[Notifications Slice - Reducer] connectNotifications.pending triggered");
         state.isLoading = true;
         state.connectionStatus = "connecting";
         state.error = null;
       })
       .addCase(connectNotifications.fulfilled, (state, action) => {
+        console.log("[Notifications Slice - Reducer] connectNotifications.fulfilled triggered");
+        console.log("[Notifications Slice - Reducer] Action payload:", action.payload);
         state.isLoading = false;
         state.connectionStatus = "connected";
         state.lastConnected = action.payload.timestamp;
         state.connectionError = null;
         state.reconnectAttempts = 0;
 
-        console.log("[Notifications Slice] Connected successfully");
+        console.log("[Notifications Slice - Reducer] State updated, connectionStatus is now:", state.connectionStatus);
       })
       .addCase(connectNotifications.rejected, (state, action) => {
+        console.error("[Notifications Slice - Reducer] connectNotifications.rejected triggered");
+        console.error("[Notifications Slice - Reducer] Action payload:", action.payload);
         state.isLoading = false;
         state.connectionStatus = "error";
         state.error = action.payload?.message || "Failed to connect";
         state.connectionError = action.payload;
-
-        console.error("[Notifications Slice] Connect failed:", action.payload);
       });
 
     // Disconnect notifications

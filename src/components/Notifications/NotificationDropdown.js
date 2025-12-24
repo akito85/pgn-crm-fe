@@ -24,6 +24,7 @@ import {
   NOTIFICATION_TYPES,
   NOTIFICATION_PRIORITY,
 } from "../../redux/slices/notifications";
+import { NOTIFICATION_CONFIG } from "../../constants/configApp";
 import moment from "moment";
 
 const { Text } = Typography;
@@ -38,28 +39,44 @@ const NotificationDropdown = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Get user ID from auth state
-  const { user } = useSelector((state) => state.auth);
-  const userId = user?.userId || user?.id;
-
   // Get notification state
   const unreadCount = useSelector(selectUnreadCount);
   const notifications = useSelector(selectFilteredNotifications);
   const isConnected = useSelector(selectIsConnected);
 
-  // Connect to notification stream on mount
+  // Connect to notification stream on mount (only once)
   useEffect(() => {
+    // Check if notifications are enabled via config
+    if (!NOTIFICATION_CONFIG.ENABLED) {
+      console.log("[NotificationDropdown] Notifications disabled via config");
+      return;
+    }
+
+    // Get user ID from token - parse inside effect to avoid re-renders
+    const tokenJSON = JSON.parse(
+      localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
+    );
+    const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+
+    console.log("[NotificationDropdown] Token data:", tokenJSON);
+
     if (userId) {
       console.log("[NotificationDropdown] Connecting to notifications for user:", userId);
       dispatch(connectNotifications({ userId }));
+    } else {
+      console.warn("[NotificationDropdown] No userId found in token");
     }
 
     // Cleanup: Disconnect on unmount
+    // Note: In development with React StrictMode, this runs twice
+    // The service handles reconnection gracefully
     return () => {
-      console.log("[NotificationDropdown] Disconnecting from notifications");
-      dispatch(disconnectNotifications());
+      if (NOTIFICATION_CONFIG.ENABLED) {
+        console.log("[NotificationDropdown] Component unmounting, disconnecting from notifications");
+        dispatch(disconnectNotifications());
+      }
     };
-  }, [dispatch, userId]);
+  }, [dispatch]); // Only depend on dispatch, not userId - connect once on mount
 
   /**
    * Get icon based on notification type
@@ -89,7 +106,12 @@ const NotificationDropdown = () => {
    * Get tag color based on priority
    */
   const getPriorityColor = (priority) => {
-    switch (priority) {
+    // Normalize priority to string if it's a number
+    const normalizedPriority = typeof priority === 'number'
+      ? getPriorityString(priority)
+      : priority;
+
+    switch (normalizedPriority) {
       case NOTIFICATION_PRIORITY.URGENT:
         return "red";
       case NOTIFICATION_PRIORITY.HIGH:
@@ -100,6 +122,31 @@ const NotificationDropdown = () => {
         return "default";
       default:
         return "default";
+    }
+  };
+
+  /**
+   * Convert priority (number or string) to display string
+   */
+  const getPriorityString = (priority) => {
+    // If already a string, return as-is
+    if (typeof priority === 'string') {
+      return priority;
+    }
+
+    // If number, map to priority string
+    // Assuming: 1=low, 2=normal, 3=high, 4=urgent
+    switch (priority) {
+      case 1:
+        return NOTIFICATION_PRIORITY.LOW;
+      case 2:
+        return NOTIFICATION_PRIORITY.NORMAL;
+      case 3:
+        return NOTIFICATION_PRIORITY.HIGH;
+      case 4:
+        return NOTIFICATION_PRIORITY.URGENT;
+      default:
+        return NOTIFICATION_PRIORITY.NORMAL;
     }
   };
 
@@ -257,12 +304,12 @@ const NotificationDropdown = () => {
                         {notification.title}
                       </Text>
                       {notification.priority &&
-                        notification.priority !== NOTIFICATION_PRIORITY.NORMAL && (
+                        getPriorityString(notification.priority) !== NOTIFICATION_PRIORITY.NORMAL && (
                           <Tag
                             color={getPriorityColor(notification.priority)}
                             style={{ marginLeft: 8, fontSize: 10 }}
                           >
-                            {notification.priority.toUpperCase()}
+                            {getPriorityString(notification.priority).toUpperCase()}
                           </Tag>
                         )}
                     </div>
