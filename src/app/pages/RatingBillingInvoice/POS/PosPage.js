@@ -104,7 +104,8 @@ const PosPage = () => {
   };
 
   // TAMBAHAN: Calculate if there's more data
-  const hasMore = (data_view?.result?.length || 0) < (data_view?.page?.totalElements || 0);
+  const hasMore =
+    (data_view?.result?.length || 0) < (data_view?.page?.totalElements || 0);
 
   // PERUBAHAN: Reset page ke 0 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -454,7 +455,7 @@ const PosPage = () => {
             </div>
           }
         >
-          <div className="pt-3">
+          <div className="-pt-3">
             <TableRBI
               idTable="pos-table"
               dataSource={dataSource}

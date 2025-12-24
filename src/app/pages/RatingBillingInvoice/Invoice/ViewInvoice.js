@@ -491,7 +491,7 @@ const ViewInvoice = () => {
             </div>
           }
         >
-          <div className="w-full pt-3">
+          <div className="w-full -pt-3">
             <TableRBI
               idTable="invoice-table"
               dataSource={dataSource}
