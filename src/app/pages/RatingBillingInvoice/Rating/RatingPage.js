@@ -118,7 +118,7 @@ const RatingPage = () => {
     const totalPages = data?.page?.totalPages || 0;
 
     // Check if there's more data to load
-    if (nextPage < totalPages) {
+    if (nextPage <= totalPages) {
       await dispatch(
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),

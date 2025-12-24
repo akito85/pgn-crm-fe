@@ -72,7 +72,7 @@ const PrabillingPage = () => {
     const totalPages = prabilling_pagination?.totalPages || 0;
 
     // Check if there's more data to load
-    if (nextPage < totalPages) {
+    if (nextPage <= totalPages) {
       await dispatch(
         getListPrabillingInitPopulate({
           search: encodeURIComponent(JSON.stringify(search)),

@@ -111,7 +111,7 @@ const CalculationPage = () => {
     const totalPages = data_calculation?.page?.totalPages || 0;
 
     // Check if there's more data to load
-    if (nextPage < totalPages) {
+    if (nextPage <= totalPages) {
       if (tabHeader === "Calculation List") {
         await dispatch(
           getCalculationPaginate({

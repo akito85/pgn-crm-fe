@@ -149,7 +149,7 @@ const ViewInvoice = () => {
     const totalPages = data?.page?.totalPages || 0;
 
     // Check if there's more data to load
-    if (nextPage < totalPages) {
+    if (nextPage <= totalPages) {
       let searchParam = undefined;
       let tempSearch = "";
       for (const dataIndex in search) {
