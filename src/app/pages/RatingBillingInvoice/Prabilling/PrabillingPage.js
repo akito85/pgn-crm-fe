@@ -25,7 +25,7 @@ const PrabillingPage = () => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -42,13 +42,13 @@ const PrabillingPage = () => {
     dispatch(
       getListPrabillingInitPopulate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page: 0,
+        page: 1,
         pageSize: 100, // Initial load 100
         sort,
         isLoadMore: false,
       })
     );
-    setPage(0);
+    setPage(1);
   }, [dispatch, search, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -57,7 +57,7 @@ const PrabillingPage = () => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
+        setPage(1);
       }
       return {
         ...prevState,
@@ -95,7 +95,7 @@ const PrabillingPage = () => {
       {
         key: "no",
         title: "NO",
-        width: 30,
+        width: 20,
         isClassification: true,
         render: (text, object, index) => index + 1,
       },
@@ -105,7 +105,7 @@ const PrabillingPage = () => {
         dataIndex: "initCode",
         sorter: true,
         isClassification: true,
-        width: 120,
+        width: 60,
         filteredValue: [search?.initCode] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -133,7 +133,7 @@ const PrabillingPage = () => {
         dataIndex: "sor",
         isClassification: true,
         sorter: true,
-        width: 150,
+        width: 60,
         filteredValue: [search?.sor] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
@@ -162,7 +162,7 @@ const PrabillingPage = () => {
         dataIndex: "billingCycle",
         isClassification: true,
         sorter: true,
-        width: 100,
+        width: 70,
         filteredValue: [search?.billingCycle] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -190,7 +190,7 @@ const PrabillingPage = () => {
         dataIndex: "billPeriod",
         isClassification: true,
         sorter: true,
-        width: 100,
+        width: 70,
         filteredValue: [search?.billPeriod] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -217,7 +217,7 @@ const PrabillingPage = () => {
         title: "PROCESS NAME",
         dataIndex: "processName",
         align: "left",
-        width: 150,
+        width: 70,
         sorter: true,
         filteredValue: [search?.processName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -245,7 +245,7 @@ const PrabillingPage = () => {
         title: "CREATED BY",
         dataIndex: "createdBy",
         isClassification: true,
-        width: 120,
+        width: 60,
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -274,7 +274,7 @@ const PrabillingPage = () => {
         dataIndex: "createdDtm",
         isClassification: true,
         sorter: true,
-        width: 180,
+        width: 80,
         filteredValue: [search?.createdDtm] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -306,7 +306,7 @@ const PrabillingPage = () => {
         dataIndex: "message",
         align: "left",
         sorter: true,
-        width: 200,
+        width: 60,
         filteredValue: [search?.message] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
@@ -335,7 +335,7 @@ const PrabillingPage = () => {
         dataIndex: "totalCustomer",
         isNumber: true,
         sorter: true,
-        width: 150,
+        width: 80,
         filteredValue: [search?.totalCustomer] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -365,7 +365,7 @@ const PrabillingPage = () => {
         dataIndex: "remark",
         align: "left",
         sorter: true,
-        width: 200,
+        width: 70,
         filteredValue: [search?.remark] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
@@ -394,7 +394,7 @@ const PrabillingPage = () => {
         dataIndex: "status",
         align: "center",
         sorter: true,
-        width: 100,
+        width: 40,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -524,7 +524,7 @@ const PrabillingPage = () => {
               dataSource={list_prabilling_init}
               columns={processedColumns}
               totalData={prabilling_pagination?.totalElements || 0}
-              tableScrolled={{ x: 2500, y: 525 }}
+              tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
               showExport={false}
               columnDefinitions={columnDefinitions}
