@@ -97,6 +97,7 @@ export const deleteBatch = createAsyncThunk(
       const successMessage = {
         title: "Successful",
         description: "Batch has been deleted successfully.",
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return { batchId, data: response.data };
@@ -111,6 +112,7 @@ export const deleteBatch = createAsyncThunk(
         title: "Failed",
         data: response.response?.data?.data,
         description: `Failed to delete batch. ${message}. Please try again.`,
+        return: false,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
@@ -744,6 +746,8 @@ const monitoringUsageSlice = createSlice({
           if (state.data_list_batch.page?.totalElements) {
             state.data_list_batch.page.totalElements -= 1;
           }
+          // IMPORTANT: Update state.data reference agar perubahan terlihat di UI
+          state.data = state.data_list_batch;
         }
       })
       .addCase(deleteBatch.rejected, (state) => {

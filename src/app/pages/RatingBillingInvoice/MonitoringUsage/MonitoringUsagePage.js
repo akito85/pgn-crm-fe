@@ -248,7 +248,14 @@ const MonitoringUsagePage = () => {
       width: 120,
       align: "center",
       render: (text, record) => (
-        <div style={{ display: "flex", gap: "12px", justifyContent: "center", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           {/* View Icon */}
           <Link
             to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
@@ -262,12 +269,9 @@ const MonitoringUsagePage = () => {
           {/* Delete Icon - Only for Draft status */}
           {record?.status?.toLowerCase() === "draft" && (
             <Tooltip title="Delete Batch">
-              <WarningOutlined
-                style={{ 
-                  fontSize: "20px", 
-                  color: "#ff4d4f",
-                  cursor: "pointer"
-                }}
+              <SVGIcon
+                name="IconDelete"
+                width={20}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteBatch(record);
