@@ -35,7 +35,7 @@ const CalculationPage = () => {
   const searchInput = useRef(null);
 
   // PERUBAHAN: State untuk infinite scroll
-  const [page, setPage] = useState(0); // Start from 0
+  const [page, setPage] = useState(1); // Start from 1
   const [loadMoreSize] = useState(20); // Load 20 data each time
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -54,7 +54,7 @@ const CalculationPage = () => {
       dispatch(
         getCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page: 0,
+          page: 1,
           pageSize: 100, // Initial load 100 data
           sort,
           isLoadMore: false, // Flag untuk initial load
@@ -64,24 +64,24 @@ const CalculationPage = () => {
       dispatch(
         getHistoryCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page: 0,
+          page: 1,
           pageSize: 100, // Initial load 100 data
           sort,
           isLoadMore: false, // Flag untuk initial load
         })
       );
     }
-    setPage(0);
+    setPage(1);
   }, [dispatch, search, sort, tabHeader]);
 
-  // PERUBAHAN: Reset page ke 0 saat search
+  // PERUBAHAN: Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0); // Reset to 0
+        setPage(1); // Reset to 1
       }
       let result = selectedKeys[0];
       if (dataIndex === "isTry") {
@@ -1306,7 +1306,7 @@ const CalculationPage = () => {
   const changeTab = (key) => {
     setTabHeader((prevState) => {
       if (prevState !== key) {
-        setPage(0); // Reset to 0
+        setPage(1); // Reset to 1
         setSearch({});
         setSort("");
         setSearchText("");

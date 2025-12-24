@@ -25,7 +25,7 @@ const PrabillingPage = () => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -42,13 +42,13 @@ const PrabillingPage = () => {
     dispatch(
       getListPrabillingInitPopulate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page: 0,
+        page: 1,
         pageSize: 100, // Initial load 100
         sort,
         isLoadMore: false,
       })
     );
-    setPage(0);
+    setPage(1);
   }, [dispatch, search, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -57,7 +57,7 @@ const PrabillingPage = () => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
+        setPage(1);
       }
       return {
         ...prevState,

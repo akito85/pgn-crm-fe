@@ -36,7 +36,7 @@ const BillingPage = () => {
   const detailRef = useRef(null);
 
   // PERUBAHAN: State untuk infinite scroll
-  const [page, setPage] = useState(0); // Start from 0
+  const [page, setPage] = useState(1); // Start from 1
   const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -78,13 +78,13 @@ const BillingPage = () => {
     dispatch(
       getAllBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page: 0,
+        page: 1,
         pageSize: 100, // Initial load 100 data
         sort,
         isLoadMore: false, // Flag untuk initial load
       })
     );
-    setPage(0);
+    setPage(1);
   }, [dispatch, search, sort]);
 
   useEffect(() => {
@@ -126,14 +126,14 @@ const BillingPage = () => {
     },
   ];
 
-  // PERUBAHAN: Reset page ke 0 saat search
+  // PERUBAHAN: Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0); // Reset to 0
+        setPage(1); // Reset to 1
       }
       return {
         ...prevState,
@@ -214,7 +214,7 @@ const BillingPage = () => {
   const onChangeTab = (key) => {
     setValueTab(key);
     setSearch({});
-    setPage(0); // Reset to 0
+    setPage(1); // Reset to 1
   };
 
   const handleRefresh = () => {
@@ -222,7 +222,7 @@ const BillingPage = () => {
     dispatch(
       getAllBillingPaginate({
         search: reqSearch,
-        page: 0,
+        page: 1,
         pageSize: 100,
         sort,
         isLoadMore: false,
@@ -230,7 +230,7 @@ const BillingPage = () => {
     );
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
-    setPage(0);
+    setPage(1);
   };
 
   const itemGrantAccess = [

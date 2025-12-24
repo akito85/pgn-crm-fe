@@ -107,7 +107,7 @@ export const useMonitoringList = (tabs, batchId) => {
   const dispatch = useDispatch();
 
   // Use State
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -131,7 +131,7 @@ export const useMonitoringList = (tabs, batchId) => {
       dispatch(
         getDetailBatch({
           batchId,
-          page: 0,
+          page: 1,
           pageSize: 100,
           search: tempSearch,
           sort,
@@ -141,7 +141,7 @@ export const useMonitoringList = (tabs, batchId) => {
       dispatch(
         getListUsagePaginate({
           search: searchRequest,
-          page: 0,
+          page: 1,
           pageSize: 100,
           sort,
           isLoadMore: false,
@@ -151,14 +151,14 @@ export const useMonitoringList = (tabs, batchId) => {
       dispatch(
         getListBatchPaginate({
           search: searchRequest,
-          page: 0,
+          page: 1,
           pageSize: 100,
           sort,
           isLoadMore: false,
         })
       );
     }
-    setPage(0);
+    setPage(1);
   }, [dispatch, search, sort, tabs, batchId]);
 
   // handle search
@@ -168,7 +168,7 @@ export const useMonitoringList = (tabs, batchId) => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
+        setPage(1);
       }
       return {
         ...prevState,
