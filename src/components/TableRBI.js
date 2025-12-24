@@ -135,12 +135,12 @@ const TableRBI = ({
   onRow,
   rowClassName,
   customHeaderLeft,
-  showExport = false, 
-  showAdvanceSearch = true, 
-  showSearchBar = true, 
-  enableRowClick = false, 
-  selectedRowKey = null, 
-  onRowClick = () => {}, 
+  showExport = false,
+  showAdvanceSearch = true,
+  showSearchBar = true,
+  enableRowClick = false,
+  selectedRowKey = null,
+  onRowClick = () => {},
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -428,50 +428,103 @@ const TableRBI = ({
   }, [selectedRowKey, clickedRowKey]);
 
   // Handle row click
-  const handleRowClick = useCallback((record) => {
-    const rowKey = record.key || record.recordId || record.id;
-    setClickedRowKey(rowKey);
-    onRowClick(record, rowKey);
-  }, [onRowClick]);
+  const handleRowClick = useCallback(
+    (record) => {
+      const rowKey = record.key || record.recordId || record.id;
+      setClickedRowKey(rowKey);
+      onRowClick(record, rowKey);
+    },
+    [onRowClick]
+  );
 
   // Custom onRow handler with hover and click effects
-  const customOnRow = useCallback((record, index) => {
-    const baseOnRow = onRow ? onRow(record, index) : {};
+  const customOnRow = useCallback(
+    (record, index) => {
+      const baseOnRow = onRow ? onRow(record, index) : {};
 
-    return {
-      ...baseOnRow,
-      onClick: (event) => {
-        // Call original onClick if exists
-        if (baseOnRow.onClick) {
-          baseOnRow.onClick(event);
-        }
-        // Handle row click for highlighting
-        if (enableRowClick) {
-          handleRowClick(record);
-        }
-      },
-      style: {
-        ...baseOnRow.style,
-        cursor: enableRowClick ? 'pointer' : (baseOnRow.style?.cursor || 'default'),
-        transition: 'background-color 0.2s ease',
-      },
-    };
-  }, [onRow, enableRowClick, handleRowClick]);
+      return {
+        ...baseOnRow,
+        onClick: (event) => {
+          // Call original onClick if exists
+          if (baseOnRow.onClick) {
+            baseOnRow.onClick(event);
+          }
+          // Handle row click for highlighting
+          if (enableRowClick) {
+            handleRowClick(record);
+          }
+        },
+        style: {
+          ...baseOnRow.style,
+          cursor: enableRowClick
+            ? "pointer"
+            : baseOnRow.style?.cursor || "default",
+          transition: "background-color 0.2s ease",
+        },
+      };
+    },
+    [onRow, enableRowClick, handleRowClick]
+  );
 
   // Custom rowClassName handler
-  const customRowClassName = useCallback((record, index) => {
-    const rowKey = record.key || record.recordId || record.id;
-    const isSelected = enableRowClick && clickedRowKey === rowKey;
+  const customRowClassName = useCallback(
+    (record, index) => {
+      const rowKey = record.key || record.recordId || record.id;
+      const isSelected = enableRowClick && clickedRowKey === rowKey;
 
-    const baseClassName = typeof rowClassName === 'function'
-      ? rowClassName(record, index)
-      : (rowClassName || '');
+      const baseClassName =
+        typeof rowClassName === "function"
+          ? rowClassName(record, index)
+          : rowClassName || "";
 
-    return `${baseClassName} ${isSelected ? 'row-selected' : ''}`.trim();
-  }, [rowClassName, enableRowClick, clickedRowKey]);
+      return `${baseClassName} ${isSelected ? "row-selected" : ""}`.trim();
+    },
+    [rowClassName, enableRowClick, clickedRowKey]
+  );
 
   return (
     <div className={"flex flex-col w-full"}>
+      <style>
+        {`
+          /* Override cursor for sort and filter icons in table headers */
+          #${idTable} .ant-table-column-sorter,
+          #${idTable} .ant-table-filter-trigger,
+          #${idTable} .ant-table-column-sorter-up,
+          #${idTable} .ant-table-column-sorter-down,
+          #${idTable} .ant-table-filter-trigger-container {
+            cursor: pointer !important;
+          }
+
+          /* Keep drag cursor for the header cell text area only when draggable */
+          #${idTable} th[draggable="true"] {
+            cursor: move;
+          }
+
+          /* Override cursor back to pointer when hovering over interactive elements */
+          #${idTable} th[draggable="true"] .ant-table-column-sorter,
+          #${idTable} th[draggable="true"] .ant-table-filter-trigger,
+          #${idTable} th[draggable="true"] .ant-table-column-sorter-up,
+          #${idTable} th[draggable="true"] .ant-table-column-sorter-down,
+          #${idTable} th[draggable="true"] .ant-table-filter-trigger-container,
+          #${idTable} th[draggable="true"] .ant-table-column-sorters {
+            cursor: pointer !important;
+          }
+
+          /* Geser icon sort dan filter lebih ke kiri agar tidak mepet kanan */
+          #${idTable} .ant-table-column-sorter {
+            margin-left: 4px;
+            margin-right: 0px;
+          }
+
+          #${idTable} .ant-table-filter-trigger {
+            margin-right: 6px;
+          }
+
+          #${idTable} .ant-table-column-sorters {
+            padding-right: 0px;
+          }
+        `}
+      </style>
       {useSelect ? (
         <div className={"w-full flex mb-3 justify-between items-center"}>
           {/* BAGIAN KIRI: Column Settings + Custom Header Left */}
@@ -557,7 +610,8 @@ const TableRBI = ({
             {isLoadingMore && " | Loading..."}
             {!hasMore && dataSource?.length > 0 && (
               <span style={{ color: "#52c41a", fontWeight: "500" }}>
-                {" "}| All data showed
+                {" "}
+                | All data showed
               </span>
             )}
           </span>
