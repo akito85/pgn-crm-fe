@@ -1353,38 +1353,38 @@ export const useMonitoringList = (tabs, batchId) => {
           search
         ),
     },
-    //  {
-    //   title: "Message",
-    //   dataIndex: "logError",
-    //   align: "left",
-    //   // sorter: true,
-    //   sorter: (a, b) => sorter("logError", a, b),
-    //   filteredValue: search?.["logError"] ? [search?.["logError"]] : null,
-    //   //filteredValue: [search?.description] || null,
-    //   ...getColumnSearchPropsUseFilteredValueFE(
-    //     search,
-    //     "logError",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //     true
-    //   ),
-    //   ellipsis: {
-    //     showTitle: false,
-    //   },
-    //   // sorter: true,
-    //   render: (text) =>
-    //     renderColumn(
-    //       "logError",
-    //       hasValue(search["logError"]),
-    //       searchText,
-    //       text,
-    //       true,
-    //       "input",
-    //       search
-    //     ),
-    // },
+     {
+      title: "Message",
+      dataIndex: "logError",
+      align: "left",
+      // sorter: true,
+      sorter: (a, b) => sorter("logError", a, b),
+      filteredValue: search?.["logError"] ? [search?.["logError"]] : null,
+      //filteredValue: [search?.description] || null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "logError",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      ellipsis: {
+        showTitle: false,
+      },
+      // sorter: true,
+      render: (text) =>
+        renderColumn(
+          "logError",
+          hasValue(search["logError"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
     {
       title: "STATUS",
       dataIndex: "status",

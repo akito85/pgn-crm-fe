@@ -1028,3 +1028,17 @@ span.ant-tree-title {
   padding: 16px;
   box-sizing: border-box;
 }
+
+/* Custom Radio Tabs - Match ButtonComponent size */
+.custom-radio-tabs .ant-radio-button-wrapper {
+  height: 32px !important;
+  line-height: 30px !important;
+  font-size: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.custom-radio-tabs .ant-radio-button-wrapper span {
+  font-size: 12px !important;
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Radio, Tooltip } from "antd";
+import { Spin, Tabs, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -35,8 +35,9 @@ const BillingPage = () => {
   const dataSource = data?.result;
   const detailRef = useRef(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // PERUBAHAN: State untuk infinite scroll
+  const [page, setPage] = useState(0); // Start from 0
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -72,16 +73,19 @@ const BillingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
+  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
       getAllBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100, // Initial load 100 data
         sort,
+        isLoadMore: false, // Flag untuk initial load
       })
     );
-  }, [search, page, pageSize, sort, dispatch]);
+    setPage(0);
+  }, [dispatch, search, sort]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -108,27 +112,28 @@ const BillingPage = () => {
 
   const tabBilling = [
     {
-      label: "All",
-      value: "All",
-    },
-    {
+      key: "Billing Gas",
       label: "Billing Gas",
-      value: "Billing Gas",
     },
     {
+      key: "All",
+      label: "All",
+    },
+    {
+      key: "Billing Non Gas",
       label: "Billing Non Gas",
-      value: "Billing Non Gas",
       disabled: true,
     },
   ];
 
+  // PERUBAHAN: Reset page ke 0 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0); // Reset to 0
       }
       return {
         ...prevState,
@@ -137,11 +142,28 @@ const BillingPage = () => {
     });
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // TAMBAHAN: Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage < totalPages) {
+      await dispatch(
+        getAllBillingPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true, // Flag untuk load more
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -152,21 +174,11 @@ const BillingPage = () => {
   };
 
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
       downloadBillingList({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
@@ -199,29 +211,26 @@ const BillingPage = () => {
     setModalApprovalHistory(true);
   };
 
-  const onChangeTab = ({ target: { value } }) => {
-    setValueTab(value);
+  const onChangeTab = (key) => {
+    setValueTab(key);
     setSearch({});
-    setPage(1);
+    setPage(0); // Reset to 0
   };
 
   const handleRefresh = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAllBillingPaginate({ search: reqSearch, page, pageSize, sort })
+      getAllBillingPaginate({
+        search: reqSearch,
+        page: 0,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      })
     );
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
+    setPage(0);
   };
 
   const itemGrantAccess = [
@@ -229,7 +238,7 @@ const BillingPage = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={handleDownload}
         >
@@ -241,7 +250,7 @@ const BillingPage = () => {
       action: "Approval",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconRequestApproval" width={24} color="#FFF" />}
+          icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
           type="submit"
           onClick={() => setModalApproval(true)}
         >
@@ -253,7 +262,7 @@ const BillingPage = () => {
       action: "Request",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          icon={<SVGIcon name="IconButtonCreate" width={20} />}
           type="submit"
           onClick={() => setModalRequest(true)}
         >
@@ -261,23 +270,6 @@ const BillingPage = () => {
         </ButtonComponent>
       ),
     },
-    // {
-    //   action: "View",
-    //   type: "table",
-    //   render: (record) => {
-    //     return (
-    //       <Tooltip title="Detail">
-    //         <div className="pt-1">
-    //           <SVGIcon
-    //             name="IconDetail"
-    //             width={24}
-    //             onClick={() => handleDetail(record)}
-    //           />
-    //         </div>
-    //       </Tooltip>
-    //     );
-    //   },
-    // },
     {
       action: "History",
       type: "table",
@@ -308,15 +300,15 @@ const BillingPage = () => {
     itemGrantAccess
   ).map((col) => ({
     ...col,
-    width: 100,
+    width: 15,
     align: "center",
   }));
 
   const baseColumns = useMemo(() => {
     if (valueTab === "All") {
       return columnsAllBilling(
-        page,
-        pageSize,
+        0, // Tidak digunakan untuk infinite scroll
+        0, // Tidak digunakan untuk infinite scroll
         searchInput,
         searchedColumn,
         searchText,
@@ -325,23 +317,15 @@ const BillingPage = () => {
       );
     }
     return columnsBilling(
-      page,
-      pageSize,
+      0, // Tidak digunakan untuk infinite scroll
+      0, // Tidak digunakan untuk infinite scroll
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       search
     );
-  }, [
-    valueTab,
-    page,
-    pageSize,
-    searchInput,
-    searchedColumn,
-    searchText,
-    search,
-  ]);
+  }, [valueTab, searchInput, searchedColumn, searchText, search]);
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
@@ -381,70 +365,52 @@ const BillingPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Billing List</p>
-              <div className="flex gap-[20px]">
-                <Toolbar items={itemGrantAccess} />
-              </div>
+              <p className="w-full mt-[15px]">Billing List</p>
+              <Toolbar items={itemGrantAccess} />
             </div>
           }
-          type="tabs"
-          element={
-            <Radio.Group
-              options={tabBilling}
-              onChange={onChangeTab}
-              value={valueTab}
-              optionType="button"
-              buttonStyle="solid"
-              style={{ gap: 5, display: "flex" }}
-            />
-          }
         >
-          <div className="my-0">
-            <TableRBI
-              dataSource={dataSourceForTab}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: valueTab === "All" ? 1300 : 16000, y: 525 }}
-              onSort={onSort}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              onRow={(record) => ({
-                onClick: () => handleDetail(record),
-                style: {
-                  cursor: "pointer",
-                  backgroundColor:
-                    activeRowKey ===
-                    (record.billingCode || record.invoiceNumber)
-                      ? "#bae7ff"
-                      : "transparent",
-                  transition: "background-color 0.2s ease",
-                },
-                onMouseEnter: (e) => {
-                  if (
-                    activeRowKey !==
-                    (record.billingCode || record.invoiceNumber)
-                  ) {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }
-                },
-                onMouseLeave: (e) => {
-                  if (
-                    activeRowKey !==
-                    (record.billingCode || record.invoiceNumber)
-                  ) {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
-                },
-              })}
-            />
-          </div>
+          <Tabs
+            activeKey={valueTab}
+            onChange={onChangeTab}
+            type="line"
+            size="small"
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
+            items={tabBilling.map((tab) => ({
+              key: tab.key,
+              label: tab.label,
+              disabled: tab.disabled,
+              children: (
+                <div className="my-0">
+                  <TableRBI
+                    idTable="billing-table"
+                    dataSource={dataSourceForTab}
+                    columns={processedColumns}
+                    totalData={data?.page?.totalElements || 0}
+                    tableScrolled={{
+                      x: "max-content",
+                      y: 525,
+                    }}
+                    onSort={onSort}
+                    handleDownload={handleDownload}
+                    columnDefinitions={columnDefinitions}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={loading}
+                    showExport={false}
+                    usePagination={false}
+                    useInfiniteScroll={true}
+                    onLoadMore={handleLoadMore}
+                    hasMore={hasMore}
+                    loadMoreThreshold={20}
+                    enableRowClick={true}
+                    selectedRowKey={activeRowKey}
+                    onRowClick={handleDetail}
+                  />
+                </div>
+              ),
+            }))}
+          />
         </CardContainer>
 
         {pageDetail && (

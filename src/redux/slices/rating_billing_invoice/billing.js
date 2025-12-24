@@ -97,14 +97,19 @@ export const approvedBilling = createAsyncThunk(
 
 export const getAllBillingPaginate = createAsyncThunk(
   "GET_ALL_BILLING_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -462,15 +467,34 @@ const billingSlice = createSlice({
     },
 
     // Get All Billing Pagination
-    [getAllBillingPaginate.pending]: (state) => {
-      state.loading = true;
+    [getAllBillingPaginate.pending]: (state, action) => {
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllBillingPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.data = action.payload;
+      }
     },
-    [getAllBillingPaginate.rejected]: (state) => {
+    [getAllBillingPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
     },
 
     // Get All Billing Request Pagination

@@ -39,14 +39,19 @@ const initialState = {
 
 export const getListPointOfSales = createAsyncThunk(
   "GET_LIST_POINT_OF_SALES",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/pos/list-pos?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error, action: "GET_LIST_POINT_OF_SALES" })
@@ -680,15 +685,33 @@ const pointOfSalesSlice = createSlice({
   extraReducers: {
     // pagination view
     [getListPointOfSales.pending]: (state, action) => {
-      state.loading = true;
-      state.data_view = action.payload;
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getListPointOfSales.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_view = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.data_view = {
+          ...action.payload,
+          result: [...(state.data_view?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.data_view = action.payload;
+      }
     },
     [getListPointOfSales.rejected]: (state, action) => {
       state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_view = [];
+      }
       state.data_view = action.payload;
     },
 
