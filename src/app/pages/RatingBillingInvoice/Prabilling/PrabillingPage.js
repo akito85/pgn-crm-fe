@@ -518,7 +518,7 @@ const PrabillingPage = () => {
             </div>
           }
         >
-          <div className="pt-3">
+          <div className="-pt-3">
             <TableRBI
               idTable="prabilling-table"
               dataSource={list_prabilling_init}
