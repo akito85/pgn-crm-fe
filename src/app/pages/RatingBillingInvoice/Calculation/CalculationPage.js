@@ -19,14 +19,12 @@ import {
   renderDateColumn,
   toTitleCase,
 } from "../../../../utils";
-import RadioTabs from "../../../../components/RadioTabs";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
-import { EyeOutlined } from "@ant-design/icons";
 
 const CalculationPage = () => {
   const { data: data_calculation, loading } = useSelector(
@@ -639,7 +637,7 @@ const CalculationPage = () => {
         dataIndex: "status",
         isClassification: true,
         sorter: true,
-        width: 150,
+        width: 80,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -1373,10 +1371,8 @@ const CalculationPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">CALCULATION JOB LIST</p>
-              <div className="flex gap-[20px]">
+              <p className="w-full mt-[15px]">CALCULATION JOB LIST</p>
                 <Toolbar items={itemGrantAccess} />
-              </div>
             </div>
           }
         >
@@ -1385,7 +1381,7 @@ const CalculationPage = () => {
             onChange={changeTab}
             type="line"
             size="small"
-            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-2 [&_.ant-tabs-nav]:pt-0"
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0"
           >
             <Tabs.TabPane tab="Calculation List" key="Calculation List">
               <div className="my-0">

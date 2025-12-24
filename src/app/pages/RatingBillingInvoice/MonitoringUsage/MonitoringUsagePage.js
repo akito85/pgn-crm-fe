@@ -45,10 +45,7 @@ const MonitoringUsagePage = () => {
     batchColumns,
     data_usage,
     loading,
-    page,
     setPage,
-    pageSize,
-    setPageSize,
     onSort,
     onClickApproval,
     data_approval,
@@ -59,6 +56,9 @@ const MonitoringUsagePage = () => {
     setSearchedColumn,
     setSort,
     sort,
+    handleLoadMore,
+    hasMoreUsage,
+    hasMoreBatch,
   } = useMonitoringList(tabHeader);
 
   // Use State
@@ -104,19 +104,11 @@ const MonitoringUsagePage = () => {
     }
   };
 
-  // onChange page
-  const onChangePage = (page, sizeChange) => {
-    const tempPage = pageSize !== sizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(sizeChange);
-  };
-
   // onchange tabs
   const changeTab = (key) => {
     setTabHeader((prevState) => {
       if (prevState !== key) {
-        setPage(1);
-        setPageSize(10);
+        setPage(0);
         setSearch({});
         setSort("");
         setSearchText("");
@@ -295,11 +287,13 @@ const MonitoringUsagePage = () => {
     dispatch(
       getListUsagePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100,
         sort,
+        isLoadMore: false,
       })
     );
+    setPage(0);
   };
 
   return (
@@ -326,40 +320,44 @@ const MonitoringUsagePage = () => {
             <Tabs.TabPane tab="Usage List" key="Usage List">
               <div className="my-0">
                 <TableRBI
+                  idTable="monitoring-usage-table"
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}
                   columns={processedColumns}
-                  current={page}
-                  pageSize={pageSize}
                   tableScrolled={tableScroll(tabHeader)}
-                  onChange={onChangePage}
-                  onSizeChanger={onChangePage}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}
                   setFixedColumns={setFixedColumns}
                   loading={loading}
                   handleDownload={handleDownload}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMoreUsage}
+                  loadMoreThreshold={20}
                 />
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Batch List" key="Batch List">
               <div className="my-0">
                 <TableRBI
+                  idTable="monitoring-batch-table"
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}
                   columns={processedColumns}
-                  current={page}
-                  pageSize={pageSize}
                   tableScrolled={tableScroll(tabHeader)}
-                  onChange={onChangePage}
-                  onSizeChanger={onChangePage}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}
                   setFixedColumns={setFixedColumns}
                   loading={loading}
                   handleDownload={handleDownload}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMoreBatch}
+                  loadMoreThreshold={20}
                 />
               </div>
             </Tabs.TabPane>

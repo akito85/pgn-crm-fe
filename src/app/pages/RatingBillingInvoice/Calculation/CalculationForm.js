@@ -589,7 +589,7 @@ const CalculationForm = ({ type }) => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">
+                <p className="mt-[15px] text-primary">
                   Billing Cycle Information
                 </p>
               </div>
@@ -637,7 +637,7 @@ const CalculationForm = ({ type }) => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">
+                <p className="mt-[15px] text-primary">
                   INPUT PARAMETER INFORMATION
                 </p>
               </div>
@@ -879,7 +879,7 @@ const CalculationForm = ({ type }) => {
                             <span
                               className={
                                 searchCustomerValue.length >= MAX_SEARCH_LENGTH
-                                  ? "text-red-500 font-semibold"
+                                  ? "text-red-500 "
                                   : "text-gray-500"
                               }
                             >
@@ -909,7 +909,7 @@ const CalculationForm = ({ type }) => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">
+                <p className="mt-[15px] text-primary">
                   SCHEDULER INFORMATION
                 </p>
               </div>
@@ -1033,7 +1033,7 @@ const CalculationForm = ({ type }) => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
+          <p className="text-[18px]">
             Are you sure you want to back?
           </p>
         </div>
@@ -1056,28 +1056,28 @@ const CalculationForm = ({ type }) => {
               }}
             />
             <div className="flex-1">
-              <p className="text-[18px] font-bold text-gray-800">
+              <p className="text-[18px] text-gray-800">
                 No Specific Customer Selected
               </p>
               <p className="text-[14px] text-gray-600 mt-3">
                 You have not selected any specific customer account.
               </p>
               <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
-                <p className="text-[14px] font-semibold text-orange-800">
+                <p className="text-[14px] text-orange-800">
                   The system will process{" "}
-                  <span className="text-[16px] font-bold">ALL customers</span>{" "}
+                  <span className="text-[16px]">ALL customers</span>{" "}
                   that match your filter criteria
                 </p>
               </div>
 
               <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200 max-h-[300px] overflow-y-auto">
-                <p className="text-[13px] font-semibold text-gray-700 mb-3">
+                <p className="text-[13px] text-gray-700 mb-3">
                   Current Filter Criteria:
                 </p>
 
                 <div className="space-y-2">
                   <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                    <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                    <span className="text-[13px] text-gray-700 min-w-[140px]">
                       SOR:
                     </span>
                     <span className="text-[13px] text-gray-600">
@@ -1089,7 +1089,7 @@ const CalculationForm = ({ type }) => {
 
                   {pendingDataFinal?.rRbiCalculationCostCenter?.length > 0 && (
                     <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Cost Center:
                       </span>
                       <div className="flex-1">
@@ -1104,7 +1104,7 @@ const CalculationForm = ({ type }) => {
                   {pendingDataFinal?.rRbiCalculationMeterReadingCode?.length >
                     0 && (
                     <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Meter Reading Code:
                       </span>
                       <div className="flex-1">
@@ -1122,7 +1122,7 @@ const CalculationForm = ({ type }) => {
                   {pendingDataFinal?.rRbiCalculationAccountSegment?.length >
                     0 && (
                     <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Account Segment:
                       </span>
                       <div className="flex-1">
@@ -1140,7 +1140,7 @@ const CalculationForm = ({ type }) => {
                   {pendingDataFinal?.rRbiCalculationAccountGroupType?.length >
                     0 && (
                     <div className="flex items-start gap-2 pb-2">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Account Group Type:
                       </span>
                       <div className="flex-1">
@@ -1236,7 +1236,7 @@ const CalculationForm = ({ type }) => {
         <div className="px-8 py-8 justify-center">
           <div className="w-full flex gap-[20px]">
             {IconModal["icon_success_default"]}
-            <p className="text-[18px] font-bold">{"Successful"}</p>
+            <p className="text-[18px]">{"Successful"}</p>
           </div>
           <p className="pl-[70px]">{"Your data has been created."}</p>
         </div>
@@ -1252,7 +1252,7 @@ const CalculationForm = ({ type }) => {
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">
             <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+            <p className="text-[18px]">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">{`Your data was not created. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>

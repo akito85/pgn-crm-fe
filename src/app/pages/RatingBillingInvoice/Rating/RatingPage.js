@@ -25,8 +25,9 @@ const RatingPage = () => {
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // PERUBAHAN: State untuk infinite scroll
+  const [page, setPage] = useState(0); // Start from 0
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -58,16 +59,19 @@ const RatingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
+  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
       getListRatingGasPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100, // Initial load 100 data
         sort,
+        isLoadMore: false, // Flag untuk initial load
       })
     );
-  }, [search, page, pageSize, sort, dispatch]);
+    setPage(0);
+  }, [dispatch, search, sort]);
 
   const tabItems = [
     {
@@ -94,13 +98,14 @@ const RatingPage = () => {
     },
   ];
 
+  // PERUBAHAN: Reset page ke 0 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0); // Reset to 0
       }
       return {
         ...prevState,
@@ -109,10 +114,29 @@ const RatingPage = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // TAMBAHAN: Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage < totalPages) {
+      await dispatch(
+        getListRatingGasPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true, // Flag untuk load more
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore = 
+    (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
     // Mapping untuk field yang berbeda case
@@ -134,8 +158,8 @@ const RatingPage = () => {
     setValueTab(key);
   };
 
-  const handleDetail = (record) => {
-    const recordKey = record.ratingCode;
+  const handleDetail = (record, rowKey) => {
+    const recordKey = rowKey || record.ratingCode;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
@@ -157,7 +181,7 @@ const RatingPage = () => {
       downloadRatingGas({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
@@ -179,23 +203,6 @@ const RatingPage = () => {
         </ButtonComponent>
       ),
     },
-    // {
-    //   action: "View",
-    //   type: "table",
-    //   render: (record) => {
-    //     return (
-    //       <Tooltip title="Detail">
-    //         <div className="pt-1">
-    //           <SVGIcon
-    //             name="IconDetail"
-    //             width={24}
-    //             onClick={() => handleDetail(record)}
-    //           />
-    //         </div>
-    //       </Tooltip>
-    //     );
-    //   },
-    // },
   ];
 
   const dataSourceWithKeys = useMemo(() => {
@@ -209,14 +216,14 @@ const RatingPage = () => {
     () =>
       columnsRating(
         search,
-        page,
-        pageSize,
+        0, // Tidak perlu pass page karena tidak digunakan untuk infinite scroll
+        0, // Tidak perlu pass pageSize karena tidak digunakan untuk infinite scroll
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
-    [search, page, pageSize, searchedColumn, searchText]
+    [search, searchedColumn, searchText]
   );
 
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
@@ -264,42 +271,26 @@ const RatingPage = () => {
           </div>
           <div className="my-0">
             <TableRBI
+              idTable="rating-table"
               size="small"
               dataSource={dataSourceWithKeys}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              handleDownload={handleDownload}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 16000 }}
+              tableScrolled={{ y: 525, x: 13000 }}
               onSort={onSortApi}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
-              onRow={(record) => ({
-                onClick: () => handleDetail(record),
-                style: {
-                  cursor: "pointer",
-                  backgroundColor:
-                    activeRowKey === record.ratingCode
-                      ? "#bae7ff"
-                      : "transparent",
-                  transition: "background-color 0.2s ease",
-                },
-                onMouseEnter: (e) => {
-                  if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }
-                },
-                onMouseLeave: (e) => {
-                  if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
-                },
-              })}
+              enableRowClick={true}
+              selectedRowKey={activeRowKey}
+              onRowClick={handleDetail}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>

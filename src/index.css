@@ -70,16 +70,19 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
   background-color: #ffffff !important;
 }
 
-/* Override default Ant Design frozen column background */
-.ant-table-cell-fix-left,
-.ant-table-cell-fix-right {
-  background-color: inherit !important;
+/* Hover effect - kuning pastel soft */
+.ant-table-tbody > tr:hover > td {
+  background-color: #fef9e7 !important;
 }
 
-/* Ensure frozen columns in thead maintain primary color */
-.ant-table-thead .ant-table-cell-fix-left,
-.ant-table-thead .ant-table-cell-fix-right {
-  background-color: var(--primary) !important;
+/* Selected/clicked row - kuning soft */
+.ant-table-tbody > tr.row-selected > td {
+  background-color: #fffbea !important;
+}
+
+/* Hover pada selected row tetap kuning soft */
+.ant-table-tbody > tr.row-selected:hover > td {
+  background-color: #fffbea !important;
 }
 
 .ant-tag {

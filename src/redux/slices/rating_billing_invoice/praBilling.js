@@ -496,8 +496,7 @@ export const getUserDetailCalculation = createAsyncThunk(
     }
   }
 );
-
-// create calculation slice
+  
 export const createPrabilling = createAsyncThunk(
   "CREATE_PRABILLING",
   async ({ body }, thunkAPI) => {
@@ -532,7 +531,7 @@ export const createPrabilling = createAsyncThunk(
 // get prabill list
 export const getListPrabillingInitPopulate = createAsyncThunk(
   "GET_LIST_PRABILLING_INIT_POPULATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "createdDtm~desc";
@@ -540,7 +539,10 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
 
       const response = await ratingBillingHttpService.getPagination(url);
 
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -1599,13 +1601,27 @@ const prabillingSlice = createSlice({
     },
 
     // Get list prabilling init populate
-    [getListPrabillingInitPopulate.pending]: (state) => {
-      state.loading = true;
+    [getListPrabillingInitPopulate.pending]: (state, action) => {
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getListPrabillingInitPopulate.fulfilled]: (state, action) => {
       state.loading = false;
-      // action.payload = { result: [], page: {} }
-      state.list_prabilling_init = action.payload.result || [];
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.list_prabilling_init = [
+          ...state.list_prabilling_init,
+          ...newData,
+        ];
+      } else {
+        state.list_prabilling_init = newData;
+      }
+
       state.prabilling_pagination = {
         totalPages: action.payload.page?.totalPages || 0,
         totalElements: action.payload.page?.totalElements || 0,
@@ -1613,15 +1629,18 @@ const prabillingSlice = createSlice({
         pageSize: action.payload.page?.size || 10,
       };
     },
-    [getListPrabillingInitPopulate.rejected]: (state) => {
+    [getListPrabillingInitPopulate.rejected]: (state, action) => {
       state.loading = false;
-      state.list_prabilling_init = [];
-      state.prabilling_pagination = {
-        totalPages: 0,
-        totalElements: 0,
-        currentPage: 0,
-        pageSize: 10,
-      };
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_prabilling_init = [];
+        state.prabilling_pagination = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
     // Get Log Activities
     [getLogActivities.pending]: (state) => {

@@ -507,7 +507,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING INFORMATION</p>
+            <p className="mt-[15px] ">PRABILLING INFORMATION</p>
           </div>
         }
       >
@@ -573,7 +573,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING RESULT</p>
+            <p className="mt-[15px]">PRABILLING RESULT</p>
             <ButtonComponent
               type={"submit"}
               border={false}
@@ -614,7 +614,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+            <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
           </div>
         }
       >
