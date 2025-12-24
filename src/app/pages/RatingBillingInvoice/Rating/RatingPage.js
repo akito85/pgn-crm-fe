@@ -135,8 +135,7 @@ const RatingPage = () => {
   };
 
   // TAMBAHAN: Calculate if there's more data
-  const hasMore = 
-    (dataSource?.length || 0) < (data?.page?.totalElements || 0);
+  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
     // Mapping untuk field yang berbeda case
@@ -194,7 +193,7 @@ const RatingPage = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -255,20 +254,20 @@ const RatingPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold">RATING LIST</p>
+              <p className="w-full mt-[15px]">RATING LIST</p>
               <div className="w-full flex justify-end gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
             </div>
           }
         >
-          <div className="mt-[0px]">
-            <Tabs
-              items={tabItems}
-              onChange={onChangeTab}
-              activeKey={valueTab}
-            />
-          </div>
+          <Tabs
+            items={tabItems}
+            onChange={onChangeTab}
+            activeKey={valueTab}
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
+          />
+
           <div className="my-0">
             <TableRBI
               idTable="rating-table"

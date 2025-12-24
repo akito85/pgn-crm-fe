@@ -21,14 +21,14 @@ const BillingDetail = ({
   useEffect(() => {
     if (billingCodeId && detailRef.current) {
       setActiveTab("1");
-      
+
       // Gunakan requestAnimationFrame untuk scroll lebih smooth
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          detailRef.current?.scrollIntoView({ 
-            behavior: "smooth", 
+          detailRef.current?.scrollIntoView({
+            behavior: "smooth",
             block: "start",
-            inline: "nearest"
+            inline: "nearest",
           });
         });
       });
@@ -80,10 +80,10 @@ const BillingDetail = ({
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold text-primary uppercase">Billing Detail</p>
+            <p className="mt-[15px] text-primary uppercase">Billing Detail</p>
             <button
               onClick={onClose}
-              className="mt-[15px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 w-8 h-8 flex items-center justify-center transition-colors"
               title="Close Detail"
             >
               ✕

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Radio, Tooltip } from "antd";
+import { Spin, Tabs, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -112,16 +112,16 @@ const BillingPage = () => {
 
   const tabBilling = [
     {
-      label: "All",
-      value: "All",
-    },
-    {
+      key: "Billing Gas",
       label: "Billing Gas",
-      value: "Billing Gas",
     },
     {
+      key: "All",
+      label: "All",
+    },
+    {
+      key: "Billing Non Gas",
       label: "Billing Non Gas",
-      value: "Billing Non Gas",
       disabled: true,
     },
   ];
@@ -163,8 +163,7 @@ const BillingPage = () => {
   };
 
   // TAMBAHAN: Calculate if there's more data
-  const hasMore = 
-    (dataSource?.length || 0) < (data?.page?.totalElements || 0);
+  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -212,8 +211,8 @@ const BillingPage = () => {
     setModalApprovalHistory(true);
   };
 
-  const onChangeTab = ({ target: { value } }) => {
-    setValueTab(value);
+  const onChangeTab = (key) => {
+    setValueTab(key);
     setSearch({});
     setPage(0); // Reset to 0
   };
@@ -221,12 +220,12 @@ const BillingPage = () => {
   const handleRefresh = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAllBillingPaginate({ 
-        search: reqSearch, 
-        page: 0, 
-        pageSize: 100, 
+      getAllBillingPaginate({
+        search: reqSearch,
+        page: 0,
+        pageSize: 100,
         sort,
-        isLoadMore: false 
+        isLoadMore: false,
       })
     );
     dispatch(getAllBillingRequestPaginate());
@@ -239,7 +238,7 @@ const BillingPage = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={handleDownload}
         >
@@ -251,7 +250,7 @@ const BillingPage = () => {
       action: "Approval",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconRequestApproval" width={24} color="#FFF" />}
+          icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
           type="submit"
           onClick={() => setModalApproval(true)}
         >
@@ -263,7 +262,7 @@ const BillingPage = () => {
       action: "Request",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          icon={<SVGIcon name="IconButtonCreate" width={20} />}
           type="submit"
           onClick={() => setModalRequest(true)}
         >
@@ -301,7 +300,7 @@ const BillingPage = () => {
     itemGrantAccess
   ).map((col) => ({
     ...col,
-    width: 100,
+    width: 15,
     align: "center",
   }));
 
@@ -366,74 +365,52 @@ const BillingPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Billing List</p>
-              <div className="flex gap-[20px]">
-                <Toolbar items={itemGrantAccess} />
-              </div>
+              <p className="w-full mt-[15px]">Billing List</p>
+              <Toolbar items={itemGrantAccess} />
             </div>
           }
-          type="tabs"
-          element={
-            <Radio.Group
-              options={tabBilling}
-              onChange={onChangeTab}
-              value={valueTab}
-              optionType="button"
-              buttonStyle="solid"
-              style={{ gap: 5, display: "flex" }}
-            />
-          }
         >
-          <div className="my-0">
-            <TableRBI
-              idTable="billing-table"
-              dataSource={dataSourceForTab}
-              columns={processedColumns}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: valueTab === "All" ? 1300 : 16000, y: 525 }}
-              onSort={onSort}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              showExport={false}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-              
-              onRow={(record) => ({
-                onClick: () => handleDetail(record),
-                style: {
-                  cursor: "pointer",
-                  backgroundColor:
-                    activeRowKey ===
-                    (record.billingCode || record.invoiceNumber)
-                      ? "#bae7ff"
-                      : "transparent",
-                  transition: "background-color 0.2s ease",
-                },
-                onMouseEnter: (e) => {
-                  if (
-                    activeRowKey !==
-                    (record.billingCode || record.invoiceNumber)
-                  ) {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }
-                },
-                onMouseLeave: (e) => {
-                  if (
-                    activeRowKey !==
-                    (record.billingCode || record.invoiceNumber)
-                  ) {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
-                },
-              })}
-            />
-          </div>
+          <Tabs
+            activeKey={valueTab}
+            onChange={onChangeTab}
+            type="line"
+            size="small"
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
+            items={tabBilling.map((tab) => ({
+              key: tab.key,
+              label: tab.label,
+              disabled: tab.disabled,
+              children: (
+                <div className="my-0">
+                  <TableRBI
+                    idTable="billing-table"
+                    dataSource={dataSourceForTab}
+                    columns={processedColumns}
+                    totalData={data?.page?.totalElements || 0}
+                    tableScrolled={{
+                      x: "max-content",
+                      y: 525,
+                    }}
+                    onSort={onSort}
+                    handleDownload={handleDownload}
+                    columnDefinitions={columnDefinitions}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={loading}
+                    showExport={false}
+                    usePagination={false}
+                    useInfiniteScroll={true}
+                    onLoadMore={handleLoadMore}
+                    hasMore={hasMore}
+                    loadMoreThreshold={20}
+                    enableRowClick={true}
+                    selectedRowKey={activeRowKey}
+                    onRowClick={handleDetail}
+                  />
+                </div>
+              ),
+            }))}
+          />
         </CardContainer>
 
         {pageDetail && (
