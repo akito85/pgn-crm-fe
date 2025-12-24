@@ -15,7 +15,7 @@ const CardContainer = ({ header, subHeader, children, type, element }) => {
         </div>
       )}
       {type === "tabs" && <div className="p-3">{element}</div>}
-      <div className="px-3 pb-3">{children}</div>
+      <div className="px-3 py-3 ">{children}</div>
     </div>
   );
 };
