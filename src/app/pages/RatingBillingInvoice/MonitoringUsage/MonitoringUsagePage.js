@@ -239,7 +239,6 @@ const MonitoringUsagePage = () => {
     align: "center",
   }));
 
-  // Manual column for Batch List with explicit render
   const columnActionBatch = [
     {
       title: "ACTION",
@@ -247,40 +246,69 @@ const MonitoringUsagePage = () => {
       fixed: "right",
       width: 120,
       align: "center",
-      render: (text, record) => (
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {/* View Icon */}
-          <Link
-            to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
-            state={{ id: record?.batchId }}
-          >
-            <Tooltip title="Detail">
-              <SVGIcon name="IconDetail" width={20} />
-            </Tooltip>
-          </Link>
+      render: (text, record) => {
+        const isDraft = record?.status?.toLowerCase() === "draft";
 
-          {/* Delete Icon - Only for Draft status */}
-          {record?.status?.toLowerCase() === "draft" && (
-            <Tooltip title="Delete Batch">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteBatch(record);
+        return (
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {/* View Icon */}
+            <Link
+              to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
+              state={{ id: record?.batchId }}
+            >
+              <Tooltip title="Detail">
+                <SVGIcon name="IconDetail" width={20} />
+              </Tooltip>
+            </Link>
+
+            <Tooltip
+              // title={
+              //   isDraft ? "Delete Batch" : "Cannot delete (Status not Draft)"
+              // }
+            >
+              <div
+                style={{
+                  cursor: isDraft ? "pointer" : "not-allowed",
+                  transition: "all 0.2s ease",
+                  display: "inline-flex",
+                  alignItems: "center",
                 }}
-              />
+                onMouseEnter={(e) => {
+                  if (isDraft) {
+                    e.currentTarget.style.transform = "scale(1.1)";
+                    e.currentTarget.style.opacity = "0.7";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (isDraft) {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.opacity = "1";
+                  }
+                }}
+                onClick={(e) => {
+                  if (isDraft) {
+                    e.stopPropagation();
+                    handleDeleteBatch(record);
+                  }
+                }}
+              >
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  color={isDraft ? undefined : "#C0BEC6"}
+                />
+              </div>
             </Tooltip>
-          )}
-        </div>
-      ),
+          </div>
+        );
+      },
     },
   ];
 
