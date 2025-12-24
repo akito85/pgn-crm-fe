@@ -19,6 +19,7 @@ import { useLocation } from "react-router-dom";
 const MultiDestination = ({
   id = 0,
   idCustomer = 0,
+  isActive = false,
   isApproval = false,
   setIsApproval = () => {},
   setShowApprovalButton = () => {},
