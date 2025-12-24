@@ -419,7 +419,7 @@ const DetailInformation = ({ data, tabHeader }) => {
         title: "Choose Customer",
         content: (
           <>
-            <p className="text-primary text-xs font-bold uppercase py-[20px] gap-5">
+            <p className="text-primary text-xs uppercase py-[20px] gap-5">
               CUSTOMER INFORMATION
             </p>
             {modalRecalculateRating ? (
@@ -473,7 +473,7 @@ const DetailInformation = ({ data, tabHeader }) => {
         title: "Confirmation",
         content: (
           <div>
-            <p className="text-primary text-xs font-bold uppercase py-[20px] gap-5">
+            <p className="text-primary text-xs uppercase py-[20px] gap-5">
               CONFIRMATION
             </p>
             <div>
@@ -696,7 +696,7 @@ const DetailInformation = ({ data, tabHeader }) => {
         <CardContainer
           subHeader={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+              <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
             </div>
           }
         >

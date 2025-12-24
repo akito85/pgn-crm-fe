@@ -514,7 +514,6 @@ const PrabillingPage = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="w-full mt-[15px] text-primary">PRABILLING LIST</p>
-
               <Toolbar items={itemGrantAccess} />
             </div>
           }

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { getCalculateLogPaginate } from "../../../../../../redux/slices/rating_billing_invoice/calculation";
-import { hasValue, renderColumn } from "../../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const TableCalculateLog = ({ calculationCode }) => {
@@ -20,7 +20,7 @@ const TableCalculateLog = ({ calculationCode }) => {
     right: [],
   }));
 
-  const { list_calculation_log, loading } = useSelector(
+  const { list_calculation_logp, loading } = useSelector(
     (state) => state.rbi_calculation
   );
 
@@ -281,13 +281,12 @@ const TableCalculateLog = ({ calculationCode }) => {
           true
         ),
         render: (text) =>
-          renderColumn(
+          renderDateColumn(
             "logDate",
             hasValue(search["logDate"]),
             searchText,
             text,
-            false,
-            "input",
+            "datetime",
             search
           ),
       },
@@ -336,8 +335,8 @@ const TableCalculateLog = ({ calculationCode }) => {
   return (
     <TableRBI
       columns={processedColumns}
-      dataSource={list_calculation_log?.result}
-      totalData={list_calculation_log?.page?.totalElements || 0}
+      dataSource={list_calculation_logp?.result}
+      totalData={list_calculation_logp?.page?.totalElements || 0}
       current={page}
       pageSize={pageSize}
       onChange={handleChangePage}

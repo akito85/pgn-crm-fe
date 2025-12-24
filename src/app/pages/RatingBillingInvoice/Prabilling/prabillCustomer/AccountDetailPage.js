@@ -533,7 +533,7 @@ const AccountDetailPage = () => {
     <CardContainer
       header={
         <div className="flex -my-4 justify-between items-center">
-          <p className="mt-[15px] font-bold">{title}</p>
+          <p className="mt-[15px]">{title}</p>
         </div>
       }
     >
