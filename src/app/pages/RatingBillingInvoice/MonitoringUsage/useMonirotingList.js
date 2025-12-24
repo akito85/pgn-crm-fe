@@ -129,15 +129,33 @@ export const useMonitoringList = (tabs, batchId) => {
     const searchRequest = encodeURIComponent(JSON.stringify(search));
     if (hasValue(batchId) && tabs === "Upload") {
       dispatch(
-        getDetailBatch({ batchId, page: 0, pageSize: 100, search: tempSearch, sort })
+        getDetailBatch({
+          batchId,
+          page: 0,
+          pageSize: 100,
+          search: tempSearch,
+          sort,
+        })
       );
     } else if (tabs === "Usage List") {
       dispatch(
-        getListUsagePaginate({ search: searchRequest, page: 0, pageSize: 100, sort, isLoadMore: false })
+        getListUsagePaginate({
+          search: searchRequest,
+          page: 0,
+          pageSize: 100,
+          sort,
+          isLoadMore: false,
+        })
       );
     } else if (tabs === "Batch List") {
       dispatch(
-        getListBatchPaginate({ search: searchRequest, page: 0, pageSize: 100, sort, isLoadMore: false })
+        getListBatchPaginate({
+          search: searchRequest,
+          page: 0,
+          pageSize: 100,
+          sort,
+          isLoadMore: false,
+        })
       );
     }
     setPage(0);
@@ -215,7 +233,12 @@ export const useMonitoringList = (tabs, batchId) => {
     try {
       const searchRequest = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getDownloadList({ search: searchRequest, sort, page: 1, pageSize: 1000 })
+        getDownloadList({
+          search: searchRequest,
+          sort,
+          page: 1,
+          pageSize: 1000,
+        })
       );
     } catch (error) {
       console.log("Error", error);
@@ -230,7 +253,7 @@ export const useMonitoringList = (tabs, batchId) => {
   const columns = [
     {
       title: "NO",
-      width: 50,
+      width: 40,
       align: "center",
       render: (text, object, index) => index + 1,
     },
@@ -238,7 +261,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "RECORD ID",
       dataIndex: "recordId",
       isNumber: true,
-      width: 100,
+      width: 120,
       // sorter: true,
       sorter: (a, b) => sorter("recordId", a, b),
       filteredValue: search?.["recordId"] ? [search?.["recordId"]] : null,
@@ -266,7 +289,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "BATCH ID",
       dataIndex: "batchId",
       isNumber: true,
-      width: 100,
+      width: 110,
       // sorter: true,
       sorter: (a, b) => sorter("batchId", a, b),
       filteredValue: search?.["batchId"] ? [search?.["batchId"]] : null,
@@ -294,7 +317,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
       isClassification: true,
-      width: 190,
+      width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("customerNumber", a, b),
       filteredValue: search?.["customerNumber"]
@@ -347,6 +370,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       isClassification: true,
+      width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("accountNumber", a, b),
       filteredValue: search?.["accountNumber"]
@@ -377,7 +401,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
       isClassification: true,
-      width: 200,
+      width: 160,
       // sorter: true,
       sorter: (a, b) => sorter("accountName", a, b),
       filteredValue: search?.["accountName"] ? [search?.["accountName"]] : null,
@@ -496,7 +520,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "SOR",
       dataIndex: "sor",
-      width: 220,
+      width: 150,
       isClassification: true,
       // sorter: true,
       sorter: (a, b) => sorter("sor", a, b),
@@ -589,7 +613,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "ACCOUNT SEGMENT",
       dataIndex: "accountSegment",
       isClassification: true,
-      width: 160,
+      width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("accountSegment", a, b),
       filteredValue: search?.["accountSegment"]
@@ -653,7 +677,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "ASSET SERIAL NUMBER",
       dataIndex: "assetSerialNumber",
       isClassification: true,
-      width: 180,
+      width: 200,
       // sorter: true,
       sorter: (a, b) => sorter("assetSerialNumber", a, b),
       filteredValue: search?.["assetSerialNumber"]
@@ -917,6 +941,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "UNCORRECTED VOL",
       dataIndex: "uncorrectedValue",
       align: "right",
+      width: 170,
       sorter: (a, b) => sorter("uncorrectedValue", a, b),
       filteredValue: search?.["unsorrectedValue"]
         ? [search?.["unsorrectedValue"]]
@@ -1000,6 +1025,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "CORRECTION FACTOR",
       dataIndex: "correctionFactor",
       align: "right",
+      width: 180,
       sorter: (a, b) => sorter("correctionFactor", a, b),
       filteredValue: search?.["correctionFactor"]
         ? [search?.["correctionFactor"]]
@@ -1207,7 +1233,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "DATA SOURCE",
       dataIndex: "fileSource",
-      width: 280,
+      width: 200,
       // sorter: true,
       sorter: (a, b) => sorter("fileSource", a, b),
       filteredValue: search?.["fileSource"] ? [search?.["fileSource"]] : null,
@@ -1239,6 +1265,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "TAXATION ROW ID",
       dataIndex: "taxationRowId",
       align: "right",
+      width: 170,
       sorter: (a, b) => sorter("taxationRowId", a, b),
       filteredValue: search?.["taxationRowId"]
         ? [search?.["taxationRowId"]]
@@ -1419,14 +1446,14 @@ export const useMonitoringList = (tabs, batchId) => {
   const batchColumns = [
     {
       title: "NO",
-      width: 50,
+      width: 30,
       align: "center",
       render: (text, object, index) => index + 1,
     },
-     {
+    {
       title: "FileName",
       dataIndex: "fileSource",
-      width: 150,
+      width: 130,
       sorter: true,
       isClassification: true,
       filteredValue: [search?.fileSource] || null,
@@ -1502,7 +1529,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "Σ SUCCEED",
       dataIndex: "totalSucceed",
-      width: 80,
+      width: 90,
       sorter: true,
       filteredValue: [search?.totalSucceed] || null,
       isNumber: true,
@@ -1528,7 +1555,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "Σ PROGRESS",
       dataIndex: "totalProgress",
-      width: 80,
+      width: 100,
       sorter: true,
       filteredValue: [search?.totalProgress] || null,
       isNumber: true,
@@ -1580,7 +1607,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "UPLOAD TYPE",
       dataIndex: "uploadType",
-      width: 90,
+      width: 110,
       sorter: true,
       filteredValue: [search?.uploadType] || null,
       isClassification: true,

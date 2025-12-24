@@ -131,7 +131,7 @@ const MonitoringUsagePage = () => {
 
   const tableScroll = (tabHeader) => {
     if (tabHeader === "Usage List") {
-      return { x: 8000, y: 525 };
+      return { x: 2000, y: 525 };
     } else {
       return { x: 800, y: 525 };
     }

@@ -147,7 +147,7 @@ const CalculationPage = () => {
       {
         key: "no",
         title: "NO",
-        width: 30,
+        width: 60,
         isClassification: true,
         render: (text, object, index) => index + 1, // Tidak digunakan untuk infinite scroll
       },
@@ -155,7 +155,7 @@ const CalculationPage = () => {
         key: "calculationCode",
         title: "CALCULATION CODE",
         dataIndex: "calculationCode",
-        width: 130,
+        width: 165,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.calculationCode] || null,
@@ -183,7 +183,7 @@ const CalculationPage = () => {
         key: "billingCycleVal",
         title: "BILLING CYCLE",
         dataIndex: "billingCycleVal",
-        width: 100,
+        width: 140,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.billingCycleVal] || null,
@@ -211,7 +211,7 @@ const CalculationPage = () => {
         key: "billingPeriodVal",
         title: "BILLING PERIOD",
         dataIndex: "billingPeriodVal",
-        width: 110,
+        width: 150,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.billingPeriodVal] || null,
@@ -239,7 +239,7 @@ const CalculationPage = () => {
         key: "serviceTypeVal",
         title: "SERVICE TYPE",
         dataIndex: "serviceTypeVal",
-        width: 100,
+        width: 140,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.serviceTypeVal] || null,
@@ -267,7 +267,7 @@ const CalculationPage = () => {
         key: "sorVal",
         title: "SOR",
         dataIndex: "sorVal",
-        width: 100,
+        width: 140,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.sorVal] || null,
@@ -358,7 +358,7 @@ const CalculationPage = () => {
         key: "accGroupType",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupType",
-        width: 200,
+        width: 180,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accGroupType] || null,
@@ -389,7 +389,7 @@ const CalculationPage = () => {
         key: "meterReadingCode",
         title: "METER READING CODE",
         dataIndex: "meterReadingCode",
-        width: 200,
+        width: 180,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.meterReadingCode] || null,
@@ -420,7 +420,7 @@ const CalculationPage = () => {
         key: "custNumb",
         title: "SPECIFIC CUSTOMER ACCOUNT",
         dataIndex: "custNumb",
-        width: 240,
+        width: 230,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.custNumb] || null,
@@ -507,7 +507,7 @@ const CalculationPage = () => {
         key: "progress",
         title: "Σ PROGRESS",
         dataIndex: "progress",
-        width: 120,
+        width: 130,
         isNumber: true,
         sorter: true,
         filteredValue: [search?.progress] || null,
@@ -563,7 +563,7 @@ const CalculationPage = () => {
         key: "failed",
         title: "Σ FAILED",
         dataIndex: "failed",
-        width: 110,
+        width: 100,
         isNumber: true,
         sorter: true,
         filteredValue: [search?.failed] || null,
@@ -591,7 +591,7 @@ const CalculationPage = () => {
         key: "customer",
         title: "Σ CUSTOMER",
         dataIndex: "customer",
-        width: 130,
+        width: 140,
         isNumber: true,
         sorter: true,
         filteredValue: [search?.customer] || null,
@@ -680,7 +680,7 @@ const CalculationPage = () => {
         dataIndex: "status",
         isClassification: true,
         sorter: true,
-        width: 80,
+        width: 120,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -728,15 +728,15 @@ const CalculationPage = () => {
       {
         key: "no",
         title: "NO",
-        width: 60,
-        align: "center",
+        width: 30,
+        isClassification: true,
         render: (text, object, index) => index + 1, // Tidak digunakan untuk infinite scroll
       },
       {
         key: "calCode",
         title: "CALCULATION CODE",
         dataIndex: "calCode",
-        width: 180,
+        width: 115,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.calCode] || null,
@@ -764,7 +764,7 @@ const CalculationPage = () => {
         key: "custNumb",
         title: "CUSTOMER NUMBER",
         dataIndex: "custNumb",
-        width: 170,
+        width: 120,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.custNumb] || null,
@@ -795,7 +795,7 @@ const CalculationPage = () => {
         key: "custName",
         title: "CUSTOMER NAME",
         dataIndex: "custName",
-        width: 170,
+        width: 120,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.custName] || null,
@@ -823,7 +823,7 @@ const CalculationPage = () => {
         key: "accNumb",
         title: "ACCOUNT NUMBER",
         dataIndex: "accNumb",
-        width: 160,
+        width: 120,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accNumb] || null,
@@ -851,7 +851,7 @@ const CalculationPage = () => {
         key: "accName",
         title: "ACCOUNT NAME",
         dataIndex: "accName",
-        width: 150,
+        width: 130,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accName] || null,
@@ -879,7 +879,7 @@ const CalculationPage = () => {
         key: "accGroupTypeVal",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupTypeVal",
-        width: 200,
+        width: 130,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.accGroupTypeVal] || null,
@@ -910,7 +910,7 @@ const CalculationPage = () => {
         key: "serviceTypeVal",
         title: "SERVICE TYPE",
         dataIndex: "serviceTypeVal",
-        width: 130,
+        width: 110,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.serviceTypeVal] || null,
@@ -938,7 +938,7 @@ const CalculationPage = () => {
         key: "saNumb",
         title: "SA NUMBER",
         dataIndex: "saNumb",
-        width: 120,
+        width: 100,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.saNumb] || null,
@@ -997,7 +997,7 @@ const CalculationPage = () => {
         key: "costCenterVal",
         title: "COST CENTER",
         dataIndex: "costCenterVal",
-        width: 130,
+        width: 120,
         isClassification: true,
         sorter: true,
         filteredValue: [search?.costCenterVal] || null,
@@ -1028,7 +1028,7 @@ const CalculationPage = () => {
         key: "accSegmentVal",
         title: "ACCOUNT SEGMENT",
         dataIndex: "accSegmentVal",
-        width: 170,
+        width: 120,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.accSegmentVal] || null,
@@ -1056,7 +1056,7 @@ const CalculationPage = () => {
         key: "meterReadingCodeVal",
         title: "METER READING CODE",
         dataIndex: "meterReadingCodeVal",
-        width: 200,
+        width: 130,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.meterReadingCodeVal] || null,
@@ -1084,7 +1084,7 @@ const CalculationPage = () => {
         key: "billingCycVal",
         title: "BILLING CYCLE",
         dataIndex: "billingCycVal",
-        width: 140,
+        width: 100,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.billingCycVal] || null,
@@ -1112,7 +1112,7 @@ const CalculationPage = () => {
         key: "billingPeriodVal",
         title: "BILLING PERIODE",
         dataIndex: "billingPeriodVal",
-        width: 140,
+        width: 110,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.billingPeriodVal] || null,
@@ -1140,7 +1140,7 @@ const CalculationPage = () => {
         key: "message",
         title: "MESSAGE",
         dataIndex: "message",
-        width: 200,
+        width: 100,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.message] || null,
@@ -1171,7 +1171,7 @@ const CalculationPage = () => {
         key: "calculateAt",
         title: "CALCULATE AT",
         dataIndex: "calculateAt",
-        width: 140,
+        width: 120,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.calculateAt] || null,
@@ -1199,7 +1199,7 @@ const CalculationPage = () => {
         key: "isTry",
         title: "IS TRY",
         dataIndex: "isTry",
-        width: 100,
+        width: 80,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.isTry] || null,
@@ -1229,18 +1229,18 @@ const CalculationPage = () => {
         title: "STATUS",
         dataIndex: "status",
         isClassification: true,
-        width: 100,
+        width: 70,
         sorter: true,
         filteredValue: [search?.status] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
+        // ...getColumnSearchPropsUseFilteredValue(
+        //   search,
+        //   "status",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch,
+        //   true
+        // ),
         render: (index) => {
           return renderColumn(
             "status",
@@ -1400,77 +1400,75 @@ const CalculationPage = () => {
   }, [allColumns]);
 
   return (
-    <Spin spinning={loading}>
-      <LayoutMenu>
-        <BreadCrumb routes={routes} />
+    <LayoutMenu>
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px]">CALCULATION JOB LIST</p>
-              <Toolbar items={itemGrantAccess} />
-            </div>
-          }
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px]">CALCULATION JOB LIST</p>
+            <Toolbar items={itemGrantAccess} />
+          </div>
+        }
+      >
+        <Tabs
+          activeKey={tabHeader}
+          onChange={changeTab}
+          type="line"
+          size="small"
+          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
         >
-          <Tabs
-            activeKey={tabHeader}
-            onChange={changeTab}
-            type="line"
-            size="small"
-            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
-          >
-            <Tabs.TabPane tab="Calculation List" key="Calculation List">
-              <div className="my-0">
-                <TableRBI
-                  idTable="calculation-table"
-                  size="small"
-                  dataSource={data_calculation.result}
-                  columns={processedColumns}
-                  totalData={data_calculation?.page?.totalElements || 0}
-                  tableScrolled={{ x: 4000, y: 525 }}
-                  onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  handleDownload={handleDownload}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
-                  loading={loading}
-                  showExport={false}
-                  usePagination={false}
-                  useInfiniteScroll={true}
-                  onLoadMore={handleLoadMore}
-                  hasMore={hasMore}
-                  loadMoreThreshold={20}
-                />
-              </div>
-            </Tabs.TabPane>
-            <Tabs.TabPane tab="Calculation History" key="Calculation History">
-              <div className="my-0">
-                <TableRBI
-                  idTable="calculation-history-table"
-                  size="small"
-                  dataSource={data_calculation.result}
-                  columns={processedColumns}
-                  totalData={data_calculation?.page?.totalElements || 0}
-                  tableScrolled={{ x: 4000, y: 525 }}
-                  onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  handleDownload={handleDownload}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
-                  loading={loading}
-                  showExport={false}
-                  usePagination={false}
-                  useInfiniteScroll={true}
-                  onLoadMore={handleLoadMore}
-                  hasMore={hasMore}
-                  loadMoreThreshold={20}
-                />
-              </div>
-            </Tabs.TabPane>
-          </Tabs>
-        </CardContainer>
-      </LayoutMenu>
-    </Spin>
+          <Tabs.TabPane tab="Calculation List" key="Calculation List">
+            <div className="my-0">
+              <TableRBI
+                idTable="calculation-table"
+                size="small"
+                dataSource={data_calculation.result}
+                columns={processedColumns}
+                totalData={data_calculation?.page?.totalElements || 0}
+                tableScrolled={{ x: 3000, y: 525 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                handleDownload={handleDownload}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
+                showExport={false}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
+              />
+            </div>
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Calculation History" key="Calculation History">
+            <div className="my-0">
+              <TableRBI
+                idTable="calculation-history-table"
+                size="small"
+                dataSource={data_calculation.result}
+                columns={processedColumns}
+                totalData={data_calculation?.page?.totalElements || 0}
+                tableScrolled={{ x: 3000, y: 525 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                handleDownload={handleDownload}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
+                showExport={false}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
+              />
+            </div>
+          </Tabs.TabPane>
+        </Tabs>
+      </CardContainer>
+    </LayoutMenu>
   );
 };
 

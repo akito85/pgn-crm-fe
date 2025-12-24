@@ -300,7 +300,7 @@ const BillingPage = () => {
     itemGrantAccess
   ).map((col) => ({
     ...col,
-    width: 15,
+    width: valueTab === "All" ? 70 : 25,
     align: "center",
   }));
 
@@ -388,7 +388,7 @@ const BillingPage = () => {
                     columns={processedColumns}
                     totalData={data?.page?.totalElements || 0}
                     tableScrolled={{
-                      x: "max-content",
+                      x: valueTab === "All" ? 1000 : 11000,
                       y: 525,
                     }}
                     onSort={onSort}
