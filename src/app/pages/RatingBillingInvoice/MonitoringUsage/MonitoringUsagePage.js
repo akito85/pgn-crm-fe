@@ -5,7 +5,8 @@ import React, {
   useState,
   useRef,
 } from "react";
-import { Spin, Tooltip, Tabs } from "antd";
+import { Spin, Tooltip, Tabs, Modal } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
@@ -13,6 +14,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getApprovalHistory,
   getListUsagePaginate,
+  getListBatchPaginate,
+  deleteBatch,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -102,6 +105,26 @@ const MonitoringUsagePage = () => {
     } catch (error) {
       console.error("Error fetching approval history:", error);
     }
+  };
+
+  const handleDeleteBatch = (record) => {
+    Modal.confirm({
+      title: "Delete Batch",
+      icon: <WarningOutlined style={{ color: "#faad14" }} />,
+      content: `Are you sure you want to delete Batch ID: ${record?.batchId}? This action cannot be undone.`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteBatch(record?.batchId)).unwrap();
+          // No need to refresh, Redux will automatically update the state
+          // The reducer already handles removing the deleted batch from the list
+        } catch (error) {
+          console.error("Error deleting batch:", error);
+        }
+      },
+    });
   };
 
   // onchange tabs
@@ -207,25 +230,6 @@ const MonitoringUsagePage = () => {
     },
   ];
 
-  const grantAccessBatch = [
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
-            state={{ id: record?.batchId }}
-          >
-            <Tooltip title="Detail">
-              <SVGIcon name="IconDetail" width={20} />
-            </Tooltip>
-          </Link>
-        );
-      },
-    },
-  ];
-
   const columnActionUsage = useColumnActionPermission(
     ["history"],
     grantAccessUsage
@@ -235,14 +239,46 @@ const MonitoringUsagePage = () => {
     align: "center",
   }));
 
-  const columnActionBatch = useColumnActionPermission(
-    ["view"],
-    grantAccessBatch
-  ).map((col) => ({
-    ...col,
-    width: 80,
-    align: "center",
-  }));
+  // Manual column for Batch List with explicit render
+  const columnActionBatch = [
+    {
+      title: "ACTION",
+      key: "action",
+      fixed: "right",
+      width: 120,
+      align: "center",
+      render: (text, record) => (
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", alignItems: "center" }}>
+          {/* View Icon */}
+          <Link
+            to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
+            state={{ id: record?.batchId }}
+          >
+            <Tooltip title="Detail">
+              <SVGIcon name="IconDetail" width={20} />
+            </Tooltip>
+          </Link>
+
+          {/* Delete Icon - Only for Draft status */}
+          {record?.status?.toLowerCase() === "draft" && (
+            <Tooltip title="Delete Batch">
+              <WarningOutlined
+                style={{ 
+                  fontSize: "20px", 
+                  color: "#ff4d4f",
+                  cursor: "pointer"
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteBatch(record);
+                }}
+              />
+            </Tooltip>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   const allColumns = useMemo(() => {
     let baseColumns = tabHeader === "Usage List" ? columnUsage : batchColumns;
@@ -286,6 +322,19 @@ const MonitoringUsagePage = () => {
   const handleListRefresh = () => {
     dispatch(
       getListUsagePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 0,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      })
+    );
+    setPage(0);
+  };
+
+  const handleBatchListRefresh = () => {
+    dispatch(
+      getListBatchPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 0,
         pageSize: 100,
