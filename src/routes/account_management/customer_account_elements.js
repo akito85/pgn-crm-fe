@@ -17,6 +17,7 @@ import ServicePoint from "../../app/pages/AccountManagement/CustomerAccountDetai
 import ServicePointAssetAssign from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServicePoint/ServicePointAssetAssign";
 import UpdateAccountInformation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/AccountInformation/UpdateAccountInformation";
 import RelationshipCreateAndUpdate from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipCreateAndUpdate";
+import RelationshipDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipDetail";
 import ApproveOrRejectTOS from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/DetailServiceAgreement/TosSubmission/ApproveOrRejectTos/ApproveOrRejectTOS";
 import CustomerDetail from "../../app/pages/AccountManagement/Customer/CustomerDetail";
 import UpdateCustomer from "../../app/pages/AccountManagement/Customer/Update/UpdateCustomer";
@@ -47,6 +48,13 @@ import GasUtilizationForm from "../../app/pages/AccountManagement/CustomerAccoun
 import EquipmentForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Equipment/Form/EquipmentForm";
 import RawMaterialSourceForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/RawMaterialSource/RawMaterialSourceHistory/RawMaterialSourceForm";
 import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ProductDistribution/ProductDistributionHistory/ProductDistributionForm";
+import PaymentRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetails"; 
+import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
+
+// import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+// import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
+import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetails";
+import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -92,6 +100,21 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Update Account Contact
   UPDATE_ACCOUNT_CONTACT_PAGE: <FormAccountContact type={"update"} />,
 
+  // Service Request Detail
+  // VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
+  // CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
+  // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
+
+  // Payment Relation Detail
+  VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails />,
+  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"create"} />,
+  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"update"} />,
+
+  // Payment Relation Detail
+  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
+  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"create"} />,
+  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"update"} />,
+
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,
   CREATE_GAS_SOURCE: <GasSourceForm type={"create"} />,
@@ -112,6 +135,7 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   //RELATIONSHIP
   CREATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"create"} />,
   UPDATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"update"} />,
+  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetail />,
 
   //SA-APPROVE-REJECT-TOS
   APPROVE_OR_REJECT_TOS_PAGE: <ApproveOrRejectTOS />,

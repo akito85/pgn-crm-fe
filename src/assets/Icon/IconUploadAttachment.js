@@ -1,5 +1,3 @@
-import React from "react";
-
 const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
   <svg
     width={218}
