@@ -88,6 +88,38 @@ export const deleteSingleUsage = createAsyncThunk(
   }
 );
 
+export const deleteBatch = createAsyncThunk(
+  "DELETE_BATCH",
+  async (batchId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/usage/delete-batch/${batchId}`;
+      const response = await ratingBillingHttpService.deleteData(url);
+      const successMessage = {
+        title: "Successful",
+        description: "Batch has been deleted successfully.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return { batchId, data: response.data };
+    } catch (response) {
+      const message =
+        (response.response &&
+          response.response.data &&
+          response.response.data.message) ||
+        response.message ||
+        response.toString();
+      const errorBody = {
+        title: "Failed",
+        data: response.response?.data?.data,
+        description: `Failed to delete batch. ${message}. Please try again.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(response.response?.data);
+    }
+  }
+);
+
 export const getListUsagePaginate = createAsyncThunk(
   "GET_MONITORING_USAGE_PAGINATE",
   async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
@@ -700,6 +732,28 @@ const monitoringUsageSlice = createSlice({
         state.data_upload = action.payload;
       });
     builder
+      .addCase(deleteBatch.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteBatch.fulfilled, (state, action) => {
+        state.loading = false;
+        // Remove batch dari list
+        if (state.data_list_batch?.result) {
+          state.data_list_batch.result = state.data_list_batch.result.filter(
+            (item) => item.batchId !== action.payload.batchId
+          );
+          // Update total count
+          if (state.data_list_batch.page?.totalElements) {
+            state.data_list_batch.page.totalElements -= 1;
+          }
+          // IMPORTANT: Update state.data reference agar perubahan terlihat di UI
+          state.data = state.data_list_batch;
+        }
+      })
+      .addCase(deleteBatch.rejected, (state) => {
+        state.loading = false;
+      });
+    builder
       .addCase(saveSubmitData.pending, (state) => {
         state.loading = true;
       })
@@ -822,8 +876,5 @@ const monitoringUsageSlice = createSlice({
 
 const { reducer } = monitoringUsageSlice;
 export default reducer;
-export const {
-  setClearData,
-  clearUpdated,
-  clearUpdatedDeleted,
-} = monitoringUsageSlice.actions;
+export const { setClearData, clearUpdated, clearUpdatedDeleted } =
+  monitoringUsageSlice.actions;

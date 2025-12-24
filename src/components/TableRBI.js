@@ -134,13 +134,13 @@ const TableRBI = ({
   onAdvanceSearch = () => {},
   onRow,
   rowClassName,
-  customHeaderLeft, // PROPS BARU untuk custom content di kiri header
-  showExport = true, // PROPS BARU untuk mengontrol tampilan tombol Export
-  showAdvanceSearch = true, // PROPS BARU untuk mengontrol tampilan tombol Advance Search
-  showSearchBar = true, // PROPS BARU untuk mengontrol tampilan Search Bar
-  enableRowClick = false, // PROPS BARU untuk mengaktifkan highlight row yang diklik
-  selectedRowKey = null, // PROPS BARU untuk row key yang terpilih dari parent
-  onRowClick = () => {}, // PROPS BARU callback ketika row diklik
+  customHeaderLeft,
+  showExport = false, 
+  showAdvanceSearch = true, 
+  showSearchBar = true, 
+  enableRowClick = false, 
+  selectedRowKey = null, 
+  onRowClick = () => {}, 
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);

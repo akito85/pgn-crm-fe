@@ -101,13 +101,17 @@ export const getHistoryCalculationPaginate = createAsyncThunk(
 // pagination Log
 export const getCalculateLogPaginate = createAsyncThunk(
   "GET_CALCULATE_LOG_PAGINATE",
-  async ({ search, page, pageSize, sort, calCode }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, calCode, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "logId~desc";
       const url = `/v1/dbs/api/rbi/calculation/list-calculatelog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -580,14 +584,18 @@ export const getDetailCalculationJob = createAsyncThunk(
 // detail calculation log
 export const getDetailCalculationLog = createAsyncThunk(
   "GET_DETAIL_CALCULATION_LOG",
-  async ({ calCode, search, page, pageSize, sort }, thunkAPI) => {
+  async ({ calCode, search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationlog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
       const response = await ratingBillingHttpService.getListPagination(url);
-      return response.data;
+      
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -811,16 +819,56 @@ const calculationSlice = createSlice({
         state.data = [];
       }
     },
-    // get pagination calculate log
     [getCalculateLogPaginate.pending]: (state, action) => {
-      state.loading_log = true;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getCalculateLogPaginate.fulfilled]: (state, action) => {
-      state.loading_log = false;
-      state.list_calculation_logp = action.payload;
+      state.loading = false;
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.list_calculation_logp = {
+          result: [
+            ...(state.list_calculation_logp?.result || []),
+            ...newData,
+          ],
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      } else {
+        state.list_calculation_logp = {
+          result: newData,
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
     },
     [getCalculateLogPaginate.rejected]: (state, action) => {
-      state.loading_log = false;
+      state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_calculation_logp = {
+          result: [],
+          page: {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
     },
     // download excel
     [donwloadedExcel.pending]: (state) => {
@@ -1009,15 +1057,57 @@ const calculationSlice = createSlice({
       state.loading = false;
     },
     // get detail calculation log
-    [getDetailCalculationLog.pending]: (state) => {
-      state.loading = true;
+     [getDetailCalculationLog.pending]: (state, action) => {
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getDetailCalculationLog.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_calculation_log = action.payload;
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.list_calculation_log = {
+          result: [
+            ...(state.list_calculation_log?.result || []),
+            ...newData,
+          ],
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      } else {
+        state.list_calculation_log = {
+          result: newData,
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
     },
-    [getDetailCalculationLog.rejected]: (state) => {
+    [getDetailCalculationLog.rejected]: (state, action) => {
       state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_calculation_log = {
+          result: [],
+          page: {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
     },
 
     // get detail calculation log no paigng
