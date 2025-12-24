@@ -2,15 +2,14 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import TableRBI from "../../../../../components/TableRBI";
-import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import TableCalculateLog from "./Table/TableCalculateLog";
-import CardContainer from "../../../../../components/CardContainer";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const DetailLog = ({ data, tabHeader }) => {
-  const { list_calculation_result, loading } = useSelector(
+  const { list_calculation_log, loading } = useSelector(
     (state) => state.rbi_calculation
   );
   const dispatch = useDispatch();
@@ -18,49 +17,43 @@ const DetailLog = ({ data, tabHeader }) => {
   const calculationCode = data?.calCode;
   
   // state
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20); // Load 20 data per load more
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: [],
   }));
 
-  // useEffect
+  // Initial fetch - load 100 data pertama
   useEffect(() => {
-    if (tabHeader === "Calculation Log") {
+    if (tabHeader === "Calculation Log" && calculationCode) {
       dispatch(
         getDetailCalculationLog({
           calCode: calculationCode,
           sort,
-          page,
-          pageSize,
+          page: 0,
+          pageSize: 100, // Initial load 100
           search: encodeURIComponent(JSON.stringify(search)),
+          isLoadMore: false,
         })
       );
+      setPage(0);
     }
-  }, [
-    tabHeader,
-    data,
-    dispatch,
-    calculationCode,
-    sort,
-    page,
-    pageSize,
-    search,
-  ]);
+  }, [tabHeader, dispatch, calculationCode, sort, search]);
 
   // handle search column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
@@ -69,16 +62,37 @@ const DetailLog = ({ data, tabHeader }) => {
     });
   };
 
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const pageInfo = list_calculation_log?.page || {};
+    const totalPages = pageInfo?.totalPages || 0;
+
+    if (nextPage < totalPages) {
+      await dispatch(
+        getDetailCalculationLog({
+          calCode: calculationCode,
+          sort,
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          search: encodeURIComponent(JSON.stringify(search)),
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
   // onSort
   const onSort = (_, __, sorter) => {
     const dataSort =
-      sorter && sorter.order !== undefined
+      sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
-  // base columns
+  // columns
   const baseColumns = useMemo(
     () => [
       {
@@ -86,12 +100,13 @@ const DetailLog = ({ data, tabHeader }) => {
         title: "NO",
         width: 60,
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         key: "action",
         title: "ACTION",
         dataIndex: "action",
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.action] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -118,6 +133,7 @@ const DetailLog = ({ data, tabHeader }) => {
         key: "calType",
         title: "TYPE",
         dataIndex: "calType",
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.calType] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -144,6 +160,7 @@ const DetailLog = ({ data, tabHeader }) => {
         key: "calDate",
         title: "CALCULATE AT",
         dataIndex: "calDate",
+        isClassification: true,
         align: "center",
         sorter: true,
         filteredValue: [search?.calDate] || null,
@@ -171,6 +188,7 @@ const DetailLog = ({ data, tabHeader }) => {
         key: "createdBy",
         title: "CALCULATE BY",
         dataIndex: "createdBy",
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -197,9 +215,12 @@ const DetailLog = ({ data, tabHeader }) => {
         key: "remark",
         title: "REMARK",
         dataIndex: "remark",
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.remark] || null,
-        ellipsis: { showTitle: false },
+        ellipsis: {
+          showTitle: false,
+        },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "remark",
@@ -221,39 +242,41 @@ const DetailLog = ({ data, tabHeader }) => {
           ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn]
   );
 
-  // processed columns with fixed
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(baseColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
 
-  // column definitions for table settings
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
   const columnDefinitions = useMemo(() => {
-    return baseColumns.map((col) => ({
+    return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [baseColumns]);
+  }, [allColumns]);
 
-  // change table pagination
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
+  const resultData = list_calculation_log?.result || [];
+  const pageInfo = list_calculation_log?.page || {};
+  
+  // Calculate if there's more data
+  const hasMore = resultData.length < (pageInfo?.totalElements || 0);
 
   return (
-    <CardContainer subHeader={"calculation log"}>
+    <BaseContainer subHeader={"calculation log"}>
       <TableRBI
+        idTable="calculation-log-table"
         columns={processedColumns}
-        dataSource={list_calculation_result?.result}
-        totalData={list_calculation_result?.page?.totalElements || 0}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChangePage}
-        onSizeChanger={handleChangePage}
+        dataSource={resultData}
+        totalData={pageInfo?.totalElements || 0}
         tableScrolled={{ x: 2000, y: 600 }}
         onSort={onSort}
         showExport={false}
@@ -261,9 +284,14 @@ const DetailLog = ({ data, tabHeader }) => {
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         loading={loading}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        loadMoreThreshold={20}
       />
       <TableCalculateLog calculationCode={calculationCode} />
-    </CardContainer>
+    </BaseContainer>
   );
 };
 
