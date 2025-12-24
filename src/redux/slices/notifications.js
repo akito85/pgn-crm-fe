@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import notificationService from "../services/notificationService";
+import notificationApi from "../../services/notificationApi";
 
 /**
  * Notification Types (aligned with Oracle schema)
@@ -107,6 +108,126 @@ export const connectNotifications = createAsyncThunk(
       console.error("[Notifications Slice] Connect error:", error);
       return rejectWithValue({
         message: error.message || "Failed to connect to notification stream",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Fetch user notifications from API
+ */
+export const fetchUserNotifications = createAsyncThunk(
+  "notifications/fetchUserNotifications",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await notificationApi.getUserNotifications(params);
+      return response;
+    } catch (error) {
+      console.error("[Notifications Slice] Error fetching user notifications:", error);
+      return rejectWithValue({
+        message: error.message || "Failed to fetch notifications",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Fetch unread notifications count from API
+ */
+export const fetchUnreadCount = createAsyncThunk(
+  "notifications/fetchUnreadCount",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await notificationApi.getUnreadNotificationsCount();
+      return response;
+    } catch (error) {
+      console.error("[Notifications Slice] Error fetching unread count:", error);
+      return rejectWithValue({
+        message: error.message || "Failed to fetch unread count",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Fetch unread notifications from API
+ */
+export const fetchUnreadNotifications = createAsyncThunk(
+  "notifications/fetchUnreadNotifications",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await notificationApi.getUnreadNotifications(params);
+      return response;
+    } catch (error) {
+      console.error("[Notifications Slice] Error fetching unread notifications:", error);
+      return rejectWithValue({
+        message: error.message || "Failed to fetch unread notifications",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Mark notification as read via API
+ */
+export const markNotificationAsReadApi = createAsyncThunk(
+  "notifications/markNotificationAsReadApi",
+  async (notificationId, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await notificationApi.markNotificationAsRead(notificationId);
+      // Update local state as well
+      dispatch(markAsRead(notificationId));
+      return response;
+    } catch (error) {
+      console.error("[Notifications Slice] Error marking notification as read:", error);
+      return rejectWithValue({
+        message: error.message || "Failed to mark notification as read",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Mark all notifications as read via API
+ */
+export const markAllNotificationsAsReadApi = createAsyncThunk(
+  "notifications/markAllNotificationsAsReadApi",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await notificationApi.markAllNotificationsAsRead();
+      // Update local state as well
+      dispatch(markAllAsRead());
+      return response;
+    } catch (error) {
+      console.error("[Notifications Slice] Error marking all notifications as read:", error);
+      return rejectWithValue({
+        message: error.message || "Failed to mark all notifications as read",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Delete notification via API
+ */
+export const deleteNotificationApi = createAsyncThunk(
+  "notifications/deleteNotificationApi",
+  async (notificationId, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await notificationApi.deleteNotification(notificationId);
+      // Update local state as well
+      dispatch(removeNotification(notificationId));
+      return response;
+    } catch (error) {
+      console.error("[Notifications Slice] Error deleting notification:", error);
+      return rejectWithValue({
+        message: error.message || "Failed to delete notification",
         error,
       });
     }
@@ -367,6 +488,101 @@ const notificationsSlice = createSlice({
         state.connectionStatus = "error";
         state.error = action.payload?.message || "Failed to connect";
         state.connectionError = action.payload;
+      });
+
+    // Fetch user notifications
+    builder
+      .addCase(fetchUserNotifications.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserNotifications.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Update notifications array with API response
+        state.notifications = action.payload.data || action.payload; // Depending on API response structure
+      })
+      .addCase(fetchUserNotifications.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to fetch notifications";
+      });
+
+    // Fetch unread count
+    builder
+      .addCase(fetchUnreadCount.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchUnreadCount.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Update unread count from API response
+        state.unreadCount = action.payload.count || action.payload.unreadCount || action.payload;
+      })
+      .addCase(fetchUnreadCount.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to fetch unread count";
+      });
+
+    // Fetch unread notifications
+    builder
+      .addCase(fetchUnreadNotifications.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchUnreadNotifications.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Update notifications array with unread notifications
+        const unreadNotifications = action.payload.data || action.payload;
+        // Add to state, ensuring no duplicates
+        unreadNotifications.forEach(notification => {
+          const exists = state.notifications.some(n => n.id === notification.id);
+          if (!exists) {
+            state.notifications.unshift(notification);
+          }
+        });
+      })
+      .addCase(fetchUnreadNotifications.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to fetch unread notifications";
+      });
+
+    // Mark notification as read via API
+    builder
+      .addCase(markNotificationAsReadApi.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(markNotificationAsReadApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // State is already updated via dispatch in the thunk
+      })
+      .addCase(markNotificationAsReadApi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to mark notification as read";
+      });
+
+    // Mark all notifications as read via API
+    builder
+      .addCase(markAllNotificationsAsReadApi.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(markAllNotificationsAsReadApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // State is already updated via dispatch in the thunk
+      })
+      .addCase(markAllNotificationsAsReadApi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to mark all notifications as read";
+      });
+
+    // Delete notification via API
+    builder
+      .addCase(deleteNotificationApi.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteNotificationApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // State is already updated via dispatch in the thunk
+      })
+      .addCase(deleteNotificationApi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to delete notification";
       });
 
     // Disconnect notifications

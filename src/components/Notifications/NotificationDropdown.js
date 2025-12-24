@@ -23,6 +23,9 @@ import {
   updateFilters,
   NOTIFICATION_TYPES,
   NOTIFICATION_PRIORITY,
+  fetchUnreadCount,
+  markNotificationAsReadApi,
+  markAllNotificationsAsReadApi,
 } from "../../redux/slices/notifications";
 import { NOTIFICATION_CONFIG } from "../../constants/configApp";
 import moment from "moment";
@@ -63,6 +66,8 @@ const NotificationDropdown = () => {
     if (userId) {
       console.log("[NotificationDropdown] Connecting to notifications for user:", userId);
       dispatch(connectNotifications({ userId }));
+      // Fetch unread count from API to ensure we have the most up-to-date count
+      dispatch(fetchUnreadCount());
     } else {
       console.warn("[NotificationDropdown] No userId found in token");
     }
@@ -154,9 +159,9 @@ const NotificationDropdown = () => {
    * Handle notification click - State-based navigation
    */
   const handleNotificationClick = (notification) => {
-    // Mark as read if not already read
+    // Mark as read if not already read via API
     if (!notification.read) {
-      dispatch(markAsRead(notification.id));
+      dispatch(markNotificationAsReadApi(notification.id));
     }
 
     // Navigate using state-based routing pattern
@@ -194,7 +199,7 @@ const NotificationDropdown = () => {
    * Handle mark all as read
    */
   const handleMarkAllAsRead = () => {
-    dispatch(markAllAsRead());
+    dispatch(markAllNotificationsAsReadApi());
   };
 
   /**

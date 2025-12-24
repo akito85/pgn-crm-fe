@@ -27,4 +27,5 @@ export const configApp = {
   INTEGRATION_SERVICE: `/service/integration`,
   JP_SERVICE: `/service/jp`,
   REPORT_SERVICE: `/rpt`,
+  NOTIFICATION_SERVICE: `/ntf`, // Notification REST API service
 };

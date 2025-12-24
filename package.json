@@ -2,7 +2,7 @@
   "name": "pgn-billing-fe-digisquare",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://dev-energy.pgn.co.id",
+  "proxy": "http://localhost:8080",
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@react-google-maps/api": "^2.19.2",
