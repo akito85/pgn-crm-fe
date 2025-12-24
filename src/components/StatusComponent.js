@@ -23,8 +23,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     let bgColor = "bg-slate-600";
     let tColor = "text-white";
 
-    console.log("status: ", colour);
-
     switch (lowerColour) {
       // ===== SUCCESS STATUSES =====
       case "active":
@@ -262,7 +260,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "submitted": // ✅ E-Faktur submitted
       case "waiting approval":
       case "waiting_approval":
-      case "waiting approval":
       case "awaiting_approval":
       case "awaiting approval":
       case "waiting_cancellation_approval": // ✅ E-Faktur
