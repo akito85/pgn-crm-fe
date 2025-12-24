@@ -19,7 +19,7 @@ export const columnsAllBilling = (
     key: "no",
     title: "NO",
     align: "center",
-    width: 30,
+    width: 50,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -175,7 +175,7 @@ export const columnsAllBilling = (
     title: "TRANSACTION DATE",
     sorter: true,
     align: "center",
-    width: 160,
+    width: 180,
     dataIndex: "transactionDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,

@@ -131,7 +131,7 @@ const MonitoringUsagePage = () => {
   const changeTab = (key) => {
     setTabHeader((prevState) => {
       if (prevState !== key) {
-        setPage(0);
+        setPage(1);
         setSearch({});
         setSort("");
         setSearchText("");
@@ -154,7 +154,7 @@ const MonitoringUsagePage = () => {
 
   const tableScroll = (tabHeader) => {
     if (tabHeader === "Usage List") {
-      return { x: 8000, y: 525 };
+      return { x: 2000, y: 525 };
     } else {
       return { x: 800, y: 525 };
     }
@@ -327,26 +327,26 @@ const MonitoringUsagePage = () => {
     dispatch(
       getListUsagePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page: 0,
+        page: 1,
         pageSize: 100,
         sort,
         isLoadMore: false,
       })
     );
-    setPage(0);
+    setPage(1);
   };
 
   const handleBatchListRefresh = () => {
     dispatch(
       getListBatchPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page: 0,
+        page: 1,
         pageSize: 100,
         sort,
         isLoadMore: false,
       })
     );
-    setPage(0);
+    setPage(1);
   };
 
   return (
