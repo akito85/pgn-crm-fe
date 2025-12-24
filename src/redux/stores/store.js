@@ -119,6 +119,7 @@ import contentManagementReducer from "../slices/rating_billing_invoice/MasterDat
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
+import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -264,6 +265,8 @@ const reducer = combineReducers({
   activityAction: activityActionReducer,
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
+
+  multiDestination: multiDestinationReducer,
 });
 
 // add throttle middlewares

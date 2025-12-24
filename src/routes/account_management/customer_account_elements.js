@@ -55,6 +55,8 @@ import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/Custo
 // import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
 import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetails";
 import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
+import MultiDestinationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/Details/MultiDestinationDetails";
+import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/CreateUpdate/CreateUpdateMultiDestination";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -121,6 +123,11 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_GAS_SOURCE: <GasSourceForm type={"update"} />,
   VIEW_GAS_SOURCE: <ViewGasSource />,
   UPLOAD_GAS_SOURCE: <UploadGasSource />,
+
+  // Multi Destination
+  VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetails />,
+  CREATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination type={"create"} />,
+  UPDATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination type={"update"} />,
 
   // Premise
   VIEW_DETAIL_PREMISE_PAGE: <PremiseDetail />,

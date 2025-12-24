@@ -236,6 +236,21 @@ const AccountDetailInformation = ({
       )
     ) {
       setTypeAccountInfoDetailSection(dataTabs.fi);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/update"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.md);
     }
     else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
@@ -372,15 +387,17 @@ const AccountDetailInformation = ({
       case dataTabs.promo:
         return <AccountPromo id={id} />;
       case dataTabs.md:
-        return <MultiDestination
-          id={id}
-          idCustomer={idCustomer}
-          isApproval={isApproval}
-          setIsApproval={setIsApproval}
-          setShowApprovalButton={setShowApprovalButton}
-          submitApprovalCondition={submitApprovalCondition}
-          setSubmitApprovalCondition={setSubmitApprovalCondition}
-        />
+        return (
+          <MultiDestination
+            id={id}
+            idCustomer={idCustomer}
+            isApproval={isApproval}
+            setIsApproval={setIsApproval}
+            setShowApprovalButton={setShowApprovalButton}
+            submitApprovalCondition={submitApprovalCondition}
+            setSubmitApprovalCondition={setSubmitApprovalCondition}
+          />
+        )
       default:
         return <></>;
     }
