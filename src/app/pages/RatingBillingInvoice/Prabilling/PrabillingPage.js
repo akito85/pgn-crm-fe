@@ -481,7 +481,7 @@ const PrabillingPage = () => {
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess).map(
     (col) => ({
       ...col,
-      width: 40,
+      width: 30,
       align: "center",
     })
   );
