@@ -4,7 +4,7 @@
  */
 
 import axios from "axios";
-import { tokenHeader } from "../utils/tokenHeader";
+import { notificationTokenHeader } from "../utils/notificationTokenHeader";
 
 // Use full URL for notification API (different from SSE endpoint)
 const NOTIFICATION_API_URL = "http://localhost:8080/ntf/v1/dbs/api/notifications";
@@ -19,7 +19,7 @@ const notificationApi = {
     try {
       const config = {
         params: params,
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.get(NOTIFICATION_API_URL, config);
@@ -37,7 +37,7 @@ const notificationApi = {
   getUnreadNotificationsCount: async () => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread-count`, config);
@@ -57,7 +57,7 @@ const notificationApi = {
     try {
       const config = {
         params: params,
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread`, config);
@@ -76,7 +76,7 @@ const notificationApi = {
   markNotificationAsRead: async (notificationId) => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.patch(`${NOTIFICATION_API_URL}/${notificationId}/read`, {}, config);
@@ -95,7 +95,7 @@ const notificationApi = {
   markNotificationsAsRead: async (notificationIds) => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.put(
@@ -117,7 +117,7 @@ const notificationApi = {
   markAllNotificationsAsRead: async () => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.put(`${NOTIFICATION_API_URL}/mark-all-read`, {}, config);
@@ -136,7 +136,7 @@ const notificationApi = {
   deleteNotification: async (notificationId) => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.delete(`${NOTIFICATION_API_URL}/${notificationId}`, config);
@@ -156,7 +156,7 @@ const notificationApi = {
     try {
       const config = {
         data: { notificationIds },
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.delete(NOTIFICATION_API_URL, config);
@@ -174,7 +174,7 @@ const notificationApi = {
   deleteAllNotifications: async () => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.delete(`${NOTIFICATION_API_URL}/all`, config);
@@ -193,7 +193,7 @@ const notificationApi = {
   bulkUpdateNotifications: async (bulkAction) => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.put(`${NOTIFICATION_API_URL}/bulk`, bulkAction, config);
@@ -212,7 +212,7 @@ const notificationApi = {
   sendNotification: async (notificationData) => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.post(NOTIFICATION_API_URL, notificationData, config);
@@ -230,7 +230,7 @@ const notificationApi = {
   getNotificationSettings: async () => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/settings`, config);
@@ -249,7 +249,7 @@ const notificationApi = {
   updateNotificationSettings: async (settings) => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.put(`${NOTIFICATION_API_URL}/settings`, settings, config);
@@ -270,7 +270,7 @@ const notificationApi = {
     try {
       console.log('[NotificationApi] Registering session for user:', userId);
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.post(
@@ -294,7 +294,7 @@ const notificationApi = {
   validateSession: async () => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/validate`, config);
@@ -313,7 +313,7 @@ const notificationApi = {
   getSessionInfo: async () => {
     try {
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/session`, config);
@@ -333,7 +333,7 @@ const notificationApi = {
     try {
       console.log('[NotificationApi] Unregistering session');
       const config = {
-        headers: tokenHeader(),
+        headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.post(`${NOTIFICATION_API_URL}/unregister`, {}, config);

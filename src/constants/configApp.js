@@ -4,7 +4,7 @@
 // Notification configuration
 export const NOTIFICATION_CONFIG = {
   ENABLED: true, // Set to false to disable notifications globally
-  SSE_BASE_URL: "http://localhost:8911", // SSE server URL
+  SSE_BASE_URL: "http://localhost:8080/ntf", // SSE server URL (through Envoy proxy)
   NOTIFICATION_SERVICE: `/ntf`,
   RECONNECT_DELAY: 30000, // Reconnection delay in ms (30 seconds to prevent spam)
   MAX_RECONNECT_ATTEMPTS: 5, // Maximum reconnection attempts before giving up
