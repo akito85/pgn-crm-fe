@@ -252,16 +252,37 @@ const PrabillingForm = ({ type }) => {
       "scheduleDateTime",
       "remark",
     ];
+
+    // Jangan reset field yang memiliki default data
     if (defaultData?.costCenter?.length > 0) {
       tempData = tempData.filter((item) => item !== "costCenter");
     }
     if (defaultData?.sor) {
       tempData = tempData.filter((item) => item !== "sor");
     }
+
+    // Reset form fields
     form.resetFields(tempData);
+
+    // Reset state-state yang terkait
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
+    setBillingCycle(null); // Reset billing cycle state
+
+    // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
+    setDataSpecificCustomer({
+      sorId: defaultData?.sor || null,
+      costCenterId: defaultData?.costCenter || [],
+      meterReadingCodeId: [],
+      accountSegmentId: [],
+      accountGroupTypeId: [],
+      search: "",
+      limit: DEFAULT_SEARCH_LIMIT,
+    });
+
+    // Reset selected customers map
+    setSelectedCustomersMap({});
   };
 
   const onFinish = async (formValue) => {
@@ -876,9 +897,7 @@ const PrabillingForm = ({ type }) => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] text-primary">
-                  SCHEDULER INFORMATION
-                </p>
+                <p className="mt-[15px] text-primary">SCHEDULER INFORMATION</p>
               </div>
             }
           >
@@ -999,9 +1018,7 @@ const PrabillingForm = ({ type }) => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px]">
-            Are you sure you want to back?
-          </p>
+          <p className="text-[18px]">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
 
@@ -1030,8 +1047,8 @@ const PrabillingForm = ({ type }) => {
               <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
                 <p className="text-[14px] text-orange-800">
                   The system will process{" "}
-                  <span className="text-[16px]">ALL customers</span>{" "}
-                  that match your filter criteria
+                  <span className="text-[16px]">ALL customers</span> that match
+                  your filter criteria
                 </p>
               </div>
 
