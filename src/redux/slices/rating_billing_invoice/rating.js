@@ -20,14 +20,19 @@ const initialState = {
 // list gas
 export const getListRatingGasPaginate = createAsyncThunk(
   "GET_LIST_RATING_GAS_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rating/list-rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -43,6 +48,7 @@ export const getListRatingGasPaginate = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -359,15 +365,38 @@ const ratingSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Rating Gas Pagination
-    [getListRatingGasPaginate.pending]: (state) => {
-      state.loading = true;
+   [getListRatingGasPaginate.pending]: (state, action) => {
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getListRatingGasPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+      
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        // Append new data to existing data
+        state.data = {
+          ...action.payload,
+          result: [
+            ...(state.data?.result || []),
+            ...newResult
+          ]
+        };
+      } else {
+        // Replace with new data (initial load or after search/sort)
+        state.data = action.payload;
+      }
     },
-    [getListRatingGasPaginate.rejected]: (state) => {
+    [getListRatingGasPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
     },
 
     // Get All Calculation Usage Pagination

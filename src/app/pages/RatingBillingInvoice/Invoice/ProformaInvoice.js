@@ -431,6 +431,16 @@ const ProformaInvoice = () => {
               <p className="mt-[15px] font-bold">Proforma Invoice List</p>
               <div className="flex gap-2">
                 <ButtonComponent
+                  type={"submit"}
+                  border={false}
+                  icon={<SVGIcon name="IconButtonDownload" width={24} />}
+                  onClick={() => {
+                    handleDownload();
+                  }}
+                >
+                  Download List
+                </ButtonComponent>
+                <ButtonComponent
                   icon={<SVGIcon name="IconButtonCreate" width={24} />}
                   type="submit"
                   onClick={() => {

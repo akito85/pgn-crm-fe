@@ -459,32 +459,6 @@ const DetailMonitoringUsage = () => {
                   </div>
                 </BaseContainer>
 
-                <BaseContainer
-                  header={"History Log Information"}
-                  className="mt-1"
-                  border
-                >
-                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
-                    <DetailText label="Record ID">
-                      {detail_batch?.batchInformation?.batchId}
-                    </DetailText>
-                    <DetailText label="Created Date">
-                      {detail_batch?.batchInformation?.uploadDate}
-                    </DetailText>
-                    <DetailText label="Created By">
-                      {detail_batch?.batchInformation?.uploadBy}
-                    </DetailText>
-                    <DetailText label="Updated Date">
-                      {/* Tambahkan field updated date jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedDate}
-                    </DetailText>
-                    <DetailText label="Updated By">
-                      {/* Tambahkan field updated by jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedBy}
-                    </DetailText>
-                  </div>
-                </BaseContainer>
-
                 <BaseContainer header={"Usage List"} border className="mt-1">
                   <div className="my-5">
                     <TableRBI
@@ -503,10 +477,32 @@ const DetailMonitoringUsage = () => {
                     />
                   </div>
                 </BaseContainer>
+                <BaseContainer
+                  header={"History Log Information"}
+                  className="mt-1"
+                  border
+                >
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                    <DetailText label="Record ID">
+                      {detail_batch?.batchInformation?.batchId}
+                    </DetailText>
+                    <DetailText label="Created Date">
+                      {detail_batch?.batchInformation?.uploadDate}
+                    </DetailText>
+                    <DetailText label="Created By">
+                      {detail_batch?.batchInformation?.uploadBy}
+                    </DetailText>
+                    <DetailText label="Updated Date">
+                      {detail_batch?.batchInformation?.updatedDate}
+                    </DetailText>
+                    <DetailText label="Updated By">
+                      {detail_batch?.batchInformation?.updatedBy}
+                    </DetailText>
+                  </div>
+                </BaseContainer>
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Approval" key="Approval">
-                {/* Approval Tab - Sesuai Desain Figma */}
                 <div className="bg-white mt-1">
                   <ApprovalComponentGeneral
                     dataTable={appHierDataDetail}

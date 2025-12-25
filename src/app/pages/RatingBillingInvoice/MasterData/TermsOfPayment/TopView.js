@@ -563,18 +563,18 @@ const TopView = () => {
 
   // Grant Access Item
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
-    //       type="submit"
-    //       onClick={handleDownload}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          type="submit"
+          onClick={handleDownload}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (

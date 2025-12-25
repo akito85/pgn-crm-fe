@@ -4,7 +4,6 @@ import { Alert, Spin, Tooltip } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -23,7 +22,6 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
@@ -40,9 +38,9 @@ const PosPage = () => {
   const dispatch = useDispatch();
   const dataSource = data_view?.result;
 
-  // Use State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // Use State - PERUBAHAN: State untuk infinite scroll
+  const [page, setPage] = useState(0); // Start from 0
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -60,68 +58,69 @@ const PosPage = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
-  //useEffect
+  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
-    // let tempSearch = "";
-    // for (const dataIndex in search) {
-    //   if (Object.hasOwnProperty.call(search, dataIndex)) {
-    //     const tempSearchText = search[dataIndex];
-    //     if (tempSearchText) {
-    //       tempSearch += `${dataIndex}~${tempSearchText},`;
-    //     }
-    //   }
-    // }
-    // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-
     dispatch(
       getListPointOfSales({
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100, // Initial load 100 data
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
+        isLoadMore: false, // Flag untuk initial load
       })
     );
-  }, [dispatch, page, pageSize, sort, search]);
+    setPage(0);
+  }, [dispatch, sort, search]);
 
   const handleDownload = () => {
-    // let tempSearch = "";
-    // for (const dataIndex in search) {
-    //   if (Object.hasOwnProperty.call(search, dataIndex)) {
-    //     const tempSearchText = search[dataIndex];
-    //     if (tempSearchText) {
-    //       tempSearch += `${dataIndex}~${tempSearchText},`;
-    //     }
-    //   }
-    // }
-    // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
       downloadPOS({
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
       })
     );
   };
 
+  // TAMBAHAN: Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data_view?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage < totalPages) {
+      await dispatch(
+        getListPointOfSales({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true, // Flag untuk load more
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore =
+    (data_view?.result?.length || 0) < (data_view?.page?.totalElements || 0);
+
+  // PERUBAHAN: Reset page ke 0 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0); // Reset to 0
       }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
     });
-  };
-
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
   };
 
   const onSort = (_, __, sort) => {
@@ -147,25 +146,16 @@ const PosPage = () => {
       .unwrap()
       .then(() => {
         setModalDelete(false);
-        // let tempSearch = "";
-        // for (const dataIndex in search) {
-        //   if (Object.hasOwnProperty.call(search, dataIndex)) {
-        //     const tempSearchText = search[dataIndex];
-        //     if (tempSearchText) {
-        //       tempSearch += `${dataIndex}~${tempSearchText},`;
-        //     }
-        //   }
-        // }
-        // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-
         dispatch(
           getListPointOfSales({
-            page,
-            pageSize,
+            page: 0,
+            pageSize: 100,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
+            isLoadMore: false,
           })
         );
+        setPage(0);
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -227,25 +217,16 @@ const PosPage = () => {
   ];
 
   const handleApproveReject = () => {
-    // let tempSearch = "";
-    // for (const dataIndex in search) {
-    //   if (Object.hasOwnProperty.call(search, dataIndex)) {
-    //     const tempSearchText = search[dataIndex];
-    //     if (tempSearchText) {
-    //       tempSearch += `${dataIndex}~${tempSearchText},`;
-    //     }
-    //   }
-    // }
-    // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-
     dispatch(
       getListPointOfSales({
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
+        isLoadMore: false,
       })
     );
+    setPage(0);
   };
 
   const itemGrantAccess = [
@@ -255,7 +236,7 @@ const PosPage = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -268,7 +249,7 @@ const PosPage = () => {
       action: "Upload",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={24} />}
+          icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={20} />}
           type={"submit"}
           border={false}
           disabled={false}
@@ -282,7 +263,7 @@ const PosPage = () => {
       render: (
         <ButtonComponent
           icon={
-            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={24} />
+            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={20} />
           }
           type={"submit"}
           border={false}
@@ -297,7 +278,7 @@ const PosPage = () => {
       render: (
         <Link to={RBI_ROUTES.POS_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type={"submit"}
             border={false}
           >
@@ -315,7 +296,7 @@ const PosPage = () => {
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconDetail" width={24} />}
+              icon={<SVGIcon name="IconDetail" width={20} />}
               border={false}
               onClick={() => handleOpenDetail(record)}
             >
@@ -326,7 +307,7 @@ const PosPage = () => {
               <div className="">
                 <SVGIcon
                   name="IconDetail"
-                  width={24}
+                  width={20}
                   onClick={() => handleOpenDetail(record)}
                 />
               </div>
@@ -344,7 +325,7 @@ const PosPage = () => {
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEye" color={"#0075bf"} width={24} />}
+              icon={<SVGIcon name="IconEye" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isAvailable}
             >
@@ -353,7 +334,7 @@ const PosPage = () => {
           ) : (
             <Tooltip title="Detail">
               <div className="">
-                <SVGIcon name="IconEye" width={24} />
+                <SVGIcon name="IconEye" width={20} />
               </div>
             </Tooltip>
           );
@@ -372,7 +353,7 @@ const PosPage = () => {
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={24} />}
+              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isEditable}
             >
@@ -466,30 +447,26 @@ const PosPage = () => {
 
         <CardContainer
           header={
-            <div className="flex w-full h-9">
-              <p className="w-full font-bold">point of sales list</p>
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px]">point of sales list</p>
               <div className={"w-full flex justify-end gap-2"}>
                 <Toolbar items={itemGrantAccess} />
               </div>
             </div>
           }
         >
-          <div className="w-full">
+          <div className="-pt-3">
             <TableRBI
+              idTable="pos-table"
               dataSource={dataSource}
               showExport={false}
               columns={[
                 ...PosTableView(
-                  page,
-                  pageSize,
                   searchInput,
                   searchedColumn,
                   searchText,
                   handleSearch,
                   search
-                  // handleApprovalHistory,
-                  // handleOpenDetail,
-                  // handleDelete
                 ),
                 ...useColumnActionPermission(
                   ["view", "update", "delete", "preview", "history"],
@@ -497,13 +474,14 @@ const PosPage = () => {
                   "Delete"
                 ),
               ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
               totalData={data_view?.page?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 8000 }}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>

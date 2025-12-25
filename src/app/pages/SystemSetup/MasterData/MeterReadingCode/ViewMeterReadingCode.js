@@ -333,6 +333,21 @@ const ViewMeterReadingCode = () => {
   const itemActions = [
     //action toolbar
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Upload",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_METER_READING_CODES}>
@@ -480,7 +495,7 @@ const ViewMeterReadingCode = () => {
             </div>
           }
         >
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               dataSource={data?.result}
               columns={processedColumns}

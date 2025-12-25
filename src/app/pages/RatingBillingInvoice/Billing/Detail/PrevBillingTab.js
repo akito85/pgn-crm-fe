@@ -134,7 +134,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
     <div className="space-y-6">
       {/* Billing Information Section */}
       <div>
-        <h3 className="text-sm font-bold text-primary uppercase mb-4">
+        <h3 className="text-sm text-primary uppercase mb-4">
           Billing Information
         </h3>
 
@@ -199,15 +199,24 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
           />
           <InfoField
             label="Prev Withholding Tax"
-            value={currencyFormatting(data_prevBilling?.prevWithHoldingTax, "idr")}
+            value={currencyFormatting(
+              data_prevBilling?.prevWithHoldingTax,
+              "idr"
+            )}
           />
           <InfoField
             label="Discount IDR"
-            value={currencyFormatting(data_prevBilling?.discountAmountIdr, "idr")}
+            value={currencyFormatting(
+              data_prevBilling?.discountAmountIdr,
+              "idr"
+            )}
           />
           <InfoField
             label="Discount USD"
-            value={currencyFormatting(data_prevBilling?.discountAmountUsd, "usd")}
+            value={currencyFormatting(
+              data_prevBilling?.discountAmountUsd,
+              "usd"
+            )}
           />
           <InfoField
             label="Tax Basis IDR"
@@ -238,7 +247,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
 
       {/* Billing Item Information Section */}
       <div>
-        <h3 className="text-sm font-bold text-primary uppercase mb-3">
+        <h3 className="text-sm text-primary uppercase mb-3">
           Billing Item Information
         </h3>
 

@@ -1,7 +1,10 @@
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { Tooltip } from "antd";
-import { currencyFormatting, numberFormatting } from "../../../../../utils/formatCurrency";
+import {
+  currencyFormatting,
+  numberFormatting,
+} from "../../../../../utils/formatCurrency";
 
 export const columnsAllBilling = (
   page = 1,
@@ -16,7 +19,7 @@ export const columnsAllBilling = (
     key: "no",
     title: "NO",
     align: "center",
-    width: 60,
+    width: 50,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -67,7 +70,8 @@ export const columnsAllBilling = (
       ]
     ),
     render: (text) => {
-      const displayText = text === "GAS" ? "Gas" : text === "NON_GAS" ? "Non Gas" : text;
+      const displayText =
+        text === "GAS" ? "Gas" : text === "NON_GAS" ? "Non Gas" : text;
       return renderColumn(
         "billingType",
         hasValue(search["billingType"]),
@@ -171,7 +175,7 @@ export const columnsAllBilling = (
     title: "TRANSACTION DATE",
     sorter: true,
     align: "center",
-    width: 160,
+    width: 180,
     dataIndex: "transactionDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -197,7 +201,7 @@ export const columnsAllBilling = (
     key: "remark",
     sorter: true,
     title: "REMARK",
-    isClassification:true,
+    isClassification: true,
     dataIndex: "remark",
     width: 250,
     ellipsis: {

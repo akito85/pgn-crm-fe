@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../components/TableRBI";
-import {
-  getPrevPaymentBilling,
-} from "../../../../../redux/slices/rating_billing_invoice/billing";
+import { getPrevPaymentBilling } from "../../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsPayment } from "./Table/TablePayment";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
@@ -99,7 +97,7 @@ const PrevPaymentTab = ({ billingCodeId }) => {
     <div className="space-y-6">
       {/* Payment Information Section */}
       <div>
-        <h3 className="text-sm font-bold text-primary uppercase mb-4">
+        <h3 className="text-sm text-primary uppercase mb-4">
           Payment Information
         </h3>
 
@@ -107,16 +105,22 @@ const PrevPaymentTab = ({ billingCodeId }) => {
           {/* Left Column */}
           <div className="space-y-4">
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment IDR</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment IDR
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_PrevPayment?.totalIdr, "idr") || "0.00 IDR"}
+                {currencyFormatting(data_PrevPayment?.totalIdr, "idr") ||
+                  "0.00 IDR"}
               </p>
             </div>
 
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment EQV IDR</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment EQV IDR
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_PrevPayment?.totalEqvIdr, "idr") || "0.00 IDR"}
+                {currencyFormatting(data_PrevPayment?.totalEqvIdr, "idr") ||
+                  "0.00 IDR"}
               </p>
             </div>
           </div>
@@ -124,16 +128,22 @@ const PrevPaymentTab = ({ billingCodeId }) => {
           {/* Right Column */}
           <div className="space-y-4">
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment USD</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment USD
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_PrevPayment?.totalUsd, "usd") || "0.00 USD"}
+                {currencyFormatting(data_PrevPayment?.totalUsd, "usd") ||
+                  "0.00 USD"}
               </p>
             </div>
 
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment EQV USD</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment EQV USD
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_PrevPayment?.totalEqvUsd, "usd") || "0.00 USD"}
+                {currencyFormatting(data_PrevPayment?.totalEqvUsd, "usd") ||
+                  "0.00 USD"}
               </p>
             </div>
           </div>
@@ -142,7 +152,7 @@ const PrevPaymentTab = ({ billingCodeId }) => {
 
       {/* Payment Detail Information Section */}
       <div>
-        <h3 className="text-sm font-bold text-primary uppercase mb-3">
+        <h3 className="text-sm text-primary uppercase mb-3">
           Payment Detail Information
         </h3>
 

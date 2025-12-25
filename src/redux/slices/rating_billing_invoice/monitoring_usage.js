@@ -88,16 +88,51 @@ export const deleteSingleUsage = createAsyncThunk(
   }
 );
 
+export const deleteBatch = createAsyncThunk(
+  "DELETE_BATCH",
+  async (batchId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/usage/delete-batch/${batchId}`;
+      const response = await ratingBillingHttpService.deleteData(url);
+      const successMessage = {
+        title: "Successful",
+        description: "Batch has been deleted successfully.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return { batchId, data: response.data };
+    } catch (response) {
+      const message =
+        (response.response &&
+          response.response.data &&
+          response.response.data.message) ||
+        response.message ||
+        response.toString();
+      const errorBody = {
+        title: "Failed",
+        data: response.response?.data?.data,
+        description: `Failed to delete batch. ${message}. Please try again.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(response.response?.data);
+    }
+  }
+);
+
 export const getListUsagePaginate = createAsyncThunk(
   "GET_MONITORING_USAGE_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/usage/paging?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -119,14 +154,17 @@ export const getListUsagePaginate = createAsyncThunk(
 );
 export const getListBatchPaginate = createAsyncThunk(
   "GET_MONITORING_BATCH_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/usage/list-batch?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -544,30 +582,68 @@ const monitoringUsageSlice = createSlice({
   extraReducers: (builder) => {
     // pagination monitoring usage list
     builder
-      .addCase(getListUsagePaginate.pending, (state) => {
-        state.loading = true;
+      .addCase(getListUsagePaginate.pending, (state, action) => {
+        // Only show loading on initial fetch, not on load more
+        if (!action.meta.arg?.isLoadMore) {
+          state.loading = true;
+        }
       })
       .addCase(getListUsagePaginate.fulfilled, (state, action) => {
         state.loading = false;
-        state.data_list_usage = action.payload;
-        state.data = action.payload;
+        const newData = action.payload.result || [];
+        const isLoadMore = action.payload.isLoadMore;
+
+        // If it's load more, append data. Otherwise, replace data
+        if (isLoadMore) {
+          state.data_list_usage = {
+            ...action.payload,
+            result: [...(state.data_list_usage.result || []), ...newData],
+          };
+        } else {
+          state.data_list_usage = action.payload;
+        }
+        state.data = state.data_list_usage;
       })
-      .addCase(getListUsagePaginate.rejected, (state) => {
+      .addCase(getListUsagePaginate.rejected, (state, action) => {
         state.loading = false;
+        // Only clear data on initial fetch failure, not on load more failure
+        if (!action.meta.arg?.isLoadMore) {
+          state.data_list_usage = { result: [], page: {} };
+          state.data = { result: [], page: {} };
+        }
       });
 
     // pagination monitoring batch list
     builder
-      .addCase(getListBatchPaginate.pending, (state) => {
-        state.loading = true;
+      .addCase(getListBatchPaginate.pending, (state, action) => {
+        // Only show loading on initial fetch, not on load more
+        if (!action.meta.arg?.isLoadMore) {
+          state.loading = true;
+        }
       })
       .addCase(getListBatchPaginate.fulfilled, (state, action) => {
         state.loading = false;
-        state.data_list_batch = action.payload;
-        state.data = action.payload;
+        const newData = action.payload.result || [];
+        const isLoadMore = action.payload.isLoadMore;
+
+        // If it's load more, append data. Otherwise, replace data
+        if (isLoadMore) {
+          state.data_list_batch = {
+            ...action.payload,
+            result: [...(state.data_list_batch.result || []), ...newData],
+          };
+        } else {
+          state.data_list_batch = action.payload;
+        }
+        state.data = state.data_list_batch;
       })
-      .addCase(getListBatchPaginate.rejected, (state) => {
+      .addCase(getListBatchPaginate.rejected, (state, action) => {
         state.loading = false;
+        // Only clear data on initial fetch failure, not on load more failure
+        if (!action.meta.arg?.isLoadMore) {
+          state.data_list_batch = { result: [], page: {} };
+          state.data = { result: [], page: {} };
+        }
       });
 
     // pagination monitoring approval list
@@ -654,6 +730,28 @@ const monitoringUsageSlice = createSlice({
       .addCase(uploadMonitoringUsage.rejected, (state, action) => {
         state.loading = false;
         state.data_upload = action.payload;
+      });
+    builder
+      .addCase(deleteBatch.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteBatch.fulfilled, (state, action) => {
+        state.loading = false;
+        // Remove batch dari list
+        if (state.data_list_batch?.result) {
+          state.data_list_batch.result = state.data_list_batch.result.filter(
+            (item) => item.batchId !== action.payload.batchId
+          );
+          // Update total count
+          if (state.data_list_batch.page?.totalElements) {
+            state.data_list_batch.page.totalElements -= 1;
+          }
+          // IMPORTANT: Update state.data reference agar perubahan terlihat di UI
+          state.data = state.data_list_batch;
+        }
+      })
+      .addCase(deleteBatch.rejected, (state) => {
+        state.loading = false;
       });
     builder
       .addCase(saveSubmitData.pending, (state) => {
@@ -778,8 +876,5 @@ const monitoringUsageSlice = createSlice({
 
 const { reducer } = monitoringUsageSlice;
 export default reducer;
-export const {
-  setClearData,
-  clearUpdated,
-  clearUpdatedDeleted,
-} = monitoringUsageSlice.actions;
+export const { setClearData, clearUpdated, clearUpdatedDeleted } =
+  monitoringUsageSlice.actions;

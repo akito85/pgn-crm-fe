@@ -2,21 +2,19 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getCo
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 
 export const PosTableView = (
-  page = 1,
-  pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch = () => {},
   search
-  // handleApprovalHistory = () => {},
-  // handleOpenDetail = () => {},
-  // handleDelete = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
+    dataIndex: "no",
+    fixed: "left",
     width: 60,
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    render: (text, object, index) => index + 1, // Infinite scroll tidak menggunakan page-based numbering
   },
   {
     title: "POS NUMBER",
