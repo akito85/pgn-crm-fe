@@ -122,7 +122,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         key: "customerNumber",
         title: "CUSTOMER NUMBER",
         dataIndex: "customerNumber",
-        width: 150,
+        width: 200,
         sorter: true,
         filteredValue: [search?.customerNumber] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -151,7 +151,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "customerName",
         width: 200,
         sorter: true,
-        isClassification: true,
         filteredValue: [search?.customerName] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -177,9 +176,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         key: "accountNumber",
         title: "ACCOUNT NUMBER",
         dataIndex: "accountNumber",
-        width: 150,
+        width: 200,
         sorter: true,
-        isNumber: true,
         filteredValue: [search?.accountNumber] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -207,7 +205,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "accountName",
         width: 200,
         sorter: true,
-        isClassification: true,
         filteredValue: [search?.accountName] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -245,7 +242,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         key: "costCenter",
         title: "COST CENTER",
         dataIndex: "costCenter",
-        width: 200,
+        width: 150,
         isClassification: true,
         sorter: true,
         ellipsis: {
@@ -257,7 +254,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         key: "accountGroupType",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accountGroupType",
-        width: 150,
+        width: 160,
         isClassification: true,
         sorter: true,
         render: (text) => text || "",
@@ -267,7 +264,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "METER READING CODE",
         dataIndex: "meterReadingCode",
         isClassification: true,
-        width: 150,
+        width: 160,
         sorter: true,
         render: (text) => text || "",
       },
@@ -276,7 +273,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "ACCOUNT TYPE",
         dataIndex: "accountType",
         isClassification: true,
-        width: 100,
+        width: 150,
         align: "center",
         sorter: true,
         render: (text) => text || "",
@@ -315,7 +312,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "BILLING PERIOD",
         dataIndex: "billPeriod",
         isClassification: true,
-        width: 120,
+        width: 140,
         align: "center",
         sorter: true,
         render: (text) => text || "",
@@ -324,7 +321,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         key: "accountGroup",
         title: "ACCOUNT GROUP",
         dataIndex: "accountGroup",
-        width: 120,
+        isClassification:true,
+        width: 140,
         sorter: true,
         render: (text) => text || "",
       },
@@ -334,7 +332,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "saNumber",
         width: 150,
         sorter: true,
-        isClassification: true,
         render: (text) => text || "",
       },
       {
@@ -342,9 +339,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "PJBG TYPE",
         dataIndex: "pjbgType",
         width: 100,
-        align: "center",
+        isClassification:true,
         sorter: true,
-        isNumber: true,
         render: (text) => text || "",
       },
       {
@@ -352,7 +348,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "SA SERVICE TYPE",
         dataIndex: "saServiceType",
         width: 120,
-        align: "center",
         isClassification: true,
         sorter: true,
         render: (text) => text || "",
@@ -399,7 +394,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "TIME UNIT",
         dataIndex: "timeUnit",
         width: 100,
-        align: "center",
+        isClassification:true,
         sorter: true,
         render: (text) => text || "",
       },
@@ -408,7 +403,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "UNIT MEASURE",
         dataIndex: "unitMeasure",
         width: 120,
-        align: "center",
+        isClassification:true,
         sorter: true,
         render: (text) => text || "",
       },
@@ -417,7 +412,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "CURRENCY",
         dataIndex: "currency",
         width: 100,
-        align: "center",
+        isClassification:true,
         sorter: true,
         render: (text) => text || "",
       },
@@ -426,7 +421,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "PAYMENT TYPE",
         dataIndex: "paymentType",
         width: 120,
-        align: "center",
+        isClassification:true,
         sorter: true,
         render: (text) => text || "",
       },
@@ -435,7 +430,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         title: "CHARGING METHOD",
         dataIndex: "chargingMethod",
         width: 150,
-        align: "center",
+        isClassification:true,
         sorter: true,
         render: (text) => text || "",
       },
@@ -607,7 +602,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             dataSource={resultData}
             columns={processedColumns}
             totalData={pageInfo?.totalElements || 0}
-            tableScrolled={{ x: 5500, y: 600 }}
+            tableScrolled={{ x: 3000, y: 600 }}
             onSort={onSort}
             showExport={false}
             columnDefinitions={columnDefinitions}
