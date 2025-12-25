@@ -260,7 +260,6 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "RECORD ID",
       dataIndex: "recordId",
-      isNumber: true,
       width: 120,
       // sorter: true,
       sorter: (a, b) => sorter("recordId", a, b),
@@ -288,7 +287,6 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "BATCH ID",
       dataIndex: "batchId",
-      isNumber: true,
       width: 110,
       // sorter: true,
       sorter: (a, b) => sorter("batchId", a, b),
@@ -316,7 +314,6 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
-      isClassification: true,
       width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("customerNumber", a, b),
@@ -346,7 +343,6 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
-      isClassification: true,
       width: 180,
       // sorter: true
       sorter: (a, b) => sorter("customerName", a, b),
@@ -369,7 +365,6 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
-      isClassification: true,
       width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("accountNumber", a, b),
@@ -400,7 +395,6 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
-      isClassification: true,
       width: 160,
       // sorter: true,
       sorter: (a, b) => sorter("accountName", a, b),
@@ -824,7 +818,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "HOUR",
       dataIndex: "fhour",
-      isNumber: true,
+      isClassification: true,
       // sorter: true,
       sorter: (a, b) => sorter("fhour", a, b),
       filteredValue: search?.["fhour"] ? [search?.["fhour"]] : null,
