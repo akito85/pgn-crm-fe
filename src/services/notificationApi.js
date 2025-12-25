@@ -112,7 +112,7 @@ const notificationApi = {
 
   /**
    * Mark all user notifications as read
-   * PUT /v1/dbs/api/notifications/mark-all-read
+   * PUT /v1/dbs/api/notifications/read-all
    */
   markAllNotificationsAsRead: async () => {
     try {
@@ -120,7 +120,7 @@ const notificationApi = {
         headers: notificationTokenHeader(),
         withCredentials: true,
       };
-      const response = await axios.put(`${NOTIFICATION_API_URL}/mark-all-read`, {}, config);
+      const response = await axios.patch(`${NOTIFICATION_API_URL}/read-all`, {}, config);
       return response?.data;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
