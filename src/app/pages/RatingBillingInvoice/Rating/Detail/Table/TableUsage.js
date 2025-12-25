@@ -13,14 +13,14 @@ export const columnsUsage = (
   {
     key: "no",
     title: "NO",
-    align: "center",
+    isClassification:true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
     key: "billingPeriod",
-    title: "PERIOD",
-    width: 100,
+    title: "Billing Period",
+    width: 150,
     sorter: true,
     isClassification:true,
     dataIndex: "billingPeriod",
@@ -48,6 +48,7 @@ export const columnsUsage = (
     key: "assetSerialNumber",
     title: "ASSET SERIAL NUMBER",
     dataIndex: "assetSerialNumber",
+    width: 190,
     sorter: true,
     isClassification:true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -75,6 +76,7 @@ export const columnsUsage = (
     key: "assetType",
     title: "ASSET TYPE",
     dataIndex: "assetType",
+    width: 130,
     sorter: true,
     isClassification:true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -127,6 +129,7 @@ export const columnsUsage = (
   {
     key: "fdate",
     title: "DATE",
+    width: 120,
     sorter: true,
     isClassification:true,
     dataIndex: "fdate",
@@ -154,6 +157,7 @@ export const columnsUsage = (
     key: "fhour",
     title: "HOUR",
     dataIndex: "fhour",
+    width: 100,
     sorter: true,
     isClassification:true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -172,6 +176,7 @@ export const columnsUsage = (
     key: "streamId",
     title: "STREAM ID",
     dataIndex: "streamId",
+    width: 120,
     sorter: true,
     isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -280,8 +285,9 @@ export const columnsUsage = (
     key: "calorie",
     title: "CALORIE",
     dataIndex: "calorie",
+    width: 150,
     sorter: true,
-    isNumner:true,
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calorie",
@@ -464,6 +470,7 @@ export const columnsUsage = (
     key: "taxationRowId",
     title: "TAXATION ROW ID",
     dataIndex: "taxationRowId",
+    width: 180,
     sorter: true,
     isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(

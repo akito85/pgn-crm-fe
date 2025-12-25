@@ -648,7 +648,7 @@ const DetailInformation = ({ data, tabHeader }) => {
               {data?.generateDate}
             </DetailText>
             <DetailText label={"Completion Date"}>
-              21 Nov 2025 17:49:31
+              {data?.completionDate}
             </DetailText>
             <DetailText label={"Status"}>
               {renderStatus(data?.status)}
@@ -662,7 +662,7 @@ const DetailInformation = ({ data, tabHeader }) => {
             <DetailText label={"SOR"}>{data?.sor}</DetailText>
             <DetailText label={"Cost Center"}>{data?.costCenter}</DetailText>
             <DetailText label={"Meter Reading Code"}>
-              {data?.mreadingCode}
+              {data?.meterReadingCode}
             </DetailText>
 
             <DetailText label={"Account Segment"}>
