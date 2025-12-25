@@ -425,11 +425,11 @@ export const saveSubmitData = createAsyncThunk(
         data
       );
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been ${
           data?.isSubmit ? "submitted" : "updated"
         }.`,
-      }; // 1 draft false , 2 submit true
+      };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
@@ -439,15 +439,27 @@ export const saveSubmitData = createAsyncThunk(
           response.response.data.message) ||
         response.message ||
         response.toString();
+
+      // Custom handling untuk apphierId null error
+      let errorDescription = `Your data was not ${
+        data?.isSubmit ? "submitted" : "updated"
+      }. ${message}. Please try again.`;
+
+      if (
+        message.toLowerCase().includes("apphierid") ||
+        message.toLowerCase().includes("null")
+      ) {
+        errorDescription =
+          "Please select an Approval Hierarchy in the Approval tab before submitting.";
+      }
+
       const errorBody = {
         title: "Failed",
-        data: response.response.data.data,
-        description: `Your data was not ${
-          data?.isSubmit ? "submitted" : "updated"
-        }. ${message}. Please try again.`,
+        data: response.response?.data?.data,
+        description: errorDescription,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(response.response.data);
+      return thunkAPI.rejectWithValue(response.response?.data);
     }
   }
 );

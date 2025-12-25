@@ -18,6 +18,7 @@ import {
   updateSingleUsage,
   deleteSingleUsage,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../components/CardContainer";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
@@ -156,6 +157,17 @@ const DetailMonitoringUsage = () => {
 
   // handle save
   const handleSave = (formValue) => {
+    if (!selectedHierarchy || !hasValue(selectedHierarchy)) {
+      const errorBody = {
+        title: "Validation Error",
+        description:
+          "Please select an Approval Hierarchy in the Approval tab before saving or submitting.",
+      };
+      dispatch(showModalError(errorBody));
+      setTabHeader("Approval");
+      return;
+    }
+
     setBody({
       ...detail_batch,
       usageList: dataTable,
@@ -166,7 +178,6 @@ const DetailMonitoringUsage = () => {
 
   const handleSaveUpdateUsage = async (formValue) => {
     try {
-      // Prepare request body sesuai format backend
       const requestBody = {
         accountNumber: formValue?.accountNumber || null,
         accountName: formValue?.accountName || null,
