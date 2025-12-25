@@ -188,11 +188,14 @@ export const getListBatchPaginate = createAsyncThunk(
 // list approval
 export const getListApproval = createAsyncThunk(
   "GET_LIST_APPROVAL",
-  async ({ page, pageSize }, thunkAPI) => {
+  async ({ page, pageSize, isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/usage/get-approval?page=${page}&size=${pageSize}`;
       const response = await ratingBillingHttpService.getListPagination(url);
-      return response?.data;
+      return {
+        ...response?.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -660,15 +663,33 @@ const monitoringUsageSlice = createSlice({
 
     // pagination monitoring approval list
     builder
-      .addCase(getListApproval.pending, (state) => {
-        state.loading = true;
+      .addCase(getListApproval.pending, (state, action) => {
+        // Only show loading on initial fetch, not on load more
+        if (!action.meta.arg?.isLoadMore) {
+          state.loading = true;
+        }
       })
       .addCase(getListApproval.fulfilled, (state, action) => {
         state.loading = false;
-        state.data_approval = action.payload;
+        const newData = action.payload.result || [];
+        const isLoadMore = action.payload.isLoadMore;
+
+        // If it's load more, append data. Otherwise, replace data
+        if (isLoadMore) {
+          state.data_approval = {
+            ...action.payload,
+            result: [...(state.data_approval.result || []), ...newData],
+          };
+        } else {
+          state.data_approval = action.payload;
+        }
       })
-      .addCase(getListApproval.rejected, (state) => {
+      .addCase(getListApproval.rejected, (state, action) => {
         state.loading = false;
+        // Only clear data on initial fetch failure, not on load more failure
+        if (!action.meta.arg?.isLoadMore) {
+          state.data_approval = { result: [], page: {} };
+        }
       });
 
     // detail batch
