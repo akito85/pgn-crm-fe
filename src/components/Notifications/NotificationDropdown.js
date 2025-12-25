@@ -71,6 +71,8 @@ const NotificationDropdown = () => {
       const initializeNotifications = async () => {
         try {
           // Step 1: Register session (creates HttpSession and session cookie)
+          // TODO: Check if session already exists (validateSession) before registering new one
+          // to avoid creating duplicate sessions on component remount
           console.log("[NotificationDropdown] Registering session for user:", userId);
           await notificationApi.registerSession(userId);
 
@@ -93,20 +95,13 @@ const NotificationDropdown = () => {
       console.warn("[NotificationDropdown] No userId found in token");
     }
 
-    // Cleanup: Unregister session and disconnect on unmount
-    // Note: In development with React StrictMode, this runs twice
-    // The service handles reconnection gracefully
+    // Cleanup: Disconnect from SSE on unmount
+    // Note: Session is NOT unregistered here - it should only be unregistered on logout
+    // Session will expire naturally after timeout (30 minutes per SESSION_AUTH_TESTING.md)
+    // In development with React StrictMode, this runs twice - service handles reconnection gracefully
     return () => {
       if (NOTIFICATION_CONFIG.ENABLED) {
-        console.log("[NotificationDropdown] Component unmounting, cleaning up notifications");
-
-        // Unregister session (invalidate HttpSession and clear cookie)
-        notificationApi.unregisterSession().catch((error) => {
-          console.warn("[NotificationDropdown] Failed to unregister session:", error);
-          // Session will expire naturally after timeout
-        });
-
-        // Disconnect from SSE
+        console.log("[NotificationDropdown] Component unmounting, disconnecting from SSE");
         dispatch(disconnectNotifications());
       }
     };
