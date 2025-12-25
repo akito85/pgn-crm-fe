@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Badge, Empty, List, Popover, Typography, Tag, Button } from "antd";
+import { Badge, Empty, List, Popover, Typography, Tag, Button, Tooltip } from "antd";
 import {
   BellOutlined,
   CheckOutlined,
@@ -11,6 +11,7 @@ import {
   CloseCircleOutlined,
   MessageOutlined,
   BellFilled,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import {
   connectNotifications,
@@ -26,8 +27,10 @@ import {
   fetchUnreadCount,
   markNotificationAsReadApi,
   markAllNotificationsAsReadApi,
+  deleteNotificationApi,
 } from "../../redux/slices/notifications";
 import { NOTIFICATION_CONFIG } from "../../constants/configApp";
+import notificationApi from "../../services/notificationApi";
 import moment from "moment";
 
 const { Text } = Typography;
@@ -64,20 +67,46 @@ const NotificationDropdown = () => {
     console.log("[NotificationDropdown] Token data:", tokenJSON);
 
     if (userId) {
-      console.log("[NotificationDropdown] Connecting to notifications for user:", userId);
-      dispatch(connectNotifications({ userId }));
-      // Fetch unread count from API to ensure we have the most up-to-date count
-      dispatch(fetchUnreadCount());
+      // Initialize notification system with session registration
+      const initializeNotifications = async () => {
+        try {
+          // Step 1: Register session (creates HttpSession and session cookie)
+          console.log("[NotificationDropdown] Registering session for user:", userId);
+          await notificationApi.registerSession(userId);
+
+          // Step 2: Connect to SSE (now authenticated with session cookie)
+          console.log("[NotificationDropdown] Connecting to notifications for user:", userId);
+          dispatch(connectNotifications({ userId }));
+
+          // Step 3: Fetch unread count from API
+          dispatch(fetchUnreadCount());
+        } catch (error) {
+          console.error("[NotificationDropdown] Failed to initialize notifications:", error);
+          // Continue anyway - user might still see notifications if backend allows
+          dispatch(connectNotifications({ userId }));
+          dispatch(fetchUnreadCount());
+        }
+      };
+
+      initializeNotifications();
     } else {
       console.warn("[NotificationDropdown] No userId found in token");
     }
 
-    // Cleanup: Disconnect on unmount
+    // Cleanup: Unregister session and disconnect on unmount
     // Note: In development with React StrictMode, this runs twice
     // The service handles reconnection gracefully
     return () => {
       if (NOTIFICATION_CONFIG.ENABLED) {
-        console.log("[NotificationDropdown] Component unmounting, disconnecting from notifications");
+        console.log("[NotificationDropdown] Component unmounting, cleaning up notifications");
+
+        // Unregister session (invalidate HttpSession and clear cookie)
+        notificationApi.unregisterSession().catch((error) => {
+          console.warn("[NotificationDropdown] Failed to unregister session:", error);
+          // Session will expire naturally after timeout
+        });
+
+        // Disconnect from SSE
         dispatch(disconnectNotifications());
       }
     };
@@ -203,6 +232,19 @@ const NotificationDropdown = () => {
   };
 
   /**
+   * Handle delete notification
+   * @param {Event} e - Click event
+   * @param {string} notificationId - Notification ID to delete
+   */
+  const handleDeleteNotification = (e, notificationId) => {
+    // Stop event propagation to prevent notification click
+    e.stopPropagation();
+
+    // Dispatch delete action
+    dispatch(deleteNotificationApi(notificationId));
+  };
+
+  /**
    * Handle view all notifications
    */
   const handleViewAll = () => {
@@ -290,6 +332,21 @@ const NotificationDropdown = () => {
                   borderBottom: "1px solid #f0f0f0",
                 }}
                 className="notification-item hover:bg-gray-50"
+                extra={
+                  <Tooltip title="Delete notification">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={(e) => handleDeleteNotification(e, notification.id)}
+                      style={{
+                        color: "#ff4d4f",
+                        opacity: 0.7,
+                      }}
+                      className="hover:opacity-100"
+                    />
+                  </Tooltip>
+                }
               >
                 <List.Item.Meta
                   avatar={getNotificationIcon(notification.notificationType)}

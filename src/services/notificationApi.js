@@ -1,36 +1,13 @@
 /**
  * Notification API Service
  * Handle all API calls for notification operations
- *
- * NOTE: Uses lightweight authentication headers to avoid "Request Header Too Large" errors
- * caused by oversized JWT tokens in the Authorization header.
  */
 
 import axios from "axios";
-import { configApp } from "../constants/configApp";
-import { notificationTokenHeader } from "../utils/notificationTokenHeader";
+import { tokenHeader } from "../utils/tokenHeader";
 
-const BASE_URL = configApp.NOTIFICATION_SERVICE;
-const API_PATH = "/v1/dbs/api/notifications";
-
-// Construct the full API endpoint URL
-const NOTIFICATION_API_URL = `${BASE_URL}${API_PATH}`;
-
-/**
- * Create axios config with lightweight auth headers
- * Avoids sending the full JWT token which causes header size issues
- */
-const createConfig = (additionalConfig = {}) => {
-  return {
-    ...additionalConfig,
-    headers: {
-      ...notificationTokenHeader(),
-      ...additionalConfig.headers,
-    },
-    // Enable credentials for cookie-based auth if backend uses it
-    withCredentials: true,
-  };
-};
+// Use full URL for notification API (different from SSE endpoint)
+const NOTIFICATION_API_URL = "http://localhost:8080/ntf/v1/dbs/api/notifications";
 
 const notificationApi = {
   /**
@@ -40,7 +17,11 @@ const notificationApi = {
    */
   getUserNotifications: async (params = {}) => {
     try {
-      const config = createConfig({ params });
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.get(NOTIFICATION_API_URL, config);
       return response?.data;
     } catch (error) {
@@ -55,7 +36,10 @@ const notificationApi = {
    */
   getUnreadNotificationsCount: async () => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread-count`, config);
       return response?.data;
     } catch (error) {
@@ -71,7 +55,11 @@ const notificationApi = {
    */
   getUnreadNotifications: async (params = {}) => {
     try {
-      const config = createConfig({ params });
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread`, config);
       return response?.data;
     } catch (error) {
@@ -82,13 +70,16 @@ const notificationApi = {
 
   /**
    * Mark a single notification as read
-   * PUT /v1/dbs/api/notifications/{id}/read
+   * PATCH /v1/dbs/api/notifications/{id}/read
    * @param {number} notificationId - Notification ID
    */
   markNotificationAsRead: async (notificationId) => {
     try {
-      const config = createConfig();
-      const response = await axios.put(`${NOTIFICATION_API_URL}/${notificationId}/read`, {}, config);
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.patch(`${NOTIFICATION_API_URL}/${notificationId}/read`, {}, config);
       return response?.data;
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -103,7 +94,10 @@ const notificationApi = {
    */
   markNotificationsAsRead: async (notificationIds) => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.put(
         `${NOTIFICATION_API_URL}/mark-read`,
         { notificationIds },
@@ -122,7 +116,10 @@ const notificationApi = {
    */
   markAllNotificationsAsRead: async () => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.put(`${NOTIFICATION_API_URL}/mark-all-read`, {}, config);
       return response?.data;
     } catch (error) {
@@ -138,7 +135,10 @@ const notificationApi = {
    */
   deleteNotification: async (notificationId) => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.delete(`${NOTIFICATION_API_URL}/${notificationId}`, config);
       return response?.data;
     } catch (error) {
@@ -154,7 +154,11 @@ const notificationApi = {
    */
   deleteNotifications: async (notificationIds) => {
     try {
-      const config = createConfig({ data: { notificationIds } });
+      const config = {
+        data: { notificationIds },
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.delete(NOTIFICATION_API_URL, config);
       return response?.data;
     } catch (error) {
@@ -169,7 +173,10 @@ const notificationApi = {
    */
   deleteAllNotifications: async () => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.delete(`${NOTIFICATION_API_URL}/all`, config);
       return response?.data;
     } catch (error) {
@@ -185,7 +192,10 @@ const notificationApi = {
    */
   bulkUpdateNotifications: async (bulkAction) => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.put(`${NOTIFICATION_API_URL}/bulk`, bulkAction, config);
       return response?.data;
     } catch (error) {
@@ -201,7 +211,10 @@ const notificationApi = {
    */
   sendNotification: async (notificationData) => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.post(NOTIFICATION_API_URL, notificationData, config);
       return response?.data;
     } catch (error) {
@@ -216,7 +229,10 @@ const notificationApi = {
    */
   getNotificationSettings: async () => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.get(`${NOTIFICATION_API_URL}/settings`, config);
       return response?.data;
     } catch (error) {
@@ -232,11 +248,99 @@ const notificationApi = {
    */
   updateNotificationSettings: async (settings) => {
     try {
-      const config = createConfig();
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
       const response = await axios.put(`${NOTIFICATION_API_URL}/settings`, settings, config);
       return response?.data;
     } catch (error) {
       console.error('Error updating notification settings:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Register session for notification authentication
+   * POST /v1/dbs/api/notifications/register
+   * Creates HttpSession and returns session cookie
+   * @param {string} userId - User ID to register session for
+   */
+  registerSession: async (userId) => {
+    try {
+      console.log('[NotificationApi] Registering session for user:', userId);
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.post(
+        `${NOTIFICATION_API_URL}/register`,
+        { userId },
+        config
+      );
+      console.log('[NotificationApi] Session registered:', response?.data);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error registering session:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Validate current session
+   * GET /v1/dbs/api/notifications/validate
+   * Checks if session cookie is valid
+   */
+  validateSession: async () => {
+    try {
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/validate`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error validating session:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get current session info
+   * GET /v1/dbs/api/notifications/session
+   * Returns session details (userId, expiresIn, etc.)
+   */
+  getSessionInfo: async () => {
+    try {
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/session`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error getting session info:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Unregister/invalidate current session
+   * POST /v1/dbs/api/notifications/unregister
+   * Invalidates HttpSession and clears session cookie
+   */
+  unregisterSession: async () => {
+    try {
+      console.log('[NotificationApi] Unregistering session');
+      const config = {
+        headers: tokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.post(`${NOTIFICATION_API_URL}/unregister`, {}, config);
+      console.log('[NotificationApi] Session unregistered');
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error unregistering session:', error);
       throw error;
     }
   },

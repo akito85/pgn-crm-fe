@@ -52,21 +52,23 @@ class NotificationService {
 
       // Build URL with manual encoding to preserve token integrity
       // Use encodeURIComponent only for the token value to ensure proper encoding
-      let url = `${sseBaseUrl}/v1/dbs/api/notifications?`;
+      let url = `${sseBaseUrl}/v1/dbs/api/notifications`;
 
       // Add userId only if provided (optional in production)
+      // Based on server implementation, userId might be derived from session/authorization
       if (userId) {
-        url += `userId=${encodeURIComponent(userId)}`;
+        url += `?userId=${encodeURIComponent(userId)}`;
       }
 
       console.log("[NotificationService] Connecting to SSE");
       console.log("[NotificationService] SSE URL:", url);
       console.log("[NotificationService] User ID:", userId);
 
-      // Create EventSource connection
-      this.eventSource = new EventSource(url);
+      // Create EventSource connection with credentials for session authentication
+      // NOTE: withCredentials ensures session cookies are sent with SSE requests
+      this.eventSource = new EventSource(url, { withCredentials: true });
 
-      console.log("[NotificationService] EventSource created, readyState:", this.eventSource.readyState);
+      console.log("[NotificationService] EventSource created with credentials, readyState:", this.eventSource.readyState);
       console.log("[NotificationService] EventSource.CONNECTING =", EventSource.CONNECTING);
       console.log("[NotificationService] EventSource.OPEN =", EventSource.OPEN);
       console.log("[NotificationService] EventSource.CLOSED =", EventSource.CLOSED);
