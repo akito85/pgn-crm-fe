@@ -75,14 +75,11 @@ export const connectNotifications = createAsyncThunk(
   "notifications/connect",
   async ({ userId }, { dispatch, rejectWithValue }) => {
     try {
-      console.log(`[Notifications Slice] Connecting for user: ${userId}`);
 
       return new Promise((resolve, reject) => {
-        console.log("[Notifications Slice] Setting up callbacks");
 
         notificationService.connect(userId, {
           onMessage: (notification) => {
-            console.log("[Notifications Slice] Received notification:", notification);
             dispatch(addNotification(notification));
           },
           onError: (error) => {
@@ -90,17 +87,13 @@ export const connectNotifications = createAsyncThunk(
             dispatch(setConnectionError(error));
           },
           onConnect: (data) => {
-            console.log("[Notifications Slice] onConnect callback triggered with data:", data);
-            console.log("[Notifications Slice] Resolving promise to mark connection as fulfilled");
             resolve(data);
           },
           onDisconnect: (data) => {
-            console.log("[Notifications Slice] Disconnected:", data);
             dispatch(setConnectionStatus("disconnected"));
           },
         });
 
-        console.log("[Notifications Slice] Callbacks registered, dispatching 'connecting' status");
         // Set connecting status immediately
         dispatch(setConnectionStatus("connecting"));
       });
@@ -240,7 +233,6 @@ export const deleteNotificationApi = createAsyncThunk(
 export const disconnectNotifications = createAsyncThunk(
   "notifications/disconnect",
   async (_, { dispatch }) => {
-    console.log("[Notifications Slice] Disconnecting");
     notificationService.disconnect();
     dispatch(setConnectionStatus("disconnected"));
     return { disconnected: true };
@@ -263,7 +255,6 @@ const notificationsSlice = createSlice({
       // Check if notification already exists
       const exists = state.notifications.some((n) => n.id === notification.id);
       if (exists) {
-        console.log("[Notifications Slice] Notification already exists:", notification.id);
         return;
       }
 
@@ -297,7 +288,6 @@ const notificationsSlice = createSlice({
         }
       }
 
-      console.log("[Notifications Slice] Notification added:", notification.id);
     },
 
     /**
@@ -312,7 +302,6 @@ const notificationsSlice = createSlice({
         notification.readAt = new Date().toISOString();
         state.unreadCount = Math.max(0, state.unreadCount - 1);
 
-        console.log("[Notifications Slice] Marked as read:", notificationId);
       }
     },
 
@@ -328,7 +317,6 @@ const notificationsSlice = createSlice({
       });
       state.unreadCount = 0;
 
-      console.log("[Notifications Slice] Marked all as read");
     },
 
     /**
@@ -358,7 +346,6 @@ const notificationsSlice = createSlice({
           if (directIndex !== -1) state.directNotifications.splice(directIndex, 1);
         }
 
-        console.log("[Notifications Slice] Notification removed:", notificationId);
       }
     },
 
@@ -371,7 +358,6 @@ const notificationsSlice = createSlice({
       state.directNotifications = [];
       state.unreadCount = 0;
 
-      console.log("[Notifications Slice] All notifications cleared");
     },
 
     /**
@@ -398,7 +384,6 @@ const notificationsSlice = createSlice({
         state.directNotifications = [];
       }
 
-      console.log(`[Notifications Slice] Cleared ${direction} notifications`);
     },
 
     /**
@@ -413,7 +398,6 @@ const notificationsSlice = createSlice({
         state.reconnectAttempts = 0;
       }
 
-      console.log("[Notifications Slice] Connection status:", action.payload);
     },
 
     /**
@@ -436,7 +420,6 @@ const notificationsSlice = createSlice({
         ...action.payload,
       };
 
-      console.log("[Notifications Slice] Filters updated:", state.filters);
     },
 
     /**
@@ -445,7 +428,6 @@ const notificationsSlice = createSlice({
     resetFilters: (state) => {
       state.filters = initialState.filters;
 
-      console.log("[Notifications Slice] Filters reset");
     },
 
     /**
@@ -457,7 +439,6 @@ const notificationsSlice = createSlice({
         ...action.payload,
       };
 
-      console.log("[Notifications Slice] Settings updated:", state.settings);
     },
   },
 
@@ -465,21 +446,17 @@ const notificationsSlice = createSlice({
     // Connect notifications
     builder
       .addCase(connectNotifications.pending, (state) => {
-        console.log("[Notifications Slice - Reducer] connectNotifications.pending triggered");
         state.isLoading = true;
         state.connectionStatus = "connecting";
         state.error = null;
       })
       .addCase(connectNotifications.fulfilled, (state, action) => {
-        console.log("[Notifications Slice - Reducer] connectNotifications.fulfilled triggered");
-        console.log("[Notifications Slice - Reducer] Action payload:", action.payload);
         state.isLoading = false;
         state.connectionStatus = "connected";
         state.lastConnected = action.payload.timestamp;
         state.connectionError = null;
         state.reconnectAttempts = 0;
 
-        console.log("[Notifications Slice - Reducer] State updated, connectionStatus is now:", state.connectionStatus);
       })
       .addCase(connectNotifications.rejected, (state, action) => {
         console.error("[Notifications Slice - Reducer] connectNotifications.rejected triggered");
@@ -595,7 +572,6 @@ const notificationsSlice = createSlice({
         state.connectionStatus = "disconnected";
         state.connectionError = null;
 
-        console.log("[Notifications Slice] Disconnected successfully");
       })
       .addCase(disconnectNotifications.rejected, (state, action) => {
         state.isLoading = false;

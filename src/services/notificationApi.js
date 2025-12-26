@@ -268,7 +268,6 @@ const notificationApi = {
    */
   registerSession: async (userId) => {
     try {
-      console.log('[NotificationApi] Registering session for user:', userId);
       const config = {
         headers: notificationTokenHeader(),
         withCredentials: true,
@@ -278,7 +277,6 @@ const notificationApi = {
         { userId },
         config
       );
-      console.log('[NotificationApi] Session registered:', response?.data);
       return response?.data;
     } catch (error) {
       console.error('[NotificationApi] Error registering session:', error);
@@ -331,13 +329,11 @@ const notificationApi = {
    */
   unregisterSession: async () => {
     try {
-      console.log('[NotificationApi] Unregistering session');
       const config = {
         headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.post(`${NOTIFICATION_API_URL}/unregister`, {}, config);
-      console.log('[NotificationApi] Session unregistered');
       return response?.data;
     } catch (error) {
       console.error('[NotificationApi] Error unregistering session:', error);

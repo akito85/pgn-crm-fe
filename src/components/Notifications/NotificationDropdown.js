@@ -70,7 +70,6 @@ const NotificationDropdown = () => {
   useEffect(() => {
     // Check if notifications are enabled via config
     if (!NOTIFICATION_CONFIG.ENABLED) {
-      console.log("[NotificationDropdown] Notifications disabled via config");
       return;
     }
 
@@ -80,8 +79,6 @@ const NotificationDropdown = () => {
     );
     const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
 
-    console.log("[NotificationDropdown] Token data:", tokenJSON);
-
     if (userId) {
       // Initialize notification system with session registration
       const initializeNotifications = async () => {
@@ -89,11 +86,9 @@ const NotificationDropdown = () => {
           // Step 1: Register session (creates HttpSession and session cookie)
           // TODO: Check if session already exists (validateSession) before registering new one
           // to avoid creating duplicate sessions on component remount
-          console.log("[NotificationDropdown] Registering session for user:", userId);
           await notificationApi.registerSession(userId);
 
           // Step 2: Connect to SSE (now authenticated with session cookie)
-          console.log("[NotificationDropdown] Connecting to notifications for user:", userId);
           dispatch(connectNotifications({ userId }));
 
           // Step 3: Fetch unread count from API
@@ -117,7 +112,6 @@ const NotificationDropdown = () => {
     // In development with React StrictMode, this runs twice - service handles reconnection gracefully
     return () => {
       if (NOTIFICATION_CONFIG.ENABLED) {
-        console.log("[NotificationDropdown] Component unmounting, disconnecting from SSE");
         dispatch(disconnectNotifications());
       }
     };
@@ -259,7 +253,13 @@ const NotificationDropdown = () => {
    * Handle view all notifications
    */
   const handleViewAll = () => {
-    navigate("/notifications");
+    // Get user ID from token to pass in state
+    const tokenJSON = JSON.parse(
+      localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
+    );
+    const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+
+    navigate("/notifications/view", { state: { userId } });
   };
 
   /**
@@ -509,22 +509,6 @@ const NotificationDropdown = () => {
         </div>
       )}
 
-      {/* Connection Status Indicator (for debugging) */}
-      {process.env.NODE_ENV === "development" && (
-        <div
-          style={{
-            padding: "4px 16px",
-            borderTop: "1px solid #f0f0f0",
-            backgroundColor: isConnected ? "#f6ffed" : "#fff1f0",
-            fontSize: 11,
-            textAlign: "center",
-          }}
-        >
-          <Text type={isConnected ? "success" : "danger"}>
-            {isConnected ? "● Connected" : "● Disconnected"}
-          </Text>
-        </div>
-      )}
     </div>
   );
 

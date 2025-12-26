@@ -30,7 +30,6 @@ class NotificationService {
    * @param {function} callbacks.onDisconnect - Callback when disconnected
    */
   connect(userId, callbacks = {}) {
-    console.log(`[NotificationService] Connecting to SSE for user: ${userId}`);
     const sseBaseUrl = NOTIFICATION_CONFIG.SSE_BASE_URL;
 
     this.userId = userId;
@@ -60,28 +59,19 @@ class NotificationService {
         url += `?userId=${encodeURIComponent(userId)}`;
       }
 
-      console.log("[NotificationService] Connecting to SSE");
-      console.log("[NotificationService] SSE URL:", url);
-      console.log("[NotificationService] User ID:", userId);
 
       // Create EventSource connection with credentials for session authentication
       // NOTE: withCredentials ensures session cookies are sent with SSE requests
       this.eventSource = new EventSource(url, { withCredentials: true });
 
-      console.log("[NotificationService] EventSource created with credentials, readyState:", this.eventSource.readyState);
-      console.log("[NotificationService] EventSource.CONNECTING =", EventSource.CONNECTING);
-      console.log("[NotificationService] EventSource.OPEN =", EventSource.OPEN);
-      console.log("[NotificationService] EventSource.CLOSED =", EventSource.CLOSED);
 
       // Fallback: Check connection state after a delay if onopen doesn't fire
       // Some SSE servers don't trigger onopen immediately
       const connectionCheckTimeout = setTimeout(() => {
         if (this.eventSource && this.eventSource.readyState === EventSource.OPEN) {
-          console.log("[NotificationService] Connection detected via readyState check (onopen may not have fired)");
           this.reconnectAttempts = 0;
 
           if (this.onConnectCallback) {
-            console.log("[NotificationService] Calling onConnectCallback via timeout fallback");
             this.onConnectCallback({
               userId,
               timestamp: new Date().toISOString(),
@@ -98,13 +88,9 @@ class NotificationService {
       // Handle connection opened
       this.eventSource.onopen = (event) => {
         clearTimeout(connectionCheckTimeout); // Clear the fallback timeout
-        console.log("[NotificationService] SSE Connection opened via onopen event");
-        console.log("[NotificationService] EventSource readyState after open:", this.eventSource.readyState);
-        console.log("[NotificationService] Event details:", event);
         this.reconnectAttempts = 0; // Reset reconnect attempts on successful connection
 
         if (this.onConnectCallback) {
-          console.log("[NotificationService] Calling onConnectCallback");
           this.onConnectCallback({
             userId,
             timestamp: new Date().toISOString(),
@@ -119,18 +105,12 @@ class NotificationService {
 
       // Handle incoming messages
       this.eventSource.onmessage = (event) => {
-        console.log("[NotificationService] ===== RAW MESSAGE RECEIVED =====");
-        console.log("[NotificationService] Raw event data:", event.data);
-        console.log("[NotificationService] Event type:", event.type);
-        console.log("[NotificationService] Current userId:", userId);
 
         try {
           const rawNotification = JSON.parse(event.data);
-          console.log("[NotificationService] Parsed notification:", rawNotification);
 
           // Transform Oracle schema fields to camelCase
           const notification = this._transformNotification(rawNotification);
-          console.log("[NotificationService] Transformed notification:", notification);
 
           // Validate required fields
           if (!notification.id || !notification.notificationType) {
@@ -144,11 +124,6 @@ class NotificationService {
           const isForUser = notification.toUserId === userId;
           const isForAll = notification.toUserId === "ALL" || notification.broadcast === true;
 
-          console.log("[NotificationService] Direction check:");
-          console.log("  - notification.toUserId:", notification.toUserId);
-          console.log("  - current userId:", userId);
-          console.log("  - isForUser:", isForUser);
-          console.log("  - isForAll:", isForAll);
 
           // Enrich notification with metadata
           const enrichedNotification = {
@@ -159,17 +134,13 @@ class NotificationService {
             read: notification.status === "read",
           };
 
-          console.log("[NotificationService] Enriched notification:", enrichedNotification);
-          console.log("[NotificationService] Calling onMessageCallback");
 
           if (this.onMessageCallback) {
             this.onMessageCallback(enrichedNotification);
-            console.log("[NotificationService] onMessageCallback executed successfully");
           } else {
             console.warn("[NotificationService] No onMessageCallback registered!");
           }
 
-          console.log("[NotificationService] ===== MESSAGE PROCESSING COMPLETE =====");
         } catch (error) {
           console.error("[NotificationService] Failed to parse notification:", error);
           console.error("[NotificationService] Error stack:", error.stack);
@@ -209,9 +180,6 @@ class NotificationService {
 
         // Attempt to reconnect
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          console.log(
-            `[NotificationService] Attempting to reconnect (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})...`
-          );
           this.reconnectAttempts++;
 
           // Close current connection
@@ -244,7 +212,6 @@ class NotificationService {
       // Handle custom event types (if server sends them)
       // Server can send events like: event: notification-update
       this.eventSource.addEventListener("notification-update", (event) => {
-        console.log("[NotificationService] Notification update:", event.data);
         // Handle notification updates (e.g., mark as read)
         try {
           const update = JSON.parse(event.data);
@@ -268,7 +235,6 @@ class NotificationService {
       });
 
       this.eventSource.addEventListener("notification-delete", (event) => {
-        console.log("[NotificationService] Notification delete:", event.data);
         // Handle notification deletions
         try {
           const deleteEvent = JSON.parse(event.data);
@@ -411,7 +377,6 @@ class NotificationService {
    * Disconnect from SSE stream
    */
   disconnect() {
-    console.log("[NotificationService] Disconnecting from SSE");
 
     if (this.eventSource) {
       this.eventSource.close();
