@@ -28,6 +28,7 @@ import { TablePaginationNew } from "poc-table-dragandrop";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 
 // Local imports
 import RelationshipDetail from "./RelationshipDetail";
@@ -456,6 +457,11 @@ const RelationshipTable = ({
   const [modalConfirmReject, setModalConfirmReject] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState(null);
 
+  // Inactivate modal states
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactivateRelationshipId, setInactivateRelationshipId] = useState(0);
+  const [inactivateRelationshipName, setInactivateRelationshipName] = useState("");
+
   // Mock attachment data for approval detail
   const mockAttachmentData = [
     {
@@ -547,18 +553,33 @@ const RelationshipTable = ({
     });
   };
 
-  const handleActiveOrInactive = (record) => {
-    console.log("Toggle activation for:", record.id);
+  /**
+   * Open or close inactivate modal
+   */
+  const handleInactivateModal = (show, relationshipId = 0, relationshipName = "") => {
+    if (show) {
+      setInactivateRelationshipId(relationshipId);
+      setInactivateRelationshipName(relationshipName);
+      setShowInactiveModal(true);
+    } else {
+      setInactivateRelationshipId(0);
+      setInactivateRelationshipName("");
+      setShowInactiveModal(false);
+    }
+  };
 
-    // Call API to toggle relationship status
+  /**
+   * Handle inactivate relationship
+   */
+  const handleInactivateRelationship = (remark, handleClear) => {
     dispatch(
       toggleRelationshipStatus({
-        relationshipId: record.id,
-        remarks: "test", // Hardcoded as requested
+        relationshipId: inactivateRelationshipId,
+        remarks: remark,
       })
-    ).then((result) => {
-      // Only refresh the list if the API call was successful
-      if (result.type === "TOGGLE_RELATIONSHIP_STATUS/fulfilled") {
+    )
+      .unwrap()
+      .then(() => {
         dispatch(
           getRelationshipListAdvanced({
             idAccount,
@@ -573,8 +594,10 @@ const RelationshipTable = ({
             },
           })
         );
-      }
-    });
+        setShowInactiveModal(false);
+        handleClear();
+      })
+      .catch(() => { });
   };
 
   // Approval handlers
@@ -661,7 +684,7 @@ const RelationshipTable = ({
   // Action items for table
   const itemsActionView = (
     handleDetail,
-    handleActiveOrInactive,
+    handleInactivateModal,
     handleApprovalHistory,
     handleApprovalDetail
   ) => [
@@ -744,35 +767,40 @@ const RelationshipTable = ({
         },
       },
       {
-        action: "Active",
+        action: "Inactive",
         type: "table",
         render: (record, data_length) => {
-          const isActive = record?.status === "Active" || record?.status === "ACTIVE";
+          // Enable only when status is ACTIVE and statusApproval is APPROVED
+          const isApproved = record?.statusApproval === "APPROVED" || record?.statusApproval === "approved";
+          const isActive = record?.status === "ACTIVE" || record?.status === "Active";
+          const isEnabled = isApproved && isActive;
+          const isChecked = !isActive; // Checked when inactive
 
           return data_length > 3 ? (
             <ButtonComponent
               icon={
                 <Checkbox
                   className="inactive-check"
-                  checked={isActive}
-                  disabled={false}
+                  checked={isChecked}
+                  disabled={!isEnabled}
                 />
               }
               border={false}
-              onClick={() => handleActiveOrInactive(record)}
+              disabled={!isEnabled}
+              onClick={() => isEnabled && handleInactivateModal(true, record?.id, record?.subjectName || record?.objectName || "")}
             >
-              <span className="text-black ml-5">
-                {isActive ? "Active" : "Inactive"}
+              <span className={`${!isEnabled ? "text-gray-400" : "text-black"} ml-5`}>
+                Inactive
               </span>
             </ButtonComponent>
           ) : (
-            <Tooltip title={isActive ? "Active" : "Inactive"}>
+            <Tooltip title="Inactive">
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleActiveOrInactive(record)}
-                  checked={isActive}
-                  disabled={false}
+                  disabled={!isEnabled}
+                  checked={isChecked}
+                  onClick={() => handleInactivateModal(true, record?.id, record?.subjectName || record?.objectName || "")}
                 />
               </div>
             </Tooltip>
@@ -858,7 +886,7 @@ const RelationshipTable = ({
         ? itemsApprovalMode
         : itemsActionView(
           handleDetail,
-          handleActiveOrInactive,
+          handleInactivateModal,
           handleApprovalHistory,
           handleApprovalDetail
         );
@@ -1053,6 +1081,15 @@ const RelationshipTable = ({
         handleConfirm={handleConfirmReject}
         type="reject"
         selectedData={selectedRows}
+      />
+
+      {/* Modal Inactivate Confirmation */}
+      <ModalApproveOrReject
+        isOpen={showInactiveModal}
+        header={"INACTIVATE"}
+        handleCloseModal={() => handleInactivateModal(false)}
+        customMessage={`Are you sure you want to inactivate relationship - ${inactivateRelationshipName}?`}
+        onFinish={({ remark }, handleClear) => handleInactivateRelationship(remark, handleClear)}
       />
     </Fragment>
   );
