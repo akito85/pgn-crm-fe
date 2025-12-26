@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Badge, Empty, List, Popover, Typography, Tag, Button, Tooltip } from "antd";
@@ -45,10 +45,26 @@ const NotificationDropdown = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState('all');
+
   // Get notification state
   const unreadCount = useSelector(selectUnreadCount);
-  const notifications = useSelector(selectFilteredNotifications);
+  const allNotifications = useSelector(selectFilteredNotifications);
   const isConnected = useSelector(selectIsConnected);
+
+  // Filter notifications based on active tab
+  const notifications = activeTab === 'all'
+    ? allNotifications
+    : allNotifications.filter(notification => !notification.read);
+
+  // Calculate counts for tabs
+  const allCount = allNotifications.length;
+  const unreadCountForTab = allNotifications.filter(notification => !notification.read).length;
+
+  const tabs = [
+    { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
+    { id: 'unread', label: 'Unread', count: unreadCountForTab, badgeVariant: 'soft' }
+  ];
 
   // Connect to notification stream on mount (only once)
   useEffect(() => {
@@ -273,7 +289,7 @@ const NotificationDropdown = () => {
    * Render notification content
    */
   const notificationContent = (
-    <div className="notification-dropdown" style={{ width: 380, maxHeight: 500 }}>
+    <div className="notification-dropdown" style={{ width: 380, maxHeight: 700 }}>
       {/* Header */}
       <div
         className="notification-header"
@@ -288,7 +304,8 @@ const NotificationDropdown = () => {
         <Text strong style={{ fontSize: 16 }}>
           Notifications
         </Text>
-        {unreadCount > 0 && (
+        {((activeTab === 'all' && allNotifications.some(notification => !notification.read)) ||
+          (activeTab === 'unread' && unreadCountForTab > 0)) && (
           <Button
             type="link"
             size="small"
@@ -298,6 +315,40 @@ const NotificationDropdown = () => {
             Mark all as read
           </Button>
         )}
+      </div>
+
+      {/* Tabs */}
+      <div className="w-full self-stretch border-t-[0.5px] border-b-1 border-l-0 border-r-0 border-b-[#1d1c1d]/10 border-t-[#1d1c1d]/10 border-solid inline-flex justify-center items-center">
+        <div className="w-full self-stretch px-5 inline-flex justify-center items-center gap-10">
+          {tabs.map((tab) => {
+            const isSelected = activeTab === tab.id;
+            
+            return (
+              <div
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 h-12 min-w-12 min-h-12 flex justify-center items-center gap-2 cursor-pointer ${
+                  isSelected ? 'border-solid border-l-0 border-r-0 border-t-0 border-b-2 border-[#000]' : ''
+                }`}
+              >
+                <div className={`justify-start text-sm font-semibold leading-[22px] ${
+                  isSelected ? 'text-[#1d1c1d]' : 'text-[#74797d]'
+                }`}>
+                  {tab.label}
+                </div>
+                <div className={`h-6 min-w-6 px-1.5 rounded-md flex justify-start items-center gap-1.5 ${
+                  tab.badgeVariant === 'filled' ? 'bg-[#1d1c1d]' : 'bg-[#e6f1f9]'
+                }`}>
+                  <div className={`text-center justify-start text-xs font-bold leading-5 ${
+                    tab.badgeVariant === 'filled' ? 'text-white' : 'text-[#0075bf]'
+                  }`}>
+                    {tab.count}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Notification List */}
@@ -315,7 +366,7 @@ const NotificationDropdown = () => {
         ) : (
           <List
             itemLayout="horizontal"
-            dataSource={notifications.slice(0, 10)} // Show only first 10
+            dataSource={notifications} // Show all filtered notifications
             renderItem={(notification) => (
               <List.Item
                 key={notification.id}
@@ -449,7 +500,7 @@ const NotificationDropdown = () => {
       placement="bottomRight"
       overlayClassName="notification-popover"
     >
-      <Badge count={unreadCount} offset={[-5, 5]} overflowCount={99}>
+      <Badge count={activeTab === 'all' ? unreadCount : unreadCountForTab} offset={[-5, 5]} overflowCount={99}>
         <a onClick={(e) => e.preventDefault()} className="pt-2.5">
           <BellOutlined
             style={{
