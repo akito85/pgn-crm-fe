@@ -19,7 +19,11 @@ import {
   downloadGasSource,
   getAllGasSourcePaginate,
 } from "../../../../../redux/slices/account_management/MasterData/gasSourceSlice";
-import { formMessageRequired, hasValue, renderColumn } from "../../../../../utils";
+import {
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+} from "../../../../../utils";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -33,8 +37,8 @@ import CardContainer from "../../../../../components/CardContainer";
 const ViewGasSource = () => {
   // Selector
   const { data, loading } = useSelector((state) => state.gasSource);
-  const { bodyError } = useSelector(state => state?.general);
-  
+  const { bodyError } = useSelector((state) => state?.general);
+
   // Declaration
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -53,7 +57,7 @@ const ViewGasSource = () => {
   const [dataTable, setDataTable] = useState([]);
   const [chooseId, setChooseId] = useState();
   const [modalError, setModalError] = useState(false);
-  const [calorieName, setCalorieName] = useState('');
+  const [calorieName, setCalorieName] = useState("");
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["status", "action"],
@@ -62,12 +66,14 @@ const ViewGasSource = () => {
 
   // Use Effect
   useEffect(() => {
-    dispatch(getAllGasSourcePaginate({ 
-      search: encodeURIComponent(JSON.stringify(search)), 
-      sort, 
-      page, 
-      pageSize 
-    }));
+    dispatch(
+      getAllGasSourcePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      })
+    );
   }, [search, sort, page, pageSize, dispatch]);
 
   useEffect(() => {
@@ -87,7 +93,7 @@ const ViewGasSource = () => {
   // trigger modal try again
   useEffect(() => {
     if (bodyError?.response?.data?.code === 500) {
-      setModalError(true)
+      setModalError(true);
     }
   }, [bodyError]);
 
@@ -160,28 +166,32 @@ const ViewGasSource = () => {
       .unwrap()
       .then(() => {
         setRemark("");
-        dispatch(getAllGasSourcePaginate({ 
-          search: encodeURIComponent(JSON.stringify(search)), 
-          sort, 
-          page, 
-          pageSize 
-        }));
-        form.resetFields()
+        dispatch(
+          getAllGasSourcePaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            sort,
+            page,
+            pageSize,
+          })
+        );
+        form.resetFields();
       })
       .catch(() => {
         setRemark("");
-        form.resetFields()
+        form.resetFields();
       });
   };
 
   // Handle Download
   const handleDownload = () => {
-    dispatch(downloadGasSource({ 
-      search: encodeURIComponent(JSON.stringify(search)), 
-      sort, 
-      page, 
-      pageSize 
-    }));
+    dispatch(
+      downloadGasSource({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      })
+    );
   };
 
   // Handle Confirmation Active/Inactive
@@ -200,34 +210,40 @@ const ViewGasSource = () => {
       const setBodyRemark = {
         gasSourceDetailId: chooseId,
         remark: remark,
-      }
+      };
       const setStatus = {
         activeOrInactive: activeOrInactive,
-      }
-      dispatch(activeOrInactiveGasSource({ 
-        body: setBodyRemark, 
-        activeOrInactive: setStatus 
-      }))
-      dispatch(getAllGasSourcePaginate({ 
-        search: encodeURIComponent(JSON.stringify(search)), 
-        sort, 
-        page, 
-        pageSize 
-      }))
+      };
+      dispatch(
+        activeOrInactiveGasSource({
+          body: setBodyRemark,
+          activeOrInactive: setStatus,
+        })
+      );
+      dispatch(
+        getAllGasSourcePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        })
+      );
     } else {
-      dispatch(getAllGasSourcePaginate({ 
-        search: encodeURIComponent(JSON.stringify(search)), 
-        sort, 
-        page, 
-        pageSize 
-      }))
+      dispatch(
+        getAllGasSourcePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        })
+      );
     }
     dispatch(clearBodyMessage());
-  }
+  };
 
   // handle retry
   const handleRetry = () => {
-    handleConfirmRetry()
+    handleConfirmRetry();
     setModalError(false);
     dispatch(clearBodyMessage());
   };
@@ -239,151 +255,174 @@ const ViewGasSource = () => {
   };
 
   // base columns with useMemo
-  const baseColumns = useMemo(() => [
-    {
-      key: "no",
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      key: "calorieCode",
-      title: "CALORIE CODE",
-      dataIndex: "calorieCode",
-      sorter: true,
-      filteredValue: [search?.calorieCode] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "calorieCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'calorieCode', 
-        hasValue(search["calorieCode"]), 
-        searchText, 
-        text, 
-        false, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "name",
-      title: "NAME",
-      dataIndex: "name",
-      sorter: true,
-      filteredValue: [search?.name] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "name",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'name', 
-        hasValue(search["name"]), 
-        searchText, 
-        text, 
-        false, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "uom",
-      title: "UOM",
-      dataIndex: "uom",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.uom] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "uom",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'uom', 
-        hasValue(search["uom"]), 
-        searchText, 
-        text, 
-        false, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "description",
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      sorter: true,
-      filteredValue: [search?.description] || null,
-      ellipsis: {
-        showTitle: false,
+  const baseColumns = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'description', 
-        hasValue(search["description"]), 
-        searchText, 
-        text, 
-        true, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "status",
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      width: 120,
-      filteredValue: [search?.status] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'status', 
-        hasValue(search["status"]), 
-        searchText, 
-        text, 
-        false, 
-        'status', 
-        search
-      )
-    },
-  ], [page, pageSize, search, searchText, searchedColumn]);
+      {
+        key: "calorieCode",
+        title: "CALORIE CODE",
+        dataIndex: "calorieCode",
+        sorter: true,
+        filteredValue: [search?.calorieCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calorieCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "calorieCode",
+            hasValue(search["calorieCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "name",
+        title: "NAME",
+        dataIndex: "name",
+        sorter: true,
+        filteredValue: [search?.name] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "name",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "name",
+            hasValue(search["name"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "uom",
+        title: "UOM",
+        dataIndex: "uom",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.uom] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "uom",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "uom",
+            hasValue(search["uom"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "description",
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        sorter: true,
+        filteredValue: [search?.description] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "description",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "description",
+            hasValue(search["description"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "status",
+        title: "STATUS",
+        dataIndex: "status",
+        sorter: true,
+        width: 120,
+        filteredValue: [search?.status] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "status",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search
+          ),
+      },
+    ],
+    [page, pageSize, search, searchText, searchedColumn]
+  );
 
   // item toolbar
   const itemActions = [
     //action toolbar
     {
-      action: 'Upload',
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Upload",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_GAS_SOURCE}>
           <ButtonComponent
@@ -393,10 +432,10 @@ const ViewGasSource = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_GAS_SOURCE}>
           <ButtonComponent
@@ -406,7 +445,7 @@ const ViewGasSource = () => {
             Create Gas Source
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // Column Action Table
@@ -423,8 +462,8 @@ const ViewGasSource = () => {
               <SVGIcon name="IconDetail" width={24} />
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Update",
@@ -432,39 +471,62 @@ const ViewGasSource = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${
+                record?.status?.toLowerCase() === "inactive" &&
+                "cursor-not-allowed"
+              }`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record.gasSourceId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record.gasSourceId,
+                  }
+                }
               >
-                <SVGIcon 
-                  name="IconEdit" 
-                  width={24} 
-                  className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} 
-                /> 
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  className={`${
+                    record?.status?.toLowerCase() === "inactive" &&
+                    "cursor-not-allowed"
+                  }`}
+                  color={
+                    record?.status?.toLowerCase() === "inactive"
+                      ? "#8D91A0"
+                      : "#ACC424"
+                  }
+                />
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Activate",
       type: "table",
       render: (record, data) => {
         return (
-          <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+          <Tooltip
+            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+          >
             <div>
               <Checkbox
-                onClick={() => { handleActiveOrInactive(record); }}
+                onClick={() => {
+                  handleActiveOrInactive(record);
+                }}
                 checked={record.status === "ACTIVE" ? false : true}
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   const actionCols = useColumnActionPermission(
@@ -473,12 +535,10 @@ const ViewGasSource = () => {
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map(
-      (col) => ({
-        ...col,
-        key: col.key || col.dataIndex || col.title,
-      })
-    );
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
     return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
@@ -508,9 +568,11 @@ const ViewGasSource = () => {
             </div>
           }
         >
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
-              dataSource={data?.result && data?.result.length === 0 ? null : dataTable}
+              dataSource={
+                data?.result && data?.result.length === 0 ? null : dataTable
+              }
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
@@ -554,7 +616,7 @@ const ViewGasSource = () => {
             id="inactivateForm"
             form={form}
             onFinish={handleConfirm}
-            layout='vertical'
+            layout="vertical"
           >
             <div className="flex flex-col gap-6">
               <Alert
@@ -566,7 +628,7 @@ const ViewGasSource = () => {
               />
               <Form.Item
                 name={"remark"}
-                label={'Remark'}
+                label={"Remark"}
                 rules={formMessageRequired("remark")}
                 className="w-full"
               >
@@ -592,7 +654,9 @@ const ViewGasSource = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
+            <p className="pl-[70px]">
+              {bodyError?.response?.data?.message?.toString()}
+            </p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

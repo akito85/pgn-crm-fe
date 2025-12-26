@@ -79,6 +79,11 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   VIEW_GAS_SOURCE: "/system-setup/gas-sources",
   UPLOAD_GAS_SOURCE: "/system-setup/gas-sources/upload",
 
+  // Multi Destination
+  VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/details",
+  CREATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/create",
+  UPDATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/update",
+
   //Premise
   DETAIL_PREMISE: "/account-management/account-standard/premise/view",
 

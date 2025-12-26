@@ -1,10 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { Spin, Tooltip, Tabs } from "antd";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
+import { Spin, Tooltip, Tabs, Modal } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
 import { useDispatch, useSelector } from "react-redux";
-import { getApprovalHistory, getListUsagePaginate } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import {
+  getApprovalHistory,
+  getListUsagePaginate,
+  getListBatchPaginate,
+  deleteBatch,
+} from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -17,7 +29,6 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
-import { EyeOutlined } from "@ant-design/icons";
 
 const MonitoringUsagePage = () => {
   // Selector
@@ -37,10 +48,7 @@ const MonitoringUsagePage = () => {
     batchColumns,
     data_usage,
     loading,
-    page,
     setPage,
-    pageSize,
-    setPageSize,
     onSort,
     onClickApproval,
     data_approval,
@@ -50,7 +58,10 @@ const MonitoringUsagePage = () => {
     setSearchText,
     setSearchedColumn,
     setSort,
-    sort
+    sort,
+    handleLoadMore,
+    hasMoreUsage,
+    hasMoreBatch,
   } = useMonitoringList(tabHeader);
 
   // Use State
@@ -96,23 +107,35 @@ const MonitoringUsagePage = () => {
     }
   };
 
-  // onChange page
-  const onChangePage = (page, sizeChange) => {
-    const tempPage = pageSize !== sizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(sizeChange);
+  const handleDeleteBatch = (record) => {
+    Modal.confirm({
+      title: "Delete Batch",
+      icon: <WarningOutlined style={{ color: "#faad14" }} />,
+      content: `Are you sure you want to delete Batch ID: ${record?.batchId}? This action cannot be undone.`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteBatch(record?.batchId)).unwrap();
+          // No need to refresh, Redux will automatically update the state
+          // The reducer already handles removing the deleted batch from the list
+        } catch (error) {
+          console.error("Error deleting batch:", error);
+        }
+      },
+    });
   };
 
   // onchange tabs
   const changeTab = (key) => {
     setTabHeader((prevState) => {
       if (prevState !== key) {
-        setPage(1);
-        setPageSize(10);
+        setPage(0);
         setSearch({});
-        setSort('');
+        setSort("");
         setSearchText("");
-        setSearchedColumn('');
+        setSearchedColumn("");
       }
       return key;
     });
@@ -139,6 +162,21 @@ const MonitoringUsagePage = () => {
 
   const grantAccessButton = [
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Approval",
       render: (
         <ButtonComponent
@@ -162,7 +200,7 @@ const MonitoringUsagePage = () => {
       render: (
         <NavLink to={RBI_ROUTES.MONITORING_USAGE_UPLOAD}>
           <ButtonComponent
-            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={24} />}
+            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={17} />}
             type={"submit"}
             border={false}
           >
@@ -180,32 +218,13 @@ const MonitoringUsagePage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval History">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={20}
-                onClick={() => handleApprovalHistory(record)}
-              />
+            <SVGIcon
+              name="IconLogHistory"
+              color={"#0075bf"}
+              width={20}
+              onClick={() => handleApprovalHistory(record)}
+            />
           </Tooltip>
-        );
-      },
-    },
-  ];
-
-  const grantAccessBatch = [
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
-            state={{ id: record?.batchId }}
-          >
-            <Tooltip title="Detail">
-                <EyeOutlined style={{ fontSize: "20px" }} />
-            </Tooltip>
-          </Link>
         );
       },
     },
@@ -220,27 +239,70 @@ const MonitoringUsagePage = () => {
     align: "center",
   }));
 
-  const columnActionBatch = useColumnActionPermission(
-    ["view"],
-    grantAccessBatch
-  ).map((col) => ({
-    ...col,
-    width: 80,
-    align: "center",
-  }));
+  // Manual column for Batch List with explicit render
+  const columnActionBatch = [
+    {
+      title: "ACTION",
+      key: "action",
+      fixed: "right",
+      width: 120,
+      align: "center",
+      render: (text, record) => (
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* View Icon */}
+          <Link
+            to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
+            state={{ id: record?.batchId }}
+          >
+            <Tooltip title="Detail">
+              <SVGIcon name="IconDetail" width={20} />
+            </Tooltip>
+          </Link>
+
+          {/* Delete Icon - Only for Draft status */}
+          {record?.status?.toLowerCase() === "draft" && (
+            <Tooltip title="Delete Batch">
+              <SVGIcon
+                name="IconDelete"
+                width={20}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteBatch(record);
+                }}
+              />
+            </Tooltip>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   const allColumns = useMemo(() => {
     let baseColumns = tabHeader === "Usage List" ? columnUsage : batchColumns;
-    let actionColumns = tabHeader === "Usage List" ? columnActionUsage : columnActionBatch;
-    
+    let actionColumns =
+      tabHeader === "Usage List" ? columnActionUsage : columnActionBatch;
+
     const columnsWithKeys = [...baseColumns, ...actionColumns].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
       width: col.width || 150,
     }));
-    
+
     return columnsWithKeys;
-  }, [batchColumns, columnActionBatch, columnActionUsage, columnUsage, tabHeader]);
+  }, [
+    batchColumns,
+    columnActionBatch,
+    columnActionUsage,
+    columnUsage,
+    tabHeader,
+  ]);
 
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
@@ -259,16 +321,33 @@ const MonitoringUsagePage = () => {
     } else {
       return dataBatch;
     }
-  }
-  
+  };
+
   const handleListRefresh = () => {
-    dispatch(getListUsagePaginate({ 
-      search: encodeURIComponent(JSON.stringify(search)), 
-      page, 
-      pageSize, 
-      sort 
-    }))
-  }
+    dispatch(
+      getListUsagePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 0,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      })
+    );
+    setPage(0);
+  };
+
+  const handleBatchListRefresh = () => {
+    dispatch(
+      getListBatchPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 0,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      })
+    );
+    setPage(0);
+  };
 
   return (
     <Spin spinning={loading}>
@@ -278,9 +357,7 @@ const MonitoringUsagePage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
-                MONITORING USAGE
-              </p>
+              <p className="w-full mt-[15px] text-primary">MONITORING USAGE</p>
               <Toolbar items={grantAccessButton} />
             </div>
           }
@@ -292,42 +369,46 @@ const MonitoringUsagePage = () => {
             size="small"
           >
             <Tabs.TabPane tab="Usage List" key="Usage List">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
+                  idTable="monitoring-usage-table"
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}
                   columns={processedColumns}
-                  current={page}
-                  pageSize={pageSize}
                   tableScrolled={tableScroll(tabHeader)}
-                  onChange={onChangePage}
-                  onSizeChanger={onChangePage}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}
                   setFixedColumns={setFixedColumns}
                   loading={loading}
                   handleDownload={handleDownload}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMoreUsage}
+                  loadMoreThreshold={20}
                 />
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Batch List" key="Batch List">
-              <div className="my-5">
+              <div className="my-0">
                 <TableRBI
+                  idTable="monitoring-batch-table"
                   totalData={handleList(tabHeader)?.page?.totalElements}
                   dataSource={handleList(tabHeader)?.result}
                   columns={processedColumns}
-                  current={page}
-                  pageSize={pageSize}
                   tableScrolled={tableScroll(tabHeader)}
-                  onChange={onChangePage}
-                  onSizeChanger={onChangePage}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}
                   setFixedColumns={setFixedColumns}
                   loading={loading}
                   handleDownload={handleDownload}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMoreBatch}
+                  loadMoreThreshold={20}
                 />
               </div>
             </Tabs.TabPane>

@@ -560,7 +560,7 @@ const LayoutMenu = ({ children }) => {
             !isPublicPath ? (
               <NotFound type={"unauthorized"} />
             ) : (
-              <div className="mt-[30px]">{children}</div>
+              <div className="mt-[15px]">{children}</div>
             )}
             {/* <div className="mt-[30px]">{children}</div> */}
           </Content>

@@ -30,8 +30,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const prabillData = data?.prabillInitPopulate || {};
   const detailsData = data?.details || [];
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20); // Load 20 data setiap kali load more
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -42,27 +42,22 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     right: ["action"],
   }));
 
+  // Initial fetch - load 100 data pertama
   useEffect(() => {
     if (tabHeader === "Prabilling Information" && prabillData?.initCode) {
       dispatch(
         getDetailPrabillingResult({
           initCode: prabillData.initCode,
-          page,
-          pageSize,
+          page: 0,
+          pageSize: 100, // Initial load 100
           sort,
           search: Object.keys(search).length > 0 ? search : {},
+          isLoadMore: false,
         })
       );
+      setPage(0);
     }
-  }, [
-    tabHeader,
-    dispatch,
-    prabillData?.initCode,
-    page,
-    pageSize,
-    sort,
-    search,
-  ]);
+  }, [tabHeader, dispatch, prabillData?.initCode, sort, search]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -70,13 +65,35 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
     });
+  };
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const pageInfo = detail_prabilling_result?.page || {};
+    const totalPages = pageInfo?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage < totalPages) {
+      await dispatch(
+        getDetailPrabillingResult({
+          initCode: prabillData.initCode,
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          search: Object.keys(search).length > 0 ? search : {},
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
 
   const handleDownload = () => {
@@ -99,7 +116,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 60,
         align: "center",
         isClassification: true,
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         key: "customerNumber",
@@ -441,13 +458,13 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             style={{ lineHeight: 0 }}
           >
             <Tooltip title="View Account Detail">
-              <EyeOutlined style={{ fontSize: "20px" }} />
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn, prabillData]
+    [search, searchText, searchedColumn, prabillData]
   );
 
   const allColumns = useMemo(() => {
@@ -477,12 +494,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     setSort(dataSort);
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   const renderStatus = (status) => {
     switch (status) {
       case 0:
@@ -500,6 +511,9 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
 
   const resultData = detail_prabilling_result?.result || [];
   const pageInfo = detail_prabilling_result?.page || {};
+  
+  // Calculate if there's more data
+  const hasMore = resultData.length < (pageInfo?.totalElements || 0);
 
   return (
     <Spin spinning={loading}>
@@ -507,7 +521,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING INFORMATION</p>
+            <p className="mt-[15px] ">PRABILLING INFORMATION</p>
           </div>
         }
       >
@@ -569,11 +583,54 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         </div>
       </CardContainer>
 
+      {/* Prabilling Result Table Section */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px]">PRABILLING RESULT</p>
+            <ButtonComponent
+              type={"submit"}
+              border={false}
+              icon={<SVGIcon name="IconButtonDownload" width={24} />}
+              onClick={() => {
+                handleDownload();
+              }}
+            >
+              Download List
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <div className="my-0">
+          <TableRBI
+            idTable="prabilling-result-table"
+            dataSource={resultData}
+            columns={processedColumns}
+            totalData={pageInfo?.totalElements || 0}
+            tableScrolled={{ x: 5500, y: 600 }}
+            onSort={onSort}
+            showExport={false}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+            rowKey={(record, index) =>
+              `${record.customerNumber}-${record.accountNumber}-${index}`
+            }
+          />
+        </div>
+      </CardContainer>
+
       {/* History Log Information Section */}
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+            <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
           </div>
         }
       >
@@ -597,37 +654,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           <DetailText label={"Updated By"}>
             {prabillData?.updatedBy || ""}
           </DetailText>
-        </div>
-      </CardContainer>
-
-      {/* Prabilling Result Table Section */}
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PRABILLING RESULT</p>
-          </div>
-        }
-      >
-        <div className="my-5">
-          <TableRBI
-            dataSource={resultData}
-            columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={pageInfo?.totalElements || 0}
-            tableScrolled={{ x: 5500, y: 600 }}
-            onSort={onSort}
-            handleDownload={handleDownload}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
-            rowKey={(record, index) =>
-              `${record.customerNumber}-${record.accountNumber}-${index}`
-            }
-          />
         </div>
       </CardContainer>
     </Spin>

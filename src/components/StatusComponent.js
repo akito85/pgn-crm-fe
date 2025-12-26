@@ -23,8 +23,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     let bgColor = "bg-slate-600";
     let tColor = "text-white";
 
-    console.log("status: ", colour);
-
     switch (lowerColour) {
       // ===== SUCCESS STATUSES =====
       case "active":
@@ -252,7 +250,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "success_upload":
       case "latest":
       case "standard":
-        return <CheckCircleFilled style={{ fontSize: "15px" }} />;
+        return <CheckCircleFilled style={{ fontSize: "13px" }} />;
 
       // ===== PROCESSING ICONS =====
       case "generating":
@@ -262,14 +260,13 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "submitted": // ✅ E-Faktur submitted
       case "waiting approval":
       case "waiting_approval":
-      case "waiting approval":
       case "awaiting_approval":
       case "awaiting approval":
       case "waiting_cancellation_approval": // ✅ E-Faktur
       case "waiting cancellation approval":
       case "waiting_upload_approval": // ✅ E-Faktur
       case "waiting upload approval":
-        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
+        return <Loading3QuartersOutlined style={{ fontSize: "13px" }} />;
 
       // ===== FAILED ICONS =====
       case "failed":
@@ -277,27 +274,27 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "not_paid":
       case "rejected":
       case "cancelled":
-        return <CloseCircleFilled style={{ fontSize: "15px" }} />;
+        return <CloseCircleFilled style={{ fontSize: "13px" }} />;
 
       // ===== PENDING/SCHEDULED ICONS =====
       case "scheduled":
       case "not_generated":
       case "not generated":
-        return <ClockCircleFilled style={{ fontSize: "15px" }} />;
+        return <ClockCircleFilled style={{ fontSize: "13px" }} />;
 
       case "cancellation":
-        return <StopOutlined style={{ fontSize: "15px" }} />;
+        return <StopOutlined style={{ fontSize: "13px" }} />;
 
       case "replaced":
-        return <ExclamationCircleFilled style={{ fontSize: "15px" }} />;
+        return <ExclamationCircleFilled style={{ fontSize: "13px" }} />;
 
       case "replacement":
-        return <SyncOutlined style={{ fontSize: "15px" }} />;
+        return <SyncOutlined style={{ fontSize: "13px" }} />;
 
       case "normal":
       case "manual_upload":
       case "manual upload":
-        return <FileTextOutlined style={{ fontSize: "15px" }} />;
+        return <FileTextOutlined style={{ fontSize: "13px" }} />;
 
       default:
         return null;
@@ -310,11 +307,11 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     <div
       className={
         type === "status"
-          ? `flex gap-2 justify-center items-center ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
+          ? `flex gap-2 justify-center items-center my-1 ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
           : `${textColor} font-semibold`
       }
     >
-      {renderIconStatus()}
+      {/* {renderIconStatus()} */}
       {children}
     </div>
   );

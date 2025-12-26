@@ -3,14 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { getCalculateLogPaginate } from "../../../../../../redux/slices/rating_billing_invoice/calculation";
-import { hasValue, renderColumn } from "../../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const TableCalculateLog = ({ calculationCode }) => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20); // Load 20 data per load more
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
@@ -20,21 +20,26 @@ const TableCalculateLog = ({ calculationCode }) => {
     right: [],
   }));
 
-  const { list_calculation_log, loading } = useSelector(
+  const { list_calculation_logp, loading } = useSelector(
     (state) => state.rbi_calculation
   );
 
+  // Initial fetch - load 100 data pertama
   useEffect(() => {
-    dispatch(
-      getCalculateLogPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        sort,
-        page,
-        pageSize,
-        calCode: calculationCode,
-      })
-    );
-  }, [dispatch, calculationCode, sort, page, pageSize, search]);
+    if (calculationCode) {
+      dispatch(
+        getCalculateLogPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page: 0,
+          pageSize: 100, // Initial load 100
+          calCode: calculationCode,
+          isLoadMore: false,
+        })
+      );
+      setPage(0);
+    }
+  }, [dispatch, calculationCode, sort, search]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -42,13 +47,34 @@ const TableCalculateLog = ({ calculationCode }) => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
     });
+  };
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const pageInfo = list_calculation_logp?.page || {};
+    const totalPages = pageInfo?.totalPages || 0;
+
+    if (nextPage < totalPages) {
+      await dispatch(
+        getCalculateLogPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          calCode: calculationCode,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
 
   const onSort = (_, __, sorter) => {
@@ -59,12 +85,6 @@ const TableCalculateLog = ({ calculationCode }) => {
     setSort(dataSort);
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   const baseColumns = useMemo(
     () => [
       {
@@ -72,7 +92,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         title: "NO",
         width: 60,
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         key: "idCalJob",
@@ -132,7 +152,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "logMsg",
         title: "LOG MESSAGE",
         dataIndex: "logMsg",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.logMsg] || null,
         ellipsis: { showTitle: false },
@@ -160,7 +180,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "procName",
         title: "PROCESS NAME",
         dataIndex: "procName",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.procName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -187,7 +207,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "billCycle",
         title: "BILL CYCLE",
         dataIndex: "billCycle",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.billCycle] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -214,7 +234,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "billPeriod",
         title: "BILL PERIOD",
         dataIndex: "billPeriod",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.billPeriod] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -241,7 +261,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "countNo",
         title: "COUNTER NO",
         dataIndex: "countNo",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.countNo] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -268,7 +288,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "logDate",
         title: "LOG DATE",
         dataIndex: "logDate",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.logDate] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -278,16 +298,16 @@ const TableCalculateLog = ({ calculationCode }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
+          "datetime"
         ),
         render: (text) =>
-          renderColumn(
+          renderDateColumn(
             "logDate",
             hasValue(search["logDate"]),
             searchText,
             text,
-            false,
-            "input",
+            "datetime",
             search
           ),
       },
@@ -295,7 +315,7 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "createdBy",
         title: "CREATED BY",
         dataIndex: "createdBy",
-        isClassification:true,
+        isClassification: true,
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -319,29 +339,40 @@ const TableCalculateLog = ({ calculationCode }) => {
           ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn]
   );
 
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
   const processedColumns = useMemo(() => {
-    return applyFixedColumns(baseColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
-    return baseColumns.map((col) => ({
+    return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [baseColumns]);
+  }, [allColumns]);
+
+  const resultData = list_calculation_logp?.result || [];
+  const pageInfo = list_calculation_logp?.page || {};
+  
+  // Calculate if there's more data
+  const hasMore = resultData.length < (pageInfo?.totalElements || 0);
 
   return (
     <TableRBI
+      idTable="calculate-log-paginate-table"
       columns={processedColumns}
-      dataSource={list_calculation_log?.result}
-      totalData={list_calculation_log?.page?.totalElements || 0}
-      current={page}
-      pageSize={pageSize}
-      onChange={handleChangePage}
-      onSizeChanger={handleChangePage}
+      dataSource={resultData}
+      totalData={pageInfo?.totalElements || 0}
       tableScrolled={{ x: 2000, y: 600 }}
       onSort={onSort}
       showExport={false}
@@ -349,6 +380,11 @@ const TableCalculateLog = ({ calculationCode }) => {
       fixedColumns={fixedColumns}
       setFixedColumns={setFixedColumns}
       loading={loading}
+      usePagination={false}
+      useInfiniteScroll={true}
+      onLoadMore={handleLoadMore}
+      hasMore={hasMore}
+      loadMoreThreshold={20}
     />
   );
 };

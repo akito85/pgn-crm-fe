@@ -15,6 +15,8 @@ import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
   const { data, loading } = useSelector((state) => state.rating);
@@ -23,8 +25,8 @@ const RatingPage = () => {
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -60,12 +62,14 @@ const RatingPage = () => {
     dispatch(
       getListRatingGasPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 0,
+        pageSize: 100,
         sort,
+        isLoadMore: false,
       })
     );
-  }, [search, page, pageSize, sort, dispatch]);
+    setPage(0);
+  }, [dispatch, search, sort]);
 
   const tabItems = [
     {
@@ -92,13 +96,14 @@ const RatingPage = () => {
     },
   ];
 
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
@@ -107,10 +112,27 @@ const RatingPage = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    if (nextPage < totalPages) {
+      await dispatch(
+        getListRatingGasPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, 
+          sort,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
     // Mapping untuk field yang berbeda case
@@ -132,8 +154,8 @@ const RatingPage = () => {
     setValueTab(key);
   };
 
-  const handleDetail = (record) => {
-    const recordKey = record.ratingCode;
+  const handleDetail = (record, rowKey) => {
+    const recordKey = rowKey || record.ratingCode;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
@@ -155,30 +177,28 @@ const RatingPage = () => {
       downloadRatingGas({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
   };
 
   const itemGrantAccess = [
-    // {
-    //   action: "View",
-    //   type: "table",
-    //   render: (record) => {
-    //     return (
-    //       <Tooltip title="Detail">
-    //         <div className="pt-1">
-    //           <SVGIcon
-    //             name="IconDetail"
-    //             width={24}
-    //             onClick={() => handleDetail(record)}
-    //           />
-    //         </div>
-    //       </Tooltip>
-    //     );
-    //   },
-    // },
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
   ];
 
   const dataSourceWithKeys = useMemo(() => {
@@ -192,14 +212,14 @@ const RatingPage = () => {
     () =>
       columnsRating(
         search,
-        page,
-        pageSize,
+        0, // Tidak perlu pass page karena tidak digunakan untuk infinite scroll
+        0, // Tidak perlu pass pageSize karena tidak digunakan untuk infinite scroll
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
-    [search, page, pageSize, searchedColumn, searchText]
+    [search, searchedColumn, searchText]
   );
 
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
@@ -227,62 +247,46 @@ const RatingPage = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">RATING LIST</p>
+              <p className="w-full mt-[15px]">RATING LIST</p>
+              <div className="w-full flex justify-end gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
             </div>
           }
         >
-          <div className="mt-[0px]">
-            <Tabs
-              items={tabItems}
-              onChange={onChangeTab}
-              activeKey={valueTab}
-            />
-          </div>
-          <div className="my-5">
+          <Tabs
+            items={tabItems}
+            onChange={onChangeTab}
+            activeKey={valueTab}
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
+          />
+
+          <div className="my-0">
             <TableRBI
+              idTable="rating-table"
               size="small"
               dataSource={dataSourceWithKeys}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              handleDownload={handleDownload}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 16000 }}
+              tableScrolled={{ y: 525, x: 13000 }}
               onSort={onSortApi}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
-              onRow={(record) => ({
-                onClick: () => handleDetail(record),
-                style: {
-                  cursor: "pointer",
-                  backgroundColor:
-                    activeRowKey === record.ratingCode
-                      ? "#bae7ff"
-                      : "transparent",
-                  transition: "background-color 0.2s ease",
-                },
-                onMouseEnter: (e) => {
-                  if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }
-                },
-                onMouseLeave: (e) => {
-                  if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
-                },
-              })}
+              enableRowClick={true}
+              selectedRowKey={activeRowKey}
+              onRowClick={handleDetail}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>
