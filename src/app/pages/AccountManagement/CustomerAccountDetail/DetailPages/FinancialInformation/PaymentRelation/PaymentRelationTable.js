@@ -52,6 +52,7 @@ const PaymentRelationTable = ({
       title: "PRIORITY",
       dataIndex: "priority",
       width: 150,
+      align: "center",
       sorter: true,
       ...getColumnSearchProps("priority"),
     },
