@@ -188,7 +188,7 @@ const PaymentRelationDetails = ({
     if (detail_paymentRelation?.result) {
       const { approvalType } = detail_paymentRelation.result;
 
-      if (approvalType === "INVOICE_RELATION" || approvalType === "INACTIVE_INVOICE_RELATION")
+      if (approvalType === "PAYMENT_RELATION" || approvalType === "INACTIVE_PAYMENT_RELATION")
         setIsApproval(true);
       else
         setIsApproval(false);
