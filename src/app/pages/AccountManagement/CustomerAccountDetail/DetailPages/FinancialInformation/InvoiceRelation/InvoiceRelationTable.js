@@ -50,14 +50,14 @@ const InvoiceRelationTable = ({
     {
       title: "PRIORITY",
       dataIndex: "priority",
-      width: 250,
+      width: 150,
       sorter: true,
       ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
-      width: 250,
+      width: 200,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
       render: (startDate) => moment(startDate, "DD-MM-YYYY").format(dateFormatting.date),
@@ -65,7 +65,7 @@ const InvoiceRelationTable = ({
     {
       title: "END DATE",
       dataIndex: "endDate",
-      width: 250,
+      width: 200,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
       render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
@@ -73,7 +73,7 @@ const InvoiceRelationTable = ({
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 300,
+      width: 200,
       sorter: true,
       align: "center",
       fixed: "right",
@@ -98,9 +98,9 @@ const InvoiceRelationTable = ({
     {
       title: "STATUS",
       dataIndex: "status",
+      width: 120,
       sorter: true,
       fixed: "right",
-      width: 150,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
@@ -333,7 +333,7 @@ const InvoiceRelationTable = ({
         pageSize={pageSize}
         onChange={handleChange}
         onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 400, x: 2000 }}
+        tableScrolled={{ y: 400, x: "max-content" }}
         onSort={onSort}
         columns={[
           ...columns,
