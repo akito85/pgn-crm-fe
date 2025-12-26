@@ -74,7 +74,6 @@ const PaymentRelationTable = ({
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 300,
       sorter: true,
       align: "center",
       fixed: "right",
@@ -101,7 +100,6 @@ const PaymentRelationTable = ({
       dataIndex: "status",
       sorter: true,
       fixed: "right",
-      width: 150,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
