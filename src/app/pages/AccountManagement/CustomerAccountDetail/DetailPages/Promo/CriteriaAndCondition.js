@@ -94,7 +94,6 @@ const selectedRender = ({
               enableDragColumn={true}
               enableColumnSorter={conditionDataSource.length > 0}
               enableColumnFilter={conditionDataSource.length > 0}
-              freezeColumns={[{ key: "action", position: "right" }]}
               tableScrolled={{ x: 800 }}
               columns={promoConditionRepository.getColumns(handleClickConditionDetail)}
               dataSource={conditionDataSource}
