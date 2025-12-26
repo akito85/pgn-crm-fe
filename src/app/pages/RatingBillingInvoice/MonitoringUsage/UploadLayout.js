@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
 import {
-  deleteSingleUsage,
+  // deleteSingleUsage, // ❌ Hapus import ini
   getFormatUsageType,
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
@@ -85,30 +85,20 @@ const UploadLayout = ({
     setSelectedRecord(null);
   };
 
-  const handleDeleteOk = async () => {
-    try {
-      if (!recordId) {
-        console.error("No recordId found");
-        return;
-      }
-
-      const resultAction = await dispatch(deleteSingleUsage(recordId));
-
-      if (deleteSingleUsage.fulfilled.match(resultAction)) {
-        // Update local state setelah API berhasil
-        const newData = dataTable.filter((item) => item.recordId !== recordId);
-        setDataTable(newData);
-        setModalDelete(false);
-
-        // Refresh data dari parent component jika ada
-        if (refreshData && typeof refreshData === "function") {
-          refreshData();
-        }
-      }
-    } catch (error) {
-      console.error("Error deleting usage:", error);
-      setModalDelete(false);
-    }
+  // ✅ Handle delete - hanya update state lokal (seperti versi sebelumnya)
+  const handleDeleteOk = () => {
+    // Filter data berdasarkan recordId
+    const newData = dataTable.filter((item) => item.recordId !== recordId);
+    
+    // Update state lokal
+    setDataTable(newData);
+    
+    // Tutup modal
+    setModalDelete(false);
+    
+    // Optional: Jika ada callback untuk tracking deleted data
+    // Anda bisa menambahkan dispatch(addDeletedData(deletedRecord)) di sini
+    // jika ingin menyimpan history data yang dihapus
   };
 
   // column action dengan recordId
@@ -360,7 +350,6 @@ const UploadLayout = ({
       return (
         <Form>
           <div className={"w-full flex flex-col"}>
-            {/* <span className={"text-xl"}>Upload Usage List</span> */}
             <div className={"w-full flex no-margin-form"}>
               <Form.Item className="w-1/4">
                 <SelectComponent
@@ -404,7 +393,6 @@ const UploadLayout = ({
                     <p className="ant-upload-text">
                       Put Google Drive link or local file
                     </p>
-                    {/* ✅ Tambahkan onClick dengan stopPropagation pada div wrapper */}
                     <div
                       className="flex my-5 justify-center items-center"
                       onClick={(e) => e.stopPropagation()}

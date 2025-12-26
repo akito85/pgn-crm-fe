@@ -95,10 +95,10 @@ const DetailMonitoringUsage = () => {
   useEffect(() => {
     if (location?.state?.id) {
       dispatch(
-        getDetailBatch({ 
-          batchId: location?.state?.id, 
-          page: 1, 
-          pageSize: 100 // Initial load 100 items
+        getDetailBatch({
+          batchId: location?.state?.id,
+          page: 1,
+          pageSize: 100, // Initial load 100 items
         })
       );
       dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
@@ -270,10 +270,10 @@ const DetailMonitoringUsage = () => {
 
         // Refresh data from server
         dispatch(
-          getDetailBatch({ 
-            batchId: location?.state?.id, 
-            page: 1, 
-            pageSize: page * loadMoreSize // Keep current loaded data
+          getDetailBatch({
+            batchId: location?.state?.id,
+            page: 1,
+            pageSize: page * loadMoreSize, // Keep current loaded data
           })
         );
       }
@@ -306,28 +306,11 @@ const DetailMonitoringUsage = () => {
   };
 
   // handle delete usage list
-  const handleDeleteOk = async () => {
-    try {
-      const resultAction = await dispatch(deleteSingleUsage(recordId));
-
-      if (deleteSingleUsage.fulfilled.match(resultAction)) {
-        const newData = dataTable.filter((item) => item.recordId !== recordId);
-        setDataTable(newData);
-        setModalDelete(false);
-
-        // Refresh data from server
-        dispatch(
-          getDetailBatch({ 
-            batchId: location?.state?.id, 
-            page: 1, 
-            pageSize: page * loadMoreSize // Keep current loaded data
-          })
-        );
-      }
-    } catch (error) {
-      console.error("Error deleting usage:", error);
-      setModalDelete(false);
-    }
+  const handleDeleteOk = () => {
+    const newData = dataTable.filter((item) => item.recordId !== recordId);
+    setDataTable(newData);
+    dispatch(addDeletedData(deletedRecord));
+    setModalDelete(false);
   };
 
   const handleDownloadFailed = () => {
