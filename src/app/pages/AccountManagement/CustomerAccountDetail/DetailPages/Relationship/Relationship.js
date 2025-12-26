@@ -6,15 +6,17 @@ import RelationshipTable from "./RelationshipTable";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Form } from "antd";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import CustomerQuery from "../../../Customer/Component/CustomerQuesry";
-import { getGlobalSearchColumn, getGlobalSearchCondition, getGlobalSearchOperator } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import NxFilter from "../../../../../../components/Nx/NxFilter";
+import { getRelationshipColumnApi, getRelationshipConditionApi, getRelationshipOperatorApi, downloadRelationship } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { CheckOutlined, DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 
 const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   const dispatch = useDispatch();
+  const relationshipState = useSelector((state) => state.relationship);
+  const { loading } = relationshipState;
   const [formQuery] = Form.useForm();
 
   const [page, setPage] = useState(1);
@@ -89,6 +91,19 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
     }
   };
 
+  const handleDownload = () => {
+    const body = {
+      page,
+      size: pageSize,
+      sort,
+      inputFields: tempInputFields,
+      searchs: search,
+      listType: listType,
+    };
+
+    dispatch(downloadRelationship({ idAccount: id, body }));
+  };
+
   return (
     // <Spin spinning={loading} className={"w-full top-20"} tip={"Loading..."}>
     <Fragment>
@@ -113,7 +128,7 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
             <div className="flex gap-3">
               <ButtonComponent
                 type={"submit"}
-                // onClick={handleDownload}
+                onClick={handleDownload}
                 icon={
                   <DownloadOutlined
                     style={{
@@ -209,32 +224,23 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
       {/* Modal Filter */}
       <ModalCustom
         isOpen={modalQuery}
-        type="filter"
-        header="Advanced Filter"
-        width={700}
+        type={"confirmation"}
+        header={"QUERY"}
+        width={1200}
         handleCancel={handleCancelQuery}
-        handleOk={handleSaveQuery}
       >
-        <Form
-          form={formQuery}
-          id={"formQuery"}
-          layout={"vertical"}
-          onFinish={handleSaveQuery}
-          initialValues={{
-            query:
-              tempInputFields.length > 0
-                ? tempInputFields
-                : [{ condition: 1311 }],
-          }}
-        >
-          <CustomerQuery
-            handleFirstQuery={handleFirstQuery}
-            handleCancelQuery={handleCancelQuery}
+        <Form form={formQuery} layout="vertical" onFinish={handleSaveQuery} id={"relationshipFilterForm"}>
+          <NxFilter
+            form={formQuery}
+            onCancel={handleCancelQuery}
             dispatch={dispatch}
-            typeSelector="relationship"
-            getApiColumn={getGlobalSearchColumn}
-            getApiOperator={getGlobalSearchOperator}
-            getApiCondition={getGlobalSearchCondition}
+            getColumnApi={getRelationshipColumnApi}
+            getConditionApi={getRelationshipConditionApi}
+            getOperatorApi={getRelationshipOperatorApi}
+            reduxState={relationshipState}
+            maxFilters={5}
+            loading={loading}
+            formId="relationshipFilterForm"
           />
         </Form>
       </ModalCustom>
