@@ -64,7 +64,6 @@ const selectedRender = ({
               enableDragColumn={true}
               enableColumnSorter={criteriaDataSource.length > 0}
               enableColumnFilter={criteriaDataSource.length > 0}
-              freezeColumns={[{ key: "action", position: "right" }]}
               tableScrolled={{ x: 800 }}
               columns={promoCriteriaRepository.getColumns(handleClickCriteriaDetail)}
               dataSource={criteriaDataSource}
