@@ -20,11 +20,14 @@ import {
   markAllAsRead,
   selectUnreadCount,
   selectFilteredNotifications,
+  selectAllNotifications,
   selectIsConnected,
   updateFilters,
   NOTIFICATION_TYPES,
   NOTIFICATION_PRIORITY,
   fetchUnreadCount,
+  fetchUserNotifications,
+  fetchAllUserNotifications,
   markNotificationAsReadApi,
   markAllNotificationsAsReadApi,
   deleteNotificationApi,
@@ -48,18 +51,36 @@ const NotificationDropdown = () => {
   const [activeTab, setActiveTab] = useState('all');
 
   // Get notification state
-  const unreadCount = useSelector(selectUnreadCount);
-  const allNotifications = useSelector(selectFilteredNotifications);
+  const allNotifications = useSelector(selectAllNotifications) || [];
   const isConnected = useSelector(selectIsConnected);
+
+  // Get user ID from token
+  const tokenJSON = JSON.parse(
+    localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
+  );
+  const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+
+  // Filter notifications for current user only
+  const userNotifications = allNotifications.filter(notification => {
+    // Include broadcast notifications (for all users) or notifications directed to this user
+    return notification.direction === "broadcast" ||
+           notification.TO_USER_ID === userId ||
+           notification.TO_USER_ID === "ALL" ||
+           notification.toUserId === userId ||
+           notification.toUserId === "ALL";
+  });
+
+  // Calculate user's unread count
+  const userUnreadCount = userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read").length;
 
   // Filter notifications based on active tab
   const notifications = activeTab === 'all'
-    ? allNotifications
-    : allNotifications.filter(notification => !notification.read);
+    ? userNotifications
+    : userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read");
 
   // Calculate counts for tabs
-  const allCount = allNotifications.length;
-  const unreadCountForTab = allNotifications.filter(notification => !notification.read).length;
+  const allCount = userNotifications.length;
+  const unreadCountForTab = userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read").length;
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
@@ -93,11 +114,15 @@ const NotificationDropdown = () => {
 
           // Step 3: Fetch unread count from API
           dispatch(fetchUnreadCount());
+
+          // Step 4: Fetch all existing user notifications from API (list endpoint)
+          dispatch(fetchAllUserNotifications({ userId }));
         } catch (error) {
           console.error("[NotificationDropdown] Failed to initialize notifications:", error);
           // Continue anyway - user might still see notifications if backend allows
           dispatch(connectNotifications({ userId }));
           dispatch(fetchUnreadCount());
+          dispatch(fetchAllUserNotifications({ userId }));
         }
       };
 
@@ -147,8 +172,26 @@ const NotificationDropdown = () => {
   const getPriorityColor = (priority) => {
     // Normalize priority to string if it's a number
     const normalizedPriority = typeof priority === 'number'
-      ? getPriorityString(priority)
+      ? getPriorityStringFromNumber(priority)
       : priority;
+
+    // If it's a number string like "1", convert to number
+    if (typeof priority === 'string' && !isNaN(priority) && priority.trim() !== '') {
+      const priorityNumber = Number(priority);
+      const priorityString = getPriorityStringFromNumber(priorityNumber);
+      switch (priorityString) {
+        case NOTIFICATION_PRIORITY.URGENT:
+          return "red";
+        case NOTIFICATION_PRIORITY.HIGH:
+          return "orange";
+        case NOTIFICATION_PRIORITY.NORMAL:
+          return "blue";
+        case NOTIFICATION_PRIORITY.LOW:
+          return "default";
+        default:
+          return "default";
+      }
+    }
 
     switch (normalizedPriority) {
       case NOTIFICATION_PRIORITY.URGENT:
@@ -168,11 +211,20 @@ const NotificationDropdown = () => {
    * Convert priority (number or string) to display string
    */
   const getPriorityString = (priority) => {
-    // If already a string, return as-is
-    if (typeof priority === 'string') {
-      return priority;
+    // Normalize priority to string if it's a number
+    const normalizedPriority = typeof priority === 'number'
+      ? getPriorityStringFromNumber(priority)
+      : priority;
+
+    // If it's a number string like "1", convert to number
+    if (typeof priority === 'string' && !isNaN(priority) && priority.trim() !== '') {
+      return getPriorityStringFromNumber(Number(priority));
     }
 
+    return normalizedPriority;
+  };
+
+  const getPriorityStringFromNumber = (priority) => {
     // If number, map to priority string
     // Assuming: 1=low, 2=normal, 3=high, 4=urgent
     switch (priority) {
@@ -194,33 +246,33 @@ const NotificationDropdown = () => {
    */
   const handleNotificationClick = (notification) => {
     // Mark as read if not already read via API
-    if (!notification.read) {
+    if ((notification.STATUS || notification.status) !== "read") {
       dispatch(markNotificationAsReadApi(notification.id));
     }
 
     // Navigate using state-based routing pattern
-    if (notification.link) {
+    if (notification.link || notification.LINK) {
       // Build route state object
       const routeState = {
-        id: notification.entityId,
-        type: notification.entityType,
+        id: notification.entityId || notification.ENTITY_ID,
+        type: notification.entityType || notification.ENTITY_TYPE,
         ...notification.navigationState, // Spread additional state (idAccount, idCustomer, etc.)
       };
 
       // Add approval context if present
-      if (notification.tappId) {
-        routeState.tappId = notification.tappId;
-        routeState.appHierId = notification.appHierId;
-        routeState.approvalAction = notification.approvalAction;
-        routeState.approvalLevel = notification.approvalLevel;
+      if (notification.tappId || notification.TAPP_ID) {
+        routeState.tappId = notification.tappId || notification.TAPP_ID;
+        routeState.appHierId = notification.appHierId || notification.APP_HIER_ID;
+        routeState.approvalAction = notification.approvalAction || notification.APPROVAL_ACTION;
+        routeState.approvalLevel = notification.approvalLevel || notification.APPROVAL_LEVEL;
       }
 
       // Navigate based on presence of entity_id
-      if (notification.entityId) {
-        navigate(notification.link, { state: routeState });
+      if (notification.entityId || notification.ENTITY_ID) {
+        navigate(notification.link || notification.LINK, { state: routeState });
       } else {
         // General page navigation (might still have state for bulk operations)
-        navigate(notification.link, {
+        navigate(notification.link || notification.LINK, {
           state: Object.keys(notification.navigationState || {}).length > 0
             ? notification.navigationState
             : undefined
@@ -289,7 +341,10 @@ const NotificationDropdown = () => {
    * Get notification timestamp - handles different property names
    */
   const getNotificationTimestamp = (notification) => {
-    return notification.receivedAt || notification.createdAt || notification.CREATED_AT;
+    return notification.receivedAt ||
+           notification.RECEIVED_AT ||
+           notification.createdAt ||
+           notification.CREATED_AT;
   };
 
   /**
@@ -338,7 +393,7 @@ const NotificationDropdown = () => {
         <Text strong style={{ fontSize: 16 }}>
           Notifications
         </Text>
-        {((activeTab === 'all' && allNotifications.some(notification => !notification.read)) ||
+        {((activeTab === 'all' && userNotifications.some(notification => !notification.read)) ||
           (activeTab === 'unread' && unreadCountForTab > 0)) && (
           <Button
             type="link"
@@ -418,8 +473,8 @@ const NotificationDropdown = () => {
                       onClick={() => handleNotificationClick(notification)}
                       style={{
                         padding: "12px 16px",
-                        cursor: notification.link ? "pointer" : "default",
-                        backgroundColor: notification.read ? "#ffffff" : "#f0f7ff",
+                        cursor: (notification.LINK || notification.link) ? "pointer" : "default",
+                        backgroundColor: ((notification.STATUS || notification.status) === "read") ? "#ffffff" : "#f0f7ff",
                         borderBottom: "1px dashed rgb(29 28 29 / 0.1)",
                         borderTop: "1px dashed rgb(29 28 29 / 0.1)",
                         marginTop: "-1px"
@@ -427,7 +482,7 @@ const NotificationDropdown = () => {
                       className="notification-item hover:bg-gray-50"
                     >
                       <List.Item.Meta
-                        // avatar={getNotificationIcon(notification.notificationType)}
+                        // avatar={getNotificationIcon(notification.notificationType || notification.NOTIFICATION_TYPE)}
                         title={
                           <div
                             style={{
@@ -437,19 +492,19 @@ const NotificationDropdown = () => {
                             }}
                           >
                             <Text
-                              strong={!notification.read}
+                              strong={!(notification.read || notification.STATUS === "read")}
                               style={{ fontSize: 14 }}
                               ellipsis
                             >
-                              {notification.title}
+                              {notification.title || notification.TITLE}
                             </Text>
-                            {notification.priority &&
-                              getPriorityString(notification.priority) !== NOTIFICATION_PRIORITY.NORMAL && (
+                            {(notification.priority || notification.PRIORITY) &&
+                              getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
                                 <Tag
-                                  color={getPriorityColor(notification.priority)}
+                                  color={getPriorityColor(notification.priority || notification.PRIORITY)}
                                   style={{ marginLeft: 8, fontSize: 10 }}
                                 >
-                                  {getPriorityString(notification.priority).toUpperCase()}
+                                  {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
                                 </Tag>
                               )}
                           </div>
@@ -461,7 +516,7 @@ const NotificationDropdown = () => {
                               style={{ fontSize: 13, display: "block" }}
                               ellipsis={{ rows: 2 }}
                             >
-                              {notification.message}
+                              {notification.message || notification.MESSAGE}
                             </Text>
                             <div
                               style={{
@@ -519,7 +574,12 @@ const NotificationDropdown = () => {
       placement="bottomRight"
       overlayClassName="notification-popover"
     >
-      <Badge count={activeTab === 'all' ? unreadCount : unreadCountForTab} offset={[-5, 5]} overflowCount={99}>
+      <Badge
+        count={userUnreadCount > 0 ? 1 : 0}
+        offset={[-5, 5]}
+        overflowCount={99}
+        style={{ boxShadow: '0 0 0 2px #fff' }}
+      >
         <a onClick={(e) => e.preventDefault()} className="pt-2.5">
           <BellOutlined
             style={{

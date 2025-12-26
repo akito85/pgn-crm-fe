@@ -17,8 +17,11 @@ const notificationApi = {
    */
   getUserNotifications: async (params = {}) => {
     try {
+      // Remove userId from params since it's passed in the X-User-Id header
+      const { userId, ...otherParams } = params;
+
       const config = {
-        params: params,
+        params: otherParams,
         headers: notificationTokenHeader(),
         withCredentials: true,
       };
@@ -26,6 +29,30 @@ const notificationApi = {
       return response?.data;
     } catch (error) {
       console.error('Error fetching user notifications:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get all user notifications (list endpoint)
+   * GET /v1/dbs/api/notifications/list
+   * @param {string} userId - User ID to fetch notifications for
+   * @param {Object} params - Query parameters (page, size, sort, status, type, priority)
+   */
+  getAllUserNotifications: async (userId, params = {}) => {
+    try {
+      const config = {
+        params: {
+          ...params,
+          toUserId: userId
+        },
+        headers: notificationTokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/list`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('Error fetching all user notifications:', error);
       throw error;
     }
   },
@@ -55,8 +82,11 @@ const notificationApi = {
    */
   getUnreadNotifications: async (params = {}) => {
     try {
+      // Remove userId from params since it's passed in the X-User-Id header
+      const { userId, ...otherParams } = params;
+
       const config = {
-        params: params,
+        params: otherParams,
         headers: notificationTokenHeader(),
         withCredentials: true,
       };

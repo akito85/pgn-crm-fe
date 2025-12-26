@@ -127,6 +127,25 @@ export const fetchUserNotifications = createAsyncThunk(
 );
 
 /**
+ * Fetch all user notifications from API (list endpoint)
+ */
+export const fetchAllUserNotifications = createAsyncThunk(
+  "notifications/fetchAllUserNotifications",
+  async ({ userId, params = {} }, { rejectWithValue }) => {
+    try {
+      const response = await notificationApi.getAllUserNotifications(userId, params);
+      return response;
+    } catch (error) {
+      console.error("[Notifications Slice] Error fetching all user notifications:", error);
+      return rejectWithValue({
+        message: error.message || "Failed to fetch all notifications",
+        error,
+      });
+    }
+  }
+);
+
+/**
  * Fetch unread notifications count from API
  */
 export const fetchUnreadCount = createAsyncThunk(
@@ -476,11 +495,26 @@ const notificationsSlice = createSlice({
       .addCase(fetchUserNotifications.fulfilled, (state, action) => {
         state.isLoading = false;
         // Update notifications array with API response
-        state.notifications = action.payload.data || action.payload; // Depending on API response structure
+        // API returns { data: { content: [...], ...pagination } }, so get the content array
+        state.notifications = action.payload.data?.content || action.payload.data || action.payload || [];
       })
       .addCase(fetchUserNotifications.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload?.message || "Failed to fetch notifications";
+      })
+      .addCase(fetchAllUserNotifications.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllUserNotifications.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Update notifications array with API response from list endpoint
+        // API returns { data: { content: [...], ...pagination } }, so get the content array
+        state.notifications = action.payload.data?.content || action.payload.data || action.payload || [];
+      })
+      .addCase(fetchAllUserNotifications.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to fetch all notifications";
       });
 
     // Fetch unread count
