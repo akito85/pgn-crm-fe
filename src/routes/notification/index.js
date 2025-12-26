@@ -1,5 +1,4 @@
 import NotificationHistory from "../../app/pages/Notifications/NotificationHistory"
-import IconPreview from "../../app/pages/Notifications/IconPreview"
 
 export const NOTIFICATION_ELEMENT = {
   VIEW_NOTIFICATION_PAGE: <NotificationHistory />,
