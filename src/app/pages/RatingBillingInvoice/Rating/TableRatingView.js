@@ -23,7 +23,7 @@ export const columnsRating = (
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
     isClassification: true,
-    width: 170,
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -49,7 +49,7 @@ export const columnsRating = (
     title: "RATING CODE",
     dataIndex: "ratingCode",
     isClassification: true,
-    width: 130,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -75,7 +75,7 @@ export const columnsRating = (
     title: "RATE TYPE",
     dataIndex: "rateType",
     isClassification: true,
-    width: 110,
+    width: 130,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -100,8 +100,7 @@ export const columnsRating = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
-    isClassification: true,
-    width: 170,
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -126,8 +125,7 @@ export const columnsRating = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
-    isClassification: true,
-    width: 130,
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -152,8 +150,7 @@ export const columnsRating = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
-    isClassification: true,
-    width: 160,
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -179,7 +176,6 @@ export const columnsRating = (
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     width: 160,
-    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -204,7 +200,7 @@ export const columnsRating = (
     key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
-    width: 110,
+    width: 150,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -230,7 +226,7 @@ export const columnsRating = (
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
-    width: 170,
+    width: 190,
     isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -255,7 +251,7 @@ export const columnsRating = (
   {
     key: "costCenter",
     title: "COST CENTER",
-    width: 110,
+    width: 150,
     dataIndex: "costCenter",
     isClassification: true,
     sorter: true,
@@ -282,7 +278,7 @@ export const columnsRating = (
     key: "mreadingCode",
     title: "METER READING CODE",
     dataIndex: "mreadingCode",
-    width: 130,
+    width: 200,
     isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -308,7 +304,7 @@ export const columnsRating = (
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
-    width: 120,
+    width: 180,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -334,7 +330,7 @@ export const columnsRating = (
     key: "accGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accGroupType",
-    width: 130,
+    width: 210,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -360,7 +356,7 @@ export const columnsRating = (
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
-    width: 100,
+    width: 170,
     isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -385,7 +381,7 @@ export const columnsRating = (
   {
     key: "billingPeriod",
     title: "BILLING PERIOD",
-    width: 100,
+    width: 160,
     sorter: true,
     isClassification: true,
     dataIndex: "billingPeriod",
@@ -413,7 +409,6 @@ export const columnsRating = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
-    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -462,7 +457,7 @@ export const columnsRating = (
   {
     key: "minContract",
     title: "MIN CONTRACT",
-    width: 100,
+    width: 160,
     dataIndex: "minContract",
     sorter: true,
     isNumber: true,
@@ -488,7 +483,7 @@ export const columnsRating = (
   {
     key: "maxContract",
     title: "MAX CONTRACT",
-    width: 100,
+    width: 160,
     dataIndex: "maxContract",
     sorter: true,
     isNumber: true,
@@ -515,7 +510,7 @@ export const columnsRating = (
     key: "uom",
     title: "UOM",
     dataIndex: "uom",
-    width: 60,
+    width: 100,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -541,7 +536,7 @@ export const columnsRating = (
     key: "timeUnitContract",
     title: "CONTRACT TIME UNIT",
     dataIndex: "timeUnitContract",
-    width: 120,
+    width: 190,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -566,7 +561,7 @@ export const columnsRating = (
   {
     key: "usage",
     title: "USAGE",
-    width: 70,
+    width: 110,
     dataIndex: "usage",
     sorter: true,
     isNumber: true,
@@ -592,7 +587,7 @@ export const columnsRating = (
   {
     key: "convUsageM3",
     title: "CONVERTED USAGE M3",
-    width: 130,
+    width: 200,
     dataIndex: "convUsageM3",
     sorter: true,
     isNumber: true,
@@ -619,6 +614,7 @@ export const columnsRating = (
     key: "convUsageMmbtu",
     title: "CONVERTED USAGE MMBTU",
     dataIndex: "convUsageMmbtu",
+    width: 230,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -644,7 +640,7 @@ export const columnsRating = (
     key: "discountUsage",
     title: "DISCOUNT USAGE",
     dataIndex: "discountUsage",
-    width: 120,
+    width: 180,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -669,7 +665,7 @@ export const columnsRating = (
   {
     key: "totalUsage",
     title: "TOTAL USAGE",
-    width: 100,
+    width: 150,
     dataIndex: "totalUsage",
     sorter: true,
     isNumber: true,
@@ -696,6 +692,7 @@ export const columnsRating = (
     key: "convTotalUsageM3",
     title: "CONVERTED TOTAL USAGE M3",
     dataIndex: "convTotalUsageM3",
+    width: 250,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -720,7 +717,7 @@ export const columnsRating = (
   {
     key: "convTotalUsageMmbtu",
     title: "CONVERTED TOTAL USAGE MMBTU",
-    width: 170,
+    width: 280,
     dataIndex: "convTotalUsageMmbtu",
     sorter: true,
     isNumber: true,
@@ -772,7 +769,7 @@ export const columnsRating = (
   {
     key: "convMinimumUsageM3",
     title: "CONVERTED MINIMUM USAGE M3",
-    width: 170,
+    width: 270,
     dataIndex: "convMinimumUsageM3",
     sorter: true,
     isNumber: true,
@@ -799,7 +796,7 @@ export const columnsRating = (
     key: "convMinimumUsageMmbtu",
     title: "CONVERTED MINIMUM USAGE MMBTU",
     dataIndex: "convMinimumUsageMmbtu",
-    width: 180,
+    width: 280,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -824,7 +821,7 @@ export const columnsRating = (
   {
     key: "normalUsage",
     title: "NORMAL USAGE",
-    width: 100,
+    width: 160,
     dataIndex: "normalUsage",
     sorter: true,
     isNumber: true,
@@ -850,7 +847,7 @@ export const columnsRating = (
   {
     key: "convNormalUsageM3",
     title: "CONVERTED NORMAL USAGE M3",
-    width: 170,
+    width: 270,
     dataIndex: "convNormalUsageM3",
     sorter: true,
     isNumber: true,
@@ -876,7 +873,7 @@ export const columnsRating = (
   {
     key: "convNormalUsageMmbtu",
     title: "CONVERTED NORMAL USAGE MMBTU",
-    width: 180,
+    width: 280,
     dataIndex: "convNormalUsageMmbtu",
     sorter: true,
     isNumber: true,
@@ -903,7 +900,7 @@ export const columnsRating = (
     key: "oup",
     title: "OUP",
     dataIndex: "oup",
-    width: 60,
+    width: 120,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -929,7 +926,7 @@ export const columnsRating = (
     key: "convOupM3",
     title: "CONVERTED OUP M3",
     dataIndex: "convOupM3",
-    width: 120,
+    width: 200,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -954,7 +951,7 @@ export const columnsRating = (
   {
     key: "convOupMmbtu",
     title: "CONVERTED OUP MMBTU",
-    width: 130,
+    width: 210,
     dataIndex: "convOupMmbtu",
     sorter: true,
     isNumber: true,
@@ -980,7 +977,7 @@ export const columnsRating = (
   {
     key: "calculatedUsage",
     title: "CALCULATED USAGE",
-    width: 110,
+    width: 190,
     dataIndex: "calculatedUsage",
     sorter: true,
     isNumber: true,
@@ -1007,6 +1004,7 @@ export const columnsRating = (
     key: "convCalculatedUsageM3",
     title: "CONVERTED CALCULATED USAGE M3",
     dataIndex: "convCalculatedUsageM3",
+    width: 290,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1032,6 +1030,7 @@ export const columnsRating = (
     key: "convCalculatedUsageMmbtu",
     title: "CONVERTED CALCULATED USAGE MMBTU",
     dataIndex: "convCalculatedUsageMmbtu",
+    width: 300,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1057,7 +1056,7 @@ export const columnsRating = (
     key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
-    width:100,
+    width:150,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1083,6 +1082,7 @@ export const columnsRating = (
     key: "rate",
     title: "RATE",
     dataIndex: "rate",
+    width: 110,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1108,6 +1108,7 @@ export const columnsRating = (
     key: "rateDate",
     title: "RATE DATE",
     sorter: true,
+    width: 130,
     isClassification: true,
     dataIndex: "rateDate",
     ...getColumnSearchPropsUseFilteredValue(
@@ -1134,6 +1135,7 @@ export const columnsRating = (
     key: "totalAmountMinIdr",
     title: "TOTAL AMOUNT MINIMUM IDR",
     dataIndex: "totalAmountMinIdr",
+    width: 250,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1159,6 +1161,7 @@ export const columnsRating = (
     key: "totalAmountMinUsd",
     title: "TOTAL AMOUNT MINIMUM USD",
     dataIndex: "totalAmountMinUsd",
+    width: 240,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1184,6 +1187,7 @@ export const columnsRating = (
     key: "totalAmountMinEqvIdr",
     title: "TOTAL AMOUNT MINIMUM EQV IDR",
     dataIndex: "totalAmountMinEqvIdr",
+    width: 270,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1209,6 +1213,7 @@ export const columnsRating = (
     key: "totalAmountMinEqvUsd",
     title: "TOTAL AMOUNT MINIMUM EQV USD",
     dataIndex: "totalAmountMinEqvUsd",
+    width: 270,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1234,6 +1239,7 @@ export const columnsRating = (
     key: "totalAmountNormalIdr",
     title: "TOTAL AMOUNT NORMAL IDR",
     dataIndex: "totalAmountNormalIdr",
+    width: 250,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1259,6 +1265,7 @@ export const columnsRating = (
     key: "totalAmountNormalUsd",
     title: "TOTAL AMOUNT NORMAL USD",
     dataIndex: "totalAmountNormalUsd",
+    width: 250,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1284,6 +1291,7 @@ export const columnsRating = (
     key: "totalAmountNormalEqvIdr",
     title: "TOTAL AMOUNT NORMAL EQV IDR",
     dataIndex: "totalAmountNormalEqvIdr",
+    width: 270,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1309,6 +1317,7 @@ export const columnsRating = (
     key: "totalAmountNormalEqvUsd",
     title: "TOTAL AMOUNT NORMAL EQV USD",
     dataIndex: "totalAmountNormalEqvUsd",
+    width: 270,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1334,6 +1343,7 @@ export const columnsRating = (
     key: "totalAmountOupIdr",
     title: "TOTAL AMOUNT OUP IDR",
     dataIndex: "totalAmountOupIdr",
+    width: 210,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1359,6 +1369,7 @@ export const columnsRating = (
     key: "totalAmountOupUsd",
     title: "TOTAL AMOUNT OUP USD",
     dataIndex: "totalAmountOupUsd",
+    width: 220,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1384,6 +1395,7 @@ export const columnsRating = (
     key: "totalAmountOupEqvIdr",
     title: "TOTAL AMOUNT OUP EQV IDR",
     dataIndex: "totalAmountOupEqvIdr",
+    width: 250,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1409,6 +1421,7 @@ export const columnsRating = (
     key: "totalAmountOupEqvUsd",
     title: "TOTAL AMOUNT OUP EQV USD",
     dataIndex: "totalAmountOupEqvUsd",
+    width: 250,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1484,6 +1497,7 @@ export const columnsRating = (
     key: "amountEqvIdr",
     title: "AMOUNT EQV IDR",
     dataIndex: "amountEqvIdr",
+    width: 170,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1509,6 +1523,7 @@ export const columnsRating = (
     key: "amountEqvUsd",
     title: "AMOUNT EQV USD",
     dataIndex: "amountEqvUsd",
+    width: 170,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1534,6 +1549,7 @@ export const columnsRating = (
     key: "discountAmount",
     title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
+    width: 180,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1559,6 +1575,7 @@ export const columnsRating = (
     key: "totalAmountIdr",
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
+    width: 190,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1584,6 +1601,7 @@ export const columnsRating = (
     key: "totalAmountUsd",
     title: "TOTAL AMOUNT USD",
     dataIndex: "totalAmountUsd",
+    width: 190,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1609,6 +1627,7 @@ export const columnsRating = (
     key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
+    width: 210,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1634,6 +1653,7 @@ export const columnsRating = (
     key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
+    width: 210,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1658,6 +1678,7 @@ export const columnsRating = (
   {
     key: "transactionDate",
     title: "TRANSACTION DATE",
+    width: 190,
     sorter: true,
     isClassification: true,
     dataIndex: "transactionDate",
