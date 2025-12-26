@@ -286,10 +286,44 @@ const NotificationDropdown = () => {
   };
 
   /**
+   * Get notification timestamp - handles different property names
+   */
+  const getNotificationTimestamp = (notification) => {
+    return notification.receivedAt || notification.createdAt || notification.CREATED_AT;
+  };
+
+  /**
+   * Group notifications by date
+   */
+  const groupNotificationsByDate = (notifications) => {
+    const grouped = {};
+
+    notifications.forEach(notification => {
+      const notificationDate = getNotificationTimestamp(notification);
+      const date = moment(notificationDate).format("YYYY-MM-DD");
+      const dateFormatted = moment(notificationDate).format("MMM D").split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      const notificationMoment = moment(notificationDate);
+      // Check if today (same day, month, and year)
+      const isToday = moment().isSame(notificationMoment, 'day');
+      const displayDate = isToday ? "Today" : dateFormatted;
+
+      if (!grouped[displayDate]) {
+        grouped[displayDate] = [];
+      }
+      grouped[displayDate].push(notification);
+    });
+
+    return grouped;
+  };
+
+  /**
    * Render notification content
    */
   const notificationContent = (
-    <div className="notification-dropdown" style={{ width: 380, maxHeight: 700 }}>
+    <div className="notification-dropdown" style={{ width: 420, maxHeight: 700 }}>
       {/* Header */}
       <div
         className="notification-header"
@@ -364,97 +398,98 @@ const NotificationDropdown = () => {
             />
           </div>
         ) : (
-          <List
-            itemLayout="horizontal"
-            dataSource={notifications} // Show all filtered notifications
-            renderItem={(notification) => (
-              <List.Item
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification)}
-                style={{
-                  padding: "12px 16px",
-                  cursor: notification.link ? "pointer" : "default",
-                  backgroundColor: notification.read ? "#ffffff" : "#f0f7ff",
-                  borderBottom: "1px solid #f0f0f0",
-                }}
-                className="notification-item hover:bg-gray-50"
-                extra={
-                  <Tooltip title="Delete notification">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<DeleteOutlined />}
-                      onClick={(e) => handleDeleteNotification(e, notification.id)}
+          <div>
+            {Object.entries(groupNotificationsByDate(notifications)).map(([date, dateNotifications]) => (
+              <div key={date}>
+                {/* Date Group Header */}
+                <div className="w-[420px] px-5 py-4 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4">
+                  <div className="flex-1 justify-start text-[#1d1c1d] text-sm font-bold capitalize">
+                    {date}
+                  </div>
+                </div>
+
+                {/* Notifications for this date */}
+                <List
+                  itemLayout="horizontal"
+                  dataSource={dateNotifications}
+                  renderItem={(notification) => (
+                    <List.Item
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification)}
                       style={{
-                        color: "#ff4d4f",
-                        opacity: 0.7,
+                        padding: "12px 16px",
+                        cursor: notification.link ? "pointer" : "default",
+                        backgroundColor: notification.read ? "#ffffff" : "#f0f7ff",
+                        borderBottom: "1px dashed rgb(29 28 29 / 0.1)",
+                        borderTop: "1px dashed rgb(29 28 29 / 0.1)",
+                        marginTop: "-1px"
                       }}
-                      className="hover:opacity-100"
-                    />
-                  </Tooltip>
-                }
-              >
-                <List.Item.Meta
-                  avatar={getNotificationIcon(notification.notificationType)}
-                  title={
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
+                      className="notification-item hover:bg-gray-50"
                     >
-                      <Text
-                        strong={!notification.read}
-                        style={{ fontSize: 14 }}
-                        ellipsis
-                      >
-                        {notification.title}
-                      </Text>
-                      {notification.priority &&
-                        getPriorityString(notification.priority) !== NOTIFICATION_PRIORITY.NORMAL && (
-                          <Tag
-                            color={getPriorityColor(notification.priority)}
-                            style={{ marginLeft: 8, fontSize: 10 }}
+                      <List.Item.Meta
+                        // avatar={getNotificationIcon(notification.notificationType)}
+                        title={
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
                           >
-                            {getPriorityString(notification.priority).toUpperCase()}
-                          </Tag>
-                        )}
-                    </div>
-                  }
-                  description={
-                    <div>
-                      <Text
-                        type="secondary"
-                        style={{ fontSize: 13, display: "block" }}
-                        ellipsis={{ rows: 2 }}
-                      >
-                        {notification.message}
-                      </Text>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginTop: 4,
-                        }}
-                      >
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {formatTimestamp(
-                            notification.receivedAt || notification.createdAt
-                          )}
-                        </Text>
-                        {notification.direction === "broadcast" && (
-                          <Tag color="purple" style={{ fontSize: 10 }}>
-                            BROADCAST
-                          </Tag>
-                        )}
-                      </div>
-                    </div>
-                  }
+                            <Text
+                              strong={!notification.read}
+                              style={{ fontSize: 14 }}
+                              ellipsis
+                            >
+                              {notification.title}
+                            </Text>
+                            {notification.priority &&
+                              getPriorityString(notification.priority) !== NOTIFICATION_PRIORITY.NORMAL && (
+                                <Tag
+                                  color={getPriorityColor(notification.priority)}
+                                  style={{ marginLeft: 8, fontSize: 10 }}
+                                >
+                                  {getPriorityString(notification.priority).toUpperCase()}
+                                </Tag>
+                              )}
+                          </div>
+                        }
+                        description={
+                          <div>
+                            <Text
+                              type="secondary"
+                              style={{ fontSize: 13, display: "block" }}
+                              ellipsis={{ rows: 2 }}
+                            >
+                              {notification.message}
+                            </Text>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                marginTop: 4,
+                              }}
+                            >
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {formatTimestamp(
+                                  getNotificationTimestamp(notification)
+                                )}
+                              </Text>
+                              {notification.direction === "broadcast" && (
+                                <Tag color="purple" style={{ fontSize: 10 }}>
+                                  BROADCAST
+                                </Tag>
+                              )}
+                            </div>
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  )}
                 />
-              </List.Item>
-            )}
-          />
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
