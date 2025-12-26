@@ -396,7 +396,7 @@ const NotificationDropdown = () => {
         className="notification-header"
         style={{
           padding: "12px 16px",
-          borderBottom: "1px solid #f0f0f0",
+          // borderBottom: "1px solid #f0f0f0",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -455,7 +455,7 @@ const NotificationDropdown = () => {
       {/* Notification List */}
       <div
         className="notification-list"
-        style={{ maxHeight: 380, overflowY: "auto" }}
+        style={{ maxHeight: 670, overflowY: "auto" }}
       >
         {notifications.length === 0 ? (
           <div style={{ padding: "40px 16px" }}>
@@ -595,35 +595,82 @@ const NotificationDropdown = () => {
     </div>
   );
 
+  const toggleDropdown = () => {
+    const newOpenState = !isDropdownOpen;
+    setIsDropdownOpen(newOpenState);
+    if (newOpenState) {
+      setLastViewedTime(new Date().toISOString());
+    }
+  };
+
+  const closeDropdown = () => {
+    setIsDropdownOpen(false);
+  };
+
   return (
-    <Popover
-      content={notificationContent}
-      trigger="click"
-      placement="bottomRight"
-      overlayClassName="notification-popover"
-      onOpenChange={(open) => {
-        setIsDropdownOpen(open);
-        if (open) {
-          setLastViewedTime(new Date().toISOString());
-        }
-      }}
-    >
-      <Badge
-        count={userUnreadCount}
-        offset={[-5, 5]}
-        overflowCount={99}
-        style={{ boxShadow: '0 0 0 2px #fff' }}
-      >
-        <a onClick={(e) => e.preventDefault()} className="pt-2.5">
-          <BellOutlined
-            style={{
-              fontSize: "24px",
-              color: "#FFFFFF",
+    <>
+      {isDropdownOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+            cursor: 'pointer',
+          }}
+          onClick={closeDropdown}
+        />
+      )}
+      <div style={{ position: 'relative', display: 'flex' }}>
+        <Badge
+          count={userUnreadCount}
+          offset={[-5, 10]}
+          overflowCount={99}
+          style={{ boxShadow: '0 0 0 2px #fff' }}
+        >
+          <a
+            onClick={(e) => {
+              e.preventDefault();
+              toggleDropdown();
             }}
-          />
-        </a>
-      </Badge>
-    </Popover>
+            className="pt-2.5"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <BellOutlined
+              style={{
+                fontSize: "24px",
+                color: "#FFFFFF",
+              }}
+            />
+          </a>
+        </Badge>
+        {isDropdownOpen && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              zIndex: 1001,
+              width: 380,
+              maxHeight: 900,
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              boxShadow: '0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05)',
+            }}
+            onClick={(e) => e.stopPropagation()} // Prevent click from closing dropdown
+          >
+            {notificationContent}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
