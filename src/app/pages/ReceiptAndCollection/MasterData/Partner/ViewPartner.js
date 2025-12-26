@@ -5,13 +5,13 @@ import {
   Tooltip,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
-  DownloadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import {
   renderColumn,
@@ -146,6 +146,7 @@ const ViewPartner = () => {
     {
       title: "NO",
       width: 60,
+      key: "no",
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -153,6 +154,7 @@ const ViewPartner = () => {
       title: "PARTNER CODE",
       dataIndex: "partnerCode",
       sorter: true,
+      key: "partnerCode",
       ...getColumnSearchPropsPaging(
         "partnerCode",
         searchInput,
@@ -201,6 +203,7 @@ const ViewPartner = () => {
       title: "EFF START DATE",
       sorter: true,
       align: "center",
+      key: "effStartDate",
       dataIndex: "effStartDate",
       ...getColumnSearchPropsPaging(
         "effStartDate",
@@ -225,6 +228,7 @@ const ViewPartner = () => {
       title: "EFF END DATE",
       sorter: true,
       align: "center",
+      key: "effEndDate",
       dataIndex: "effEndDate",
       ...getColumnSearchPropsPaging(
         "effEndDate",
@@ -353,6 +357,11 @@ const ViewPartner = () => {
     },
   ];
 
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+      left: ["no"],
+      right: ["statusApproval", "action"],
+    }));
+
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -380,19 +389,6 @@ const ViewPartner = () => {
 
   const itemActions = [
     // toolbar items
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
     {
       action: "Create",
       render: (
@@ -423,7 +419,7 @@ const ViewPartner = () => {
                   icon={<SVGIcon name="IconDetail" width={24} />}
                   border={false}
                 /> */}
-              <SVGIcon name="IconDetail" width={24} />
+              <EyeOutlined />
             </Link>
           </Tooltip>
         );
@@ -536,8 +532,10 @@ const ViewPartner = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
-        <BaseContainer header={"PARTNER LIST"}>
-          <TablePagination
+        <CardContainer header={"PARTNER LIST"}>
+          <TableRBI
+            showExport={true}
+            handleDownload={handleDownload}
             dataSource={data?.result}
             pageSize={pageSize}
             // columns={columns}
@@ -557,8 +555,10 @@ const ViewPartner = () => {
               x: 2500,
               y: 525,
             }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
-        </BaseContainer>
+        </CardContainer>
 
         
 

@@ -15,6 +15,8 @@ import {
   getDetailBatch,
   getDownloadFailed,
   getListApprovalById,
+  updateSingleUsage,
+  deleteSingleUsage,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import CardContainer from "../../../../../components/CardContainer";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -32,12 +34,8 @@ import StatusComponent from "../../../../../components/StatusComponent";
 
 const DetailMonitoringUsage = () => {
   // Selector
-  const {
-    detail_batch,
-    loading,
-    list_approval_by_id,
-    list_approval,
-  } = useSelector((state) => state.monitoring_usage);
+  const { detail_batch, loading, list_approval_by_id, list_approval } =
+    useSelector((state) => state.monitoring_usage);
 
   // Declaration
   const navigate = useNavigate();
@@ -49,7 +47,6 @@ const DetailMonitoringUsage = () => {
     (item) =>
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "batchId" &&
-      item?.dataIndex !== "accountGroupType" &&
       item?.dataIndex !== "serviceType" &&
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "fileSource" &&
@@ -75,7 +72,7 @@ const DetailMonitoringUsage = () => {
   const [body, setBody] = useState({});
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["status","action"],
+    right: ["status", "action"],
   }));
 
   // assert function
@@ -159,43 +156,91 @@ const DetailMonitoringUsage = () => {
 
   // handle save
   const handleSave = (formValue) => {
-    setBody({ 
-      ...detail_batch, 
-      usageList: dataTable, 
-      isSubmit: flag === 1 ? false : true 
+    setBody({
+      ...detail_batch,
+      usageList: dataTable,
+      isSubmit: flag === 1 ? false : true,
     });
     setOpenConfirmation(true);
   };
 
   const handleSaveUpdateUsage = async (formValue) => {
-    const newDataTable = [...dataTable];
-    const index = newDataTable.findIndex((item) => recordId === item.recordId);
-    const item = newDataTable[index];
-    const updatedRow = {
-      ...item,
-      ...formValue,
-      billingPeriod:
-        formValue?.billingPeriod === false
-          ? null
-          : moment(formValue?.billingPeriod).format(dateFormatting.datePeriod),
-      fdate:
-        formValue?.fdate === false
-          ? null
-          : moment(formValue?.fdate).format(dateFormatting.date),
-      fhour: hasValue(formValue?.fhour)
-        ? moment(formValue?.fhour).format(dateFormatting.hour_format)
-        : null,
-      measDate:
-        formValue?.measDate === false
-          ? null
-          : moment(formValue?.measDate).format(dateFormatting.dateTime),
-      status: "SUCCESS",
-      recordId: recordId,
-    };
-    newDataTable.splice(index, 1, updatedRow);
-    setDataTable(newDataTable);
-    setOpenUpdateUsage(false);
-    dispatch(addUpdatedData(updatedRow));
+    try {
+      // Prepare request body sesuai format backend
+      const requestBody = {
+        accountNumber: formValue?.accountNumber || null,
+        accountName: formValue?.accountName || null,
+        costCenter: formValue?.costCenter || null,
+        billingPeriod: formValue?.billingPeriod || null,
+        assetSerialNum: formValue?.assetSerialNum || null,
+        assetType: formValue?.assetType || null,
+        fdate:
+          formValue?.fdate === false
+            ? null
+            : moment(formValue?.fdate).format(dateFormatting.dateFormal),
+        fhour: hasValue(formValue?.fhour)
+          ? moment(formValue?.fhour).format(dateFormatting.fhour)
+          : null,
+        measDate: formValue?.measDate || null,
+        streamId: formValue?.streamId || null,
+        temperature: formValue?.temperature || null,
+        pressure: formValue?.pressure || null,
+        correctionFactor: formValue?.correctionFactor || null,
+        calorie: formValue?.calorie || null,
+        beginStand: formValue?.beginStand || null,
+        endStand: formValue?.endStand || null,
+        volMeasured27: formValue?.volMeasured27 || null,
+        volMeasured60: formValue?.volMeasured60 || null,
+        engMeasured: formValue?.engMeasured || null,
+        ghv: formValue?.ghv || null,
+        volMscf: formValue?.volMscf || null,
+        uncorrectedValue: formValue?.uncorrectedValue || null,
+        taxationRowId: formValue?.taxationRowId || null,
+        source: formValue?.source || null,
+        description: formValue?.description || null,
+      };
+
+      // Dispatch update ke API
+      const resultAction = await dispatch(
+        updateSingleUsage({
+          recordId: recordId,
+          data: requestBody,
+        })
+      );
+
+      if (updateSingleUsage.fulfilled.match(resultAction)) {
+        // Update local state setelah API berhasil
+        const newDataTable = [...dataTable];
+        const index = newDataTable.findIndex(
+          (item) => recordId === item.recordId
+        );
+
+        if (index !== -1) {
+          const item = newDataTable[index];
+          const updatedRow = {
+            ...item,
+            ...formValue,
+            billingPeriod: requestBody.billingPeriod,
+            fdate: requestBody.fdate,
+            fhour: requestBody.fhour,
+            measDate: requestBody.measDate,
+            status: "SUCCESS",
+            recordId: recordId,
+          };
+          newDataTable.splice(index, 1, updatedRow);
+          setDataTable(newDataTable);
+        }
+
+        setOpenUpdateUsage(false);
+
+        // Refresh data dari server
+        dispatch(
+          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        );
+      }
+    } catch (error) {
+      console.error("Error updating usage:", error);
+    }
   };
 
   // change tabs
@@ -215,11 +260,25 @@ const DetailMonitoringUsage = () => {
   const handleClear = () => {};
 
   // handle delete usage list
-  const handleDeleteOk = () => {
-    const newData = dataTable.filter((item) => item.recordId !== recordId);
-    setDataTable(newData);
-    dispatch(addDeletedData(deletedRecord));
-    setModalDelete(false);
+  const handleDeleteOk = async () => {
+    try {
+      const resultAction = await dispatch(deleteSingleUsage(recordId));
+
+      if (deleteSingleUsage.fulfilled.match(resultAction)) {
+        // Update local state setelah API berhasil
+        const newData = dataTable.filter((item) => item.recordId !== recordId);
+        setDataTable(newData);
+        setModalDelete(false);
+
+        // Refresh data dari server
+        dispatch(
+          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting usage:", error);
+      setModalDelete(false);
+    }
   };
 
   // change page
@@ -254,7 +313,8 @@ const DetailMonitoringUsage = () => {
       align: "center",
       width: 100,
       render: (id, record, index) => {
-        const isComplete = detail_batch?.batchInformation?.status === "COMPLETE";
+        const isComplete =
+          detail_batch?.batchInformation?.status === "COMPLETE";
         return (
           <div className="flex w-full justify-center gap-3">
             <Tooltip title="Update">
@@ -312,11 +372,13 @@ const DetailMonitoringUsage = () => {
 
   // All columns with keys
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...filteredColumns, ...actionColumns].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-      width: col.width || 150,
-    }));
+    const columnsWithKeys = [...filteredColumns, ...actionColumns].map(
+      (col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+        width: col.width || 150,
+      })
+    );
     return columnsWithKeys;
   }, [filteredColumns, actionColumns]);
 
@@ -335,11 +397,7 @@ const DetailMonitoringUsage = () => {
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSave}
-        >
+        <Form layout="vertical" form={form} onFinish={handleSave}>
           <CardContainer
             header={
               <div className="flex justify-between items-center -my-4">
@@ -357,68 +415,51 @@ const DetailMonitoringUsage = () => {
               className="tabs-compact"
               style={{ marginBottom: 0 }}
             >
-              <Tabs.TabPane tab="Upload" key="Upload">
-                <BaseContainer header={"Batch List"} className="-mt-4">
+              <Tabs.TabPane
+                tab="Upload"
+                key="Upload"
+                className="flex flex-col gap-3"
+              >
+                <BaseContainer header={"Batch List"} border className="-mt-4">
                   {/* Two Column Layout */}
-                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-0">
                     <DetailText label="Batch ID">
                       {detail_batch?.batchInformation?.batchId}
                     </DetailText>
                     <DetailText label="Upload Type">
                       {detail_batch?.batchInformation?.uploadType}
                     </DetailText>
-                    
+
                     <DetailText label="Upload Date">
                       {detail_batch?.batchInformation?.uploadDate}
-                    </DetailText>                    
-                    <DetailText label="Total Invoice">
+                    </DetailText>
+                    <DetailText label="Total Usage">
                       {detail_batch?.batchInformation?.totalUsage}
                     </DetailText>
                     <DetailText label="Total Succeed">
                       {detail_batch?.batchInformation?.totalSucceed}
                     </DetailText>
-                    
+
                     <DetailText label="Total Progress">
                       {detail_batch?.batchInformation?.totalProgress}
                     </DetailText>
                     <DetailText label="Total Failed">
                       {detail_batch?.batchInformation?.totalFailed}
                     </DetailText>
-                    
-                    <DetailText label="Generate Date">
+                    {/* <DetailText label="Generate Date">
                       {detail_batch?.batchInformation?.generateDate}
-                    </DetailText>
+                    </DetailText> */}
                     <DetailText label="Status">
-                      <StatusComponent colour={detail_batch?.batchInformation?.status}>
+                      <StatusComponent
+                        colour={detail_batch?.batchInformation?.status}
+                      >
                         {detail_batch?.batchInformation?.status}
                       </StatusComponent>
                     </DetailText>
                   </div>
                 </BaseContainer>
 
-                <BaseContainer header={"History Log Information"} className="mt-1">
-                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
-                    <DetailText label="Record ID">
-                      {detail_batch?.batchInformation?.batchId || "-"}
-                    </DetailText>
-                    <DetailText label="Created Date">
-                      {detail_batch?.batchInformation?.uploadDate || "-"}
-                    </DetailText>
-                    <DetailText label="Created By">
-                      {detail_batch?.batchInformation?.uploadBy || "-"}
-                    </DetailText>
-                    <DetailText label="Updated Date">
-                      {/* Tambahkan field updated date jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedDate || "-"}
-                    </DetailText>
-                    <DetailText label="Updated By">
-                      {/* Tambahkan field updated by jika tersedia dari API */}
-                      {detail_batch?.batchInformation?.updatedBy || "-"}
-                    </DetailText>
-                  </div>
-                </BaseContainer>
-
-                <BaseContainer header={"Usage List"} className="mt-1">
+                <BaseContainer header={"Usage List"} border className="mt-1">
                   <div className="my-5">
                     <TableRBI
                       dataSource={dataTable}
@@ -436,10 +477,32 @@ const DetailMonitoringUsage = () => {
                     />
                   </div>
                 </BaseContainer>
+                <BaseContainer
+                  header={"History Log Information"}
+                  className="mt-1"
+                  border
+                >
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                    <DetailText label="Record ID">
+                      {detail_batch?.batchInformation?.batchId}
+                    </DetailText>
+                    <DetailText label="Created Date">
+                      {detail_batch?.batchInformation?.uploadDate}
+                    </DetailText>
+                    <DetailText label="Created By">
+                      {detail_batch?.batchInformation?.uploadBy}
+                    </DetailText>
+                    <DetailText label="Updated Date">
+                      {detail_batch?.batchInformation?.updatedDate}
+                    </DetailText>
+                    <DetailText label="Updated By">
+                      {detail_batch?.batchInformation?.updatedBy}
+                    </DetailText>
+                  </div>
+                </BaseContainer>
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Approval" key="Approval">
-                {/* Approval Tab - Sesuai Desain Figma */}
                 <div className="bg-white mt-1">
                   <ApprovalComponentGeneral
                     dataTable={appHierDataDetail}

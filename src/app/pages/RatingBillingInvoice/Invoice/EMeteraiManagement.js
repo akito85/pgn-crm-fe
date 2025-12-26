@@ -168,7 +168,8 @@ const EMeteraiManagement = () => {
 
   // Handle signing submission
   const handleSigningSubmit = async (signingData) => {
-    const { invoiceNumber, signingMethod, file, remark, apphierId } = signingData;
+    const { invoiceNumber, signingMethod, file, remark, apphierId } =
+      signingData;
 
     try {
       if (signingMethod === "digital") {

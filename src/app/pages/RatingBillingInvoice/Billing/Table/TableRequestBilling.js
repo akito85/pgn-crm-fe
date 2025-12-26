@@ -23,6 +23,7 @@ export const columnsRequestBilling = (
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
+    isClassification:true,
     width: 180,
     sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
     ...getColumnSearchPropsPaging(
@@ -42,6 +43,7 @@ export const columnsRequestBilling = (
     key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.ratingCode?.localeCompare(b?.ratingCode),
     ...getColumnSearchPropsPaging(
@@ -61,6 +63,7 @@ export const columnsRequestBilling = (
     key: "billingCode",
     title: "BILLING CODE",
     dataIndex: "billingCode",
+    isClassification:true,
     width: 180,
     sorter: (a, b) => a?.billingCode?.localeCompare(b?.billingCode),
     ...getColumnSearchPropsPaging(
@@ -80,6 +83,7 @@ export const columnsRequestBilling = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.saNumber?.localeCompare(b?.saNumber),
     ...getColumnSearchPropsPaging(
@@ -99,6 +103,7 @@ export const columnsRequestBilling = (
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
+    isClassification:true,
     width: 120,
     sorter: (a, b) => a?.billingCycle?.localeCompare(b?.billingCycle),
     ...getColumnSearchPropsPaging(
@@ -118,6 +123,7 @@ export const columnsRequestBilling = (
     key: "billingPeriod",
     title: "BILLING PERIOD",
     dataIndex: "billingPeriod",
+    isClassification:true,
     width: 120,
     sorter: (a, b) => a?.billingPeriod?.localeCompare(b?.billingPeriod),
     ...getColumnSearchPropsPaging(
@@ -161,6 +167,7 @@ export const columnsRequestBilling = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.customerNumber?.localeCompare(b?.customerNumber),
     ...getColumnSearchPropsPaging(
@@ -180,6 +187,7 @@ export const columnsRequestBilling = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
+    isClassification:true,
     width: 200,
     sorter: (a, b) => a?.customerName?.localeCompare(b?.customerName),
     ...getColumnSearchPropsPaging(
@@ -199,6 +207,7 @@ export const columnsRequestBilling = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.accountNumber?.localeCompare(b?.accountNumber),
     ...getColumnSearchPropsPaging(
@@ -218,6 +227,7 @@ export const columnsRequestBilling = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    isClassification:true,
     width: 200,
     sorter: (a, b) => a?.accountName?.localeCompare(b?.accountName),
     ...getColumnSearchPropsPaging(
@@ -237,6 +247,7 @@ export const columnsRequestBilling = (
     key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
+    isClassification:true,
     width: 180,
     sorter: (a, b) => a?.accountGroupType?.localeCompare(b?.accountGroupType),
     ...getColumnSearchPropsPaging(
@@ -256,6 +267,7 @@ export const columnsRequestBilling = (
     key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
+    isClassification:true,
     width: 120,
     sorter: (a, b) => a?.serviceType?.localeCompare(b?.serviceType),
     ...getColumnSearchPropsPaging(
@@ -275,6 +287,7 @@ export const columnsRequestBilling = (
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
+    isClassification:true,
     width: 200,
     sorter: (a, b) => a?.sor?.localeCompare(b?.sor),
     ...getColumnSearchPropsPaging(
@@ -294,6 +307,7 @@ export const columnsRequestBilling = (
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
+    isClassification:true,
     width: 200,
     sorter: (a, b) => a?.costCenter?.localeCompare(b?.costCenter),
     ...getColumnSearchPropsPaging(
@@ -313,6 +327,7 @@ export const columnsRequestBilling = (
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.accountSegment?.localeCompare(b?.accountSegment),
     ...getColumnSearchPropsPaging(
@@ -332,6 +347,7 @@ export const columnsRequestBilling = (
     key: "meterReadingCode",
     title: "METER READING CODE",
     dataIndex: "meterReadingCode",
+    isClassification:true,
     width: 180,
     sorter: (a, b) => a?.meterReadingCode?.localeCompare(b?.meterReadingCode),
     ...getColumnSearchPropsPaging(
@@ -351,6 +367,7 @@ export const columnsRequestBilling = (
     key: "product",
     title: "PRODUCT",
     dataIndex: "product",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.product?.localeCompare(b?.product),
     ...getColumnSearchPropsPaging(
@@ -370,6 +387,7 @@ export const columnsRequestBilling = (
     key: "timeUnitContract",
     title: "CONTRACT PERIOD UNIT",
     dataIndex: "timeUnitContract",
+    isClassification:true,
     width: 180,
     sorter: (a, b) => a?.timeUnitContract?.localeCompare(b?.timeUnitContract),
     ...getColumnSearchPropsPaging(
@@ -389,6 +407,7 @@ export const columnsRequestBilling = (
     key: "uom",
     title: "UOM",
     dataIndex: "uom",
+    isClassification:true,
     width: 100,
     sorter: (a, b) => a?.uom?.localeCompare(b?.uom),
     ...getColumnSearchPropsPaging(
@@ -408,6 +427,7 @@ export const columnsRequestBilling = (
     key: "minContract",
     title: "MIN CONTRACT",
     dataIndex: "minContract",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.minContract?.localeCompare(b?.minContract),
     ...getColumnSearchPropsPaging(
@@ -427,6 +447,7 @@ export const columnsRequestBilling = (
     key: "maxContract",
     title: "MAX CONTRACT",
     dataIndex: "maxContract",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.maxContract?.localeCompare(b?.maxContract),
     ...getColumnSearchPropsPaging(
@@ -446,6 +467,7 @@ export const columnsRequestBilling = (
     key: "totalUsage",
     title: "TOTAL USAGE",
     dataIndex: "totalUsage",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.totalUsage?.localeCompare(b?.totalUsage),
     ...getColumnSearchPropsPaging(
@@ -465,6 +487,7 @@ export const columnsRequestBilling = (
     key: "totalUsageConvM3",
     title: "TOTAL USAGE EQV M3",
     dataIndex: "totalUsageConvM3",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.totalUsageConvM3?.localeCompare(b?.totalUsageConvM3),
     ...getColumnSearchPropsPaging(
@@ -484,6 +507,7 @@ export const columnsRequestBilling = (
     key: "totalUsageConvMmbtu",
     title: "TOTAL USAGE EQV MMBTU",
     dataIndex: "totalUsageConvMmbtu",
+    isNumber:true,
     width: 200,
     sorter: (a, b) =>
       a?.totalUsageConvMmbtu?.localeCompare(b?.totalUsageConvMmbtu),
@@ -503,6 +527,7 @@ export const columnsRequestBilling = (
   {
     key: "basicBillingIdr",
     title: "BASIC BILL IDR",
+    isNumber:true,
     dataIndex: "basicBillingIdr",
     width: 180,
     sorter: (a, b) => a?.basicBillingIdr?.localeCompare(b?.basicBillingIdr),
@@ -522,6 +547,7 @@ export const columnsRequestBilling = (
   {
     key: "basicBillingUsd",
     title: "BASIC BILL USD",
+    isNumber:true,
     dataIndex: "basicBillingUsd",
     width: 180,
     sorter: (a, b) => a?.basicBillingUsd?.localeCompare(b?.basicBillingUsd),
@@ -542,6 +568,7 @@ export const columnsRequestBilling = (
     key: "totalBasicBillEqvIdr",
     title: "TOTAL BASIC BILL EQV IDR",
     dataIndex: "totalBasicBillEqvIdr",
+    isNumber:true,
     width: 220,
     sorter: (a, b) =>
       a?.totalBasicBillEqvIdr?.localeCompare(b?.totalBasicBillEqvIdr),
@@ -562,6 +589,7 @@ export const columnsRequestBilling = (
     key: "totalBasicBillEqvUsd",
     title: "TOTAL BASIC BILL EQV USD",
     dataIndex: "totalBasicBillEqvUsd",
+    isNumber:true,
     width: 220,
     sorter: (a, b) =>
       a?.totalBasicBillEqvUsd?.localeCompare(b?.totalBasicBillEqvUsd),
@@ -582,6 +610,7 @@ export const columnsRequestBilling = (
     key: "otherBillIdr",
     title: "OTHER BILL IDR",
     dataIndex: "otherBillIdr",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.otherBillIdr?.localeCompare(b?.otherBillIdr),
     ...getColumnSearchPropsPaging(
@@ -601,6 +630,7 @@ export const columnsRequestBilling = (
     key: "otherBillUsd",
     title: "OTHER BILL USD",
     dataIndex: "otherBillUsd",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.otherBillUsd?.localeCompare(b?.otherBillUsd),
     ...getColumnSearchPropsPaging(
@@ -620,6 +650,7 @@ export const columnsRequestBilling = (
     key: "totalOtherBillEqvIdr",
     title: "TOTAL OTHER BILL EQV IDR",
     dataIndex: "totalOtherBillEqvIdr",
+    isNumber:true,
     width: 220,
     sorter: (a, b) =>
       a?.totalOtherBillEqvIdr?.localeCompare(b?.totalOtherBillEqvIdr),
@@ -640,6 +671,7 @@ export const columnsRequestBilling = (
     key: "totalOtherBillEqvUsd",
     title: "TOTAL OTHER BILL EQV USD",
     dataIndex: "totalOtherBillEqvUsd",
+    isNumber:true,
     width: 220,
     sorter: (a, b) =>
       a?.totalOtherBillEqvUsd?.localeCompare(b?.totalOtherBillEqvUsd),
@@ -660,6 +692,7 @@ export const columnsRequestBilling = (
     key: "discountAmountIdr",
     title: "DISCOUNT IDR",
     dataIndex: "discountAmountIdr",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.discountAmountIdr?.localeCompare(b?.discountAmountIdr),
     ...getColumnSearchPropsPaging(
@@ -679,6 +712,7 @@ export const columnsRequestBilling = (
     key: "discountAmountUsd",
     title: "DISCOUNT USD",
     dataIndex: "discountAmountUsd",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.discountAmountUsd?.localeCompare(b?.discountAmountUsd),
     ...getColumnSearchPropsPaging(
@@ -698,6 +732,7 @@ export const columnsRequestBilling = (
     key: "taxBasicIdr",
     title: "TAX BASIS IDR",
     dataIndex: "taxBasicIdr",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.taxBasicIdr?.localeCompare(b?.taxBasicIdr),
     ...getColumnSearchPropsPaging(
@@ -717,6 +752,7 @@ export const columnsRequestBilling = (
     key: "taxBasicUsd",
     title: "TAX BASIS USD",
     dataIndex: "taxBasicUsd",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.taxBasicUsd?.localeCompare(b?.taxBasicUsd),
     ...getColumnSearchPropsPaging(
@@ -736,6 +772,7 @@ export const columnsRequestBilling = (
     key: "taxBasicEqvIdr",
     title: "TAX BASIS EQV IDR",
     dataIndex: "taxBasicEqvIdr",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.taxBasicEqvIdr?.localeCompare(b?.taxBasicEqvIdr),
     ...getColumnSearchPropsPaging(
@@ -755,6 +792,7 @@ export const columnsRequestBilling = (
     key: "vatIdr",
     title: "VAT IDR",
     dataIndex: "vatIdr",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.vatIdr?.localeCompare(b?.vatIdr),
     ...getColumnSearchPropsPaging(
@@ -774,6 +812,7 @@ export const columnsRequestBilling = (
     key: "vatUsd",
     title: "VAT USD",
     dataIndex: "vatUsd",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.vatUsd?.localeCompare(b?.vatUsd),
     ...getColumnSearchPropsPaging(
@@ -793,6 +832,7 @@ export const columnsRequestBilling = (
     key: "vatEqvIdr",
     title: "VAT EQV IDR",
     dataIndex: "vatEqvIdr",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.vatEqvIdr?.localeCompare(b?.vatEqvIdr),
     ...getColumnSearchPropsPaging(
@@ -812,6 +852,7 @@ export const columnsRequestBilling = (
     key: "withHoldingTax",
     title: "WITHHOLDING TAX",
     dataIndex: "withHoldingTax",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.withHoldingTax?.localeCompare(b?.withHoldingTax),
     ...getColumnSearchPropsPaging(
@@ -831,6 +872,7 @@ export const columnsRequestBilling = (
     key: "prevWithHoldingTax",
     title: "PREV WITHHOLDING TAX",
     dataIndex: "prevWithHoldingTax",
+    isNumber:true,
     width: 200,
     sorter: (a, b) => a?.prevWithHoldingTax?.localeCompare(b?.prevWithHoldingTax),
     ...getColumnSearchPropsPaging(
@@ -850,6 +892,7 @@ export const columnsRequestBilling = (
     key: "taxRateType",
     title: "TAX RATE TYPE",
     dataIndex: "taxRateType",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.taxRateType?.localeCompare(b?.taxRateType),
     ...getColumnSearchPropsPaging(
@@ -869,6 +912,7 @@ export const columnsRequestBilling = (
     key: "taxRate",
     title: "TAX RATE",
     dataIndex: "taxRate",
+    isNumber:true,
     width: 120,
     sorter: (a, b) => a?.taxRate?.localeCompare(b?.taxRate),
     ...getColumnSearchPropsPaging(
@@ -888,6 +932,7 @@ export const columnsRequestBilling = (
     key: "taxRateDate",
     title: "TAX RATE DATE",
     dataIndex: "taxRateDate",
+    isNumber:true,
     width: 150,
     sorter: (a, b) => a?.taxRateDate?.localeCompare(b?.taxRateDate),
     ...getColumnSearchPropsPaging(
@@ -931,6 +976,7 @@ export const columnsRequestBilling = (
     key: "totalAmountIdr",
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.totalAmountIdr?.localeCompare(b?.totalAmountIdr),
     ...getColumnSearchPropsPaging(
@@ -950,6 +996,7 @@ export const columnsRequestBilling = (
     key: "totalAmountUsd",
     title: "TOTAL AMOUNT USD",
     dataIndex: "totalAmountUsd",
+    isNumber:true,
     width: 180,
     sorter: (a, b) => a?.totalAmountUsd?.localeCompare(b?.totalAmountUsd),
     ...getColumnSearchPropsPaging(
@@ -969,6 +1016,7 @@ export const columnsRequestBilling = (
     key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
+    isNumber:true,
     width: 200,
     sorter: (a, b) => a?.totalAmountEqvIdr?.localeCompare(b?.totalAmountEqvIdr),
     ...getColumnSearchPropsPaging(
@@ -988,6 +1036,7 @@ export const columnsRequestBilling = (
     key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
+    isNumber:true,
     width: 200,
     sorter: (a, b) => a?.totalAmountEqvUsd?.localeCompare(b?.totalAmountEqvUsd),
     ...getColumnSearchPropsPaging(
@@ -1007,6 +1056,7 @@ export const columnsRequestBilling = (
     key: "rateType",
     title: "RATE TYPE",
     dataIndex: "rateType",
+    isNumber:true,
     width: 120,
     sorter: (a, b) => a?.rateType?.localeCompare(b?.rateType),
     ...getColumnSearchPropsPaging(
@@ -1026,6 +1076,7 @@ export const columnsRequestBilling = (
     key: "rate",
     title: "RATE",
     dataIndex: "rate",
+    isNumber:true,
     width: 120,
     sorter: (a, b) => a?.rate?.localeCompare(b?.rate),
     ...getColumnSearchPropsPaging(
@@ -1045,6 +1096,7 @@ export const columnsRequestBilling = (
     key: "rateDate",
     title: "RATE DATE",
     dataIndex: "rateDate",
+    isClassification:true,
     width: 120,
     sorter: (a, b) => a?.rateDate?.localeCompare(b?.rateDate),
     ...getColumnSearchPropsPaging(
@@ -1088,6 +1140,7 @@ export const columnsRequestBilling = (
     key: "transactionDate",
     title: "TRANSACTION DATE",
     dataIndex: "transactionDate",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.transactionDate?.localeCompare(b?.transactionDate),
     ...getColumnSearchPropsPaging(
@@ -1131,6 +1184,7 @@ export const columnsRequestBilling = (
     key: "accountDate",
     title: "ACCOUNTING DATE",
     dataIndex: "accountDate",
+    isClassification:true,
     width: 150,
     sorter: (a, b) => a?.accountDate?.localeCompare(b?.accountDate),
     ...getColumnSearchPropsPaging(
@@ -1174,6 +1228,7 @@ export const columnsRequestBilling = (
     key: "invoiceDate",
     title: "INVOICE DATE",
     dataIndex: "invoiceDate",
+    isClassification:true,
     width: 120,
     sorter: (a, b) => a?.invoiceDate?.localeCompare(b?.invoiceDate),
     ...getColumnSearchPropsPaging(
@@ -1217,6 +1272,7 @@ export const columnsRequestBilling = (
     key: "dueDate",
     title: "DUE DATE",
     dataIndex: "dueDate",
+    isClassification:true,
     width: 120,
     sorter: (a, b) => a?.dueDate?.localeCompare(b?.dueDate),
     ...getColumnSearchPropsPaging(
@@ -1261,6 +1317,7 @@ export const columnsRequestBilling = (
     sorter: (a, b) => a?.remark?.localeCompare(b?.remark),
     title: "REMARK",
     dataIndex: "remark",
+    isClassification:true,
     width: 200,
     ellipsis: {
       showTitle: false,

@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Col, Collapse, Divider, Row, Space } from "antd";
+import { Badge, Col, Collapse, Divider, Row, Space } from "antd";
 import { TablePaginationNew } from "poc-table-dragandrop";
 import HeaderText from "./components/HeaderText";
 import FilterButton from "./components/FilterButton";
@@ -16,6 +16,7 @@ import promoConditionRepository from "./repository/promoConditionRepository";
 import ExportButton from "./components/ExportButton";
 import { usePromo } from "./hooks/usePromo";
 import { transformValidPromoResponse, transformPromoHistoryResponse } from "./utils/promoHelpers";
+import moment from "moment";
 
 const HeaderAccountPromo = ({ onChangeTab, isPromoHistory }) => {
   const keys = [
@@ -41,8 +42,11 @@ const PromoViewData = ({
 }) => {
   const {
     validPromoList,
+    validPromoDetail,
     loadValidPromoList,
+    loadValidPromoDetail,
     downloadValidPromo,
+    clearValidPromo,
   } = usePromo();
 
   const [dataSource, setDataSource] = useState([]);
@@ -51,76 +55,143 @@ const PromoViewData = ({
     pageSize: 10,
     total: 0,
   });
+  const [activeFilters, setActiveFilters] = useState([]);
+
+  // Handle view detail - fetch detail from API
+  const handleViewDetail = (record) => {
+    if (record?.id) {
+      loadValidPromoDetail(record.id);
+    }
+  };
 
   // Get columns from repository
-  const columns = promoRepository.getColumns(setIsModalPromoVisible, setDetailPromoData);
+  const columns = promoRepository.getColumns(handleViewDetail);
 
   useEffect(() => {
     // Load promo list on mount with accountId
     if (accountId) {
-      loadValidPromoList({ page: 0, size: 10, accountId, sort: 'id~desc' });
+      loadValidPromoList({ page: 1, size: 10, accountId, sort: 'id~desc' });
     }
   }, [accountId, loadValidPromoList]);
 
   useEffect(() => {
-    console.log('=== VALID PROMO LIST DEBUG ===');
-    console.log('validPromoList full:', validPromoList);
-    console.log('validPromoList.data:', validPromoList?.data);
-    console.log('validPromoList.loading:', validPromoList?.loading);
-    
+
     // Transform API response using helper
     if (validPromoList?.data && !validPromoList.loading) {
-      console.log('Attempting transform with data:', validPromoList.data);
-      
-      const { dataSource: transformedData, pagination: paginationData } = 
+
+      const { dataSource: transformedData, pagination: paginationData } =
         transformValidPromoResponse(validPromoList.data);
-      
-      console.log('Transformed dataSource:', transformedData);
-      console.log('Transformed dataSource length:', transformedData?.length);
-      console.log('Pagination:', paginationData);
-      
+
       setDataSource(transformedData);
       setPagination(paginationData);
     } else if (validPromoList && !validPromoList.loading && !validPromoList.data) {
       // Reset when no data but not loading
-      console.log('Resetting dataSource - no data');
+      // console.log('Resetting dataSource - no data');
       setDataSource([]);
     }
   }, [validPromoList]);
 
+  // Update detail promo data when validPromoDetail changes and open modal
+  useEffect(() => {
+    if (validPromoDetail?.data?.data && !validPromoDetail.loading) {
+      setDetailPromoData(validPromoDetail.data.data);  // Access nested data
+      // Open modal only after data is loaded
+      setIsModalPromoVisible(true);
+    }
+  }, [validPromoDetail, setDetailPromoData, setIsModalPromoVisible]);
+
+  // Clear detail state when modal is closed
+  useEffect(() => {
+    if (!isModalPromoVisible) {
+      clearValidPromo();
+      setDetailPromoData({});
+    }
+  }, [isModalPromoVisible, clearValidPromo, setDetailPromoData]);
+
+  // Clear detail state when component unmounts (tab switch)
+  useEffect(() => {
+    return () => {
+      clearValidPromo();
+      setDetailPromoData({});
+    };
+  }, [clearValidPromo, setDetailPromoData]);
+
   const handleDownload = async () => {
-    if (customerId) {
+    if (accountId) {
       try {
-        console.log('Starting download...');
-        // Download with same params as current table state
         const params = {
-          page: pagination.current - 1, // Convert to 0-based for API
+          page: pagination.current,
           size: pagination.pageSize,
-          customerId: customerId,
+          accountId: accountId,
         };
-        
-        console.log('Download params:', params);
-        await downloadValidPromo(params);
-        console.log('Download completed');
+
+        const advancedSearch = {
+          inputFields: activeFilters.map(q => ({
+            condition: q.condition || "",
+            column: q.column || "",
+            operator: q.operator || "",
+            value: q.value || ""
+          }))
+        };
+
+        await downloadValidPromo(params, advancedSearch);
       } catch (error) {
         console.error('Download failed:', error);
       }
     } else {
-      console.warn('Cannot download: customerId is missing');
+      console.warn('Cannot download: accountId is missing');
     }
   };
 
-  const handleTableChange = (paginationParams) => {
-    const { current, pageSize } = paginationParams;
-    
-    if (customerId) {
-      // API uses 0-based page index
-      loadValidPromoList({ 
-        page: current - 1, 
-        size: pageSize, 
-        customerId,
+  const handleTableChange = (current, pageSize) => {
+    if (accountId) {
+      const advancedSearch = {
+        inputFields: activeFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
+      // API uses 1-based page index (same as PaymentRelation)
+      loadValidPromoList({
+        page: current,
+        size: pageSize,
+        accountId,
         sort: 'id~desc'
-      });
+      }, advancedSearch);
+    }
+  };
+
+  const handleFilterPromo = (queries) => {
+    console.log('handleFilterPromo called with queries:', queries);
+    // Save active filters to state
+    setActiveFilters(queries || []);
+
+    if (accountId) {
+      // Transform queries to advanced search format
+      const advancedSearch = {
+        inputFields: queries.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
+
+      console.log('Calling loadValidPromoList with advancedSearch:', advancedSearch);
+
+      loadValidPromoList(
+        {
+          page: 1,
+          size: pagination.pageSize,
+          accountId,
+          sort: 'id~desc'
+        },
+        advancedSearch
+      );
+    } else {
+      console.warn('handleFilterPromo: accountId is missing');
     }
   };
 
@@ -131,17 +202,17 @@ const PromoViewData = ({
           <HeaderText text="PROMO LIST" />
         </Col>
       </Row>
-      <Row align={"middle"}>
-        <Col span={3} offset={0} style={{ textAlign: "center" }}>
-          <FilterButton 
-            columnType="promo"
-            onApplyFilter={(queries) => {
-              console.log('Apply filter with queries:', queries);
-              // TODO: Implement filter logic
-            }}
-          />
+      <Row align={"middle"} justify={"space-between"} style={{ marginBottom: "1.5rem" }}>
+        <Col>
+          <Badge count={activeFilters.length}>
+            <FilterButton
+              columnType="promo"
+              onApplyFilter={handleFilterPromo}
+              activeFilters={activeFilters}
+            />
+          </Badge>
         </Col>
-        <Col span={3} offset={18} style={{ textAlign: "center" }}>
+        <Col>
           <ExportButton onClick={handleDownload} />
         </Col>
       </Row>
@@ -174,8 +245,11 @@ const PromoHistoryViewData = ({
 }) => {
   const {
     promoHistoryList,
+    promoHistoryDetail,
     loadPromoHistoryList,
+    loadPromoHistoryDetail,
     downloadPromoHistory,
+    clearPromoHistory,
   } = usePromo();
 
   const [dataSource, setDataSource] = useState([]);
@@ -184,23 +258,32 @@ const PromoHistoryViewData = ({
     pageSize: 10,
     total: 0,
   });
+  const [activeFilters, setActiveFilters] = useState([]);
+
+  // Handle view detail - fetch detail from API
+  const handleViewDetail = (record) => {
+    if (record?.billingCode) {
+      console.log('Fetching detail for billing code:', record.billingCode, 'accountId:', accountId);
+      loadPromoHistoryDetail(record.billingCode, accountId);
+    }
+  };
 
   // Get columns from repository
-  const columns = promoHistoryRepository.getColumns(setIsModalHistoryVisible, setDetailHistoryData);
+  const columns = promoHistoryRepository.getColumns(handleViewDetail);
 
   useEffect(() => {
     // Load promo history on mount with customerId
     if (accountId) {
-      loadPromoHistoryList({ page: 0, size: 10, accountId, sort: 'id~desc' });
+      loadPromoHistoryList({ page: 1, size: 10, accountId, sort: 'id~desc' });
     }
   }, [accountId, loadPromoHistoryList]);
 
   useEffect(() => {
     // Transform API response using helper
     if (promoHistoryList?.data && !promoHistoryList.loading) {
-      const { dataSource: transformedData, pagination: paginationData } = 
+      const { dataSource: transformedData, pagination: paginationData } =
         transformPromoHistoryResponse(promoHistoryList.data);
-      
+
       setDataSource(transformedData);
       setPagination(paginationData);
     } else if (promoHistoryList && !promoHistoryList.loading && !promoHistoryList.data) {
@@ -208,32 +291,107 @@ const PromoHistoryViewData = ({
     }
   }, [promoHistoryList]);
 
+  // Update detail history data when promoHistoryDetail changes and open modal
+  useEffect(() => {
+    if (promoHistoryDetail?.data?.data && !promoHistoryDetail.loading) {
+      console.log('Setting detail history data:', promoHistoryDetail.data.data);
+      setDetailHistoryData(promoHistoryDetail.data.data);
+      // Open modal only after data is loaded
+      setIsModalHistoryVisible(true);
+    }
+  }, [promoHistoryDetail, setDetailHistoryData, setIsModalHistoryVisible]);
+
+  // Clear detail state when modal is closed
+  useEffect(() => {
+    if (!isModalHistoryVisible) {
+      clearPromoHistory();
+      setDetailHistoryData({});
+    }
+  }, [isModalHistoryVisible, clearPromoHistory, setDetailHistoryData]);
+
+  // Clear detail state when component unmounts (tab switch)
+  useEffect(() => {
+    return () => {
+      clearPromoHistory();
+      setDetailHistoryData({});
+    };
+  }, [clearPromoHistory, setDetailHistoryData]);
+
   const handleDownload = async () => {
-    if (customerId) {
+    if (accountId) {
       try {
         const params = {
-          page: pagination.current - 1,
+          page: pagination.current,
           size: pagination.pageSize,
-          customerId: customerId,
+          accountId: accountId,
         };
-        
-        await downloadPromoHistory(params);
+
+        const advancedSearch = {
+          inputFields: activeFilters.map(q => ({
+            condition: q.condition || "",
+            column: q.column || "",
+            operator: q.operator || "",
+            value: q.value || ""
+          }))
+        };
+
+        await downloadPromoHistory(params, advancedSearch);
       } catch (error) {
         console.error('Download failed:', error);
       }
+    } else {
+      console.warn('Cannot download: accountId is missing');
     }
   };
 
-  const handleTableChange = (paginationParams) => {
-    const { current, pageSize } = paginationParams;
-    
-    if (customerId) {
-      loadPromoHistoryList({ 
-        page: current - 1, 
-        size: pageSize, 
-        customerId,
+  const handleTableChange = (current, pageSize) => {
+    if (accountId) {
+      const advancedSearch = {
+        inputFields: activeFilters.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
+      loadPromoHistoryList({
+        page: current,
+        size: pageSize,
+        accountId,
         sort: 'id~desc'
-      });
+      }, advancedSearch);
+    }
+  };
+
+  const handleFilterPromoHistory = (queries) => {
+    console.log('handleFilterPromoHistory called with queries:', queries);
+    // Save active filters to state
+    setActiveFilters(queries || []);
+
+    if (accountId) {
+      // Transform queries to advanced search format
+      const advancedSearch = {
+        inputFields: queries.map(q => ({
+          condition: q.condition || "",
+          column: q.column || "",
+          operator: q.operator || "",
+          value: q.value || ""
+        }))
+      };
+
+      console.log('Calling loadPromoHistoryList with advancedSearch:', advancedSearch);
+
+      loadPromoHistoryList(
+        {
+          page: 1,
+          size: pagination.pageSize,
+          accountId,
+          sort: 'id~desc'
+        },
+        advancedSearch
+      );
+    } else {
+      console.warn('handleFilterPromoHistory: accountId is missing');
     }
   };
 
@@ -269,6 +427,13 @@ const PromoHistoryViewData = ({
         dataIndex: "category",
         key: "category",
         width: 130,
+      },
+      {
+        title: "Criteria",
+        dataIndex: "criteria",
+        key: "criteria",
+        width: 200,
+        ellipsis: true,
       },
       {
         title: "Billing Date",
@@ -312,17 +477,17 @@ const PromoHistoryViewData = ({
           <HeaderText text="PROMO HISTORY" />
         </Col>
       </Row>
-      <Row align={"middle"}>
-        <Col span={3} offset={0} style={{ textAlign: "center" }}>
-          <FilterButton 
-            columnType="history"
-            onApplyFilter={(queries) => {
-              console.log('Apply filter with queries:', queries);
-              // TODO: Implement filter logic
-            }}
-          />
+      <Row align={"middle"} justify={"space-between"} style={{ marginBottom: "1.5rem" }}>
+        <Col>
+          <Badge count={activeFilters.length}>
+            <FilterButton
+              columnType="history"
+              onApplyFilter={handleFilterPromoHistory}
+              activeFilters={activeFilters}
+            />
+          </Badge>
         </Col>
-        <Col span={3} offset={18} style={{ textAlign: "center" }}>
+        <Col>
           <ExportButton onClick={handleDownload} />
         </Col>
       </Row>
@@ -382,11 +547,17 @@ const selectedRender = ({
     />
   );
 };
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  // Format from "2025-12-05" or "2025-12-05T04:47:09.210+00:00" to "05 Dec 2025"
+  return moment(dateString).format("DD MMM YYYY");
+};
+
 const renderLabelDataValue = (label, value) => {
   return (
     <Space direction="vertical" size={"small"}>
       <strong>{label}</strong>
-      <span>{value}</span>
+      <span>{value || "-"}</span>
     </Space>
   );
 };
@@ -416,7 +587,7 @@ const renderModalAccountPromo = ({
         >
           <Space direction="vertical" style={{ width: "100%" }}>
             <Collapse
-              defaultActiveKey={["criteria"]}
+              defaultActiveKey={["general"]}
               onChange={(key) => setOnChangeDetailPromo(key)}
               style={{ borderRadius: "8px", backgroundColor: "#E6F1F9" }}
             >
@@ -431,7 +602,7 @@ const renderModalAccountPromo = ({
                       {renderLabelDataValue("Name", detailPromoData?.name)}
                     </Col>
                     <Col span={8}>
-                      {renderLabelDataValue("Promotion Type", detailPromoData?.promotionType)}
+                      {renderLabelDataValue("Promotion Type", detailPromoData?.promotionTypeName)}
                     </Col>
                     <Col span={8}>
                       {renderLabelDataValue("Type", detailPromoData?.typeName)}
@@ -447,7 +618,7 @@ const renderModalAccountPromo = ({
                     <Col span={8}>
                       {renderLabelDataValue(
                         "Criteria",
-                        detailPromoData?.criteriaName,
+                        detailPromoData?.criterias,
                       )}
                     </Col>
                   </Row>
@@ -455,13 +626,13 @@ const renderModalAccountPromo = ({
                     <Col span={8}>
                       {renderLabelDataValue(
                         "Start Date",
-                        detailPromoData?.startDate,
+                        formatDate(detailPromoData?.startDate),
                       )}
                     </Col>
                     <Col span={8}>
                       {renderLabelDataValue(
                         "End Date",
-                        detailPromoData?.endDate,
+                        formatDate(detailPromoData?.endDate),
                       )}
                     </Col>
                   </Row>
@@ -490,118 +661,122 @@ const renderModalAccountPromo = ({
                   setIsVisible={setIsModalPromoVisible}
                   selectedTab={selectedTabCriteriaAndCondition}
                   setSelectedTab={setSelectedTabCriteriaAndCondition}
+                  promoId={detailPromoData?.id}
                 />
               </Collapse.Panel>
             </Collapse>
             <HistoryLogInformation
-              historyLog={
-                selectedTabCriteriaAndCondition === "criteria"
-                  ? promoCriteriaRepository.getHistoryLog()
-                  : promoConditionRepository.getHistoryLog()
-              }
+              data={detailPromoData}
             />
           </Space>
         </ModalCustomPromo>
       );
     case "promoHistory":
+      // Define columns for detail table
+      const historyDetailColumns = [
+        {
+          title: "NO",
+          dataIndex: "no",
+          key: "no",
+          width: 60,
+          render: (_, __, index) => index + 1,
+        },
+        {
+          title: "BILLING DATE",
+          dataIndex: "billingDate",
+          key: "billingDate",
+          width: 120,
+        },
+        {
+          title: "NAME",
+          dataIndex: "name",
+          key: "name",
+          width: 150,
+        },
+        {
+          title: "PROMOTION TYPE",
+          dataIndex: "promotionType",
+          key: "promotionType",
+          width: 150,
+        },
+        {
+          title: "TYPE",
+          dataIndex: "type",
+          key: "type",
+          width: 150,
+        },
+        {
+          title: "CATEGORY",
+          dataIndex: "category",
+          key: "category",
+          width: 130,
+        },
+        {
+          title: "CRITERIA",
+          dataIndex: "criteria",
+          key: "criteria",
+          width: 200,
+          ellipsis: true,
+        },
+        {
+          title: "DESCRIPTION",
+          dataIndex: "description",
+          key: "description",
+          width: 200,
+          ellipsis: true,
+        },
+      ];
+
       return (
         <ModalCustomPromo
           title={"DETAIL PROMO HISTORY"}
           isOpen={isModalHistoryVisible}
           setIsOpen={setIsModalHistoryVisible}
         >
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Collapse
-              defaultActiveKey={["promoHistoryInformation"]}
-              onChange={(key) => setOnChangeDetailHistory(key)}
-              style={{ borderRadius: "8px", backgroundColor: "#E6F1F9" }}
-            >
-              <Collapse.Panel
-                header="Promo History Information"
-                key="promoHistoryInformation"
-              >
-                <Space
-                  direction="vertical"
-                  size={"small"}
-                  style={{ width: "100%" }}
-                >
-                  <Row>
-                    <Col span={8}>
-                      {renderLabelDataValue("Name", detailHistoryData?.name)}
-                    </Col>
-                    <Col span={8}>
-                      {renderLabelDataValue("Type", detailHistoryData?.type)}
-                    </Col>
-                    <Col span={8}>
-                      {renderLabelDataValue(
-                        "Category",
-                        detailHistoryData?.category,
-                      )}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={8}>
-                      {renderLabelDataValue(
-                        "Criteria",
-                        detailHistoryData?.criteria,
-                      )}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={8}>
-                      {renderLabelDataValue(
-                        "Start Date",
-                        detailHistoryData?.startDate,
-                      )}
-                    </Col>
-                    <Col span={8}>
-                      {renderLabelDataValue(
-                        "End Date",
-                        detailHistoryData?.endDate,
-                      )}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={24}>
-                      {renderLabelDataValue(
-                        "Description",
-                        detailHistoryData?.description,
-                      )}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={8}>
-                      {renderLabelDataValue(
-                        "Billing Date",
-                        detailHistoryData?.billingDate,
-                      )}
-                    </Col>
-                    <Col span={8}>
-                      {renderLabelDataValue(
-                        "Billing No.",
-                        detailHistoryData?.billingNo,
-                      )}
-                    </Col>
-                    <Col span={8}>
-                      {renderLabelDataValue(
-                        "Billing Period",
-                        detailHistoryData?.billingPeriod,
-                      )}
-                    </Col>
-                  </Row>
-                </Space>
-              </Collapse.Panel>
-            </Collapse>
-            <Collapse
-              defaultActiveKey={["criteria"]}
-              onChange={(key) => setOnChangeDetailHistory(key)}
-              style={{ borderRadius: "8px", backgroundColor: "#E6F1F9" }}
-            >
-              <Collapse.Panel
-                header="Criteria & Conditions Information"
-                key="criteria"
-              ></Collapse.Panel>
-            </Collapse>
+          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            {/* Basic Information Section */}
+            <div>
+              <Row gutter={[16, 16]}>
+                <Col span={8}>
+                  {renderLabelDataValue("Billing No.", detailHistoryData?.billingCode)}
+                </Col>
+                <Col span={8}>
+                  {renderLabelDataValue("Billing Period", detailHistoryData?.billingPeriod)}
+                </Col>
+                <Col span={8}>
+                  {renderLabelDataValue("Billing Cycle", detailHistoryData?.billingCycle)}
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
+                <Col span={8}>
+                  {renderLabelDataValue("Promo Applied", detailHistoryData?.promosApplied)}
+                </Col>
+              </Row>
+            </div>
+
+            {/* Promo History Detail Table */}
+            <div>
+              <p className="text-primary text-xs font-bold uppercase mb-2">
+                PROMO HISTORY DETAIL
+              </p>
+              <TablePaginationNew
+                enableDragColumn={true}
+                enableColumnSorter={true}
+                enableColumnFilter={true}
+                dataSource={detailHistoryData?.details || []}
+                columns={historyDetailColumns}
+                tableScrolled={{
+                  x: 1200,
+                }}
+                useSelect={false}
+                usePagination={false}
+              />
+            </div>
+
+            {/* History Log Information */}
+            <HistoryLogInformation
+              data={detailHistoryData?.historyLog}
+            />
           </Space>
         </ModalCustomPromo>
       );
@@ -632,9 +807,9 @@ const AccountPromo = ({ id }) => {
   };
 
   // Debug log
-  useEffect(() => {
-    console.log('Customer ID from route:', idCustomer);
-  }, [idCustomer]);
+  // useEffect(() => {
+  //   console.log('Customer ID from route:', idCustomer);
+  // }, [idCustomer]);
 
   return (
     <Fragment>

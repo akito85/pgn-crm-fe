@@ -66,7 +66,7 @@ const PrabillingForm = ({ type }) => {
   const [form] = Form.useForm();
   const formValue = form.getFieldsValue();
 
-  const DEFAULT_SEARCH_LIMIT = 99999;
+  const DEFAULT_SEARCH_LIMIT = 10;
   const MAX_SEARCH_LENGTH = 50;
 
   const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
@@ -203,7 +203,6 @@ const PrabillingForm = ({ type }) => {
 
   const handleSelectCustomer = useCallback(
     (value, option) => {
-      // Simpan data customer yang baru dipilih
       const customerData = filteredCustomerList.find(
         (item) => item.accountNumber === value
       );
@@ -218,7 +217,6 @@ const PrabillingForm = ({ type }) => {
         }));
       }
 
-      // Clear search (tapi JANGAN clear selectedCustomersMap!)
       setSearchCustomerValue("");
       setFilteredCustomerList([]);
       setDataSpecificCustomer((prevState) => ({
@@ -282,9 +280,18 @@ const PrabillingForm = ({ type }) => {
         return {
           id: null,
           calCode: null,
-          mreadingCode: id,
+          costCenter: id,
         };
       }),
+      rRbiCalculationMeterReadingCode: (formValue?.meterReading || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            mreadingCode: id,
+          };
+        }
+      ),
       rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
         (id) => {
           return {
@@ -583,13 +590,13 @@ const PrabillingForm = ({ type }) => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">
+                <p className="mt-[15px] text-primary">
                   Billing Cycle Information
                 </p>
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-1 gap-2"}>
+            <div className={"w-full grid grid-cols-2 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
                 name={"billing_cycle"}
@@ -610,7 +617,7 @@ const PrabillingForm = ({ type }) => {
                 label={"Billing Period"}
                 name={"billing_period"}
                 rules={formMessageRequired("Billing Period")}
-                style={{ marginBottom: 4 }}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   disabled={!billingCycle}
@@ -631,32 +638,38 @@ const PrabillingForm = ({ type }) => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">
+                <p className="mt-[15px] text-primary">
                   INPUT PARAMETER INFORMATION
                 </p>
               </div>
             }
           >
             <div className={"w-full grid grid-cols-2 gap-2"}>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"SOR"}
-                  name={"sor"}
-                  rules={formMessageRequired("SOR")}
-                >
-                  <SelectComponent
-                    onChange={handleChangeSOR}
-                    options={list_sor?.data?.map((item) => {
-                      return {
-                        label: item?.name,
-                        value: item?.id,
-                      };
-                    })}
-                    disabled={defaultData?.sor}
-                  />
-                </Form.Item>
-              </div>
-              <Form.Item label={"Cost Center"} name={"costCenter"}>
+              {/* SOR - Left column */}
+              <Form.Item
+                label={"SOR"}
+                name={"sor"}
+                rules={formMessageRequired("SOR")}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  onChange={handleChangeSOR}
+                  options={list_sor?.data?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })}
+                  disabled={defaultData?.sor}
+                />
+              </Form.Item>
+
+              {/* Cost Center - Right column */}
+              <Form.Item
+                label={"Cost Center"}
+                name={"costCenter"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -669,7 +682,13 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Meter Reading Code"} name={"meterReading"}>
+
+              {/* Meter Reading Code - Right column */}
+              <Form.Item
+                label={"Meter Reading Code"}
+                name={"meterReading"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleMeterReadingRoute}
@@ -685,7 +704,13 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Segment"} name={"accountSegment"}>
+
+              {/* Account Segment - Left column */}
+              <Form.Item
+                label={"Account Segment"}
+                name={"accountSegment"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
@@ -697,7 +722,13 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Group Type"} name={"accountGroupType"}>
+
+              {/* Account Group Type - Left column */}
+              <Form.Item
+                label={"Account Group Type"}
+                name={"accountGroupType"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
@@ -713,11 +744,13 @@ const PrabillingForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <div className="col-span-2">
+
+              {/* Specific Customer Account - Right column */}
+              <div>
                 <Form.Item
                   label={"Specific Customer Account"}
                   name={"specificCustomer"}
-                  style={{ marginBottom: 4 }}
+                  style={{ marginBottom: 0 }}
                   help={
                     specific_customer_message && (
                       <span className="text-blue-600 text-xs">
@@ -757,14 +790,13 @@ const PrabillingForm = ({ type }) => {
                     }}
                     allowClear
                     placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
-                    // ============ INI YANG PENTING: tagRender ============
                     tagRender={(props) => {
                       const { value, closable, onClose } = props;
                       const customerData = selectedCustomersMap[value];
 
                       const displayText = customerData
                         ? `${customerData.accountName} - ${customerData.accountNumber}`
-                        : value; // Fallback ke account number saja
+                        : value;
 
                       return (
                         <span
@@ -816,7 +848,7 @@ const PrabillingForm = ({ type }) => {
                             <span
                               className={
                                 searchCustomerValue.length >= MAX_SEARCH_LENGTH
-                                  ? "text-red-500 font-semibold"
+                                  ? "text-red-500"
                                   : "text-gray-500"
                               }
                             >
@@ -844,66 +876,75 @@ const PrabillingForm = ({ type }) => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">
+                <p className="mt-[15px] text-primary">
                   SCHEDULER INFORMATION
                 </p>
               </div>
             }
           >
-            <Form.Item
-              label={"Type"}
-              name={"type"}
-              rules={formMessageRequired("Type")}
-            >
-              <SelectComponent
-                onChange={handleScheduleTypeChange}
-                options={(list_scheduler_type || []).map((item) => {
-                  return {
-                    label: item?.name,
-                    value: item?.id,
-                  };
-                })}
-              />
-            </Form.Item>
-
-            {selectedScheduleType &&
-              list_scheduler_type
-                ?.find((item) => item.id === selectedScheduleType)
-                ?.name?.toLowerCase() === "scheduler" && (
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex w-1/2 gap-3">
                 <Form.Item
-                  label={"Schedule"}
-                  name={"scheduleDateTime"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select schedule date and time",
-                    },
-                  ]}
+                  label={"Type"}
+                  name={"type"}
+                  rules={formMessageRequired("Type")}
+                  style={{ marginBottom: 0 }}
                 >
-                  <DatePicker
-                    showTime
-                    format="DD MMM YYYY HH:mm:ss"
-                    placeholder="Select date and time"
-                    className="w-full"
-                    disabledDate={(current) => {
-                      return current && current < moment().startOf("day");
-                    }}
+                  <SelectComponent
+                    onChange={handleScheduleTypeChange}
+                    placeholder={"Choose Type..."}
+                    options={(list_scheduler_type || []).map((item) => {
+                      return {
+                        label: item?.name,
+                        value: item?.id,
+                      };
+                    })}
                   />
                 </Form.Item>
-              )}
 
-            <Form.Item
-              label={"Remark"}
-              name={"remark"}
-              rules={formMessageRequired("Remark")}
-            >
-              <InputComponent
-                type="textarea"
-                value={remark}
-                style={{ marginBottom: 4 }}
-                onChange={(e) => setRemark(e.target.value)}
-              />
-            </Form.Item>
+                {selectedScheduleType &&
+                  list_scheduler_type
+                    ?.find((item) => item.id === selectedScheduleType)
+                    ?.name?.toLowerCase() === "scheduler" && (
+                    <Form.Item
+                      label={"Schedule"}
+                      name={"scheduleDateTime"}
+                      style={{ marginBottom: 0 }}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select schedule date and time",
+                        },
+                      ]}
+                    >
+                      <DatePicker
+                        showTime
+                        format="DD MMM YYYY HH:mm:ss"
+                        placeholder="Select date and time"
+                        className="w-full"
+                        disabledDate={(current) => {
+                          return current && current < moment().startOf("day");
+                        }}
+                      />
+                    </Form.Item>
+                  )}
+              </div>
+              <div className="w-full">
+                <Form.Item
+                  label={"Remark"}
+                  name={"remark"}
+                  rules={formMessageRequired("Remark")}
+                  style={{ marginBottom: 0 }}
+                >
+                  <InputComponent
+                    type="textarea"
+                    value={remark}
+                    style={{ marginBottom: 4 }}
+                    onChange={(e) => setRemark(e.target.value)}
+                  />
+                </Form.Item>
+              </div>
+            </div>
           </CardContainer>
           <div className={"w-full flex mt-5"}>
             <div className={"w-full justify-start"}>
@@ -958,7 +999,7 @@ const PrabillingForm = ({ type }) => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
+          <p className="text-[18px]">
             Are you sure you want to back?
           </p>
         </div>
@@ -980,28 +1021,28 @@ const PrabillingForm = ({ type }) => {
               }}
             />
             <div className="flex-1">
-              <p className="text-[18px] font-bold text-gray-800">
+              <p className="text-[18px] text-gray-800">
                 No Specific Customer Selected
               </p>
               <p className="text-[14px] text-gray-600 mt-3">
                 You have not selected any specific customer account.
               </p>
               <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
-                <p className="text-[14px] font-semibold text-orange-800">
+                <p className="text-[14px] text-orange-800">
                   The system will process{" "}
-                  <span className="text-[16px] font-bold">ALL customers</span>{" "}
+                  <span className="text-[16px]">ALL customers</span>{" "}
                   that match your filter criteria
                 </p>
               </div>
 
               <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200 max-h-[300px] overflow-y-auto">
-                <p className="text-[13px] font-semibold text-gray-700 mb-3">
+                <p className="text-[13px] text-gray-700 mb-3">
                   Current Filter Criteria:
                 </p>
 
                 <div className="space-y-2">
                   <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                    <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                    <span className="text-[13px] text-gray-700 min-w-[140px]">
                       SOR:
                     </span>
                     <span className="text-[13px] text-gray-600">
@@ -1013,7 +1054,7 @@ const PrabillingForm = ({ type }) => {
 
                   {pendingDataFinal?.rRbiCalculationCostCenter?.length > 0 && (
                     <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Cost Center:
                       </span>
                       <div className="flex-1">
@@ -1028,7 +1069,7 @@ const PrabillingForm = ({ type }) => {
                   {pendingDataFinal?.rRbiCalculationMeterReadingCode?.length >
                     0 && (
                     <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Meter Reading Code:
                       </span>
                       <div className="flex-1">
@@ -1046,7 +1087,7 @@ const PrabillingForm = ({ type }) => {
                   {pendingDataFinal?.rRbiCalculationAccountSegment?.length >
                     0 && (
                     <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Account Segment:
                       </span>
                       <div className="flex-1">
@@ -1064,7 +1105,7 @@ const PrabillingForm = ({ type }) => {
                   {pendingDataFinal?.rRbiCalculationAccountGroupType?.length >
                     0 && (
                     <div className="flex items-start gap-2 pb-2">
-                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
                         Account Group Type:
                       </span>
                       <div className="flex-1">
@@ -1158,7 +1199,7 @@ const PrabillingForm = ({ type }) => {
         <div className="px-8 py-8 justify-center">
           <div className="w-full flex gap-[20px]">
             {IconModal["icon_success_default"]}
-            <p className="text-[18px] font-bold">{"Successful"}</p>
+            <p className="text-[18px]">{"Successful"}</p>
           </div>
           <p className="pl-[70px]">{"Your data has been created."}</p>
         </div>
@@ -1173,7 +1214,7 @@ const PrabillingForm = ({ type }) => {
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">
             <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+            <p className="text-[18px]">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">{`Your data was not created. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>

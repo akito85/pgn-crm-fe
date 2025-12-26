@@ -300,13 +300,31 @@ export const toggleRelationshipStatus = createAsyncThunk(
 // Create Relationship
 export const createRelationship = createAsyncThunk(
   "CREATE_RELATIONSHIP",
-  async ({ idAccount, payload }, thunkAPI) => {
+  async ({ idAccount, payload, attachments = [] }, thunkAPI) => {
     try {
+      // 1. Create relationship first
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships/create`;
       const response = await accountManagementService.createData(url, payload);
+
+      // 2. Get ID from response
+      const { id } = response?.data || {};
+
+      // 3. Upload all attachments with refId
+      if (id && attachments.length > 0) {
+        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadPromises = attachments.map((attachment) =>
+          accountManagementService.uploadAttachment(uploadUrl, {
+            files: attachment.file,
+            category: attachment.fileCategoryId,
+            refId: id,
+          })
+        );
+        await Promise.all(uploadPromises);
+      }
+
       const successMessage = {
         title: "Successful",
-        description: "Relationship has been created successfully.",
+        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -319,7 +337,7 @@ export const createRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Failed to create relationship: ${message}`,
+        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
@@ -330,13 +348,28 @@ export const createRelationship = createAsyncThunk(
 // Update Relationship
 export const updateRelationship = createAsyncThunk(
   "UPDATE_RELATIONSHIP",
-  async ({ idAccount, idRelationship, payload }, thunkAPI) => {
+  async ({ idAccount, idRelationship, payload, attachments = [] }, thunkAPI) => {
     try {
+      // 1. Update relationship first
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}`;
       const response = await accountManagementService.updateData(url, payload);
+
+      // 2. Upload new attachments only (filter out existing ones)
+      if (attachments.length > 0) {
+        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadPromises = attachments.map((attachment) =>
+          accountManagementService.uploadAttachment(uploadUrl, {
+            files: attachment.file,
+            category: attachment.fileCategoryId,
+            refId: idRelationship,
+          })
+        );
+        await Promise.all(uploadPromises);
+      }
+
       const successMessage = {
         title: "Successful",
-        description: "Relationship has been updated successfully.",
+        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -349,7 +382,7 @@ export const updateRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Failed to update relationship: ${message}`,
+        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
@@ -422,15 +455,25 @@ export const getAttachmentList = createAsyncThunk(
 // Download Attachment
 export const downloadAttachment = createAsyncThunk(
   "DOWNLOAD_ATTACHMENT",
-  async ({ idAccount, idFile }, thunkAPI) => {
+  async ({ idAccount, idFile, urlFile1, fileName }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
+      // craft url if urlFile1 is not provided, else use urlFile1
+      const url = urlFile1 || `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
       const response = await accountManagementService.downloadData(url);
       return response;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_ATTACHMENT" })
-      );
+      const message =
+        (error.response &&
+          error.response.error &&
+          error.response.error.message) ||
+        error.message ||
+        error.toString();
+
+      const errorBody = {
+        title: "Download Failed",
+        description: `Failed to download file "${fileName || 'Unknown'}". ${error.response.error.message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -485,6 +528,48 @@ export const getRelatedObjectData = createAsyncThunk(
         validateError({ error: error, action: "GET_RELATED_OBJECT_DATA" })
       );
       return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// Approve or Reject Relationship
+export const approveOrRejectRelationship = createAsyncThunk(
+  "APPROVE_OR_REJECT_RELATIONSHIP",
+  async ({ idAccount, body, action }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approve`;
+      const response = await accountManagementService.activationWithRemark(url, body, {
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      let message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occurred";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -685,7 +770,8 @@ const relationshipSlice = createSlice({
       state.loading = true;
     },
     [getAttachmentList.fulfilled]: (state, action) => {
-      state.data_attachmentList = action.payload?.data?.result || [];
+      const payload = action.payload;
+      state.data_attachmentList = payload?.data?.result || payload?.result || payload || [];
       state.loading = false;
     },
     [getAttachmentList.rejected]: (state) => {
@@ -737,6 +823,17 @@ const relationshipSlice = createSlice({
     },
     [getApprovalHistory.rejected]: (state) => {
       state.loadingApprovalHistory = false;
+    },
+
+    // Approve or Reject Relationship
+    [approveOrRejectRelationship.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectRelationship.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectRelationship.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });

@@ -50,7 +50,7 @@ table {
   background-color: var(--primary);
   color: #ffffff;
   letter-spacing: 1px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   text-align: center !important;
 }
@@ -70,16 +70,19 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
   background-color: #ffffff !important;
 }
 
-/* Override default Ant Design frozen column background */
-.ant-table-cell-fix-left,
-.ant-table-cell-fix-right {
-  background-color: inherit !important;
+/* Hover effect - kuning pastel soft */
+.ant-table-tbody > tr:hover > td {
+  background-color: #fef9e7 !important;
 }
 
-/* Ensure frozen columns in thead maintain primary color */
-.ant-table-thead .ant-table-cell-fix-left,
-.ant-table-thead .ant-table-cell-fix-right {
-  background-color: var(--primary) !important;
+/* Selected/clicked row - kuning soft */
+.ant-table-tbody > tr.row-selected > td {
+  background-color: #fffbea !important;
+}
+
+/* Hover pada selected row tetap kuning soft */
+.ant-table-tbody > tr.row-selected:hover > td {
+  background-color: #fffbea !important;
 }
 
 .ant-tag {
@@ -475,7 +478,7 @@ td.ant-table-column-sort {
   border-radius: 8px !important;
 }
 .ant-table-thead > tr > th {
-  padding: 8px !important;
+  padding: 4px 8px !important;
 }
 .ant-table-tbody > tr > td {
   padding: 0px 8px !important;
@@ -1024,4 +1027,18 @@ span.ant-tree-title {
   width: 100%;
   padding: 16px;
   box-sizing: border-box;
+}
+
+/* Custom Radio Tabs - Match ButtonComponent size */
+.custom-radio-tabs .ant-radio-button-wrapper {
+  height: 32px !important;
+  line-height: 30px !important;
+  font-size: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.custom-radio-tabs .ant-radio-button-wrapper span {
+  font-size: 12px !important;
 }

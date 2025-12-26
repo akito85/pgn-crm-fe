@@ -12,10 +12,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin } from "antd";
-import { 
-  getDetailCalculationJob,
-  getDetailCalculationLog // ← TAMBAHKAN INI
-} from "../../../../../redux/slices/rating_billing_invoice/calculation";
+import { getDetailCalculationJob } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 
 const CalculationDetail = () => {
   // Selector
@@ -32,27 +29,12 @@ const CalculationDetail = () => {
   // state
   const [tabHeader, setTabHeader] = useState("Calculation Information");
 
-  // Use Effect - Fetch Detail Job
+  // Use Effect
   useEffect(() => {
     if (calJobId) {
       dispatch(getDetailCalculationJob(calJobId));
     }
   }, [dispatch, calJobId]);
-
-  // ← TAMBAHKAN INI: Fetch Calculation Log saat pertama kali load
-  useEffect(() => {
-    if (detail_calculation_job?.calCode) {
-      dispatch(
-        getDetailCalculationLog({
-          calCode: detail_calculation_job?.calCode,
-          sort: "calDate~desc",
-          page: 1,
-          pageSize: 1,
-          search: encodeURIComponent(JSON.stringify({})),
-        })
-      );
-    }
-  }, [dispatch, detail_calculation_job?.calCode]);
 
   const routes = [
     {
@@ -68,15 +50,15 @@ const CalculationDetail = () => {
       breadcrumbName: "Detail Calculation",
     },
   ];
-  
   const dataTabs = [
     { value: "Calculation Information" },
     { value: "Calculation Log" },
   ];
-  
   const changeTabHeader = (e) => {
     setTabHeader(e.target.value);
   };
+
+
 
   return (
     <Spin spinning={loading}>

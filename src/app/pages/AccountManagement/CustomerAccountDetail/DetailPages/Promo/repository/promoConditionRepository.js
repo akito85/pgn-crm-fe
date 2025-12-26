@@ -2,20 +2,7 @@ import { UnorderedListOutlined } from "@ant-design/icons";
 import { Col } from "antd";
 
 const promoConditionRepository = {
-  getPromoConditionList: () => [
-    {
-      key: "1",
-      no: 1,
-      name: "Minimum Purchase",
-      operator: "lorem",
-      dataType: "Number",
-      value: "100000",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Minimum purchase value to qualify",
-    },
-  ],
-  getColumns: (handleClickDetail, setDetailData) => [
+  getColumns: (handleClickDetail) => [
     {
       title: "No",
       dataIndex: "no",
@@ -68,10 +55,7 @@ const promoConditionRepository = {
         <Col span={24} className="text-center">
           <UnorderedListOutlined
             style={{ cursor: "pointer" }}
-            onClick={() => {
-              handleClickDetail();
-              setDetailData(record);
-            }}
+            onClick={() => handleClickDetail(record)}
           />
         </Col>
       ),

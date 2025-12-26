@@ -9,16 +9,23 @@ import { usePromo } from "../hooks/usePromo";
 const ModalQueryCustom = ({
   isOpen,
   setIsOpen,
-  handleFirstQuery = () => {},
-  handleCancelQuery = () => {},
+  onSaveQuery = () => {},
   columnType = "promo", // "promo" | "criteria" | "condition" | "history"
+  activeFilters,
 }) => {
+  const [form] = Form.useForm();
   const { advancedSearchMetadata, loadAdvancedSearchMetadata } = usePromo();
 
   useEffect(() => {
     // Load advanced search metadata (conditions, operators, columns)
     loadAdvancedSearchMetadata();
   }, [loadAdvancedSearchMetadata]);
+
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue({ query: activeFilters || [] });
+    }
+  }, [isOpen, activeFilters, form]);
 
   // Select columns based on type
   const getColumns = () => {
@@ -34,15 +41,35 @@ const ModalQueryCustom = ({
     }
   };
 
+  const handleFirstQuery = () => {
+    console.log('First query triggered');
+  };
+
+  const handleCancelQuery = () => {
+    form.resetFields();
+    setIsOpen(false);
+  };
+
+  const handleFinish = (values) => {
+    console.log('ModalQueryCustom - Form submitted with values:', values);
+    onSaveQuery(values);
+  };
+
   return (
-    <ModalCustomPromo 
+    <ModalCustomPromo
       title="Query"
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       width={1200}
     >
-      <div>
-        <Form.List name="query">
+      <Form
+        form={form}
+        name="formQuery"
+        onFinish={handleFinish}
+        initialValues={{ query: activeFilters || [] }}
+      >
+        <div>
+          <Form.List name="query">
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }, index) => (
@@ -100,7 +127,6 @@ const ModalQueryCustom = ({
                     <ButtonComponent
                       type="submit"
                       htmlType={"submit"}
-                      form={"formQuery"}
                     >
                       Save
                     </ButtonComponent>
@@ -110,7 +136,8 @@ const ModalQueryCustom = ({
             </>
           )}
         </Form.List>
-      </div>
+        </div>
+      </Form>
     </ModalCustomPromo>
   );
 };

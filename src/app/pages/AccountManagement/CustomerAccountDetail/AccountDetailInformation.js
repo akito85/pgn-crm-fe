@@ -192,6 +192,30 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
+          "/account-management/account-standard/relationship/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/relationship/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/relationship/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/details"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.rs);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
           "/account-management/account-standard/financial-information/payment-relation/details"
         ) ||
         path.pathname.includes(
@@ -208,7 +232,7 @@ const AccountDetailInformation = ({
         ) ||
         path.pathname.includes(
           "/account-management/account-standard/financial-information/invoice-relation/update"
-        ) 
+        )
       )
     ) {
       setTypeAccountInfoDetailSection(dataTabs.fi);
@@ -269,7 +293,7 @@ const AccountDetailInformation = ({
             ]}
             idCustomer={idCustomer}
             type={type}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.la:
@@ -284,12 +308,12 @@ const AccountDetailInformation = ({
         );
       case dataTabs.sr:
         return <></>;
-        // return <ServiceRequest />;
+      // return <ServiceRequest />;
       case dataTabs.dm:
         return (
           <DistributionMedia
             id={id}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.premise:
@@ -298,7 +322,7 @@ const AccountDetailInformation = ({
             id={id}
             idCustomer={idCustomer}
             type={type}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.gs:
@@ -345,7 +369,7 @@ const AccountDetailInformation = ({
         return (
           <AdditionalInformation
             idAccount={id}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.eq:

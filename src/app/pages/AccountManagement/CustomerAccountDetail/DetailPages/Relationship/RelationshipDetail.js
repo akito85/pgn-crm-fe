@@ -70,10 +70,12 @@ const RelationshipDetail = () => {
     if (data_attachmentList && data_attachmentList.length > 0) {
       const formattedAttachments = data_attachmentList.map((item, index) => ({
         key: index + 1,
-        type: item.categoryName || item.type || "-",
+        type: item.fileCategoryName || item.categoryName || item.type || "-",
         fileName: item.fileName || "-",
         fileSize: item.fileSize || 0,
-        fileId: item.fileId,
+        fileId: item.fileId || item.id,
+        urlFile1: item.urlFile1,
+        fileType: item.fileType,
         dataType: "exist",
       }));
       setAttachmentData(formattedAttachments);
@@ -82,11 +84,13 @@ const RelationshipDetail = () => {
 
   // Handle download attachment
   const handleDownloadAttachment = (record) => {
-    if (record.fileId) {
+    if (record.urlFile1 || record.fileId) {
       dispatch(
         downloadAttachment({
           idAccount,
           idFile: record.fileId,
+          urlFile1: record.urlFile1,
+          fileName: record.fileName,
         })
       );
     }

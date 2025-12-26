@@ -23,6 +23,7 @@ export const columnsPricingRule = (
     sorter: true,
     title: "MINIMUM",
     dataIndex: "min",
+    isNumber:true,
     align: "right",
     ...getColumnSearchPropsPaging(
       "min",
@@ -51,6 +52,7 @@ export const columnsPricingRule = (
     sorter: true,
     title: "MAXIMUM",
     dataIndex: "max",
+    isNumber:true,
     align: "right",
     ...getColumnSearchPropsPaging(
       "max",
@@ -79,6 +81,7 @@ export const columnsPricingRule = (
     sorter: true,
     title: "PRICE CODE",
     dataIndex: "priceCode",
+    isClassification:true,
     align: "left",
     ...getColumnSearchPropsPaging(
       "priceCode",
@@ -109,6 +112,7 @@ export const columnsPricingRule = (
       {
         title: "VALUE",
         dataIndex: "value",
+        isNumber:true,
         align: "right",
         render: (value, record) => {
           // Remove comma and convert to number for NumericFormat
@@ -132,11 +136,13 @@ export const columnsPricingRule = (
       {
         title: "CURRENCY",
         dataIndex: "currency",
+        isClassification:true,
         align: "center",
       },
       {
         title: "UOM",
         dataIndex: "uom",
+        isClassification:true,
         align: "center",
       },
     ],

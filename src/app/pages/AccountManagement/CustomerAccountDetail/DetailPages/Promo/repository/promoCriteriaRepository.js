@@ -3,19 +3,7 @@ import create from "@ant-design/icons/lib/components/IconFont";
 import { Col } from "antd";
 
 const promoCriteriaRepository = {
-  getPromoCriteriaList: () => [
-    {
-      key: "1",
-      no: 1,
-      serviceType: "Electricity",
-      customerSegment: "Residential",
-      accountGroup: "Individual",
-      adjustmentType: "Percentage",
-      adjustmentValue: "10",
-      uom: "%",
-    },
-  ],
-  getColumns: (handleClickDetail, setDetailData) => [
+  getColumns: (handleClickDetail) => [
     {
       title: "No",
       dataIndex: "no",
@@ -63,10 +51,7 @@ const promoCriteriaRepository = {
         <Col span={24} className="text-center">
           <UnorderedListOutlined
             style={{ cursor: "pointer" }}
-            onClick={() => {
-              handleClickDetail();
-              setDetailData(record);
-            }}
+            onClick={() => handleClickDetail(record)}
           />
         </Col>
       ),

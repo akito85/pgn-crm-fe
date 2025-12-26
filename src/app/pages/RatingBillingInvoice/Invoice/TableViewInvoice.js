@@ -9,8 +9,6 @@ import StatusComponent from "../../../../components/StatusComponent";
 
 export const columnsInvoice = (
   search,
-  page = 1,
-  pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
@@ -22,12 +20,13 @@ export const columnsInvoice = (
       title: "NO",
       isClassification: true,
       width: 60,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       key: "invoiceNumber",
       title: "INVOICE NUMBER",
       dataIndex: "invoiceNumber",
+      isClassification: true,
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -53,6 +52,7 @@ export const columnsInvoice = (
       key: "templateName",
       title: "TEMPLATE",
       dataIndex: "templateName",
+      isClassification: true,
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -78,6 +78,7 @@ export const columnsInvoice = (
       key: "billingCycle",
       title: "BILLING CYCLE",
       dataIndex: "billingCycle",
+      isClassification: true,
       width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -131,6 +132,7 @@ export const columnsInvoice = (
       title: "BILLING CODE",
       dataIndex: "billingCode",
       width: 180,
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -155,6 +157,7 @@ export const columnsInvoice = (
       key: "customerNumber",
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
+      isClassification: true,
       width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -180,6 +183,7 @@ export const columnsInvoice = (
       key: "customerName",
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
+      isClassification: true,
       width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -205,6 +209,7 @@ export const columnsInvoice = (
       key: "accountNumber",
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
+      isClassification: true,
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -230,6 +235,7 @@ export const columnsInvoice = (
       key: "accountName",
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
+      isClassification: true,
       width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -308,6 +314,7 @@ export const columnsInvoice = (
       title: "SOR",
       width: 250,
       dataIndex: "sor",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -332,6 +339,7 @@ export const columnsInvoice = (
       key: "costCenter",
       title: "COST CENTER",
       dataIndex: "costCenter",
+      isClassification: true,
       width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -383,6 +391,7 @@ export const columnsInvoice = (
       key: "meterReadingCode",
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
+      isClassification: true,
       width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -514,7 +523,7 @@ export const columnsInvoice = (
       title: "TAX RATE",
       sorter: true,
       isNumber: true,
-      width: 150,
+      width: 100,
       dataIndex: "taxRate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -873,10 +882,48 @@ export const columnsInvoice = (
         ),
     },
     {
+      key: "remarkPaymentGw",
+      sorter: true,
+      title: "REMARK PAYMENT GW",
+      dataIndex: "remarkPaymentGw",
+      width: 250,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(search, "remark"),
+      render: (text) =>
+        renderColumn(
+          "remarkPaymentGw",
+          hasValue(search["remarkPaymentGw"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "statusPaymentGw",
+      title: "STATUS PAYMENT GW",
+      dataIndex: "statusPaymentGw",
+      width: 200,
+      isClassification: true,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusPaymentGw",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) => <StatusComponent colour={text}>{text}</StatusComponent>,
+    },
+    {
       key: "status",
       title: "STATUS",
       dataIndex: "status",
-      width: 150,
+      width: 100,
       isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(

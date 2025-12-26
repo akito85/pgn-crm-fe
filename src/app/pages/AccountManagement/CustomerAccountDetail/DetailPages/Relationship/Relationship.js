@@ -11,6 +11,7 @@ import { Form } from "antd";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CustomerQuery from "../../../Customer/Component/CustomerQuesry";
 import { getGlobalSearchColumn, getGlobalSearchCondition, getGlobalSearchOperator } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { CheckOutlined, DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 
 const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   const [tempInputFields, setTempInputFields] = useState([]);
   const [modalQuery, setModalQuery] = useState(false);
   const [approvalMode, setApprovalMode] = useState(false);
+  const [listType, setListType] = useState("all");
 
   const handleOpenFilter = () => {
     setModalQuery(true);
@@ -65,40 +67,118 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
     }
   };
 
+  /**
+   * Handle entering or exiting approval mode
+   * When entering: set listType = "approval"
+   * When exiting: set listType = "all"
+   * @param {boolean} newApprovalMode
+   */
+  const handleIsApproval = (newApprovalMode) => {
+    if (newApprovalMode) {
+      // ENTERING APPROVAL MODE
+      setPage(1);
+      setListType("approval");
+      setApprovalMode(true);
+    } else {
+      // EXITING APPROVAL MODE
+      setSearchText("");
+      setSearchedColumn("");
+      setPage(1);
+      setListType("all");
+      setApprovalMode(false);
+    }
+  };
+
   return (
     // <Spin spinning={loading} className={"w-full top-20"} tip={"Loading..."}>
     <Fragment>
       <BaseContainer header={"RELATIONSHIP LIST"}>
-        <div className="w-full flex justify-between mb-[30px]">
-          <ButtonComponent
-            icon={<SVGIcon name="IconFilter" width={24} />}
-            type="default"
-            onClick={handleOpenFilter}
-          >
-            Filters
-          </ButtonComponent>
-
-          <div className="flex gap-3">
+        {!approvalMode ? (
+          <div className="w-full flex justify-between mb-[30px]">
             <ButtonComponent
-              type={approvalMode ? "submit" : "default"}
-              onClick={() => setApprovalMode(!approvalMode)}
+              icon={
+                <FilterOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              type="submit"
+              onClick={handleOpenFilter}
             >
-              {approvalMode ? "Cancel Approval" : "Approval"}
+              Filters
             </ButtonComponent>
 
-            <NavLink
-              to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP}
-              state={{ idAccount: id, idCustomer: idCustomer, type: type }}
-            >
+            <div className="flex gap-3">
               <ButtonComponent
                 type={"submit"}
-                icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                // onClick={handleDownload}
+                icon={
+                  <DownloadOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px"
+                }}
               >
-                Create
+                Download List
               </ButtonComponent>
-            </NavLink>
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => handleIsApproval(true)}
+                icon={
+                  <CheckOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px"
+                }}
+              >
+                Approval
+              </ButtonComponent>
+
+              <NavLink
+                to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP}
+                state={{ idAccount: id, idCustomer: idCustomer, type: type }}
+              >
+                <ButtonComponent
+                  type={"submit"}
+                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                >
+                  Create
+                </ButtonComponent>
+              </NavLink>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-full flex justify-end mb-[30px]">
+            <ButtonComponent
+              type="default"
+              onClick={() => handleIsApproval(false)}
+            >
+              Cancel Approval
+            </ButtonComponent>
+          </div>
+        )}
 
         <div className={"w-full mt-5"}>
           <RelationshipTable
@@ -116,10 +196,12 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
             search={search}
             setSearch={setSearch}
             approvalMode={approvalMode}
+            handleIsApproval={handleIsApproval}
             type={type}
             idCustomer={idCustomer}
             inputFields={inputFields}
             tempInputFields={tempInputFields}
+            listType={listType}
           />
         </div>
       </BaseContainer>

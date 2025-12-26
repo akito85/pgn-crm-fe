@@ -354,6 +354,10 @@ const InvoiceRelation = ({
     const body = {
       inputFields: tempFilters,
     }
+    
+    console.log("search", search);
+    console.log("search JSON", JSON.stringify(search));
+    console.log("search encoded", JSON.stringify(search))
 
     dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), listType, body }));
   }, [page, pageSize, sort, search, tempFilters, listType]);

@@ -1,23 +1,57 @@
 import { EyeOutlined } from "@ant-design/icons";
-import { Tooltip } from "antd";
-import { useState } from "react";
+import { Tooltip, Spin } from "antd";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
+import NxPanel from "../../../../../../../components/Nx/NxPanel";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../utils/previewFileAttachment";
+import ModalAttachmentRelationship from "./ModalAttachmentRelationship";
+import FileSaver from "file-saver";
+import axios from "axios";
+import { getBase64 } from "../../../../../../../utils/getBase64";
+import { tokenHeader } from "../../../../../../../utils/tokenHeader";
+import { configApp } from "../../../../../../../constants/configApp";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
+import { showModalError } from "../../../../../../../redux/slices/general_slice";
 
 const RelationshipAttachment = ({
   data = [],
   updateData = () => { },
   type,
-  setModalUpload = () => { },
+  dispatch = () => { },
   hideActions = false,
   showUploadButton = true,
   onDownload = () => { },
+  className = "",
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [modalUpload, setModalUpload] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [loadingDownload, setLoadingDownload] = useState(false);
+
+  // Get attachment category from Redux
+  const { data_attachmentCategory } = useSelector((state) => state.relationship);
+
+  useEffect(() => {
+    if (data_attachmentCategory && data_attachmentCategory.length > 0) {
+      setCategoryOptions(prevOptions => {
+        // Only update if data has actually changed
+        const newOptions = data_attachmentCategory.map((category) => ({
+          id: category.id,
+          text: category.text,
+        }));
+        // Simple check to avoid unnecessary updates
+        if (JSON.stringify(prevOptions) !== JSON.stringify(newOptions)) {
+          return newOptions;
+        }
+        return prevOptions;
+      });
+    }
+  }, [data_attachmentCategory]);
 
   const handleDelete = (record) => {
     updateData((prevState) => {
@@ -27,15 +61,51 @@ const RelationshipAttachment = ({
   };
 
   const handleShow = async (r) => {
-    if (r.dataType === "exist") {
-      onDownload(r);
-    } else {
-      if (r.fileType.includes("application/vnd")) {
-        // FileSaver.saveAs(r.base64, r.fileName);
+    if (r.dataType !== "exist") {
+      // New files - preview from base64
+      if (r.fileType && r.fileType.includes("application/vnd")) {
+        FileSaver.saveAs(r.base64, r.fileName);
       } else {
         previewFileAttachment(r.base64);
       }
+    } else {
+      // Existing files - download from API
+      if ((r.fileType || r.type || "").includes("application/vnd")) {
+        // VND files (Excel, etc.) - download directly using service
+        try {
+          await accountManagementService.downloadData(r.urlFile1);
+        } catch (error) {
+          const message = error?.response?.statusText || error?.message || "Unknown error";
+          dispatch(showModalError({
+            title: "Download Failed",
+            description: `Failed to download file "${r.fileName || 'Unknown'}". File ${message}`,
+          }));
+        }
+      } else {
+        // Non-VND files - preview in browser
+        setLoadingDownload(true);
+        try {
+          const response = await axios.get(configApp.ACCOUNT_SERVICE + r.urlFile1, {
+            headers: tokenHeader(),
+            responseType: "blob",
+          });
+          const base64 = await getBase64(response.data);
+          previewFileAttachment(base64);
+        } catch (error) {
+          const message = error?.response?.statusText || error?.message || "Unknown error";
+          dispatch(showModalError({
+            title: "Preview Failed",
+            description: `Failed to preview file "${r.fileName || 'Unknown'}". File ${message}`,
+          }));
+        } finally {
+          setLoadingDownload(false);
+        }
+      }
     }
+  };
+
+  const handleOpenModal = () => {
+    setModalUpload(true);
   };
 
   const columns = [
@@ -49,9 +119,10 @@ const RelationshipAttachment = ({
     },
     {
       sorter: true,
-      title: "TYPE",
-      dataIndex: "type",
+      title: "CATEGORY",
+      dataIndex: "fileCategoryName",
       width: 180,
+      render: (val, record) => val || record.type || "-",
     },
     {
       sorter: true,
@@ -78,46 +149,45 @@ const RelationshipAttachment = ({
         </span>
       ),
     },
-    // Conditional action column - hanya tampil jika hideActions = false
-    ...(!hideActions
-      ? [
-        {
-          title: "ACTION",
-          align: "center",
-          width: 100,
-          render: (v, r, i) => {
-            return (
-              <div className="flex w-full justify-center gap-3">
-                <Tooltip title="Preview">
-                  <EyeOutlined
-                    onClick={() => handleShow(r)}
-                    style={{
-                      fontSize: "18px",
-                      color: "#0075bf",
-                      cursor: "pointer",
-                    }}
-                  />
-                </Tooltip>
+    // Action column - Preview always visible, Delete conditionally hidden
+    {
+      title: "ACTION",
+      align: "center",
+      width: 100,
+      render: (v, r, i) => {
+        return (
+          <div className="flex w-full justify-center gap-3">
+            <Tooltip title="Preview">
+              <EyeOutlined
+                onClick={() => handleShow(r)}
+                style={{
+                  fontSize: "18px",
+                  color: "#0075bf",
+                  cursor: "pointer",
+                }}
+              />
+            </Tooltip>
 
-                <Tooltip title="Delete">
-                  <SVGIcon
-                    name="IconDelete"
-                    width={18}
-                    className="cursor-pointer"
-                    onClick={
-                      r.dataType !== "exist"
-                        ? () => handleDelete(r)
-                        : undefined
-                    }
-                  />
-                </Tooltip>
-              </div>
-            );
-          },
-          key: "action",
-        },
-      ]
-      : []),
+            {!hideActions && (
+              <Tooltip title="Delete">
+                <SVGIcon
+                  name="IconDelete"
+                  width={18}
+                  className={r.dataType === "exist" ? "cursor-not-allowed" : "cursor-pointer"}
+                  color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
+                  onClick={
+                    r.dataType !== "exist"
+                      ? () => handleDelete(r)
+                      : undefined
+                  }
+                />
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
+      key: "action",
+    },
   ];
 
   const handleChange = (pageChange, pageSizeChange) => {
@@ -126,43 +196,53 @@ const RelationshipAttachment = ({
   };
 
   return (
-    <div>
-      <h3 className="text-primary text-xs font-bold uppercase py-4">
-        ATTACHMENT
-      </h3>
-      <div className="flex flex-col w-full gap-2">
-        {showUploadButton && (
-          <div className="flex justify-between items-center mb-3">
-            <p className="text-[13px] mb-0 text-dg-grey-dark">
-              Attach File:
-            </p>
-            <div className="flex flex-row gap-2 items-center">
-              <ButtonComponent
-                size="small"
-                type="default"
-                onClick={() => setModalUpload(true)}
-              >
-                Choose File
-              </ButtonComponent>
-              <p className="text-[11px] text-dg-grey-dark mb-0">
-                {data.length === 0 ? "[No file choosen]" : ""}
-              </p>
+    <div className={className}>
+      <Spin spinning={loadingDownload}>
+        <NxPanel title={"ATTACHMENT"} removeBottomMargin>
+          <div className="flex flex-col w-full gap-2">
+            {showUploadButton && (
+              <div className="flex justify-between items-center mb-3">
+                <p className="text-[13px] mb-0 text-dg-grey-dark">
+                  Attach File:
+                </p>
+                <div className="flex flex-row gap-2 items-center">
+                  <ButtonComponent
+                    size="small"
+                    type="default"
+                    onClick={handleOpenModal}
+                  >
+                    Choose File
+                  </ButtonComponent>
+                  <p className="text-[11px] text-dg-grey-dark mb-0">
+                    {data.length === 0 ? "[No file choosen]" : `${data.length} file(s) selected`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="pt-[10px]">
+              <TablePagination
+                dataSource={data.slice((page - 1) * pageSize, page * pageSize)}
+                totalData={data?.length}
+                current={page}
+                pageSize={pageSize}
+                onChange={handleChange}
+                onShowSizeChange={handleChange}
+                columns={columns}
+              />
             </div>
           </div>
-        )}
 
-        <div className="pt-[10px]">
-          <TablePagination
-            dataSource={data.slice((page - 1) * pageSize, page * pageSize)}
-            totalData={data?.length}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            onShowSizeChange={handleChange}
-            columns={columns}
+          {/* Modal for attachment upload */}
+          <ModalAttachmentRelationship
+            openUpload={modalUpload}
+            updateData={updateData}
+            categoryOptions={categoryOptions}
+            handleCancel={() => setModalUpload(false)}
+            withLink
           />
-        </div>
-      </div>
+        </NxPanel>
+      </Spin>
     </div>
   );
 };

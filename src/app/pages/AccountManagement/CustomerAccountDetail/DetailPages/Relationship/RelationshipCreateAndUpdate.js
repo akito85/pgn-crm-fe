@@ -14,6 +14,7 @@ import RelationshipApproval from "./RelationshipApproval";
 import RelationshipAttachment from "./RelationshipAttachment";
 import ModalAttachment from "./RelationshipAttachment/ModalAttachment";
 import RelationshipInformation from "./RelationshipInformation";
+import RelatedDetailCard from "./RelationshipInformation/RelatedDetailCard";
 import {
   createRelationship,
   downloadAttachment,
@@ -21,11 +22,14 @@ import {
   getApprovalHierarchyDetail,
   getAttachmentCategory,
   getAttachmentList,
+  getRelationshipDetail,
   updateRelationship
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Spin, Steps } from "antd";
 import { RightOutlined } from "@ant-design/icons";
+import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 
 const obj = {
   id: 1,
@@ -65,6 +69,10 @@ const RelationshipCreateAndUpdate = ({
     data_attachmentList,
     data_approvalHierarchies,
     data_approvalHierarchyDetail,
+    data_relationshipType,
+    data_relationshipCategory,
+    data_relationshipDetail,
+    loadingDetail,
     loadingApprovalHierarchies,
     loadingApprovalHierarchyDetail
   } = useSelector(
@@ -76,6 +84,7 @@ const RelationshipCreateAndUpdate = ({
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalUpload, setModalUpload] = useState(false);
   const [dataConfirm, setDataConfirm] = useState();
+  const [isDraftSubmission, setIsDraftSubmission] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -84,6 +93,10 @@ const RelationshipCreateAndUpdate = ({
   const [approvalObj, setApprovalObj] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [dataDetailApproval, setDataDetailApproval] = useState([]);
+  const [relatedDetailData, setRelatedDetailData] = useState([]);
+
+  // Step State
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   useEffect(() => {
     console.log("relationshipObj => ", relationshipObj);
@@ -108,27 +121,73 @@ const RelationshipCreateAndUpdate = ({
     }
     if (type === "update" && id) {
       dispatch(getAttachmentList({ idAccount, idRelationship: id }));
-    }
-    if (obj && obj.id && type === "update") {
-      form.setFieldsValue({
-        relationshipType: 1,
-        relationshipCategory: 1,
-        relatedName: 1,
-        relatedNumber: 1,
-      });
+      dispatch(getRelationshipDetail({ idAccount, idRelationship: id }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [obj, type, idAccount, id]);
+  }, [type, idAccount, id]);
+
+  // Populate form and relationshipObj when data_relationshipDetail is loaded (update mode)
+  useEffect(() => {
+    if (data_relationshipDetail && data_relationshipDetail.id && type === "update") {
+      const detail = data_relationshipDetail;
+
+      // Set form values
+      form.setFieldsValue({
+        relationshipType: detail.relationshipType,
+        relationshipCategory: detail.relationshipCategory,
+        relatedName: detail.objectName,
+        relatedNumber: detail.objectNumber,
+        startDate: detail.startDate ? moment(detail.startDate) : null,
+        endDate: detail.endDate ? moment(detail.endDate) : null,
+        description: detail.description || "",
+        appHierId: detail.appHierId,
+        appHierName: detail.appHierName,
+      });
+
+      // Set relationshipObj for submit
+      setRelationshipObj({
+        objectId: detail.objectId,
+        objectName: detail.objectName,
+        objectValue: detail.objectNumber,
+        relationshipType: detail.relationshipType,
+        relationshipCategory: detail.relationshipCategory,
+        startDate: detail.startDate,
+        endDate: detail.endDate,
+        description: detail.description,
+      });
+
+      // Set approvalObj
+      setApprovalObj({
+        appHierId: detail.appHierId,
+      });
+
+      // Load approval hierarchy detail if appHierId exists
+      if (detail.appHierId) {
+        dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
+      }
+
+      // Populate Related Detail data for update mode
+      if (detail.relatedDetail && detail.relatedDetail.length > 0) {
+        setRelatedDetailData(detail.relatedDetail);
+      }
+    }
+  }, [data_relationshipDetail, type, form, idAccount, dispatch]);
 
   useEffect(() => {
-    if (data_attachmentList && type === "update") {
+    if (data_attachmentList && data_attachmentList.length > 0 && type === "update") {
       const mapped = data_attachmentList.map((item) => ({
         key: item.id,
+        fileId: item.fileId || item.id,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
         type: item.fileCategoryName,
         fileName: item.fileName,
         fileSize: item.fileSize,
-        dataType: "exist",
         fileType: item.fileType,
+        urlFile1: item.urlFile1,
+        createdBy: item.createdBy,
+        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
+        dataType: "exist",
       }));
       setListDataAttachment(mapped);
     }
@@ -205,98 +264,120 @@ const RelationshipCreateAndUpdate = ({
         ...value,
         relationshipCategory: value?.relationshipCategory?.toString(),
         relationshipType: value?.relationshipType?.toString(),
-        ...(type === "create" && { action: isDraft ? "DRAFT" : "SUBMIT" }),
+        action: isDraft ? "DRAFT" : "SUBMIT",
       };
 
+      // Filter only new attachments (not existing ones)
+      const newAttachments = listDataAttachment.filter(a => a.dataType !== "exist");
+
       if (type === "create") {
-        await dispatch(createRelationship({ idAccount, payload })).unwrap();
+        await dispatch(createRelationship({
+          idAccount,
+          payload,
+          attachments: newAttachments
+        })).unwrap();
       } else {
         await dispatch(
-          updateRelationship({ idAccount, idRelationship: id, payload })
+          updateRelationship({
+            idAccount,
+            idRelationship: id,
+            payload,
+            attachments: newAttachments
+          })
         ).unwrap();
       }
 
       setLoading(false);
-      navigate(-1);
+      // Navigate back to Account Detail page after success
+      setTimeout(() => {
+        navigate(
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+          {
+            state: {
+              idAccount,
+              idCustomer,
+            }
+          }
+        );
+      }, 2000);
     } catch (error) {
       console.error("Error submitting data:", error);
       setLoading(false);
     }
   };
 
-  const handleSaveAsDraft = () => {
-    if (listDataAttachment.length === 0) {
-      alert("Please upload at least one attachment");
-      return;
-    }
-    console.log("Current Form Values (Draft):", form.getFieldsValue());
-    console.log("Relationship Obj:", relationshipObj);
-    console.log("Approval Obj:", approvalObj);
-    console.log("Attachment List:", listDataAttachment);
-
-    form
-      .validateFields()
-      .then((values) => {
-        const valueForm = {
-          subjectId: idAccount,
-          relationshipType: values.relationshipType || relationshipObj.relationshipType,
-          relationshipCategory: values.relationshipCategory || relationshipObj.relationshipCategory,
-          objectId: relationshipObj.objectId,
-          objectName: relationshipObj.objectName || values.relatedName,
-          objectValue: relationshipObj.objectValue || values.relatedNumber,
-          startDate: (values.startDate || relationshipObj.startDate)
-            ? moment(values.startDate || relationshipObj.startDate).format("YYYY-MM-DD")
-            : "",
-          endDate: (values.endDate || relationshipObj.endDate)
-            ? moment(values.endDate || relationshipObj.endDate).format("YYYY-MM-DD")
-            : "",
-          description: values.description || relationshipObj.description || "",
-          appHierId: values.appHierId || approvalObj.appHierId,
-        };
-        sendData(valueForm, true);
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-        alert("Please fill all required fields");
-      });
-  };
-
-  const handleSaveAndSubmit = () => {
-
+  // Reusable validation and confirmation handler
+  const handleValidateAndConfirm = (action) => {
     if (listDataAttachment.length === 0) {
       alert("Please upload at least one attachment");
       return;
     }
 
-    console.log("Attachment validation passed");
-    console.log("Current form values:", form.getFieldsValue());
-    console.log("Relationship Obj:", relationshipObj);
-    console.log("Approval Obj:", approvalObj);
-    console.log("Attachment List:", listDataAttachment);
+    const isDraft = action === "DRAFT";
 
     form
       .validateFields()
       .then((values) => {
+        // Get display names for type and category
+        const typeId = values.relationshipType || relationshipObj.relationshipType;
+        const categoryId = values.relationshipCategory || relationshipObj.relationshipCategory;
+
+        const typeName = data_relationshipType?.find(t => t.id === typeId)?.text || typeId;
+        const categoryName = data_relationshipCategory?.find(c => c.id === categoryId)?.text || categoryId;
+
         // Convert moment objects to strings
+        const startDateValue = values.startDate || relationshipObj.startDate;
+        const endDateValue = values.endDate || relationshipObj.endDate;
+
         const valueForm = {
           subjectId: idAccount,
-          relationshipType: values.relationshipType || relationshipObj.relationshipType,
-          relationshipCategory: values.relationshipCategory || relationshipObj.relationshipCategory,
+          relationshipType: typeId,
+          relationshipTypeName: typeName,
+          relationshipCategory: categoryId,
+          relationshipCategoryName: categoryName,
           objectId: relationshipObj.objectId,
           objectName: relationshipObj.objectName || values.relatedName,
           objectValue: relationshipObj.objectValue || values.relatedNumber,
-          startDate: (values.startDate || relationshipObj.startDate)
-            ? moment(values.startDate || relationshipObj.startDate).format("YYYY-MM-DD")
-            : "",
-          endDate: (values.endDate || relationshipObj.endDate)
-            ? moment(values.endDate || relationshipObj.endDate).format("YYYY-MM-DD")
-            : "",
+          relatedName: relationshipObj.objectName || values.relatedName,
+          relatedNumber: relationshipObj.objectValue || values.relatedNumber,
+          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+          startDateDisplay: startDateValue ? moment(startDateValue).format("DD MMM YYYY") : "-",
+          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+          endDateDisplay: endDateValue ? moment(endDateValue).format("DD MMM YYYY") : "-",
           description: values.description || relationshipObj.description || "",
           appHierId: values.appHierId || approvalObj.appHierId,
+          appHierName: values.appHierName || approvalObj.appHierName
         };
 
-        setDataConfirm(valueForm);
-        setModalConfirm(true);
+        // Validate before showing confirmation modal
+        const validateBody = {
+          id: type === "update" ? id : undefined,
+          subjectId: idAccount,
+          relationshipType: typeId,
+          relationshipCategory: categoryId,
+          objectId: relationshipObj.objectId,
+          objectName: relationshipObj.objectName || values.relatedName,
+          objectValue: relationshipObj.objectValue || values.relatedNumber,
+          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+          description: values.description || relationshipObj.description || "",
+          appHierId: values.appHierId || approvalObj.appHierId,
+          action,
+        };
+
+        dispatch(validateCreateUpdate({
+          body: validateBody,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
+          type,
+        }))
+          .unwrap()
+          .then(() => {
+            setDataConfirm(valueForm);
+            setIsDraftSubmission(isDraft);
+            setModalConfirm(true);
+          })
+          .catch(() => { });
       })
       .catch((error) => {
         console.error("Validation failed:", error);
@@ -307,7 +388,15 @@ const RelationshipCreateAndUpdate = ({
         );
       });
   };
-  
+
+  const handleSaveAsDraft = () => {
+    handleValidateAndConfirm("DRAFT");
+  };
+
+  const handleSaveAndSubmit = () => {
+    handleValidateAndConfirm("SUBMIT");
+  };
+
   const routes = [
     {
       path: "",
@@ -335,8 +424,28 @@ const RelationshipCreateAndUpdate = ({
     },
   ];
 
+  const formFields = [
+    [
+      "relationshipType",
+      "relationshipCategory",
+      "relatedName",
+      "relatedNumber",
+      "startDate",
+    ],
+    [
+      "appHierId",
+    ],
+    []
+  ];
+
   // Navigation handlers
-  const next = () => {
+  const next = async () => {
+    try {
+      await form.validateFields(formFields[current]);
+    } catch (err) {
+      return;
+    }
+
     setCurrent(current + 1);
   };
 
@@ -350,6 +459,19 @@ const RelationshipCreateAndUpdate = ({
     }
   };
 
+  const handleSetCurrent = async (newCurrent) => {
+    for (let i = current; i < newCurrent; i++) {
+      try {
+        await form.validateFields(formFields[i]);
+      } catch (err) {
+        setCurrent(i);
+        return;
+      }
+    }
+
+    setCurrent(newCurrent);
+  }
+
   const scrollLeftHandler = () => {
     if (containerRef.current) {
       containerRef.current.scrollLeft -= 250;
@@ -357,28 +479,96 @@ const RelationshipCreateAndUpdate = ({
   };
 
   const handleClear = () => {
-    if (current === 0) {
-      setRelationshipObj({});
-      form.resetFields();
-    } else if (current === 1) {
-      setApprovalObj({});
-      setDataDetailApproval([]);
-      form.resetFields(["appHierId"]);
-    } else {
-      setListDataAttachment([]);
+    if (type === "create") {
+      // Create mode - clear all data based on current step
+      if (current === 0) {
+        setRelationshipObj({});
+        setRelatedDetailData([]);
+        form.resetFields(["relationshipType", "relationshipCategory", "relatedName", "relatedNumber", "startDate", "endDate", "description"]);
+      } else if (current === 1) {
+        setApprovalObj({});
+        setDataDetailApproval([]);
+        form.resetFields(["appHierId"]);
+      } else {
+        setListDataAttachment([]);
+      }
+    } else if (type === "update") {
+      // Update mode - restore to original API data
+      if (data_relationshipDetail && data_relationshipDetail.id) {
+        const detail = data_relationshipDetail;
+
+        // Restore form values to original
+        form.setFieldsValue({
+          relationshipType: detail.relationshipType,
+          relationshipCategory: detail.relationshipCategory,
+          relatedName: detail.objectName,
+          relatedNumber: detail.objectNumber,
+          startDate: detail.startDate ? moment(detail.startDate) : null,
+          endDate: detail.endDate ? moment(detail.endDate) : null,
+          description: detail.description || "",
+          appHierId: detail.appHierId,
+          appHierName: detail.appHierName,
+        });
+
+        // Restore relationshipObj
+        setRelationshipObj({
+          objectId: detail.objectId,
+          objectName: detail.objectName,
+          objectValue: detail.objectNumber,
+          relationshipType: detail.relationshipType,
+          relationshipCategory: detail.relationshipCategory,
+          startDate: detail.startDate,
+          endDate: detail.endDate,
+          description: detail.description,
+        });
+
+        // Restore approvalObj
+        setApprovalObj({
+          appHierId: detail.appHierId,
+        });
+
+        // Restore approval hierarchy detail
+        if (detail.appHierId) {
+          dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
+        }
+
+        // Restore Related Detail data
+        if (detail.relatedDetail && detail.relatedDetail.length > 0) {
+          setRelatedDetailData(detail.relatedDetail);
+        } else {
+          setRelatedDetailData([]);
+        }
+      }
+
+      // Restore attachment list to original API data
+      if (data_attachmentList && data_attachmentList.length > 0) {
+        const mapped = data_attachmentList.map((item) => ({
+          key: item.id,
+          fileId: item.fileId || item.id,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          type: item.fileCategoryName,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          urlFile1: item.urlFile1,
+          createdBy: item.createdBy,
+          createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
+          dataType: "exist",
+        }));
+        setListDataAttachment(mapped);
+      } else {
+        setListDataAttachment([]);
+      }
+
+      // Reset to first step
+      setCurrent(0);
     }
   };
 
-  const handleButtonNext = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        next();
-        scrollRightHandler();
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-      });
+  const handleButtonNext = async () => {
+    await next();
+    scrollRightHandler();
   };
 
   // Steps Configuration
@@ -386,11 +576,22 @@ const RelationshipCreateAndUpdate = ({
     {
       title: "Relationship Information",
       content: (
-        <RelationshipInformation
-          form={form}
-          relationshipObj={relationshipObj}
-          handleRelationshipObj={handleRelationshipObj}
-        />
+        <>
+          <RelationshipInformation
+            form={form}
+            relationshipObj={relationshipObj}
+            handleRelationshipObj={handleRelationshipObj}
+            initialRelationshipType={data_relationshipDetail?.relationshipType}
+            initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
+            key={`relationship-tab-0`}
+            className={`${current !== 0 ? "hidden" : ""}`}
+            onRelatedDetailChange={(data) => setRelatedDetailData(data)}
+          />
+          <RelatedDetailCard
+            data={relatedDetailData}
+            className={`${current !== 0 ? "hidden" : ""} mt-4`}
+          />
+        </>
       ),
       disabled: false,
     },
@@ -405,6 +606,8 @@ const RelationshipCreateAndUpdate = ({
           dataDetailApproval={dataDetailApproval}
           handleDetailApproval={handleDetailApproval}
           loading={loadingApprovalHierarchyDetail}
+          key={`relationship-tab-1`}
+          className={`${current !== 1 ? "hidden" : ""}`}
         />
       ),
       disabled: false,
@@ -416,10 +619,9 @@ const RelationshipCreateAndUpdate = ({
           data={listDataAttachment}
           updateData={setListDataAttachment}
           type={type}
-          setModalUpload={setModalUpload}
-          onDownload={(file) =>
-            dispatch(downloadAttachment({ idAccount, idFile: file.key }))
-          }
+          dispatch={dispatch}
+          key={`relationship-tab-2`}
+          className={`${current !== 2 ? "hidden" : ""}`}
         />
       ),
       disabled: false,
@@ -431,10 +633,16 @@ const RelationshipCreateAndUpdate = ({
     title: item.title,
   }));
 
+  const handleScroll = () => {
+    if (containerRef.current) {
+      setScrollLeft(containerRef.current.scrollLeft);
+    }
+  };
+
   return (
     <>
       <LayoutMenu>
-        <Spin spinning={loading}>
+        <Spin spinning={loading || loadingDetail}>
           <BreadCrumb routes={routes} />
           <div className="w-full">
             <HeaderDetail
@@ -458,31 +666,32 @@ const RelationshipCreateAndUpdate = ({
             }}
           >
             {/* Steps Content */}
-            <BaseContainer>
-              <div className="flex justify-center py-4">
-                <Steps
-                  current={current}
-                  items={items.map((item, index) => ({
-                    ...item,
-                    status:
-                      index < current
-                        ? "finish"
-                        : index === current
-                          ? "process"
-                          : "wait",
-                  }))}
-                  labelPlacement="vertical"
-                />
+
+            <div className="flex flex-row gap-x-6 justify-center my-6">
+              <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
               </div>
-              <div className="steps-content my-6">{steps[current].content}</div>
-            </BaseContainer>
+            </div>
+            <div className="steps-content my-6">
+              {
+                steps.map((step) => step.content)
+              }
+            </div>
 
             {/* Section Action Steps */}
             <div className="steps-action my-8 flex w-full justify-between gap-x-2">
               <ButtonComponent
                 type="submit"
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                onClick={() => navigate(-1)}
+                onClick={() => navigate(
+                  ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+                  {
+                    state: {
+                      idAccount,
+                      idCustomer,
+                    }
+                  }
+                )}
               >
                 Back
               </ButtonComponent>
@@ -492,7 +701,7 @@ const RelationshipCreateAndUpdate = ({
                   type="submit"
                   onClick={handleClear}
                 >
-                  Clear
+                  {type === "create" ? "Clear" : "Reset"}
                 </ButtonComponent>
                 {current > 0 && (
                   <ButtonComponent
@@ -507,52 +716,45 @@ const RelationshipCreateAndUpdate = ({
                   </ButtonComponent>
                 )}
                 {current < steps.length - 1 && (
-                  <Button
+                  <ButtonComponent
                     onClick={handleButtonNext}
-                    type="primary"
-                    className="ant-btn ant-btn-submit flex w-full justify-center"
+                    type={"submit"}
                     disabled={steps[current].disabled}
                   >
-                    <span className="p-1 text-[18px] text-center">Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </Button>
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
+                  </ButtonComponent>
                 )}
                 {current === steps.length - 1 && (
                   <>
-                    <Button
-                      type="primary"
-                      htmlType="button"
-                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                    <ButtonComponent
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleSaveAsDraft();
                       }}
+                      type={"submit"}
                     >
-                      <span className="p-1 text-[18px] text-center">
-                        Save as Draft
-                      </span>
-                    </Button>
-                    <Button
-                      type="primary"
-                      htmlType="button"
-                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                      Save as Draft
+                    </ButtonComponent>
+                    <ButtonComponent
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleSaveAndSubmit();
                       }}
+                      type={"submit"}
                     >
-                      <span className="p-1 text-[18px] text-center">
-                        Save & Submit
-                      </span>
-                    </Button>
+                      Save & Submit
+                    </ButtonComponent>
                   </>
                 )}
               </div>
@@ -560,7 +762,7 @@ const RelationshipCreateAndUpdate = ({
           </Form>
         </Spin>
 
-        {/* create tax relation */}
+        {/* create tax relation - COMMENTED OUT: Duplicate modal causing double popup
         <ModalCustom
           isOpen={modalConfirm}
           type={"confirmation"}
@@ -592,13 +794,14 @@ const RelationshipCreateAndUpdate = ({
         >
           <RelationshipConfirm data={dataConfirm} />
         </ModalCustom>
+        */}
       </LayoutMenu>
-      
+
       {/* Modal Confirmation */}
       <ModalCustom
         isOpen={modalConfirm}
         type="confirmation"
-        header="CONFIRMATION RELATIONSHIP"
+        header={isDraftSubmission ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
         width={1000}
         centered={false}
         style={{ top: 20 }}
@@ -618,11 +821,11 @@ const RelationshipCreateAndUpdate = ({
             <ButtonComponent
               type="submit"
               onClick={() => {
-                sendData(dataConfirm, false);
+                sendData(dataConfirm, isDraftSubmission);
                 setModalConfirm(false);
               }}
             >
-              Submit
+              {isDraftSubmission ? "Save as Draft" : "Submit"}
             </ButtonComponent>
           </div>
         }
@@ -631,6 +834,8 @@ const RelationshipCreateAndUpdate = ({
           data={dataConfirm || {}}
           approvalData={dataDetailApproval}
           attachmentData={listDataAttachment}
+          idAccount={idAccount}
+          dispatch={dispatch}
         />
       </ModalCustom>
 

@@ -310,7 +310,7 @@ export const transformValidPromoResponse = (apiResponse) => {
 
   // Transform pagination
   const pagination = {
-    current: (page.number || 0) + 1, // API uses 0-based index
+    current: (page.number || 0) + 1, // API returns 0-based, convert to 1-based for UI
     pageSize: page.size || 10,
     total: page.totalElements || 0,
     totalPages: page.totalPages || 0,
@@ -490,15 +490,16 @@ export const transformPromoHistoryResponse = (apiResponse) => {
 
   // Transform invoice as main row with details as nested data
   const dataSource = result.map((invoice, index) => {
-    const { invoiceNumber, billingPeriod, billingCycle, promoApplied, details = [] } = invoice;
-    
+    const { invoiceNumber, billingCode, billingPeriod, billingCycle, promoApplied, details = [], id, createdDate, createdBy, updatedDate, updatedBy } = invoice;
+
     // Get first detail for display in main row
     const firstDetail = details[0] || {};
-    
+
     return {
       key: invoiceNumber || index,
       no: (page.number || 0) * (page.size || 10) + index + 1,
       invoiceNumber: invoiceNumber || '-',
+      billingCode: billingCode || '-',
       billingCycle: billingCycle || '-',
       billingPeriod: billingPeriod || '-',
       promoApplied: promoApplied || 0,
@@ -507,6 +508,12 @@ export const transformPromoHistoryResponse = (apiResponse) => {
       category: firstDetail.category || '-',
       criteria: firstDetail.criteria || '-',
       billingDate: formatDate(firstDetail.billingDate),
+      // Audit fields for history log information
+      id: id,
+      createdDate: createdDate,
+      createdBy: createdBy,
+      updatedDate: updatedDate,
+      updatedBy: updatedBy,
       // Store all details for expandable row
       details: details.map(detail => ({
         key: detail.id,
@@ -524,7 +531,7 @@ export const transformPromoHistoryResponse = (apiResponse) => {
 
   // Transform pagination
   const pagination = {
-    current: (page.number || 0) + 1, // API uses 0-based index
+    current: (page.number || 0) + 1, // API returns 0-based, convert to 1-based for UI
     pageSize: page.size || 10,
     total: page.totalElements || 0,
     totalPages: page.totalPages || 0,

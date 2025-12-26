@@ -156,7 +156,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   return (
     <>
       <div className="mb-4">
-        <p className="text-[15px] font-medium text-blue-600 mb-3">
+        <p className="text-[15px] font-medium text-[#0075bf] mb-3">
           SERVICE ITEM INFORMATION
         </p>
         <div className="flex flex-row gap-8">
@@ -164,13 +164,13 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
             <p className="text-[15px] font-normal text-gray-700">
               Calculation Code
             </p>
-            <p className="text-[20px] font-medium text-blue-600">
+            <p className="text-[20px] font-medium text-[#0075bf]">
               {calculationCode}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
-            <p className="text-[20px] font-medium text-blue-600">
+            <p className="text-[20px] font-medium text-[#0075bf]">
               {ratingCodeId}
             </p>
           </div>
@@ -186,7 +186,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
           showExport={false}
           onSizeChanger={handleChange}
           totalData={data_serviceAgreement?.page?.totalElements || 0}
-          tableScrolled={{ y: 525, x: 3000 }}
+          tableScrolled={{ y: 525, x: 2500 }}
           onSort={onSortApi}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}

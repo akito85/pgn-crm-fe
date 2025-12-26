@@ -44,7 +44,6 @@ const BillingCycleView = ({ type }) => {
     (state) => state.billingCycle
   );
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("billingCycleFixedColumns");
     return saved
@@ -55,7 +54,6 @@ const BillingCycleView = ({ type }) => {
         };
   });
 
-  // ✅ Save to localStorage when fixedColumns change
   useEffect(() => {
     localStorage.setItem(
       "billingCycleFixedColumns",
@@ -234,18 +232,18 @@ const BillingCycleView = ({ type }) => {
 
   // Grant Access Item
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       type={"submit"}
-    //       border={false}
-    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (

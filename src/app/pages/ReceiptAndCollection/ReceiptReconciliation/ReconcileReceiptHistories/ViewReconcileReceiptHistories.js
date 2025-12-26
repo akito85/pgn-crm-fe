@@ -8,7 +8,9 @@ import { DownloadOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
   downloadReconcileReceiptHistories,
   getReceiptReconcileHistoriesPaging,
@@ -482,18 +484,8 @@ const ViewReconcileReceiptHistories = () => {
   const itemActions = [
     // toolbar items
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+      action: "Download"
+    }
     // {
     //   action: "Create",
     //   render: (
@@ -535,9 +527,9 @@ const ViewReconcileReceiptHistories = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
-        <BaseContainer header={"RECONCILE RECEIPT HISTORIES LIST"}>
+        <CardContainer header={"RECONCILE RECEIPT HISTORIES LIST"}>
           <div className="w-full">
-            <TablePagination
+            <TableRBI
               dataSource={data_reconcile?.result}
               columns={columns(
                 search,
@@ -554,13 +546,14 @@ const ViewReconcileReceiptHistories = () => {
               onShowSizeChange={handleChange}
               totalData={data_reconcile?.page?.totalElements}
               onSort={onSort}
+              handleDownload={handleDownload}
               tableScrolled={{
                 x: 3200,
                 y: 300,
               }}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
       </Spin>
       {renderModal()}
     </LayoutMenu>

@@ -1,7 +1,7 @@
 // ViewInvoice.js
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Form, Select, Dropdown, Button } from "antd";
+import { Spin, Form, Select, Tooltip } from "antd";
 import axios from "axios";
 import DocViewer from "react-doc-viewer";
 import SelectComponent from "../../../../components/SelectComponent";
@@ -22,12 +22,6 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import {
-  DownloadOutlined,
-  EyeOutlined,
-  ReloadOutlined,
-  EllipsisOutlined,
-} from "@ant-design/icons";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { configApp } from "../../../../constants/configApp";
@@ -45,9 +39,9 @@ const ViewInvoice = () => {
   const searchInput = useRef(null);
   const dataSource = data?.result || [];
 
-  // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // State - PERUBAHAN: State untuk infinite scroll
+  const [page, setPage] = useState(1); // Start from 1
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -69,27 +63,25 @@ const ViewInvoice = () => {
         ? JSON.parse(saved)
         : {
             left: ["no"], // default left fixed column keys if any
-            right: ["actions"], // default right fixed column keys - actions column
+            right: ["status", "statusPaymentGw", "action"], // default right fixed column keys - actions column
           };
     } catch (e) {
-      return { left: ["no"], right: ["actions"] };
+      return { left: ["no"], right: ["action"] };
     }
   });
 
   // ✅ Save to localStorage when fixedColumns change
   useEffect(() => {
     try {
-      localStorage.setItem(
-        "invoiceFixedColumns",
-        JSON.stringify(fixedColumns)
-      );
+      localStorage.setItem("invoiceFixedColumns", JSON.stringify(fixedColumns));
     } catch (e) {
       // ignore storage errors
     }
   }, [fixedColumns]);
 
-  // Use Effect
+  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
+    let searchParam = undefined;
     let tempSearch = "";
     for (const dataIndex in search) {
       if (Object.hasOwnProperty.call(search, dataIndex)) {
@@ -99,21 +91,21 @@ const ViewInvoice = () => {
         }
       }
     }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-
-    let searchParam = undefined;
     if (tempSearch) {
       searchParam = encodeURIComponent(JSON.stringify(search));
     }
+
     dispatch(
       getAllInvoicePaginate({
         search: searchParam,
-        page,
-        pageSize,
+        page: 1,
+        pageSize: 100, // Initial load 100 data
         sort,
+        isLoadMore: false, // Flag untuk initial load
       })
     );
-  }, [search, page, pageSize, sort, dispatch]);
+    setPage(1);
+  }, [search, sort, dispatch]);
 
   useEffect(() => {
     if (modalReGenerate) {
@@ -135,14 +127,14 @@ const ViewInvoice = () => {
     },
   ];
 
-  // Function Search API
+  // PERUBAHAN: Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(1); // Reset to 1
       }
       return {
         ...prevState,
@@ -151,11 +143,43 @@ const ViewInvoice = () => {
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // TAMBAHAN: Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      let searchParam = undefined;
+      let tempSearch = "";
+      for (const dataIndex in search) {
+        if (Object.hasOwnProperty.call(search, dataIndex)) {
+          const tempSearchText = search[dataIndex];
+          if (tempSearchText) {
+            tempSearch += `${dataIndex}~${tempSearchText},`;
+          }
+        }
+      }
+      if (tempSearch) {
+        searchParam = encodeURIComponent(JSON.stringify(search));
+      }
+
+      await dispatch(
+        getAllInvoicePaginate({
+          search: searchParam,
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true, // Flag untuk load more
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore =
+    (data?.result?.length || 0) < (data?.page?.totalElements || 0);
 
   // Sort Table
   const onSortApi = (_, __, sort) => {
@@ -171,7 +195,7 @@ const ViewInvoice = () => {
     dispatch(
       getDownloadList({
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
       })
@@ -260,11 +284,13 @@ const ViewInvoice = () => {
       await dispatch(
         getAllInvoicePaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 1,
+          pageSize: 100,
           sort,
+          isLoadMore: false,
         })
       )?.unwrap();
+      setPage(1);
     } catch (error) {
       if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
         const message =
@@ -296,72 +322,89 @@ const ViewInvoice = () => {
     dispatch(
       getAllInvoicePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: 100,
         sort,
+        isLoadMore: false,
       })
     );
+    setPage(1);
   };
 
   // ✅ Get base columns with key property including action column
   const baseColumns = useMemo(() => {
     const invoiceCols = columnsInvoice(
       search,
-      page,
-      pageSize,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
     );
 
-    // ✅ Single action column with Dropdown menu
+    // ✅ Single action column with multiple icons
     const actionColumn = {
-      key: "actions",
-      title: "Actions",
-      width: 80,
+      key: "action",
+      title: "ACTION",
+      width: 120,
+      align: "center",
       isClassification: true,
-      render: (_, record) => {
-        const menuItems = [
-          {
-            key: "detail",
-            label: "Detail",
-            icon: <EyeOutlined />,
-            onClick: () => {
-              handleDetail(record);
-              setTimeout(
-                () =>
-                  window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: "smooth",
-                  }),
-                100
-              );
-            },
-          },
-          {
-            key: "regenerate",
-            label: "Re-Generate",
-            icon: <ReloadOutlined />,
-            onClick: () => handleReGenerate(record),
-          },
-          {
-            key: "preview",
-            label: "Preview/Download",
-            icon: <DownloadOutlined />,
-            onClick: () => handlePreviewFile(record),
-          },
-        ];
-
-        return (
-          <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
-            <Button
-              type="text"
-              icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}
-            />
-          </Dropdown>
-        );
-      },
+      render: (_, record) => (
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Tooltip title="Detail">
+            <div
+              onClick={() => {
+                handleDetail(record);
+                setTimeout(
+                  () =>
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: "smooth",
+                    }),
+                  100
+                );
+              }}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                lineHeight: 0,
+              }}
+            >
+              <SVGIcon name="IconDetail" width={20} />
+            </div>
+          </Tooltip>
+          <Tooltip title="Re-Generate">
+            <div
+              onClick={() => handleReGenerate(record)}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                lineHeight: 0,
+              }}
+            >
+              <SVGIcon name="IconReGenerate" width={20} />
+            </div>
+          </Tooltip>
+          <Tooltip title="Download">
+            <div
+              onClick={() => handlePreviewFile(record)}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                lineHeight: 0,
+              }}
+            >
+              <SVGIcon name="IconDownload" width={20} />
+            </div>
+          </Tooltip>
+        </div>
+      ),
     };
 
     // Add 'key' property to columns that don't have it
@@ -372,7 +415,7 @@ const ViewInvoice = () => {
 
     return columnsWithKeys;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, page, pageSize, searchedColumn, searchText]);
+  }, [search, searchedColumn, searchText]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -424,11 +467,21 @@ const ViewInvoice = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Invoice List</p>
+              <p className="mt-[15px]">Invoice List</p>
               <div className="flex gap-2">
+                <ButtonComponent
+                  type={"submit"}
+                  border={false}
+                  icon={<SVGIcon name="IconButtonDownload" width={20} />}
+                  onClick={() => {
+                    handleDownload();
+                  }}
+                >
+                  Download List
+                </ButtonComponent>
                 <NavLink to={INVOICE_ROUTES.GENERATE_INVOICE_FORM}>
                   <ButtonComponent
-                    icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                    icon={<SVGIcon name="IconButtonCreate" width={20} />}
                     type="submit"
                   >
                     Generate Invoice
@@ -438,21 +491,24 @@ const ViewInvoice = () => {
             </div>
           }
         >
-          <div className="w-full">
+          <div className="w-full -pt-3">
             <TableRBI
+              idTable="invoice-table"
               dataSource={dataSource}
               columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 7000 }}
+              tableScrolled={{ y: 525, x: "max-content" }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>

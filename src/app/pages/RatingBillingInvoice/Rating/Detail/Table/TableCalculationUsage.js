@@ -3,7 +3,7 @@ import moment from "moment";
 import { Tooltip } from "antd";
 import { dateFormatting } from "../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
-import SVGIcon from "../../../../../../assets/Icon/index";
+import SVGIcon from "../../../../../../assets/Icon/index"
 
 export const columnsCalculationUsage = (
   page = 1,
@@ -18,17 +18,18 @@ export const columnsCalculationUsage = (
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 60,
+    width: 20,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
-    key: "type",
-    title: "TYPE",
-    dataIndex: "type",
+    key: "ratingType",
+    title: "RATING TYPE",
+    dataIndex: "ratingType",
     sorter: true,
-    width: 150,
+    isClassification: true,
+    width: 80,
     ...getColumnSearchPropsPaging(
-      "type",
+      "ratingType",
       searchInput,
       searchedColumn,
       searchText,
@@ -36,14 +37,104 @@ export const columnsCalculationUsage = (
     ),
   },
   {
-    key: "uom",
-    title: "UOM",
-    dataIndex: "uom",
+    key: "ratingCode",
+    title: "RATING CODE",
+    dataIndex: "ratingCode",
+    isClassification:true,
     sorter: true,
-    isClassification: true,
+    width: 80,
+    ...getColumnSearchPropsPaging(
+      "ratingCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "accountNumber",
+    title: "ACCOUNT NUMBER",
+    dataIndex: "accountNumber",
+    isClassification:true,
+    sorter: true,
+    width: 90,
+    ...getColumnSearchPropsPaging(
+      "accountNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "accountName",
+    title: "ACCOUNT NAME",
+    dataIndex: "accountName",
+    isClassification:true,
+    sorter: true,
     width: 100,
     ...getColumnSearchPropsPaging(
-      "uom",
+      "accountName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "billPeriod",
+    title: "BILL PERIOD",
+    dataIndex: "billPeriod",
+    isClassification:true,
+    sorter: true,
+    width: 60,
+    ...getColumnSearchPropsPaging(
+      "billPeriod",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "saNumber",
+    title: "SA NUMBER",
+    dataIndex: "saNumber",
+    isClassification:true,
+    sorter: true,
+    width: 70,
+    ...getColumnSearchPropsPaging(
+      "saNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "saType",
+    title: "SA TYPE",
+    dataIndex: "saType",
+    sorter: true,
+    isClassification: true,
+    width: 80,
+    ...getColumnSearchPropsPaging(
+      "saType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "calculatedUsage",
+    title: "CALCULATED USAGE",
+    dataIndex: "calculatedUsage",
+    sorter: true,
+    isNumber: true,
+    width: 100,
+    ...getColumnSearchPropsPaging(
+      "calculatedUsage",
       searchInput,
       searchedColumn,
       searchText,
@@ -56,7 +147,7 @@ export const columnsCalculationUsage = (
     dataIndex: "usage",
     sorter: true,
     isNumber: true,
-    width: 150,
+    width: 50,
     ...getColumnSearchPropsPaging(
       "usage",
       searchInput,
@@ -66,148 +157,14 @@ export const columnsCalculationUsage = (
     ),
   },
   {
-    key: "convUsageM3",
-    title: "CONVERTED USAGE M3",
-    dataIndex: "convUsageM3",
-    sorter: true,
-    isNumber: true,
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "convUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "convUsageMmbtu",
-    title: "CONVERTED USAGE MMBTU",
-    dataIndex: "convUsageMmbtu",
-    sorter: true,
-    isNumber: true,
-    width: 200,
-    ...getColumnSearchPropsPaging(
-      "convUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "discountUsage",
-    title: "DISCOUNT USAGE",
-    dataIndex: "discountUsage",
-    sorter: true,
-    isNumber: true,
-    width: 150,
-    ...getColumnSearchPropsPaging(
-      "discountUsage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "discountUsageM3",
-    title: "DISCOUNT USAGE M3",
-    dataIndex: "discountUsageM3",
-    sorter: true,
-    isNumber: true,
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "discountUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "discountUsageMmbtu",
-    title: "DISCOUNT USAGE MMBTU",
-    dataIndex: "discountUsageMmbtu",
-    sorter: true,
-    isNumber: true,
-    width: 200,
-    ...getColumnSearchPropsPaging(
-      "discountUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "totalUsage",
-    title: "TOTAL USAGE",
-    dataIndex: "totalUsage",
-    sorter: true,
-    isNumber: true,
-    width: 150,
-    ...getColumnSearchPropsPaging(
-      "totalUsage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "convTotalUsageM3",
-    title: "CONVERTED TOTAL USAGE M3",
-    dataIndex: "convTotalUsageM3",
-    sorter: true,
-    isNumber: true,
-    width: 220,
-    ...getColumnSearchPropsPaging(
-      "convTotalUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "convTotalUsageMmbtu",
-    title: "CONVERTED TOTAL USAGE MMBTU",
-    dataIndex: "convTotalUsageMmbtu",
-    sorter: true,
-    isNumber: true,
-    width: 240,
-    ...getColumnSearchPropsPaging(
-      "convTotalUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "priceCode",
-    title: "PRICE CODE",
-    dataIndex: "priceCode",
-    sorter: true,
-    width: 200,
-    ...getColumnSearchPropsPaging(
-      "priceCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "currency",
-    title: "CURRENCY",
-    dataIndex: "currency",
+    key: "uom",
+    title: "UOM",
+    dataIndex: "uom",
     sorter: true,
     isClassification: true,
-    width: 100,
+    width: 40,
     ...getColumnSearchPropsPaging(
-      "currency",
+      "uom",
       searchInput,
       searchedColumn,
       searchText,
@@ -215,14 +172,106 @@ export const columnsCalculationUsage = (
     ),
   },
   {
-    key: "price",
-    title: "PRICE",
-    dataIndex: "price",
+    key: "periodicMinUsage",
+    title: "PERIODIC MIN USAGE",
+    dataIndex: "periodicMinUsage",
     sorter: true,
     isNumber: true,
-    width: 150,
+    width: 80,
     ...getColumnSearchPropsPaging(
-      "price",
+      "periodicMinUsage",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "periodicMaxUsage",
+    title: "PERIODIC MAX USAGE",
+    dataIndex: "periodicMaxUsage",
+    sorter: true,
+    isNumber: true,
+    width: 100,
+    ...getColumnSearchPropsPaging(
+      "periodicMaxUsage",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "minContract",
+    title: "MIN CONTRACT",
+    dataIndex: "minContract",
+    sorter: true,
+    isNumber: true,
+    width: 60,
+    ...getColumnSearchPropsPaging(
+      "minContract",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "maxContract",
+    title: "MAX CONTRACT",
+    dataIndex: "maxContract",
+    sorter: true,
+    isNumber: true,
+    width: 60,
+    ...getColumnSearchPropsPaging(
+      "maxContract",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "priceMin",
+    title: "PRICE MIN",
+    dataIndex: "priceMin",
+    sorter: true,
+    isNumber: true,
+    width: 50,
+    ...getColumnSearchPropsPaging(
+      "priceMin",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "priceNormal",
+    title: "PRICE NORMAL",
+    dataIndex: "priceNormal",
+    sorter: true,
+    isNumber: true,
+    width: 80,
+    ...getColumnSearchPropsPaging(
+      "priceNormal",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "priceOup",
+    title: "PRICE OUP",
+    dataIndex: "priceOup",
+    sorter: true,
+    isNumber: true,
+    width: 60,
+    ...getColumnSearchPropsPaging(
+      "priceOup",
       searchInput,
       searchedColumn,
       searchText,
@@ -235,84 +284,9 @@ export const columnsCalculationUsage = (
     dataIndex: "amount",
     sorter: true,
     isNumber: true,
-    width: 150,
+    width: 50,
     ...getColumnSearchPropsPaging(
       "amount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "amountEqvIdr",
-    title: "AMOUNT EQV IDR",
-    dataIndex: "amountEqvIdr",
-    sorter: true,
-    isNumber: true,
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "amountEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "amountEqvUsd",
-    title: "AMOUNT EQV USD",
-    dataIndex: "amountEqvUsd",
-    sorter: true,
-    isNumber: true,
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "amountEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "discountAmount",
-    title: "DISCOUNT AMOUNT",
-    dataIndex: "discountAmount",
-    sorter: true,
-    isNumber: true,
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "discountAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "discountAmountEqvIdr",
-    title: "DISCOUNT AMOUNT EQV IDR",
-    dataIndex: "discountAmountEqvIdr",
-    sorter: true,
-    isNumber: true,
-    width: 220,
-    ...getColumnSearchPropsPaging(
-      "discountAmountEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "discountAmountEqvUsd",
-    title: "DISCOUNT AMOUNT EQV USD",
-    dataIndex: "discountAmountEqvUsd",
-    sorter: true,
-    isNumber: true,
-    width: 220,
-    ...getColumnSearchPropsPaging(
-      "discountAmountEqvUsd",
       searchInput,
       searchedColumn,
       searchText,
@@ -325,9 +299,39 @@ export const columnsCalculationUsage = (
     dataIndex: "totalAmount",
     sorter: true,
     isNumber: true,
-    width: 180,
+    width: 80,
     ...getColumnSearchPropsPaging(
       "totalAmount",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "currency",
+    title: "CURRENCY",
+    dataIndex: "currency",
+    sorter: true,
+    isClassification: true,
+    width: 60,
+    ...getColumnSearchPropsPaging(
+      "currency",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  },
+  {
+    key: "createdBy",
+    title: "CREATED BY",
+    dataIndex: "createdBy",
+    isClassification:true,
+    sorter: true,
+    width: 100,
+    ...getColumnSearchPropsPaging(
+      "createdBy",
       searchInput,
       searchedColumn,
       searchText,
@@ -340,7 +344,7 @@ export const columnsCalculationUsage = (
     sorter: true,
     isClassification: true,
     dataIndex: "createdDate",
-    width: 150,
+    width: 100,
     ...getColumnSearchPropsPaging(
       "createdDate",
       searchInput,
@@ -374,48 +378,16 @@ export const columnsCalculationUsage = (
       ),
   },
   {
-    key: "remark",
-    sorter: true,
-    title: "REMARK",
-    dataIndex: "remark",
-    width: 200,
-    ellipsis: {
-      showTitle: false,
-    },
-    ...getColumnSearchPropsPaging("remark"),
-    render: (text) =>
-      searchedColumn === "remark" ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        "-"
-      ),
-  },
-  {
     key: "action",
     title: "ACTION",
     isClassification: true,
-    width: 100,
+    width: 30,
+    fixed: "right",
     render: (record) => {
       return (
         <Tooltip title="Detail">
           <div className="pt-1 cursor-pointer">
-            <SVGIcon
-              name="IconDetail"
-              width={24}
-              onClick={() => handleDetail(record)}
-            />
+            <SVGIcon name="IconDetail" width={20}  onClick={() => handleDetail(record)} />
           </div>
         </Tooltip>
       );

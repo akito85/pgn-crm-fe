@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { columnForce } from "./columnForce";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 
 const TableForceFE = ({
   data = [],
@@ -15,6 +15,11 @@ const TableForceFE = ({
   const [searchText, setSearchText] = useState("");
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["statusApproval"],
+      }));
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -70,7 +75,7 @@ const TableForceFE = ({
   };
 
   return (
-    <TablePaginationNew
+    <TableRBI
       type="FE"
       // dataSource={paginationTable("data")}
       dataSource={data}
@@ -94,6 +99,9 @@ const TableForceFE = ({
         x: 3500,
         y: 525,
       }}
+      showExport={false}
+      fixedColumns={fixedColumns}
+      setFixedColumns={setFixedColumns}
     />
   );
 };
