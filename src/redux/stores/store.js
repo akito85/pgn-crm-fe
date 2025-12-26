@@ -119,12 +119,8 @@ import contentManagementReducer from "../slices/rating_billing_invoice/MasterDat
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
-<<<<<<< HEAD
 import notificationsReducer from "../slices/notifications";
-||||||| 987494ad
-=======
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
->>>>>>> 3ec5dda041f4c01fe0cabd21a8887da59337753e
 
 const reducer = combineReducers({
   job: jobSlice,
