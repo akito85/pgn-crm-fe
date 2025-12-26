@@ -222,7 +222,6 @@ const PromoViewData = ({
           enableDragColumn={true}
           enableColumnSorter={dataSource.length > 0}
           enableColumnFilter={dataSource.length > 0}
-          freezeColumns={[{ key: "action", position: "right" }]}
           tableScrolled={{ x: 800 }}
           columns={columns}
           dataSource={dataSource}

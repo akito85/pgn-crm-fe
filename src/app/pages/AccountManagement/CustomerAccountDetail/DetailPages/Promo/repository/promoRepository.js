@@ -463,7 +463,6 @@ const promoRepository = {
         dataIndex: "no",
         key: "no",
         width: 60,
-        fixed: 'left',
         disableFilter: true,
         disableSorter: true,
       },
