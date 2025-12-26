@@ -6,8 +6,8 @@
 import axios from "axios";
 import { notificationTokenHeader } from "../utils/notificationTokenHeader";
 
-// Use full URL for notification API (different from SSE endpoint)
-const NOTIFICATION_API_URL = "http://localhost:8080/ntf/v1/dbs/api/notifications";
+// Use relative path for notification API to go through configured proxy
+const NOTIFICATION_API_URL = "/ntf/v1/dbs/api/notifications";
 
 const notificationApi = {
   /**

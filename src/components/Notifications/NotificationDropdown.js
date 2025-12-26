@@ -49,6 +49,8 @@ const NotificationDropdown = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('all');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [lastViewedTime, setLastViewedTime] = useState(null);
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
@@ -72,6 +74,16 @@ const NotificationDropdown = () => {
 
   // Calculate user's unread count
   const userUnreadCount = userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read").length;
+
+  // Calculate new notifications count (unread notifications that arrived since last view)
+  const newNotificationsCount = lastViewedTime
+    ? userNotifications.filter(notification => {
+        const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
+        return (notification.STATUS || notification.status) !== "read" &&
+               notificationTime &&
+               new Date(notificationTime) > new Date(lastViewedTime);
+      }).length
+    : 0;
 
   // Filter notifications based on active tab
   const notifications = activeTab === 'all'
@@ -378,7 +390,7 @@ const NotificationDropdown = () => {
    * Render notification content
    */
   const notificationContent = (
-    <div className="notification-dropdown" style={{ width: 420, maxHeight: 700 }}>
+    <div className="notification-dropdown" style={{ width: 380, maxHeight: 900 }}>
       {/* Header */}
       <div
         className="notification-header"
@@ -457,7 +469,7 @@ const NotificationDropdown = () => {
             {Object.entries(groupNotificationsByDate(notifications)).map(([date, dateNotifications]) => (
               <div key={date}>
                 {/* Date Group Header */}
-                <div className="w-[420px] px-5 py-4 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4">
+                <div className="w-full px-5 py-4 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4">
                   <div className="flex-1 justify-start text-[#1d1c1d] text-sm font-bold capitalize">
                     {date}
                   </div>
@@ -491,13 +503,29 @@ const NotificationDropdown = () => {
                               alignItems: "center",
                             }}
                           >
-                            <Text
-                              strong={!(notification.read || notification.STATUS === "read")}
-                              style={{ fontSize: 14 }}
-                              ellipsis
-                            >
-                              {notification.title || notification.TITLE}
-                            </Text>
+                            <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
+                              <Text
+                                strong={!(notification.read || notification.STATUS === "read")}
+                                style={{ fontSize: 14, flex: 1 }}
+                                ellipsis
+                              >
+                                {notification.title || notification.TITLE}
+                              </Text>
+                              {(() => {
+                                const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
+                                const isNew = notificationTime &&
+                                             lastViewedTime &&
+                                             new Date(notificationTime) > new Date(lastViewedTime);
+                                return isNew ? (
+                                  <Tag
+                                    color="blue"
+                                    style={{ marginLeft: 8, fontSize: 10, height: 'fit-content', alignSelf: 'center' }}
+                                  >
+                                    New
+                                  </Tag>
+                                ) : null;
+                              })()}
+                            </div>
                             {(notification.priority || notification.PRIORITY) &&
                               getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
                                 <Tag
@@ -573,9 +601,15 @@ const NotificationDropdown = () => {
       trigger="click"
       placement="bottomRight"
       overlayClassName="notification-popover"
+      onOpenChange={(open) => {
+        setIsDropdownOpen(open);
+        if (open) {
+          setLastViewedTime(new Date().toISOString());
+        }
+      }}
     >
       <Badge
-        count={userUnreadCount > 0 ? 1 : 0}
+        count={userUnreadCount}
         offset={[-5, 5]}
         overflowCount={99}
         style={{ boxShadow: '0 0 0 2px #fff' }}

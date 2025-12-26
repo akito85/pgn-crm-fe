@@ -51,6 +51,13 @@ class NotificationService {
 
       // Build URL with manual encoding to preserve token integrity
       // Use encodeURIComponent only for the token value to ensure proper encoding
+      // For SSE, we need the full URL since EventSource doesn't respect proxy configuration
+      // If SSE_BASE_URL is relative, construct the full URL using the current window's origin
+      let sseBaseUrl = NOTIFICATION_CONFIG.SSE_BASE_URL;
+      if (sseBaseUrl.startsWith('/')) {
+        // If the URL is relative, construct it using the current origin
+        sseBaseUrl = `${window.location.protocol}//${window.location.host}${sseBaseUrl}`;
+      }
       let url = `${sseBaseUrl}/v1/dbs/api/notifications`;
 
       // Add userId only if provided (optional in production)
