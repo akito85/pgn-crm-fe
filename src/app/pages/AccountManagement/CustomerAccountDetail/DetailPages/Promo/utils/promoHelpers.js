@@ -54,7 +54,7 @@ export const isPromoExpired = (promo) => {
  * Format date for display
  */
 export const formatDate = (date, format = DATE_FORMAT.DISPLAY) => {
-  if (!date) return '-';
+  if (!date) return "";
   return moment(date).format(format);
 };
 
@@ -62,7 +62,7 @@ export const formatDate = (date, format = DATE_FORMAT.DISPLAY) => {
  * Format date range
  */
 export const formatDateRange = (startDate, endDate) => {
-  if (!startDate || !endDate) return '-';
+  if (!startDate || !endDate) return "";
   return `${formatDate(startDate)} - ${formatDate(endDate)}`;
 };
 
@@ -95,7 +95,7 @@ export const calculateRemainingDays = (endDate) => {
  * Format discount value
  */
 export const formatDiscountValue = (value, type = 'percentage') => {
-  if (!value && value !== 0) return '-';
+  if (!value && value !== 0) return "";
   
   return type === 'percentage' ? `${value}%` : `Rp ${value.toLocaleString('id-ID')}`;
 };
@@ -296,15 +296,15 @@ export const transformValidPromoResponse = (apiResponse) => {
     key: item.id || index,
     no: (page.number || 0) * (page.size || 10) + index + 1,
     id: item.id,
-    name: item.name || '-',
-    promotionType: item.promotionType || '-',
-    typeName: item.typeName || '-',
-    categoryName: item.categoryName || '-',
-    criteria: item.criteria || '-',
+    name: item.name || "",
+    promotionType: item.promotionType || "",
+    typeName: item.typeName || "",
+    categoryName: item.categoryName || "",
+    criteria: item.criteria || "",
     startDate: formatDate(item.startDate),
-    endDate: item.endDate ? formatDate(item.endDate) : '-',
-    description: item.description || '-',
-    status: item.status || '-',
+    endDate: item.endDate ? formatDate(item.endDate) : "",
+    description: item.description || "",
+    status: item.status || "",
     statusDisplay: formatPromoStatus(item.status),
   }));
 
@@ -498,15 +498,15 @@ export const transformPromoHistoryResponse = (apiResponse) => {
     return {
       key: invoiceNumber || index,
       no: (page.number || 0) * (page.size || 10) + index + 1,
-      invoiceNumber: invoiceNumber || '-',
-      billingCode: billingCode || '-',
-      billingCycle: billingCycle || '-',
-      billingPeriod: billingPeriod || '-',
+      invoiceNumber: invoiceNumber || "",
+      billingCode: billingCode || "",
+      billingCycle: billingCycle || "",
+      billingPeriod: billingPeriod || "",
       promoApplied: promoApplied || 0,
-      name: firstDetail.name || '-',
-      type: firstDetail.type || '-',
-      category: firstDetail.category || '-',
-      criteria: firstDetail.criteria || '-',
+      name: firstDetail.name || "",
+      type: firstDetail.type || "",
+      category: firstDetail.category || "",
+      criteria: firstDetail.criteria || "",
       billingDate: formatDate(firstDetail.billingDate),
       // Audit fields for history log information
       id: id,
@@ -518,13 +518,13 @@ export const transformPromoHistoryResponse = (apiResponse) => {
       details: details.map(detail => ({
         key: detail.id,
         id: detail.id,
-        name: detail.name || '-',
-        promotionType: detail.promotionType || '-',
-        type: detail.type || '-',
-        category: detail.category || '-',
-        criteria: detail.criteria || '-',
+        name: detail.name || "",
+        promotionType: detail.promotionType || "",
+        type: detail.type || "",
+        category: detail.category || "",
+        criteria: detail.criteria || "",
         billingDate: formatDate(detail.billingDate),
-        description: detail.description || '-',
+        description: detail.description || "",
       })),
     };
   });
