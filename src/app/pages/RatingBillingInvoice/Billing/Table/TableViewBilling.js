@@ -27,7 +27,8 @@ export const columnsBilling = (
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
-    width: 70,
+    isClassification: true,
+    width: 90,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "calculationCode",
@@ -128,7 +129,6 @@ export const columnsBilling = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
-    isClassification: true,
     width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -254,7 +254,6 @@ export const columnsBilling = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
-    isClassification: true,
     width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -288,7 +287,6 @@ export const columnsBilling = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
-    isClassification: true,
     width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -323,7 +321,6 @@ export const columnsBilling = (
     title: "ACCOUNT NUMBER",
     width: 70,
     dataIndex: "accountNumber",
-    isClassification: true,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "accountNumber",
@@ -356,7 +353,6 @@ export const columnsBilling = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
-    isClassification: true,
     width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1457,7 +1453,7 @@ export const columnsBilling = (
     dataIndex: "taxRateType",
     width: 70,
     sorter: true,
-    isNumber: true,
+    isClassification: true,
     // ...getColumnSearchPropsPaging(
     //   "taxRateType",
     //   searchInput,
@@ -1717,7 +1713,7 @@ export const columnsBilling = (
     dataIndex: "rateType",
     width: 70,
     sorter: true,
-    isNumber: true,
+    isClassification:true,
     // ...getColumnSearchPropsPaging(
     //   "rateType",
     //   searchInput,

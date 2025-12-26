@@ -173,62 +173,44 @@ export const getApprovalHistory = createAsyncThunk(
 
 
 
-// Get Global Search Column
-export const getGlobalSearchColumn = createAsyncThunk(
-  "GET_GLOBAL_SEARCH_COLUMN_RELATIONSHIP",
+// Get Relationship Search Column
+export const getRelationshipColumnApi = createAsyncThunk(
+  "GET_RELATIONSHIP_COLUMN_API",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/system-parameter/global-filter-column/RELATIONSHIP`;
+      const url = `/v1/dbs/api/relationships/list-search-column`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_GLOBAL_SEARCH_COLUMN_RELATIONSHIP",
-        })
-      );
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
-// Get Global Search Operator
-export const getGlobalSearchOperator = createAsyncThunk(
-  "GET_GLOBAL_SEARCH_OPERATOR_RELATIONSHIP",
+// Get Relationship Search Condition
+export const getRelationshipConditionApi = createAsyncThunk(
+  "GET_RELATIONSHIP_CONDITION_API",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/system-parameter/global-filter-operator`;
+      const url = `/v1/dbs/api/relationships/list-search-condition`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_GLOBAL_SEARCH_OPERATOR_RELATIONSHIP",
-        })
-      );
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
-// Get Global Search Condition
-export const getGlobalSearchCondition = createAsyncThunk(
-  "GET_GLOBAL_SEARCH_CONDITION_RELATIONSHIP",
+// Get Relationship Search Operator
+export const getRelationshipOperatorApi = createAsyncThunk(
+  "GET_RELATIONSHIP_OPERATOR_API",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/system-parameter/global-filter-condition`;
+      const url = `/v1/dbs/api/relationships/list-search-operator`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_GLOBAL_SEARCH_CONDITION_RELATIONSHIP",
-        })
-      );
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -455,15 +437,25 @@ export const getAttachmentList = createAsyncThunk(
 // Download Attachment
 export const downloadAttachment = createAsyncThunk(
   "DOWNLOAD_ATTACHMENT",
-  async ({ idAccount, idFile }, thunkAPI) => {
+  async ({ idAccount, idFile, urlFile1, fileName }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
+      // craft url if urlFile1 is not provided, else use urlFile1
+      const url = urlFile1 || `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
       const response = await accountManagementService.downloadData(url);
       return response;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_ATTACHMENT" })
-      );
+      const message =
+        (error.response &&
+          error.response.error &&
+          error.response.error.message) ||
+        error.message ||
+        error.toString();
+
+      const errorBody = {
+        title: "Download Failed",
+        description: `Failed to download file "${fileName || 'Unknown'}". ${error.response.error.message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -564,6 +556,21 @@ export const approveOrRejectRelationship = createAsyncThunk(
   }
 );
 
+// Download Relationship to Excel
+export const downloadRelationship = createAsyncThunk(
+  "DOWNLOAD_RELATIONSHIP",
+  async ({ idAccount, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/export-excel`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
+      return response;
+    } catch (error) {
+      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_RELATIONSHIP", back: false }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 const relationshipSlice = createSlice({
   name: "relationship",
   initialState,
@@ -652,39 +659,39 @@ const relationshipSlice = createSlice({
       state.loadingApprovalHierarchyDetail = false;
     },
 
-    // Get Global Search Column
-    [getGlobalSearchColumn.pending]: (state) => {
+    // Get Relationship Search Column
+    [getRelationshipColumnApi.pending]: (state) => {
       state.loading = true;
     },
-    [getGlobalSearchColumn.fulfilled]: (state, action) => {
+    [getRelationshipColumnApi.fulfilled]: (state, action) => {
       state.data_globalTypeColumn = action.payload;
       state.loading = false;
     },
-    [getGlobalSearchColumn.rejected]: (state) => {
+    [getRelationshipColumnApi.rejected]: (state) => {
       state.loading = false;
     },
 
-    // Get Global Search Operator
-    [getGlobalSearchOperator.pending]: (state) => {
+    // Get Relationship Search Operator
+    [getRelationshipOperatorApi.pending]: (state) => {
       state.loading = true;
     },
-    [getGlobalSearchOperator.fulfilled]: (state, action) => {
+    [getRelationshipOperatorApi.fulfilled]: (state, action) => {
       state.data_globalTypeOperator = action.payload;
       state.loading = false;
     },
-    [getGlobalSearchOperator.rejected]: (state) => {
+    [getRelationshipOperatorApi.rejected]: (state) => {
       state.loading = false;
     },
 
-    // Get Global Search Condition
-    [getGlobalSearchCondition.pending]: (state) => {
+    // Get Relationship Search Condition
+    [getRelationshipConditionApi.pending]: (state) => {
       state.loading = true;
     },
-    [getGlobalSearchCondition.fulfilled]: (state, action) => {
+    [getRelationshipConditionApi.fulfilled]: (state, action) => {
       state.data_globalTypeCondition = action.payload;
       state.loading = false;
     },
-    [getGlobalSearchCondition.rejected]: (state) => {
+    [getRelationshipConditionApi.rejected]: (state) => {
       state.loading = false;
     },
 

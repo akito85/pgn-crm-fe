@@ -24,7 +24,7 @@ import { hasValue, renderColumn } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 // Component imports
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
@@ -430,6 +430,7 @@ const RelationshipTable = ({
   idCustomer = null,
   inputFields = [],
   tempInputFields = [],
+  listType = "all",
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -453,6 +454,7 @@ const RelationshipTable = ({
   const [selectedRelationshipId, setSelectedRelationshipId] = useState(null);
   const [modalConfirmApprove, setModalConfirmApprove] = useState(false);
   const [modalConfirmReject, setModalConfirmReject] = useState(false);
+  const [openPopoverId, setOpenPopoverId] = useState(null);
 
   // Mock attachment data for approval detail
   const mockAttachmentData = [
@@ -482,12 +484,13 @@ const RelationshipTable = ({
           search: encodeURIComponent(JSON.stringify(search)),
           body: {
             inputFields: tempInputFields,
-            searchs: search,  // Add search filter to body for statusApproval filtering
+            searchs: search,
+            listType: listType,
           },
         })
       );
     }
-  }, [dispatch, idAccount, page, pageSize, sort, search, tempInputFields]);
+  }, [dispatch, idAccount, page, pageSize, sort, search, tempInputFields, listType]);
 
   // Update table data when API response changes
   useEffect(() => {
@@ -563,7 +566,11 @@ const RelationshipTable = ({
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-            body: { inputFields: tempInputFields },
+            body: {
+              inputFields: tempInputFields,
+              searchs: search,
+              listType: listType,
+            },
           })
         );
       }
@@ -578,6 +585,7 @@ const RelationshipTable = ({
 
   const handleApprovalHistory = (record) => {
     console.log("Opening approval history for record:", record);
+    setOpenPopoverId(null); // Close popover when modal opens
     setModalHistory(true);
     setSelectedRelationshipId(record.id);
   };
@@ -679,21 +687,36 @@ const RelationshipTable = ({
         action: "Update",
         type: "table",
         render: (record, data_length) => {
-          // Show Update only for status Active or Draft
-          const isEditable = ["Active", "Draft", "ACTIVE", "DRAFT"].includes(
-            record?.status
-          );
+
+          // editable only for :
+          // 1. status DRAFT && statusApproval DRAFT
+          // 2. status REJECTED && statusApproval DRAFT
+
+          const isEditable =
+            (record.status === "DRAFT" && record.statusApproval === "DRAFT") ||
+            (record.status === "REJECTED" && record.statusApproval === "DRAFT") ||
+            (record.status === "DRAFT" && record.statusApproval === "REJECTED") ||
+            (record.status === "REJECTED" && record.statusApproval === "REJECTED");
 
           const render =
             data_length > 3 ? (
               <ButtonComponent
-                icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
+                icon={
+                  <SVGIcon
+                    name="IconEdit"
+                    color={!isEditable ? "#8D91A0" : "#0075bf"}
+                    width={24}
+                  />
+                }
                 border={false}
                 disabled={!isEditable}
               >
-                {data_length > 3 && (
-                  <span className="text-black ml-3">Update</span>
-                )}
+                <span
+                  className={`${!isEditable ? "text-gray-400" : "text-black"
+                    } ml-3`}
+                >
+                  Update
+                </span>
               </ButtonComponent>
             ) : (
               <Tooltip title="Update">
@@ -849,6 +872,8 @@ const RelationshipTable = ({
             <Popover
               trigger="click"
               placement="bottomRight"
+              open={openPopoverId === record.id}
+              onOpenChange={(visible) => setOpenPopoverId(visible ? record.id : null)}
               content={
                 <Space direction="vertical">
                   {items
@@ -914,7 +939,7 @@ const RelationshipTable = ({
           totalData={totalElements}
           current={page}
           pageSize={pageSize}
-          tableScrolled={{ y: 525, x: 1800 }}
+          tableScrolled={{ y: 400, x: 2000 }}
           onChange={handleChangeSize}
           onSort={onSort}
           columns={[
@@ -940,6 +965,8 @@ const RelationshipTable = ({
             expandedRowRender,
             rowExpandable: (record) => record?.relatedDetail && record.relatedDetail.length > 0,
           }}
+          // dragcolumn sementara bisa di semua kondisi
+          enableDragColumn={true}
         />
       </Spin>
 

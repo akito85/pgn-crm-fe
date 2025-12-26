@@ -25,18 +25,18 @@ const ModalApprovalUsage = ({
   handleListRefresh = () => {},
 }) => {
   // Selector
-  const { data_approval } = useSelector((state) => state.monitoring_usage);
+  const { data_approval, loading } = useSelector((state) => state.monitoring_usage);
 
   // Declaration
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const dataApproval = data_approval?.result;
+  const dataApproval = data_approval?.result || [];
 
   // Use State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(20); // Load 20 items at a time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState("");
@@ -56,10 +56,41 @@ const ModalApprovalUsage = ({
     right: [],
   }));
 
-  // Use Effect
+  // Initial fetch with 100 items
   useEffect(() => {
-    dispatch(getListApproval({ page, pageSize }));
-  }, [dispatch, page, pageSize]);
+    if (isOpen) {
+      dispatch(
+        getListApproval({
+          page: 0, // Backend uses 0-based indexing
+          pageSize: 100, // Initial load 100
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  }, [dispatch, isOpen]);
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data_approval?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getListApproval({
+          page: nextPage - 1, // Backend uses 0-based indexing
+          pageSize: pageSize, // Load 20 more
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // Calculate if there's more data
+  const hasMore =
+    dataApproval.length < (data_approval?.page?.totalElements || 0);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -75,13 +106,6 @@ const ModalApprovalUsage = ({
         [dataIndex]: selectedKeys[0],
       };
     });
-  };
-
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
   };
 
   // Function onSort
@@ -190,6 +214,7 @@ const ModalApprovalUsage = ({
     setSelectedRowKeys([]);
     setDataTableSelect([]);
     setRemark("");
+    setCurrent(0);
     form.resetFields();
   };
 
@@ -345,17 +370,13 @@ const ModalApprovalUsage = ({
                 )}
               </div>
               <TableRBI
-                type="FE"
+                idTable="approval-usage-table"
                 dataSource={dataApproval?.map((a, index) => ({
                   ...a,
                   key: index + 1,
                 }))}
                 columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={dataApproval?.length || 0}
+                totalData={data_approval?.page?.totalElements || 0}
                 tableScrolled={{ x: 8500, y: 300 }}
                 onSort={onSort}
                 showExport={false}
@@ -363,7 +384,12 @@ const ModalApprovalUsage = ({
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 rowSelection={rowSelection}
-                loading={false}
+                loading={loading}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
               />
 
               <div className="pt-[30px]">
@@ -404,10 +430,6 @@ const ModalApprovalUsage = ({
             <TableRBI
               dataSource={dataTableSelect}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
               totalData={dataTableSelect.length || 0}
               tableScrolled={{ x: 9000, y: 300 }}
               onSort={onSort}
@@ -416,6 +438,7 @@ const ModalApprovalUsage = ({
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={false}
+              usePagination={false}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>
