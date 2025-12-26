@@ -51,14 +51,15 @@ const PaymentRelationTable = ({
     {
       title: "PRIORITY",
       dataIndex: "priority",
-      width: 250,
+      width: 150,
+      align: "center",
       sorter: true,
       ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
-      width: 250,
+      width: 200,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
       render: (startDate) => startDate ? moment(startDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
@@ -66,7 +67,7 @@ const PaymentRelationTable = ({
     {
       title: "END DATE",
       dataIndex: "endDate",
-      width: 250,
+      width: 200,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
       render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
@@ -74,7 +75,7 @@ const PaymentRelationTable = ({
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 300,
+      width: 200,
       sorter: true,
       align: "center",
       fixed: "right",
@@ -99,9 +100,9 @@ const PaymentRelationTable = ({
     {
       title: "STATUS",
       dataIndex: "status",
+      width: 120,
       sorter: true,
       fixed: "right",
-      width: 150,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
@@ -242,7 +243,7 @@ const PaymentRelationTable = ({
               idAccount,
               idCustomer,
             }})}
-            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE"}
+            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE" || r.status === "ACTIVE"}
           >
             <Tooltip title="Update">
               <div className="pt-1">
@@ -353,7 +354,7 @@ const PaymentRelationTable = ({
         current={page}
         pageSize={pageSize}
         onChange={handleChangeSize}
-        tableScrolled={{ y: 400, x: 2000 }}
+        tableScrolled={{ y: 400, x: "max-content" }}
         columns={[
           ...columns,
           ...useColumnActionPermission(
