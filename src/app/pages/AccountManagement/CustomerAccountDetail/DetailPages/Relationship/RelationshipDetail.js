@@ -1,15 +1,16 @@
 import { LeftOutlined } from "@ant-design/icons";
-import { Spin, Tabs } from "antd";
+import { Spin } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../components/DetailText";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import StatusComponent from "../../../../../../components/StatusComponent";
+import RadioTabs from "../../../../../../components/RadioTabs";
 import {
   downloadAttachment,
   getAttachmentList,
@@ -19,12 +20,12 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_mana
 import { dateFormatting } from "../../../../../../utils";
 import HeaderDetail from "../../HeaderDetail";
 import RelationshipAttachment from "./RelationshipAttachment";
-
-const { TabPane } = Tabs;
+import RelatedDetailCard from "./RelationshipInformation/RelatedDetailCard";
 
 const RelationshipDetail = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Get params from location state
   const idAccount = location?.state?.idAccount;
@@ -32,12 +33,20 @@ const RelationshipDetail = () => {
   const idCustomer = location?.state?.idCustomer;
   const type = location?.state?.type || "standard";
 
+
   const { data_relationshipDetail, loadingDetail, data_attachmentList } = useSelector(
     (state) => state.relationship
   );
 
   const [data, setData] = useState({});
   const [attachmentData, setAttachmentData] = useState([]);
+  const [activeTab, setActiveTab] = useState("Relationship Information");
+
+  // Tab options for RadioTabs
+  const tabOptions = [
+    { value: "Relationship Information" },
+    { value: "Attachment" },
+  ];
 
   // Fetch relationship detail
   useEffect(() => {
@@ -96,6 +105,11 @@ const RelationshipDetail = () => {
     }
   };
 
+  // Handle tab change
+  const handleTabChange = (e) => {
+    setActiveTab(e.target.value);
+  };
+
   // Breadcrumb configuration
   const routes = () => {
     return [
@@ -128,24 +142,12 @@ const RelationshipDetail = () => {
     ];
   };
 
-  return (
-    <LayoutMenu>
-      <Spin spinning={loadingDetail} className={"w-full top-20"}>
-        <BreadCrumbAdvanced routes={routes()} />
-
-        <div className="w-full">
-          <HeaderDetail
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
-            type={type}
-          />
-        </div>
-
-        {/* Tabs for Relationship Information and Attachment */}
-        <Tabs defaultActiveKey="1" className="mt-4">
-          <TabPane tab="Relationship Information" key="1">
+  // Render content based on active tab
+  const renderContent = () => {
+    switch (activeTab) {
+      case "Relationship Information":
+        return (
+          <>
             {/* Relationship Information Section */}
             <BaseContainer header={"RELATIONSHIP INFORMATION"}>
               <div className="flex flex-col gap-5">
@@ -199,6 +201,12 @@ const RelationshipDetail = () => {
               </div>
             </BaseContainer>
 
+            {/* Related Detail Section */}
+            <RelatedDetailCard
+              data={data?.relatedDetail || []}
+              className="mt-4"
+            />
+
             {/* History Log Information */}
             <BaseContainer header={"HISTORY LOG INFORMATION"}>
               <div className="w-full grid grid-cols-5 gap-5">
@@ -221,50 +229,77 @@ const RelationshipDetail = () => {
                 </DetailText>
               </div>
             </BaseContainer>
-          </TabPane>
+          </>
+        );
+      case "Attachment":
+        return (
+          <RelationshipAttachment
+            data={attachmentData}
+            hideActions={true}
+            showUploadButton={false}
+            onDownload={handleDownloadAttachment}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
-          <TabPane tab="Attachment" key="2">
-            {/* Attachment Section */}
-            <BaseContainer header={"ATTACHMENT"}>
-              <RelationshipAttachment
-                data={attachmentData}
-                hideActions={true}
-                showUploadButton={false}
-                onDownload={handleDownloadAttachment}
-              />
-            </BaseContainer>
-          </TabPane>
-        </Tabs>
+  return (
+    <LayoutMenu>
+      <Spin spinning={loadingDetail} className={"w-full top-20"}>
+        <BreadCrumbAdvanced routes={routes()} />
+
+        <div className="w-full">
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            type={type}
+          />
+        </div>
+
+        {/* Toggle Buttons for Relationship Information and Attachment */}
+        <div className="mt-4 mb-4">
+          <RadioTabs
+            currentPosition={activeTab}
+            data={tabOptions}
+            onChange={handleTabChange}
+          />
+        </div>
+
+        {/* Render content based on active tab */}
+        {renderContent()}
 
         {/* Back Button */}
         <div className="my-5 flex">
-          <Link
-            to={
+          <ButtonComponent
+            type={"submit"}
+            icon={
+              <LeftOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 24,
+                  justifyItems: "center",
+                }}
+              />
+            }
+            onClick={() => navigate(
               type === "standard"
                 ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
-                : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
-            }
-            state={{
-              section: "Relationship",
-              idAccount: idAccount,
-              idCustomer: idCustomer,
-            }}
-          >
-            <ButtonComponent
-              type={"submit"}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
+                : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
+              {
+                state: {
+                  section: "Relationship",
+                  idAccount,
+                  idCustomer,
+                }
               }
-            >
-              Back
-            </ButtonComponent>
-          </Link>
+            )}
+          >
+            Back
+          </ButtonComponent>
         </div>
       </Spin>
     </LayoutMenu>

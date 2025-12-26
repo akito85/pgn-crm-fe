@@ -24,7 +24,7 @@ import { hasValue, renderColumn } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 // Component imports
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
@@ -939,7 +939,7 @@ const RelationshipTable = ({
           totalData={totalElements}
           current={page}
           pageSize={pageSize}
-          tableScrolled={{ y: 525, x: 1800 }}
+          tableScrolled={{ y: 400, x: 2000 }}
           onChange={handleChangeSize}
           onSort={onSort}
           columns={[
@@ -965,6 +965,8 @@ const RelationshipTable = ({
             expandedRowRender,
             rowExpandable: (record) => record?.relatedDetail && record.relatedDetail.length > 0,
           }}
+          // dragcolumn sementara bisa di semua kondisi
+          enableDragColumn={true}
         />
       </Spin>
 
