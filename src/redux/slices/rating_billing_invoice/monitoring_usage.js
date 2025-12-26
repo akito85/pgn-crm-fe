@@ -302,14 +302,19 @@ export const getApprovalHistory = createAsyncThunk(
 
 export const getDetailBatch = createAsyncThunk(
   "GET_DETAIL_BATCH",
-  async ({ batchId, page, pageSize, search, sort }, thunkAPI) => {
+  async (
+    { batchId, page, pageSize, search, sort, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "createdDate~desc";
-      // const url = `/v1/dbs/api/usage/detail-batch/${batchId}?size=${pageSize}&search=${searchParams}&page=${page}&sort=${sortParams}`;
       const url = `/v1/dbs/api/usage/detail-batch/${batchId}?size=${pageSize}&searchs=${searchParams}&page=${page}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.getDetail(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -694,15 +699,37 @@ const monitoringUsageSlice = createSlice({
 
     // detail batch
     builder
-      .addCase(getDetailBatch.pending, (state) => {
-        state.loading = true;
+      .addCase(getDetailBatch.pending, (state, action) => {
+        if (!action.meta.arg?.isLoadMore) {
+          state.loading = true;
+        }
       })
       .addCase(getDetailBatch.fulfilled, (state, action) => {
         state.loading = false;
-        state.detail_batch = action.payload;
+
+        const newData = action.payload.usageList?.result || [];
+        const isLoadMore = action.payload.isLoadMore;
+
+        if (isLoadMore) {
+          state.detail_batch = {
+            ...action.payload,
+            usageList: {
+              ...action.payload.usageList,
+              result: [
+                ...(state.detail_batch?.usageList?.result || []),
+                ...newData,
+              ],
+            },
+          };
+        } else {
+          state.detail_batch = action.payload;
+        }
       })
-      .addCase(getDetailBatch.rejected, (state) => {
+      .addCase(getDetailBatch.rejected, (state, action) => {
         state.loading = false;
+        if (!action.meta.arg?.isLoadMore) {
+          state.detail_batch = {};
+        }
       });
     builder
       .addCase(getDownloadList.pending, (state) => {

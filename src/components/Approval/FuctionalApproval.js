@@ -129,6 +129,12 @@ const FunctionalApproval = ({
     return value;
   };
 
+  // Tambahkan unique key untuk setiap row approval
+  const dataTableWithKeys = dataTable.map((item, index) => ({
+    ...item,
+    key: item.approvalLevel || item.id || `approval-${index}`,
+  }));
+
   return (
     <Fragment>
       {showSelect ? (
@@ -166,7 +172,7 @@ const FunctionalApproval = ({
             type="FE"
             useSelect={false}
             usePagination={false}
-            dataSource={dataTable}
+            dataSource={dataTableWithKeys}
             columns={columnInactivateData(
               searchInput,
               searchedColumn,

@@ -827,7 +827,6 @@ export const useMonitoringList = (tabs, batchId) => {
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "fhour",
-        searchInput,
         searchedColumn,
         searchText,
         handleSearch,

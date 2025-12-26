@@ -57,7 +57,7 @@ const DetailMonitoringUsage = () => {
   // use state
   const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -91,15 +91,20 @@ const DetailMonitoringUsage = () => {
     [form]
   );
 
-  // use effect
+  // Initial fetch with larger page size
   useEffect(() => {
     if (location?.state?.id) {
       dispatch(
-        getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        getDetailBatch({ 
+          batchId: location?.state?.id, 
+          page: 1, 
+          pageSize: 100 // Initial load 100 items
+        })
       );
-      dispatch(getApprovalHierarchy({ page, pageSize }));
+      dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
+      setPage(1);
     }
-  }, [location, dispatch, page, pageSize]);
+  }, [location, dispatch]);
 
   useEffect(() => {
     if (
@@ -107,7 +112,7 @@ const DetailMonitoringUsage = () => {
       detail_batch?.batchInformation?.batchId === location?.state?.id
     ) {
       assert(detail_batch);
-      setDataTable(detail_batch?.usageList?.result);
+      setDataTable(detail_batch?.usageList?.result || []);
     }
   }, [detail_batch, assert, location]);
 
@@ -141,12 +146,33 @@ const DetailMonitoringUsage = () => {
   }, [
     list_approval_by_id,
     page,
-    pageSize,
     tabHeader,
     dispatch,
     list_approval,
     selectedHierarchy,
   ]);
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = detail_batch?.usageList?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages && location?.state?.id) {
+      await dispatch(
+        getDetailBatch({
+          batchId: location?.state?.id,
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // Calculate if there's more data
+  const totalElements = detail_batch?.usageList?.page?.totalElements || 0;
+  const hasMore = dataTable.length < totalElements;
 
   // handle update row
   const handleUpdate = (record, values) => {
@@ -211,7 +237,6 @@ const DetailMonitoringUsage = () => {
         description: formValue?.description || null,
       };
 
-      // Dispatch update ke API
       const resultAction = await dispatch(
         updateSingleUsage({
           recordId: recordId,
@@ -220,7 +245,6 @@ const DetailMonitoringUsage = () => {
       );
 
       if (updateSingleUsage.fulfilled.match(resultAction)) {
-        // Update local state setelah API berhasil
         const newDataTable = [...dataTable];
         const index = newDataTable.findIndex(
           (item) => recordId === item.recordId
@@ -244,9 +268,13 @@ const DetailMonitoringUsage = () => {
 
         setOpenUpdateUsage(false);
 
-        // Refresh data dari server
+        // Refresh data from server
         dispatch(
-          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+          getDetailBatch({ 
+            batchId: location?.state?.id, 
+            page: 1, 
+            pageSize: page * loadMoreSize // Keep current loaded data
+          })
         );
       }
     } catch (error) {
@@ -268,7 +296,14 @@ const DetailMonitoringUsage = () => {
   const handleCancel = () => setOpenUpdateUsage(false);
 
   // handle clear
-  const handleClear = () => {};
+  const handleClear = () => {
+    form.setFieldsValue({
+      apphierId: undefined,
+    });
+
+    setSelectedHierarchy(null);
+    setAppHierDataDetail([]);
+  };
 
   // handle delete usage list
   const handleDeleteOk = async () => {
@@ -276,14 +311,17 @@ const DetailMonitoringUsage = () => {
       const resultAction = await dispatch(deleteSingleUsage(recordId));
 
       if (deleteSingleUsage.fulfilled.match(resultAction)) {
-        // Update local state setelah API berhasil
         const newData = dataTable.filter((item) => item.recordId !== recordId);
         setDataTable(newData);
         setModalDelete(false);
 
-        // Refresh data dari server
+        // Refresh data from server
         dispatch(
-          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+          getDetailBatch({ 
+            batchId: location?.state?.id, 
+            page: 1, 
+            pageSize: page * loadMoreSize // Keep current loaded data
+          })
         );
       }
     } catch (error) {
@@ -292,11 +330,15 @@ const DetailMonitoringUsage = () => {
     }
   };
 
-  // change page
-  const handleChangePage = (page, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleDownloadFailed = () => {
+    dispatch(getDownloadFailed(location?.state?.id))
+      .unwrap()
+      .then((response) => {
+        console.log("Download successful", response);
+      })
+      .catch((error) => {
+        console.error("Download failed", error);
+      });
   };
 
   // breadcrumbs routes
@@ -369,17 +411,6 @@ const DetailMonitoringUsage = () => {
       },
     },
   ];
-
-  const handleDownloadFailed = () => {
-    dispatch(getDownloadFailed(location?.state?.id))
-      .unwrap()
-      .then((response) => {
-        console.log("Download successful", response);
-      })
-      .catch((error) => {
-        console.error("Download failed", error);
-      });
-  };
 
   // All columns with keys
   const allColumns = useMemo(() => {
@@ -457,9 +488,6 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Total Failed">
                       {detail_batch?.batchInformation?.totalFailed}
                     </DetailText>
-                    {/* <DetailText label="Generate Date">
-                      {detail_batch?.batchInformation?.generateDate}
-                    </DetailText> */}
                     <DetailText label="Status">
                       <StatusComponent
                         colour={detail_batch?.batchInformation?.status}
@@ -473,18 +501,21 @@ const DetailMonitoringUsage = () => {
                 <BaseContainer header={"Usage List"} border className="mt-1">
                   <div className="my-5">
                     <TableRBI
+                      idTable="monitoring-usage-detail-table"
                       dataSource={dataTable}
                       columns={processedColumns}
-                      current={page}
-                      pageSize={pageSize}
-                      onChange={handleChangePage}
-                      onSizeChanger={handleChangePage}
-                      totalData={dataTable?.length || 0}
+                      totalData={totalElements}
                       tableScrolled={{ x: 7000, y: 525 }}
+                      showExport={false}
                       columnDefinitions={columnDefinitions}
                       fixedColumns={fixedColumns}
                       setFixedColumns={setFixedColumns}
                       loading={loading}
+                      usePagination={false}
+                      useInfiniteScroll={true}
+                      onLoadMore={handleLoadMore}
+                      hasMore={hasMore}
+                      loadMoreThreshold={20}
                     />
                   </div>
                 </BaseContainer>
