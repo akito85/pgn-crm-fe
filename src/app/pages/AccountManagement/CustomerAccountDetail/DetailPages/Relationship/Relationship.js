@@ -27,6 +27,7 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   const [tempInputFields, setTempInputFields] = useState([]);
   const [modalQuery, setModalQuery] = useState(false);
   const [approvalMode, setApprovalMode] = useState(false);
+  const [listType, setListType] = useState("all");
 
   const handleOpenFilter = () => {
     setModalQuery(true);
@@ -68,28 +69,22 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
 
   /**
    * Handle entering or exiting approval mode
-   * When entering: filter by statusApproval = WAITING_APPROVAL
-   * When exiting: clear filter and reset states
-   * @param {boolean} newApprovalMode 
+   * When entering: set listType = "approval"
+   * When exiting: set listType = "all"
+   * @param {boolean} newApprovalMode
    */
   const handleIsApproval = (newApprovalMode) => {
     if (newApprovalMode) {
       // ENTERING APPROVAL MODE
       setPage(1);
-      setSearch((prevState) => ({
-        ...prevState,
-        statusApproval: "WAITING_APPROVAL",
-      }));
+      setListType("approval");
       setApprovalMode(true);
     } else {
       // EXITING APPROVAL MODE
       setSearchText("");
       setSearchedColumn("");
       setPage(1);
-      setSearch((prevState) => ({
-        ...prevState,
-        statusApproval: undefined,
-      }));
+      setListType("all");
       setApprovalMode(false);
     }
   };
@@ -206,6 +201,7 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
             idCustomer={idCustomer}
             inputFields={inputFields}
             tempInputFields={tempInputFields}
+            listType={listType}
           />
         </div>
       </BaseContainer>
