@@ -213,8 +213,8 @@ const RatingPage = () => {
     () =>
       columnsRating(
         search,
-        0, // Tidak perlu pass page karena tidak digunakan untuk infinite scroll
-        0, // Tidak perlu pass pageSize karena tidak digunakan untuk infinite scroll
+        0,
+        0,
         searchInput,
         searchedColumn,
         searchText,
