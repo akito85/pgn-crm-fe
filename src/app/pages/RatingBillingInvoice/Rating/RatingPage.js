@@ -25,8 +25,8 @@ const RatingPage = () => {
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  const [page, setPage] = useState(0);
-  const [loadMoreSize] = useState(20);
+  const [page, setPage] = useState(1);
+  const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -58,17 +58,18 @@ const RatingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
+  // Initial fetch
   useEffect(() => {
     dispatch(
       getListRatingGasPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page: 0,
-        pageSize: 100,
+        page: 1,
+        pageSize: 100, // Initial load 100
         sort,
         isLoadMore: false,
       })
     );
-    setPage(0);
+    setPage(1);
   }, [dispatch, search, sort]);
 
   const tabItems = [
@@ -96,14 +97,13 @@ const RatingPage = () => {
     },
   ];
 
-
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
+        setPage(1);
       }
       return {
         ...prevState,
@@ -112,17 +112,18 @@ const RatingPage = () => {
     });
   };
 
-
+  // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = data?.page?.totalPages || 0;
 
-    if (nextPage < totalPages) {
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
       await dispatch(
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
-          pageSize: loadMoreSize, 
+          pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true,
         })
@@ -272,7 +273,7 @@ const RatingPage = () => {
               dataSource={dataSourceWithKeys}
               columns={processedColumns}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 13000 }}
+              tableScrolled={{ y: 525, x: 3000 }}
               onSort={onSortApi}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}

@@ -306,7 +306,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
         </div>
       }
     >
-      <div className="pt-3">
+      <div className="-pt-3">
         <TableRBI
           dataSource={paginatedData}
           columns={finalColumns}

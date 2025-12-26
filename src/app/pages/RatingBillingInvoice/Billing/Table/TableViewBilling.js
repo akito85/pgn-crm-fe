@@ -20,14 +20,14 @@ export const columnsBilling = (
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 10,
+    width: 15,
     render: (text, object, index) => index + 1,
   },
   {
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
-    width: 25,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "calculationCode",
@@ -61,7 +61,7 @@ export const columnsBilling = (
     title: "RATING CODE",
     dataIndex: "ratingCode",
     isClassification: true,
-    width: 35,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "ratingCode",
@@ -95,7 +95,7 @@ export const columnsBilling = (
     title: "BILLING CODE",
     dataIndex: "billingCode",
     isClassification: true,
-    width: 35,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "billingCode",
@@ -129,7 +129,7 @@ export const columnsBilling = (
     title: "SA NUMBER",
     dataIndex: "saNumber",
     isClassification: true,
-    width: 25,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "saNumber",
@@ -162,7 +162,7 @@ export const columnsBilling = (
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     // ...getColumnSearchPropsPaging(
@@ -195,7 +195,7 @@ export const columnsBilling = (
   {
     key: "billingPeriod",
     title: "BILLING PERIOD",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     dataIndex: "billingPeriod",
@@ -255,7 +255,7 @@ export const columnsBilling = (
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     isClassification: true,
-    width: 25,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "customerNumber",
@@ -289,7 +289,7 @@ export const columnsBilling = (
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
     isClassification: true,
-    width: 25,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "customerName",
@@ -321,7 +321,7 @@ export const columnsBilling = (
   {
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
-    width: 25,
+    width: 70,
     dataIndex: "accountNumber",
     isClassification: true,
     sorter: true,
@@ -357,7 +357,7 @@ export const columnsBilling = (
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     isClassification: true,
-    width: 25,
+    width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -390,7 +390,7 @@ export const columnsBilling = (
     key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     // ...getColumnSearchPropsPaging(
@@ -426,7 +426,7 @@ export const columnsBilling = (
     dataIndex: "sor",
     isClassification: true,
     sorter: true,
-    width: 25,
+    width: 70,
     // ...getColumnSearchPropsPaging(
     //   "sor",
     //   searchInput,
@@ -457,7 +457,7 @@ export const columnsBilling = (
   {
     key: "costCenter",
     title: "COST CENTER",
-    width: 25,
+    width: 70,
     isClassification: true,
     dataIndex: "costCenter",
     sorter: true,
@@ -491,7 +491,7 @@ export const columnsBilling = (
   {
     key: "meterReadingCode",
     title: "METER READING CODE",
-    width: 65,
+    width: 75,
     isClassification: true,
     dataIndex: "meterReadingCode",
     sorter: true,
@@ -525,7 +525,7 @@ export const columnsBilling = (
   {
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
-    width: 25,
+    width: 70,
     isClassification: true,
     dataIndex: "accountSegment",
     sorter: true,
@@ -560,7 +560,7 @@ export const columnsBilling = (
     key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
-    width: 25,
+    width: 80,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -596,7 +596,7 @@ export const columnsBilling = (
     isClassification: true,
     dataIndex: "product",
     sorter: true,
-    width: 25,
+    width: 70,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "product",
@@ -628,7 +628,7 @@ export const columnsBilling = (
     key: "timeUnitContract",
     title: "CONTRACT PERIOD UNIT",
     dataIndex: "timeUnitContract",
-    width: 25,
+    width: 85,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -662,7 +662,7 @@ export const columnsBilling = (
     key: "uom",
     title: "UOM",
     dataIndex: "uom",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     // ...getColumnSearchPropsPaging(
@@ -695,7 +695,7 @@ export const columnsBilling = (
   {
     key: "minContract",
     title: "MIN CONTRACT",
-    width: 25,
+    width: 70,
     dataIndex: "minContract",
     isNumber: true,
     sorter: true,
@@ -726,7 +726,7 @@ export const columnsBilling = (
   {
     key: "maxContract",
     title: "MAX CONTRACT",
-    width: 25,
+    width: 70,
     isNumber: true,
     dataIndex: "maxContract",
     sorter: true,
@@ -758,7 +758,7 @@ export const columnsBilling = (
     key: "totalUsage",
     title: "TOTAL USAGE",
     dataIndex: "totalUsage",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -789,7 +789,7 @@ export const columnsBilling = (
     key: "totalUsageConvM3",
     title: "TOTAL USAGE EQV M3",
     dataIndex: "totalUsageConvM3",
-    width: 75,
+    width: 80,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -820,7 +820,7 @@ export const columnsBilling = (
     key: "totalUsageConvMmbtu",
     title: "TOTAL USAGE EQV MMBTU",
     dataIndex: "totalUsageConvMmbtu",
-    width: 75,
+    width: 90,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -853,7 +853,7 @@ export const columnsBilling = (
     key: "basicBillingIdr",
     title: "BASIC BILL IDR",
     dataIndex: "basicBillingIdr",
-    width: 25,
+    width: 70,
     isNumber: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -886,7 +886,7 @@ export const columnsBilling = (
     key: "basicBillingUsd",
     title: "BASIC BILL USD",
     dataIndex: "basicBillingUsd",
-    width: 25,
+    width: 70,
     isNumber: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -917,7 +917,7 @@ export const columnsBilling = (
     key: "totalBasicBillEqvIdr",
     title: "TOTAL BASIC BILL EQV IDR",
     dataIndex: "totalBasicBillEqvIdr",
-    width: 75,
+    width: 90,
     sorter: true,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
@@ -952,7 +952,7 @@ export const columnsBilling = (
     title: "TOTAL BASIC BILL EQV USD",
     dataIndex: "totalBasicBillEqvUsd",
     sorter: true,
-    width: 75,
+    width: 90,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalBasicBillEqvUsd",
@@ -985,7 +985,7 @@ export const columnsBilling = (
     key: "otherBillIdr",
     title: "OTHER BILL IDR",
     dataIndex: "otherBillIdr",
-    width: 25,
+    width: 70,
     isNumber: true,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -1019,7 +1019,7 @@ export const columnsBilling = (
     key: "otherBillUsd",
     title: "OTHER BILL USD",
     dataIndex: "otherBillUsd",
-    width: 25,
+    width: 70,
     isNumber: true,
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -1054,7 +1054,7 @@ export const columnsBilling = (
     title: "TOTAL OTHER BILL EQV IDR",
     dataIndex: "totalOtherBillEqvIdr",
     sorter: true,
-    width: 75,
+    width: 90,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalOtherBillEqvIdr",
@@ -1088,7 +1088,7 @@ export const columnsBilling = (
     title: "TOTAL OTHER BILL EQV USD",
     dataIndex: "totalOtherBillEqvUsd",
     sorter: true,
-    width: 75,
+    width: 100,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalOtherBillEqvUsd",
@@ -1120,7 +1120,7 @@ export const columnsBilling = (
   {
     key: "discountAmountIdr",
     title: "DISCOUNT IDR",
-    width: 25,
+    width: 70,
     dataIndex: "discountAmountIdr",
     sorter: true,
     isNumber: true,
@@ -1155,7 +1155,7 @@ export const columnsBilling = (
     key: "discountAmountUsd",
     title: "DISCOUNT USD",
     dataIndex: "discountAmountUsd",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1189,7 +1189,7 @@ export const columnsBilling = (
     key: "taxBasicIdr",
     title: "TAX BASIS IDR",
     dataIndex: "taxBasicIdr",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1216,7 +1216,7 @@ export const columnsBilling = (
     key: "taxBasicUsd",
     title: "TAX BASIS USD",
     dataIndex: "taxBasicUsd",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1249,7 +1249,7 @@ export const columnsBilling = (
   {
     key: "taxBasicEqvIdr",
     title: "TAX BASIS EQV IDR",
-    width: 25,
+    width: 70,
     dataIndex: "taxBasicEqvIdr",
     sorter: true,
     isNumber: true,
@@ -1284,7 +1284,7 @@ export const columnsBilling = (
     key: "vatIdr",
     title: "VAT IDR",
     dataIndex: "vatIdr",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -1318,7 +1318,7 @@ export const columnsBilling = (
     key: "vatUsd",
     title: "VAT USD",
     dataIndex: "vatUsd",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
@@ -1351,7 +1351,7 @@ export const columnsBilling = (
   {
     key: "vatEqvIdr",
     title: "VAT EQV IDR",
-    width: 25,
+    width: 70,
     dataIndex: "vatEqvIdr",
     sorter: true,
     isNumber: true,
@@ -1385,7 +1385,7 @@ export const columnsBilling = (
   {
     key: "withHoldingTax",
     title: "WITHHOLDING TAX",
-    width: 65,
+    width: 70,
     dataIndex: "withHoldingTax",
     sorter: true,
     isNumber: true,
@@ -1420,7 +1420,7 @@ export const columnsBilling = (
     key: "prevWithHoldingTax",
     title: "PREV WITHHOLDING TAX",
     dataIndex: "prevWithHoldingTax",
-    width: 75,
+    width: 85,
     sorter: true,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
@@ -1455,7 +1455,7 @@ export const columnsBilling = (
     key: "taxRateType",
     title: "TAX RATE TYPE",
     dataIndex: "taxRateType",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
@@ -1489,7 +1489,7 @@ export const columnsBilling = (
     key: "taxRate",
     title: "TAX RATE",
     dataIndex: "taxRate",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
@@ -1522,7 +1522,7 @@ export const columnsBilling = (
   {
     key: "taxRateDate",
     title: "TAX RATE DATE",
-    width: 65,
+    width: 70,
     sorter: true,
     isClassification: true,
     dataIndex: "taxRateDate",
@@ -1579,7 +1579,7 @@ export const columnsBilling = (
     key: "totalAmountIdr",
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
-    width: 65,
+    width: 75,
     sorter: true,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
@@ -1612,7 +1612,7 @@ export const columnsBilling = (
   {
     key: "totalAmountUsd",
     title: "TOTAL AMOUNT USD",
-    width: 65,
+    width: 80,
     dataIndex: "totalAmountUsd",
     sorter: true,
     isNumber: true,
@@ -1646,7 +1646,7 @@ export const columnsBilling = (
   {
     key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
-    width: 75,
+    width: 85,
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
     isNumber: true,
@@ -1680,7 +1680,7 @@ export const columnsBilling = (
   {
     key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
-    width: 75,
+    width: 85,
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
     isNumber: true,
@@ -1715,7 +1715,7 @@ export const columnsBilling = (
     key: "rateType",
     title: "RATE TYPE",
     dataIndex: "rateType",
-    width: 25,
+    width: 70,
     sorter: true,
     isNumber: true,
     // ...getColumnSearchPropsPaging(
@@ -1748,7 +1748,7 @@ export const columnsBilling = (
   {
     key: "rate",
     title: "RATE",
-    width: 25,
+    width: 70,
     dataIndex: "rate",
     sorter: true,
     isNumber: true,
@@ -1782,7 +1782,7 @@ export const columnsBilling = (
   {
     key: "rateDate",
     title: "RATE DATE",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     dataIndex: "rateDate",
@@ -1838,7 +1838,7 @@ export const columnsBilling = (
   {
     key: "transactionDate",
     title: "TRANSACTION DATE",
-    width: 25,
+    width: 80,
     sorter: true,
     isClassification: true,
     dataIndex: "transactionDate",
@@ -1894,7 +1894,7 @@ export const columnsBilling = (
   {
     key: "accountDate",
     title: "ACCOUNTING DATE",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     dataIndex: "accountDate",
@@ -1950,7 +1950,7 @@ export const columnsBilling = (
   {
     key: "invoiceDate",
     title: "INVOICE DATE",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     dataIndex: "invoiceDate",
@@ -2006,7 +2006,7 @@ export const columnsBilling = (
   {
     key: "dueDate",
     title: "DUE DATE",
-    width: 25,
+    width: 70,
     sorter: true,
     isClassification: true,
     dataIndex: "dueDate",
@@ -2063,7 +2063,7 @@ export const columnsBilling = (
     key: "remark",
     sorter: true,
     title: "REMARK",
-    width: 25,
+    width: 70,
     dataIndex: "remark",
     ellipsis: {
       showTitle: false,
@@ -2116,7 +2116,7 @@ export const columnsBilling = (
   {
     key: "paymentStatus",
     title: "PAYMENT STATUS",
-    width: 25,
+    width: 70,
     dataIndex: "paymentStatus",
     sorter: true,
     isClassification: true,
@@ -2170,7 +2170,7 @@ export const columnsBilling = (
     dataIndex: "statusApproval",
     isClassification: true,
     fixed: "right",
-    width: 25,
+    width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -2219,7 +2219,7 @@ export const columnsBilling = (
   // {
   //   title: "ACTION",
   //   fixed: "right",
-  //   width: 125,
+  //   width: 170,
   //
   //   render: (id, record) => {
   //     return (
