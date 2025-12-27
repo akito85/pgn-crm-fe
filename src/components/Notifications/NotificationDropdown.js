@@ -52,6 +52,7 @@ const NotificationDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [lastViewedTime, setLastViewedTime] = useState(null);
   const [clickedTab, setClickedTab] = useState(null);
+  const [animatingNotifications, setAnimatingNotifications] = useState(new Set());
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
@@ -296,7 +297,36 @@ const NotificationDropdown = () => {
    * Handle mark all as read
    */
   const handleMarkAllAsRead = () => {
-    dispatch(markAllNotificationsAsReadApi());
+    // Only animate in unread tab
+    if (activeTab === 'unread') {
+      const unreadNotifications = notifications.filter(
+        notification => (notification.STATUS || notification.status) !== "read"
+      );
+
+      if (unreadNotifications.length === 0) {
+        return;
+      }
+
+      // Sequential animation delay (ms between each notification)
+      const delayBetweenAnimations = 80;
+
+      // Trigger animations sequentially
+      unreadNotifications.forEach((notification, index) => {
+        setTimeout(() => {
+          setAnimatingNotifications(prev => new Set([...prev, notification.id]));
+        }, index * delayBetweenAnimations);
+      });
+
+      // After all animations complete, dispatch the API call
+      const totalAnimationTime = unreadNotifications.length * delayBetweenAnimations + 400; // +400ms for last animation duration
+      setTimeout(() => {
+        dispatch(markAllNotificationsAsReadApi());
+        setAnimatingNotifications(new Set());
+      }, totalAnimationTime);
+    } else {
+      // In 'all' tab, just mark as read without animation
+      dispatch(markAllNotificationsAsReadApi());
+    }
   };
 
   /**
@@ -498,7 +528,9 @@ const NotificationDropdown = () => {
                         borderTop: "1px dashed rgb(29 28 29 / 0.1)",
                         marginTop: "-1px"
                       }}
-                      className="notification-item hover:bg-gray-50"
+                      className={`notification-item hover:bg-gray-50 ${
+                        animatingNotifications.has(notification.id) ? 'notification-slide-out' : ''
+                      }`}
                     >
                       <List.Item.Meta
                         // avatar={getNotificationIcon(notification.notificationType || notification.NOTIFICATION_TYPE)}
@@ -651,12 +683,27 @@ const NotificationDropdown = () => {
           }
         }
 
+        @keyframes slideOutRight {
+          0% {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+        }
+
         .tab-item {
           animation: tabClick 0.2s ease-in-out;
         }
 
         .badge-pulse {
           animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        .notification-slide-out {
+          animation: slideOutRight 0.4s ease-out forwards;
         }
       `}</style>
       {isDropdownOpen && (
