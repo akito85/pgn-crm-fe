@@ -51,6 +51,7 @@ const NotificationDropdown = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [lastViewedTime, setLastViewedTime] = useState(null);
+  const [clickedTab, setClickedTab] = useState(null);
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
@@ -390,7 +391,7 @@ const NotificationDropdown = () => {
    * Render notification content
    */
   const notificationContent = (
-    <div className="notification-dropdown" style={{ width: 380, maxHeight: 900 }}>
+    <div className="notification-dropdown" style={{ width: 380, maxHeight: 750 }}>
       {/* Header */}
       <div
         className="notification-header"
@@ -427,8 +428,12 @@ const NotificationDropdown = () => {
             return (
               <div
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 h-12 min-w-12 min-h-12 flex justify-center items-center gap-2 cursor-pointer ${
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setClickedTab(tab.id);
+                  setTimeout(() => setClickedTab(null), 200);
+                }}
+                className={`${clickedTab === tab.id ? 'tab-item' : ''} flex-1 h-12 min-w-12 min-h-12 flex justify-center items-center gap-2 cursor-pointer ${
                   isSelected ? 'border-solid border-l-0 border-r-0 border-t-0 border-b-2 border-[#000]' : ''
                 }`}
               >
@@ -454,8 +459,13 @@ const NotificationDropdown = () => {
 
       {/* Notification List */}
       <div
+        key={activeTab}
         className="notification-list"
-        style={{ maxHeight: 670, overflowY: "auto" }}
+        style={{
+          maxHeight: 530,
+          overflowY: "auto",
+          animation: 'fadeSlideIn 0.3s ease-in-out'
+        }}
       >
         {notifications.length === 0 ? (
           <div style={{ padding: "40px 16px" }}>
@@ -609,6 +619,49 @@ const NotificationDropdown = () => {
 
   return (
     <>
+      <style>{`
+        @keyframes fadeSlideIn {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes tabClick {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(0.95);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        @keyframes badgePulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+          }
+        }
+
+        .tab-item {
+          animation: tabClick 0.2s ease-in-out;
+        }
+
+        .badge-pulse {
+          animation: badgePulse 2s ease-in-out infinite;
+        }
+      `}</style>
       {isDropdownOpen && (
         <div
           style={{
@@ -630,6 +683,7 @@ const NotificationDropdown = () => {
           offset={[-5, 10]}
           overflowCount={99}
           style={{ boxShadow: '0 0 0 2px #fff' }}
+          className={userUnreadCount > 0 ? 'badge-pulse' : ''}
         >
           <a
             onClick={(e) => {
