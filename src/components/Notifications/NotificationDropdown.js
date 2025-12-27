@@ -69,11 +69,23 @@ const NotificationDropdown = () => {
   // Filter notifications for current user only
   const userNotifications = allNotifications.filter(notification => {
     // Include broadcast notifications (for all users) or notifications directed to this user
-    return notification.direction === "broadcast" ||
+    const isForThisUser = notification.direction === "broadcast" ||
            notification.TO_USER_ID === userId ||
            notification.TO_USER_ID === "ALL" ||
            notification.toUserId === userId ||
            notification.toUserId === "ALL";
+
+    // Log warning if backend sent notifications for other users (data leakage detection)
+    if (!isForThisUser && process.env.NODE_ENV === 'development') {
+      console.warn('[NotificationDropdown] Backend sent notification for different user:', {
+        notificationId: notification.id,
+        toUserId: notification.toUserId || notification.TO_USER_ID,
+        currentUserId: userId,
+        title: notification.title || notification.TITLE
+      });
+    }
+
+    return isForThisUser;
   });
 
   // Calculate new notifications count (unread notifications that arrived since last view)
@@ -94,6 +106,21 @@ const NotificationDropdown = () => {
   // Calculate counts for tabs
   const allCount = userNotifications.length;
   const unreadCountForTab = userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read").length;
+
+  // Client-side validation: Use client-calculated unread count as fallback
+  // This protects against backend returning count for all users
+  // If Redux unreadCount doesn't match our filtered count, use the filtered count as it's more reliable
+  const safeUnreadCount = userUnreadCount !== undefined ? Math.min(userUnreadCount, unreadCountForTab) : unreadCountForTab;
+
+  // Log warning if counts don't match (potential backend issue)
+  if (userUnreadCount !== unreadCountForTab && process.env.NODE_ENV === 'development') {
+    console.warn('[NotificationDropdown] Unread count mismatch detected:', {
+      reduxUnreadCount: userUnreadCount,
+      clientCalculatedCount: unreadCountForTab,
+      usingSafeCount: safeUnreadCount,
+      possibleCause: 'Backend may be returning count for all users or counts are out of sync'
+    });
+  }
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
@@ -489,7 +516,7 @@ const NotificationDropdown = () => {
         <Text strong style={{ fontSize: 16 }}>
           Notifications
         </Text>
-        {(userUnreadCount > 0) && (
+        {(safeUnreadCount > 0) && (
           <Button
             type="link"
             size="small"
@@ -703,6 +730,12 @@ const NotificationDropdown = () => {
     setIsDropdownOpen(false);
   };
 
+  // Safety check: Don't render if no userId (prevents showing wrong user's data)
+  if (!userId) {
+    console.warn('[NotificationDropdown] No userId found - notifications disabled');
+    return null;
+  }
+
   return (
     <>
       <style>{`
@@ -794,11 +827,11 @@ const NotificationDropdown = () => {
       )}
       <div style={{ position: 'relative', display: 'flex' }}>
         <Badge
-          count={userUnreadCount}
+          count={safeUnreadCount}
           offset={[-5, 10]}
           overflowCount={99}
           style={{ boxShadow: '0 0 0 2px #fff' }}
-          className={userUnreadCount > 0 ? 'badge-pulse' : ''}
+          className={safeUnreadCount > 0 ? 'badge-pulse' : ''}
         >
           <a
             onClick={(e) => {
