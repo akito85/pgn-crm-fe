@@ -307,18 +307,41 @@ const NotificationDropdown = () => {
         return;
       }
 
-      // Sequential animation delay (ms between each notification)
-      const delayBetweenAnimations = 80;
+      // Get notifications in actual visual order by flattening the grouped structure
+      const groupedNotifications = groupNotificationsByDate(unreadNotifications);
+      const visualOrderNotifications = [];
 
-      // Trigger animations sequentially
-      unreadNotifications.forEach((notification, index) => {
+      // Flatten groups in the order they appear on screen
+      Object.entries(groupedNotifications).forEach(([date, dateNotifications]) => {
+        visualOrderNotifications.push(...dateNotifications);
+      });
+
+      // Sequential animation delay (ms between each notification)
+      const delayBetweenAnimations = 84; // 84ms delay - 20 messages complete in ~2s
+
+      // Trigger animations sequentially from oldest (bottom) to newest (top)
+      visualOrderNotifications.forEach((notification, index) => {
+        // Reverse the order: last item (oldest) animates first
+        const reverseIndex = visualOrderNotifications.length - 1 - index;
+        const delay = reverseIndex * delayBetweenAnimations;
+
+        const notificationId = notification.id || notification.ID;
+
+        console.log(`Scheduling animation for notification ${index + 1}/${visualOrderNotifications.length}:`, {
+          id: notificationId,
+          title: notification.title || notification.TITLE,
+          delay: `${delay}ms`,
+          reverseIndex,
+        });
+
         setTimeout(() => {
-          setAnimatingNotifications(prev => new Set([...prev, notification.id]));
-        }, index * delayBetweenAnimations);
+          console.log(`Animating notification: ${notification.title || notification.TITLE} (ID: ${notificationId})`);
+          setAnimatingNotifications(prev => new Set([...prev, notificationId]));
+        }, delay);
       });
 
       // After all animations complete, dispatch the API call
-      const totalAnimationTime = unreadNotifications.length * delayBetweenAnimations + 400; // +400ms for last animation duration
+      const totalAnimationTime = visualOrderNotifications.length * delayBetweenAnimations + 400; // +400ms for last animation duration
       setTimeout(() => {
         dispatch(markAllNotificationsAsReadApi());
         setAnimatingNotifications(new Set());
@@ -529,7 +552,7 @@ const NotificationDropdown = () => {
                         marginTop: "-1px"
                       }}
                       className={`notification-item hover:bg-gray-50 ${
-                        animatingNotifications.has(notification.id) ? 'notification-slide-out' : ''
+                        animatingNotifications.has(notification.id || notification.ID) ? 'notification-slide-out' : ''
                       }`}
                     >
                       <List.Item.Meta
