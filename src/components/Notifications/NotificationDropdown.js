@@ -55,6 +55,7 @@ const NotificationDropdown = () => {
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
+  const userUnreadCount = useSelector(selectUnreadCount); // Use Redux state for unread count
   const isConnected = useSelector(selectIsConnected);
 
   // Get user ID from token
@@ -72,9 +73,6 @@ const NotificationDropdown = () => {
            notification.toUserId === userId ||
            notification.toUserId === "ALL";
   });
-
-  // Calculate user's unread count
-  const userUnreadCount = userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read").length;
 
   // Calculate new notifications count (unread notifications that arrived since last view)
   const newNotificationsCount = lastViewedTime
@@ -406,8 +404,7 @@ const NotificationDropdown = () => {
         <Text strong style={{ fontSize: 16 }}>
           Notifications
         </Text>
-        {((activeTab === 'all' && userNotifications.some(notification => !notification.read)) ||
-          (activeTab === 'unread' && unreadCountForTab > 0)) && (
+        {(userUnreadCount > 0) && (
           <Button
             type="link"
             size="small"

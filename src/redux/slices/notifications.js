@@ -193,7 +193,8 @@ export const markNotificationAsReadApi = createAsyncThunk(
       const response = await notificationApi.markNotificationAsRead(notificationId);
       // Update local state as well
       dispatch(markAsRead(notificationId));
-      return response;
+      // Return a simple success indicator instead of the full response to avoid rendering issues
+      return { success: true };
     } catch (error) {
       console.error("[Notifications Slice] Error marking notification as read:", error);
       return rejectWithValue({
@@ -214,7 +215,8 @@ export const markAllNotificationsAsReadApi = createAsyncThunk(
       const response = await notificationApi.markAllNotificationsAsRead();
       // Update local state as well
       dispatch(markAllAsRead());
-      return response;
+      // Return a simple success indicator instead of the full response to avoid rendering issues
+      return { success: true };
     } catch (error) {
       console.error("[Notifications Slice] Error marking all notifications as read:", error);
       return rejectWithValue({
@@ -235,7 +237,8 @@ export const deleteNotificationApi = createAsyncThunk(
       const response = await notificationApi.deleteNotification(notificationId);
       // Update local state as well
       dispatch(removeNotification(notificationId));
-      return response;
+      // Return a simple success indicator instead of the full response to avoid rendering issues
+      return { success: true };
     } catch (error) {
       console.error("[Notifications Slice] Error deleting notification:", error);
       return rejectWithValue({
@@ -275,6 +278,15 @@ const notificationsSlice = createSlice({
       const exists = state.notifications.some((n) => n.id === notification.id);
       if (exists) {
         return;
+      }
+
+      // Ensure status properties are set for UI compatibility
+      if (notification.read) {
+        notification.STATUS = "read";
+        notification.status = "read";
+      } else {
+        notification.STATUS = "unread";
+        notification.status = "unread";
       }
 
       // Add to main notifications array
@@ -318,6 +330,8 @@ const notificationsSlice = createSlice({
 
       if (notification && !notification.read) {
         notification.read = true;
+        notification.STATUS = "read"; // Set STATUS for UI compatibility
+        notification.status = "read"; // Set status for UI compatibility
         notification.readAt = new Date().toISOString();
         state.unreadCount = Math.max(0, state.unreadCount - 1);
 
@@ -331,6 +345,8 @@ const notificationsSlice = createSlice({
       state.notifications.forEach((notification) => {
         if (!notification.read) {
           notification.read = true;
+          notification.STATUS = "read"; // Set STATUS for UI compatibility
+          notification.status = "read"; // Set status for UI compatibility
           notification.readAt = new Date().toISOString();
         }
       });
@@ -525,7 +541,8 @@ const notificationsSlice = createSlice({
       .addCase(fetchUnreadCount.fulfilled, (state, action) => {
         state.isLoading = false;
         // Update unread count from API response
-        state.unreadCount = action.payload.count || action.payload.unreadCount || action.payload;
+        // Use nullish coalescing (??) to properly handle 0 as a valid count
+        state.unreadCount = action.payload?.count ?? action.payload?.unreadCount ?? 0;
       })
       .addCase(fetchUnreadCount.rejected, (state, action) => {
         state.isLoading = false;

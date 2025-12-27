@@ -63,8 +63,12 @@ const notificationApi = {
    */
   getUnreadNotificationsCount: async () => {
     try {
+      const headers = {
+        ...notificationTokenHeader(),
+        'Content-Type': 'application/json',
+      };
       const config = {
-        headers: notificationTokenHeader(),
+        headers,
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread-count`, config);
@@ -106,7 +110,10 @@ const notificationApi = {
   markNotificationAsRead: async (notificationId) => {
     try {
       const config = {
-        headers: notificationTokenHeader(),
+        headers: {
+          ...notificationTokenHeader(),
+          'Content-Type': 'application/json',
+        },
         withCredentials: true,
       };
       const response = await axios.patch(`${NOTIFICATION_API_URL}/${notificationId}/read`, {}, config);
@@ -124,8 +131,12 @@ const notificationApi = {
    */
   markNotificationsAsRead: async (notificationIds) => {
     try {
+      const headers = {
+        ...notificationTokenHeader(),
+        'Content-Type': 'application/json',
+      };
       const config = {
-        headers: notificationTokenHeader(),
+        headers,
         withCredentials: true,
       };
       const response = await axios.put(
@@ -142,12 +153,16 @@ const notificationApi = {
 
   /**
    * Mark all user notifications as read
-   * PUT /v1/dbs/api/notifications/read-all
+   * PATCH /v1/dbs/api/notifications/read-all
    */
   markAllNotificationsAsRead: async () => {
     try {
+      const headers = {
+        ...notificationTokenHeader(),
+        'Content-Type': 'application/json',
+      };
       const config = {
-        headers: notificationTokenHeader(),
+        headers,
         withCredentials: true,
       };
       const response = await axios.patch(`${NOTIFICATION_API_URL}/read-all`, {}, config);
@@ -184,9 +199,13 @@ const notificationApi = {
    */
   deleteNotifications: async (notificationIds) => {
     try {
+      const headers = {
+        ...notificationTokenHeader(),
+        'Content-Type': 'application/json',
+      };
       const config = {
         data: { notificationIds },
-        headers: notificationTokenHeader(),
+        headers,
         withCredentials: true,
       };
       const response = await axios.delete(NOTIFICATION_API_URL, config);
@@ -203,8 +222,12 @@ const notificationApi = {
    */
   deleteAllNotifications: async () => {
     try {
+      const headers = {
+        ...notificationTokenHeader(),
+        'Content-Type': 'application/json',
+      };
       const config = {
-        headers: notificationTokenHeader(),
+        headers,
         withCredentials: true,
       };
       const response = await axios.delete(`${NOTIFICATION_API_URL}/all`, config);
@@ -222,8 +245,12 @@ const notificationApi = {
    */
   bulkUpdateNotifications: async (bulkAction) => {
     try {
+      const headers = {
+        ...notificationTokenHeader(),
+        'Content-Type': 'application/json',
+      };
       const config = {
-        headers: notificationTokenHeader(),
+        headers,
         withCredentials: true,
       };
       const response = await axios.put(`${NOTIFICATION_API_URL}/bulk`, bulkAction, config);
