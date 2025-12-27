@@ -53,6 +53,7 @@ const NotificationDropdown = () => {
   const [lastViewedTime, setLastViewedTime] = useState(null);
   const [clickedTab, setClickedTab] = useState(null);
   const [animatingNotifications, setAnimatingNotifications] = useState(new Set());
+  const [animatingDateGroups, setAnimatingDateGroups] = useState(new Set());
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
@@ -310,14 +311,26 @@ const NotificationDropdown = () => {
       // Get notifications in actual visual order by flattening the grouped structure
       const groupedNotifications = groupNotificationsByDate(unreadNotifications);
       const visualOrderNotifications = [];
+      const dateGroupsOrder = [];
 
       // Flatten groups in the order they appear on screen
       Object.entries(groupedNotifications).forEach(([date, dateNotifications]) => {
+        dateGroupsOrder.push(date);
         visualOrderNotifications.push(...dateNotifications);
       });
 
       // Sequential animation delay (ms between each notification)
       const delayBetweenAnimations = 84; // 84ms delay - 20 messages complete in ~2s
+      const dateGroupAnimationDelay = 100; // Delay for date group header animation
+
+      // Track the last notification index for each date group
+      const dateGroupLastIndices = {};
+      let currentIndex = 0;
+
+      Object.entries(groupedNotifications).forEach(([date, dateNotifications]) => {
+        currentIndex += dateNotifications.length;
+        dateGroupLastIndices[date] = currentIndex - 1;
+      });
 
       // Trigger animations sequentially from oldest (bottom) to newest (top)
       visualOrderNotifications.forEach((notification, index) => {
@@ -340,11 +353,30 @@ const NotificationDropdown = () => {
         }, delay);
       });
 
+      // Animate date group headers after their last notification
+      Object.entries(groupedNotifications).forEach(([date, dateNotifications]) => {
+        const lastNotificationIndex = dateGroupLastIndices[date];
+        const reverseIndex = visualOrderNotifications.length - 1 - lastNotificationIndex;
+        const lastNotificationDelay = reverseIndex * delayBetweenAnimations;
+        const dateGroupDelay = lastNotificationDelay + dateGroupAnimationDelay;
+
+        setTimeout(() => {
+          console.log(`Animating date group: ${date}`);
+          setAnimatingDateGroups(prev => new Set([...prev, date]));
+        }, dateGroupDelay);
+      });
+
       // After all animations complete, dispatch the API call
-      const totalAnimationTime = visualOrderNotifications.length * delayBetweenAnimations + 400; // +400ms for last animation duration
+      const totalAnimationTime = visualOrderNotifications.length * delayBetweenAnimations + dateGroupAnimationDelay + 400; // +400ms for animation duration
       setTimeout(() => {
         dispatch(markAllNotificationsAsReadApi());
-        setAnimatingNotifications(new Set());
+
+        // Clear animating notifications and date groups after a delay to allow Redux state to update
+        // This prevents glitch where notifications might briefly reappear
+        setTimeout(() => {
+          setAnimatingNotifications(new Set());
+          setAnimatingDateGroups(new Set());
+        }, 300);
       }, totalAnimationTime);
     } else {
       // In 'all' tab, just mark as read without animation
@@ -529,7 +561,9 @@ const NotificationDropdown = () => {
             {Object.entries(groupNotificationsByDate(notifications)).map(([date, dateNotifications]) => (
               <div key={date}>
                 {/* Date Group Header */}
-                <div className="w-full px-5 py-4 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4">
+                <div className={`w-full px-5 py-4 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4 ${
+                  animatingDateGroups.has(date) ? 'date-group-slide-out' : ''
+                }`}>
                   <div className="flex-1 justify-start text-[#1d1c1d] text-sm font-bold capitalize">
                     {date}
                   </div>
@@ -727,6 +761,20 @@ const NotificationDropdown = () => {
 
         .notification-slide-out {
           animation: slideOutRight 0.4s ease-out forwards;
+        }
+
+        .date-group-slide-out {
+          animation: slideOutRight 0.3s ease-out forwards;
+        }
+
+        .notification-dropdown {
+          transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          overflow: hidden;
+        }
+
+        .notification-list {
+          transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: max-height, height;
         }
       `}</style>
       {isDropdownOpen && (
