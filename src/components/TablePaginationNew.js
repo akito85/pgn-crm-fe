@@ -29,6 +29,9 @@ const TablePaginationNew = ({
   const [totalDataFE, setTotalDataFE] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  
+  // State untuk mengontrol expanded rows
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
 
   useEffect(() => {
     if (type !== "BE") {
@@ -80,6 +83,28 @@ const TablePaginationNew = ({
     setOptionSelectedCol(newSelected);
   };
 
+  // Handler untuk expand/collapse row
+  const onExpand = (expanded, record) => {
+    const keys = [...expandedRowKeys];
+    // Gunakan index atau unique identifier dari record sebagai key
+    const recordKey = record.key || record.approvalLevel || record.id || JSON.stringify(record);
+    
+    if (expanded) {
+      // Jika expand, tambahkan key ke array
+      if (!keys.includes(recordKey)) {
+        keys.push(recordKey);
+      }
+    } else {
+      // Jika collapse, hapus key dari array
+      const index = keys.indexOf(recordKey);
+      if (index > -1) {
+        keys.splice(index, 1);
+      }
+    }
+    
+    setExpandedRowKeys(keys);
+  };
+
   // Menu untuk Show/Hide Column
   const showHideMenu = (
     <div
@@ -122,6 +147,15 @@ const TablePaginationNew = ({
     </div>
   );
 
+  // Enhanced expandable configuration
+  const enhancedExpandable = expandable ? {
+    ...expandable,
+    expandedRowKeys: expandedRowKeys,
+    onExpand: onExpand,
+    // Tambahkan rowKey jika belum ada untuk ensure unique keys
+    ...(expandable.rowKey ? {} : {}),
+  } : undefined;
+
   return (
     <div className={"relative flex flex-col w-full"}>
       <div className="flex gap-2 justify-between items-center mb-4">
@@ -139,11 +173,11 @@ const TablePaginationNew = ({
                 alignItems: "center",
                 gap: "5px",
                 border: "1px solid #BDBDBD",
-                height: "40px",
+                height: "30px",
                 color: "black",
               }}
             >
-              Show / Hide Column <DownOutlined style={{ fontSize: "15px" }} />
+              Show / Hide Column <DownOutlined style={{ fontSize: "10px" }} />
             </Button>
           </Dropdown>
         )}
@@ -173,10 +207,11 @@ const TablePaginationNew = ({
         className={`w-full ${className}`}
         loading={loading}
         tableLayout="fixed"
-        expandable={expandable}
+        expandable={enhancedExpandable}
         id={idTable}
         onChange={type === "BE" ? onSort : onChangeFE}
         rowSelection={rowSelection}
+        rowKey={(record) => record.key || record.approvalLevel || record.id || JSON.stringify(record)}
       />
     </div>
   );

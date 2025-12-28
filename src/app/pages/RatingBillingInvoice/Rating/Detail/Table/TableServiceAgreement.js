@@ -4,7 +4,6 @@ import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { dateFormatting } from "../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
-import { EyeOutlined } from "@ant-design/icons";
 
 export const columnsServiceAgreement = (
   page = 1,
@@ -18,8 +17,8 @@ export const columnsServiceAgreement = (
   {
     key: "no",
     title: "NO",
-    align: "center",
-    width: 60,
+    isClassification:true,
+    width: 35,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -27,8 +26,8 @@ export const columnsServiceAgreement = (
     title: "SA TYPE",
     dataIndex: "saType",
     sorter: true,
-    align: "center",
-    width: 120,
+    isClassification:true,
+    width: 110,
     ...getColumnSearchPropsPaging(
       "saType",
       searchInput,
@@ -42,7 +41,7 @@ export const columnsServiceAgreement = (
     title: "SA CLASS",
     dataIndex: "saServiceType",
     sorter: true,
-    align: "center",
+    isClassification:true,
     width: 120,
     ...getColumnSearchPropsPaging(
       "saServiceType",
@@ -84,7 +83,7 @@ export const columnsServiceAgreement = (
     key: "saDate",
     title: "SA DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "saDate",
     width: 120,
     ...getColumnSearchPropsPaging(
@@ -122,7 +121,7 @@ export const columnsServiceAgreement = (
     title: "PJBG TYPE",
     dataIndex: "pjbgType",
     sorter: true,
-    align: "center",
+    isClassification:true,
     width: 120,
     ...getColumnSearchPropsPaging(
       "pjbgType",
@@ -136,7 +135,7 @@ export const columnsServiceAgreement = (
     key: "startDate",
     title: "START DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "startDate",
     width: 120,
     ...getColumnSearchPropsPaging(
@@ -173,7 +172,7 @@ export const columnsServiceAgreement = (
     key: "endDate",
     title: "END DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "endDate",
     width: 120,
     ...getColumnSearchPropsPaging(
@@ -211,8 +210,8 @@ export const columnsServiceAgreement = (
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
     sorter: true,
-    align: "center",
-    width: 120,
+    isClassification:true,
+    width: 150,
     ...getColumnSearchPropsPaging(
       "billingCycle",
       searchInput,
@@ -226,8 +225,8 @@ export const columnsServiceAgreement = (
     title: "TERM OF PAYMENT",
     dataIndex: "termOfPayment",
     sorter: true,
-    align: "center",
-    width: 150,
+    isClassification:true,
+    width: 170,
     ...getColumnSearchPropsPaging(
       "termOfPayment",
       searchInput,
@@ -241,8 +240,8 @@ export const columnsServiceAgreement = (
     title: "PAYMENT CHANNEL",
     dataIndex: "paymentChannel",
     sorter: true,
-    align: "center",
-    width: 150,
+    isClassification:true,
+    width: 170,
     ...getColumnSearchPropsPaging(
       "paymentChannel",
       searchInput,
@@ -255,6 +254,7 @@ export const columnsServiceAgreement = (
     key: "distributionMedia",
     title: "MEDIA DISTRIBUTION",
     dataIndex: "distributionMedia",
+    isClassification:true,
     sorter: true,
     width: 180,
     ...getColumnSearchPropsPaging(
@@ -275,7 +275,7 @@ export const columnsServiceAgreement = (
         <div className="flex w-full justify-center gap-6">
           <Tooltip title="Detail">
             <div className="pt-1 cursor-pointer">
-              <EyeOutlined onClick={() => handleDetail(record)} style={{ fontSize: "20px" }} />
+              <SVGIcon name="IconDetail" width={20}  onClick={() => handleDetail(record)} />
             </div>
           </Tooltip>
         </div>

@@ -267,6 +267,21 @@ const GLAccountView = () => {
   // Grant Access Item
   const itemGrantAccess = [
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Approve",
       render: (
         <ButtonComponent

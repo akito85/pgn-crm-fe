@@ -13,16 +13,16 @@ export const columnsUsage = (
   {
     key: "no",
     title: "NO",
-    align: "center",
+    isClassification:true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
     key: "billingPeriod",
-    title: "PERIOD",
-    width: 100,
+    title: "Billing Period",
+    width: 150,
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "billingPeriod",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -48,8 +48,9 @@ export const columnsUsage = (
     key: "assetSerialNumber",
     title: "ASSET SERIAL NUMBER",
     dataIndex: "assetSerialNumber",
+    width: 190,
     sorter: true,
-    align: "left",
+    isClassification:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "assetSerialNumber",
@@ -75,8 +76,9 @@ export const columnsUsage = (
     key: "assetType",
     title: "ASSET TYPE",
     dataIndex: "assetType",
+    width: 130,
     sorter: true,
-    align: "center",
+    isClassification:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "assetType",
@@ -102,7 +104,7 @@ export const columnsUsage = (
     key: "measDate",
     title: "READING DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "measDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -127,8 +129,9 @@ export const columnsUsage = (
   {
     key: "fdate",
     title: "DATE",
+    width: 120,
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "fdate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -154,8 +157,9 @@ export const columnsUsage = (
     key: "fhour",
     title: "HOUR",
     dataIndex: "fhour",
+    width: 100,
     sorter: true,
-    align: "center",
+    isClassification:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fhour",
@@ -172,8 +176,9 @@ export const columnsUsage = (
     key: "streamId",
     title: "STREAM ID",
     dataIndex: "streamId",
+    width: 120,
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "streamId",
@@ -200,7 +205,7 @@ export const columnsUsage = (
     title: "TEMPERATURE",
     dataIndex: "temperature",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "temperature",
@@ -227,7 +232,7 @@ export const columnsUsage = (
     title: "PRESSURE",
     dataIndex: "pressure",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "pressure",
@@ -254,7 +259,7 @@ export const columnsUsage = (
     title: "CORRECTION FACTOR",
     dataIndex: "correctionFactor",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "correctionFactor",
@@ -280,8 +285,9 @@ export const columnsUsage = (
     key: "calorie",
     title: "CALORIE",
     dataIndex: "calorie",
+    width: 150,
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calorie",
@@ -307,7 +313,7 @@ export const columnsUsage = (
     title: "BEGIN STAND",
     dataIndex: "beginStand",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "beginStand",
@@ -333,7 +339,7 @@ export const columnsUsage = (
     title: "END STAND",
     dataIndex: "endStand",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endStand",
@@ -359,7 +365,7 @@ export const columnsUsage = (
     title: "VOLUME 27",
     dataIndex: "volMeasured27",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "volMeasured27",
@@ -385,7 +391,7 @@ export const columnsUsage = (
     title: "VOLUME 60",
     dataIndex: "volMeasured60",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "volMeasured60",
@@ -411,7 +417,7 @@ export const columnsUsage = (
     title: "MMBTU",
     dataIndex: "engMeasured",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "engMeasured",
@@ -428,7 +434,7 @@ export const columnsUsage = (
     title: "GHV",
     dataIndex: "ghv",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "ghv",
@@ -444,6 +450,7 @@ export const columnsUsage = (
     key: "fileSource",
     sorter: true,
     title: "SOURCE",
+    isClassification:true,
     dataIndex: "fileSource",
     ellipsis: {
       showTitle: false,
@@ -463,8 +470,9 @@ export const columnsUsage = (
     key: "taxationRowId",
     title: "TAXATION ROW ID",
     dataIndex: "taxationRowId",
+    width: 180,
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxationRowId",
@@ -480,7 +488,7 @@ export const columnsUsage = (
     key: "createdDate",
     title: "CREATION DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "createdDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -498,6 +506,7 @@ export const columnsUsage = (
     key: "approvedBy",
     title: "APPROVED BY",
     dataIndex: "approvedBy",
+    isClassification:true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -515,7 +524,7 @@ export const columnsUsage = (
     title: "VOLUME MSCF",
     dataIndex: "volMscf",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "volMscf",
@@ -532,7 +541,7 @@ export const columnsUsage = (
     title: "UNCORRECTED VOL",
     dataIndex: "uncorrectedValue",
     sorter: true,
-    align: "right",
+    isNumber:true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "uncorrectedValue",
@@ -548,7 +557,7 @@ export const columnsUsage = (
     key: "lastUpdatedDate",
     title: "LAST UPDATE DATE",
     sorter: true,
-    align: "center",
+    isClassification:true,
     dataIndex: "lastUpdatedDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -567,7 +576,7 @@ export const columnsUsage = (
     title: "SOURCE",
     dataIndex: "source",
     sorter: true,
-    align: "center",
+    isClassification:true,
     ...getColumnSearchPropsUseFilteredValue(
       "source",
       searchInput,
@@ -580,6 +589,7 @@ export const columnsUsage = (
     key: "description",
     sorter: true,
     title: "DESCRIPTION",
+    isClassification:true,
     dataIndex: "description",
     ellipsis: {
       showTitle: false,

@@ -1,80 +1,104 @@
-import { Fragment } from "react";
-import React from "react";
+import { useState } from "react";
 import DetailText from "../../../../../../components/DetailText";
-
-const data_detail = {
-  id: 1,
-  category: "External",
-  corporate: "Yes",
-  locationInformation: {
-    sor: "SOR 3",
-    costCenter: "015-AREA BOGOR",
-    meterReadingCodes: "0054",
-  },
-  accountInformation: {
-    accountNumber: "CSC1234567890",
-    registrationNumber: "00889977665544",
-    accountName: "PT KERAMIK INTI 1",
-    category: "External",
-    sor: "SOR 3",
-    costCenter: "015-AREA BOGOR",
-    meterReadingCodes: "0054",
-    customerManagement: "CM Bogor 2",
-    classificationType: "Related Party",
-    segment: "KI",
-    accountGroupType: "BRONZE1",
-    accountType: "UMU",
-    status: "Active",
-  },
-  customerInformation: {
-    customerNumber: "CSC1234567890",
-    customerName: "KERAMIK INTI",
-    customerType: "Organization",
-    customerRefId: "01234567890",
-    identificationType: "KTP",
-    primaryTaxIdentificationNumber: "98761234567890",
-    taxIdentificationNumber: "98761234567890",
-    personalIdentificationNumber: "98761234567890",
-    searchKey: "Keramk Inti Pusat",
-    description: "Keramik Inti Pusat",
-    status: "Active",
-  },
-  budget: {
-    budget: "APBN",
-    budgetYear: "2021",
-    teritory: "APBN",
-  },
-  createdBy: "Annisa",
-  createdDate: "21 Agustus 2023 11:03:55",
-  updatedBy: "Annisa",
-  updatedDate: "22 Agustus 2023 11:03:55",
-};
+import RelationshipApproval from "./RelationshipApproval";
+import RelationshipAttachment from "./RelationshipAttachment";
+import { Button, Divider } from "antd";
 
 const RelationshipConfirm = ({
-	data = {}
+  data = {},
+  approvalData = [],
+  attachmentData = [],
+  approvalHierarchyName = "Hierarchy SA 1", // Nama approval hierarchy yang dipilih
 }) => {
-  // useEffect(() => {},[]);
+  const [activeTab, setActiveTab] = useState("1");
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "1":
+        return (
+          <div>
+            <div className="text-primary text-sm font-bold uppercase mb-4">
+              RELATIONSHIP INFORMATION
+            </div>
+            <div className="w-full grid grid-cols-3 gap-4">
+              <DetailText label="Relationship Type">
+                {data?.relationshipTypeName || "-"}
+              </DetailText>
+              <DetailText label="Relationship Category">
+                {data?.relationshipCategoryName || "-"}
+              </DetailText>
+              <DetailText label="Related Name">
+                {data?.relatedName || data?.objectName || "-"}
+              </DetailText>
+              <DetailText label="Related Number">
+                {data?.relatedNumber || data?.objectValue || "-"}
+              </DetailText>
+              <DetailText label="Start Date">
+                {data?.startDateDisplay || "-"}
+              </DetailText>
+              <DetailText label="End Date">
+                {data?.endDateDisplay || "-"}
+              </DetailText>
+            </div>
+            <div className="w-full mt-4">
+              <DetailText label="Description">
+                {data?.description || "-"}
+              </DetailText>
+            </div>
+          </div>
+        );
+      case "2":
+        return (
+          <RelationshipApproval
+            dataDetailApproval={approvalData}
+            hideSelector={true}
+            approvalHierarchyLabel={approvalHierarchyName}
+          />
+        );
+      case "3":
+        return (
+          <RelationshipAttachment
+            data={attachmentData}
+            hideActions={true}
+            showUploadButton={false}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"RELATIONSHIP INFORMATION"}
+    <div className="w-full">
+      {/* Custom Tab Buttons - Sesuai Design Figma */}
+      <div className="flex gap-3 mb-6 border-b border-gray-200 pb-1">
+        <Button
+          onClick={() => setActiveTab("1")}
+          size="large"
+          type={activeTab === "1" ? "primary" : "default"}
+        >
+          Relationship Information
+        </Button>
+        <Button
+          onClick={() => setActiveTab("2")}
+          size="large"
+          type={activeTab === "2" ? "primary" : "default"}
+        >
+          Approval
+        </Button>
+        <Button
+          onClick={() => setActiveTab("3")}
+          size="large"
+          type={activeTab === "3" ? "primary" : "default"}
+        >
+          Attachment
+        </Button>
       </div>
+      <Divider />
 
-      <div className="w-full grid grid-cols-4 gap-4">
-        {/* Account information */}
-
-        <DetailText label="Object Table">
-          {data?.objectTable}
-        </DetailText>
-        <DetailText label="Object Id">
-          {data?.objectId}
-        </DetailText>
-        <DetailText label="Relation Code">
-          {data?.relationCode}
-        </DetailText>
-        <DetailText label="Direction Flag">{data?.directionFlag}</DetailText>
-      </div>
-    </Fragment>
+      {/* Content */}
+      <div className="w-full">{renderContent()}</div>
+    </div>
   );
 };
 

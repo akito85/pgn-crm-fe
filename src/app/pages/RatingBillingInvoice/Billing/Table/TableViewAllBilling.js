@@ -1,6 +1,10 @@
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { Tooltip } from "antd";
+import {
+  currencyFormatting,
+  numberFormatting,
+} from "../../../../../utils/formatCurrency";
 
 export const columnsAllBilling = (
   page = 1,
@@ -15,18 +19,18 @@ export const columnsAllBilling = (
     key: "no",
     title: "NO",
     align: "center",
-    width: 60,
+    width: 50,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
-    key: "invoiceNumber",
+    key: "billingCode",
     title: "INVOICE NUMBER",
-    dataIndex: "invoiceNumber",
+    dataIndex: "billingCode",
     sorter: true,
     width: 200,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "invoiceNumber",
+      "billingCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -35,8 +39,8 @@ export const columnsAllBilling = (
     ),
     render: (text) =>
       renderColumn(
-        "invoiceNumber",
-        hasValue(search["invoiceNumber"]),
+        "billingCode",
+        hasValue(search["billingCode"]),
         searchText,
         text,
         false,
@@ -46,11 +50,11 @@ export const columnsAllBilling = (
   },
   {
     key: "billingType",
-    title: "BILLING TYPE",
+    title: "TYPE",
     dataIndex: "billingType",
     sorter: true,
     align: "center",
-    width: 150,
+    width: 120,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "billingType",
@@ -61,55 +65,89 @@ export const columnsAllBilling = (
       true,
       "select",
       [
-        { value: "Gas", label: "Gas" },
-        { value: "Non Gas", label: "Non Gas" },
+        { value: "GAS", label: "Gas" },
+        { value: "NON_GAS", label: "Non Gas" },
       ]
     ),
-    render: (text) =>
-      renderColumn(
+    render: (text) => {
+      const displayText =
+        text === "GAS" ? "Gas" : text === "NON_GAS" ? "Non Gas" : text;
+      return renderColumn(
         "billingType",
         hasValue(search["billingType"]),
         searchText,
-        text,
+        displayText,
         false,
         "input",
         search
-      ),
+      );
+    },
   },
   {
-    key: "quantity",
-    title: "QUANTITY",
-    dataIndex: "quantity",
+    key: "totalQuantity",
+    title: "QTY",
+    dataIndex: "totalQuantity",
     sorter: true,
     align: "right",
-    width: 150,
+    width: 120,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "quantity",
+      "totalQuantity",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "quantity",
-        hasValue(search["quantity"]),
+    render: (text) => {
+      const formatted = numberFormatting(text);
+      return renderColumn(
+        "totalQuantity",
+        hasValue(search["totalQuantity"]),
         searchText,
-        text,
+        formatted,
         false,
         "input",
         search
-      ),
+      );
+    },
+  },
+  {
+    key: "totalPriceIdr",
+    title: "AMOUNT (IDR)",
+    dataIndex: "totalPriceIdr",
+    sorter: true,
+    align: "right",
+    width: 180,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "totalPriceIdr",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      const formatted = currencyFormatting(text);
+      return renderColumn(
+        "totalPriceIdr",
+        hasValue(search["totalPriceIdr"]),
+        searchText,
+        formatted,
+        false,
+        "input",
+        search
+      );
+    },
   },
   {
     key: "totalAmountIdr",
-    title: "TOTAL AMOUNT (IDR)",
+    title: "TOTAL (IDR)",
     dataIndex: "totalAmountIdr",
     sorter: true,
     align: "right",
-    width: 200,
+    width: 180,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountIdr",
@@ -119,16 +157,18 @@ export const columnsAllBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
+    render: (text) => {
+      const formatted = currencyFormatting(text);
+      return renderColumn(
         "totalAmountIdr",
         hasValue(search["totalAmountIdr"]),
         searchText,
-        text,
+        formatted,
         false,
         "input",
         search
-      ),
+      );
+    },
   },
   {
     key: "transactionDate",
@@ -161,8 +201,9 @@ export const columnsAllBilling = (
     key: "remark",
     sorter: true,
     title: "REMARK",
+    isClassification: true,
     dataIndex: "remark",
-    width: 300,
+    width: 250,
     ellipsis: {
       showTitle: false,
     },

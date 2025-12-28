@@ -18,6 +18,7 @@ import {
   updateSingleUsage,
   deleteSingleUsage,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../components/CardContainer";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
@@ -47,7 +48,6 @@ const DetailMonitoringUsage = () => {
     (item) =>
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "batchId" &&
-      item?.dataIndex !== "accountGroupType" &&
       item?.dataIndex !== "serviceType" &&
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "fileSource" &&
@@ -57,7 +57,7 @@ const DetailMonitoringUsage = () => {
   // use state
   const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -91,15 +91,20 @@ const DetailMonitoringUsage = () => {
     [form]
   );
 
-  // use effect
+  // Initial fetch with larger page size
   useEffect(() => {
     if (location?.state?.id) {
       dispatch(
-        getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        getDetailBatch({
+          batchId: location?.state?.id,
+          page: 1,
+          pageSize: 100, // Initial load 100 items
+        })
       );
-      dispatch(getApprovalHierarchy({ page, pageSize }));
+      dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
+      setPage(1);
     }
-  }, [location, dispatch, page, pageSize]);
+  }, [location, dispatch]);
 
   useEffect(() => {
     if (
@@ -107,7 +112,7 @@ const DetailMonitoringUsage = () => {
       detail_batch?.batchInformation?.batchId === location?.state?.id
     ) {
       assert(detail_batch);
-      setDataTable(detail_batch?.usageList?.result);
+      setDataTable(detail_batch?.usageList?.result || []);
     }
   }, [detail_batch, assert, location]);
 
@@ -141,12 +146,33 @@ const DetailMonitoringUsage = () => {
   }, [
     list_approval_by_id,
     page,
-    pageSize,
     tabHeader,
     dispatch,
     list_approval,
     selectedHierarchy,
   ]);
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = detail_batch?.usageList?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages && location?.state?.id) {
+      await dispatch(
+        getDetailBatch({
+          batchId: location?.state?.id,
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // Calculate if there's more data
+  const totalElements = detail_batch?.usageList?.page?.totalElements || 0;
+  const hasMore = dataTable.length < totalElements;
 
   // handle update row
   const handleUpdate = (record, values) => {
@@ -157,6 +183,17 @@ const DetailMonitoringUsage = () => {
 
   // handle save
   const handleSave = (formValue) => {
+    if (!selectedHierarchy || !hasValue(selectedHierarchy)) {
+      const errorBody = {
+        title: "Validation Error",
+        description:
+          "Please select an Approval Hierarchy in the Approval tab before saving or submitting.",
+      };
+      dispatch(showModalError(errorBody));
+      setTabHeader("Approval");
+      return;
+    }
+
     setBody({
       ...detail_batch,
       usageList: dataTable,
@@ -167,13 +204,11 @@ const DetailMonitoringUsage = () => {
 
   const handleSaveUpdateUsage = async (formValue) => {
     try {
-      // Prepare request body sesuai format backend
       const requestBody = {
         accountNumber: formValue?.accountNumber || null,
         accountName: formValue?.accountName || null,
         costCenter: formValue?.costCenter || null,
-        billingPeriod:
-          formValue?.billingPeriod || null,
+        billingPeriod: formValue?.billingPeriod || null,
         assetSerialNum: formValue?.assetSerialNum || null,
         assetType: formValue?.assetType || null,
         fdate:
@@ -183,8 +218,7 @@ const DetailMonitoringUsage = () => {
         fhour: hasValue(formValue?.fhour)
           ? moment(formValue?.fhour).format(dateFormatting.fhour)
           : null,
-        measDate:
-          formValue?.measDate || null ,
+        measDate: formValue?.measDate || null,
         streamId: formValue?.streamId || null,
         temperature: formValue?.temperature || null,
         pressure: formValue?.pressure || null,
@@ -203,7 +237,6 @@ const DetailMonitoringUsage = () => {
         description: formValue?.description || null,
       };
 
-      // Dispatch update ke API
       const resultAction = await dispatch(
         updateSingleUsage({
           recordId: recordId,
@@ -212,7 +245,6 @@ const DetailMonitoringUsage = () => {
       );
 
       if (updateSingleUsage.fulfilled.match(resultAction)) {
-        // Update local state setelah API berhasil
         const newDataTable = [...dataTable];
         const index = newDataTable.findIndex(
           (item) => recordId === item.recordId
@@ -236,9 +268,13 @@ const DetailMonitoringUsage = () => {
 
         setOpenUpdateUsage(false);
 
-        // Refresh data dari server
+        // Refresh data from server
         dispatch(
-          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+          getDetailBatch({
+            batchId: location?.state?.id,
+            page: 1,
+            pageSize: page * loadMoreSize, // Keep current loaded data
+          })
         );
       }
     } catch (error) {
@@ -260,35 +296,32 @@ const DetailMonitoringUsage = () => {
   const handleCancel = () => setOpenUpdateUsage(false);
 
   // handle clear
-  const handleClear = () => {};
+  const handleClear = () => {
+    form.setFieldsValue({
+      apphierId: undefined,
+    });
 
-  // handle delete usage list
-  const handleDeleteOk = async () => {
-    try {
-      const resultAction = await dispatch(deleteSingleUsage(recordId));
-
-      if (deleteSingleUsage.fulfilled.match(resultAction)) {
-        // Update local state setelah API berhasil
-        const newData = dataTable.filter((item) => item.recordId !== recordId);
-        setDataTable(newData);
-        setModalDelete(false);
-
-        // Refresh data dari server
-        dispatch(
-          getDetailBatch({ batchId: location?.state?.id, page, pageSize })
-        );
-      }
-    } catch (error) {
-      console.error("Error deleting usage:", error);
-      setModalDelete(false);
-    }
+    setSelectedHierarchy(null);
+    setAppHierDataDetail([]);
   };
 
-  // change page
-  const handleChangePage = (page, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // handle delete usage list
+  const handleDeleteOk = () => {
+    const newData = dataTable.filter((item) => item.recordId !== recordId);
+    setDataTable(newData);
+    dispatch(addDeletedData(deletedRecord));
+    setModalDelete(false);
+  };
+
+  const handleDownloadFailed = () => {
+    dispatch(getDownloadFailed(location?.state?.id))
+      .unwrap()
+      .then((response) => {
+        console.log("Download successful", response);
+      })
+      .catch((error) => {
+        console.error("Download failed", error);
+      });
   };
 
   // breadcrumbs routes
@@ -362,17 +395,6 @@ const DetailMonitoringUsage = () => {
     },
   ];
 
-  const handleDownloadFailed = () => {
-    dispatch(getDownloadFailed(location?.state?.id))
-      .unwrap()
-      .then((response) => {
-        console.log("Download successful", response);
-      })
-      .catch((error) => {
-        console.error("Download failed", error);
-      });
-  };
-
   // All columns with keys
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...filteredColumns, ...actionColumns].map(
@@ -418,10 +440,14 @@ const DetailMonitoringUsage = () => {
               className="tabs-compact"
               style={{ marginBottom: 0 }}
             >
-              <Tabs.TabPane tab="Upload" key="Upload">
-                <BaseContainer header={"Batch List"} className="-mt-4">
+              <Tabs.TabPane
+                tab="Upload"
+                key="Upload"
+                className="flex flex-col gap-3"
+              >
+                <BaseContainer header={"Batch List"} border className="-mt-4">
                   {/* Two Column Layout */}
-                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-0">
                     <DetailText label="Batch ID">
                       {detail_batch?.batchInformation?.batchId}
                     </DetailText>
@@ -445,10 +471,6 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Total Failed">
                       {detail_batch?.batchInformation?.totalFailed}
                     </DetailText>
-
-                    <DetailText label="Generate Date">
-                      {detail_batch?.batchInformation?.generateDate}
-                    </DetailText>
                     <DetailText label="Status">
                       <StatusComponent
                         colour={detail_batch?.batchInformation?.status}
@@ -459,9 +481,31 @@ const DetailMonitoringUsage = () => {
                   </div>
                 </BaseContainer>
 
+                <BaseContainer header={"Usage List"} border className="mt-1">
+                  <div className="my-5">
+                    <TableRBI
+                      idTable="monitoring-usage-detail-table"
+                      dataSource={dataTable}
+                      columns={processedColumns}
+                      totalData={totalElements}
+                      tableScrolled={{ x: 7000, y: 525 }}
+                      showExport={false}
+                      columnDefinitions={columnDefinitions}
+                      fixedColumns={fixedColumns}
+                      setFixedColumns={setFixedColumns}
+                      loading={loading}
+                      usePagination={false}
+                      useInfiniteScroll={true}
+                      onLoadMore={handleLoadMore}
+                      hasMore={hasMore}
+                      loadMoreThreshold={20}
+                    />
+                  </div>
+                </BaseContainer>
                 <BaseContainer
                   header={"History Log Information"}
                   className="mt-1"
+                  border
                 >
                   <div className="grid grid-cols-5 gap-x-8 gap-y-4">
                     <DetailText label="Record ID">
@@ -474,38 +518,16 @@ const DetailMonitoringUsage = () => {
                       {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                     <DetailText label="Updated Date">
-                      {/* Tambahkan field updated date jika tersedia dari API */}
                       {detail_batch?.batchInformation?.updatedDate}
                     </DetailText>
                     <DetailText label="Updated By">
-                      {/* Tambahkan field updated by jika tersedia dari API */}
                       {detail_batch?.batchInformation?.updatedBy}
                     </DetailText>
-                  </div>
-                </BaseContainer>
-
-                <BaseContainer header={"Usage List"} className="mt-1">
-                  <div className="my-5">
-                    <TableRBI
-                      dataSource={dataTable}
-                      columns={processedColumns}
-                      current={page}
-                      pageSize={pageSize}
-                      onChange={handleChangePage}
-                      onSizeChanger={handleChangePage}
-                      totalData={dataTable?.length || 0}
-                      tableScrolled={{ x: 7000, y: 525 }}
-                      columnDefinitions={columnDefinitions}
-                      fixedColumns={fixedColumns}
-                      setFixedColumns={setFixedColumns}
-                      loading={loading}
-                    />
                   </div>
                 </BaseContainer>
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Approval" key="Approval">
-                {/* Approval Tab - Sesuai Desain Figma */}
                 <div className="bg-white mt-1">
                   <ApprovalComponentGeneral
                     dataTable={appHierDataDetail}

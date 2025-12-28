@@ -161,7 +161,9 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
           <p style={{ marginBottom: 12 }}>
             Tiket laporan akan dibuat untuk tim Master Data:
           </p>
-          <div style={{ backgroundColor: "#f5f5f5", padding: 12, borderRadius: 4 }}>
+          <div
+            style={{ backgroundColor: "#f5f5f5", padding: 12, borderRadius: 4 }}
+          >
             <p>
               <strong>Customer ID:</strong> {record.customerId}
             </p>
@@ -252,16 +254,25 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
           </ButtonComponent>
         </div>
 
-        <CardContainer 
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">DETAIL - GAP DATA: PRA-BILLING VS MASTER DATA</p>
+              <p className="mt-[15px] font-bold">
+                DETAIL - GAP DATA: PRA-BILLING VS MASTER DATA
+              </p>
             </div>
           }
         >
           {/* Filters */}
           <div className="w-full mb-4 mt-4">
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 16,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
               <div>
                 <span style={{ marginRight: 8, fontWeight: 500 }}>Period:</span>
                 <Input value={filterPeriod} disabled style={{ width: 120 }} />
@@ -296,7 +307,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
           </div>
 
           {/* Table */}
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               dataSource={dataSource}
               columns={processedColumns}

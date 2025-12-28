@@ -186,7 +186,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
           showExport={false}
           onSizeChanger={handleChange}
           totalData={data_serviceAgreement?.page?.totalElements || 0}
-          tableScrolled={{ y: 525, x: 3000 }}
+          tableScrolled={{ y: 525, x: 1700 }}
           onSort={onSortApi}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}

@@ -16,7 +16,6 @@ import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import moment from "moment";
 import CardContainer from "../../../../components/CardContainer";
-import { EyeOutlined } from "@ant-design/icons";
 
 const PrabillingPage = () => {
   const { loading, list_prabilling_init, prabilling_pagination } = useSelector(
@@ -27,7 +26,7 @@ const PrabillingPage = () => {
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -38,16 +37,19 @@ const PrabillingPage = () => {
     right: ["status", "action"],
   }));
 
+  // Initial fetch
   useEffect(() => {
     dispatch(
       getListPrabillingInitPopulate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: 100, // Initial load 100
         sort,
+        isLoadMore: false,
       })
     );
-  }, [dispatch, search, page, pageSize, sort]);
+    setPage(1);
+  }, [dispatch, search, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -64,22 +66,46 @@ const PrabillingPage = () => {
     });
   };
 
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = prabilling_pagination?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getListPrabillingInitPopulate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // Calculate if there's more data
+  const hasMore =
+    list_prabilling_init.length < (prabilling_pagination?.totalElements || 0);
+
   const baseColumns = useMemo(
     () => [
       {
         key: "no",
         title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        width: 20,
+        isClassification: true,
+        render: (text, object, index) => index + 1,
       },
       {
         key: "initCode",
         title: "INIT CODE",
         dataIndex: "initCode",
         sorter: true,
-        align: "left",
-        width: 150,
+        isClassification: true,
+        width: 60,
         filteredValue: [search?.initCode] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -105,9 +131,9 @@ const PrabillingPage = () => {
         key: "sor",
         title: "SOR",
         dataIndex: "sor",
-        align: "left",
+        isClassification: true,
         sorter: true,
-        width: 200,
+        width: 60,
         filteredValue: [search?.sor] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
@@ -134,8 +160,9 @@ const PrabillingPage = () => {
         key: "billingCycle",
         title: "BILLING CYCLE",
         dataIndex: "billingCycle",
-        align: "center",
+        isClassification: true,
         sorter: true,
+        width: 70,
         filteredValue: [search?.billingCycle] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -161,8 +188,9 @@ const PrabillingPage = () => {
         key: "billPeriod",
         title: "BILLING PERIOD",
         dataIndex: "billPeriod",
-        align: "center",
+        isClassification: true,
         sorter: true,
+        width: 70,
         filteredValue: [search?.billPeriod] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -189,7 +217,7 @@ const PrabillingPage = () => {
         title: "PROCESS NAME",
         dataIndex: "processName",
         align: "left",
-        width: 200,
+        width: 70,
         sorter: true,
         filteredValue: [search?.processName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -216,8 +244,8 @@ const PrabillingPage = () => {
         key: "createdBy",
         title: "CREATED BY",
         dataIndex: "createdBy",
-        align: "center",
-        width: 130,
+        isClassification: true,
+        width: 60,
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -244,8 +272,9 @@ const PrabillingPage = () => {
         key: "createdDtm",
         title: "CREATED DATE",
         dataIndex: "createdDtm",
-        align: "center",
+        isClassification: true,
         sorter: true,
+        width: 80,
         filteredValue: [search?.createdDtm] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -260,7 +289,7 @@ const PrabillingPage = () => {
         render: (text) => {
           const formattedDate = text
             ? moment(text).format("DD MMM YYYY HH:mm:ss")
-            : "-";
+            : "";
           return renderDateColumn(
             "createdDtm",
             hasValue(search["createdDtm"]),
@@ -277,6 +306,7 @@ const PrabillingPage = () => {
         dataIndex: "message",
         align: "left",
         sorter: true,
+        width: 60,
         filteredValue: [search?.message] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
@@ -305,6 +335,7 @@ const PrabillingPage = () => {
         dataIndex: "totalCustomer",
         isNumber: true,
         sorter: true,
+        width: 80,
         filteredValue: [search?.totalCustomer] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -316,7 +347,7 @@ const PrabillingPage = () => {
           true
         ),
         render: (text) => {
-          const displayText = text?.toLocaleString() || "-";
+          const displayText = text?.toLocaleString() || "";
           return renderColumn(
             "totalCustomer",
             hasValue(search["totalCustomer"]),
@@ -334,6 +365,7 @@ const PrabillingPage = () => {
         dataIndex: "remark",
         align: "left",
         sorter: true,
+        width: 70,
         filteredValue: [search?.remark] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
@@ -362,7 +394,7 @@ const PrabillingPage = () => {
         dataIndex: "status",
         align: "center",
         sorter: true,
-        width: 150,
+        width: 40,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -398,19 +430,13 @@ const PrabillingPage = () => {
         },
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn]
   );
 
   const routes = [
     { path: "", breadcrumbName: "Rating Billing" },
     { path: "", breadcrumbName: "Prabilling" },
   ];
-
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
 
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -426,7 +452,7 @@ const PrabillingPage = () => {
       render: (
         <NavLink to={RBI_ROUTES.PRABILLING_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type={"submit"}
             border={false}
           >
@@ -442,10 +468,10 @@ const PrabillingPage = () => {
         <Link
           to={RBI_ROUTES.PRABILLING_DETAIL}
           state={{ id: record?.initCode }}
-          style={{ lineHeight: 0 }}
+          style={{ padding: 0, margin: 0 }}
         >
           <Tooltip title="Detail">
-            <EyeOutlined style={{ fontSize: "20px" }} />
+            <SVGIcon name="IconDetail" width={15} />
           </Tooltip>
         </Link>
       ),
@@ -455,7 +481,7 @@ const PrabillingPage = () => {
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess).map(
     (col) => ({
       ...col,
-      width: 80,
+      width: 30,
       align: "center",
     })
   );
@@ -487,30 +513,29 @@ const PrabillingPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
-                PRABILLING LIST
-              </p>
-
+              <p className="w-full mt-[15px] text-primary">PRABILLING LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
-          <div className="my-5">
+          <div className="-pt-3">
             <TableRBI
+              idTable="prabilling-table"
               dataSource={list_prabilling_init}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
               totalData={prabilling_pagination?.totalElements || 0}
-              tableScrolled={{ x: 2500, y: 525 }}
+              tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
               showExport={false}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>

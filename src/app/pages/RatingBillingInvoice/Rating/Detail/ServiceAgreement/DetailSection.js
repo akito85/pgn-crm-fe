@@ -19,7 +19,7 @@ export const columnsDetailServiceAgreement = (
     title: "NO",
     dataIndex: "no",
     key: "no",
-    align: "center",
+    isClassification:true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },

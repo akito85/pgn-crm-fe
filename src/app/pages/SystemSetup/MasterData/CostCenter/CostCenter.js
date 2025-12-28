@@ -1,4 +1,10 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllCostCenter,
@@ -30,7 +36,7 @@ const CostCenter = () => {
   const { data, loading, data_detail } = useSelector(
     (state) => state.master_cost_center
   );
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
 
   // use state
   const searchInput = useRef(null);
@@ -54,17 +60,19 @@ const CostCenter = () => {
 
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getAllCostCenter({ 
-      search: encodeURIComponent(JSON.stringify(search)), 
-      page, 
-      pageSize, 
-      sort 
-    }));
+    dispatch(
+      getAllCostCenter({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
   }, [dispatch, page, pageSize, search, sort]);
 
   // use effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   // handle search
@@ -84,207 +92,217 @@ const CostCenter = () => {
   };
 
   // base columns
-  const baseColumns = useMemo(() => [
-    {
-      key: "no",
-      title: "NO",
-      dataIndex: "key",
-      align: "center",
-      width: 60,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      key: "code",
-      title: "CODE",
-      dataIndex: "code",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.code] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "code",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'code', 
-        hasValue(search["code"]), 
-        searchText, 
-        text, 
-        false, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "name",
-      title: "COST CENTER NAME",
-      dataIndex: "name",
-      align: "left",
-      width: 250,
-      sorter: true,
-      filteredValue: [search?.name] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "name",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'name', 
-        hasValue(search["name"]), 
-        searchText, 
-        text, 
-        false, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "ccType",
-      title: "TYPE",
-      dataIndex: "ccType",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.ccType] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "ccType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'ccType', 
-        hasValue(search["ccType"]), 
-        searchText, 
-        text, 
-        false, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "valName",
-      title: "VALUE NAME",
-      dataIndex: "valName",
-      align: "left",
-      ellipsis: {
-        showTitle: false,
+  const baseColumns = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        dataIndex: "key",
+        align: "center",
+        width: 60,
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
-      sorter: true,
-      filteredValue: [search?.valName] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "valName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'valName', 
-        hasValue(search["valName"]), 
-        searchText, 
-        text, 
-        true, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "valCode",
-      title: "VALUE CODE",
-      dataIndex: "valCode",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.valCode] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "valCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'valCode', 
-        hasValue(search["valCode"]), 
-        searchText, 
-        text, 
-        false, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "description",
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      align: "left",
-      width: 300,
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
+      {
+        key: "code",
+        title: "CODE",
+        dataIndex: "code",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.code] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "code",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "code",
+            hasValue(search["code"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
       },
-      filteredValue: [search?.description] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'description', 
-        hasValue(search["description"]), 
-        searchText, 
-        text, 
-        true, 
-        'input', 
-        search
-      )
-    },
-    {
-      key: "status",
-      title: "STATUS",
-      dataIndex: "status",
-      align: "center",
-      width: 100,
-      sorter: true,
-      filteredValue: [search?.status] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'status', 
-        hasValue(search["status"]), 
-        searchText, 
-        text, 
-        false, 
-        'status', 
-        search
-      )
-    }
-  ], [page, pageSize, search, searchText, searchedColumn]);
+      {
+        key: "name",
+        title: "COST CENTER NAME",
+        dataIndex: "name",
+        align: "left",
+        width: 250,
+        sorter: true,
+        filteredValue: [search?.name] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "name",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "name",
+            hasValue(search["name"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "ccType",
+        title: "TYPE",
+        dataIndex: "ccType",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.ccType] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "ccType",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "ccType",
+            hasValue(search["ccType"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "valName",
+        title: "VALUE NAME",
+        dataIndex: "valName",
+        align: "left",
+        ellipsis: {
+          showTitle: false,
+        },
+        sorter: true,
+        filteredValue: [search?.valName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "valName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "valName",
+            hasValue(search["valName"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "valCode",
+        title: "VALUE CODE",
+        dataIndex: "valCode",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.valCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "valCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "valCode",
+            hasValue(search["valCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "description",
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        align: "left",
+        width: 300,
+        sorter: true,
+        ellipsis: {
+          showTitle: false,
+        },
+        filteredValue: [search?.description] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "description",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "description",
+            hasValue(search["description"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "status",
+        title: "STATUS",
+        dataIndex: "status",
+        align: "center",
+        width: 100,
+        sorter: true,
+        filteredValue: [search?.status] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "status",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search
+          ),
+      },
+    ],
+    [page, pageSize, search, searchText, searchedColumn]
+  );
 
   // breadcrumb routes
   const routes = [
@@ -319,7 +337,7 @@ const CostCenter = () => {
     }
     setModalConfirm(true);
     setCostCenterId(r?.ccId);
-    setRecord(r)
+    setRecord(r);
   };
 
   // handle cancel modals
@@ -327,8 +345,8 @@ const CostCenter = () => {
     setModalConfirm(false);
     setModalDetail(false);
     form.resetFields();
-    handleCancelTryAgain()
-    setRecord({})
+    handleCancelTryAgain();
+    setRecord({});
   };
 
   // handle confirm activation
@@ -337,12 +355,12 @@ const CostCenter = () => {
       const data = {
         id: costCenterId,
         remark: formValue?.remark,
-        status: activeOrInactive
+        status: activeOrInactive,
       };
       setBody(body);
       handleCancel();
-      handleCancelModal()
-      await dispatch(activateCostCenter(data))?.unwrap()
+      handleCancelModal();
+      await dispatch(activateCostCenter(data))?.unwrap();
       await handleFetch()?.unwrap();
     } catch (error) {
       await handleFetch()?.unwrap();
@@ -352,7 +370,7 @@ const CostCenter = () => {
   // handle detail
   const handleDetail = async (id) => {
     try {
-      setBody(id)
+      setBody(id);
       await dispatch(getCostCenterDetail(id))?.unwrap();
       setModalDetail(true);
     } catch (error) {
@@ -389,22 +407,37 @@ const CostCenter = () => {
       } else if (bodyError?.action === "DOWNLOAD_MASTER_COST_CENTER") {
         handleDownload();
       } else {
-        dispatch(getCostCenterDetail(body))
+        dispatch(getCostCenterDetail(body));
       }
-      handleFetch()
+      handleFetch();
       handleCancelModal();
     } catch (error) {
-      handleFetch()
+      handleFetch();
     }
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   // item action
   const itemActions = [
     // toolbar items
     {
-      action: 'Create',
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_COST_CENTER}>
           <ButtonComponent
@@ -414,13 +447,13 @@ const CostCenter = () => {
             Create Cost Center
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -432,36 +465,56 @@ const CostCenter = () => {
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${
+                record?.status?.toLowerCase() === "inactive" &&
+                "cursor-not-allowed"
+              }`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.ccId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record?.ccId,
+                  }
+                }
               >
                 <div>
                   <SVGIcon
                     name="IconEdit"
-                    className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                    color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"}
-                    width={24} />
+                    className={`${
+                      record?.status?.toLowerCase() === "inactive" &&
+                      "cursor-not-allowed"
+                    }`}
+                    color={
+                      record?.status?.toLowerCase() === "inactive"
+                        ? "#8D91A0"
+                        : "#ACC424"
+                    }
+                    width={24}
+                  />
                 </div>
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
@@ -476,23 +529,21 @@ const CostCenter = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   const actionCols = useColumnActionPermission(
-    ['view', 'update', 'activate'], 
+    ["view", "update", "activate"],
     itemActions
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map(
-      (col) => ({
-        ...col,
-        key: col.key || col.dataIndex || col.title,
-      })
-    );
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
     return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
@@ -522,7 +573,7 @@ const CostCenter = () => {
             </div>
           }
         >
-          <div className="my-5">
+          <div className="my-0">
             <TableRBI
               dataSource={dataSource}
               columns={processedColumns}

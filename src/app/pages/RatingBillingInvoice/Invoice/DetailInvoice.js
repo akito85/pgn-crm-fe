@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { Tooltip } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
 import axios from "axios";
-import DocViewer from "react-doc-viewer";
+import SVGIcon from "../../../../assets/Icon/index";
 
 import BaseContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
@@ -13,6 +12,7 @@ import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getCol
 import { sorterFunction } from "../../../../utils/sorterFunction";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
+import CardContainer from "../../../../components/CardContainer";
 
 export const columns = (
   search,
@@ -185,15 +185,12 @@ export const columns = (
   {
     title: "FILE",
     key: "actionButtons",
-    width: 80,
+    width: 40,
     fixed: "right",
-    align: "center",
+    isClassification: true,
     render: (_, record) => (
-      <Tooltip title="Preview File">
-        <DownloadOutlined
-          style={{ fontSize: 22, cursor: "pointer" }}
-          onClick={() => handlePreview(record)}
-        />
+      <Tooltip title="Download">
+        <SVGIcon name="IconDownload" width={20} />
       </Tooltip>
     ),
   },
@@ -301,31 +298,33 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
   }, [finalColumns]);
 
   return (
-    <BaseContainer
+    <CardContainer
       header={
-        <div className="flex justify-between">
-          <p>Invoice Log Information</p>
-          <p className="text-primary font-semibold">{invoiceNumber}</p>
+        <div className="flex -my-4 justify-between items-center">
+          <p className="w-full mt-[15px]">Invoice Log Information</p>
+          <p className="text-primary mt-[15px]">{invoiceNumber}</p>
         </div>
       }
     >
-      <TableRBI
-        dataSource={paginatedData}
-        columns={finalColumns}
-        totalData={filteredData.length}
-        current={page}
-        pageSize={pageSize}
-        onChange={(p) => setPage(p)}
-        onSizeChanger={(p, s) => {
-          setPage(1);
-          setPageSize(s);
-        }}
-        tableScrolled={{ y: 500, x: 1400 }}
-        columnDefinitions={columnDefinitions}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-      />
-    </BaseContainer>
+      <div className="-pt-3">
+        <TableRBI
+          dataSource={paginatedData}
+          columns={finalColumns}
+          totalData={filteredData.length}
+          current={page}
+          pageSize={pageSize}
+          onChange={(p) => setPage(p)}
+          onSizeChanger={(p, s) => {
+            setPage(1);
+            setPageSize(s);
+          }}
+          tableScrolled={{ y: 500, x: "max-content" }}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+        />
+      </div>
+    </CardContainer>
   );
 };
 

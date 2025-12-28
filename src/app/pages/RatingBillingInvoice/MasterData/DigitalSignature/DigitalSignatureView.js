@@ -256,18 +256,18 @@ const DigitalSignatureView = () => {
 
   // Grant Access Item
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       type={"submit"}
-    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
-    //       onClick={() => handleDownload()}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => handleDownload()}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (
