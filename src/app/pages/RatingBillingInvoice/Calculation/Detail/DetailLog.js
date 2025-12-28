@@ -1,8 +1,13 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import TableRBI from "../../../../../components/TableRBI";
 import TableCalculateLog from "./Table/TableCalculateLog";
@@ -15,7 +20,7 @@ const DetailLog = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const calculationCode = data?.calCode;
-  
+
   // state
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20); // Load 20 data per load more
@@ -23,7 +28,7 @@ const DetailLog = ({ data, tabHeader }) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  
+
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: [],
@@ -266,32 +271,41 @@ const DetailLog = ({ data, tabHeader }) => {
 
   const resultData = list_calculation_log?.result || [];
   const pageInfo = list_calculation_log?.page || {};
-  
+
   // Calculate if there's more data
   const hasMore = resultData.length < (pageInfo?.totalElements || 0);
 
   return (
-    <BaseContainer subHeader={"calculation log"}>
-      <TableRBI
-        idTable="calculation-log-table"
-        columns={processedColumns}
-        dataSource={resultData}
-        totalData={pageInfo?.totalElements || 0}
-        tableScrolled={{ x: 2000, y: 600 }}
-        onSort={onSort}
-        showExport={false}
-        columnDefinitions={columnDefinitions}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        loading={loading}
-        usePagination={false}
-        useInfiniteScroll={true}
-        onLoadMore={handleLoadMore}
-        hasMore={hasMore}
-        loadMoreThreshold={20}
-      />
-      <TableCalculateLog calculationCode={calculationCode} />
-    </BaseContainer>
+    <>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px]">CALCULATION LOG</p>
+          </div>
+        }
+      >
+        <TableRBI
+          idTable="calculation-log-table"
+          columns={processedColumns}
+          dataSource={resultData}
+          totalData={pageInfo?.totalElements || 0}
+          tableScrolled={{ x: 2000, y: 600 }}
+          onSort={onSort}
+          showExport={false}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={loading}
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={hasMore}
+          loadMoreThreshold={20}
+        />
+
+        <TableCalculateLog calculationCode={calculationCode} />
+      </CardContainer>
+    </>
   );
 };
 

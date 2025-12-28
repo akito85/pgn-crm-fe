@@ -101,13 +101,16 @@ export const getHistoryCalculationPaginate = createAsyncThunk(
 // pagination Log
 export const getCalculateLogPaginate = createAsyncThunk(
   "GET_CALCULATE_LOG_PAGINATE",
-  async ({ search, page, pageSize, sort, calCode, isLoadMore = false }, thunkAPI) => {
+  async (
+    { search, page, pageSize, sort, calCode, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "logId~desc";
       const url = `/v1/dbs/api/rbi/calculation/list-calculatelog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      
+
       return {
         ...response.data,
         isLoadMore, // Pass the flag to reducer
@@ -584,14 +587,17 @@ export const getDetailCalculationJob = createAsyncThunk(
 // detail calculation log
 export const getDetailCalculationLog = createAsyncThunk(
   "GET_DETAIL_CALCULATION_LOG",
-  async ({ calCode, search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
+  async (
+    { calCode, search, page, pageSize, sort, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationlog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
       const response = await ratingBillingHttpService.getListPagination(url);
-      
+
       return {
         ...response.data,
         isLoadMore, // Pass the flag to reducer
@@ -619,14 +625,18 @@ export const getDetailCalculationLog = createAsyncThunk(
 // detail calcultaion result
 export const getDetailCalculationResult = createAsyncThunk(
   "GET_DETAIL_CALCULATION_RESULT",
-  async ({ calCode, calType, search, page, pageSize, sort }, thunkAPI) => {
+  async ({ calCode, calType, search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationresult?calCode=${calCode}&calType=${calType}&sort=${sortParams}&page=${page}&size=${pageSize}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -646,7 +656,6 @@ export const getDetailCalculationResult = createAsyncThunk(
     }
   }
 );
-
 // detail calcultaion result no paging
 export const getDetailCalculationResultNoPaging = createAsyncThunk(
   "GET_DETAIL_CALCULATION_LOG_NO_PAGING",
@@ -832,10 +841,7 @@ const calculationSlice = createSlice({
       // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
         state.list_calculation_logp = {
-          result: [
-            ...(state.list_calculation_logp?.result || []),
-            ...newData,
-          ],
+          result: [...(state.list_calculation_logp?.result || []), ...newData],
           page: action.payload.page || {
             size: 10,
             totalElements: 0,
@@ -1011,6 +1017,36 @@ const calculationSlice = createSlice({
       state.loading = false;
       state.list_billing_cycle = [];
     },
+    //get detail calculatin result
+    [getDetailCalculationResult.pending]: (state, action) => {
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getDetailCalculationResult.fulfilled]: (state, action) => {
+      state.loading = false;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.list_calculation_result = {
+          ...action.payload,
+          result: [...(state.list_calculation_result?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.list_calculation_result = action.payload;
+      }
+    },
+    [getDetailCalculationResult.rejected]: (state, action) => {
+      state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_calculation_result = { result: [], page: {} };
+      }
+    },
     // lov billing period
     [getListBillingPeriod.pending]: (state) => {
       state.loading = true;
@@ -1057,7 +1093,7 @@ const calculationSlice = createSlice({
       state.loading = false;
     },
     // get detail calculation log
-     [getDetailCalculationLog.pending]: (state, action) => {
+    [getDetailCalculationLog.pending]: (state, action) => {
       // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
@@ -1071,10 +1107,7 @@ const calculationSlice = createSlice({
       // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
         state.list_calculation_log = {
-          result: [
-            ...(state.list_calculation_log?.result || []),
-            ...newData,
-          ],
+          result: [...(state.list_calculation_log?.result || []), ...newData],
           page: action.payload.page || {
             size: 10,
             totalElements: 0,
