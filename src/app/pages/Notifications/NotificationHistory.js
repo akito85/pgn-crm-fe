@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   List,
@@ -91,6 +91,16 @@ const NotificationHistory = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedType, setSelectedType] = useState(null);
   const [selectedPriority, setSelectedPriority] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionClass, setTransitionClass] = useState('');
+
+  const location = useLocation();
+
+  // Page enter animation
+  useEffect(() => {
+    const fromSettings = location.state?.from === 'settings';
+    setTransitionClass(fromSettings ? 'page-transition-enter-from-right' : 'page-transition-enter-from-left');
+  }, [location]);
 
   // Get filtered notifications based on all filters
   const getFilteredNotifications = () => {
@@ -577,6 +587,7 @@ const NotificationHistory = () => {
 
   return (
   <LayoutMenu>
+    <div className={transitionClass}>
     <div class="w-full flex flex-col justify-end items-end mb-5">
       <ButtonComponent 
         type={"submit"}
@@ -595,8 +606,13 @@ const NotificationHistory = () => {
         }
           className="p-5"
         onClick={() => {
-            navigate("/notifications/settings/view");
+            setIsTransitioning(true);
+            setTransitionClass('page-transition-exit-to-right');
+            setTimeout(() => {
+              navigate("/notifications/settings/view", { state: { from: 'history' } });
+            }, 300);
         }}
+        disabled={isTransitioning}
       >
           Setting
       </ButtonComponent>
@@ -906,6 +922,7 @@ const NotificationHistory = () => {
       >
         Back
       </button>
+    </div>
     </div>
   </LayoutMenu>
   );
