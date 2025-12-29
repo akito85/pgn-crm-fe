@@ -88,7 +88,7 @@ const CalculationDetail = () => {
           />
         </div>
 
-        <div className="w-full flex justify-start my-5">
+        <div className="w-full flex justify-start">
           <ButtonComponent
             type="submit"
             border={false}
