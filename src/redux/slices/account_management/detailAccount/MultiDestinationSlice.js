@@ -408,10 +408,9 @@ export const getMdApprovalHistory = createAsyncThunk(
   "GET_MD_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/approval-history/${id}`;
-      // const response = await accountManagementService.getDetail(url);
-      // return Array.isArray(response.data) ? null : response.data;
-      return {};
+      const url = `/v1/dbs/api/multi-destination/approval-history/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
