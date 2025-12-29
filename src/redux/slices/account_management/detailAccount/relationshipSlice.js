@@ -55,10 +55,16 @@ export const getRelationshipListAdvanced = createAsyncThunk(
   "GET_RELATIONSHIP_LIST_ADVANCED",
   async ({ idAccount, page, pageSize, sort, search, body }, thunkAPI) => {
     try {
-      const sortParam = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const searchParam = search ? `&searchs=${search}` : "";
+      // empty string for default sort
+      const sortParam = sort === undefined || sort === "" ? "" : sort;
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const requestBody = {
+        ...body,
+        page,
+        size: pageSize,
+        sort: sortParam,
+      };
+      const response = await accountManagementService.updateDataWithMethodPost(url, requestBody);
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(

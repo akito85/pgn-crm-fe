@@ -760,7 +760,7 @@ export const getDetailPrabillingResult = createAsyncThunk(
 export const getDetailPrabillingLog = createAsyncThunk(
   "GET_DETAIL_PRABILLING_LOG",
   async (
-    { initCode, page = 0, size = 10, sort = "", search = "" },
+    { initCode, page = 0, size = 10, sort = "", search = "", isLoadMore = false },
     thunkAPI
   ) => {
     try {
@@ -784,6 +784,7 @@ export const getDetailPrabillingLog = createAsyncThunk(
           totalPages: 0,
           number: 0,
         },
+        isLoadMore, // Pass the flag to reducer
       };
     } catch (error) {
       const message =
@@ -1624,29 +1625,54 @@ const prabillingSlice = createSlice({
     },
 
     // Get Detail Prabilling Log
-    [getDetailPrabillingLog.pending]: (state) => {
-      state.loading_log = true;
+    [getDetailPrabillingLog.pending]: (state, action) => {
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_log = true;
+      }
     },
     [getDetailPrabillingLog.fulfilled]: (state, action) => {
       state.loading_log = false;
-      state.detail_prabilling_log = {
-        content: action.payload.result || [],
-        totalPages: action.payload.page?.totalPages || 0,
-        totalElements: action.payload.page?.totalElements || 0,
-        pageable: {
-          pageNumber: action.payload.page?.number || 0,
-          pageSize: action.payload.page?.size || 10,
-        },
-      };
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.detail_prabilling_log = {
+          content: [
+            ...(state.detail_prabilling_log?.content || []),
+            ...newData,
+          ],
+          totalPages: action.payload.page?.totalPages || 0,
+          totalElements: action.payload.page?.totalElements || 0,
+          pageable: {
+            pageNumber: action.payload.page?.number || 0,
+            pageSize: action.payload.page?.size || 10,
+          },
+        };
+      } else {
+        state.detail_prabilling_log = {
+          content: newData,
+          totalPages: action.payload.page?.totalPages || 0,
+          totalElements: action.payload.page?.totalElements || 0,
+          pageable: {
+            pageNumber: action.payload.page?.number || 0,
+            pageSize: action.payload.page?.size || 10,
+          },
+        };
+      }
     },
-    [getDetailPrabillingLog.rejected]: (state) => {
+    [getDetailPrabillingLog.rejected]: (state, action) => {
       state.loading_log = false;
-      state.detail_prabilling_log = {
-        content: [],
-        pageable: {},
-        totalPages: 0,
-        totalElements: 0,
-      };
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.detail_prabilling_log = {
+          content: [],
+          pageable: {},
+          totalPages: 0,
+          totalElements: 0,
+        };
+      }
     },
 
     // Download Prabilling Result

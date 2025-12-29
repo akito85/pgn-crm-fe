@@ -1,5 +1,5 @@
 // React imports
-import { Fragment, useRef, useState, useEffect } from "react";
+import { Fragment, useRef, useState, useEffect, useMemo, useCallback } from "react";
 
 // Ant Design imports
 import { Checkbox, Tooltip, Spin, Popover, Space } from "antd";
@@ -28,6 +28,7 @@ import { TablePaginationNew } from "poc-table-dragandrop";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 
 // Local imports
 import RelationshipDetail from "./RelationshipDetail";
@@ -44,86 +45,83 @@ import moment from "moment";
 // Import TablePagination for nested table in expandable rows
 import TablePagination from "../../../../../../components/TablePagination";
 
-// Expandable row renderer for Related Detail
+// ============================================
+// CONSTANTS (moved outside component for performance)
+// ============================================
+
+// Mock attachment data for approval detail
+const MOCK_ATTACHMENT_DATA = [
+  {
+    key: 1,
+    type: "Contract",
+    fileName: "relationship_contract.pdf",
+    fileSize: "2.5 MB",
+  },
+  {
+    key: 2,
+    type: "Agreement",
+    fileName: "partnership_agreement.docx",
+    fileSize: "1.8 MB",
+  },
+];
+
+/**
+ * Format status text to Title Case with special handling
+ * @param {string} status - Raw status string
+ * @param {Object} statusMap - Optional mapping for specific status values
+ * @returns {string} Formatted status text
+ */
+const formatStatusText = (status, statusMap = {}) => {
+  if (!status) return status;
+
+  // Check for specific mappings first
+  const upperStatus = status.toUpperCase().replace(/_/g, " ");
+  if (statusMap[upperStatus]) return statusMap[upperStatus];
+  if (statusMap[status]) return statusMap[status];
+
+  // Default: Title Case
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+};
+
+/**
+ * Create nested column configuration (DRY helper)
+ * @param {string} title - Column title
+ * @param {string} dataIndex - Data index for the column
+ * @returns {Object} Column configuration
+ */
+const createNestedColumn = (title, dataIndex) => ({
+  title: () => (
+    <div className="flex items-center justify-between w-full">
+      <span>{title}</span>
+    </div>
+  ),
+  dataIndex,
+  align: "left",
+  sorter: (a, b) => (a[dataIndex] || "").localeCompare(b[dataIndex] || ""),
+  render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+});
+
+// Nested columns configuration (memoized outside component)
+const NESTED_COLUMNS = [
+  {
+    title: "NO",
+    align: "center",
+    width: 60,
+    render: (text, object, index) => (
+      <div style={{ padding: "8px 0" }}>{index + 1}</div>
+    ),
+  },
+  createNestedColumn("ACCOUNT NUMBER", "accountNumber"),
+  createNestedColumn("ACCOUNT NAME", "accountName"),
+  createNestedColumn("ACCOUNT CATEGORY", "accountCategory"),
+  createNestedColumn("SOR", "sor"),
+  createNestedColumn("COST CENTER", "costCenter"),
+  createNestedColumn("METER READING CODE", "meterReadingCode"),
+];
+
+// Expandable row renderer for Related Detail (uses memoized NESTED_COLUMNS)
 const expandedRowRender = (record) => {
   const relatedDetailData = record?.relatedDetail || [];
-
-  const nestedColumns = [
-    {
-      title: "NO",
-      align: "center",
-      width: 60,
-      render: (text, object, index) => (
-        <div style={{ padding: "8px 0" }}>{index + 1}</div>
-      ),
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>ACCOUNT NUMBER</span>
-        </div>
-      ),
-      dataIndex: "accountNumber",
-      align: "left",
-      sorter: (a, b) => (a.accountNumber || "").localeCompare(b.accountNumber || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>ACCOUNT NAME</span>
-        </div>
-      ),
-      dataIndex: "accountName",
-      align: "left",
-      sorter: (a, b) => (a.accountName || "").localeCompare(b.accountName || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>ACCOUNT CATEGORY</span>
-        </div>
-      ),
-      dataIndex: "accountCategory",
-      align: "left",
-      sorter: (a, b) => (a.accountCategory || "").localeCompare(b.accountCategory || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>SOR</span>
-        </div>
-      ),
-      dataIndex: "sor",
-      align: "left",
-      sorter: (a, b) => (a.sor || "").localeCompare(b.sor || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>COST CENTER</span>
-        </div>
-      ),
-      dataIndex: "costCenter",
-      align: "left",
-      sorter: (a, b) => (a.costCenter || "").localeCompare(b.costCenter || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>METER READING CODE</span>
-        </div>
-      ),
-      dataIndex: "meterReadingCode",
-      align: "left",
-      sorter: (a, b) => (a.meterReadingCode || "").localeCompare(b.meterReadingCode || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-  ];
 
   return (
     <div className="bg-blue-50 -mx-2 pl-6 py-2">
@@ -132,7 +130,7 @@ const expandedRowRender = (record) => {
         useSelect={false}
         usePagination={false}
         dataSource={relatedDetailData}
-        columns={nestedColumns}
+        columns={NESTED_COLUMNS}
         className="related-detail-nested-table"
       />
     </div>
@@ -334,20 +332,12 @@ const columns = (
         true
       ),
       render: (statusApproval) => {
-        let text;
-        switch (statusApproval) {
-          case "WAITING APPROVAL":
-          case "WAITING_FOR_APPROVAL":
-          case "WAITING_APPROVAL":
-            text = "Waiting Approval";
-            break;
-          default:
-            text = statusApproval
-              ? statusApproval.charAt(0).toUpperCase() +
-              statusApproval.slice(1).toLowerCase()
-              : statusApproval;
-            break;
-        }
+        const statusMap = {
+          "WAITING APPROVAL": "Waiting Approval",
+          "WAITING FOR APPROVAL": "Waiting Approval",
+          "WAITING_APPROVAL": "Waiting Approval",
+        };
+        const text = formatStatusText(statusApproval, statusMap);
         return text
           ? renderColumn(
             "statusApproval",
@@ -377,23 +367,7 @@ const columns = (
         true
       ),
       render: (status) => {
-        let text;
-        switch (status) {
-          case "ACTIVE":
-            text = "Active";
-            break;
-          case "INACTIVE":
-            text = "Inactive";
-            break;
-          case "DRAFT":
-            text = "Draft";
-            break;
-          default:
-            text = status
-              ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-              : status;
-            break;
-        }
+        const text = formatStatusText(status);
         return text
           ? renderColumn(
             "status",
@@ -456,24 +430,15 @@ const RelationshipTable = ({
   const [modalConfirmReject, setModalConfirmReject] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState(null);
 
-  // Mock attachment data for approval detail
-  const mockAttachmentData = [
-    {
-      key: 1,
-      type: "Contract",
-      fileName: "relationship_contract.pdf",
-      fileSize: "2.5 MB",
-    },
-    {
-      key: 2,
-      type: "Agreement",
-      fileName: "partnership_agreement.docx",
-      fileSize: "1.8 MB",
-    },
-  ];
+  // Inactivate modal states
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactivateRelationshipId, setInactivateRelationshipId] = useState(0);
+  const [inactivateRelationshipName, setInactivateRelationshipName] = useState("");
 
-  // Fetch relationship data from API
-  useEffect(() => {
+
+
+  // Memoized fetch function (DRY + performance optimization)
+  const fetchRelationshipData = useCallback(() => {
     if (idAccount) {
       dispatch(
         getRelationshipListAdvanced({
@@ -491,6 +456,11 @@ const RelationshipTable = ({
       );
     }
   }, [dispatch, idAccount, page, pageSize, sort, search, tempInputFields, listType]);
+
+  // Fetch relationship data from API
+  useEffect(() => {
+    fetchRelationshipData();
+  }, [fetchRelationshipData]);
 
   // Update table data when API response changes
   useEffect(() => {
@@ -547,34 +517,38 @@ const RelationshipTable = ({
     });
   };
 
-  const handleActiveOrInactive = (record) => {
-    console.log("Toggle activation for:", record.id);
+  /**
+   * Open or close inactivate modal
+   */
+  const handleInactivateModal = (show, relationshipId = 0, relationshipName = "") => {
+    if (show) {
+      setInactivateRelationshipId(relationshipId);
+      setInactivateRelationshipName(relationshipName);
+      setShowInactiveModal(true);
+    } else {
+      setInactivateRelationshipId(0);
+      setInactivateRelationshipName("");
+      setShowInactiveModal(false);
+    }
+  };
 
-    // Call API to toggle relationship status
+  /**
+   * Handle inactivate relationship
+   */
+  const handleInactivateRelationship = (remark, handleClear) => {
     dispatch(
       toggleRelationshipStatus({
-        relationshipId: record.id,
-        remarks: "test", // Hardcoded as requested
+        relationshipId: inactivateRelationshipId,
+        remarks: remark,
       })
-    ).then((result) => {
-      // Only refresh the list if the API call was successful
-      if (result.type === "TOGGLE_RELATIONSHIP_STATUS/fulfilled") {
-        dispatch(
-          getRelationshipListAdvanced({
-            idAccount,
-            page,
-            pageSize,
-            sort,
-            search: encodeURIComponent(JSON.stringify(search)),
-            body: {
-              inputFields: tempInputFields,
-              searchs: search,
-              listType: listType,
-            },
-          })
-        );
-      }
-    });
+    )
+      .unwrap()
+      .then(() => {
+        fetchRelationshipData(); // Use memoized fetch function
+        setShowInactiveModal(false);
+        handleClear();
+      })
+      .catch(() => { });
   };
 
   // Approval handlers
@@ -598,9 +572,8 @@ const RelationshipTable = ({
     setModalConfirmReject(true);
   };
 
-  const handleConfirmApprove = (remark) => {
-    const action = "APPROVE";
-
+  // Unified handler for approve/reject actions (DRY optimization)
+  const handleConfirmAction = useCallback((remark, action) => {
     const body = selectedRows.map((row) => ({
       id: row.id,
       approvalId: row.approvalId || row.tappId,
@@ -611,40 +584,22 @@ const RelationshipTable = ({
     dispatch(approveOrRejectRelationship({ idAccount, body, action }))
       .unwrap()
       .then(() => {
-        setModalConfirmApprove(false);
+        if (action === "APPROVE") {
+          setModalConfirmApprove(false);
+        } else {
+          setModalConfirmReject(false);
+        }
         setSelectedRowKeys([]);
         setSelectedRows([]);
-        // Stay in approval mode and refresh data
+        // Refresh table data after action
+        fetchRelationshipData();
+        // Stay in approval mode
         handleIsApproval(true);
       })
       .catch(() => {
         // Error already handled in thunk
       });
-  };
-
-  const handleConfirmReject = (remark) => {
-    const action = "REJECT";
-
-    const body = selectedRows.map((row) => ({
-      id: row.id,
-      approvalId: row.approvalId || row.tappId,
-      action,
-      description: remark,
-    }));
-
-    dispatch(approveOrRejectRelationship({ idAccount, body, action }))
-      .unwrap()
-      .then(() => {
-        setModalConfirmReject(false);
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
-        // Stay in approval mode and refresh data
-        handleIsApproval(true);
-      })
-      .catch(() => {
-        // Error already handled in thunk
-      });
-  };
+  }, [dispatch, idAccount, selectedRows, handleIsApproval, fetchRelationshipData]);
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -661,7 +616,7 @@ const RelationshipTable = ({
   // Action items for table
   const itemsActionView = (
     handleDetail,
-    handleActiveOrInactive,
+    handleInactivateModal,
     handleApprovalHistory,
     handleApprovalDetail
   ) => [
@@ -744,35 +699,40 @@ const RelationshipTable = ({
         },
       },
       {
-        action: "Active",
+        action: "Inactive",
         type: "table",
         render: (record, data_length) => {
-          const isActive = record?.status === "Active" || record?.status === "ACTIVE";
+          // Enable only when status is ACTIVE and statusApproval is APPROVED
+          const isApproved = record?.statusApproval === "APPROVED" || record?.statusApproval === "approved";
+          const isActive = record?.status === "ACTIVE" || record?.status === "Active";
+          const isEnabled = isApproved && isActive;
+          const isChecked = !isActive; // Checked when inactive
 
           return data_length > 3 ? (
             <ButtonComponent
               icon={
                 <Checkbox
                   className="inactive-check"
-                  checked={isActive}
-                  disabled={false}
+                  checked={isChecked}
+                  disabled={!isEnabled}
                 />
               }
               border={false}
-              onClick={() => handleActiveOrInactive(record)}
+              disabled={!isEnabled}
+              onClick={() => isEnabled && handleInactivateModal(true, record?.id, record?.subjectName || record?.objectName || "")}
             >
-              <span className="text-black ml-5">
-                {isActive ? "Active" : "Inactive"}
+              <span className={`${!isEnabled ? "text-gray-400" : "text-black"} ml-5`}>
+                Inactive
               </span>
             </ButtonComponent>
           ) : (
-            <Tooltip title={isActive ? "Active" : "Inactive"}>
+            <Tooltip title="Inactive">
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleActiveOrInactive(record)}
-                  checked={isActive}
-                  disabled={false}
+                  disabled={!isEnabled}
+                  checked={isChecked}
+                  onClick={() => handleInactivateModal(true, record?.id, record?.subjectName || record?.objectName || "")}
                 />
               </div>
             </Tooltip>
@@ -793,15 +753,13 @@ const RelationshipTable = ({
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconLogHistory"
-                  color="#0075bf"
-                  width={24}
-                  onClick={() => handleApprovalHistory(record)}
-                  className="cursor-pointer"
-                />
-              </div>
+              <SVGIcon
+                name="IconLogHistory"
+                color="#0075bf"
+                width={24}
+                onClick={() => handleApprovalHistory(record)}
+                className="cursor-pointer"
+              />
             </Tooltip>
           );
         },
@@ -836,7 +794,7 @@ const RelationshipTable = ({
         return (
           <Tooltip title="Approval History">
             <div
-              className="cursor-pointer pt-1"
+              className="cursor-pointer"
               onClick={() => handleApprovalHistory(record)}
             >
               <SVGIcon name="IconLogHistory" color="#0075bf" width={24} />
@@ -858,7 +816,7 @@ const RelationshipTable = ({
         ? itemsApprovalMode
         : itemsActionView(
           handleDetail,
-          handleActiveOrInactive,
+          handleInactivateModal,
           handleApprovalHistory,
           handleApprovalDetail
         );
@@ -916,8 +874,8 @@ const RelationshipTable = ({
     },
   };
 
-  // Row selection config for approval mode
-  const rowSelection = approvalMode
+  // Memoized row selection config for approval mode (performance optimization)
+  const rowSelection = useMemo(() => approvalMode
     ? {
       selectedRowKeys,
       onChange: onSelectChange,
@@ -929,7 +887,21 @@ const RelationshipTable = ({
         },
       }),
     }
-    : null;
+    : null, [approvalMode, selectedRowKeys, onSelectChange]);
+
+  // Memoized columns array (performance optimization)
+  const memoizedColumns = useMemo(() => [
+    ...columns(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    actionColumn,
+  ], [search, page, pageSize, searchedColumn, searchText, actionColumn]);
 
   return (
     <Fragment>
@@ -942,18 +914,7 @@ const RelationshipTable = ({
           tableScrolled={{ y: 400, x: 2000 }}
           onChange={handleChangeSize}
           onSort={onSort}
-          columns={[
-            ...columns(
-              search,
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch
-            ),
-            actionColumn,
-          ]}
+          columns={memoizedColumns}
           rowSelection={rowSelection}
           rowKey="id"
           rowClassName={(record) =>
@@ -1022,7 +983,7 @@ const RelationshipTable = ({
       >
         <RelationshipApprovalDetail
           data={approvalDetailData}
-          attachmentData={mockAttachmentData}
+          attachmentData={MOCK_ATTACHMENT_DATA}
         />
       </ModalCustom>
 
@@ -1041,7 +1002,7 @@ const RelationshipTable = ({
       <ModalConfirmApproval
         isOpen={modalConfirmApprove}
         handleCancel={() => setModalConfirmApprove(false)}
-        handleConfirm={handleConfirmApprove}
+        handleConfirm={(remark) => handleConfirmAction(remark, "APPROVE")}
         type="approve"
         selectedData={selectedRows}
       />
@@ -1050,9 +1011,18 @@ const RelationshipTable = ({
       <ModalConfirmApproval
         isOpen={modalConfirmReject}
         handleCancel={() => setModalConfirmReject(false)}
-        handleConfirm={handleConfirmReject}
+        handleConfirm={(remark) => handleConfirmAction(remark, "REJECT")}
         type="reject"
         selectedData={selectedRows}
+      />
+
+      {/* Modal Inactivate Confirmation */}
+      <ModalApproveOrReject
+        isOpen={showInactiveModal}
+        header={"INACTIVATE"}
+        handleCloseModal={() => handleInactivateModal(false)}
+        customMessage={`Are you sure you want to inactivate relationship - ${inactivateRelationshipName}?`}
+        onFinish={({ remark }, handleClear) => handleInactivateRelationship(remark, handleClear)}
       />
     </Fragment>
   );

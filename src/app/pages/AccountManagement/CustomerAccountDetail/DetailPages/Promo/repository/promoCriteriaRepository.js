@@ -45,6 +45,7 @@ const promoCriteriaRepository = {
       title: "Action",
       dataIndex: "action",
       key: "action",
+      fixed: 'right',
       disableFilter: true,
       disableSorter: true,
       render: (_, record) => (

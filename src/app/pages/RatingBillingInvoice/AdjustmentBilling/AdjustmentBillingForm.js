@@ -22,7 +22,6 @@ import {
   getListType,
 } from "../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import ModalBack from "../../../../components/Modal/ModalBack";
-import BaseContainer from "../../../../components/BaseContainer";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
 import { dateFormatting } from "../../../../utils";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
@@ -32,6 +31,7 @@ import { configApp } from "../../../../constants/configApp";
 import { getConfigFileRBIData } from "../../../../redux/slices/attachmentSlice";
 import { showModalError } from "../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
+import CardContainer from "../../../../components/CardContainer";
 
 const AdjustmentBillingForm = ({ type }) => {
   // Selector
@@ -250,7 +250,7 @@ const AdjustmentBillingForm = ({ type }) => {
       setDataInvoice({});
       setIdInvoice();
       setCycleId();
-      setRangeDisableDate({})
+      setRangeDisableDate({});
     } else {
       dataUpdate(dataDetail);
     }
@@ -522,7 +522,7 @@ const AdjustmentBillingForm = ({ type }) => {
           </div>
 
           <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"Approval Information"}>
+            <CardContainer subHeader={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -530,11 +530,11 @@ const AdjustmentBillingForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
-            <BaseContainer header={"Attachment Information"}>
+            <CardContainer subHeader={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -548,27 +548,15 @@ const AdjustmentBillingForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
+          <div className="mt-[10px] flex">
+            <ButtonComponent type={"submit"} onClick={() => setModalBack(true)}>
               Back
             </ButtonComponent>
 
-            <div className={"w-full flex justify-end gap-5"}>
+            <div className={"w-full flex justify-end gap-1"}>
               <Form.Item>
                 <ButtonComponent
                   icon={
@@ -578,7 +566,7 @@ const AdjustmentBillingForm = ({ type }) => {
                           ? `IconButtonReset`
                           : `IconButtonClear`
                       }
-                      width={24}
+                      width={20}
                     />
                   }
                   type="submit"

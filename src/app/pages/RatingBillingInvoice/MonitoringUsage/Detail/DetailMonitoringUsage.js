@@ -57,7 +57,7 @@ const DetailMonitoringUsage = () => {
   // use state
   const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); // Load more 20 data each time
+  const [loadMoreSize] = useState(20);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -98,7 +98,7 @@ const DetailMonitoringUsage = () => {
         getDetailBatch({
           batchId: location?.state?.id,
           page: 1,
-          pageSize: 100, // Initial load 100 items
+          pageSize: 100,
         })
       );
       dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
@@ -157,13 +157,12 @@ const DetailMonitoringUsage = () => {
     const nextPage = page + 1;
     const totalPages = detail_batch?.usageList?.page?.totalPages || 0;
 
-    // Check if there's more data to load
     if (nextPage <= totalPages && location?.state?.id) {
       await dispatch(
         getDetailBatch({
           batchId: location?.state?.id,
           page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
+          pageSize: loadMoreSize,
         })
       );
       setPage(nextPage);
@@ -273,7 +272,7 @@ const DetailMonitoringUsage = () => {
           getDetailBatch({
             batchId: location?.state?.id,
             page: 1,
-            pageSize: page * loadMoreSize, // Keep current loaded data
+            pageSize: page * loadMoreSize,
           })
         );
       }
@@ -518,10 +517,10 @@ const DetailMonitoringUsage = () => {
                       {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                     <DetailText label="Updated Date">
-                      {detail_batch?.batchInformation?.updatedDate}
+                      {detail_batch?.batchInformation?.uploadDate}
                     </DetailText>
                     <DetailText label="Updated By">
-                      {detail_batch?.batchInformation?.updatedBy}
+                      {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                   </div>
                 </BaseContainer>

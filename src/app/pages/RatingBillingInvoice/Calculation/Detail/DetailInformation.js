@@ -2,11 +2,10 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import { Form, Spin, Steps } from "antd";
+import { Form, Spin, Steps, Tabs } from "antd";
 import InputComponent from "../../../../../components/InputComponent";
 import moment from "moment";
 import {
@@ -16,7 +15,7 @@ import {
   retryData,
   getDetailCalculationLog,
 } from "../../../../../redux/slices/rating_billing_invoice/calculation";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { columnsRecalculate } from "./Table/TableRecalculate";
 import { columnsCalculation } from "./Table/TableCalculation";
@@ -39,9 +38,9 @@ const DetailInformation = ({ data, tabHeader }) => {
   const containerRef = useRef(null);
   const searchInputCal = useRef(null);
 
-  // state
+  // state untuk infinite scroll
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(20); // Load 20 data each time
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
@@ -60,11 +59,12 @@ const DetailInformation = ({ data, tabHeader }) => {
   const [searchTextCal, setSearchTextCal] = useState("");
   const [searchedColumnCal, setSearchedColumnCal] = useState("");
 
-  const [segmentedPage, setSegmentedPage] = useState("");
-  const [tabData, setTabData] = useState([
-    { value: "Rating Result" },
-    { value: "Billing Result" },
-  ]);
+  const [activeTab, setActiveTab] = useState("rating");
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
   useEffect(() => {
     dispatch(
@@ -78,62 +78,43 @@ const DetailInformation = ({ data, tabHeader }) => {
     );
   }, [tabHeader, data?.calCode, dispatch]);
 
-  // use Effect
+  // Initial fetch dengan 100 data
   useEffect(() => {
-    if (
-      tabHeader === "Calculation Information" &&
-      data?.calCode &&
-      segmentedPage
-    ) {
-      let tempSearch = "";
-      for (const dataIndex in search) {
-        if (Object.hasOwnProperty.call(search, dataIndex)) {
-          const tempSearchText = search[dataIndex];
-          if (tempSearchText) {
-            tempSearch += `${dataIndex}~${tempSearchText},`;
-          }
-        }
-      }
-      tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    if (tabHeader === "Calculation Information" && data?.calCode && activeTab) {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
         getDetailCalculationResult({
           calCode: data?.calCode,
-          calType: segmentedPage === "Rating Result" ? 621 : 623,
-          page,
-          pageSize,
+          calType: activeTab === "rating" ? 621 : 623,
+          page: 1,
+          pageSize: 100, // Initial load 100 data
           sort,
           search: reqSearch,
+          isLoadMore: false,
         })
       );
+      setPage(1);
     }
-  }, [segmentedPage, dispatch, data, page, pageSize, search, sort, tabHeader]);
+  }, [activeTab, dispatch, data, search, sort, tabHeader]);
 
   useEffect(() => {
-    if (
-      tabHeader === "Calculation Information" &&
-      data?.calCode &&
-      segmentedPage
-    ) {
+    if (tabHeader === "Calculation Information" && data?.calCode && activeTab) {
       dispatch(
         getDetailCalculationResultNoPaging({
           calCode: data?.calCode,
-          calType: segmentedPage === "Rating Result" ? 621 : 623,
+          calType: activeTab === "rating" ? 621 : 623,
         })
       );
     }
-  }, [dispatch, segmentedPage, data]);
+  }, [dispatch, activeTab, data]);
 
   useEffect(() => {
     if (data?.calType === 621) {
-      setSegmentedPage("Rating Result");
-      setTabData([{ value: "Rating Result" }]);
+      setActiveTab("rating");
     } else if (data?.calType === 623) {
-      setSegmentedPage("Billing Result");
-      setTabData([{ value: "Billing Result" }]);
+      setActiveTab("billing");
     } else {
-      setSegmentedPage("Rating Result");
-      setTabData([{ value: "Rating Result" }, { value: "Billing Result" }]);
+      setActiveTab("rating");
     }
   }, [data]);
 
@@ -142,117 +123,38 @@ const DetailInformation = ({ data, tabHeader }) => {
     return list_calculation_log?.result?.[0] || null;
   }, [list_calculation_log]);
 
-  //handleTab
-  const handleSegmentedPage = (e) => {
-    setSegmentedPage((prevState) => {
-      const tempValue = e.target.value;
-      if (tempValue !== prevState) {
+  // Handle tab change
+  const handleTabChange = (key) => {
+    setActiveTab((prevState) => {
+      if (key !== prevState) {
         setPage(1);
-        setPageSize(10);
         setSearch({});
         setSort("");
       }
-      return tempValue;
+      return key;
     });
   };
 
-  const tempTabs = useMemo(
-    () => <RadioTabs data={tabData} onChange={handleSegmentedPage} />,
-    [segmentedPage, handleSegmentedPage, tabData]
-  );
+  // Prepare tab items
+  const tabItems = useMemo(() => {
+    const items = [];
 
-  const renderSection = (segmentedPage) => {
-    switch (segmentedPage) {
-      case "Rating Result":
-        return (
-          <>
-            <div className={"w-full flex justify-end gap-2 my-2"}>
-              <ButtonComponent
-                type={"submit"}
-                border={false}
-                icon={<SVGIcon name={"IconRatingReconculate"} width={24} />}
-                onClick={() => setModalRecalculateRating(true)}
-              >
-                Recalculate
-              </ButtonComponent>
-              <ButtonComponent
-                onClick={() => setOpenRetry(true)}
-                type={"submit"}
-                border={false}
-                icon={<SVGIcon name={`IconButtonReset`} width={24} />}
-              >
-                Retry
-              </ButtonComponent>
-            </div>
-            <div className="my-10">
-              <TablePaginationNew
-                columns={columnsCalculation(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search
-                )}
-                dataSource={list_calculation_result?.result}
-                totalData={list_calculation_result?.page?.totalElements || 0}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChangePage}
-                tableScrolled={{ x: 2000, y: 600 }}
-                onSort={onSort}
-              />
-            </div>
-          </>
-        );
-      case "Billing Result":
-        return (
-          <>
-            <div className={"w-full flex justify-end gap-2 my-2"}>
-              <ButtonComponent
-                type={"submit"}
-                border={false}
-                icon={<SVGIcon name={"IconRatingReconculate"} width={24} />}
-                onClick={() => setModalRecalculateRating(true)}
-              >
-                Recalculate
-              </ButtonComponent>
-              <ButtonComponent
-                onClick={() => setOpenRetry(true)}
-                type={"submit"}
-                border={false}
-                icon={<SVGIcon name={`IconButtonReset`} width={24} />}
-              >
-                Retry
-              </ButtonComponent>
-            </div>
-            <div className="my-10">
-              <TablePaginationNew
-                columns={columnsCalculation(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search
-                )}
-                dataSource={list_calculation_result?.result}
-                totalData={list_calculation_result?.page?.totalElements || 0}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChangePage}
-                tableScrolled={{ x: 2000, y: 600 }}
-                onSort={onSort}
-              />
-            </div>
-          </>
-        );
-      default:
-        return <></>;
+    if (data?.calType !== 623) {
+      items.push({
+        key: "rating",
+        label: "Rating Result",
+      });
     }
-  };
+
+    if (data?.calType !== 621) {
+      items.push({
+        key: "billing",
+        label: "Billing Result",
+      });
+    }
+
+    return items;
+  }, [data?.calType]);
 
   // handle search column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -295,7 +197,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setSearchedColumnCal(tempSearchColumn);
     setSearchRecalculate((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPageCal(1);
       }
       return {
         ...prevState,
@@ -313,12 +215,32 @@ const DetailInformation = ({ data, tabHeader }) => {
     setSort(dataSort);
   };
 
-  // change table pagination
-  const handleChangePage = (page, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // Load more handler untuk infinite scroll
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = list_calculation_result?.page?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      const reqSearch = encodeURIComponent(JSON.stringify(search));
+      await dispatch(
+        getDetailCalculationResult({
+          calCode: data?.calCode,
+          calType: activeTab === "rating" ? 621 : 623,
+          page: nextPage,
+          pageSize: pageSize, // Load 20 more
+          sort,
+          search: reqSearch,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  // Calculate if there's more data
+  const hasMore =
+    (list_calculation_result?.result?.length || 0) <
+    (list_calculation_result?.page?.totalElements || 0);
 
   // change table recalculate modal
   const handleChangePageCal = (pageCal, pageSizeChangeCal) => {
@@ -413,32 +335,35 @@ const DetailInformation = ({ data, tabHeader }) => {
     return type === "data" ? result : result.length;
   };
 
+  const filterDataRecalculate = useMemo(() => {
+    const filtered = (list_calculation_no_paging || [])
+      .filter((item) => item.calType !== 624 && !item.isTry)
+      ?.map((item) => {
+        return Object.fromEntries(
+          Object.entries(item).map(([key, value]) => [
+            key,
+            value === null ? "" : value,
+          ])
+        );
+      });
+    return filterDataByPage(filtered, "data");
+  }, [list_calculation_no_paging]);
+
   const steps = () => {
     let temp = [
       {
         title: "Choose Customer",
         content: (
           <>
-            <p className="text-primary text-xs uppercase py-[20px] gap-5">
+            <p className="text-primary text-xs uppercase py-2 gap-5">
               CUSTOMER INFORMATION
             </p>
             {modalRecalculateRating ? (
               <div>
-                <TablePaginationNew
-                  type="FE"
-                  dataSource={filterDataByPage(
-                    (list_calculation_no_paging || [])
-                      .filter((item) => item.calType !== 624 && !item.isTry)
-                      ?.map((item) => {
-                        return Object.fromEntries(
-                          Object.entries(item).map(([key, value]) => [
-                            key,
-                            value === null ? "" : value,
-                          ])
-                        );
-                      }),
-                    "data"
-                  )}
+                <TableRBI
+                  idTable="recalculate-modal-table"
+                  size="small"
+                  dataSource={filterDataRecalculate}
                   columns={columnsRecalculate(
                     pageCal,
                     pageSizeCal,
@@ -448,21 +373,21 @@ const DetailInformation = ({ data, tabHeader }) => {
                     handleSearchRecalculate,
                     searchRecalculate
                   )}
-                  current={pageCal}
-                  pageSize={pageSizeCal}
-                  totalData={filterDataByPage(
-                    (list_calculation_no_paging || []).filter(
-                      (item) => item.calType !== 624 && !item.isTry
-                    ),
-                    "length"
-                  )}
+                  totalData={filterDataRecalculate.length}
                   tableScrolled={{
                     x: 2500,
                     y: 525,
                   }}
                   rowSelection={rowSelection}
-                  onChange={handleChangePageCal}
+                  loading={loading}
+                  showExport={false}
+                  usePagination={false}
+                  useInfiniteScroll={false}
                 />
+                <div className="flex justify-end mt-2 text-sm text-gray-600">
+                  Showing {filterDataRecalculate.length} rows |{" "}
+                  <span className="text-green-600 ml-1">All data showed</span>
+                </div>
               </div>
             ) : null}
           </>
@@ -473,11 +398,13 @@ const DetailInformation = ({ data, tabHeader }) => {
         title: "Confirmation",
         content: (
           <div>
-            <p className="text-primary text-xs uppercase py-[20px] gap-5">
+            <p className="text-primary text-xs uppercase py-2 gap-5">
               CONFIRMATION
             </p>
             <div>
-              <TablePaginationNew
+              <TableRBI
+                idTable="confirmation-modal-table"
+                size="small"
                 dataSource={filterDataByPage(tableSelected, "data")}
                 columns={columnsRecalculate(
                   pageCal,
@@ -488,12 +415,18 @@ const DetailInformation = ({ data, tabHeader }) => {
                   handleSearchRecalculate,
                   searchRecalculate
                 )}
-                current={pageCal}
-                pageSize={pageSizeCal}
                 totalData={filterDataByPage(tableSelected, "length") || 0}
                 tableScrolled={{ x: 2000, y: 525 }}
+                loading={loading}
+                showExport={false}
+                usePagination={false}
+                useInfiniteScroll={false}
               />
-              <div className={"mt-4"}>
+              <div className="flex justify-end mt-2 text-sm text-gray-600">
+                Showing {filterDataByPage(tableSelected, "length")} rows |{" "}
+                <span className="text-green-600 ml-1">All data showed</span>
+              </div>
+              <div className={"mt-2"}>
                 <Form.Item
                   label={"Remark"}
                   name={"remark"}
@@ -534,7 +467,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     const body = {
       accNumb: accNumb,
       calCode: data?.calCode,
-      calType: segmentedPage === "Rating Result" ? 621 : 623,
+      calType: activeTab === "rating" ? 621 : 623,
       remark: forceObj?.remark,
       resultId: tableSelected
         ?.filter((item) => keyTableSelected?.includes(item?.key))
@@ -547,17 +480,18 @@ const DetailInformation = ({ data, tabHeader }) => {
         dispatch(
           getDetailCalculationResult({
             calCode: data?.calCode,
-            calType: segmentedPage === "Rating Result" ? 621 : 623,
-            page,
-            pageSize,
+            calType: activeTab === "rating" ? 621 : 623,
+            page: 1,
+            pageSize: 100,
             sort,
             search: reqSearch,
+            isLoadMore: false,
           })
         );
         dispatch(
           getDetailCalculationResultNoPaging({
             calCode: data?.calCode,
-            calType: segmentedPage === "Rating Result" ? 621 : 623,
+            calType: activeTab === "rating" ? 621 : 623,
           })
         );
         handleClear();
@@ -568,31 +502,22 @@ const DetailInformation = ({ data, tabHeader }) => {
     setOpenRetry(false);
     const body = {
       calCode: data?.calCode,
-      calType: segmentedPage === "Rating Result" ? 621 : 623,
+      calType: activeTab === "rating" ? 621 : 623,
       remark: res.remark,
     };
     dispatch(retryData(body))
       .unwrap()
       .then(() => {
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
         const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(
           getDetailCalculationResult({
             calCode: data?.calCode,
-            calType: segmentedPage === "Rating Result" ? 621 : 623,
-            page,
-            pageSize,
+            calType: activeTab === "rating" ? 621 : 623,
+            page: 1,
+            pageSize: 100,
             sort,
             search: reqSearch,
+            isLoadMore: false,
           })
         );
         clearRetry();
@@ -619,114 +544,221 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   };
 
+  // Prepare columns dengan key yang konsisten
+  const calculationColumns = useMemo(() => {
+    const cols = columnsCalculation(
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search
+    );
+
+    return cols.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+  }, [page, pageSize, searchedColumn, searchText, search]);
+
+  const columnDefinitions = useMemo(() => {
+    return calculationColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [calculationColumns]);
+
   return (
     <>
       <Spin spinning={loadingModal}>
-        <CardContainer subHeader={"Calculation Information"}>
-          <div className={"w-full grid grid-cols-4 gap-2"}>
-            <DetailText label={"Calculation Code"}>{data?.calCode}</DetailText>
-            <DetailText label={"Type"}>{data?.calculationType}</DetailText>
-            <DetailText label={"Billing Cycle"}>
-              {data?.billingCycle}
-            </DetailText>
-            <DetailText label={"Billing Period"}>
-              {data?.billingPeriod}
-            </DetailText>
+        {/* Calculation Information */}
+        <div className="-mt-6">
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">CALCULATION INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Calculation Code"}>
+                {data?.calCode}
+              </DetailText>
+              <DetailText label={"Type"}>{data?.calculationType}</DetailText>
+              <DetailText label={"Billing Cycle"}>
+                {data?.billingCycle}
+              </DetailText>
+              <DetailText label={"Billing Period"}>
+                {data?.billingPeriod}
+              </DetailText>
 
-            <DetailText label={"Total Customer"}>
-              {data?.totalCustomer}
-            </DetailText>
-            <DetailText label={"Total Success"}>
-              {data?.totalSucceed}
-            </DetailText>
-            <DetailText label={"Total Progress"}>
-              {data?.totalProgress}
-            </DetailText>
-            <DetailText label={"Total Failed"}>{data?.totalFailed}</DetailText>
+              <DetailText label={"Total Customer"}>
+                {data?.totalCustomer}
+              </DetailText>
+              <DetailText label={"Total Success"}>
+                {data?.totalSucceed}
+              </DetailText>
+              <DetailText label={"Total Progress"}>
+                {data?.totalProgress}
+              </DetailText>
+              <DetailText label={"Total Failed"}>
+                {data?.totalFailed}
+              </DetailText>
 
-            <DetailText label={"Generate Date"}>
-              {data?.generateDate}
-            </DetailText>
-            <DetailText label={"Completion Date"}>
-              {data?.completionDate}
-            </DetailText>
-            <DetailText label={"Status"}>
-              {renderStatus(data?.status)}
-            </DetailText>
-          </div>
-        </CardContainer>
-
-        <CardContainer subHeader={"parameter information"}>
-          <div className={"w-full grid grid-cols-4 gap-2"}>
-            <DetailText label={"Service Type"}>{data?.serviceType}</DetailText>
-            <DetailText label={"SOR"}>{data?.sor}</DetailText>
-            <DetailText label={"Cost Center"}>{data?.costCenter}</DetailText>
-            <DetailText label={"Meter Reading Code"}>
-              {data?.meterReadingCode}
-            </DetailText>
-
-            <DetailText label={"Account Segment"}>
-              {data?.accGroupSegment}
-            </DetailText>
-            <DetailText label={"Account Group Type"}>
-              {data?.accGroupType}
-            </DetailText>
-            <DetailText label={"Specific Customer"}>
-              {data?.specCustacc}
-            </DetailText>
-          </div>
-        </CardContainer>
-
-        <CardContainer subHeader={"schedule information"}>
-          <div className={"w-full grid grid-cols-4"}>
-            <DetailText label={"Type"}>{data?.scheduleType}</DetailText>
-            <div className="col-span-3">
-              <DetailText label={"Remark"}>{data?.remark}</DetailText>
+              <DetailText label={"Generate Date"}>
+                {data?.generateDate}
+              </DetailText>
+              <DetailText label={"Completion Date"}>
+                {data?.completionDate
+                  ? moment(data.completionDate).format("DD MMM YYYY HH:mm:ss")
+                  : ""}
+              </DetailText>
+              <DetailText label={"Status"}>
+                {renderStatus(data?.status)}
+              </DetailText>
             </div>
-          </div>
-        </CardContainer>
+          </CardContainer>
 
-        <CardContainer subHeader={"calculation result"}>
-          {tempTabs}
+          {/* Parameter Information */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">PARAMETER INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Service Type"}>
+                {data?.serviceType}
+              </DetailText>
+              <DetailText label={"SOR"}>{data?.sor}</DetailText>
+              <DetailText label={"Cost Center"}>{data?.costCenter}</DetailText>
+              <DetailText label={"Meter Reading Code"}>
+                {data?.meterReadingCode}
+              </DetailText>
 
-          {renderSection(segmentedPage)}
-        </CardContainer>
-
-        {/* HISTORY LOG INFORMATION - CARD BARU */}
-        <CardContainer
-          subHeader={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
+              <DetailText label={"Account Segment"}>
+                {data?.accGroupSegment}
+              </DetailText>
+              <DetailText label={"Account Group Type"}>
+                {data?.accGroupType}
+              </DetailText>
+              <DetailText label={"Specific Customer"}>
+                {data?.specCustacc}
+              </DetailText>
             </div>
-          }
-        >
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Record ID"}>
-              {latestLogData?.calLogId || ""}
-            </DetailText>
-            <DetailText label={"Created Date"}>
-              {latestLogData?.createdDate
-                ? moment(latestLogData.createdDate).format(
-                    "DD MMM YYYY HH:mm:ss"
-                  )
-                : ""}
-            </DetailText>
-            <DetailText label={"Created By"}>
-              {latestLogData?.createdBy || ""}
-            </DetailText>
-            <DetailText label={"Updated Date"}>
-              {latestLogData?.updatedDate
-                ? moment(latestLogData.updatedDate).format(
-                    "DD MMM YYYY HH:mm:ss"
-                  )
-                : ""}
-            </DetailText>
-            <DetailText label={"Updated By"}>
-              {latestLogData?.updatedBy || ""}
-            </DetailText>
-          </div>
-        </CardContainer>
+          </CardContainer>
 
+          {/* Schedule Information */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">SCHEDULE INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Type"}>{data?.scheduleType}</DetailText>
+              <div className="col-span-3">
+                <DetailText label={"Remark"}>{data?.remark}</DetailText>
+              </div>
+            </div>
+          </CardContainer>
+
+          {/* Calculation Result */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">CALCULATION RESULT</p>
+              </div>
+            }
+          >
+            <div className="w-full mt-0">
+              <Tabs
+                activeKey={activeTab}
+                items={tabItems}
+                onChange={handleTabChange}
+              />
+            </div>
+
+            <div className="w-full flex justify-end gap-2 mb-1">
+              <ButtonComponent
+                type={"submit"}
+                border={false}
+                icon={<SVGIcon name={"IconRatingReconculate"} width={24} />}
+                onClick={() => setModalRecalculateRating(true)}
+              >
+                Recalculate
+              </ButtonComponent>
+              <ButtonComponent
+                onClick={() => setOpenRetry(true)}
+                type={"submit"}
+                border={false}
+                icon={<SVGIcon name={`IconButtonReset`} width={24} />}
+              >
+                Retry
+              </ButtonComponent>
+            </div>
+
+            <div className="mt-1">
+              <TableRBI
+                idTable="calculation-result-table"
+                size="small"
+                columns={calculationColumns}
+                dataSource={list_calculation_result?.result}
+                totalData={list_calculation_result?.page?.totalElements || 0}
+                tableScrolled={{ x: 2000, y: 600 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
+                showExport={false}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
+              />
+            </div>
+          </CardContainer>
+
+          {/* History Log Information */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Record ID"}>
+                {latestLogData?.calLogId || ""}
+              </DetailText>
+              <DetailText label={"Created Date"}>
+                {latestLogData?.createdDate
+                  ? moment(latestLogData.createdDate).format(
+                      "DD MMM YYYY HH:mm:ss"
+                    )
+                  : ""}
+              </DetailText>
+              <DetailText label={"Created By"}>
+                {latestLogData?.createdBy || ""}
+              </DetailText>
+              <DetailText label={"Updated Date"}>
+                {latestLogData?.updatedDate
+                  ? moment(latestLogData.updatedDate).format(
+                      "DD MMM YYYY HH:mm:ss"
+                    )
+                  : ""}
+              </DetailText>
+              <DetailText label={"Updated By"}>
+                {latestLogData?.updatedBy || ""}
+              </DetailText>
+            </div>
+          </CardContainer>
+        </div>
         {/* retry modal */}
         <ModalApproveOrReject
           isOpen={openRetry}
@@ -745,7 +777,7 @@ const DetailInformation = ({ data, tabHeader }) => {
           handleCancel={handleClear}
           width={1200}
           footer={
-            <div className="flex justify-end gap-5">
+            <div className="flex justify-end gap-1">
               <ButtonComponent type={"default"} onClick={handleClear}>
                 Back
               </ButtonComponent>

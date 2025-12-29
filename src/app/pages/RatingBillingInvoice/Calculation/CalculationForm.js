@@ -992,6 +992,7 @@ const handleReset = () => {
                 >
                   <InputComponent
                     type="textarea"
+                    rows={3}
                     value={remark}
                     style={{ marginBottom: 4 }}
                     onChange={(e) => setRemark(e.target.value)}
