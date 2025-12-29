@@ -223,7 +223,7 @@ const RelationshipInformation = ({
 
             handleRelationshipObj(displayName, "relatedName");
             handleRelationshipObj(displayNumber, "relatedNumber");
-            handleRelationshipObj(selected.objectId, "objectId");
+            handleRelationshipObj(selected.relatedObjectId, "relatedObjectId");
             handleRelationshipObj(displayName, "objectName");
             handleRelationshipObj(displayNumber, "objectValue");
 
