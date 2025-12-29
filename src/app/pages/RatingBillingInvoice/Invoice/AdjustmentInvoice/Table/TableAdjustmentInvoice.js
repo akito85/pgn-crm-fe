@@ -16,7 +16,7 @@ export const columnsAdjustmentInvoice = (
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 15,
+    width: 25,
     render: (text, object, index) => index + 1,
   },
   {
@@ -24,7 +24,7 @@ export const columnsAdjustmentInvoice = (
     title: "INVOICE NUMBER",
     dataIndex: "invoiceNumber",
     isClassification: true,
-    width: 90,
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -41,7 +41,7 @@ export const columnsAdjustmentInvoice = (
     key: "adjustmentNumber",
     title: "ADJUSTMENT NUMBER",
     dataIndex: "adjustmentNumber",
-    width: 100,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -58,7 +58,7 @@ export const columnsAdjustmentInvoice = (
     key: "type",
     title: "TYPE",
     dataIndex: "type",
-    width: 60,
+    width: 80,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -75,7 +75,7 @@ export const columnsAdjustmentInvoice = (
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
-    width: 70,
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -92,7 +92,7 @@ export const columnsAdjustmentInvoice = (
     key: "billingPeriod",
     title: "BILLING PERIOD",
     dataIndex: "billingPeriod",
-    width: 75,
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -109,7 +109,7 @@ export const columnsAdjustmentInvoice = (
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
-    width: 90,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -126,7 +126,7 @@ export const columnsAdjustmentInvoice = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
-    width: 110,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -143,7 +143,7 @@ export const columnsAdjustmentInvoice = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
-    width: 85,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -160,7 +160,7 @@ export const columnsAdjustmentInvoice = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
-    width: 100,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -177,7 +177,7 @@ export const columnsAdjustmentInvoice = (
     key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
-    width: 95,
+    width: 160,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -194,7 +194,7 @@ export const columnsAdjustmentInvoice = (
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
-    width: 50,
+    width: 80,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -211,7 +211,7 @@ export const columnsAdjustmentInvoice = (
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
-    width: 75,
+    width: 135,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -228,7 +228,7 @@ export const columnsAdjustmentInvoice = (
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
-    width: 90,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -245,7 +245,7 @@ export const columnsAdjustmentInvoice = (
     key: "meterReadingCode",
     title: "METER READING CODE",
     dataIndex: "meterReadingCode",
-    width: 95,
+    width: 160,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -262,7 +262,7 @@ export const columnsAdjustmentInvoice = (
     key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
-    width: 55,
+    width: 100,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -279,7 +279,7 @@ export const columnsAdjustmentInvoice = (
     key: "totalAdjustmentAmountIdr",
     title: "TOTAL ADJUSTMENT AMOUNT IDR",
     dataIndex: "totalAdjustmentAmountIdr",
-    width: 120,
+    width: 190,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -297,7 +297,7 @@ export const columnsAdjustmentInvoice = (
     key: "totalAdjustmentAmountUsd",
     title: "TOTAL ADJUSTMENT AMOUNT USD",
     dataIndex: "totalAdjustmentAmountUsd",
-    width: 120,
+    width: 190,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -315,7 +315,7 @@ export const columnsAdjustmentInvoice = (
     key: "termsOfPayment",
     title: "TERMS OF PAYMENT",
     dataIndex: "termsOfPayment",
-    width: 90,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -332,7 +332,7 @@ export const columnsAdjustmentInvoice = (
     key: "transactionDate",
     title: "TRANSACTION DATE",
     dataIndex: "transactionDate",
-    width: 85,
+    width: 130,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -349,7 +349,7 @@ export const columnsAdjustmentInvoice = (
     key: "documentDate",
     title: "DOCUMENT DATE",
     dataIndex: "documentDate",
-    width: 80,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -366,7 +366,7 @@ export const columnsAdjustmentInvoice = (
     key: "adjustmentReason",
     title: "ADJUSTMENT REASON",
     dataIndex: "adjustmentReason",
-    width: 100,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -383,7 +383,7 @@ export const columnsAdjustmentInvoice = (
     key: "rateType",
     title: "RATE TYPE",
     dataIndex: "rateType",
-    width: 65,
+    width: 100,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -400,7 +400,7 @@ export const columnsAdjustmentInvoice = (
     key: "rate",
     title: "RATE",
     dataIndex: "rate",
-    width: 60,
+    width: 80,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -418,7 +418,7 @@ export const columnsAdjustmentInvoice = (
     key: "rateDate",
     title: "RATE DATE",
     dataIndex: "rateDate",
-    width: 70,
+    width: 100,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -452,7 +452,7 @@ export const columnsAdjustmentInvoice = (
     key: "status",
     title: "STATUS",
     dataIndex: "status",
-    width: 60,
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -469,7 +469,7 @@ export const columnsAdjustmentInvoice = (
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 80,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,

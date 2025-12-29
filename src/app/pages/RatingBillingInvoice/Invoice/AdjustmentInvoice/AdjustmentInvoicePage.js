@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
@@ -19,6 +19,7 @@ import {
   ModalError,
 } from "../../../../../components/Modal/ModalPopUp";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const AdjustmentInvoicePage = () => {
   // Selector - Placeholder for Redux state
@@ -43,6 +44,11 @@ const AdjustmentInvoicePage = () => {
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [idDelete, setIdDelete] = useState();
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["statusApproval", "action"],
+  }));
 
   // Use Effect - Initial fetch dengan 100 data
   useEffect(() => {
@@ -306,6 +312,54 @@ const AdjustmentInvoicePage = () => {
     },
   ];
 
+  const actionCols = useColumnActionPermission(
+    ["view", "update", "delete", "history"],
+    itemGrantAccess,
+    "Delete"
+  ).map((col) => ({
+    ...col,
+    width: 70,
+    align: "center",
+  }));
+
+  const baseColumns = useMemo(() => {
+    return columnsAdjustmentInvoice(
+      0, // Tidak digunakan untuk infinite scroll
+      0, // Tidak digunakan untuk infinite scroll
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search
+    );
+  }, [searchInput, searchedColumn, searchText, search]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.id || item.invoiceNumber,
+    }));
+  }, [dataSource]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -324,32 +378,23 @@ const AdjustmentInvoicePage = () => {
         >
           <div className="w-full">
             <TableRBI
+              idTable="adjustment-invoice-table"
               showExport={false}
-              dataSource={dataSource}
-              columns={[
-                ...columnsAdjustmentInvoice(
-                  0, // Tidak digunakan untuk infinite scroll
-                  0, // Tidak digunakan untuk infinite scroll
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search
-                ),
-                ...useColumnActionPermission(
-                  ["view", "update", "delete", "history"],
-                  itemGrantAccess,
-                  "Delete"
-                ),
-              ]}
+              dataSource={dataSourceWithKeys}
+              columns={processedColumns}
               totalData={data?.page?.totalElements || 0}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 10100 }}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
               usePagination={false}
               useInfiniteScroll={true}
               onLoadMore={handleLoadMore}
               hasMore={hasMore}
               loadMoreThreshold={20}
+              tableScrolled={{ y: 525, x: 5000 }}
             />
           </div>
         </CardContainer>
