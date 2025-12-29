@@ -578,7 +578,12 @@ const TableRBI = ({
                 </Button>
               )}
 
-              {showSearchBar && <SearchBar />}
+              {showSearchBar && (
+                <div style={{ width: "200px" }}>
+                  {" "}
+                  <SearchBar />
+                </div>
+              )}
             </div>
           )}
         </div>

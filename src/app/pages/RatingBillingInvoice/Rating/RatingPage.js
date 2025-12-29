@@ -8,6 +8,7 @@ import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   downloadRatingGas,
   getListRatingGasPaginate,
+  getListBillingPeriodForRating,
 } from "../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsRating } from "./TableRatingView";
 import RatingDetail from "./RatingDetail";
@@ -16,17 +17,23 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import ButtonComponent from "../../../../components/ButtonComponent";
+import SelectComponent from "../../../../components/SelectComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
-  const { data, loading } = useSelector((state) => state.rating);
+  const { data, loading, list_billing_period } = useSelector((state) => state.rating);
+
+  // Debug: Log list_billing_period
+  useEffect(() => {
+    console.log('list_billing_period:', list_billing_period);
+  }, [list_billing_period]);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); // Load more 20 data each time
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -39,12 +46,37 @@ const RatingPage = () => {
   const [saNumberId, setSANumberId] = useState("");
   const [activeRowKey, setActiveRowKey] = useState(null);
 
+  // State untuk billing period filter
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
+
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["action"],
   }));
 
   const detailRef = useRef(null);
+
+  // Load billing period list saat component mount
+  useEffect(() => {
+    dispatch(getListBillingPeriodForRating());
+  }, [dispatch]);
+
+  // Set default billing period ke ID tertentu setelah data loaded
+  useEffect(() => {
+    if (list_billing_period && list_billing_period.length > 0 && !selectedBillingPeriod) {
+      // OPTION 1: Set ke ID spesifik (misal 453)
+      const defaultPeriod = list_billing_period.find(item => item.id === 453);
+      if (defaultPeriod) {
+        setSelectedBillingPeriod(defaultPeriod.id);
+      } else {
+        // Fallback ke yang pertama jika ID 453 tidak ada
+        setSelectedBillingPeriod(list_billing_period[0].id);
+      }
+      
+      // OPTION 2: Atau langsung set ke yang pertama
+      // setSelectedBillingPeriod(list_billing_period[0].id);
+    }
+  }, [list_billing_period]);
 
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
@@ -58,19 +90,23 @@ const RatingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // Initial fetch
+  // Initial fetch - sekarang dengan billPeriodId
   useEffect(() => {
-    dispatch(
-      getListRatingGasPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: 100, // Initial load 100
-        sort,
-        isLoadMore: false,
-      })
-    );
-    setPage(1);
-  }, [dispatch, search, sort]);
+    // Hanya fetch jika billing period sudah dipilih
+    if (selectedBillingPeriod) {
+      dispatch(
+        getListRatingGasPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: 100,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  }, [dispatch, search, sort, selectedBillingPeriod]);
 
   const tabItems = [
     {
@@ -112,19 +148,19 @@ const RatingPage = () => {
     });
   };
 
-  // Load more handler
+  // Load more handler dengan billPeriodId
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = data?.page?.totalPages || 0;
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPages && selectedBillingPeriod) {
       await dispatch(
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
+          pageSize: loadMoreSize,
           sort,
+          billPeriodId: selectedBillingPeriod,
           isLoadMore: true,
         })
       );
@@ -132,14 +168,11 @@ const RatingPage = () => {
     }
   };
 
-  // TAMBAHAN: Calculate if there's more data
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
-    // Mapping untuk field yang berbeda case
     const fieldMapping = {
       mreadingCode: "mReadingCode",
-      // Tambahkan mapping lain jika ada field serupa
     };
 
     const field = fieldMapping[sorter.field] || sorter.field;
@@ -174,14 +207,23 @@ const RatingPage = () => {
   };
 
   const handleDownload = () => {
-    dispatch(
-      downloadRatingGas({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize: loadMoreSize,
-        sort,
-      })
-    );
+    if (selectedBillingPeriod) {
+      dispatch(
+        downloadRatingGas({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize: loadMoreSize,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+        })
+      );
+    }
+  };
+
+  // Handle billing period change
+  const handleBillingPeriodChange = (value) => {
+    setSelectedBillingPeriod(value);
+    setPage(1);
   };
 
   const itemGrantAccess = [
@@ -192,9 +234,8 @@ const RatingPage = () => {
           type={"submit"}
           border={false}
           icon={<SVGIcon name="IconButtonDownload" width={20} />}
-          onClick={() => {
-            handleDownload();
-          }}
+          onClick={handleDownload}
+          disabled={!selectedBillingPeriod}
         >
           Download List
         </ButtonComponent>
@@ -213,8 +254,8 @@ const RatingPage = () => {
     () =>
       columnsRating(
         search,
-        0, // Tidak perlu pass page karena tidak digunakan untuk infinite scroll
-        0, // Tidak perlu pass pageSize karena tidak digunakan untuk infinite scroll
+        0,
+        0,
         searchInput,
         searchedColumn,
         searchText,
@@ -263,8 +304,26 @@ const RatingPage = () => {
             items={tabItems}
             onChange={onChangeTab}
             activeKey={valueTab}
-            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
           />
+
+          {/* Filter Section */}
+          <div className="flex gap-4 mb-1 items-end">
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-2">
+                Billing Period <span className="text-red-500">*</span>
+              </label>
+              <SelectComponent
+                value={selectedBillingPeriod}
+                onChange={handleBillingPeriodChange}
+                placeholder="Select Billing Period"
+                options={(list_billing_period || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </div>
+          </div>
 
           <div className="my-0">
             <TableRBI

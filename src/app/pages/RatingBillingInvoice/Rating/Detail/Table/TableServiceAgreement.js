@@ -27,7 +27,7 @@ export const columnsServiceAgreement = (
     dataIndex: "saType",
     sorter: true,
     isClassification:true,
-    width: 80,
+    width: 110,
     ...getColumnSearchPropsPaging(
       "saType",
       searchInput,
@@ -55,7 +55,6 @@ export const columnsServiceAgreement = (
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
-    isClassification:true,
     sorter: true,
     width: 150,
     ...getColumnSearchPropsPaging(
@@ -70,7 +69,6 @@ export const columnsServiceAgreement = (
     key: "saReferenceNumber",
     title: "SA REFERENCE",
     dataIndex: "saReferenceNumber",
-    isClassification:true,
     sorter: true,
     width: 180,
     ...getColumnSearchPropsPaging(
@@ -213,7 +211,7 @@ export const columnsServiceAgreement = (
     dataIndex: "billingCycle",
     sorter: true,
     isClassification:true,
-    width: 120,
+    width: 150,
     ...getColumnSearchPropsPaging(
       "billingCycle",
       searchInput,
@@ -228,7 +226,7 @@ export const columnsServiceAgreement = (
     dataIndex: "termOfPayment",
     sorter: true,
     isClassification:true,
-    width: 150,
+    width: 170,
     ...getColumnSearchPropsPaging(
       "termOfPayment",
       searchInput,
@@ -243,7 +241,7 @@ export const columnsServiceAgreement = (
     dataIndex: "paymentChannel",
     sorter: true,
     isClassification:true,
-    width: 150,
+    width: 170,
     ...getColumnSearchPropsPaging(
       "paymentChannel",
       searchInput,
