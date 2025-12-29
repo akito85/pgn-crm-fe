@@ -162,10 +162,10 @@ const MultiDestinationTable = ({
     },
     {
       title: "SUBDISTRICT",
-      dataIndex: "subdistrict",
+      dataIndex: "subDistrict",
       width: 250,
       align: "center",
-      ...getColumnSearchProps("subdistrict"),
+      ...getColumnSearchProps("subDistrict"),
     },
     {
       title: "DISTRICT",
@@ -208,7 +208,6 @@ const MultiDestinationTable = ({
       width: 250,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
-      render: (startDate) => startDate ? moment(startDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
     },
     {
       title: "END DATE",
@@ -216,7 +215,6 @@ const MultiDestinationTable = ({
       width: 250,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
     },
     {
       title: "STATUS APPROVAL",

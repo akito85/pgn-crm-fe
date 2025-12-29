@@ -21,21 +21,11 @@ export const getMultiDestination = createAsyncThunk(
   "GET_MULTI_DESTINATION",
   async ({ id, body }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/list/${id}`;
-      // const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-      //     headers: { "Accept": "application/json, text/plain, */*" }
-      //   });
-      // return response.data;
-      return {
-        result: [
-          {
-            id: 1,
-          }
-        ],
-        page: {
-          totalElements: 1,
-        }
-      };
+      const url = `/v1/dbs/api/multi-destination/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+          headers: { "Accept": "application/json, text/plain, */*" }
+        });
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
