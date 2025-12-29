@@ -277,34 +277,36 @@ const DetailLog = ({ data, tabHeader }) => {
 
   return (
     <>
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px]">CALCULATION LOG</p>
-          </div>
-        }
-      >
-        <TableRBI
-          idTable="calculation-log-table"
-          columns={processedColumns}
-          dataSource={resultData}
-          totalData={pageInfo?.totalElements || 0}
-          tableScrolled={{ x: 2000, y: 600 }}
-          onSort={onSort}
-          showExport={false}
-          columnDefinitions={columnDefinitions}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          loading={loading}
-          usePagination={false}
-          useInfiniteScroll={true}
-          onLoadMore={handleLoadMore}
-          hasMore={hasMore}
-          loadMoreThreshold={20}
-        />
+      <div className="-mt-6">
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px]">CALCULATION LOG</p>
+            </div>
+          }
+        >
+          <TableRBI
+            idTable="calculation-log-table"
+            columns={processedColumns}
+            dataSource={resultData}
+            totalData={pageInfo?.totalElements || 0}
+            tableScrolled={{ x: 2000, y: 600 }}
+            onSort={onSort}
+            showExport={false}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+          />
 
-        <TableCalculateLog calculationCode={calculationCode} />
-      </CardContainer>
+          <TableCalculateLog calculationCode={calculationCode} />
+        </CardContainer>
+      </div>
     </>
   );
 };

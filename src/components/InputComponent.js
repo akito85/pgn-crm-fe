@@ -60,7 +60,7 @@ const InputComponent = ({
       {type === "textarea" ? (
         <>
           <Input.TextArea
-            rows={rows || 5}
+            rows={rows || 3}
             style={style}
             onChange={onChange}
             value={value}
