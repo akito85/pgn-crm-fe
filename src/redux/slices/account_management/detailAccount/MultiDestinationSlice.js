@@ -180,10 +180,10 @@ export const getDetailMdApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_MD_APPROVAL_HIERARCHY",
   async ({ id }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/approval-hierarchy/${id}`;
-      // const response = await accountManagementService.getDetail(url);
+      const url = `/v1/dbs/api/multi-destination/approval-hierarchy/${id}`;
+      const response = await accountManagementService.getDetail(url);
       // return response.data;
-      return {};
+      return []
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }

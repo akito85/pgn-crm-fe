@@ -59,7 +59,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
     detail_mdApprovalHierarchy,
     detail_multiDestination,
     data_multiDestinationAttachment,
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.multiDestination);
 
   //declare
   const location = useLocation();
@@ -413,7 +413,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   
   const next = async () => {
     try {
-      await formCreate.validateFields(formFields[current]);
+      // await formCreate.validateFields(formFields[current]);
     } catch (err) {
       return;
     }
@@ -427,7 +427,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        await formCreate.validateFields(formFields[i]);
+        // await formCreate.validateFields(formFields[i]);
       } catch (err) {
         setCurrent(i);
         return;

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ApprovalHierarchy from "./ApprovalHierarchy";
 
 const ApprovalSectionForm = ({
@@ -11,6 +11,10 @@ const ApprovalSectionForm = ({
   approvalName = "",
   className,
 }) => {
+  useEffect(() => {
+    console.log("dataOption", dataOption);
+  }, [dataOption])
+
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
