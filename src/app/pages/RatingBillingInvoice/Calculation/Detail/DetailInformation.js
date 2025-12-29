@@ -138,21 +138,21 @@ const DetailInformation = ({ data, tabHeader }) => {
   // Prepare tab items
   const tabItems = useMemo(() => {
     const items = [];
-    
+
     if (data?.calType !== 623) {
       items.push({
         key: "rating",
         label: "Rating Result",
       });
     }
-    
+
     if (data?.calType !== 621) {
       items.push({
         key: "billing",
         label: "Billing Result",
       });
     }
-    
+
     return items;
   }, [data?.calType]);
 
@@ -385,7 +385,8 @@ const DetailInformation = ({ data, tabHeader }) => {
                   useInfiniteScroll={false}
                 />
                 <div className="flex justify-end mt-2 text-sm text-gray-600">
-                  Showing {filterDataRecalculate.length} rows | <span className="text-green-600 ml-1">All data showed</span>
+                  Showing {filterDataRecalculate.length} rows |{" "}
+                  <span className="text-green-600 ml-1">All data showed</span>
                 </div>
               </div>
             ) : null}
@@ -422,7 +423,8 @@ const DetailInformation = ({ data, tabHeader }) => {
                 useInfiniteScroll={false}
               />
               <div className="flex justify-end mt-2 text-sm text-gray-600">
-                Showing {filterDataByPage(tableSelected, "length")} rows | <span className="text-green-600 ml-1">All data showed</span>
+                Showing {filterDataByPage(tableSelected, "length")} rows |{" "}
+                <span className="text-green-600 ml-1">All data showed</span>
               </div>
               <div className={"mt-2"}>
                 <Form.Item
@@ -553,7 +555,7 @@ const DetailInformation = ({ data, tabHeader }) => {
       handleSearch,
       search
     );
-    
+
     return cols.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
@@ -571,183 +573,192 @@ const DetailInformation = ({ data, tabHeader }) => {
     <>
       <Spin spinning={loadingModal}>
         {/* Calculation Information */}
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">CALCULATION INFORMATION</p>
+        <div className="-mt-6">
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">CALCULATION INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Calculation Code"}>
+                {data?.calCode}
+              </DetailText>
+              <DetailText label={"Type"}>{data?.calculationType}</DetailText>
+              <DetailText label={"Billing Cycle"}>
+                {data?.billingCycle}
+              </DetailText>
+              <DetailText label={"Billing Period"}>
+                {data?.billingPeriod}
+              </DetailText>
+
+              <DetailText label={"Total Customer"}>
+                {data?.totalCustomer}
+              </DetailText>
+              <DetailText label={"Total Success"}>
+                {data?.totalSucceed}
+              </DetailText>
+              <DetailText label={"Total Progress"}>
+                {data?.totalProgress}
+              </DetailText>
+              <DetailText label={"Total Failed"}>
+                {data?.totalFailed}
+              </DetailText>
+
+              <DetailText label={"Generate Date"}>
+                {data?.generateDate}
+              </DetailText>
+              <DetailText label={"Completion Date"}>
+                {data?.completionDate
+                  ? moment(data.completionDate).format("DD MMM YYYY HH:mm:ss")
+                  : ""}
+              </DetailText>
+              <DetailText label={"Status"}>
+                {renderStatus(data?.status)}
+              </DetailText>
             </div>
-          }
-        >
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Calculation Code"}>{data?.calCode}</DetailText>
-            <DetailText label={"Type"}>{data?.calculationType}</DetailText>
-            <DetailText label={"Billing Cycle"}>
-              {data?.billingCycle}
-            </DetailText>
-            <DetailText label={"Billing Period"}>
-              {data?.billingPeriod}
-            </DetailText>
+          </CardContainer>
 
-            <DetailText label={"Total Customer"}>
-              {data?.totalCustomer}
-            </DetailText>
-            <DetailText label={"Total Success"}>
-              {data?.totalSucceed}
-            </DetailText>
-            <DetailText label={"Total Progress"}>
-              {data?.totalProgress}
-            </DetailText>
-            <DetailText label={"Total Failed"}>{data?.totalFailed}</DetailText>
+          {/* Parameter Information */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">PARAMETER INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Service Type"}>
+                {data?.serviceType}
+              </DetailText>
+              <DetailText label={"SOR"}>{data?.sor}</DetailText>
+              <DetailText label={"Cost Center"}>{data?.costCenter}</DetailText>
+              <DetailText label={"Meter Reading Code"}>
+                {data?.meterReadingCode}
+              </DetailText>
 
-            <DetailText label={"Generate Date"}>
-              {data?.generateDate}
-            </DetailText>
-            <DetailText label={"Completion Date"}>
-              {data?.completionDate ? moment(data.completionDate).format("DD MMM YYYY HH:mm:ss") : ""}
-            </DetailText>
-            <DetailText label={"Status"}>
-              {renderStatus(data?.status)}
-            </DetailText>
-          </div>
-        </CardContainer>
-
-        {/* Parameter Information */}
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">PARAMETER INFORMATION</p>
+              <DetailText label={"Account Segment"}>
+                {data?.accGroupSegment}
+              </DetailText>
+              <DetailText label={"Account Group Type"}>
+                {data?.accGroupType}
+              </DetailText>
+              <DetailText label={"Specific Customer"}>
+                {data?.specCustacc}
+              </DetailText>
             </div>
-          }
-        >
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Service Type"}>{data?.serviceType}</DetailText>
-            <DetailText label={"SOR"}>{data?.sor}</DetailText>
-            <DetailText label={"Cost Center"}>{data?.costCenter}</DetailText>
-            <DetailText label={"Meter Reading Code"}>
-              {data?.meterReadingCode}
-            </DetailText>
+          </CardContainer>
 
-            <DetailText label={"Account Segment"}>
-              {data?.accGroupSegment}
-            </DetailText>
-            <DetailText label={"Account Group Type"}>
-              {data?.accGroupType}
-            </DetailText>
-            <DetailText label={"Specific Customer"}>
-              {data?.specCustacc}
-            </DetailText>
-          </div>
-        </CardContainer>
-
-        {/* Schedule Information */}
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">SCHEDULE INFORMATION</p>
+          {/* Schedule Information */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">SCHEDULE INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Type"}>{data?.scheduleType}</DetailText>
+              <div className="col-span-3">
+                <DetailText label={"Remark"}>{data?.remark}</DetailText>
+              </div>
             </div>
-          }
-        >
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Type"}>{data?.scheduleType}</DetailText>
-            <div className="col-span-3">
-              <DetailText label={"Remark"}>{data?.remark}</DetailText>
+          </CardContainer>
+
+          {/* Calculation Result */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">CALCULATION RESULT</p>
+              </div>
+            }
+          >
+            <div className="w-full mt-0">
+              <Tabs
+                activeKey={activeTab}
+                items={tabItems}
+                onChange={handleTabChange}
+              />
             </div>
-          </div>
-        </CardContainer>
 
-        {/* Calculation Result */}
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">CALCULATION RESULT</p>
+            <div className="w-full flex justify-end gap-2 mb-1">
+              <ButtonComponent
+                type={"submit"}
+                border={false}
+                icon={<SVGIcon name={"IconRatingReconculate"} width={24} />}
+                onClick={() => setModalRecalculateRating(true)}
+              >
+                Recalculate
+              </ButtonComponent>
+              <ButtonComponent
+                onClick={() => setOpenRetry(true)}
+                type={"submit"}
+                border={false}
+                icon={<SVGIcon name={`IconButtonReset`} width={24} />}
+              >
+                Retry
+              </ButtonComponent>
             </div>
-          }
-        >
-          <div className="w-full mt-0">
-            <Tabs
-              activeKey={activeTab}
-              items={tabItems}
-              onChange={handleTabChange}
-            />
-          </div>
 
-          <div className="w-full flex justify-end gap-2 mb-1">
-            <ButtonComponent
-              type={"submit"}
-              border={false}
-              icon={<SVGIcon name={"IconRatingReconculate"} width={24} />}
-              onClick={() => setModalRecalculateRating(true)}
-            >
-              Recalculate
-            </ButtonComponent>
-            <ButtonComponent
-              onClick={() => setOpenRetry(true)}
-              type={"submit"}
-              border={false}
-              icon={<SVGIcon name={`IconButtonReset`} width={24} />}
-            >
-              Retry
-            </ButtonComponent>
-          </div>
-
-          <div className="mt-1">
-            <TableRBI
-              idTable="calculation-result-table"
-              size="small"
-              columns={calculationColumns}
-              dataSource={list_calculation_result?.result}
-              totalData={list_calculation_result?.page?.totalElements || 0}
-              tableScrolled={{ x: 2000, y: 600 }}
-              onSort={onSort}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              showExport={false}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-            />
-          </div>
-        </CardContainer>
-
-        {/* History Log Information */}
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
+            <div className="mt-1">
+              <TableRBI
+                idTable="calculation-result-table"
+                size="small"
+                columns={calculationColumns}
+                dataSource={list_calculation_result?.result}
+                totalData={list_calculation_result?.page?.totalElements || 0}
+                tableScrolled={{ x: 2000, y: 600 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
+                showExport={false}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
+              />
             </div>
-          }
-        >
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-            <DetailText label={"Record ID"}>
-              {latestLogData?.calLogId || ""}
-            </DetailText>
-            <DetailText label={"Created Date"}>
-              {latestLogData?.createdDate
-                ? moment(latestLogData.createdDate).format(
-                    "DD MMM YYYY HH:mm:ss"
-                  )
-                : ""}
-            </DetailText>
-            <DetailText label={"Created By"}>
-              {latestLogData?.createdBy || ""}
-            </DetailText>
-            <DetailText label={"Updated Date"}>
-              {latestLogData?.updatedDate
-                ? moment(latestLogData.updatedDate).format(
-                    "DD MMM YYYY HH:mm:ss"
-                  )
-                : ""}
-            </DetailText>
-            <DetailText label={"Updated By"}>
-              {latestLogData?.updatedBy || ""}
-            </DetailText>
-          </div>
-        </CardContainer>
+          </CardContainer>
 
+          {/* History Log Information */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
+              </div>
+            }
+          >
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Record ID"}>
+                {latestLogData?.calLogId || ""}
+              </DetailText>
+              <DetailText label={"Created Date"}>
+                {latestLogData?.createdDate
+                  ? moment(latestLogData.createdDate).format(
+                      "DD MMM YYYY HH:mm:ss"
+                    )
+                  : ""}
+              </DetailText>
+              <DetailText label={"Created By"}>
+                {latestLogData?.createdBy || ""}
+              </DetailText>
+              <DetailText label={"Updated Date"}>
+                {latestLogData?.updatedDate
+                  ? moment(latestLogData.updatedDate).format(
+                      "DD MMM YYYY HH:mm:ss"
+                    )
+                  : ""}
+              </DetailText>
+              <DetailText label={"Updated By"}>
+                {latestLogData?.updatedBy || ""}
+              </DetailText>
+            </div>
+          </CardContainer>
+        </div>
         {/* retry modal */}
         <ModalApproveOrReject
           isOpen={openRetry}
