@@ -282,43 +282,83 @@ const NotificationDropdown = () => {
   };
 
   /**
-   * Handle notification click - State-based navigation
+   * Handle notification click - State-based navigation with proper NAVIGATION_STATE parsing
    */
   const handleNotificationClick = (notification) => {
-    // Mark as read if not already read via API
-    if ((notification.STATUS || notification.status) !== "read") {
-      dispatch(markNotificationAsReadApi(notification.id));
+    console.log('=== Notification Click Debug ===');
+    console.log('Full notification object:', notification);
+
+    // Mark as read if not already read
+    const notificationId = notification.id || notification.ID;
+    const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
+
+    console.log('Notification ID:', notificationId);
+    console.log('Is Read:', isRead);
+
+    if (!isRead && notificationId) {
+      console.log('Marking notification as read:', notificationId);
+      dispatch(markAsRead(notificationId));
     }
 
     // Navigate using state-based routing pattern
-    if (notification.link || notification.LINK) {
+    const link = notification.link || notification.LINK;
+    console.log('Navigation link:', link);
+
+    if (link) {
+      // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
+      let parsedNavigationState = {};
+      const navState = notification.navigationState || notification.NAVIGATION_STATE;
+      console.log('Raw NAVIGATION_STATE:', navState);
+
+      if (navState) {
+        try {
+          parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
+          console.log('Parsed NAVIGATION_STATE:', parsedNavigationState);
+        } catch (e) {
+          console.error('Failed to parse NAVIGATION_STATE:', e);
+          parsedNavigationState = {};
+        }
+      }
+
       // Build route state object
       const routeState = {
         id: notification.entityId || notification.ENTITY_ID,
         type: notification.entityType || notification.ENTITY_TYPE,
-        ...notification.navigationState, // Spread additional state (idAccount, idCustomer, etc.)
+        ...parsedNavigationState, // Spread parsed navigation state (idAccount, idCustomer, etc.)
       };
 
       // Add approval context if present
-      if (notification.tappId || notification.TAPP_ID) {
-        routeState.tappId = notification.tappId || notification.TAPP_ID;
-        routeState.appHierId = notification.appHierId || notification.APP_HIER_ID;
-        routeState.approvalAction = notification.approvalAction || notification.APPROVAL_ACTION;
-        routeState.approvalLevel = notification.approvalLevel || notification.APPROVAL_LEVEL;
+      const tappId = notification.tappId || notification.TAPP_ID;
+      const appHierId = notification.appHierId || notification.APP_HIER_ID;
+      const approvalAction = notification.approvalAction || notification.APPROVAL_ACTION;
+      const approvalLevel = notification.approvalLevel || notification.APPROVAL_LEVEL;
+
+      if (tappId) {
+        routeState.tappId = tappId;
+        routeState.appHierId = appHierId;
+        routeState.approvalAction = approvalAction;
+        routeState.approvalLevel = approvalLevel;
       }
+
+      console.log('Final route state:', routeState);
+      console.log('Navigating to:', link);
 
       // Navigate based on presence of entity_id
       if (notification.entityId || notification.ENTITY_ID) {
-        navigate(notification.link || notification.LINK, { state: routeState });
+        console.log('Navigation with entity state');
+        navigate(link, { state: routeState });
       } else {
-        // General page navigation (might still have state for bulk operations)
-        navigate(notification.link || notification.LINK, {
-          state: Object.keys(notification.navigationState || {}).length > 0
-            ? notification.navigationState
+        console.log('Navigation without entity');
+        navigate(link, {
+          state: Object.keys(parsedNavigationState).length > 0
+            ? parsedNavigationState
             : undefined
         });
       }
+    } else {
+      console.log('No link found - skipping navigation');
     }
+    console.log('=== End Notification Click Debug ===');
   };
 
   /**
