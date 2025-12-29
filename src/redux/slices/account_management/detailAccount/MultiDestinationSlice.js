@@ -303,21 +303,21 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_MULTI_DESTINATION",
   async ({ body, inactiveBody, action }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/approve";
-      // const inactiveUrl = "/v1/dbs/api/multi-destination/approve-inactive";
+      const url = "/v1/dbs/api/multi-destination/approve";
+      const inactiveUrl = "/v1/dbs/api/multi-destination/approve-inactive";
       
-      // await Promise.all([
-      //   body.length ? accountManagementService.activationWithRemark(url, body, {
-      //     headers: {
-      //       "Accept": "application/json"
-      //     }
-      //   }) : null,
-      //   inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody, {
-      //     headers: {
-      //       "Accept": "application/json"
-      //     }
-      //   }) : null,
-      // ]);
+      await Promise.all([
+        body.length ? accountManagementService.activationWithRemark(url, body, {
+          headers: {
+            "Accept": "application/json"
+          }
+        }) : null,
+        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody, {
+          headers: {
+            "Accept": "application/json"
+          }
+        }) : null,
+      ]);
 
       const successBody = {
         title: `Successful`,
