@@ -17,7 +17,7 @@ const NotificationSettings = () => {
   useEffect(() => {
     // Determine entry direction based on navigation state
     const fromHistory = location.state?.from === 'history';
-    setTransitionClass(fromHistory ? 'page-transition-enter-from-left' : 'page-transition-enter-from-right');
+    setTransitionClass(fromHistory ? 'page-transition-enter-from-right' : 'page-transition-enter-from-left');
   }, [location]);
 
   const handleBackClick = () => {
@@ -26,7 +26,7 @@ const NotificationSettings = () => {
 
     setTimeout(() => {
       navigate("/notifications/view", { state: { from: 'settings' } });
-    }, 200);
+    }, 300);
   };
 
   return(

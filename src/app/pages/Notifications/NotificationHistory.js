@@ -104,7 +104,7 @@ const NotificationHistory = () => {
   // Page enter animation
   useEffect(() => {
     const fromSettings = location.state?.from === 'settings';
-    setTransitionClass(fromSettings ? 'page-transition-enter-from-right' : 'page-transition-enter-from-left');
+    setTransitionClass(fromSettings ? 'page-transition-enter-from-left' : 'page-transition-enter-from-right');
   }, [location]);
 
   // Get filtered notifications based on all filters
@@ -615,7 +615,7 @@ const NotificationHistory = () => {
             setTransitionClass('page-transition-exit-to-right');
             setTimeout(() => {
               navigate("/notifications/settings/view", { state: { from: 'history' } });
-            }, 200);
+            }, 300);
         }}
         disabled={isTransitioning}
       >
