@@ -405,6 +405,7 @@ const RelationshipTable = ({
   inputFields = [],
   tempInputFields = [],
   listType = "all",
+  isAccessGranted = true,
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -457,10 +458,12 @@ const RelationshipTable = ({
     }
   }, [dispatch, idAccount, page, pageSize, sort, search, tempInputFields, listType]);
 
-  // Fetch relationship data from API
+  // check access granted
   useEffect(() => {
-    fetchRelationshipData();
-  }, [fetchRelationshipData]);
+    if (isAccessGranted) {
+      fetchRelationshipData();
+    }
+  }, [fetchRelationshipData, isAccessGranted]);
 
   // Update table data when API response changes
   useEffect(() => {
@@ -538,6 +541,7 @@ const RelationshipTable = ({
   const handleInactivateRelationship = (remark, handleClear) => {
     dispatch(
       toggleRelationshipStatus({
+        accountId: idAccount,
         relationshipId: inactivateRelationshipId,
         remarks: remark,
       })
