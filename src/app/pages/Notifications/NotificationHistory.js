@@ -17,6 +17,7 @@ import {
   Dropdown,
   Menu,
   Popconfirm,
+  Pagination,
 } from "antd";
 import {
   BellOutlined,
@@ -49,6 +50,10 @@ import {
 } from "../../../redux/slices/notifications";
 import moment from "moment";
 import NxPanel from "../../../components/Nx/NxPanel";
+import NxDateRangePicker from "../../../components/Nx/NxDateRangePicker";
+import NxSearchInput from "../../../components/Nx/NxSearchInput";
+import NxDropdownBase from "../../../components/Nx/NxDropdownBase";
+import NxTextButton from "../../../components/Nx/NxTextButton";
 import LayoutMenu from "../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../components/ButtonComponent";
 
@@ -60,46 +65,126 @@ const { Title, Text } = Typography;
  * Displays full notification history with filtering and management capabilities
  */
 const NotificationHistory = () => {
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [selectedNotificationType, setSelectedNotificationType] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // Get notification state
-  const allNotifications = useSelector(selectAllNotifications);
+  const allNotifications = useSelector(selectAllNotifications) || [];
   const broadcastNotifications = useSelector(selectBroadcastNotifications);
   const directNotifications = useSelector(selectDirectNotifications);
   const unreadCount = useSelector(selectUnreadCount);
   const connectionStatus = useSelector(selectConnectionStatus);
 
-  // Local state
+  // Local state for tab and animations
+  const [activeTab, setActiveTab] = useState('all');
+  const [lastViewedTime, setLastViewedTime] = useState(null);
+  const [clickedTab, setClickedTab] = useState(null);
+  const [animatingNotifications, setAnimatingNotifications] = useState(new Set());
+  const [animatingDateGroups, setAnimatingDateGroups] = useState(new Set());
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedType, setSelectedType] = useState(null);
   const [selectedPriority, setSelectedPriority] = useState(null);
 
-  // Get filtered notifications based on selected filter
+  // Get filtered notifications based on all filters
   const getFilteredNotifications = () => {
     let notifications = allNotifications;
 
-    // Filter by direction
-    if (selectedFilter === "broadcast") {
-      notifications = broadcastNotifications;
-    } else if (selectedFilter === "direct") {
-      notifications = directNotifications;
+    // Filter by tab (all/unread)
+    if (activeTab === 'unread') {
+      notifications = notifications.filter(notification =>
+        (notification.STATUS || notification.status) !== "read"
+      );
     }
 
-    // Filter by type
-    if (selectedType) {
-      notifications = notifications.filter((n) => n.notificationType === selectedType);
+    // Filter by search (title or message)
+    if (search && search.trim()) {
+      const searchLower = search.toLowerCase().trim();
+      notifications = notifications.filter(notification => {
+        const title = (notification.title || notification.TITLE || "").toLowerCase();
+        const message = (notification.message || notification.MESSAGE || "").toLowerCase();
+        return title.includes(searchLower) || message.includes(searchLower);
+      });
     }
 
-    // Filter by priority
-    if (selectedPriority) {
-      notifications = notifications.filter((n) => n.priority === selectedPriority);
+    // Filter by date range
+    if (startDate && endDate) {
+      notifications = notifications.filter(notification => {
+        const notificationDate = moment(
+          notification.receivedAt || notification.RECEIVED_AT ||
+          notification.createdAt || notification.CREATED_AT
+        );
+        return notificationDate.isBetween(moment(startDate), moment(endDate), 'day', '[]');
+      });
+    }
+
+    // Filter by notification type dropdown
+    if (selectedNotificationType && selectedNotificationType !== "Show All") {
+      notifications = notifications.filter(notification => {
+        const type = (notification.notificationType || notification.NOTIFICATION_TYPE || "").toLowerCase();
+        return type === selectedNotificationType.toLowerCase();
+      });
     }
 
     return notifications;
   };
 
   const filteredNotifications = getFilteredNotifications();
+
+  // Pagination logic
+  const totalNotifications = filteredNotifications.length;
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
+
+  // Calculate counts for tabs
+  const allCount = allNotifications.length;
+  const unreadCountForTab = allNotifications.filter(notification =>
+    (notification.STATUS || notification.status) !== "read"
+  ).length;
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, startDate, endDate, selectedNotificationType, activeTab]);
+
+  // Safe unread count
+  const safeUnreadCount = unreadCount !== undefined ? Math.min(unreadCount, unreadCountForTab) : unreadCountForTab;
+
+  const tabs = [
+    { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
+    { id: 'unread', label: 'Unread', count: unreadCountForTab, badgeVariant: 'soft' }
+  ];
+
+  /**
+   * Handle clear all filters
+   */
+  const handleClearFilters = () => {
+    setSearch("");
+    setStartDate(null);
+    setEndDate(null);
+    setSelectedNotificationType(null);
+  };
+
+  /**
+   * Handle confirm filters (could be used to apply filters or refresh)
+   */
+  const handleConfirmFilters = () => {
+    // Filters are applied automatically via state changes
+    // This could be used to log analytics or trigger other actions
+    console.log("Filters applied:", {
+      search,
+      startDate,
+      endDate,
+      notificationType: selectedNotificationType
+    });
+  };
 
   /**
    * Get icon based on notification type
@@ -129,7 +214,30 @@ const NotificationHistory = () => {
    * Get tag color based on priority
    */
   const getPriorityColor = (priority) => {
-    switch (priority) {
+    // Normalize priority to string if it's a number
+    const normalizedPriority = typeof priority === 'number'
+      ? getPriorityStringFromNumber(priority)
+      : priority;
+
+    // If it's a number string like "1", convert to number
+    if (typeof priority === 'string' && !isNaN(priority) && priority.trim() !== '') {
+      const priorityNumber = Number(priority);
+      const priorityString = getPriorityStringFromNumber(priorityNumber);
+      switch (priorityString) {
+        case NOTIFICATION_PRIORITY.URGENT:
+          return "red";
+        case NOTIFICATION_PRIORITY.HIGH:
+          return "orange";
+        case NOTIFICATION_PRIORITY.NORMAL:
+          return "blue";
+        case NOTIFICATION_PRIORITY.LOW:
+          return "default";
+        default:
+          return "default";
+      }
+    }
+
+    switch (normalizedPriority) {
       case NOTIFICATION_PRIORITY.URGENT:
         return "red";
       case NOTIFICATION_PRIORITY.HIGH:
@@ -144,11 +252,97 @@ const NotificationHistory = () => {
   };
 
   /**
+   * Convert priority (number or string) to display string
+   */
+  const getPriorityString = (priority) => {
+    // Normalize priority to string if it's a number
+    const normalizedPriority = typeof priority === 'number'
+      ? getPriorityStringFromNumber(priority)
+      : priority;
+
+    // If it's a number string like "1", convert to number
+    if (typeof priority === 'string' && !isNaN(priority) && priority.trim() !== '') {
+      return getPriorityStringFromNumber(Number(priority));
+    }
+
+    return normalizedPriority;
+  };
+
+  const getPriorityStringFromNumber = (priority) => {
+    // If number, map to priority string
+    // Assuming: 1=low, 2=normal, 3=high, 4=urgent
+    switch (priority) {
+      case 1:
+        return NOTIFICATION_PRIORITY.LOW;
+      case 2:
+        return NOTIFICATION_PRIORITY.NORMAL;
+      case 3:
+        return NOTIFICATION_PRIORITY.HIGH;
+      case 4:
+        return NOTIFICATION_PRIORITY.URGENT;
+      default:
+        return NOTIFICATION_PRIORITY.NORMAL;
+    }
+  };
+
+  /**
    * Format notification timestamp
    */
   const formatTimestamp = (timestamp) => {
+    const now = moment();
     const notificationTime = moment(timestamp);
-    return notificationTime.format("MMM D, YYYY HH:mm");
+    const diffMinutes = now.diff(notificationTime, "minutes");
+    const diffHours = now.diff(notificationTime, "hours");
+    const diffDays = now.diff(notificationTime, "days");
+
+    if (diffMinutes < 1) {
+      return "Just now";
+    } else if (diffMinutes < 60) {
+      return `${diffMinutes}m ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    } else if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    } else {
+      return notificationTime.format("MMM D, YYYY");
+    }
+  };
+
+  /**
+   * Get notification timestamp - handles different property names
+   */
+  const getNotificationTimestamp = (notification) => {
+    return notification.receivedAt ||
+           notification.RECEIVED_AT ||
+           notification.createdAt ||
+           notification.CREATED_AT;
+  };
+
+  /**
+   * Group notifications by date
+   */
+  const groupNotificationsByDate = (notifications) => {
+    const grouped = {};
+
+    notifications.forEach(notification => {
+      const notificationDate = getNotificationTimestamp(notification);
+      const date = moment(notificationDate).format("YYYY-MM-DD");
+      const dateFormatted = moment(notificationDate).format("MMM D").split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      const notificationMoment = moment(notificationDate);
+      // Check if today (same day, month, and year)
+      const isToday = moment().isSame(notificationMoment, 'day');
+      const displayDate = isToday ? "Today" : dateFormatted;
+
+      if (!grouped[displayDate]) {
+        grouped[displayDate] = [];
+      }
+      grouped[displayDate].push(notification);
+    });
+
+    return grouped;
   };
 
   /**
@@ -202,7 +396,80 @@ const NotificationHistory = () => {
    * Handle mark all as read
    */
   const handleMarkAllAsRead = () => {
-    dispatch(markAllAsRead());
+    // Only animate in unread tab
+    if (activeTab === 'unread') {
+      const unreadNotifications = filteredNotifications.filter(
+        notification => (notification.STATUS || notification.status) !== "read"
+      );
+
+      if (unreadNotifications.length === 0) {
+        return;
+      }
+
+      // Get notifications in actual visual order by flattening the grouped structure
+      const groupedNotifications = groupNotificationsByDate(unreadNotifications);
+      const visualOrderNotifications = [];
+      const dateGroupsOrder = [];
+
+      // Flatten groups in the order they appear on screen
+      Object.entries(groupedNotifications).forEach(([date, dateNotifications]) => {
+        dateGroupsOrder.push(date);
+        visualOrderNotifications.push(...dateNotifications);
+      });
+
+      // Sequential animation delay (ms between each notification)
+      const delayBetweenAnimations = 84; // 84ms delay
+      const dateGroupAnimationDelay = 100; // Delay for date group header animation
+
+      // Track the last notification index for each date group
+      const dateGroupLastIndices = {};
+      let currentIndex = 0;
+
+      Object.entries(groupedNotifications).forEach(([date, dateNotifications]) => {
+        currentIndex += dateNotifications.length;
+        dateGroupLastIndices[date] = currentIndex - 1;
+      });
+
+      // Trigger animations sequentially from oldest (bottom) to newest (top)
+      visualOrderNotifications.forEach((notification, index) => {
+        // Reverse the order: last item (oldest) animates first
+        const reverseIndex = visualOrderNotifications.length - 1 - index;
+        const delay = reverseIndex * delayBetweenAnimations;
+
+        const notificationId = notification.id || notification.ID;
+
+        setTimeout(() => {
+          setAnimatingNotifications(prev => new Set([...prev, notificationId]));
+        }, delay);
+      });
+
+      // Animate date group headers after their last notification
+      Object.entries(groupedNotifications).forEach(([date, dateNotifications]) => {
+        const lastNotificationIndex = dateGroupLastIndices[date];
+        const reverseIndex = visualOrderNotifications.length - 1 - lastNotificationIndex;
+        const lastNotificationDelay = reverseIndex * delayBetweenAnimations;
+        const dateGroupDelay = lastNotificationDelay + dateGroupAnimationDelay;
+
+        setTimeout(() => {
+          setAnimatingDateGroups(prev => new Set([...prev, date]));
+        }, dateGroupDelay);
+      });
+
+      // After all animations complete, dispatch the API call
+      const totalAnimationTime = visualOrderNotifications.length * delayBetweenAnimations + dateGroupAnimationDelay + 400;
+      setTimeout(() => {
+        dispatch(markAllAsRead());
+
+        // Clear animating notifications and date groups after a delay
+        setTimeout(() => {
+          setAnimatingNotifications(new Set());
+          setAnimatingDateGroups(new Set());
+        }, 300);
+      }, totalAnimationTime);
+    } else {
+      // In 'all' tab, just mark as read without animation
+      dispatch(markAllAsRead());
+    }
   };
 
   /**
@@ -267,6 +534,7 @@ const NotificationHistory = () => {
     </Menu>
   );
 
+
   return (
   <LayoutMenu>
     <div class="w-full flex flex-col justify-end items-end mb-5">
@@ -295,251 +563,280 @@ const NotificationHistory = () => {
       {/* Page Header */}
       <NxPanel title="NOTIFICATION HISTORY">
         {/* Statistics */}
-        <Row gutter={16} className="mb-6">
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Total Notifications"
-                value={allNotifications.length}
-                prefix={<BellOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Unread"
-                value={unreadCount}
-                valueStyle={{ color: "#cf1322" }}
-                prefix={<BellFilled />}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Broadcast"
-                value={broadcastNotifications.length}
-                prefix={<BellOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="Direct"
-                value={directNotifications.length}
-                prefix={<MessageOutlined />}
-              />
-            </Card>
-          </Col>
-        </Row>
+        <div className="flex items-center gap-2.5 w-full justify-center">
+          <div className="flex-1 flex items-center">
+            <p className="text-base font-semibold leading-[25.6px] m-0">
+              <span className="text-[#74797d]">You have </span>
+              <span className="text-[#0075bf]">{safeUnreadCount}</span>
+              <span className="text-[#74797d]"> unread notifications</span>
+            </p>
+          </div>
 
-        {/* Filters and Actions */}
-        <div className="flex justify-between items-center mb-6">
-          <Space size="middle">
-            <Segmented
-              options={[
-                { label: "All", value: "all" },
-                { label: "Broadcast", value: "broadcast" },
-                { label: "Direct", value: "direct" },
-              ]}
-              value={selectedFilter}
-              onChange={handleFilterChange}
-            />
-
-            {/* Type Filter */}
-            <Dropdown
-              overlay={
-                <Menu
-                  onClick={({ key }) =>
-                    setSelectedType(key === "all" ? null : key)
-                  }
-                >
-                  <Menu.Item key="all">All Types</Menu.Item>
-                  <Menu.Divider />
-                  {Object.values(NOTIFICATION_TYPES).map((type) => (
-                    <Menu.Item key={type}>{type.toUpperCase()}</Menu.Item>
-                  ))}
-                </Menu>
-              }
+          <div className="flex gap-2.5">
+            <button
+              onClick={() => {
+                setActiveTab('all');
+                setClickedTab('all');
+                setTimeout(() => setClickedTab(null), 200);
+              }}
+              className={`w-[146px] px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all ${
+                activeTab === 'all'
+                  ? 'bg-[#0075bf] text-white font-semibold shadow-none border-none'
+                  : 'bg-white text-[#0075bf] font-normal border border-[#0075bf] shadow-none hover:bg-[#0075bf]/5'
+              }`}
+              style={{ boxShadow: 'none', outline: 'none' }}
             >
-              <Button icon={<FilterOutlined />}>
-                Type: {selectedType ? selectedType.toUpperCase() : "ALL"}
-              </Button>
-            </Dropdown>
+              All ({allCount})
+            </button>
 
-            {/* Priority Filter */}
-            <Dropdown
-              overlay={
-                <Menu
-                  onClick={({ key }) =>
-                    setSelectedPriority(key === "all" ? null : key)
-                  }
-                >
-                  <Menu.Item key="all">All Priorities</Menu.Item>
-                  <Menu.Divider />
-                  {Object.values(NOTIFICATION_PRIORITY).map((priority) => (
-                    <Menu.Item key={priority}>
-                      {priority.toUpperCase()}
-                    </Menu.Item>
-                  ))}
-                </Menu>
-              }
+            <button
+              onClick={() => {
+                setActiveTab('unread');
+                setClickedTab('unread');
+                setTimeout(() => setClickedTab(null), 200);
+              }}
+              className={`w-[131px] px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all ${
+                activeTab === 'unread'
+                  ? 'bg-[#0075bf] text-white font-semibold shadow-none border-none'
+                  : 'bg-white text-[#0075bf] font-normal border border-[#0075bf] shadow-none hover:bg-[#0075bf]/5'
+              }`}
+              style={{ boxShadow: 'none', outline: 'none' }}
             >
-              <Button icon={<FilterOutlined />}>
-                Priority:{" "}
-                {selectedPriority ? selectedPriority.toUpperCase() : "ALL"}
-              </Button>
-            </Dropdown>
-          </Space>
-
-          <Space>
-            {unreadCount > 0 && (
-              <Button
-                icon={<CheckOutlined />}
-                onClick={handleMarkAllAsRead}
-              >
-                Mark All as Read
-              </Button>
-            )}
-            {selectedFilter !== "all" && filteredNotifications.length > 0 && (
-              <Popconfirm
-                title="Clear all notifications in this category?"
-                onConfirm={handleClearByDirection}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button icon={<ClearOutlined />} danger>
-                  Clear {selectedFilter}
-                </Button>
-              </Popconfirm>
-            )}
-            {allNotifications.length > 0 && (
-              <Popconfirm
-                title="Are you sure you want to clear all notifications?"
-                onConfirm={handleClearAll}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button icon={<DeleteOutlined />} danger>
-                  Clear All
-                </Button>
-              </Popconfirm>
-            )}
-          </Space>
+              Unread ({unreadCountForTab})
+            </button>
+          </div>
         </div>
 
-        {/* Connection Status */}
-        <div className="mb-4">
-          <Tag color={connectionStatus === "connected" ? "success" : "default"}>
-            {connectionStatus === "connected" ? "● Connected" : "○ Disconnected"}
-          </Tag>
+        {/* Filter Row */}
+        <div className="flex items-center gap-2 w-full justify-center my-5">
+          <p className="flex flex-col w-auto m-0 whitespace-nowrap">Filter:</p>
+          <NxSearchInput
+            className="flex-[8]"
+            placeholder="Search by title or message..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <NxDateRangePicker
+            className="flex-[5]"
+            value={[startDate, endDate]}
+            onChange={([start, end]) => {
+              setStartDate(start);
+              setEndDate(end);
+            }}
+            size="middle"
+            allowClear
+            placeholder={["Start Date", "End Date"]}
+          />
+          <NxDropdownBase
+            className="flex-[2]"
+            options={["Show All", "Approval", "Warning", "Error", "Success", "Info", "System"]}
+            value={selectedNotificationType || "Show All"}
+            onChange={(value) => setSelectedNotificationType(value === "Show All" ? null : value)}
+          />
+          <NxTextButton
+            className="flex-[0.5] text-center"
+            variant="primary"
+            onClick={handleConfirmFilters}
+          >
+            Confirm
+          </NxTextButton>
+          <NxTextButton
+            className="flex-[0.5] text-center"
+            variant="muted"
+            onClick={handleClearFilters}
+          >
+            Clear
+          </NxTextButton>
         </div>
-
-        <Divider />
 
         {/* Notification List */}
-        {filteredNotifications.length === 0 ? (
-          <div className="py-20">
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="No notifications"
-            />
-          </div>
-        ) : (
-          <List
-            itemLayout="horizontal"
-            dataSource={filteredNotifications}
-            pagination={{
-              pageSize: 20,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} notifications`,
-            }}
-            renderItem={(notification) => (
-              <List.Item
-                key={notification.id}
-                style={{
-                  backgroundColor: notification.read ? "#ffffff" : "#f0f7ff",
-                  padding: "16px",
-                  marginBottom: "8px",
-                  borderRadius: "4px",
-                  border: "1px solid #f0f0f0",
-                  cursor: notification.link ? "pointer" : "default",
-                }}
-                onClick={() =>
-                  notification.link && handleNotificationClick(notification)
+        <div
+          key={activeTab}
+          className="w-full notification-list"
+          style={{
+            maxHeight: 600,
+            overflowY: "auto",
+            marginTop: 16,
+            animation: 'fadeSlideIn 0.3s ease-in-out',
+            position: 'relative',
+            // paddingBottom: 60
+          }}
+        >
+          {filteredNotifications.length === 0 ? (
+            <div style={{ padding: "40px 16px" }}>
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  search || startDate || endDate || selectedNotificationType
+                    ? "No notifications match your filters"
+                    : "No notifications"
                 }
-                actions={[
-                  <Dropdown
-                    overlay={getActionMenu(notification)}
-                    trigger={["click"]}
-                  >
-                    <Button
-                      type="text"
-                      icon={<MoreOutlined />}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </Dropdown>,
-                ]}
-              >
-                <List.Item.Meta
-                  avatar={getNotificationIcon(notification.notificationType)}
-                  title={
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text strong={!notification.read} style={{ fontSize: 16 }}>
-                        {notification.title}
-                      </Text>
-                      <Space>
-                        {notification.priority &&
-                          notification.priority !== NOTIFICATION_PRIORITY.NORMAL && (
-                            <Tag color={getPriorityColor(notification.priority)}>
-                              {notification.priority.toUpperCase()}
-                            </Tag>
-                          )}
-                        {notification.direction === "broadcast" && (
-                          <Tag color="purple">BROADCAST</Tag>
-                        )}
-                        {!notification.read && <Tag color="blue">UNREAD</Tag>}
-                      </Space>
+              />
+            </div>
+          ) : (
+            <div>
+              {Object.entries(groupNotificationsByDate(paginatedNotifications)).map(([date, dateNotifications]) => (
+                <div className="w-full flex flex-col" key={date}>
+                  {/* Date Group Header */}
+                  <div className={`w-full px-5 py-3 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4 ${
+                    animatingDateGroups.has(date) ? 'date-group-slide-out' : ''
+                  }`}>
+                    <div className="flex-1 justify-start text-[#1d1c1d] text-sm font-bold capitalize">
+                      {date}
                     </div>
+                  </div>
+
+                  {/* Notifications for this date */}
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={dateNotifications}
+                    renderItem={(notification) => (
+                      <List.Item
+                        key={notification.id || notification.ID}
+                        onClick={() => handleNotificationClick(notification)}
+                        style={{
+                          padding: "12px 16px",
+                          cursor: (notification.LINK || notification.link) ? "pointer" : "default",
+                          backgroundColor: ((notification.STATUS || notification.status) === "read") ? "#ffffff" : "#f0f7ff",
+                          borderBottom: "1px dashed rgb(29 28 29 / 0.1)",
+                          borderTop: "1px dashed rgb(29 28 29 / 0.1)",
+                          marginTop: "-1px"
+                        }}
+                        className={`notification-item hover:bg-gray-50 ${
+                          animatingNotifications.has(notification.id || notification.ID) ? 'notification-slide-out' : ''
+                        }`}
+                      >
+                        <List.Item.Meta
+                          // avatar={getNotificationIcon(notification.notificationType || notification.NOTIFICATION_TYPE)}
+                          title={
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
+                                <Text
+                                  strong={!(notification.read || notification.STATUS === "read")}
+                                  style={{ fontSize: 14, flex: 1 }}
+                                  ellipsis
+                                >
+                                  {notification.title || notification.TITLE}
+                                </Text>
+                                {(() => {
+                                  const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
+                                  const isNew = notificationTime &&
+                                               lastViewedTime &&
+                                               new Date(notificationTime) > new Date(lastViewedTime);
+                                  return isNew ? (
+                                    <Tag
+                                      color="blue"
+                                      style={{ marginLeft: 8, fontSize: 10, height: 'fit-content', alignSelf: 'center' }}
+                                    >
+                                      New
+                                    </Tag>
+                                  ) : null;
+                                })()}
+                              </div>
+                              {(notification.priority || notification.PRIORITY) &&
+                                getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
+                                  <Tag
+                                    color={getPriorityColor(notification.priority || notification.PRIORITY)}
+                                    style={{ marginLeft: 8, fontSize: 10 }}
+                                  >
+                                    {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
+                                  </Tag>
+                                )}
+                            </div>
+                          }
+                          description={
+                            <div>
+                              <Text
+                                type="secondary"
+                                style={{ fontSize: 13, display: "block" }}
+                                ellipsis={{ rows: 2 }}
+                              >
+                                {notification.message || notification.MESSAGE}
+                              </Text>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  marginTop: 4,
+                                }}
+                              >
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                  {formatTimestamp(
+                                    getNotificationTimestamp(notification)
+                                  )}
+                                </Text>
+                                {notification.direction === "broadcast" && (
+                                  <Tag color="purple" style={{ fontSize: 10 }}>
+                                    BROADCAST
+                                  </Tag>
+                                )}
+                              </div>
+                            </div>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Pagination - Sticky at bottom right */}
+          {filteredNotifications.length > 0 && (
+            <div
+              style={{
+                position: 'sticky',
+                bottom: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'flex-end',
+                padding: '12px 16px',
+                backgroundColor: '#ffffff',
+                // borderTop: '1px solid #f0f0f0',
+                marginTop: '40px',
+                zIndex: 10
+              }}
+            >
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={totalNotifications}
+                onChange={(page, size) => {
+                  setCurrentPage(page);
+                  if (size !== pageSize) {
+                    setPageSize(size);
                   }
-                  description={
-                    <div>
-                      <Text style={{ fontSize: 14, display: "block", marginBottom: 8 }}>
-                        {notification.message}
-                      </Text>
-                      <Space split={<Divider type="vertical" />}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          <strong>Type:</strong> {notification.notificationType}
-                        </Text>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          <strong>Received:</strong>{" "}
-                          {formatTimestamp(
-                            notification.receivedAt || notification.createdAt
-                          )}
-                        </Text>
-                        {notification.read && notification.readAt && (
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            <strong>Read:</strong>{" "}
-                            {formatTimestamp(notification.readAt)}
-                          </Text>
-                        )}
-                      </Space>
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        )}
+                }}
+                onShowSizeChange={(current, size) => {
+                  setCurrentPage(1);
+                  setPageSize(size);
+                }}
+                showSizeChanger
+                showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} notifications`}
+                pageSizeOptions={['10', '20', '50', '100']}
+                size="default"
+              />
+            </div>
+          )}
+        </div>
+
       </NxPanel>
+      <button
+        onClick={() => {
+            navigate("/");
+        }}
+        className={`w-[146px] mb-5 px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all bg-[#0075bf] text-white font-semibold shadow-none border-none`}
+        style={{ boxShadow: 'none', outline: 'none' }}
+      >
+        Back
+      </button>
     </div>
   </LayoutMenu>
   );

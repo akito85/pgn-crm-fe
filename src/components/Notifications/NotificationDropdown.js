@@ -511,6 +511,7 @@ const NotificationDropdown = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          maxHeight: "62px"
         }}
       >
         <Text strong style={{ fontSize: 16 }}>
@@ -586,9 +587,9 @@ const NotificationDropdown = () => {
         ) : (
           <div>
             {Object.entries(groupNotificationsByDate(notifications)).map(([date, dateNotifications]) => (
-              <div key={date}>
+              <div className="flex flex-col" key={date}>
                 {/* Date Group Header */}
-                <div className={`w-full px-5 py-4 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4 ${
+                <div className={`w-full px-5 py-3 border-b border-[#1d1c1d]/10 inline-flex justify-start items-start gap-4 ${
                   animatingDateGroups.has(date) ? 'date-group-slide-out' : ''
                 }`}>
                   <div className="flex-1 justify-start text-[#1d1c1d] text-sm font-bold capitalize">
@@ -707,6 +708,7 @@ const NotificationDropdown = () => {
             padding: "8px 16px",
             borderTop: "1px solid #f0f0f0",
             textAlign: "center",
+            maxHeight: "62px"
           }}
         >
           <Button type="link" onClick={handleViewAll} block>
