@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
+import "./Notifications.css";
 import {
   Card,
   List,
@@ -761,7 +762,6 @@ const NotificationHistory = () => {
                         style={{
                           padding: "12px 16px",
                           cursor: (notification.LINK || notification.link) ? "pointer" : "default",
-                          backgroundColor: ((notification.STATUS || notification.status) === "read") ? "#ffffff" : "#f0f7ff",
                           borderBottom: "1px dashed rgb(29 28 29 / 0.1)",
                           borderTop: "1px dashed rgb(29 28 29 / 0.1)",
                           marginTop: "-1px",
@@ -769,7 +769,9 @@ const NotificationHistory = () => {
                           alignItems: "center",
                           gap: 16
                         }}
-                        className={`notification-item hover:bg-gray-50 ${
+                        className={`notification-item ${
+                          ((notification.STATUS || notification.status) === "read") ? 'notification-read' : 'notification-unread'
+                        } ${
                           animatingNotifications.has(notification.id || notification.ID) ? 'notification-slide-out' : ''
                         }`}
                       >

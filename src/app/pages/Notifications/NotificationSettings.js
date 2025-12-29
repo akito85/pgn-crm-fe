@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router"
+import "./Notifications.css"
 
 import LayoutMenu from "../../../components/SidebarMenu/LayoutMenu"
 import NxPanel from "../../../components/Nx/NxPanel"
@@ -15,7 +16,6 @@ const NotificationSettings = () => {
 
   // Page enter animation
   useEffect(() => {
-    // Determine entry direction based on navigation state
     const fromHistory = location.state?.from === 'history';
     setTransitionClass(fromHistory ? 'page-transition-enter-from-right' : 'page-transition-enter-from-left');
   }, [location]);
@@ -24,9 +24,10 @@ const NotificationSettings = () => {
     setIsTransitioning(true);
     setTransitionClass('page-transition-exit-to-left');
 
+    // Wait for exit animation to complete (310ms ensures full completion)
     setTimeout(() => {
       navigate("/notifications/view", { state: { from: 'settings' } });
-    }, 300);
+    }, 310);
   };
 
   return(
