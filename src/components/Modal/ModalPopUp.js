@@ -22,7 +22,7 @@ const ModalConfirm = ({
       bodyStyle={{ bodyStyle }}
       maskClosable={false}
       footer={[
-        <div className={"w-full justify-end flex gap-[20px]"}>
+        <div className={"w-full justify-end flex gap-1"}>
           <ButtonComponent type={"default"} onClick={handleCancel}>
             {useOk === true ? "Back" : "Cancel"}
           </ButtonComponent>
