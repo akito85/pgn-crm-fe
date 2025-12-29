@@ -663,45 +663,52 @@ const NotificationDropdown = () => {
                       <List.Item.Meta
                         // avatar={getNotificationIcon(notification.notificationType || notification.NOTIFICATION_TYPE)}
                         title={
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
-                              <Text
-                                strong={!(notification.read || notification.STATUS === "read")}
-                                style={{ fontSize: 14, flex: 1 }}
-                                ellipsis
-                              >
-                                {notification.title || notification.TITLE}
-                              </Text>
-                              {(() => {
-                                const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
-                                const isNew = notificationTime &&
-                                             lastViewedTime &&
-                                             new Date(notificationTime) > new Date(lastViewedTime);
-                                return isNew ? (
-                                  <Tag
-                                    color="blue"
-                                    style={{ marginLeft: 8, fontSize: 10, height: 'fit-content', alignSelf: 'center' }}
-                                  >
-                                    New
-                                  </Tag>
-                                ) : null;
-                              })()}
-                            </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                            <span
+                              style={{
+                                fontSize: 14,
+                                fontWeight: !(notification.read || notification.STATUS === "read") ? 600 : 400,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {notification.title || notification.TITLE}
+                            </span>
+                            {/* Priority Badge */}
                             {(notification.priority || notification.PRIORITY) &&
                               getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
-                                <Tag
-                                  color={getPriorityColor(notification.priority || notification.PRIORITY)}
-                                  style={{ marginLeft: 8, fontSize: 10 }}
+                                <div
+                                  style={{
+                                    fontSize: 9,
+                                    fontWeight: 600,
+                                    color: getPriorityColor(notification.priority || notification.PRIORITY) === 'red' ? '#ff4d4f' :
+                                           getPriorityColor(notification.priority || notification.PRIORITY) === 'orange' ? '#fa8c16' :
+                                           getPriorityColor(notification.priority || notification.PRIORITY) === 'blue' ? '#1890ff' : '#8c8c8c',
+                                    verticalAlign: 'super',
+                                    lineHeight: 1,
+                                    margin: 0,
+                                    padding: 0
+                                  }}
                                 >
                                   {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
-                                </Tag>
+                                </div>
                               )}
+                            {/* New Badge */}
+                            {(() => {
+                              const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
+                              const isNew = notificationTime &&
+                                           lastViewedTime &&
+                                           new Date(notificationTime) > new Date(lastViewedTime);
+                              return isNew ? (
+                                <Tag
+                                  color="blue"
+                                  style={{ fontSize: 10, height: 'fit-content' }}
+                                >
+                                  New
+                                </Tag>
+                              ) : null;
+                            })()}
                           </div>
                         }
                         description={
