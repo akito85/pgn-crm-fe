@@ -349,22 +349,35 @@ const NotificationHistory = () => {
    * Handle notification click - State-based navigation
    */
   const handleNotificationClick = (notification) => {
+    console.log('=== Notification Click Debug ===');
+    console.log('Full notification object:', notification);
+
     // Mark as read if not already read
-    if (!notification.read) {
-      dispatch(markAsRead(notification.id));
+    const notificationId = notification.id || notification.ID;
+    const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
+
+    console.log('Notification ID:', notificationId);
+    console.log('Is Read:', isRead);
+
+    if (!isRead && notificationId) {
+      console.log('Marking notification as read:', notificationId);
+      dispatch(markAsRead(notificationId));
     }
 
     // Navigate using state-based routing pattern
-    if (notification.link || notification.LINK) {
-      const link = notification.link || notification.LINK;
+    const link = notification.link || notification.LINK;
+    console.log('Navigation link:', link);
 
+    if (link) {
       // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
       let parsedNavigationState = {};
       const navState = notification.navigationState || notification.NAVIGATION_STATE;
+      console.log('Raw NAVIGATION_STATE:', navState);
 
       if (navState) {
         try {
           parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
+          console.log('Parsed NAVIGATION_STATE:', parsedNavigationState);
         } catch (e) {
           console.error('Failed to parse NAVIGATION_STATE:', e);
           parsedNavigationState = {};
@@ -391,18 +404,25 @@ const NotificationHistory = () => {
         routeState.approvalLevel = approvalLevel;
       }
 
+      console.log('Final route state:', routeState);
+      console.log('Navigating to:', link);
+
       // Navigate based on presence of entity_id
       if (notification.entityId || notification.ENTITY_ID) {
+        console.log('Navigation with entity state');
         navigate(link, { state: routeState });
       } else {
-        // General page navigation (might still have state for bulk operations)
+        console.log('Navigation without entity');
         navigate(link, {
           state: Object.keys(parsedNavigationState).length > 0
             ? parsedNavigationState
             : undefined
         });
       }
+    } else {
+      console.log('No link found - skipping navigation');
     }
+    console.log('=== End Notification Click Debug ===');
   };
 
   /**
@@ -734,14 +754,38 @@ const NotificationHistory = () => {
                           <List.Item.Meta
                             // avatar={getNotificationIcon(notification.notificationType || notification.NOTIFICATION_TYPE)}
                             title={
-                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <Text
-                                  strong={!(notification.read || notification.STATUS === "read")}
-                                  style={{ fontSize: 14 }}
-                                  ellipsis
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                <span
+                                  style={{
+                                    fontSize: 14,
+                                    fontWeight: !(notification.read || notification.STATUS === "read") ? 600 : 400,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
                                 >
                                   {notification.title || notification.TITLE}
-                                </Text>
+                                </span>
+                                {/* Priority Badge */}
+                                {(notification.priority || notification.PRIORITY) &&
+                                  getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
+                                    <div
+                                      style={{
+                                        fontSize: 9,
+                                        fontWeight: 600,
+                                        color: getPriorityColor(notification.priority || notification.PRIORITY) === 'red' ? '#ff4d4f' :
+                                               getPriorityColor(notification.priority || notification.PRIORITY) === 'orange' ? '#fa8c16' :
+                                               getPriorityColor(notification.priority || notification.PRIORITY) === 'blue' ? '#1890ff' : '#8c8c8c',
+                                        verticalAlign: 'super',
+                                        lineHeight: 1,
+                                        margin: 0,
+                                        padding: 0
+                                      }}
+                                    >
+                                      {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
+                                    </div>
+                                  )}
+                                {/* New Badge */}
                                 {(() => {
                                   const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
                                   const isNew = notificationTime &&
@@ -790,17 +834,8 @@ const NotificationHistory = () => {
                           />
                         </div>
 
-                        {/* Right Column: Priority Tag and View Button */}
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                          {(notification.priority || notification.PRIORITY) &&
-                            getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
-                              <Tag
-                                color={getPriorityColor(notification.priority || notification.PRIORITY)}
-                                style={{ fontSize: 10, margin: 0 }}
-                              >
-                                {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
-                              </Tag>
-                            )}
+                        {/* Right Column: View Button */}
+                        <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
                           <NxTextButton
                             variant="primary"
                             onClick={(e) => {
