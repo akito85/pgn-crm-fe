@@ -594,6 +594,9 @@ const NotificationHistory = () => {
           </svg>
         }
           className="p-5"
+        onClick={() => {
+            navigate("/notifications/settings/view");
+        }}
       >
           Setting
       </ButtonComponent>
