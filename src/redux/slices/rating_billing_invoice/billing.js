@@ -510,15 +510,57 @@ const billingSlice = createSlice({
     },
 
     // Get All Billing Approve Pagination
-    [getAllBillingApprovePaginate.pending]: (state) => {
-      state.loading = true;
+    [getAllBillingApprovePaginate.pending]: (state, action) => {
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllBillingApprovePaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_list_billing_approval = action.payload;
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.data_list_billing_approval = {
+          result: [
+            ...(state.data_list_billing_approval?.result || []),
+            ...newData,
+          ],
+          page: {
+            totalElements: action.payload.page?.totalElements || 0,
+            totalPages: action.payload.page?.totalPages || 0,
+            number: action.payload.page?.number || 0,
+            size: action.payload.page?.size || 10,
+          },
+        };
+      } else {
+        state.data_list_billing_approval = {
+          result: newData,
+          page: {
+            totalElements: action.payload.page?.totalElements || 0,
+            totalPages: action.payload.page?.totalPages || 0,
+            number: action.payload.page?.number || 0,
+            size: action.payload.page?.size || 10,
+          },
+        };
+      }
     },
-    [getAllBillingApprovePaginate.rejected]: (state) => {
+    [getAllBillingApprovePaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_list_billing_approval = {
+          result: [],
+          page: {
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+            size: 10,
+          },
+        };
+      }
     },
 
     // Get All Billing Item Pagination
