@@ -6,7 +6,7 @@ import NxPanel from "../../../components/Nx/NxPanel"
 import NxSwitch from "../../../components/Nx/NxSwitch"
 
 const NotificationSettings = () => {
-  const [isOn, setIsOn] = useState(false);
+  const [isOn, setIsOn] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionClass, setTransitionClass] = useState('');
 
