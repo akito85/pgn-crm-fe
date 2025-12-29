@@ -423,10 +423,9 @@ export const getMdColumnApi = createAsyncThunk(
   "GET_MD_COLUMN_API",
   async (thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/list-search-column";
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = "/v1/dbs/api/multi-destination/list-search-column";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -437,9 +436,9 @@ export const getMdConditionApi = createAsyncThunk(
   "GET_MD_CONDITION_API",
   async (thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/list-search-condition";
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
+      const url = "/v1/dbs/api/multi-destination/list-search-condition";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
