@@ -117,17 +117,15 @@ const MultiDestinationDetails = ({
    * @param {"approve"|"reject"} action 
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    if (detail_multiDestination?.result) {
-      const { result } = detail_multiDestination;
-
+    if (detail_multiDestination) {
       const body = [{
-        id: result.id,
-        approvalId: result.tappId,
+        id: detail_multiDestination.id,
+        approvalId: detail_multiDestination.tappId,
         action: action.toUpperCase(),
         description,
       }];
 
-      if (result.approvalType === "MULTI_DESTINATION") {
+      if (detail_multiDestination.approvalType === "MULTI_DESTINATION") {
         dispatch(approveOrRejectMultiDestination({
           body,
           action,
@@ -139,7 +137,7 @@ const MultiDestinationDetails = ({
           handleApprovalModal(false);
         })
         .catch(() => {});
-      } else if (result.approvalType === "INACTIVE_MULTI_DESTINATION") {
+      } else if (detail_multiDestination.approvalType === "INACTIVE_MULTI_DESTINATION") {
         dispatch(approveOrRejectInactiveMultiDestination({
           body,
           action,
@@ -185,8 +183,8 @@ const MultiDestinationDetails = ({
   }, [idMd])
 
   useEffect(() => {
-    if (detail_multiDestination?.result) {
-      const { statusApproval } = detail_multiDestination.result;
+    if (detail_multiDestination) {
+      const { statusApproval } = detail_multiDestination;
 
       if (statusApproval === "WAITING_APPROVAL")
         setIsApproval(true);
@@ -253,8 +251,8 @@ const MultiDestinationDetails = ({
             section={typeDetailSection}
             options={tabs}
             handleChangeOption={handleDetailSection}
-            dataDetail={detail_multiDestination?.result}
-            dataAttachment={data_multiDestinationAttachment?.result}
+            dataDetail={detail_multiDestination}
+            dataAttachment={data_multiDestinationAttachment}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
           />
         </div>
@@ -299,7 +297,7 @@ const MultiDestinationDetails = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} multi destination - ${detail_multiDestination?.result?.relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} multi destination - ${detail_multiDestination?.relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
     </LayoutMenu>

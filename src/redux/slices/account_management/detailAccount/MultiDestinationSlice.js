@@ -155,14 +155,9 @@ export const getDetailMultiDestination = createAsyncThunk(
   "GET_DETAIL_MULTI_DESTINATION",
   async (id, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/detail/${id}`;
-      // const response = await accountManagementService.getDetail(url);
-      // return response.data;
-      return {
-        result: {
-          id: 1
-        },
-      };
+      const url = `/v1/dbs/api/multi-destination/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
