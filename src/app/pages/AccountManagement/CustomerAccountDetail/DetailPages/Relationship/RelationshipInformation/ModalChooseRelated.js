@@ -88,7 +88,7 @@ const ModalChooseRelated = ({
   if (dataSource.length > 0) {
     dataSource = dataSource.map(item => ({
       ...item,
-      key: item.id || item.objectId
+      key: item.id || item.relatedObjectId
     }));
   }
 
