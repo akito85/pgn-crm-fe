@@ -638,7 +638,7 @@ const NotificationHistory = () => {
                 setClickedTab('all');
                 setTimeout(() => setClickedTab(null), 200);
               }}
-              className={`w-[146px] px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all ${
+              className={`w-[146px] px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all cursor-pointer ${
                 activeTab === 'all'
                   ? 'bg-[#0075bf] text-white font-semibold shadow-none border-none'
                   : 'bg-white text-[#0075bf] font-normal border border-[#0075bf] shadow-none hover:bg-[#0075bf]/5'
@@ -654,7 +654,7 @@ const NotificationHistory = () => {
                 setClickedTab('unread');
                 setTimeout(() => setClickedTab(null), 200);
               }}
-              className={`w-[131px] px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all ${
+              className={`w-[131px] px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all cursor-pointer ${
                 activeTab === 'unread'
                   ? 'bg-[#0075bf] text-white font-semibold shadow-none border-none'
                   : 'bg-white text-[#0075bf] font-normal border border-[#0075bf] shadow-none hover:bg-[#0075bf]/5'
@@ -917,7 +917,7 @@ const NotificationHistory = () => {
         onClick={() => {
             navigate("/");
         }}
-        className={`w-[146px] mb-5 px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all bg-[#0075bf] text-white font-semibold shadow-none border-none`}
+        className={`w-[146px] mb-5 px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all cursor-pointer bg-[#0075bf] text-white font-semibold shadow-none border-none`}
         style={{ boxShadow: 'none', outline: 'none' }}
       >
         Back

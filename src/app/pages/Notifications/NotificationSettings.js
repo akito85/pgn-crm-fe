@@ -49,7 +49,7 @@ const NotificationSettings = () => {
         <button
           onClick={handleBackClick}
           disabled={isTransitioning}
-          className={`w-[146px] mb-5 px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all bg-[#0075bf] text-white font-semibold shadow-none border-none ${isTransitioning ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`w-[146px] mb-5 px-4 py-2 rounded-md text-[15px] leading-[22px] transition-all bg-[#0075bf] text-white font-semibold shadow-none border-none ${isTransitioning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           style={{ boxShadow: 'none', outline: 'none' }}
         >
           Back
