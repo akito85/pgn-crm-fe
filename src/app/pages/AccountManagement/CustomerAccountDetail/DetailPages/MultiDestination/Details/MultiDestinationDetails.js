@@ -184,9 +184,9 @@ const MultiDestinationDetails = ({
 
   useEffect(() => {
     if (detail_multiDestination) {
-      const { statusApproval } = detail_multiDestination;
+      const { approvalType } = detail_multiDestination;
 
-      if (statusApproval === "WAITING_APPROVAL")
+      if (approvalType === "MULTI_DESTINATION" || approvalType === "INACTIVE_MULTI_DESTINATION")
         setIsApproval(true);
       else
         setIsApproval(false);
