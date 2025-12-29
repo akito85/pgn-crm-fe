@@ -42,8 +42,8 @@ export default function InfoMultiDestination({
 
   const [isOpen, setIsOpen] = useState(false);
   
-  const { data_prAccountStandard } = useSelector(
-    (state) => state.financialInformation
+  const { data_mdAccountStandard } = useSelector(
+    (state) => state.multiDestination
   );
   
   const handleOk = () => {
@@ -160,19 +160,19 @@ export default function InfoMultiDestination({
 
   useEffect(() => {
     if (
-      data_prAccountStandard && 
-      data_prAccountStandard.result &&
-      data_prAccountStandard.result.length > 0
+      data_mdAccountStandard && 
+      data_mdAccountStandard.result &&
+      data_mdAccountStandard.result.length > 0
     ) {
-      setTotalElement(data_prAccountStandard?.page?.totalElements);
+      setTotalElement(data_mdAccountStandard?.page?.totalElements);
     }
-  }, [data_prAccountStandard]);
+  }, [data_mdAccountStandard]);
 
   // Sanitize pagination values to prevent NaN
   // Modify
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_prAccountStandard?.result?.length || 0);
+  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_mdAccountStandard?.result?.length || 0);
 
   const columnMain = [
     {
@@ -693,7 +693,7 @@ export default function InfoMultiDestination({
         ]}
       >
         {/* <TablePaginationNew
-          dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
+          dataSource={data_mdAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
           }))}
@@ -706,7 +706,7 @@ export default function InfoMultiDestination({
           onChange={handleChangeSize}
         /> */}
         <TablePaginationNew
-          dataSource={data_prAccountStandard?.result?.map((item, index) => ({
+          dataSource={data_mdAccountStandard?.result?.map((item, index) => ({
             ...item,
             key: item.id || index,
             no: (sanitizedPage - 1) * sanitizedPageSize + index + 1,

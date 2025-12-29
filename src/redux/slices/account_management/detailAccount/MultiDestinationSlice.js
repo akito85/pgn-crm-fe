@@ -167,10 +167,9 @@ export const getMdApprovalHierarchy = createAsyncThunk(
   "GET_MD_APPROVAL_HIERARCHY",
   async (thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -195,10 +194,9 @@ export const getMdAttachmentCategory = createAsyncThunk(
   "GET_MD_ATTACHMENT_CATEGORY",
   async (thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/attachment-category`;
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = `/v1/dbs/api/multi-destination/attachment-category`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -209,14 +207,13 @@ export const getMdAccountStandard = createAsyncThunk(
   "GET_MD_ACCOUNT_STANDARD",
   async ({ page, pageSize, sort, search, id }, thunkAPI) => {
     try {
-      // const searchParams = search === undefined ? "" : search;
+      const searchParams = search === undefined ? "" : search;
 
-      // const sortParams =
-      //   sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // const url = `/v1/dbs/api/multi-destination/list-account/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      // const response = await accountManagementService.getPagination(url);
-      // return response.data;
-      return {};
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/multi-destination/list-account/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await accountManagementService.getPagination(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
