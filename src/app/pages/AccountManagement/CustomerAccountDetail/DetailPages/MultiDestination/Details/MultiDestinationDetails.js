@@ -252,7 +252,7 @@ const MultiDestinationDetails = ({
             options={tabs}
             handleChangeOption={handleDetailSection}
             dataDetail={detail_multiDestination}
-            dataAttachment={data_multiDestinationAttachment}
+            dataAttachment={data_multiDestinationAttachment?.result}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
           />
         </div>

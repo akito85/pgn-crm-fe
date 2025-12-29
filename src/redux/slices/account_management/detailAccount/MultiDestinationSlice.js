@@ -36,10 +36,9 @@ export const getMultiDestinationAttachment = createAsyncThunk(
   "GET_MULTI_DESTINATION_ATTACHMENT",
   async ({ id }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/list-attachment/${id}`;
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = `/v1/dbs/api/multi-destination/list-attachment/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
