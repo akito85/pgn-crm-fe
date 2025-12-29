@@ -6,6 +6,9 @@ import EMeteraiManagement from "../../app/pages/RatingBillingInvoice/Invoice/EMe
 import ManagementDeliveryInvoice from "../../app/pages/RatingBillingInvoice/Invoice/ManagementDeliveryInvoice";
 import ViewFaktur from "../../app/pages/RatingBillingInvoice/Management E-Faktur/ViewFaktur";
 import DetailEFaktur from "../../app/pages/RatingBillingInvoice/Management E-Faktur/DetailEFaktur";
+import AdjustmentInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/AdjustmentInvoice/AdjustmentInvoicePage";
+import AdjustmentInvoiceForm from "../../app/pages/RatingBillingInvoice/Invoice/AdjustmentInvoice/AdjustmentInvoiceForm";
+import AdjustmentInvoiceDetail from "../../app/pages/RatingBillingInvoice/Invoice/AdjustmentInvoice/AdjustmentInvoiceDetail";
 
 export const INVOICE_ELEMENTS = {
   // Generate Invoice List (main page)
@@ -23,4 +26,8 @@ export const INVOICE_ELEMENTS = {
   //manajemen e-faktur
   EFAKTUR_VIEW_PAGE: <ViewFaktur />,
   EFAKTUR_DETAIL_PAGE: <DetailEFaktur />,
+  // Adjustment Invoice
+  ADJUSTMENT_INVOICE_VIEW_PAGE: <AdjustmentInvoicePage />,
+  ADJUSTMENT_INVOICE_FORM_PAGE: <AdjustmentInvoiceForm type="create" />,
+  ADJUSTMENT_INVOICE_DETAIL_PAGE: <AdjustmentInvoiceDetail />,
 };
