@@ -11,10 +11,6 @@ const ApprovalSectionForm = ({
   approvalName = "",
   className,
 }) => {
-  useEffect(() => {
-    console.log("dataOption", dataOption);
-  }, [dataOption])
-
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");

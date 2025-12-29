@@ -463,10 +463,6 @@ const MultiDestinationTable = ({
     }
   ];
 
-  useEffect(() => {
-    console.log("data", data);
-  }, [data])
-
   return (
     <div className="flex flex-col gap-y-6">
       {!isApproval && (
