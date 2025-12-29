@@ -77,10 +77,15 @@ const NotificationHistory = () => {
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
-  const broadcastNotifications = useSelector(selectBroadcastNotifications);
-  const directNotifications = useSelector(selectDirectNotifications);
+  const broadcastNotifications = useSelector(selectBroadcastNotifications) || [];
+  const directNotifications = useSelector(selectDirectNotifications) || [];
   const unreadCount = useSelector(selectUnreadCount);
   const connectionStatus = useSelector(selectConnectionStatus);
+
+  // Defensive check: Ensure all notification arrays are actually arrays
+  const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
+  const safeBroadcastNotifications = Array.isArray(broadcastNotifications) ? broadcastNotifications : [];
+  const safeDirectNotifications = Array.isArray(directNotifications) ? directNotifications : [];
 
   // Local state for tab and animations
   const [activeTab, setActiveTab] = useState('all');
@@ -104,7 +109,7 @@ const NotificationHistory = () => {
 
   // Get filtered notifications based on all filters
   const getFilteredNotifications = () => {
-    let notifications = allNotifications;
+    let notifications = safeAllNotifications;
 
     // Filter by tab (all/unread)
     if (activeTab === 'unread') {
@@ -154,8 +159,8 @@ const NotificationHistory = () => {
   const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
 
   // Calculate counts for tabs
-  const allCount = allNotifications.length;
-  const unreadCountForTab = allNotifications.filter(notification =>
+  const allCount = safeAllNotifications.length;
+  const unreadCountForTab = safeAllNotifications.filter(notification =>
     (notification.STATUS || notification.status) !== "read"
   ).length;
 

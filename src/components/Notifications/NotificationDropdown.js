@@ -60,6 +60,9 @@ const NotificationDropdown = () => {
   const userUnreadCount = useSelector(selectUnreadCount); // Use Redux state for unread count
   const isConnected = useSelector(selectIsConnected);
 
+  // Defensive check: Ensure allNotifications is always an array
+  const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
+
   // Get user ID from token
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
@@ -67,7 +70,7 @@ const NotificationDropdown = () => {
   const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
 
   // Filter notifications for current user only
-  const userNotifications = allNotifications.filter(notification => {
+  const userNotifications = safeAllNotifications.filter(notification => {
     // Include broadcast notifications (for all users) or notifications directed to this user
     const isForThisUser = notification.direction === "broadcast" ||
            notification.TO_USER_ID === userId ||

@@ -655,11 +655,19 @@ export const {
  */
 
 // Get all notifications
-export const selectAllNotifications = (state) => state.notifications.notifications;
+export const selectAllNotifications = (state) => {
+  const notifications = state.notifications?.notifications;
+  return Array.isArray(notifications) ? notifications : [];
+};
 
 // Get filtered notifications
 export const selectFilteredNotifications = (state) => {
   const { notifications, filters } = state.notifications;
+
+  // Ensure notifications is an array before filtering
+  if (!Array.isArray(notifications)) {
+    return [];
+  }
 
   return notifications.filter((notification) => {
     // Filter by type
@@ -699,12 +707,16 @@ export const selectFilteredNotifications = (state) => {
 };
 
 // Get broadcast notifications
-export const selectBroadcastNotifications = (state) =>
-  state.notifications.broadcastNotifications;
+export const selectBroadcastNotifications = (state) => {
+  const notifications = state.notifications?.broadcastNotifications;
+  return Array.isArray(notifications) ? notifications : [];
+};
 
 // Get direct notifications
-export const selectDirectNotifications = (state) =>
-  state.notifications.directNotifications;
+export const selectDirectNotifications = (state) => {
+  const notifications = state.notifications?.directNotifications;
+  return Array.isArray(notifications) ? notifications : [];
+};
 
 // Get unread count
 export const selectUnreadCount = (state) => state.notifications.unreadCount;
