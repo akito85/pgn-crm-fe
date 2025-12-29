@@ -610,7 +610,7 @@ const NotificationHistory = () => {
             setTransitionClass('page-transition-exit-to-right');
             setTimeout(() => {
               navigate("/notifications/settings/view", { state: { from: 'history' } });
-            }, 300);
+            }, 200);
         }}
         disabled={isTransitioning}
       >

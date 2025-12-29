@@ -26,7 +26,7 @@ const NotificationSettings = () => {
 
     setTimeout(() => {
       navigate("/notifications/view", { state: { from: 'settings' } });
-    }, 300);
+    }, 200);
   };
 
   return(
