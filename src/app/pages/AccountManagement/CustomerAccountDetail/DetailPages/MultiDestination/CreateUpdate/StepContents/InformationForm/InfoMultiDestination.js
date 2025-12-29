@@ -366,8 +366,10 @@ export default function InfoMultiDestination({
                   onClick={() => {
                     setAccount({
                       objectId: r?.accountId,
-                      accountSor: r?.accountSor,
-                      accountCostCenter: r?.accountCostCenter,
+                      accountNumber: r?.accountNumber,
+                      accountName: r?.accountName,
+                      sor: r?.sor,
+                      costCenter: r?.costCenter,
                       meterReadingCode: r?.meterReadingCode,
                       accountSegment: r?.accountSegment,
                       accountGroupType: r?.accountGroupType,
@@ -433,8 +435,8 @@ export default function InfoMultiDestination({
           </div>
 
           <Form.Item
-            key="accountSor"
-            name={"accountSor"}
+            key="sor"
+            name={"sor"}
             label={"Account SOR"}
             className="no-margin-form"
             rules={[
@@ -448,8 +450,8 @@ export default function InfoMultiDestination({
           </Form.Item>
 
           <Form.Item
-            key="accountCostCenter"
-            name={"accountCostCenter"}
+            key="costCenter"
+            name={"costCenter"}
             label={"Account Cost Center"}
             className="no-margin-form"
             rules={[

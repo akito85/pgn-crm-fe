@@ -314,9 +314,10 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const setAccount = (
     {
       objectId,
-      account,
-      accountSor,
-      accountCostCenter,
+      accountNumber,
+      accountName,
+      sor,
+      costCenter,
       meterReadingCode,
       accountSegment,
       accountGroupType,
@@ -332,9 +333,9 @@ const CreateUpdateMultiDestination = ({ type }) => {
   ) => {
     formCreate.setFieldsValue({
       objectId,
-      account,
-      accountSor,
-      accountCostCenter,
+      account: `${accountNumber}-${accountName}`,
+      sor,
+      costCenter,
       meterReadingCode,
       accountSegment,
       accountGroupType,
