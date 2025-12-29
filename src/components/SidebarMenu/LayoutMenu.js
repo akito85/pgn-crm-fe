@@ -54,7 +54,7 @@ const LayoutMenu = ({ children }) => {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const publicPaths = ["/invoice/generate-invoice", "/relationship", "/notifications/view"];
+  const publicPaths = ["/invoice/generate-invoice", "/relationship", "/notifications/view", "/notifications/settings/view"];
   const isPublicPath = publicPaths.some((path) =>
     location.pathname.includes(path)
   );
