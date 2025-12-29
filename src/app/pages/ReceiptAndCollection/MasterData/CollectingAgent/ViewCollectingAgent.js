@@ -471,8 +471,15 @@ const ViewCollectingAgent = () => {
         <LayoutMenu>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
-                <Toolbar items={itemActions} />
-                <CardContainer header={"Collecting Agent List"}>
+                {/* <Toolbar items={itemActions} /> */}
+                <CardContainer header={
+                    <div className="flex -my-4 justify-between items-center">
+                        <p className="mt-[15px] font-bold">Collecting Agent List</p>
+                        <div className="flex gap-2">
+                            <Toolbar items={itemActions} />
+                        </div>
+                    </div>
+                }>
                     <TableRBI
                         showExport={true}
                         handleDownload={handleDownload}
