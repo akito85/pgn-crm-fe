@@ -393,10 +393,9 @@ export const downloadMultiDestination = createAsyncThunk(
   "DOWNLOAD_MULTI_DESTINATION",
   async ({ body, id, }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/export-excel/${id}`;
-      // const response = await accountManagementService.downloadDataAdvanced(url, body);
-      // return response;
-      return null;
+      const url = `/v1/dbs/api/multi-destination/export-excel/${id}`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
+      return response;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_MULTI_DESTINATION", back: false }));
       return thunkAPI.rejectWithValue(response.response.data);
