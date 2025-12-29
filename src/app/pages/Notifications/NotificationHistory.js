@@ -355,30 +355,50 @@ const NotificationHistory = () => {
     }
 
     // Navigate using state-based routing pattern
-    if (notification.link) {
+    if (notification.link || notification.LINK) {
+      const link = notification.link || notification.LINK;
+
+      // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
+      let parsedNavigationState = {};
+      const navState = notification.navigationState || notification.NAVIGATION_STATE;
+
+      if (navState) {
+        try {
+          parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
+        } catch (e) {
+          console.error('Failed to parse NAVIGATION_STATE:', e);
+          parsedNavigationState = {};
+        }
+      }
+
       // Build route state object
       const routeState = {
-        id: notification.entityId,
-        type: notification.entityType,
-        ...notification.navigationState, // Spread additional state (idAccount, idCustomer, etc.)
+        id: notification.entityId || notification.ENTITY_ID,
+        type: notification.entityType || notification.ENTITY_TYPE,
+        ...parsedNavigationState, // Spread parsed navigation state (idAccount, idCustomer, etc.)
       };
 
       // Add approval context if present
-      if (notification.tappId) {
-        routeState.tappId = notification.tappId;
-        routeState.appHierId = notification.appHierId;
-        routeState.approvalAction = notification.approvalAction;
-        routeState.approvalLevel = notification.approvalLevel;
+      const tappId = notification.tappId || notification.TAPP_ID;
+      const appHierId = notification.appHierId || notification.APP_HIER_ID;
+      const approvalAction = notification.approvalAction || notification.APPROVAL_ACTION;
+      const approvalLevel = notification.approvalLevel || notification.APPROVAL_LEVEL;
+
+      if (tappId) {
+        routeState.tappId = tappId;
+        routeState.appHierId = appHierId;
+        routeState.approvalAction = approvalAction;
+        routeState.approvalLevel = approvalLevel;
       }
 
       // Navigate based on presence of entity_id
-      if (notification.entityId) {
-        navigate(notification.link, { state: routeState });
+      if (notification.entityId || notification.ENTITY_ID) {
+        navigate(link, { state: routeState });
       } else {
         // General page navigation (might still have state for bulk operations)
-        navigate(notification.link, {
-          state: Object.keys(notification.navigationState || {}).length > 0
-            ? notification.navigationState
+        navigate(link, {
+          state: Object.keys(parsedNavigationState).length > 0
+            ? parsedNavigationState
             : undefined
         });
       }
@@ -700,26 +720,24 @@ const NotificationHistory = () => {
                           backgroundColor: ((notification.STATUS || notification.status) === "read") ? "#ffffff" : "#f0f7ff",
                           borderBottom: "1px dashed rgb(29 28 29 / 0.1)",
                           borderTop: "1px dashed rgb(29 28 29 / 0.1)",
-                          marginTop: "-1px"
+                          marginTop: "-1px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 16
                         }}
                         className={`notification-item hover:bg-gray-50 ${
                           animatingNotifications.has(notification.id || notification.ID) ? 'notification-slide-out' : ''
                         }`}
                       >
-                        <List.Item.Meta
-                          // avatar={getNotificationIcon(notification.notificationType || notification.NOTIFICATION_TYPE)}
-                          title={
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
+                        {/* Left Column: Notification Details */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <List.Item.Meta
+                            // avatar={getNotificationIcon(notification.notificationType || notification.NOTIFICATION_TYPE)}
+                            title={
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 <Text
                                   strong={!(notification.read || notification.STATUS === "read")}
-                                  style={{ fontSize: 14, flex: 1 }}
+                                  style={{ fontSize: 14 }}
                                   ellipsis
                                 >
                                   {notification.title || notification.TITLE}
@@ -732,54 +750,67 @@ const NotificationHistory = () => {
                                   return isNew ? (
                                     <Tag
                                       color="blue"
-                                      style={{ marginLeft: 8, fontSize: 10, height: 'fit-content', alignSelf: 'center' }}
+                                      style={{ fontSize: 10, height: 'fit-content' }}
                                     >
                                       New
                                     </Tag>
                                   ) : null;
                                 })()}
                               </div>
-                              {(notification.priority || notification.PRIORITY) &&
-                                getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
-                                  <Tag
-                                    color={getPriorityColor(notification.priority || notification.PRIORITY)}
-                                    style={{ marginLeft: 8, fontSize: 10 }}
-                                  >
-                                    {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
-                                  </Tag>
-                                )}
-                            </div>
-                          }
-                          description={
-                            <div>
-                              <Text
-                                type="secondary"
-                                style={{ fontSize: 13, display: "block" }}
-                                ellipsis={{ rows: 2 }}
-                              >
-                                {notification.message || notification.MESSAGE}
-                              </Text>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  marginTop: 4,
-                                }}
-                              >
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  {formatTimestamp(
-                                    getNotificationTimestamp(notification)
-                                  )}
+                            }
+                            description={
+                              <div>
+                                <Text
+                                  type="secondary"
+                                  style={{ fontSize: 13, display: "block" }}
+                                  ellipsis={{ rows: 2 }}
+                                >
+                                  {notification.message || notification.MESSAGE}
                                 </Text>
-                                {notification.direction === "broadcast" && (
-                                  <Tag color="purple" style={{ fontSize: 10 }}>
-                                    BROADCAST
-                                  </Tag>
-                                )}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    marginTop: 4,
+                                  }}
+                                >
+                                  <Text type="secondary" style={{ fontSize: 12 }}>
+                                    {formatTimestamp(
+                                      getNotificationTimestamp(notification)
+                                    )}
+                                  </Text>
+                                  {notification.direction === "broadcast" && (
+                                    <Tag color="purple" style={{ fontSize: 10 }}>
+                                      BROADCAST
+                                    </Tag>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          }
-                        />
+                            }
+                          />
+                        </div>
+
+                        {/* Right Column: Priority Tag and View Button */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                          {(notification.priority || notification.PRIORITY) &&
+                            getPriorityString(notification.priority || notification.PRIORITY) !== NOTIFICATION_PRIORITY.NORMAL && (
+                              <Tag
+                                color={getPriorityColor(notification.priority || notification.PRIORITY)}
+                                style={{ fontSize: 10, margin: 0 }}
+                              >
+                                {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
+                              </Tag>
+                            )}
+                          <NxTextButton
+                            variant="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleNotificationClick(notification);
+                            }}
+                          >
+                            View
+                          </NxTextButton>
+                        </div>
                       </List.Item>
                     )}
                   />
