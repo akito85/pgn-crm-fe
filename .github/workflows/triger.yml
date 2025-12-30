@@ -24,7 +24,7 @@ jobs:
     secrets: inherit
 
   remote-workflow:
-    uses: PT-Perusahaan-Gas-Negara-Tbk/reusable-workflow/.github/workflows/energy-frontendservice-template.yml@energy-template
+    uses: PT-Perusahaan-Gas-Negara-Tbk/reusable-workflow/.github/workflows/energy-fe.yml@energy-template
     needs: Preparation
     secrets: inherit
     with:
