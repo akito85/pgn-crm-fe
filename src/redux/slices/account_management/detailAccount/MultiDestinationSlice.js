@@ -181,8 +181,7 @@ export const getDetailMdApprovalHierarchy = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/multi-destination/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
-      // return response.data;
-      return []
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
