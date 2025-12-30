@@ -42,6 +42,13 @@ const PaymentRelationTable = ({
       width: 100,
     },
     {
+      title: "ACCOUNT NAME",
+      dataIndex: "relatedAccountName",
+      width: 250,
+      sorter: true,
+      ...getColumnSearchProps("relatedAccountName"),
+    },
+    {
       title: "ACCOUNT NUMBER",
       dataIndex: "relatedAccountNumber",
       width: 250,
