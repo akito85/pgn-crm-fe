@@ -20,6 +20,7 @@ const initialState = {
   specific_customer_message: "",
   list_billing_cycle: [],
   list_billing_period: [],
+  list_component_prabilling: [],
   detail_calculation_job: null,
   list_calculation_log: [],
   list_calculation_result: [],
@@ -467,6 +468,33 @@ export const getListBillingPeriod = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/calculation/billingperiod/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+
+export const getListComponentPrabilling = createAsyncThunk(
+  "GET_LIST_COMPONENT_PRABILLING",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/prabill/component`;
+      const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
       const message =
@@ -2227,6 +2255,17 @@ const prabillingSlice = createSlice({
       state.list_billing_period = action.payload;
     },
     [getListBillingPeriod.rejected]: (state) => {
+      state.loading = false;
+    },
+    // lov component prabilling
+    [getListComponentPrabilling.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListComponentPrabilling.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_component_prabilling = action.payload;
+    },
+    [getListComponentPrabilling.rejected]: (state) => {
       state.loading = false;
     },
     // lov user detail calculation
