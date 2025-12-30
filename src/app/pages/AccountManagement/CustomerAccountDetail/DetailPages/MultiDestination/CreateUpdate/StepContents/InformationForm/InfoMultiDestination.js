@@ -295,10 +295,10 @@ export default function InfoMultiDestination({
     },
     {
       title: "SUBDISTRICT",
-      dataIndex: "subdistrict",
+      dataIndex: "subDistrict",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("subdistrict"),
+      ...getColumnSearchProps("subDistrict"),
     },
     {
       title: "DISTRICT",
@@ -375,7 +375,7 @@ export default function InfoMultiDestination({
                       accountGroupType: r?.accountGroupType,
                       accountType: r?.accountType,
                       premiseAddress: r?.premiseAddress,
-                      subdistrict: r?.subdistrict,
+                      subDistrict: r?.subDistrict,
                       district: r?.district,
                       city: r?.city,
                       country: r?.country,
@@ -540,8 +540,8 @@ export default function InfoMultiDestination({
           </Form.Item>
 
           <Form.Item
-            key="subdistrict"
-            name={"subdistrict"}
+            key="subDistrict"
+            name={"subDistrict"}
             label={"Subdistrict"}
             className="no-margin-form"
             rules={[
