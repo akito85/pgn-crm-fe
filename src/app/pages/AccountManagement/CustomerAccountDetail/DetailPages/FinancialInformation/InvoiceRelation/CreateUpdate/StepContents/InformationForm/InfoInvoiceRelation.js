@@ -483,7 +483,6 @@ export default function InfoInvoiceRelation({
             <InputComponent
               type={"textarea"}
               rows={4}
-              placeholder="Asset meter baru PGN"
               maxLength={255}
             />
           </Form.Item>
