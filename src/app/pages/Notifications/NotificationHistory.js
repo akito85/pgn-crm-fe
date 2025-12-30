@@ -825,9 +825,20 @@ const NotificationHistory = () => {
                                     )}
                                   </Text>
                                   {notification.direction === "broadcast" && (
-                                    <Tag color="purple" style={{ fontSize: 10 }}>
+                                    <div
+                                      style={{
+                                        fontSize: 9,
+                                        fontWeight: 600,
+                                        color: '#722ed1',
+                                        verticalAlign: 'super',
+                                        lineHeight: 1,
+                                        margin: 0,
+                                        padding: 0,
+                                        marginLeft: 4
+                                      }}
+                                    >
                                       BROADCAST
-                                    </Tag>
+                                    </div>
                                   )}
                                 </div>
                               </div>
