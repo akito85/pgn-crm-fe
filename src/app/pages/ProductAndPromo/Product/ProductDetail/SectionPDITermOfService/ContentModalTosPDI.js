@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import TablePagination from "../../../../../../components/TablePagination";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
-import Highlighter from "react-highlight-words";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import moment from "moment";
 import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";

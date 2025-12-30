@@ -179,34 +179,34 @@ const FormTaxImplication = ({ type }) => {
       case "accountNumber":
         return data_account_number?.map(item => ({ label: item?.name, value: item?.id }));
       case "costCenter":
-        return data_cost_center?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_cost_center?.map(item => ({ value: item?.id, label: item?.text }));
       case "premiseProvince":
-        return data_province?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_province?.map(item => ({ value: item?.id, label: item?.text }));
       case "accountSegment":
-        return data_account_segment?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_account_segment?.map(item => ({ value: item?.id, label: item?.text }));
       case "premiseCity":
-        return data_city?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_city?.map(item => ({ value: item?.id, label: item?.text }));
       case "premiseCountry":
-        return data_country?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_country?.map(item => ({ value: item?.id, label: item?.text }));
       case "corporateFlag":
         return [
           { label: "Yes", value: true },
           { label: "No", value: false },
         ];
       case "accountType":
-        return data_account_type?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_account_type?.map(item => ({ value: item?.id, label: item?.text }));
       case "accountGroupType":
-        return data_account_group_type?.map(item => ({ value: item?.id, label: item?.name }));;
+        return data_account_group_type?.map(item => ({ value: item?.id, label: item?.name }));
       case "premiseSubdistrict":
-        return data_subdistrict?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_subdistrict?.map(item => ({ value: item?.id, label: item?.text }));
       case "premiseDistrict":
-        return data_district?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_district?.map(item => ({ value: item?.id, label: item?.text }));
       case "sor":
-        return data_sor?.map(item => ({ value: item?.id, label: item?.text }));;
+        return data_sor?.map(item => ({ value: item?.id, label: item?.text }));
       case "accountCategory":
-        return data_account_category?.map(item => ({ value: item?.Id, label: item?.text }));;
+        return data_account_category?.map(item => ({ value: item?.Id, label: item?.text }));
       case "classificationType":
-        return data_classification_type?.map(item => ({ value: item?.id, label: item?.name }));;
+        return data_classification_type?.map(item => ({ value: item?.id, label: item?.name }));
 
       default:
         return null

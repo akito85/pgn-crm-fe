@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
-  DownloadOutlined,
   InfoCircleOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -8,147 +7,38 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { Spin, Tooltip, Checkbox, Form, Alert } from "antd";
 import { Link } from "react-router-dom";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
-import Highlighter from "react-highlight-words";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { NavLink } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import TablePagination from "../../../../../components/TablePagination";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
-import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
   activeOrInactiveGasSource,
   downloadGasSource,
   getAllGasSourcePaginate,
 } from "../../../../../redux/slices/account_management/MasterData/gasSourceSlice";
-import { dateFormatting, formMessageRequired, renderColumn } from "../../../../../utils";
+import {
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+} from "../../../../../utils";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import InputComponent from "../../../../../components/InputComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
-
-
-
-// Column Approval Expand
-const expandedRowRender = (record) => {
-  const columns = (
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn,
-    searchText,
-    handleSearch = () => { }
-  ) => {
-    return [
-      {
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        title: "COST CENTER",
-        dataIndex: "costCenter",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "costCenter",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-      },
-      {
-        title: "START DATE",
-        dataIndex: "startDate",
-        align: "center",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "startDate",
-          "date",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-        render: (text) =>
-          searchedColumn === "startDate" ? (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[
-                searchText
-                  ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-                  : "",
-              ]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          ) : (
-            text || ""
-          ),
-      },
-      {
-        title: "END DATE",
-        dataIndex: "endDate",
-        align: "center",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "endDate",
-          "date",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-        render: (endDate) => moment(endDate).format(dateFormatting.date),
-      },
-      {
-        title: "DESCRIPTION",
-        dataIndex: "description",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "description",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-        render: (description) => (
-          <Tooltip placement="topLeft" title={description}>
-            <p className="overflow-hidden truncate">{description}</p>
-          </Tooltip>
-        ),
-      },
-    ];
-  };
-  return (
-    <div>
-      <p className="text-primary text-xs font-bold uppercase pt-4">
-        CRITERIA INFORMATION
-      </p>
-      <TablePagination
-        useSelect={false}
-        usePagination={false}
-        dataSource={record?.criteria}
-        columns={columns()}
-        className={"mb-4"}
-      />
-    </div>
-  );
-};
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../../components/CardContainer";
 
 const ViewGasSource = () => {
   // Selector
   const { data, loading } = useSelector((state) => state.gasSource);
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
+
   // Declaration
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -167,14 +57,23 @@ const ViewGasSource = () => {
   const [dataTable, setDataTable] = useState([]);
   const [chooseId, setChooseId] = useState();
   const [modalError, setModalError] = useState(false);
-  const [calorieName, setCalorieName] = useState('');
+  const [calorieName, setCalorieName] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "action"],
+  }));
   const [form] = Form.useForm();
-
 
   // Use Effect
   useEffect(() => {
-
-    dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
+    dispatch(
+      getAllGasSourcePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      })
+    );
   }, [search, sort, page, pageSize, dispatch]);
 
   useEffect(() => {
@@ -194,7 +93,7 @@ const ViewGasSource = () => {
   // trigger modal try again
   useEffect(() => {
     if (bodyError?.response?.data?.code === 500) {
-      setModalError(true)
+      setModalError(true);
     }
   }, [bodyError]);
 
@@ -217,7 +116,7 @@ const ViewGasSource = () => {
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -229,15 +128,16 @@ const ViewGasSource = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -266,18 +166,32 @@ const ViewGasSource = () => {
       .unwrap()
       .then(() => {
         setRemark("");
-        dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
-        form.resetFields()
+        dispatch(
+          getAllGasSourcePaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            sort,
+            page,
+            pageSize,
+          })
+        );
+        form.resetFields();
       })
       .catch(() => {
         setRemark("");
-        form.resetFields()
+        form.resetFields();
       });
   };
 
   // Handle Download
   const handleDownload = () => {
-    dispatch(downloadGasSource({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
+    dispatch(
+      downloadGasSource({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      })
+    );
   };
 
   // Handle Confirmation Active/Inactive
@@ -292,29 +206,44 @@ const ViewGasSource = () => {
 
   // handle confirm try
   const handleConfirmRetry = () => {
-
     if (bodyError?.action === "ACTIVE_OR_INACTIVE_GAS_SOURCE") {
       const setBodyRemark = {
         gasSourceDetailId: chooseId,
         remark: remark,
-      }
+      };
       const setStatus = {
         activeOrInactive: activeOrInactive,
-      }
-      dispatch(activeOrInactiveGasSource({ body: setBodyRemark, activeOrInactive: setStatus }))
-      dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))
+      };
+      dispatch(
+        activeOrInactiveGasSource({
+          body: setBodyRemark,
+          activeOrInactive: setStatus,
+        })
+      );
+      dispatch(
+        getAllGasSourcePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        })
+      );
     } else {
-
-      dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))
+      dispatch(
+        getAllGasSourcePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        })
+      );
     }
-
     dispatch(clearBodyMessage());
-  }
-
+  };
 
   // handle retry
   const handleRetry = () => {
-    handleConfirmRetry()
+    handleConfirmRetry();
     setModalError(false);
     dispatch(clearBodyMessage());
   };
@@ -323,119 +252,177 @@ const ViewGasSource = () => {
   const handleCloseModalError = () => {
     setModalError(false);
     dispatch(clearBodyMessage());
-    // setBodyError({});
   };
 
-  // column
-  const columns = (
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn,
-    searchText,
-    handleSearch = () => { },
-    handleActiveOrInactive = () => { }
-  ) => {
-    return [
+  // base columns with useMemo
+  const baseColumns = useMemo(
+    () => [
       {
+        key: "no",
         title: "NO",
         width: 60,
         align: "center",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "calorieCode",
         title: "CALORIE CODE",
         dataIndex: "calorieCode",
         sorter: true,
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.calorieCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "calorieCode",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('calorieCode', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "calorieCode",
+            hasValue(search["calorieCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
       },
       {
+        key: "name",
         title: "NAME",
         dataIndex: "name",
         sorter: true,
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.name] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "name",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('name', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "name",
+            hasValue(search["name"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
       },
       {
+        key: "uom",
         title: "UOM",
         dataIndex: "uom",
         align: "center",
         sorter: true,
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.uom] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "uom",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('uom', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "uom",
+            hasValue(search["uom"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
       },
-
       {
+        key: "description",
         title: "DESCRIPTION",
         dataIndex: "description",
         sorter: true,
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.description] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "description",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        ellipsis: {
-          showTitle: false,
-        },
-        render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "description",
+            hasValue(search["description"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
       {
+        key: "status",
         title: "STATUS",
         dataIndex: "status",
         sorter: true,
         width: 120,
-        fixed: 'right',
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.status] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "status",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+        render: (text) =>
+          renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search
+          ),
       },
-    ];
-  };
+    ],
+    [page, pageSize, search, searchText, searchedColumn]
+  );
 
   // item toolbar
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          type="submit"
-          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
         >
           Download List
         </ButtonComponent>
-
-      )
+      ),
     },
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_GAS_SOURCE}>
           <ButtonComponent
@@ -445,11 +432,10 @@ const ViewGasSource = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_GAS_SOURCE}>
           <ButtonComponent
@@ -459,8 +445,7 @@ const ViewGasSource = () => {
             Create Gas Source
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
 
     // Column Action Table
@@ -470,39 +455,58 @@ const ViewGasSource = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Detail">
-            <div className="pt-1">
-              <Link
-                to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_GAS_SOURCE}
-                state={{ id: record.gasSourceId }}
-              >
-                <SVGIcon name="IconDetail" width={24} />
-              </Link>
-            </div>
+            <Link
+              to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_GAS_SOURCE}
+              state={{ id: record.gasSourceId }}
+            >
+              <SVGIcon name="IconDetail" width={24} />
+            </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
     {
       action: "Update",
       type: "table",
       render: (record, data) => {
         return (
           <Tooltip title="Update">
-            <div className={`pt-1 ${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${
+                record?.status?.toLowerCase() === "inactive" &&
+                "cursor-not-allowed"
+              }`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record.gasSourceId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record.gasSourceId,
+                  }
+                }
               >
-                <SVGIcon name="IconEdit" width={24} className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} /> 
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  className={`${
+                    record?.status?.toLowerCase() === "inactive" &&
+                    "cursor-not-allowed"
+                  }`}
+                  color={
+                    record?.status?.toLowerCase() === "inactive"
+                      ? "#8D91A0"
+                      : "#ACC424"
+                  }
+                />
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
     {
       action: "Activate",
       type: "table",
@@ -511,7 +515,7 @@ const ViewGasSource = () => {
           <Tooltip
             title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
           >
-            <div className="pt-1">
+            <div>
               <Checkbox
                 onClick={() => {
                   handleActiveOrInactive(record);
@@ -520,51 +524,71 @@ const ViewGasSource = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
+
+  const actionCols = useColumnActionPermission(
+    ["Activate", "View", "Update"],
+    itemActions
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
+    <Spin spinning={loading}>
+      <LayoutMenu>
         <BreadCrumb routes={routes} />
 
-        <Toolbar items={itemActions} />
-
-        <BaseContainer header={"GAS SOURCE INFORMATION"}>
-          <div className="w-full">
-            <TablePagination
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">GAS SOURCE INFORMATION</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemActions} />
+              </div>
+            </div>
+          }
+        >
+          <div className="my-0">
+            <TableRBI
               dataSource={
                 data?.result && data?.result.length === 0 ? null : dataTable
               }
-              columns={[
-                ...columns(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                ),
-                ...useColumnActionPermission(
-                  ["Activate", "View", "Update"],
-                  itemActions
-                ),
-              ]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
+              totalData={data?.page?.totalElements || 0}
+              tableScrolled={{ x: 1500, y: 525 }}
               onSort={onSort}
-              totalData={data?.page?.totalElements}
-              tableScrolled={{
-                x: 1500,
-                y: 500,
-              }}
+              columnDefinitions={columnDefinitions}
+              handleDownload={handleDownload}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modal Active/Inactive*/}
         <ModalCustom
@@ -575,10 +599,7 @@ const ViewGasSource = () => {
           handleCancel={handleCancel}
           footer={
             <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-              <ButtonComponent
-                onClick={handleCancel}
-                type="default"
-              >
+              <ButtonComponent onClick={handleCancel} type="default">
                 Cancel
               </ButtonComponent>
               <ButtonComponent
@@ -595,7 +616,7 @@ const ViewGasSource = () => {
             id="inactivateForm"
             form={form}
             onFinish={handleConfirm}
-            layout='vertical'
+            layout="vertical"
           >
             <div className="flex flex-col gap-6">
               <Alert
@@ -607,7 +628,7 @@ const ViewGasSource = () => {
               />
               <Form.Item
                 name={"remark"}
-                label={'Remark'}
+                label={"Remark"}
                 rules={formMessageRequired("remark")}
                 className="w-full"
               >
@@ -622,23 +643,25 @@ const ViewGasSource = () => {
           </Form>
         </ModalCustom>
 
-      </Spin>
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">
+              {bodyError?.response?.data?.message?.toString()}
+            </p>
+            <p className="pl-[70px]">Please try again.</p>
           </div>
-          <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-    </LayoutMenu>
+        </ModalError>
+      </LayoutMenu>
+    </Spin>
   );
 };
 

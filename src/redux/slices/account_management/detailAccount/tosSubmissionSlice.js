@@ -101,7 +101,10 @@ export const getListCategory = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/tossubmission/list-category";
       const response = await accountManagementService.getAll(url);
-      return response.data.map((category) => ({ glbTypeValId : category?.id, name: category?.text}));
+      return response.data.map((category) => ({
+        glbTypeValId: category?.id,
+        name: category?.text,
+      }));
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
@@ -206,7 +209,9 @@ export const createTosSubmissionBody = createAsyncThunk(
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.flag === 1 ? "created" : "submitted"}.`,
+        description: `Your data has been ${
+          body?.flag === 1 ? "created" : "submitted"
+        }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -216,7 +221,9 @@ export const createTosSubmissionBody = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.flag === 1 ? "created" : "submitted"}. ${message}.`,
+          description: `Your data was not ${
+            body?.flag === 1 ? "created" : "submitted"
+          }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -233,7 +240,9 @@ export const updateTosSubmissionBody = createAsyncThunk(
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.flag === 1 ? " updated" : "submitted"}.`,
+        description: `Your data has been ${
+          body?.flag === 1 ? " updated" : "submitted"
+        }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -243,7 +252,9 @@ export const updateTosSubmissionBody = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.flag === 1 ? " updated" : "submitted"}. ${message}.`,
+          description: `Your data was not ${
+            body?.flag === 1 ? " updated" : "submitted"
+          }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -437,23 +448,23 @@ const tosSubmissionSlice = createSlice({
       state.loading = false;
     },
     /** Inactive Tos Submission */
-    [inactiveTosSubmission.pending]: (state, action) => {
+    [inactiveTosSubmission.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveTosSubmission.fulfilled]: (state, action) => {
+    [inactiveTosSubmission.fulfilled]: (state) => {
       state.loading = false;
     },
-    [inactiveTosSubmission.rejected]: (state, action) => {
+    [inactiveTosSubmission.rejected]: (state) => {
       state.loading = false;
     },
     /** Delete Draft Tos Submission */
-    [deleteDraftTosSubmission.pending]: (state, action) => {
+    [deleteDraftTosSubmission.pending]: (state) => {
       state.loading = true;
     },
-    [deleteDraftTosSubmission.fulfilled]: (state, action) => {
+    [deleteDraftTosSubmission.fulfilled]: (state) => {
       state.loading = false;
     },
-    [deleteDraftTosSubmission.rejected]: (state, action) => {
+    [deleteDraftTosSubmission.rejected]: (state) => {
       state.loading = false;
     },
     // Get List Select Tos Submission
@@ -509,23 +520,23 @@ const tosSubmissionSlice = createSlice({
       state.loading = false;
     },
     /** Approve/Reject Create Tos Submission */
-    [approvalCreateTosSubmission.pending]: (state, action) => {
+    [approvalCreateTosSubmission.pending]: (state) => {
       state.loading = true;
     },
-    [approvalCreateTosSubmission.fulfilled]: (state, action) => {
+    [approvalCreateTosSubmission.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approvalCreateTosSubmission.rejected]: (state, action) => {
+    [approvalCreateTosSubmission.rejected]: (state) => {
       state.loading = false;
     },
     /** Approve/Reject Inactive Tos Submission */
-    [approvalInactiveTosSubmission.pending]: (state, action) => {
+    [approvalInactiveTosSubmission.pending]: (state) => {
       state.loading = true;
     },
-    [approvalInactiveTosSubmission.fulfilled]: (state, action) => {
+    [approvalInactiveTosSubmission.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approvalInactiveTosSubmission.rejected]: (state, action) => {
+    [approvalInactiveTosSubmission.rejected]: (state) => {
       state.loading = false;
     },
     /** Get Approval History */
@@ -542,13 +553,13 @@ const tosSubmissionSlice = createSlice({
       state.loading = false;
     },
     /** Overlap validate TOS */
-    [validateOverlapTos.pending]: (state, action) => {
+    [validateOverlapTos.pending]: (state) => {
       state.loading = true;
     },
-    [validateOverlapTos.fulfilled]: (state, action) => {
+    [validateOverlapTos.fulfilled]: (state) => {
       state.loading = false;
     },
-    [validateOverlapTos.rejected]: (state, action) => {
+    [validateOverlapTos.rejected]: (state) => {
       state.loading = false;
     },
   },

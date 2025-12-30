@@ -1,7 +1,4 @@
-import { Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
-import StatusComponent from "../../../../../../components/StatusComponent";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../../../utils";
 
 export const columnsCalculation = (
@@ -15,7 +12,7 @@ export const columnsCalculation = (
 ) => [
   {
     title: "NO",
-    align: "center",
+    isClassification: true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -146,7 +143,6 @@ export const columnsCalculation = (
   {
     title: "MESSAGE",
     dataIndex: "message",
-    align: "left",
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "message",
@@ -206,9 +202,81 @@ export const columnsCalculation = (
     // },
   },
   {
+    title: "CREATED DATE",
+    dataIndex: "createdDate",
+    isClassification: true,
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "message",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch,
+    //   true
+    // ),
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "createdDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "createdDate",
+        hasValue(search["createdDate"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "UPDATED DATE",
+    dataIndex: "updatedDate",
+    isClassification: true,
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "message",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch,
+    //   true
+    // ),
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "updatedDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "updatedDate",
+        hasValue(search["updatedDate"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
     title: "IS TRY",
     dataIndex: "isTry",
-    align: "center",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,

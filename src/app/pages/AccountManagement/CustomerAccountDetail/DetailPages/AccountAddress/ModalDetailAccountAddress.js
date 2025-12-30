@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from 'react'
+import React from 'react'
 import ModalCustom from '../../../../../../components/Modal/ModalCustom'
 import CardComponent from '../../../../../../components/Card/CardComponent'
 import DetailText from '../../../../../../components/DetailText'

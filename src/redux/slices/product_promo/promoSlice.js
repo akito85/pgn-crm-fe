@@ -16,7 +16,6 @@ const initialState = {
   data_promoDiscountDetail: [],
   data_promoDiscountDetailDraft: [],
   data_listAttachment: [],
-  data_ApprovalHistory: [],
   loading: false,
   isFailed: false,
   isSuccess: false,
@@ -43,11 +42,11 @@ const initialState = {
   data_condition_operator: [],
   data_condition_type: [],
   data_promo_type: [],
+  data_promotion_type: [],
   data_promo_category: [],
   data_from_item: [],
   data_tiering: [],
   data_uom: [],
-  data_product: [],
 };
 
 export const getAllPromoPaginate = createAsyncThunk(
@@ -114,7 +113,9 @@ export const approvePromo = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${body?.action ? "approved" : "rejected"}`,
+        description: `Your data has been ${
+          body?.action ? "approved" : "rejected"
+        }`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -153,7 +154,9 @@ export const inactiveApprovePromo = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${body?.action ? "approved" : "rejected"}`,
+        description: `Your data has been ${
+          body?.action ? "approved" : "rejected"
+        }`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -166,7 +169,9 @@ export const inactiveApprovePromo = createAsyncThunk(
         error.toString();
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
-          thunkAPI.dispatch(validateError({ error, action: "INACTIVE_APPROVE_PROMO" }));
+          thunkAPI.dispatch(
+            validateError({ error, action: "INACTIVE_APPROVE_PROMO" })
+          );
         } else {
           const errorBody = {
             title: "Failed",
@@ -180,7 +185,6 @@ export const inactiveApprovePromo = createAsyncThunk(
     }
   }
 );
-
 
 export const createPromo = createAsyncThunk(
   "CREATE_PROMO",
@@ -275,7 +279,9 @@ export const downloadPromo = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PROMO", back : false }));
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PROMO", back: false })
+      );
       return thunkAPI.rejectWithValue(
         error.response.data.code === 419 ? null : error.response.data
       );
@@ -394,6 +400,24 @@ export const getListPromoType = createAsyncThunk(
   }
 );
 
+export const getListPromotionType = createAsyncThunk(
+  "GET_PROMOTION_TYPE_LIST",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/promotion-type`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_PROMOTION_TYPE_LIST" })
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
+    }
+  }
+);
+
 export const getListPromoCategory = createAsyncThunk(
   "GET_PROMO_CATEGORY_LIST",
   async (thunkAPI) => {
@@ -465,7 +489,7 @@ export const getProductList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -492,10 +516,10 @@ export const getBudgetList = createAsyncThunk(
       const url = `/v1/dbs/api/product-promo/get-budget`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
-          return {
-            value: item.id,
-            label: item.text,
-          };
+        return {
+          value: item.id,
+          label: item.text,
+        };
       });
     } catch (error) {
       const message =
@@ -527,7 +551,7 @@ export const getSubDistrictList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -558,7 +582,7 @@ export const getDistrictList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -589,7 +613,7 @@ export const getCityList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -620,7 +644,7 @@ export const getProvinceList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -651,7 +675,7 @@ export const getCostCenterList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -671,33 +695,36 @@ export const getCostCenterList = createAsyncThunk(
   }
 );
 
-export const getSorList = createAsyncThunk("GET_SOR_PROMO", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/product-promo/get-sor`;
-    const response = await productPromoHttpService.getAll(url);
-    return response.data.map((item) => {
-      return {
-        value: item.id,
-        label: item.text,
-      };
-  });
-  } catch (error) {
-    const message =
-      error?.response?.data?.message || error?.message || error?.toString();
-    if (
-      error?.response?.data?.code === 500 ||
-      error?.response?.data?.code === 419
-    ) {
-      thunkAPI.dispatch(setBodyError(error));
-    } else {
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+export const getSorList = createAsyncThunk(
+  "GET_SOR_PROMO",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/get-sor`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.map((item) => {
+        return {
+          value: item.id,
+          label: item.text,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
     }
   }
-});
+);
 
 export const getIndustrialSectorList = createAsyncThunk(
   "GET_INDUSTRIAL_SECTOR_PROMO",
@@ -710,7 +737,7 @@ export const getIndustrialSectorList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -741,7 +768,7 @@ export const getGsizesList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -769,10 +796,10 @@ export const getCustomerSegmentList = createAsyncThunk(
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
-          value: item.id,
+          value: item.Id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -803,7 +830,7 @@ export const getAccountGroupList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -834,7 +861,7 @@ export const getAccountCategoryList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -865,7 +892,7 @@ export const getServiceTypeList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -896,7 +923,7 @@ export const getCustomerList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -1005,7 +1032,7 @@ export const getAdjustmentTypeList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -1025,33 +1052,36 @@ export const getAdjustmentTypeList = createAsyncThunk(
   }
 );
 
-export const getUomList = createAsyncThunk("GET_UOM_PROMO", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/product-promo/list-uom`;
-    const response = await productPromoHttpService.getAll(url);
-    return response.data.map((item) => {
-      return {
-        value: item.id,
-        label: item.text,
-      };
-  });
-  } catch (error) {
-    const message =
-      error?.response?.data?.message || error?.message || error?.toString();
-    if (
-      error?.response?.data?.code === 500 ||
-      error?.response?.data?.code === 419
-    ) {
-      thunkAPI.dispatch(setBodyError(error));
-    } else {
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+export const getUomList = createAsyncThunk(
+  "GET_UOM_PROMO",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/list-uom`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.map((item) => {
+        return {
+          value: item.id,
+          label: item.text,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
     }
   }
-});
+);
 
 export const getFromItemList = createAsyncThunk(
   "GET_FROM_ITEM_PROMO",
@@ -1064,7 +1094,7 @@ export const getFromItemList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -1089,7 +1119,10 @@ export const getTieringList = createAsyncThunk(
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/tiering`;
-      const response = await productPromoHttpService.updateDataWithMethodPost(url, body);
+      const response = await productPromoHttpService.updateDataWithMethodPost(
+        url,
+        body
+      );
       return response.data?.map((item) => {
         return {
           value: item.id,
@@ -1120,7 +1153,7 @@ const promoSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Promo Pagination
-    [getAllPromoPaginate.pending]: (state, action) => {
+    [getAllPromoPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllPromoPaginate.fulfilled]: (state, action) => {
@@ -1173,59 +1206,59 @@ const promoSlice = createSlice({
     },
 
     //GET AVAILABLE APPROVAL
-    [getAvailableApprovalPromo.pending]: (state, action) => {
+    [getAvailableApprovalPromo.pending]: (state) => {
       state.loading = true;
     },
     [getAvailableApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListAppHierId = action.payload;
     },
-    [getAvailableApprovalPromo.rejected]: (state, action) => {
+    [getAvailableApprovalPromo.rejected]: (state) => {
       state.loading = false;
     },
     //GET SELECTED APPROVAL
-    [getSelectedApprovalPromo.pending]: (state, action) => {
+    [getSelectedApprovalPromo.pending]: (state) => {
       state.loading = true;
     },
     [getSelectedApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListAppHierDetail = action.payload;
     },
-    [getSelectedApprovalPromo.rejected]: (state, action) => {
+    [getSelectedApprovalPromo.rejected]: (state) => {
       state.loading = false;
     },
 
     //LIST ATTAHCHMENT
-    [getPromoAttachment.pending]: (state, action) => {
+    [getPromoAttachment.pending]: (state) => {
       state.loading = true;
     },
     [getPromoAttachment.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_listAttachment= action.payload;
+      state.data_listAttachment = action.payload;
     },
-    [getPromoAttachment.rejected]: (state, action) => {
+    [getPromoAttachment.rejected]: (state) => {
       state.loading = false;
     },
 
-    [getAttachmentCategoryPromo.pending]: (state, action) => {
+    [getAttachmentCategoryPromo.pending]: (state) => {
       state.loading = true;
     },
     [getAttachmentCategoryPromo.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListCategory = action.payload;
     },
-    [getAttachmentCategoryPromo.rejected]: (state, action) => {
+    [getAttachmentCategoryPromo.rejected]: (state) => {
       state.loading = false;
     },
 
-    [getListCriteriaPromo.pending]: (state, action) => {
+    [getListCriteriaPromo.pending]: (state) => {
       state.loading = true;
     },
     [getListCriteriaPromo.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListCriteria = action.payload;
     },
-    [getListCriteriaPromo.rejected]: (state, action) => {
+    [getListCriteriaPromo.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -1426,7 +1459,7 @@ const promoSlice = createSlice({
     },
 
     //LIST CONDITION
-    [getConditionName.pending]: (state, action) => {
+    [getConditionName.pending]: (state) => {
       state.loading = true;
     },
     [getConditionName.fulfilled]: (state, action) => {
@@ -1438,7 +1471,7 @@ const promoSlice = createSlice({
       state.data_condition_name = action.payload;
     },
 
-    [getConditionOperator.pending]: (state, action) => {
+    [getConditionOperator.pending]: (state) => {
       state.loading = true;
     },
     [getConditionOperator.fulfilled]: (state, action) => {
@@ -1450,7 +1483,7 @@ const promoSlice = createSlice({
       state.data_condition_operator = action.payload;
     },
 
-    [getConditionType.pending]: (state, action) => {
+    [getConditionType.pending]: (state) => {
       state.loading = true;
     },
     [getConditionType.fulfilled]: (state, action) => {
@@ -1462,7 +1495,7 @@ const promoSlice = createSlice({
       state.data_condition_type = action.payload;
     },
 
-    [getListPromoType.pending]: (state, action) => {
+    [getListPromoType.pending]: (state) => {
       state.loading = true;
     },
     [getListPromoType.fulfilled]: (state, action) => {
@@ -1474,7 +1507,19 @@ const promoSlice = createSlice({
       state.data_promo_type = action.payload;
     },
 
-    [getListPromoCategory.pending]: (state, action) => {
+    [getListPromotionType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListPromotionType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_promotion_type = action.payload;
+    },
+    [getListPromotionType.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_promotion_type = action.payload;
+    },
+
+    [getListPromoCategory.pending]: (state) => {
       state.loading = true;
     },
     [getListPromoCategory.fulfilled]: (state, action) => {
@@ -1486,7 +1531,7 @@ const promoSlice = createSlice({
       state.data_promo_category = action.payload;
     },
 
-    [getAdjustmentTypeList.pending]: (state, action) => {
+    [getAdjustmentTypeList.pending]: (state) => {
       state.loading = true;
     },
     [getAdjustmentTypeList.fulfilled]: (state, action) => {
@@ -1498,7 +1543,7 @@ const promoSlice = createSlice({
       state.data_adjustment_type = action.payload;
     },
 
-    [getUomList.pending]: (state, action) => {
+    [getUomList.pending]: (state) => {
       state.loading = true;
     },
     [getUomList.fulfilled]: (state, action) => {
@@ -1510,7 +1555,7 @@ const promoSlice = createSlice({
       state.data_uom = action.payload;
     },
 
-    [getFromItemList.pending]: (state, action) => {
+    [getFromItemList.pending]: (state) => {
       state.loading = true;
     },
     [getFromItemList.fulfilled]: (state, action) => {
@@ -1522,7 +1567,7 @@ const promoSlice = createSlice({
       state.data_from_item = action.payload;
     },
 
-    [getTieringList.pending]: (state, action) => {
+    [getTieringList.pending]: (state) => {
       state.loading = true;
     },
     [getTieringList.fulfilled]: (state, action) => {

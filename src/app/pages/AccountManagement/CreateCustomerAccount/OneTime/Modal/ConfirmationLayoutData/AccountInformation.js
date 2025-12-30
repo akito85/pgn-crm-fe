@@ -3,8 +3,6 @@ import RadioTabs from "../../../../../../../components/RadioTabs";
 import { useSelector } from "react-redux";
 import DetailText from "../../../../../../../components/DetailText";
 import { Spin } from "antd";
-import moment from "moment";
-import { dateFormatting } from "../../../../../../../utils";
 import {
   getAccountCategory,
   getAccountGroupType,

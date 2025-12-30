@@ -1,4 +1,3 @@
-import React, { useRef } from "react";
 import { Input } from "antd";
 import InputLabel from "./InputLabel";
 import { NumericFormat } from "react-number-format";
@@ -6,7 +5,7 @@ import { NumericFormat } from "react-number-format";
 const InputComponent = ({
   label,
   mandatory,
-  onChange = () => { },
+  onChange = () => {},
   type,
   typeNumber,
   maxLength = 255,
@@ -18,7 +17,7 @@ const InputComponent = ({
   disabled,
   rows,
   styleGroup,
-  onClick = () => { },
+  onClick = () => {},
   onInput = (e) => (e.target.value = e.target.value.trimStart()),
   thousandSeparator = ".",
   decimalSeparator = ",",
@@ -27,7 +26,7 @@ const InputComponent = ({
   allowNegative = false,
   numericFormatType,
   ref,
-  onPressEnter = () => { }
+  onPressEnter = () => {},
 }) => {
   const style = {
     borderRadius: "6px",
@@ -61,7 +60,7 @@ const InputComponent = ({
       {type === "textarea" ? (
         <>
           <Input.TextArea
-            rows={rows || 5}
+            rows={rows || 3}
             style={style}
             onChange={onChange}
             value={value}

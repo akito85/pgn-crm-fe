@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 import moment from "moment";
 import { Link, NavLink } from "react-router-dom";
@@ -18,10 +18,15 @@ import {
   getListApprovalById,
   inactiveDailyRates,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/dailyrate";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
+import TableRBI from "../../../../../../components/TableRBI";
 import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../../components/CardContainer";
 
 export const columnDailyRate = (
   search,
@@ -30,237 +35,270 @@ export const columnDailyRate = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
- 
+  handleSearch = () => {}
 ) => [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "TYPE",
-      dataIndex: "rateType",
-      key: "rateType",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+  {
+    title: "NO",
+    dataIndex: "no",
+    key: "no",
+    width: 60,
+    align: "center",
+    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "TYPE",
+    dataIndex: "rateType",
+    key: "rateType",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "rateType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
         "rateType",
-        searchInput,
-        searchedColumn,
+        hasValue(search["rateType"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search
       ),
-      render: (text) => renderColumn('rateType', hasValue(search['rateType']), searchText, text, false, 'input', search)
-    },
-    {
-      title: "FROM CURRENCY",
-      dataIndex: "fromCurrencyName",
-      key: "fromCurrencyName",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+  },
+  {
+    title: "FROM CURRENCY",
+    dataIndex: "fromCurrencyName",
+    key: "fromCurrencyName",
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "fromCurrencyName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
         "fromCurrencyName",
-        searchInput,
-        searchedColumn,
+        hasValue(search["fromCurrencyName"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search
       ),
-      render: (text) => renderColumn('fromCurrencyName', hasValue(search['fromCurrencyName']), searchText, text, false, 'input', search)
-    },
-    {
-      title: "TO CURRENCY",
-      dataIndex: "toCurrencyName",
-      key: "toCurrencyName",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+  },
+  {
+    title: "TO CURRENCY",
+    dataIndex: "toCurrencyName",
+    key: "toCurrencyName",
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "toCurrencyName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
         "toCurrencyName",
-        searchInput,
-        searchedColumn,
+        hasValue(search["toCurrencyName"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search
       ),
-      render: (text) => renderColumn('toCurrencyName', hasValue(search['toCurrencyName']), searchText, text, false, 'input', search)
-    },
-    {
-      title: "RATE DATE",
-      dataIndex: "rateDate",
-      key: "rateDate",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+  },
+  {
+    title: "RATE DATE",
+    dataIndex: "rateDate",
+    key: "rateDate",
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "rateDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
         "rateDate",
-        searchInput,
-        searchedColumn,
+        hasValue(search["rateDate"]),
         searchText,
-        handleSearch,
-        true,
-        "date"
+        text,
+        "date",
+        search
       ),
-      render: (text) => renderDateColumn('rateDate', hasValue(search['rateDate']), searchText, text, 'date', search)
+  },
+  {
+    title: "CONVERTED RATE",
+    dataIndex: "convertedRate",
+    key: "convertedRate",
+    sorter: true,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "convertedRate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    ellipsis: {
+      showTitle: false,
     },
-    {
-      title: "CONVERTED RATE",
-      dataIndex: "convertedRate",
-      key: "convertedRate",
-      sorter: true,
-      align: "right",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "convertedRate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (text, record) => {
-        // const currency = record.currencyIds || 244;
-        const tempValue = text ? (text + "").split(".") : [];
-        const thousandSeparator = ",";
-        const decimalSeparator = ".";
-        const descimal = tempValue[1]
-          ? `${decimalSeparator}${tempValue[1]}`
-          : `${decimalSeparator}00`;
-        const value =
-          tempValue.length > 0
-            ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
+    render: (text, record) => {
+      const tempValue = text ? (text + "").split(".") : [];
+      const thousandSeparator = ",";
+      const decimalSeparator = ".";
+      const descimal = tempValue[1]
+        ? `${decimalSeparator}${tempValue[1]}`
+        : `${decimalSeparator}00`;
+      const value =
+        tempValue.length > 0
+          ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
             descimal
-            : "";
+          : "";
 
-        return renderColumn('convertedRate', hasValue(search['convertedRate']), searchText, value, true, 'input', search)
-
-        // if (searchedColumn === "convertedRate") {
-        //   const highlight = (
-        //     <Highlighter
-        //       highlightStyle={{
-        //         backgroundColor: "#ffc069",
-        //         padding: 0,
-        //       }}
-        //       searchWords={[searchText]}
-        //       autoEscape
-        //       textToHighlight={value || ""}
-        //     />
-        //   );
-        //   if (value) {
-        //     return (
-        //       <Tooltip placement="topLeft" title={value}>
-        //         {highlight}
-        //       </Tooltip>
-        //     );
-        //   }
-        //   return highlight;
-        // } else {
-        //   if (value) {
-        //     return (
-        //       <Tooltip placement="topLeft" title={value}>
-        //         {value}
-        //       </Tooltip>
-        //     );
-        //   }
-        //   return "";
-        // }
-      },
+      return renderColumn(
+        "convertedRate",
+        hasValue(search["convertedRate"]),
+        searchText,
+        value,
+        true,
+        "input",
+        search
+      );
     },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      key: "description",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+  },
+  {
+    title: "DESCRIPTION",
+    dataIndex: "description",
+    key: "description",
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "description",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    ellipsis: {
+      showTitle: false,
+    },
+    render: (text) =>
+      renderColumn(
         "description",
-        searchInput,
-        searchedColumn,
+        hasValue(search["description"]),
         searchText,
-        handleSearch
+        text,
+        true,
+        "input",
+        search
       ),
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
-    },
-
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      fixed: "right",
-      width: 150,
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+  },
+  {
+    title: "STATUS",
+    dataIndex: "status",
+    key: "status",
+    width: 150,
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (a) => {
+      let text;
+      switch (a) {
+        case "ACTIVE":
+          text = "Active";
+          break;
+        case "INACTIVE":
+          text = "Inactive";
+          break;
+        case "DRAFT":
+          text = "Draft";
+          break;
+        default:
+          text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
+          break;
+      }
+      return renderColumn(
         "status",
-        searchInput,
-        searchedColumn,
+        hasValue(search["status"]),
         searchText,
-        handleSearch
-      ),
-      render: (a) => {
-        let text;
-        switch (a) {
-          case "ACTIVE":
-            text = "Active";
-            break;
-          case "INACTIVE":
-            text = "Inactive";
-            break;
-          case "DRAFT":
-            text = "Draft";
-            break;
-          default:
-            text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
-            break;
-        }
-        return renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
-
-      },
+        text,
+        false,
+        "status",
+        search
+      );
     },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      key: "statusApproval",
-      fixed: "right",
-      width: 200,
-      sorter: true,
-      align: "right",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "statusApproval",
-        searchInput,
-        searchedColumn,
+  },
+  {
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
+    key: "statusApproval",
+    width: 200,
+    sorter: true,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "statusApproval",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (a) => {
+      let text;
+      switch (a) {
+        case "WAITING APPROVAL":
+          text = "Waiting Approval";
+          break;
+        case "DRAFT":
+          text = "Draft";
+          break;
+        case "APPROVAL":
+          text = "Approval";
+          break;
+        default:
+          text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
+          break;
+      }
+      return renderColumn(
+        "status",
+        hasValue(search["status"]),
         searchText,
-        handleSearch
-      ),
-      render: (a) => {
-        let text;
-        switch (a) {
-          case "WAITING APPROVAL":
-            text = "Waiting Approval";
-            break;
-          case "DRAFT":
-            text = "Draft";
-            break;
-          case "APPROVAL":
-            text = "Approval";
-            break;
-          default:
-            text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
-            break;
-        }
-        return renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
-      },
+        text,
+        false,
+        "status",
+        search
+      );
     },
-  ];
+  },
+];
 
 const DailyRateView = ({ dispatch }) => {
   const { data_list, dataApprovalHistory, loading } = useSelector(
@@ -280,6 +318,22 @@ const DailyRateView = ({ dispatch }) => {
   const [dataInactivate, setDataInactivate] = useState({});
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [ratesId, setRatesId] = useState("");
+
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("dailyRateFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          left: ["no"],
+          right: ["action", "status", "statusApproval"],
+        };
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    localStorage.setItem("dailyRateFixedColumns", JSON.stringify(fixedColumns));
+  }, [fixedColumns]);
 
   const formatRupiah = (nilai) => {
     // Separate integer and decimal parts
@@ -367,9 +421,10 @@ const DailyRateView = ({ dispatch }) => {
     setOpenModalInactivate(false);
   };
 
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleChange = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
   };
 
   const onSort = (_, __, sort) => {
@@ -383,9 +438,8 @@ const DailyRateView = ({ dispatch }) => {
   const handleSubmitModalInactivate = (res, handleClear) => {
     const body = {
       ratesId: ratesId,
-      appHierId: res.approvalHierarchy, // Anda dapat menghapus ini jika tidak perlu
-      remark: res.remark, // Anda dapat menghapus ini jika tidak perlu
-      // status: status === "Inactive" ? "Active" : "Inactive",
+      appHierId: res.approvalHierarchy,
+      remark: res.remark,
     };
     dispatch(inactiveDailyRates({ body }))
       .unwrap()
@@ -403,6 +457,27 @@ const DailyRateView = ({ dispatch }) => {
       });
   };
 
+  const handleDownload = () => {
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
+        }
+      }
+    }
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    dispatch(
+      getDowloadDailyRate({
+        search: tempSearch,
+        page,
+        pageSize,
+        sort,
+      })
+    );
+  };
+
   // Grant Access Item
   const itemGrantAccess = [
     {
@@ -411,26 +486,7 @@ const DailyRateView = ({ dispatch }) => {
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
           type="submit"
-          onClick={() => {
-            let tempSearch = "";
-            for (const dataIndex in search) {
-              if (Object.hasOwnProperty.call(search, dataIndex)) {
-                const tempSearchText = search[dataIndex];
-                if (tempSearchText) {
-                  tempSearch += `${dataIndex}~${tempSearchText},`;
-                }
-              }
-            }
-            tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-            dispatch(
-              getDowloadDailyRate({
-                search: tempSearch,
-                page,
-                pageSize,
-                sort,
-              })
-            );
-          }}
+          onClick={handleDownload}
         >
           Download List
         </ButtonComponent>
@@ -482,11 +538,24 @@ const DailyRateView = ({ dispatch }) => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${
+                  isEditable ? "text-black " : "text-[#8D91A0]"
+                }`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -601,36 +670,101 @@ const DailyRateView = ({ dispatch }) => {
     },
   ];
 
+  // ✅ Call useColumnActionPermission hook at component level
+  const actionColumns = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess
+  );
+
+  // ✅ Get base columns with key property
+  const baseColumns = useMemo(() => {
+    const dailyRateCols = [
+      ...columnDailyRate(
+        search,
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleInactive,
+        handleApprovalHistory,
+        formatRupiah,
+        disabledDate
+      ),
+      ...actionColumns,
+    ];
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = dailyRateCols.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
+
   return (
     <div>
       <Spin spinning={loading}>
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-        <BaseContainer header={"DAILY RATES LIST"}>
-          <TablePaginationNew
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] font-bold text-primary">
+                DAILY RATES LIST
+              </p>
+
+              <Toolbar items={itemGrantAccess} />
+            </div>
+          }
+        >
+          <TableRBI
             dataSource={data_list?.result}
-            pageSize={pageSize}
-            columns={[
-              ...columnDailyRate(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleInactive,
-                handleApprovalHistory,
-                formatRupiah,
-                disabledDate
-              ),
-              ...useColumnActionPermission(
-                ["view", "activate", "update", "history"],
-                itemGrantAccess
-              ),
-            ]}
+            columns={columns}
             current={page}
+            pageSize={pageSize}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data_list?.page?.totalElements || 0}
@@ -639,8 +773,12 @@ const DailyRateView = ({ dispatch }) => {
               x: 2500,
               y: 525,
             }}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
-        </BaseContainer>
+        </CardContainer>
 
         <ModalInactivateWithHierarchy
           dispatch={dispatch}

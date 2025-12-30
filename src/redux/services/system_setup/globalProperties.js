@@ -49,7 +49,7 @@ const deleteGlobalProperties = async (id) => {
     `${configApp.USER_MANAGEMENT_SERVICE}/v1/dbs/api/globalproperties/${id}/delete`,
     { headers: tokenHeader() }
   );
-  console.log(id, " ini idnya");
+
   return response;
 };
 

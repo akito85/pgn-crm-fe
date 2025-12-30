@@ -16,20 +16,14 @@ export const columnsPricingRule = (
     width: 60,
     align: "center",
     render: (value, row, index) => {
-      let obj = {
-        children: (page - 1) * pageSize + row.number + 1,
-        props: {
-          colSpan: 1,
-          rowSpan: row.rowSpan,
-        },
-      };
-      return obj;
+      return (page - 1) * pageSize + index + 1;
     },
   },
   {
     sorter: true,
     title: "MINIMUM",
     dataIndex: "min",
+    isNumber:true,
     align: "right",
     ...getColumnSearchPropsPaging(
       "min",
@@ -39,33 +33,26 @@ export const columnsPricingRule = (
       handleSearch
     ),
     render: (text, row, index) => {
-      let obj = {
-        children:
-          searchedColumn === "min" ? (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          ) : (
-            text || ""
-          ),
-        props: {
-          colSpan: 1,
-          rowSpan: row.rowSpan,
-        },
-      };
-      return obj;
+      return searchedColumn === "min" ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text || ""
+      );
     },
   },
   {
     sorter: true,
     title: "MAXIMUM",
     dataIndex: "max",
+    isNumber:true,
     align: "right",
     ...getColumnSearchPropsPaging(
       "max",
@@ -75,33 +62,26 @@ export const columnsPricingRule = (
       handleSearch
     ),
     render: (text, row, index) => {
-      let obj = {
-        children:
-          searchedColumn === "maximum" ? (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          ) : (
-            toTitleCase(text) || ""
-          ),
-        props: {
-          colSpan: 1,
-          rowSpan: row.rowSpan,
-        },
-      };
-      return obj;
+      return searchedColumn === "max" ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text || ""
+      );
     },
   },
   {
     sorter: true,
     title: "PRICE CODE",
     dataIndex: "priceCode",
+    isClassification:true,
     align: "left",
     ...getColumnSearchPropsPaging(
       "priceCode",
@@ -111,81 +91,59 @@ export const columnsPricingRule = (
       handleSearch
     ),
     render: (text, row, index) => {
-      let obj = {
-        children:
-          searchedColumn === "priceCode" ? (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          ) : (
-            text || ""
-          ),
-        props: {
-          colSpan: 1,
-          rowSpan: row.rowSpan,
-        },
-      };
-      return obj;
+      return searchedColumn === "priceCode" ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text || ""
+      );
     },
   },
   {
     title: "PRICE DETAIL",
     children: [
       {
-        // sorter: true,
         title: "VALUE",
         dataIndex: "value",
+        isNumber:true,
         align: "right",
-        // ...getColumnSearchPropsPaging(
-        //   "value",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-        render: (value, record) => (
-          <NumericFormat
-            displayType="text"
-            value={value}
-            className="text-right"
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            decimalScale={2}
-            fixedDecimalScale
-          />
-        ),
+        render: (value, record) => {
+          // Remove comma and convert to number for NumericFormat
+          const numericValue = typeof value === 'string' 
+            ? parseFloat(value.replace(/,/g, '')) 
+            : value;
+          
+          return (
+            <NumericFormat
+              displayType="text"
+              value={numericValue}
+              className="text-right"
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              decimalScale={2}
+              fixedDecimalScale
+            />
+          );
+        },
       },
       {
-        // sorter: true,
         title: "CURRENCY",
         dataIndex: "currency",
+        isClassification:true,
         align: "center",
-        // ...getColumnSearchPropsPaging(
-        //   "currency",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        // sorter: true,
         title: "UOM",
         dataIndex: "uom",
+        isClassification:true,
         align: "center",
-        // ...getColumnSearchPropsPaging(
-        //   "uom",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
     ],
   },

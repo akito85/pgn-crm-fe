@@ -4,6 +4,7 @@ import { showModalError, setBodyError, validateError } from "../general_slice";
 
 const initialState = {
   data: [],
+  list_billing_period: [],
   data_calculationUsage: [],
   data_serviceAgreement: [],
   data_detailServiceAgreement: [],
@@ -20,14 +21,24 @@ const initialState = {
 // list gas
 export const getListRatingGasPaginate = createAsyncThunk(
   "GET_LIST_RATING_GAS_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (
+    { search, page, pageSize, sort, billPeriodId, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rating/list-rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
+      // Tambahkan billPeriodId ke URL
+      const url = `/v1/dbs/api/rating/list-rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
+
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -43,6 +54,51 @@ export const getListRatingGasPaginate = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const getListBillingPeriodForRating = createAsyncThunk(
+  "GET_LIST_BILLING_PERIOD_FOR_RATING",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
+      const response = await ratingBillingHttpService.getAll(url);
+
+      // Transform data sesuai struktur response
+      const rawData =
+        response?.body?.data?.data ||
+        response?.data?.data ||
+        response?.data ||
+        [];
+
+      const transformedData = Array.isArray(rawData)
+        ? rawData.map((item) => ({
+            id: item.id,
+            name: item.name,
+            code: item.code,
+            ...item,
+          }))
+        : [];
+
+      return transformedData;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -251,8 +307,7 @@ export const getAllPricingRuleSAPaginate = createAsyncThunk(
   async ({ id, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "" : sort;
+      const sortParams = sort === undefined || sort === "" ? "" : sort;
       const url = `/v1/dbs/api/rating/list-sa-pricing-rule/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
@@ -321,7 +376,9 @@ export const downloadRatingGas = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "DOWNLOAD_LIST", back: false })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -359,85 +416,105 @@ const ratingSlice = createSlice({
   extraReducers: {
     // Get All Rating Gas Pagination
     [getListRatingGasPaginate.pending]: (state, action) => {
-      state.loading = true;
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getListRatingGasPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        // Append new data to existing data
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data (initial load or after search/sort)
+        state.data = action.payload;
+      }
     },
     [getListRatingGasPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
     },
 
     // Get All Calculation Usage Pagination
-    [getAllCalculationUsagePaginate.pending]: (state, action) => {
+    [getAllCalculationUsagePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllCalculationUsagePaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_calculationUsage = action.payload;
     },
-    [getAllCalculationUsagePaginate.rejected]: (state, action) => {
+    [getAllCalculationUsagePaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Service Agreement Pagination
-    [getAllServiceAgreementPaginate.pending]: (state, action) => {
+    [getAllServiceAgreementPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllServiceAgreementPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_serviceAgreement = action.payload;
     },
-    [getAllServiceAgreementPaginate.rejected]: (state, action) => {
+    [getAllServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Usage Service Agreement Pagination
-    [getAllUsageServiceAgreementPaginate.pending]: (state, action) => {
+    [getAllUsageServiceAgreementPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllUsageServiceAgreementPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_usageSA = action.payload;
     },
-    [getAllUsageServiceAgreementPaginate.rejected]: (state, action) => {
+    [getAllUsageServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Detail Service Agreement Pagination
-    [getAllDetailServiceAgreementPaginate.pending]: (state, action) => {
+    [getAllDetailServiceAgreementPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllDetailServiceAgreementPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detailServiceAgreement = action.payload;
     },
-    [getAllDetailServiceAgreementPaginate.rejected]: (state, action) => {
+    [getAllDetailServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All TOS Service Agreement Pagination
-    [getAllTOSServiceAgreementPaginate.pending]: (state, action) => {
+    [getAllTOSServiceAgreementPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllTOSServiceAgreementPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_termOfServiceSA = action.payload;
     },
-    [getAllTOSServiceAgreementPaginate.rejected]: (state, action) => {
+    [getAllTOSServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Pricing Rule Service Agreement Pagination
-    [getAllPricingRuleSAPaginate.pending]: (state, action) => {
+    [getAllPricingRuleSAPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllPricingRuleSAPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_pricingRule = action.payload;
     },
-    [getAllPricingRuleSAPaginate.rejected]: (state, action) => {
+    [getAllPricingRuleSAPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -456,10 +533,7 @@ const ratingSlice = createSlice({
     },
 
     // Get All Calculation Rule Service Agreement Pagination
-    [getAllCalculationRuleServiceAgreementPaginate.pending]: (
-      state,
-      action
-    ) => {
+    [getAllCalculationRuleServiceAgreementPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllCalculationRuleServiceAgreementPaginate.fulfilled]: (
@@ -469,45 +543,55 @@ const ratingSlice = createSlice({
       state.loading = false;
       state.data_calculationRuleServiceAgreement = action.payload;
     },
-    [getAllCalculationRuleServiceAgreementPaginate.rejected]: (
-      state,
-      action
-    ) => {
+    [getAllCalculationRuleServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Rating Non Gas Pagination
-    [getListRatingNonGasPaginate.pending]: (state, action) => {
+    [getListRatingNonGasPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getListRatingNonGasPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getListRatingNonGasPaginate.rejected]: (state, action) => {
+    [getListRatingNonGasPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Download Rating
-    [downloadRatingGas.pending]: (state, action) => {
+    [downloadRatingGas.pending]: (state) => {
       state.loading = true;
     },
-    [downloadRatingGas.fulfilled]: (state, action) => {
+    [downloadRatingGas.fulfilled]: (state) => {
       state.loading = false;
     },
-    [downloadRatingGas.rejected]: (state, action) => {
+    [downloadRatingGas.rejected]: (state) => {
       state.loading = false;
     },
 
+    // Get List Billing Period For Rating
+    [getListBillingPeriodForRating.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListBillingPeriodForRating.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_billing_period = action.payload;
+    },
+    [getListBillingPeriodForRating.rejected]: (state) => {
+      state.loading = false;
+      state.list_billing_period = [];
+    },
+
     // get detail rating gas
-    [getDetailRatingGas.pending]: (state, action) => {
+    [getDetailRatingGas.pending]: (state) => {
       state.loading = true;
     },
     [getDetailRatingGas.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [getDetailRatingGas.rejected]: (state, action) => {
+    [getDetailRatingGas.rejected]: (state) => {
       state.loading = false;
     },
   },

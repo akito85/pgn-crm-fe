@@ -1,31 +1,34 @@
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../components/StatusComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import {
+  currencyFormatting,
+  numberFormatting,
+} from "../../../../../utils/formatCurrency";
 
 export const columnsBilling = (
-  page = 1,
-  pageSize = 10,
+  page = 0,
+  pageSize = 0,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search,
+  search
   // handleDetail = () => {},
   // handleApprovalHistory = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
-    align: "center",
-    width: 60,
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    isClassification: true,
+    width: 15,
+    render: (text, object, index) => index + 1,
   },
   {
+    key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
+    isClassification: true,
+    width: 90,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "calculationCode",
@@ -55,8 +58,11 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
+    isClassification: true,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "ratingCode",
@@ -86,8 +92,11 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "billingCode",
     title: "BILLING CODE",
     dataIndex: "billingCode",
+    isClassification: true,
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "billingCode",
@@ -117,8 +126,10 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "saNumber",
@@ -148,10 +159,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     // ...getColumnSearchPropsPaging(
     //   "billingCycle",
     //   searchInput,
@@ -180,9 +193,11 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "billingPeriod",
     title: "BILLING PERIOD",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "billingPeriod",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -236,8 +251,10 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "customerNumber",
@@ -267,8 +284,10 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
+    width: 70,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "customerName",
@@ -298,7 +317,9 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
+    width: 70,
     dataIndex: "accountNumber",
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -329,8 +350,10 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -360,42 +383,12 @@ export const columnsBilling = (
     // ),
   },
   {
-    title: "ACCOUNT GROUP TYPE",
-    dataIndex: "accountGroupType",
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accountGroupType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "accountGroupType",
-        hasValue(search["accountGroupType"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-    // ...getColumnSearchPropsPaging(
-    //   "accountGroupType",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
-  },
-  {
+    key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     // ...getColumnSearchPropsPaging(
     //   "serviceType",
     //   searchInput,
@@ -424,9 +417,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "sor",
     title: "SOR",
     dataIndex: "sor",
+    isClassification: true,
     sorter: true,
+    width: 70,
     // ...getColumnSearchPropsPaging(
     //   "sor",
     //   searchInput,
@@ -455,7 +451,10 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
+    width: 70,
+    isClassification: true,
     dataIndex: "costCenter",
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -486,39 +485,10 @@ export const columnsBilling = (
       ),
   },
   {
-    title: "ACCOUNT SEGMENT",
-    dataIndex: "accountSegment",
-    sorter: true,
-    align: "center",
-    // ...getColumnSearchPropsPaging(
-    //   "accountSegment",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accountSegment",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "accountSegment",
-        hasValue(search["accountSegment"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
+    key: "meterReadingCode",
     title: "METER READING CODE",
+    width: 75,
+    isClassification: true,
     dataIndex: "meterReadingCode",
     sorter: true,
     // ...getColumnSearchPropsPaging(
@@ -549,9 +519,80 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "accountSegment",
+    title: "ACCOUNT SEGMENT",
+    width: 70,
+    isClassification: true,
+    dataIndex: "accountSegment",
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "accountSegment",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch
+    // ),
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accountSegment",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountSegment",
+        hasValue(search["accountSegment"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "accountGroupType",
+    title: "ACCOUNT GROUP TYPE",
+    dataIndex: "accountGroupType",
+    width: 80,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accountGroupType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountGroupType",
+        hasValue(search["accountGroupType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+    // ...getColumnSearchPropsPaging(
+    //   "accountGroupType",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch
+    // ),
+  },
+  {
+    key: "product",
     title: "PRODUCT",
+    isClassification: true,
     dataIndex: "product",
     sorter: true,
+    width: 70,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "product",
@@ -580,10 +621,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "timeUnitContract",
     title: "CONTRACT PERIOD UNIT",
     dataIndex: "timeUnitContract",
+    width: 85,
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "timeUnitContract",
@@ -612,10 +655,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "uom",
     title: "UOM",
     dataIndex: "uom",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     // ...getColumnSearchPropsPaging(
     //   "uom",
     //   searchInput,
@@ -644,17 +689,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "minContract",
     title: "MIN CONTRACT",
+    width: 70,
     dataIndex: "minContract",
+    isNumber: true,
     sorter: true,
-    align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "minContract",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "minContract",
@@ -664,29 +704,28 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "minContract",
-        hasValue(search["minContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["minContract"])) {
+        return renderColumn(
+          "minContract",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
+    key: "maxContract",
     title: "MAX CONTRACT",
+    width: 70,
+    isNumber: true,
     dataIndex: "maxContract",
     sorter: true,
-    align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "maxContract",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "maxContract",
@@ -696,22 +735,28 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "maxContract",
-        hasValue(search["maxContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["maxContract"])) {
+        return renderColumn(
+          "maxContract",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
+    key: "totalUsage",
     title: "TOTAL USAGE",
     dataIndex: "totalUsage",
+    width: 70,
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalUsage",
@@ -721,36 +766,28 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "totalUsage",
-        hasValue(search["totalUsage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-    // ...getColumnSearchPropsPaging(
-    //   "totalUsage",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
+    render: (text) => {
+      if (hasValue(search["totalUsage"])) {
+        return renderColumn(
+          "totalUsage",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
+    key: "totalUsageConvM3",
     title: "TOTAL USAGE EQV M3",
     dataIndex: "totalUsageConvM3",
+    width: 80,
     sorter: true,
-    align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "totalUsageConvM3",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalUsageConvM3",
@@ -760,29 +797,28 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "totalUsageConvM3",
-        hasValue(search["totalUsageConvM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["totalUsageConvM3"])) {
+        return renderColumn(
+          "totalUsageConvM3",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
+    key: "totalUsageConvMmbtu",
     title: "TOTAL USAGE EQV MMBTU",
     dataIndex: "totalUsageConvMmbtu",
+    width: 90,
     sorter: true,
-    align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "totalUsageConvMmbtu",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalUsageConvMmbtu",
@@ -792,29 +828,30 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "totalUsageConvMmbtu",
-        hasValue(search["totalUsageConvMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["totalUsageConvMmbtu"])) {
+        return renderColumn(
+          "totalUsageConvMmbtu",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
+
+  // KOLOM CURRENCY IDR
   {
+    key: "basicBillingIdr",
     title: "BASIC BILL IDR",
     dataIndex: "basicBillingIdr",
+    width: 70,
+    isNumber: true,
     sorter: true,
-    align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "basicBillingIdr",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "basicBillingIdr",
@@ -824,29 +861,30 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "basicBillingIdr",
-        hasValue(search["basicBillingIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["basicBillingIdr"])) {
+        return renderColumn(
+          "basicBillingIdr",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return currencyFormatting(text, "idr");
+    },
   },
+
+  // KOLOM CURRENCY USD
   {
+    key: "basicBillingUsd",
     title: "BASIC BILL USD",
     dataIndex: "basicBillingUsd",
+    width: 70,
+    isNumber: true,
     sorter: true,
-    align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "basicBillingUsd",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "basicBillingUsd",
@@ -856,22 +894,28 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "basicBillingUsd",
-        hasValue(search["basicBillingUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["basicBillingUsd"])) {
+        return renderColumn(
+          "basicBillingUsd",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return currencyFormatting(text, "usd");
+    },
   },
   {
+    key: "totalBasicBillEqvIdr",
     title: "TOTAL BASIC BILL EQV IDR",
     dataIndex: "totalBasicBillEqvIdr",
+    width: 90,
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalBasicBillEqvIdr",
     //   searchInput,
@@ -900,10 +944,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalBasicBillEqvUsd",
     title: "TOTAL BASIC BILL EQV USD",
     dataIndex: "totalBasicBillEqvUsd",
     sorter: true,
-    align: "right",
+    width: 90,
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalBasicBillEqvUsd",
     //   searchInput,
@@ -932,10 +978,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "otherBillIdr",
     title: "OTHER BILL IDR",
     dataIndex: "otherBillIdr",
+    width: 70,
+    isNumber: true,
     sorter: true,
-    align: "right",
     // ...getColumnSearchPropsPaging(
     //   "otherBillIdr",
     //   searchInput,
@@ -964,10 +1012,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "otherBillUsd",
     title: "OTHER BILL USD",
     dataIndex: "otherBillUsd",
+    width: 70,
+    isNumber: true,
     sorter: true,
-    align: "right",
     // ...getColumnSearchPropsPaging(
     //   "otherBillUsd",
     //   searchInput,
@@ -996,10 +1046,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalOtherBillEqvIdr",
     title: "TOTAL OTHER BILL EQV IDR",
     dataIndex: "totalOtherBillEqvIdr",
     sorter: true,
-    align: "right",
+    width: 90,
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalOtherBillEqvIdr",
     //   searchInput,
@@ -1028,10 +1080,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalOtherBillEqvUsd",
     title: "TOTAL OTHER BILL EQV USD",
     dataIndex: "totalOtherBillEqvUsd",
     sorter: true,
-    align: "right",
+    width: 100,
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalOtherBillEqvUsd",
     //   searchInput,
@@ -1060,10 +1114,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "discountAmountIdr",
     title: "DISCOUNT IDR",
+    width: 70,
     dataIndex: "discountAmountIdr",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountAmountIdr",
@@ -1092,10 +1148,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "discountAmountUsd",
     title: "DISCOUNT USD",
     dataIndex: "discountAmountUsd",
+    width: 70,
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountAmountUsd",
@@ -1124,10 +1182,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "taxBasicIdr",
     title: "TAX BASIS IDR",
     dataIndex: "taxBasicIdr",
+    width: 70,
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxBasicIdr",
@@ -1149,10 +1209,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxBasicUsd",
     title: "TAX BASIS USD",
     dataIndex: "taxBasicUsd",
+    width: 70,
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxBasicUsd",
@@ -1181,10 +1243,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "taxBasicEqvIdr",
     title: "TAX BASIS EQV IDR",
+    width: 70,
     dataIndex: "taxBasicEqvIdr",
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "taxBasicEqvIdr",
     //   searchInput,
@@ -1213,10 +1277,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "vatIdr",
     title: "VAT IDR",
     dataIndex: "vatIdr",
+    width: 70,
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "vatIdr",
@@ -1245,10 +1311,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "vatUsd",
     title: "VAT USD",
     dataIndex: "vatUsd",
+    width: 70,
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "vatUsd",
     //   searchInput,
@@ -1277,10 +1345,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "vatEqvIdr",
     title: "VAT EQV IDR",
+    width: 70,
     dataIndex: "vatEqvIdr",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "vatEqvIdr",
@@ -1309,10 +1379,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "withHoldingTax",
     title: "WITHHOLDING TAX",
+    width: 70,
     dataIndex: "withHoldingTax",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "withHoldingTax",
@@ -1341,10 +1413,12 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "prevWithHoldingTax",
     title: "PREV WITHHOLDING TAX",
     dataIndex: "prevWithHoldingTax",
+    width: 85,
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "prevWithHoldingTax",
     //   searchInput,
@@ -1374,10 +1448,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxRateType",
     title: "TAX RATE TYPE",
     dataIndex: "taxRateType",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     // ...getColumnSearchPropsPaging(
     //   "taxRateType",
     //   searchInput,
@@ -1406,10 +1482,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxRate",
     title: "TAX RATE",
     dataIndex: "taxRate",
+    width: 70,
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "taxRate",
     //   searchInput,
@@ -1438,9 +1516,11 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxRateDate",
     title: "TAX RATE DATE",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "taxRateDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -1492,10 +1572,12 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "totalAmountIdr",
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
+    width: 75,
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalAmountIdr",
     //   searchInput,
@@ -1524,10 +1606,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalAmountUsd",
     title: "TOTAL AMOUNT USD",
+    width: 80,
     dataIndex: "totalAmountUsd",
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalAmountUsd",
     //   searchInput,
@@ -1556,10 +1640,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
+    width: 85,
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalAmountEqvIdr",
     //   searchInput,
@@ -1588,10 +1674,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
+    width: 85,
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
-    align: "right",
+    isNumber: true,
     // ...getColumnSearchPropsPaging(
     //   "totalAmountEqvUsd",
     //   searchInput,
@@ -1620,9 +1708,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "rateType",
     title: "RATE TYPE",
     dataIndex: "rateType",
+    width: 70,
     sorter: true,
+    isClassification:true,
     // ...getColumnSearchPropsPaging(
     //   "rateType",
     //   searchInput,
@@ -1651,10 +1742,12 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "rate",
     title: "RATE",
-    align: "right",
+    width: 70,
     dataIndex: "rate",
     sorter: true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rate",
@@ -1683,9 +1776,11 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "rateDate",
     title: "RATE DATE",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "rateDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -1737,9 +1832,11 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "transactionDate",
     title: "TRANSACTION DATE",
+    width: 80,
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "transactionDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -1791,9 +1888,11 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "accountDate",
     title: "ACCOUNTING DATE",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "accountDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -1845,9 +1944,11 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "invoiceDate",
     title: "INVOICE DATE",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "invoiceDate",
     // ...getColumnSearchPropsPaging(
     //   "invoiceDate",
@@ -1899,9 +2000,11 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "dueDate",
     title: "DUE DATE",
+    width: 70,
     sorter: true,
-    align: "center",
+    isClassification: true,
     dataIndex: "dueDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -1953,8 +2056,10 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "remark",
     sorter: true,
     title: "REMARK",
+    width: 70,
     dataIndex: "remark",
     ellipsis: {
       showTitle: false,
@@ -2005,9 +2110,12 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "paymentStatus",
     title: "PAYMENT STATUS",
+    width: 70,
     dataIndex: "paymentStatus",
     sorter: true,
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "paymentStatus",
@@ -2053,18 +2161,13 @@ export const columnsBilling = (
     },
   },
   {
+    key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
+    isClassification: true,
     fixed: "right",
-    width: 200,
+    width: 70,
     sorter: true,
-    // ...getColumnSearchPropsPaging(
-    //   "statusApproval",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -2072,7 +2175,14 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
+      "select",
+      [
+        // tambahkan options
+        { value: "APPROVED", label: "Approved" },
+        { value: "NEED REVIEW", label: "Need Review" },
+        { value: "WAITING APPROVAL", label: "Waiting Approval" },
+      ]
     ),
     render: (index) => {
       let text;
@@ -2105,8 +2215,8 @@ export const columnsBilling = (
   // {
   //   title: "ACTION",
   //   fixed: "right",
-  //   width: 150,
-  //   align: "center",
+  //   width: 170,
+  //
   //   render: (id, record) => {
   //     return (
   //       <div className="flex w-full justify-center gap-6">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -29,6 +29,7 @@ import {
   getListPromoCategory,
   getListPromoType,
   getPromoAttachment,
+  getListPromotionType,
   getSelectedApprovalPromo,
   updatePromo,
 } from "../../../../redux/slices/product_promo/promoSlice";
@@ -46,7 +47,6 @@ import productPromoHttpService from "../../../../redux/services/productPromoHttp
 import {
   handleDisabledEachColumnCriteria,
   handleMappingCriteriaGeneral,
-  handleCheckCriteriaMissingValidation,
 } from "../UtilsProduct/UtilsAllProduct";
 
 const PromoDiscountCreateAndUpdate = ({ type }) => {
@@ -57,6 +57,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     dataListAppHierDetail,
     loading,
     data_promo_type,
+    data_promotion_type,
     data_promo_category,
     data_promoDiscountDetail,
     data_promoDiscountDetailDraft,
@@ -80,6 +81,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         "endDate",
         "promoCategory",
         "promoType",
+        "promotionType",
         "criteria",
       ],
     },
@@ -140,6 +142,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   useEffect(() => {
     dispatch(getListCriteriaPromo());
     dispatch(getListPromoType());
+    dispatch(getListPromotionType());
     dispatch(getListPromoCategory());
     dispatch(getAvailableApprovalPromo());
   }, [dispatch]);
@@ -182,6 +185,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         name: dataDetail?.name,
         promoCategory: dataDetail?.category,
         promoType: dataDetail?.type,
+        promotionType: dataDetail?.promotionType,
         startDate: dataDetail?.startDate
           ? moment(dataDetail?.startDate)
           : moment(),
@@ -449,6 +453,8 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         description: bodyData.description ? bodyData.description : null,
         type: bodyData.promoType,
         typeName: bodyData?.typeName,
+        promotionType: bodyData.promotionType,
+        promotionTypeName: bodyData?.promotionTypeName,
         category: bodyData.promoCategory,
         categoryName: bodyData?.categoryName,
         startDate: moment(bodyData?.startDate).format(dateFormatting.date),
@@ -532,6 +538,9 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
               typeName: data_promo_type?.find(
                 (item) => item?.id === formValue?.promoType
               )?.text,
+              promotionTypeName: data_promotion_type?.find(
+                (item) => item?.id === formValue?.promotionType
+              )?.text,
               categoryName: data_promo_category?.find(
                 (item) => item?.id === formValue?.promoCategory
               )?.text,
@@ -550,6 +559,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
                   "endDate",
                   "category",
                   "promoType",
+                  "promotionType",
                   "criteria",
                 ],
               },
@@ -562,6 +572,9 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
                 ...formValue,
                 typeName: data_promo_type?.find(
                   (item) => item?.id === formValue?.promoType
+                )?.text,
+                promotionTypeName: data_promotion_type?.find(
+                  (item) => item?.id === formValue?.promotionType
                 )?.text,
                 categoryName: data_promo_category?.find(
                   (item) => item?.id === formValue?.promoCategory
@@ -590,6 +603,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       criteriaOptions,
       dispatch,
       data_promo_type,
+      data_promotion_type,
       data_promo_category,
       handleBodyConfirm,
       type,
@@ -630,6 +644,8 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       description: bodyData.description ? bodyData.description : null,
       type: bodyData.promoType,
       typeName: bodyData?.typeName,
+      promotionType: bodyData.promotionType,
+      promotionTypeName: bodyData?.promotionTypeName,
       category: bodyData.promoCategory,
       categoryName: bodyData?.categoryName,
       startDate: moment(bodyData?.startDate).format(dateFormatting.date),
@@ -779,6 +795,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
               criteriaOptionsFix={criteriaOptions}
               promoCategoryOptions={data_promo_category || []}
               promoTypeOptions={data_promo_type || []}
+              promotionTypeOptions={data_promotion_type || []}
               handleSelectCriteria={handleSelectCriteria}
               handleDeselectCriteria={handleDeselectCriteria}
               handleClearCriteria={handleClearCriteria}

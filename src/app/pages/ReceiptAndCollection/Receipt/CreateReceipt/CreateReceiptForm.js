@@ -1,6 +1,6 @@
 import { Checkbox, DatePicker, Form, Input, InputNumber, Select } from "antd";
 import moment from "moment";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
@@ -13,7 +13,6 @@ import AllocationSection from "../Table/AllocationSection";
 import {
   getAccountDDL,
   getAccountNumberDDL,
-  getConvertedCurrency,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import { useDispatch } from "react-redux";
 
@@ -29,20 +28,20 @@ const CreateReceiptForm = ({
   bankDDL,
   payMethodDDL,
   rateTypeDDL,
-  setStoredData = () => {},
+  setStoredData = () => { },
   storedData,
   dataTable,
-  setDataTable = () => {},
+  setDataTable = () => { },
   amount,
-  setAmount = () => {},
+  setAmount = () => { },
   totalAllocationAmount,
-  setTotalAllocationAmount = () => {},
+  setTotalAllocationAmount = () => { },
   dataReceiptChannelDDL,
   dataAccNumber,
   setAccNumb,
   accNumb,
   form,
-  setRequestBodyConverted = () => {},
+  setRequestBodyConverted = () => { },
   rateAmountValues,
   formValues,
   isMisc,
@@ -103,8 +102,8 @@ const CreateReceiptForm = ({
           <Form.Item
             label={"Customer Number"}
             name={"cusNumber"}
-            // rules={formMessageRequired("Customer Number")}
-            // getValueFromEvent={handleCodeBank}
+          // rules={formMessageRequired("Customer Number")}
+          // getValueFromEvent={handleCodeBank}
           >
             <SelectComponent
               onChange={handleCodeBank}
@@ -119,7 +118,7 @@ const CreateReceiptForm = ({
           <Form.Item
             label={"Account Number"}
             name={"accNumber"}
-            // rules={formMessageRequired("Account Number")}
+          // rules={formMessageRequired("Account Number")}
           >
             <SelectComponent
               disabled={!cusNumb}
@@ -127,11 +126,11 @@ const CreateReceiptForm = ({
               options={
                 dataAccNumber
                   ? dataAccNumber?.data?.map((item) => {
-                      return {
-                        label: item?.name,
-                        value: item?.id,
-                      };
-                    })
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })
                   : []
               }
             />
@@ -139,21 +138,21 @@ const CreateReceiptForm = ({
           <Form.Item
             label={"Customer Name"}
             name={"cusName"}
-            // rules={formMessageRequired("Customer Name")}
+          // rules={formMessageRequired("Customer Name")}
           >
             <InputComponent disabled={true} />
           </Form.Item>
           <Form.Item
             label={"Cost Center"}
             name={"area"}
-            // rules={formMessageRequired("Cost Center")}
+          // rules={formMessageRequired("Cost Center")}
           >
             <InputComponent disabled={true} />
           </Form.Item>
           <Form.Item
             label={"Account Segment"}
             name={"segment"}
-            // rules={formMessageRequired("Segment")}
+          // rules={formMessageRequired("Segment")}
           >
             <InputComponent disabled={true} />
           </Form.Item>
@@ -314,20 +313,17 @@ const CreateReceiptForm = ({
             name={"amount"}
             rules={formMessageRequired("Amount")}
           >
-            <Input
-              allowClear
-              maxLength={16}
-              value={value}
-              onChange={handleChangeAmount}
-              onInput={(e) => {
-                let value = e.target.value;            
-                value = value.replace(/[^\d,]/g, "");
-                let [integer, decimal] = value.split(",");
-                integer = integer.substring(0, 12);
-                integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                decimal = (decimal || "00").substring(0, 2).padEnd(2, "0");
-                e.target.value = `${integer},${decimal}`;
-              }}
+            <InputNumber
+              style={{ width: "100%" }}
+              formatter={(value) =>
+                value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
+              }
+              parser={(value) => value?.replace(/\./g, "")}
+              decimalSeparator=","
+              precision={2}
+              onChange={(value) => setAmount(value)}
+              placeholder="0,00"
+              controls={false}
             />
           </Form.Item>
         </div>
@@ -368,10 +364,10 @@ const CreateReceiptForm = ({
               allowClear
               maxLength={5}
               disabled
-              // onChange={(e) => console.log(e, 'lalalal')}
-              // onInput={(e) =>
-              //   (e.target.value = e.target.value.replace(/\D/g, ""))
-              // }
+            // onChange={(e) => console.log(e, 'lalalal')}
+            // onInput={(e) =>
+            //   (e.target.value = e.target.value.replace(/\D/g, ""))
+            // }
             />
           </Form.Item>
         </div>

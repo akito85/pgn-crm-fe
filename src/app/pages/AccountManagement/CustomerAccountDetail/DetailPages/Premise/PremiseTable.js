@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { Checkbox, Tooltip, Space } from "antd";
+import React from "react";
+import { Checkbox, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import TablePagination from "../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -8,7 +8,6 @@ import moment from "moment";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import Highlighter from "react-highlight-words";
-import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 
 const PremiseTable = ({

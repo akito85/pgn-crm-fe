@@ -1,9 +1,6 @@
 import moment from "moment";
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import { dateFormatting, hasValue, renderColumn, toTitleCase } from "../../../../../utils";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../components/StatusComponent";
+import { dateFormatting, hasValue, renderColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 
 export const tableUsage = (
   search,
@@ -18,7 +15,6 @@ export const tableUsage = (
     {
       title: "NO",
       width: 60,
-      align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
       // render: (text, object, index) => index + 1,
     },
@@ -163,45 +159,8 @@ export const tableUsage = (
         // ),
     },
     {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accountSegment",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountSegment",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-
-      ),
-      render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
-      
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountGroupType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-
-      ),
-      render: (text) => renderColumn('accountGroupType', hasValue(search['accountGroupType']), searchText, text, false, 'input', search)
-      
-    },
-    {
       title: "SERVICE TYPE",
       dataIndex: "serviceType",
-      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -220,7 +179,6 @@ export const tableUsage = (
       title: "BILLING CYCLE",
       dataIndex: "billingCycleValue",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "billingCycleValue",
@@ -237,7 +195,6 @@ export const tableUsage = (
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "billingPeriod",
@@ -255,7 +212,6 @@ export const tableUsage = (
       title: "SOR",
       dataIndex: "sor",
       sorter: true,
-      align: "left",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "sor",
@@ -322,6 +278,40 @@ export const tableUsage = (
       render: (text) => renderColumn('meterReadingCode', hasValue(search['meterReadingCode']), searchText, text, false, 'input', search)
       
     },
+     {
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountSegment",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+
+      ),
+      render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
+      
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountGroupType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+
+      ),
+      render: (text) => renderColumn('accountGroupType', hasValue(search['accountGroupType']), searchText, text, false, 'input', search)
+      
+    },
     {
       title: "ASSET SERIAL NUMBER",
       dataIndex: "assetSerialNumber",
@@ -342,7 +332,6 @@ export const tableUsage = (
     {
       title: "ASSET TYPE",
       dataIndex: "assetType",
-      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -379,7 +368,6 @@ export const tableUsage = (
     {
       title: "MEASUREMENT DATE",
       dataIndex: "measDate",
-      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -398,7 +386,6 @@ export const tableUsage = (
       title: " DATE",
       dataIndex: "fdate",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "fdate",
@@ -416,7 +403,6 @@ export const tableUsage = (
       title: "HOUR",
       dataIndex: "fhour",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "hour",
@@ -519,7 +505,6 @@ export const tableUsage = (
       title: "BEGIN STAND",
       dataIndex: "beginStand",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "beginStand",
@@ -536,7 +521,6 @@ export const tableUsage = (
     {
       title: "END STAND",
       dataIndex: "endStand",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -554,7 +538,6 @@ export const tableUsage = (
       title: "VOLUME 27",
       dataIndex: "volMeasured27",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "volMeasured27",
@@ -571,7 +554,6 @@ export const tableUsage = (
       title: "VOLUME 60",
       dataIndex: "volMeasured60",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "volMeasured60",
@@ -588,7 +570,6 @@ export const tableUsage = (
     {
       title: "VOLUME MSCF",
       dataIndex: "volMscf",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -605,7 +586,6 @@ export const tableUsage = (
     {
       title: "GHV",
       dataIndex: "ghv",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -622,7 +602,6 @@ export const tableUsage = (
     {
       title: "CALORIE",
       dataIndex: "calorie",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -640,7 +619,6 @@ export const tableUsage = (
       title: "ENG MEASURED",
       dataIndex: "engMeasured",
       sorter: true,
-      align: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "engMeasured",
@@ -724,7 +702,6 @@ export const tableUsage = (
       title: "SOURCE",
       dataIndex: "source",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "source",
@@ -740,7 +717,6 @@ export const tableUsage = (
     {
       title: "DESCRIPTION",
       dataIndex: "description",
-      align: "left",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "description",
@@ -777,7 +753,7 @@ export const tableUsage = (
       title: "STATUS",
       dataIndex: "status",
       fixed: "right",
-      width: 150,
+      width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,

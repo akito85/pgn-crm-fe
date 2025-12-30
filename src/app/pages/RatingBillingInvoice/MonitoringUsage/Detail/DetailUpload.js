@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import BaseContainer from '../../../../../components/BaseContainer';
 import DetailText from '../../../../../components/DetailText';
-import TablePagination from '../../../../../components/TablePagination';
+import TableRBI from '../../../../../components/TableRBI'; // GANTI IMPORT
+import { applyFixedColumns } from '../../../../../utils/applyFixedColumns'; // TAMBAH IMPORT
 import { useMonitoringList } from '../useMonirotingList';
-import { Alert, Form, Tooltip } from 'antd';
-import { RBI_ROUTES } from '../../../../../routes/rating_billing/rbi_routes';
+import { Alert, Tooltip } from 'antd';
 import { Link } from 'react-router-dom';
 import SVGIcon from "../../../../../assets/Icon/index";
 import ModalUpdateUsage from '../ModalUpdateUsage';
@@ -17,8 +17,9 @@ import moment from 'moment';
 
 const DetailUpload = ({ dataTable, setDataTable = () => { }, tabHeader, id, dataHeader, form }) => {
     const { columns, page, setPage, pageSize, setPageSize, onSort } = useMonitoringList(tabHeader, id);
-    // const [form] = Form.useForm();
     const dispatch = useDispatch();
+    const searchInput = useRef(null); // TAMBAH REF
+
     // use state
     const [dataSource, setDataSource] = useState(null);
     const [selectedRecord, setSelectedRecord] = useState(null);
@@ -26,7 +27,21 @@ const DetailUpload = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
     const [modalDelete, setModalDelete] = useState(false);
     const [openUpdateUsage, setOpenUpdateUsage] = useState(false);
     const [recordId, setRecordId] = useState('');
-    const filteredColumns = columns?.filter(item => item?.dataIndex !== 'ratingCode'  && item?.dataIndex !== 'batchId' && item?.dataIndex !== 'accountGroupType' && item?.dataIndex !== 'serviceType' && item?.dataIndex !== 'ratingCode' && item?.dataIndex !== 'fileSource' && item?.dataIndex !== 'creationDate');
+
+    // TAMBAH STATE FIXED COLUMNS
+    const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: [],
+        right: ['action'],
+    }));
+
+    const filteredColumns = columns?.filter(
+        item => item?.dataIndex !== 'ratingCode' && 
+                item?.dataIndex !== 'batchId' && 
+                item?.dataIndex !== 'accountGroupType' && 
+                item?.dataIndex !== 'serviceType' && 
+                item?.dataIndex !== 'fileSource' && 
+                item?.dataIndex !== 'creationDate'
+    );
 
     // handle update row
     const handleUpdate = (record, values) => {
@@ -38,21 +53,20 @@ const DetailUpload = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
     // handle cancel 
     const handleCancel = () => setOpenUpdateUsage(false);
 
-    // column
+    // column action
     const action = [
         {
+            key: "action",
             title: "ACTION",
             dataIndex: "accountId",
             align: "center",
+            width: 120,
             fixed: "right",
             render: (id, record, index) => {
                 return (
                     <div className="flex w-full justify-center gap-6">
                         <Tooltip title="Update">
-                            <Link
-                            // to={RBI_ROUTES.MONITORING_USAGE_LIST_UPDATE}
-                            // state={{ id: id, record: record }}
-                            >
+                            <Link>
                                 <div className="pt-1">
                                     {dataHeader?.batchInformation?.status !== "COMPLETE" ?
                                         <SVGIcon name="IconEdit" width={24} onClick={() => handleUpdate(record)} />
@@ -78,36 +92,59 @@ const DetailUpload = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                                     <SVGIcon
                                         name="IconDelete"
                                         width={24}
-                                        color={"#C0BEC6"} className={"cursor-not-allowed"}
+                                        color={"#C0BEC6"} 
+                                        className={"cursor-not-allowed"}
                                     />
                                 }
                             </div>
                         </Tooltip>
                     </div>
                 )
-
             }
         }
     ];
 
-    // change page
-    const handleChangePage = (page, pageSizeChange) => {
-        const tempPage = pageSize !== pageSizeChange ? 1 : page;
+    // TAMBAH BASE COLUMNS DENGAN USEMEMO
+    const baseColumns = useMemo(() => {
+        const columnsWithKeys = [...filteredColumns, ...action].map((col) => ({
+            ...col,
+            key: col.key || col.dataIndex || col.title,
+        }));
+        return columnsWithKeys;
+    }, [filteredColumns, dataHeader?.batchInformation?.status]);
+
+    // TAMBAH PROCESSED COLUMNS
+    const processedColumns = useMemo(() => {
+        return applyFixedColumns(baseColumns, fixedColumns);
+    }, [baseColumns, fixedColumns]);
+
+    // TAMBAH COLUMN DEFINITIONS
+    const columnDefinitions = useMemo(() => {
+        return baseColumns.map((col) => ({
+            key: col.key || col.dataIndex || col.title,
+            title: col.title,
+        }));
+    }, [baseColumns]);
+
+    // change page - UPDATE LOGIC
+    const handleChangePage = (pageChange, pageSizeChange) => {
+        const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
         setPage(tempPage);
         setPageSize(pageSizeChange);
     };
 
-    // handleSave udpate
+    // handleSave update
     const handleSave = async () => {
         const row = await form.validateFields();
         const newDataTable = [...dataTable];
         const index = newDataTable.findIndex((item) => recordId === item.recordId);
         const item = newDataTable[index];
         const updatedRow = {
-            ...item, ...row,
+            ...item, 
+            ...row,
             billingPeriod: row.billingPeriod === false ? null : moment(row.billingPeriod).format(dateFormatting.datePeriod),
             fdate: row.fdate === false ? null : moment(row.fdate).format(dateFormatting.date),
-            fhour: hasValue(row.fhour) ?  moment(row.fhour).format(dateFormatting.hour_format) : null,
+            fhour: hasValue(row.fhour) ? moment(row.fhour).format(dateFormatting.hour_format) : null,
             measDate: row.measDate === false ? null : moment(row.measDate).format(dateFormatting.dateTime),
             status: "SUCCESS"
         };
@@ -125,11 +162,11 @@ const DetailUpload = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
         setModalDelete(false);
     };
 
-
     // pagination table
     const paginationTable = (page, pageSize) => {
         return dataTable?.slice((page - 1) * pageSize, page * pageSize);
     };
+
     return (
         <>
             <BaseContainer header={'batch information'}>
@@ -149,20 +186,29 @@ const DetailUpload = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                     <DetailText label={'Status'}>{toTitleCase(dataHeader?.batchInformation?.status)}</DetailText>
                 </div>
             </BaseContainer>
+
             <BaseContainer header={'USAGE LIST'}>
                 <div className='my-10'>
-                    <TablePagination
-                        columns={[...filteredColumns, ...action]}
+                    {/* GANTI DENGAN TableRBI */}
+                    <TableRBI
                         dataSource={paginationTable(page, pageSize)}
-                        totalData={dataTable?.length}
+                        columns={processedColumns}
                         current={page}
                         pageSize={pageSize}
                         onChange={handleChangePage}
+                        onSizeChanger={handleChangePage}
+                        totalData={dataTable?.length || 0}
                         tableScrolled={{ x: 8000, y: 600 }}
                         onSort={onSort}
+                        showExport={false}
+                        columnDefinitions={columnDefinitions}
+                        fixedColumns={fixedColumns}
+                        setFixedColumns={setFixedColumns}
+                        loading={false}
                     />
                 </div>
             </BaseContainer>
+
             <ModalUpdateUsage
                 isOpen={openUpdateUsage}
                 handleCancel={handleCancel}
@@ -170,6 +216,7 @@ const DetailUpload = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                 handleSave={handleSave}
                 form={form}
             />
+
             <ModalConfirm
                 isOpen={modalDelete}
                 handleCancel={() => setModalDelete(false)}

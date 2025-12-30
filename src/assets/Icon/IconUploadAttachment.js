@@ -1,5 +1,3 @@
-import React from "react";
-
 const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
   <svg
     width={218}
@@ -111,7 +109,7 @@ const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
       d="M38.7461 66.6953L43.8312 72.7015C44.5454 73.5451 45.8591 73.5914 46.7026 72.8772L52.034 68.3635"
       fill="#DBE6A1"
     />
-    <g clip-path="url(#clip0_1721_311507)">
+    <g clipPath="url(#clip0_1721_311507)">
       <path
         d="M33.9058 71.3164L32.6094 72.4141L33.3639 73.3052L34.6603 72.2076L33.9058 71.3164Z"
         fill="#DBE6A1"
@@ -201,9 +199,9 @@ const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
         width="87.7773"
         height="95.1016"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -235,9 +233,9 @@ const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
         width="94.7539"
         height="94.2305"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -269,9 +267,9 @@ const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
         width="84.3594"
         height="82.9961"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -303,9 +301,9 @@ const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
         width="92.3672"
         height="87.2617"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"

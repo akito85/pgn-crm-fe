@@ -1,8 +1,5 @@
-import { Tooltip } from "antd";
-import { dateFormatting, renderColumn, renderDateColumn, renderDateConverter } from "../../../../../utils";
+import { renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchProps } from "../../../../../utils/getColumnSearchProps";
-import moment from "moment";
-import Highlighter from "react-highlight-words";
 import { sorterFunction } from "../../../../../utils/sorterFunction";
 
 export const detailAnnouncement = (

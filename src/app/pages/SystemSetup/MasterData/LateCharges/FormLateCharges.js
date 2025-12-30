@@ -490,7 +490,7 @@ const FormLateCharges = ({ type }) => {
       case "accountNumber":
         return accountNumberList;
       case "costCenter":
-        return costCenterList?.map(item => ({ value: item?.id, label: item?.text, key: item?.code }));;
+        return costCenterList?.map(item => ({ value: item?.id, label: item?.text, key: item?.code }));
       case "premiseProvince":
         return premiseProvinceList;
       case "accountSegment":
@@ -515,7 +515,7 @@ const FormLateCharges = ({ type }) => {
       case "sor":
         return sorList?.map(item => ({value:item?.id, label:item?.text, key:item?.code}));
       case "accountCategory":
-        return accountCategoryList?.map(item => ({ value: item?.id, label: item?.text, key: item?.code }));;
+        return accountCategoryList?.map(item => ({ value: item?.id, label: item?.text, key: item?.code }));
       case "classificationType":
         return classificationTypeList;
 

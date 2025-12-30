@@ -1,5 +1,5 @@
 import React from "react";
-import BaseContainer from "../components/BaseContainer";
+import BaseContainer from "../components/CardContainer";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import ButtonComponent from "../components/ButtonComponent";
 import { useNavigate } from "react-router-dom";
@@ -53,11 +53,7 @@ const NotFound = ({ type }) => {
     }
   };
 
-  return (
-    <>
-      {renderPage(type)}
-    </>
-  );
+  return <>{renderPage(type)}</>;
 };
 
 export default NotFound;

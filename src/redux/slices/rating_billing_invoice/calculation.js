@@ -24,6 +24,7 @@ const initialState = {
   list_billing_period: [],
   detail_calculation_job: null,
   list_calculation_log: [],
+  list_calculation_logp: [],
   list_calculation_result: [],
   list_calculation_no_paging: [],
   data_user_calculation: {},
@@ -32,13 +33,18 @@ const initialState = {
 // pagination slice
 export const getCalculationPaginate = createAsyncThunk(
   "GET_CALCULATION_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "generateDate~desc";
       const url = `/v1/dbs/api/rbi/calculation/list-calculationjob?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -61,13 +67,54 @@ export const getCalculationPaginate = createAsyncThunk(
 // pagination history
 export const getHistoryCalculationPaginate = createAsyncThunk(
   "GET_HISTORY_CALCULATION_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "resultId~desc";
       const url = `/v1/dbs/api/rbi/calculation/list-calculationhistory?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+// pagination Log
+export const getCalculateLogPaginate = createAsyncThunk(
+  "GET_CALCULATE_LOG_PAGINATE",
+  async (
+    { search, page, pageSize, sort, calCode, isLoadMore = false },
+    thunkAPI
+  ) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "logId~desc";
+      const url = `/v1/dbs/api/rbi/calculation/list-calculatelog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -99,7 +146,13 @@ export const donwloadedExcel = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_EXCEL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -115,7 +168,13 @@ export const donwloadedHistoryExcel = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -145,6 +204,7 @@ export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
     return error;
   }
 });
+
 export const getListServiceType = createAsyncThunk(
   "GET_LIST_SERVICE_TYPE",
   async (thunkAPI) => {
@@ -171,19 +231,33 @@ export const getListServiceType = createAsyncThunk(
     }
   }
 );
+
 export const getListAccountGroup = createAsyncThunk(
   "GET_LIST_ACCOUNT_GROUP",
-  async (body, thunkAPI) => {
+  async (segmentIds, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/accountgrouptype`;
-      const response = await ratingBillingHttpService.activationWithRemark(
-        url,
-        body
-      );
-      return response.data;
+      let queryParams = "";
+      if (segmentIds && Array.isArray(segmentIds) && segmentIds.length > 0) {
+        queryParams = segmentIds.map((id) => `idSegment=${id}`).join("&");
+      }
+
+      const url = `/v1/dbs/api/account-group-type/list${
+        queryParams ? `?${queryParams}` : ""
+      }`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+
+      const accountGroups = Array.isArray(response)
+        ? response
+        : Array.isArray(response.data)
+        ? response.data
+        : [];
+
+      return accountGroups;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
+
       if (
         error?.response?.data?.code === 500 ||
         error?.response?.data?.code === 419
@@ -196,7 +270,7 @@ export const getListAccountGroup = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      return error;
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -337,7 +411,7 @@ export const getListSpecificCustomer = createAsyncThunk(
   "GET_LIST_SPECIFIC_CUSTOMER",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/speccustacc`;
+      const url = `/v1/dbs/api/rbi/calculation/customer-accounts`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
         body
@@ -358,7 +432,7 @@ export const getListSpecificCustomer = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      return error;
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -366,9 +440,18 @@ export const getListBillingCycle = createAsyncThunk(
   "GET_LIST_BILLING_CYCLE",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/billingcycle`;
+      const url = `/v1/dbs/api/billing-cycle/list`;
       const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+
+      const rawData = response?.body?.data?.data || response?.data?.data || [];
+
+      const transformedData = rawData.map((item) => ({
+        id: item.id,
+        name: item.name,
+        ...item,
+      }));
+
+      return transformedData;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -384,7 +467,7 @@ export const getListBillingCycle = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      return error;
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -447,7 +530,7 @@ export const createCalculation = createAsyncThunk(
   "CREATE_CALCULATION",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/create-calculationjob`;
+      const url = `/v1/dbs/api/rbi/calculation/test-create `;
       const response = await ratingBillingHttpService.createData(url, body);
       return response.data;
     } catch (error) {
@@ -504,14 +587,21 @@ export const getDetailCalculationJob = createAsyncThunk(
 // detail calculation log
 export const getDetailCalculationLog = createAsyncThunk(
   "GET_DETAIL_CALCULATION_LOG",
-  async ({ calCode, search, page, pageSize, sort }, thunkAPI) => {
+  async (
+    { calCode, search, page, pageSize, sort, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationlog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
       const response = await ratingBillingHttpService.getListPagination(url);
-      return response.data;
+
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -534,15 +624,19 @@ export const getDetailCalculationLog = createAsyncThunk(
 
 // detail calcultaion result
 export const getDetailCalculationResult = createAsyncThunk(
-  "GET_DETAIL_CALCULATION_LOG",
-  async ({ calCode, calType, search, page, pageSize, sort }, thunkAPI) => {
+  "GET_DETAIL_CALCULATION_RESULT",
+  async ({ calCode, calType, search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationresult?calCode=${calCode}&calType=${calType}&sort=${sortParams}&page=${page}&size=${pageSize}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -562,7 +656,6 @@ export const getDetailCalculationResult = createAsyncThunk(
     }
   }
 );
-
 // detail calcultaion result no paging
 export const getDetailCalculationResultNoPaging = createAsyncThunk(
   "GET_DETAIL_CALCULATION_LOG_NO_PAGING",
@@ -677,224 +770,388 @@ const calculationSlice = createSlice({
   extraReducers: {
     // get pagination calculation
     [getCalculationPaginate.pending]: (state, action) => {
-      state.loading = true;
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getCalculationPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.data = action.payload;
+      }
     },
     [getCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
     },
     // get pagination calculation history
     [getHistoryCalculationPaginate.pending]: (state, action) => {
-      state.loading = true;
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getHistoryCalculationPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.data = action.payload;
+      }
     },
     [getHistoryCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
+    },
+    [getCalculateLogPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getCalculateLogPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.list_calculation_logp = {
+          result: [...(state.list_calculation_logp?.result || []), ...newData],
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      } else {
+        state.list_calculation_logp = {
+          result: newData,
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
+    },
+    [getCalculateLogPaginate.rejected]: (state, action) => {
+      state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_calculation_logp = {
+          result: [],
+          page: {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
     },
     // download excel
-    [donwloadedExcel.pending]: (state, action) => {
+    [donwloadedExcel.pending]: (state) => {
       state.loading = true;
     },
-    [donwloadedExcel.fulfilled]: (state, action) => {
+    [donwloadedExcel.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
-    [donwloadedExcel.rejected]: (state, action) => {
+    [donwloadedExcel.rejected]: (state) => {
       state.loading = false;
     },
     // download excel
-    [donwloadedHistoryExcel.pending]: (state, action) => {
+    [donwloadedHistoryExcel.pending]: (state) => {
       state.loading = true;
     },
-    [donwloadedHistoryExcel.fulfilled]: (state, action) => {
+    [donwloadedHistoryExcel.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
-    [donwloadedHistoryExcel.rejected]: (state, action) => {
+    [donwloadedHistoryExcel.rejected]: (state) => {
       state.loading = false;
     },
     // lov sor
-    [getListSor.pending]: (state, action) => {
+    [getListSor.pending]: (state) => {
       state.loading = true;
     },
     [getListSor.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_sor = action.payload;
     },
-    [getListSor.rejected]: (state, action) => {
+    [getListSor.rejected]: (state) => {
       state.loading = false;
     },
     // lov service type
-    [getListServiceType.pending]: (state, action) => {
+    [getListServiceType.pending]: (state) => {
       state.loading = true;
     },
     [getListServiceType.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_service_type = action.payload;
     },
-    [getListServiceType.rejected]: (state, action) => {
+    [getListServiceType.rejected]: (state) => {
       state.loading = false;
     },
     // lov scheduler type
-    [getListSchedulerType.pending]: (state, action) => {
+    [getListSchedulerType.pending]: (state) => {
       state.loading = true;
     },
     [getListSchedulerType.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_scheduler_type = action.payload;
     },
-    [getListSchedulerType.rejected]: (state, action) => {
+    [getListSchedulerType.rejected]: (state) => {
       state.loading = false;
     },
     // lov meter reading code
-    [getListMeterReadingCode.pending]: (state, action) => {
+    [getListMeterReadingCode.pending]: (state) => {
       state.loading = true;
     },
     [getListMeterReadingCode.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_meter_reading_code = action.payload;
     },
-    [getListMeterReadingCode.rejected]: (state, action) => {
+    [getListMeterReadingCode.rejected]: (state) => {
       state.loading = false;
     },
     // lov customer segment
-    [getListCustomerSegment.pending]: (state, action) => {
+    [getListCustomerSegment.pending]: (state) => {
       state.loading = true;
     },
     [getListCustomerSegment.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_customer_segment = action.payload;
     },
-    [getListCustomerSegment.rejected]: (state, action) => {
+    [getListCustomerSegment.rejected]: (state) => {
       state.loading = false;
     },
     // lov cost center
-    [getListCostCenter.pending]: (state, action) => {
+    [getListCostCenter.pending]: (state) => {
       state.loading = true;
     },
     [getListCostCenter.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_cost_center = action.payload;
     },
-    [getListCostCenter.rejected]: (state, action) => {
+    [getListCostCenter.rejected]: (state) => {
       state.loading = false;
     },
     // lov calculation type
-    [getListCalculationType.pending]: (state, action) => {
+    [getListCalculationType.pending]: (state) => {
       state.loading = true;
     },
     [getListCalculationType.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_calculation_type = action.payload;
     },
-    [getListCalculationType.rejected]: (state, action) => {
+    [getListCalculationType.rejected]: (state) => {
       state.loading = false;
     },
     // lov account group
-    [getListAccountGroup.pending]: (state, action) => {
+    [getListAccountGroup.pending]: (state) => {
       state.loading = true;
+      state.list_account_group = [];
     },
     [getListAccountGroup.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_account_group = action.payload;
+      state.list_account_group = action.payload || [];
     },
-    [getListAccountGroup.rejected]: (state, action) => {
+    [getListAccountGroup.rejected]: (state) => {
       state.loading = false;
+      state.list_account_group = [];
     },
     // lov specific customer
-    [getListSpecificCustomer.pending]: (state, action) => {
-      state.loading = true;
+    [getListSpecificCustomer.pending]: (state) => {
+      state.loading_specific_customer = true;
     },
     [getListSpecificCustomer.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_specific_customer = action.payload;
+      state.loading_specific_customer = false;
+      const responseData = action.payload?.data || action.payload || [];
+      state.list_specific_customer = Array.isArray(responseData)
+        ? responseData
+        : [];
+      state.specific_customer_message = action.payload?.message || "";
     },
-    [getListSpecificCustomer.rejected]: (state, action) => {
-      state.loading = false;
+    [getListSpecificCustomer.rejected]: (state) => {
+      state.loading_specific_customer = false;
+      state.list_specific_customer = [];
+      state.specific_customer_message = "";
     },
     // lov billing cycle
-    [getListBillingCycle.pending]: (state, action) => {
+    [getListBillingCycle.pending]: (state) => {
       state.loading = true;
     },
     [getListBillingCycle.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_billing_cycle = action.payload;
     },
-    [getListBillingCycle.rejected]: (state, action) => {
+    [getListBillingCycle.rejected]: (state) => {
       state.loading = false;
+      state.list_billing_cycle = [];
+    },
+    //get detail calculatin result
+    [getDetailCalculationResult.pending]: (state, action) => {
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getDetailCalculationResult.fulfilled]: (state, action) => {
+      state.loading = false;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.list_calculation_result = {
+          ...action.payload,
+          result: [...(state.list_calculation_result?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.list_calculation_result = action.payload;
+      }
+    },
+    [getDetailCalculationResult.rejected]: (state, action) => {
+      state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_calculation_result = { result: [], page: {} };
+      }
     },
     // lov billing period
-    [getListBillingPeriod.pending]: (state, action) => {
+    [getListBillingPeriod.pending]: (state) => {
       state.loading = true;
     },
     [getListBillingPeriod.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_billing_period = action.payload;
     },
-    [getListBillingPeriod.rejected]: (state, action) => {
+    [getListBillingPeriod.rejected]: (state) => {
       state.loading = false;
     },
     // lov user detail calculation
-    [getUserDetailCalculation.pending]: (state, action) => {
+    [getUserDetailCalculation.pending]: (state) => {
       state.loading = true;
     },
     [getUserDetailCalculation.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_user_calculation = action.payload;
     },
-    [getUserDetailCalculation.rejected]: (state, action) => {
+    [getUserDetailCalculation.rejected]: (state) => {
       state.loading = false;
     },
 
     // create calculation
-    [createCalculation.pending]: (state, action) => {
+    [createCalculation.pending]: (state) => {
       state.loading = true;
     },
     [createCalculation.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [createCalculation.rejected]: (state, action) => {
+    [createCalculation.rejected]: (state) => {
       state.loading = false;
     },
     // get detail calculation job
-    [getDetailCalculationJob.pending]: (state, action) => {
+    [getDetailCalculationJob.pending]: (state) => {
       state.loading = true;
     },
     [getDetailCalculationJob.fulfilled]: (state, action) => {
       state.loading = false;
       state.detail_calculation_job = action.payload;
     },
-    [getDetailCalculationJob.rejected]: (state, action) => {
+    [getDetailCalculationJob.rejected]: (state) => {
       state.loading = false;
     },
     // get detail calculation log
     [getDetailCalculationLog.pending]: (state, action) => {
-      state.loading = true;
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getDetailCalculationLog.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_calculation_result = action.payload;
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.list_calculation_log = {
+          result: [...(state.list_calculation_log?.result || []), ...newData],
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      } else {
+        state.list_calculation_log = {
+          result: newData,
+          page: action.payload.page || {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
     },
     [getDetailCalculationLog.rejected]: (state, action) => {
       state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_calculation_log = {
+          result: [],
+          page: {
+            size: 10,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+          },
+        };
+      }
     },
 
     // get detail calculation log no paigng
-    [getDetailCalculationResultNoPaging.pending]: (state, action) => {
+    [getDetailCalculationResultNoPaging.pending]: (state) => {
       state.loading = true;
     },
     [getDetailCalculationResultNoPaging.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_calculation_no_paging = action.payload;
     },
-    [getDetailCalculationResultNoPaging.rejected]: (state, action) => {
+    [getDetailCalculationResultNoPaging.rejected]: (state) => {
       state.loading = false;
     },
 

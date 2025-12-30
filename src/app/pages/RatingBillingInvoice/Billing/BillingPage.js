@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Radio, Tooltip } from "antd";
+import { Spin, Tabs, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
   downloadBillingList,
@@ -16,27 +15,29 @@ import {
   getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBilling } from "./Table/TableViewBilling";
+import { columnsAllBilling } from "./Table/TableViewAllBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
-  // Selector
   const { data, loading, data_approval_history } = useSelector(
     (state) => state.billing
   );
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
+  const detailRef = useRef(null);
 
-  // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // PERUBAHAN: State untuk infinite scroll
+  const [page, setPage] = useState(1); // Start from 1
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -53,18 +54,38 @@ const BillingPage = () => {
   const [saNumberId, setSANumberId] = useState("");
   const [calculationCodeId, setCalculationCodeId] = useState("");
   const [accountNumberId, setAccountNumberId] = useState("");
+  const [activeRowKey, setActiveRowKey] = useState(null);
 
-  // Use Effect
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["statusApproval", "action"],
+  }));
+
+  useEffect(() => {
+    if (pageDetail && activeRowKey && detailRef.current) {
+      setTimeout(() => {
+        detailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+      }, 100);
+    }
+  }, [activeRowKey, pageDetail]);
+
+  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
       getAllBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: 100, // Initial load 100 data
         sort,
+        isLoadMore: false, // Flag untuk initial load
       })
     );
-  }, [search, page, pageSize, sort, dispatch]);
+    setPage(1);
+  }, [dispatch, search, sort]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -78,7 +99,6 @@ const BillingPage = () => {
     }
   }, [data_approval_history]);
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -90,32 +110,30 @@ const BillingPage = () => {
     },
   ];
 
-  // Value Tab
   const tabBilling = [
     {
+      key: "Billing Gas",
       label: "Billing Gas",
-      value: "Billing Gas",
     },
     {
-      label: "Billing Non Gas",
-      value: "Billing Non Gas",
-      disabled: true,
-    },
-    {
+      key: "All",
       label: "All",
-      value: "All",
+    },
+    {
+      key: "Billing Non Gas",
+      label: "Billing Non Gas",
       disabled: true,
     },
   ];
 
-  // Function Search API
+  // PERUBAHAN: Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(1); // Reset to 1
       }
       return {
         ...prevState,
@@ -124,82 +142,95 @@ const BillingPage = () => {
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // TAMBAHAN: Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getAllBillingPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true, // Flag untuk load more
+        })
+      );
+      setPage(nextPage);
+    }
   };
 
-  // Sort Table
-  const onSortApi = (_, __, sort) => {
+  // TAMBAHAN: Calculate if there's more data
+  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
+
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
-  // Handle Download
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
       downloadBillingList({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
   };
 
-  // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
-    setBillingCode(record.billingCode);
-    setRatingCode(record.ratingCode);
-    setAccountNumberId(record.accountNumber);
-    setSANumberId(record.saNumber);
-    setCalculationCodeId(record.calculationCode);
+    const recordKey = record.billingCode || record.invoiceNumber;
+
+    if (activeRowKey === recordKey && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setBillingCode("");
+      setRatingCode("");
+      setAccountNumberId("");
+      setSANumberId("");
+      setCalculationCodeId("");
+    } else {
+      setBillingCode(recordKey);
+      setRatingCode(record.ratingCode);
+      setAccountNumberId(record.accountNumber);
+      setSANumberId(record.saNumber);
+      setCalculationCodeId(record.calculationCode);
+      setActiveRowKey(recordKey);
+      setPageDetail(true);
+    }
   };
 
-  // Handle Approval History
   const handleApprovalHistory = (record) => {
-    dispatch(getApprovalHistory(record.billingCode));
+    dispatch(getApprovalHistory(record.billingCode || record.invoiceNumber));
     setModalApprovalHistory(true);
   };
 
-  // Handle Value Tab
-  const onChangeTab = ({ target: { value } }) => {
-    setValueTab(value);
+  const onChangeTab = (key) => {
+    setValueTab(key);
+    setSearch({});
+    setPage(1); // Reset to 1
   };
 
-  // Handle Refresh
   const handleRefresh = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAllBillingPaginate({ search: reqSearch, page, pageSize, sort })
+      getAllBillingPaginate({
+        search: reqSearch,
+        page: 1,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      })
     );
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
+    setPage(1);
   };
 
   const itemGrantAccess = [
@@ -207,7 +238,7 @@ const BillingPage = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={handleDownload}
         >
@@ -219,7 +250,7 @@ const BillingPage = () => {
       action: "Approval",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconRequestApproval" width={24} color="#FFF" />}
+          icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
           type="submit"
           onClick={() => setModalApproval(true)}
         >
@@ -231,7 +262,7 @@ const BillingPage = () => {
       action: "Request",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          icon={<SVGIcon name="IconButtonCreate" width={20} />}
           type="submit"
           onClick={() => setModalRequest(true)}
         >
@@ -239,38 +270,24 @@ const BillingPage = () => {
         </ButtonComponent>
       ),
     },
-
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
     {
       action: "History",
       type: "table",
       render: (record) => {
         return (
           <Tooltip title="Approval Hierarchy">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record)}
-              />
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApprovalHistory(record);
+              }}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                lineHeight: 0,
+              }}
+            >
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
             </div>
           </Tooltip>
         );
@@ -278,72 +295,148 @@ const BillingPage = () => {
     },
   ];
 
+  const actionCols = useColumnActionPermission(
+    ["view", "history"],
+    itemGrantAccess
+  ).map((col) => ({
+    ...col,
+    width: valueTab === "All" ? 70 : 25,
+    align: "center",
+  }));
+
+  const baseColumns = useMemo(() => {
+    if (valueTab === "All") {
+      return columnsAllBilling(
+        0, // Tidak digunakan untuk infinite scroll
+        0, // Tidak digunakan untuk infinite scroll
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search
+      );
+    }
+    return columnsBilling(
+      0, // Tidak digunakan untuk infinite scroll
+      0, // Tidak digunakan untuk infinite scroll
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search
+    );
+  }, [valueTab, searchInput, searchedColumn, searchText, search]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.billingCode || item.invoiceNumber,
+    }));
+  }, [dataSource]);
+
+  const dataSourceForTab = useMemo(() => {
+    return dataSourceWithKeys;
+  }, [dataSourceWithKeys]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer
-          header={"Billing List"}
-          type="tabs"
-          element={
-            <Radio.Group
-              options={tabBilling}
-              onChange={onChangeTab}
-              value={valueTab}
-              optionType="button"
-              buttonStyle="solid"
-              style={{ gap: 12, display: "flex" }}
-            />
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px]">Billing List</p>
+              <Toolbar items={itemGrantAccess} />
+            </div>
           }
         >
-          <div className="w-full">
-            <TablePaginationNew
-              dataSource={dataSource}
-              columns={[
-                ...columnsBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search,
-                  // handleDetail,
-                  // handleApprovalHistory
-                ),
-                ...useColumnActionPermission(
-                  ["view", "history"],
-                  itemGrantAccess
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSortApi}
-              tableScrolled={{ y: 525, x: 16000 }}
+          <Tabs
+            activeKey={valueTab}
+            onChange={onChangeTab}
+            type="line"
+            size="small"
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
+            items={tabBilling.map((tab) => ({
+              key: tab.key,
+              label: tab.label,
+              disabled: tab.disabled,
+              children: (
+                <div className="my-0">
+                  <TableRBI
+                    idTable="billing-table"
+                    dataSource={dataSourceForTab}
+                    columns={processedColumns}
+                    totalData={data?.page?.totalElements || 0}
+                    tableScrolled={{
+                      x: valueTab === "All" ? 1000 : 11000,
+                      y: 525,
+                    }}
+                    onSort={onSort}
+                    handleDownload={handleDownload}
+                    columnDefinitions={columnDefinitions}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={loading}
+                    showExport={false}
+                    usePagination={false}
+                    useInfiniteScroll={true}
+                    onLoadMore={handleLoadMore}
+                    hasMore={hasMore}
+                    loadMoreThreshold={20}
+                    enableRowClick={true}
+                    selectedRowKey={activeRowKey}
+                    onRowClick={handleDetail}
+                  />
+                </div>
+              ),
+            }))}
+          />
+        </CardContainer>
+
+        {pageDetail && (
+          <div
+            ref={detailRef}
+            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
+          >
+            <BillingDetail
+              billingCodeId={billingCode}
+              ratingCodeId={ratingCode}
+              saNumberId={saNumberId}
+              accountNumberId={accountNumberId}
+              calculationCodeId={calculationCodeId}
+              onClose={() => {
+                setPageDetail(false);
+                setActiveRowKey(null);
+                setBillingCode("");
+                setRatingCode("");
+                setAccountNumberId("");
+                setSANumberId("");
+                setCalculationCodeId("");
+              }}
             />
           </div>
-        </BaseContainer>
+        )}
 
-        {/* Detail Billing */}
-        {pageDetail === true ? (
-          <BillingDetail
-            billingCodeId={billingCode}
-            ratingCodeId={ratingCode}
-            saNumberId={saNumberId}
-            accountNumberId={accountNumberId}
-            calculationCodeId={calculationCodeId}
-          />
-        ) : null}
-
-        {/* Modal Approval History */}
         <ModalHistory
           isOpen={modalApprovalHistory && dataApprovalHistory}
           handleClose={() => setModalApprovalHistory(false)}
@@ -353,7 +446,6 @@ const BillingPage = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
 
-        {/* Modal Request Approval */}
         <ModalRequestApproval
           isOpen={modalRequest}
           handleCancel={() => setModalRequest(false)}
@@ -361,7 +453,6 @@ const BillingPage = () => {
           handleOpenModal={() => setModalRequest(true)}
         />
 
-        {/* Modal Approval */}
         <ModalApprovalBilling
           isOpen={modalApproval}
           handleCancel={() => setModalApproval(false)}

@@ -4,7 +4,6 @@ import ApprovalSectionForm from "./ApprovalSectionForm";
 import AttachmentSectionForm from "./AttachmentSectionForm";
 import DetailText from "../../../../../components/DetailText";
 import PricingDetailTableDetail from "./PricingDetailTableDetail";
-import PricingDetailTableCriteria from "./PricingDetailTableCriteria";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
 

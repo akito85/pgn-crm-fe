@@ -11,14 +11,14 @@ const ButtonComponent = ({
   htmlType,
   size,
   form,
-  fontSizeClassname = "text-[18px]",
+  fontSizeClassname = "text-[12px]",
   className,
-  fullButton = false
+  fullButton = false,
+  isPrimary = false,
 }) => {
   return (
     <div>
       <Button
-        // size="large"
         form={form || undefined}
         onClick={onClick}
         icon={icon ? icon : null}
@@ -26,13 +26,22 @@ const ButtonComponent = ({
         type={type}
         disabled={disabled}
         htmlType={htmlType}
-        size={size || "middle"}
+        size={size || "small"}
         style={{
           borderColor: `${border === false ? "#0075bf00" : "var(--primary)"}`,
-          ...(fullButton ? {width: "100%"} :  {}),
+          ...(fullButton ? { width: "100%" } : {}),
+          backgroundColor: isPrimary && "var(--primary)",
+          color: isPrimary && "#fff",
+          height: "32px",
+          fontSize: "12px",
+          cursor: disabled ? "not-allowed" : "pointer",
         }}
       >
-        <div className={children ? `p-1 ${fontSizeClassname} text-center` : ``}>
+        <div
+          className={
+            children ? `py-0.5 px-1 ${fontSizeClassname} text-center` : ``
+          }
+        >
           {children}
         </div>
       </Button>

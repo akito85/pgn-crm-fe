@@ -263,7 +263,7 @@ export const getProvinceList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -284,7 +284,7 @@ export const getCityList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -305,7 +305,7 @@ export const getCostCenterList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -326,7 +326,7 @@ export const getSorList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -347,7 +347,7 @@ export const getDistrictList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -368,7 +368,7 @@ export const getSubDistrictList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -389,7 +389,7 @@ export const getGsizesList = createAsyncThunk(
           value: item.Id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -410,7 +410,7 @@ export const getIndustrialSectorList = createAsyncThunk(
           value: item.Id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -431,7 +431,7 @@ export const getServiceTypeList = createAsyncThunk(
           value: item.Id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -452,7 +452,7 @@ export const getAccountCategoryList = createAsyncThunk(
           value: item.Id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -473,7 +473,7 @@ export const getAccountGroupList = createAsyncThunk(
           value: item.Id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -494,7 +494,7 @@ export const getBudgetList = createAsyncThunk(
           value: item.glbTypeValId,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -515,7 +515,7 @@ export const getCustomerSegmentList = createAsyncThunk(
           value: item.Id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -536,7 +536,7 @@ export const getCustomerList = createAsyncThunk(
           value: item.Id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -760,8 +760,12 @@ export const downloadPricing = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PRICING", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data);
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PRICING", back: false })
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
     }
   }
 );
@@ -1181,13 +1185,13 @@ const pricingSlice = createSlice({
       state.dataListCriteriaValue = action.payload;
     },
     /** Inactive Pricing */
-    [inactivePricing.pending]: (state, action) => {
+    [inactivePricing.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [inactivePricing.fulfilled]: (state, action) => {
+    [inactivePricing.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [inactivePricing.rejected]: (state, action) => {
+    [inactivePricing.rejected]: (state) => {
       state.loadingPricing = false;
     },
 
@@ -1206,13 +1210,13 @@ const pricingSlice = createSlice({
     },
 
     /** Download Pricing */
-    [downloadPricing.pending]: (state, action) => {
+    [downloadPricing.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [downloadPricing.fulfilled]: (state, action) => {
+    [downloadPricing.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [downloadPricing.rejected]: (state, action) => {
+    [downloadPricing.rejected]: (state) => {
       state.loadingPricing = false;
     },
     /** Get List AppHierId */
@@ -1242,23 +1246,23 @@ const pricingSlice = createSlice({
       state.loadingPricing = false;
     },
     /** Approve/Reject Create Pricing */
-    [approvalCreatePricing.pending]: (state, action) => {
+    [approvalCreatePricing.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [approvalCreatePricing.fulfilled]: (state, action) => {
+    [approvalCreatePricing.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [approvalCreatePricing.rejected]: (state, action) => {
+    [approvalCreatePricing.rejected]: (state) => {
       state.loadingPricing = false;
     },
     /** Approve/Reject Inactive Pricing */
-    [approvalInactivePricing.pending]: (state, action) => {
+    [approvalInactivePricing.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [approvalInactivePricing.fulfilled]: (state, action) => {
+    [approvalInactivePricing.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [approvalInactivePricing.rejected]: (state, action) => {
+    [approvalInactivePricing.rejected]: (state) => {
       state.loadingPricing = false;
     },
   },

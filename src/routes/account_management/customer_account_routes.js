@@ -12,6 +12,22 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   CREATE_ACCOUNT_ONETIME: "/account-management/account-onetime/create",
   VIEW_DETAIL_ACCOUNT_ONETIME: "/account-management/account-onetime/view",
 
+  // Service Request Detail
+  VIEW_DETAIL_SERVICE_REQUEST: "/account-management/account-standard/service-requests/details",
+  CREATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/create",
+  UPDATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/update",
+  DELETE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/delete",
+
+  // Payment Relation Detail
+  VIEW_DETAIL_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/details",
+  CREATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/create",
+  UPDATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/update",
+
+  // Invoice Relation Detail
+  VIEW_DETAIL_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/details",
+  CREATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/create",
+  UPDATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/update",
+
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
     "/account-management/account-standard/service-agreement/view",
@@ -63,6 +79,11 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   VIEW_GAS_SOURCE: "/system-setup/gas-sources",
   UPLOAD_GAS_SOURCE: "/system-setup/gas-sources/upload",
 
+  // Multi Destination
+  VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/details",
+  CREATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/create",
+  UPDATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/update",
+
   //Premise
   DETAIL_PREMISE: "/account-management/account-standard/premise/view",
 
@@ -85,6 +106,8 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
     "/account-management/account-standard/relationship/create",
   UPDATE_RELATIONSHIP:
     "/account-management/account-standard/relationship/update",
+  DETAIL_RELATIONSHIP:
+    "/account-management/account-standard/relationship/view",
 
   //SA-Approve-Reject-TOS
   APPROVE_REJECT_TOS:

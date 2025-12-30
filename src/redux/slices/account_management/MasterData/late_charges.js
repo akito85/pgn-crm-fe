@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { showModalError, showModalSuccess, validateError } from "../../general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../../general_slice";
 
 const initialState = {
   data: null,
@@ -63,7 +67,13 @@ export const downloadLateCharge = createAsyncThunk(
       const response = await accountManagementService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_LATE_CHARGE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_LATE_CHARGE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -174,7 +184,7 @@ export const getSelectCriteria = createAsyncThunk(
       return (response?.data || []).map((item) => ({
         label: item.text,
         value: item.id,
-        code: item?.code
+        code: item?.code,
       }));
       // return response?.data;
     } catch (error) {
@@ -489,8 +499,8 @@ export const getListCategory = createAsyncThunk(
       return response.data.map((item) => {
         return {
           glbTypeValId: item.id,
-          name: item.name
-        }
+          name: item.name,
+        };
       });
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
@@ -652,8 +662,9 @@ export const approvalCreateLateChargeRule = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
-          }.`,
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
         // alertDescription:
         //   body.action === "REJECT"
         //     ? "Warning! if you reject this data, you will need to request approval again."
@@ -668,8 +679,9 @@ export const approvalCreateLateChargeRule = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -690,8 +702,9 @@ export const approvalInactiveLateChargeRule = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been late charge ${body.action === "APPROVE" ? "approved" : "rejected"
-          }.`,
+        description: `Your data has been late charge ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
         // alertDescription:
         //   body.action === "REJECT"
         //     ? "Warning! if you reject this data, you will need to request approval again."
@@ -706,8 +719,9 @@ export const approvalInactiveLateChargeRule = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -737,8 +751,9 @@ export const createLateChargeRuleBody = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.isSubmit ? "created" : "submitted"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.isSubmit ? "created" : "submitted"
+          }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -767,8 +782,9 @@ export const updateLateChargeRuleBody = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.isSubmit ? "updated" : "submitted"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.isSubmit ? "updated" : "submitted"
+          }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -822,10 +838,10 @@ const lateChargeSlice = createSlice({
   initialState,
   extraReducers: {
     // pagination
-    [getLateChargePaginate.pending]: (state, action) => {
+    [getLateChargePaginate.pending]: (state) => {
       state.loading = true;
     },
-    [getLateChargePaginate.rejected]: (state, action) => {
+    [getLateChargePaginate.rejected]: (state) => {
       state.loading = false;
     },
     [getLateChargePaginate.fulfilled]: (state, action) => {
@@ -833,20 +849,20 @@ const lateChargeSlice = createSlice({
       state.data = action.payload;
     },
     // download
-    [downloadLateCharge.pending]: (state, action) => {
+    [downloadLateCharge.pending]: (state) => {
       state.loading = true;
     },
-    [downloadLateCharge.rejected]: (state, action) => {
+    [downloadLateCharge.rejected]: (state) => {
       state.loading = false;
     },
-    [downloadLateCharge.fulfilled]: (state, action) => {
+    [downloadLateCharge.fulfilled]: (state) => {
       state.loading = false;
     },
     // detail
-    [getDetailLateCharge.pending]: (state, action) => {
+    [getDetailLateCharge.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailLateCharge.rejected]: (state, action) => {
+    [getDetailLateCharge.rejected]: (state) => {
       state.loading = false;
     },
     [getDetailLateCharge.fulfilled]: (state, action) => {
@@ -854,10 +870,10 @@ const lateChargeSlice = createSlice({
       state.data_detail = action.payload;
     },
     // create
-    [createLateCharge.pending]: (state, action) => {
+    [createLateCharge.pending]: (state) => {
       state.loading = true;
     },
-    [createLateCharge.rejected]: (state, action) => {
+    [createLateCharge.rejected]: (state) => {
       state.loading = false;
     },
     [createLateCharge.fulfilled]: (state, action) => {
@@ -865,10 +881,10 @@ const lateChargeSlice = createSlice({
       state.data = action.payload;
     },
     // update
-    [updateLateCharge.pending]: (state, action) => {
+    [updateLateCharge.pending]: (state) => {
       state.loading = true;
     },
-    [updateLateCharge.rejected]: (state, action) => {
+    [updateLateCharge.rejected]: (state) => {
       state.loading = false;
     },
     [updateLateCharge.fulfilled]: (state, action) => {
@@ -876,213 +892,213 @@ const lateChargeSlice = createSlice({
       state.data = action.payload;
     },
     // activation
-    [activeInactiveLateCharge.pending]: (state, action) => {
+    [activeInactiveLateCharge.pending]: (state) => {
       state.loading = true;
     },
-    [activeInactiveLateCharge.rejected]: (state, action) => {
+    [activeInactiveLateCharge.rejected]: (state) => {
       state.loading = false;
     },
-    [activeInactiveLateCharge.fulfilled]: (state, action) => {
+    [activeInactiveLateCharge.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
     /** List Select Criteria */
-    [getSelectCriteria.pending]: (state, action) => {
+    [getSelectCriteria.pending]: (state) => {
       state.loading = true;
     },
     [getSelectCriteria.fulfilled]: (state, action) => {
       state.dataListCriteriaOpt = action.payload;
       state.loading = false;
     },
-    [getSelectCriteria.rejected]: (state, action) => {
+    [getSelectCriteria.rejected]: (state) => {
       state.dataListCriteriaOpt = [];
       state.loading = false;
     },
     /** List Select Currency */
-    [getSelectCurrency.pending]: (state, action) => {
+    [getSelectCurrency.pending]: (state) => {
       state.loading = true;
     },
     [getSelectCurrency.fulfilled]: (state, action) => {
       state.dataListCurrency = action.payload;
       state.loading = false;
     },
-    [getSelectCurrency.rejected]: (state, action) => {
+    [getSelectCurrency.rejected]: (state) => {
       state.dataListCurrency = [];
       state.loading = false;
     },
     /** List Premise Country */
-    [getCountryList.pending]: (state, action) => {
+    [getCountryList.pending]: (state) => {
       state.loading = true;
     },
     [getCountryList.fulfilled]: (state, action) => {
       state.premiseCountryList = action.payload;
       state.loading = false;
     },
-    [getCountryList.rejected]: (state, action) => {
+    [getCountryList.rejected]: (state) => {
       state.premiseCountryList = [];
       state.loading = false;
     },
     /** List Premise Province */
-    [getProvinceList.pending]: (state, action) => {
+    [getProvinceList.pending]: (state) => {
       state.loading = true;
     },
     [getProvinceList.fulfilled]: (state, action) => {
       state.premiseProvinceList = action.payload;
       state.loading = false;
     },
-    [getProvinceList.rejected]: (state, action) => {
+    [getProvinceList.rejected]: (state) => {
       state.premiseProvinceList = [];
       state.loading = false;
     },
     /** List Premise City */
-    [getCityList.pending]: (state, action) => {
+    [getCityList.pending]: (state) => {
       state.loading = true;
     },
     [getCityList.fulfilled]: (state, action) => {
       state.premiseCityList = action.payload;
       state.loading = false;
     },
-    [getCityList.rejected]: (state, action) => {
+    [getCityList.rejected]: (state) => {
       state.premiseCityList = [];
       state.loading = false;
     },
     /** List Premise District */
-    [getDistrictList.pending]: (state, action) => {
+    [getDistrictList.pending]: (state) => {
       state.loading = true;
     },
     [getDistrictList.fulfilled]: (state, action) => {
       state.premiseDistrictList = action.payload;
       state.loading = false;
     },
-    [getDistrictList.rejected]: (state, action) => {
+    [getDistrictList.rejected]: (state) => {
       state.premiseDistrictList = [];
       state.loading = false;
     },
     /** List Premise Subdistrict */
-    [getSubDistrictList.pending]: (state, action) => {
+    [getSubDistrictList.pending]: (state) => {
       state.loading = true;
     },
     [getSubDistrictList.fulfilled]: (state, action) => {
       state.premiseSubdistrictList = action.payload;
       state.loading = false;
     },
-    [getSubDistrictList.rejected]: (state, action) => {
+    [getSubDistrictList.rejected]: (state) => {
       state.premiseSubdistrictList = [];
       state.loading = false;
     },
     /** List Cost Center */
-    [getCostCenterList.pending]: (state, action) => {
+    [getCostCenterList.pending]: (state) => {
       state.loading = true;
     },
     [getCostCenterList.fulfilled]: (state, action) => {
       state.costCenterList = action.payload;
       state.loading = false;
     },
-    [getCostCenterList.rejected]: (state, action) => {
+    [getCostCenterList.rejected]: (state) => {
       state.costCenterList = [];
       state.loading = false;
     },
     /** List Sor */
-    [getSorList.pending]: (state, action) => {
+    [getSorList.pending]: (state) => {
       state.loading = true;
     },
     [getSorList.fulfilled]: (state, action) => {
       state.sorList = action.payload;
       state.loading = false;
     },
-    [getSorList.rejected]: (state, action) => {
+    [getSorList.rejected]: (state) => {
       state.sorList = [];
       state.loading = false;
     },
     /** List Account Number */
-    [getAccountNumberList.pending]: (state, action) => {
+    [getAccountNumberList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountNumberList.fulfilled]: (state, action) => {
       state.accountNumberList = action.payload;
       state.loading = false;
     },
-    [getAccountNumberList.rejected]: (state, action) => {
+    [getAccountNumberList.rejected]: (state) => {
       state.accountNumberList = [];
       state.loading = false;
     },
     /** List Classification Type */
-    [getClassificationTypeList.pending]: (state, action) => {
+    [getClassificationTypeList.pending]: (state) => {
       state.loading = true;
     },
     [getClassificationTypeList.fulfilled]: (state, action) => {
       state.classificationTypeList = action.payload;
       state.loading = false;
     },
-    [getClassificationTypeList.rejected]: (state, action) => {
+    [getClassificationTypeList.rejected]: (state) => {
       state.classificationTypeList = [];
       state.loading = false;
     },
     /** List Account Segment */
-    [getAccountSegment.pending]: (state, action) => {
+    [getAccountSegment.pending]: (state) => {
       state.loading = true;
     },
     [getAccountSegment.fulfilled]: (state, action) => {
       state.accountSegmentList = action.payload;
       state.loading = false;
     },
-    [getAccountSegment.rejected]: (state, action) => {
+    [getAccountSegment.rejected]: (state) => {
       state.accountSegmentList = [];
       state.loading = false;
     },
     /** List SA Type */
-    [getSATypeList.pending]: (state, action) => {
+    [getSATypeList.pending]: (state) => {
       state.loading = true;
     },
     [getSATypeList.fulfilled]: (state, action) => {
       state.saTypeList = action.payload;
       state.loading = false;
     },
-    [getSATypeList.rejected]: (state, action) => {
+    [getSATypeList.rejected]: (state) => {
       state.saTypeList = [];
       state.loading = false;
     },
     /** List Account Category */
-    [getAccountCategoryList.pending]: (state, action) => {
+    [getAccountCategoryList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountCategoryList.fulfilled]: (state, action) => {
       state.accountCategoryList = action.payload;
       state.loading = false;
     },
-    [getAccountCategoryList.rejected]: (state, action) => {
+    [getAccountCategoryList.rejected]: (state) => {
       state.accountCategoryList = [];
       state.loading = false;
     },
     /** List Account Group Type */
-    [getAccountGroupList.pending]: (state, action) => {
+    [getAccountGroupList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountGroupList.fulfilled]: (state, action) => {
       state.accountGroupTypeList = action.payload;
       state.loading = false;
     },
-    [getAccountGroupList.rejected]: (state, action) => {
+    [getAccountGroupList.rejected]: (state) => {
       state.accountGroupTypeList = [];
       state.loading = false;
     },
     /** List Account Type */
-    [getAccountTypeList.pending]: (state, action) => {
+    [getAccountTypeList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountTypeList.fulfilled]: (state, action) => {
       state.accountTypeList = action.payload;
       state.loading = false;
     },
-    [getAccountTypeList.rejected]: (state, action) => {
+    [getAccountTypeList.rejected]: (state) => {
       state.accountTypeList = [];
       state.loading = false;
     },
 
-    [getLateChargeRulePaginate.pending]: (state, action) => {
+    [getLateChargeRulePaginate.pending]: (state) => {
       state.loading = true;
     },
-    [getLateChargeRulePaginate.rejected]: (state, action) => {
+    [getLateChargeRulePaginate.rejected]: (state) => {
       state.loading = false;
     },
     [getLateChargeRulePaginate.fulfilled]: (state, action) => {
@@ -1090,116 +1106,116 @@ const lateChargeSlice = createSlice({
       state.data_late_charge_rule = action.payload;
     },
     /** Get List AppHierId */
-    [getListAppHier.pending]: (state, action) => {
+    [getListAppHier.pending]: (state) => {
       state.loading = true;
     },
     [getListAppHier.fulfilled]: (state, action) => {
       state.dataListAppHierId = action.payload;
       state.loading = false;
     },
-    [getListAppHier.rejected]: (state, action) => {
+    [getListAppHier.rejected]: (state) => {
       state.dataListAppHierId = [];
       state.loading = false;
     },
     /** Get List AppHierDetail */
-    [getListAppHierDetail.pending]: (state, action) => {
+    [getListAppHierDetail.pending]: (state) => {
       state.loading = true;
     },
     [getListAppHierDetail.fulfilled]: (state, action) => {
       state.dataListAppHierDetail = action.payload;
       state.loading = false;
     },
-    [getListAppHierDetail.rejected]: (state, action) => {
+    [getListAppHierDetail.rejected]: (state) => {
       state.dataListAppHierDetail = [];
       state.loading = false;
     },
     /** Get List Category */
-    [getListCategory.pending]: (state, action) => {
+    [getListCategory.pending]: (state) => {
       state.loading = true;
     },
     [getListCategory.fulfilled]: (state, action) => {
       state.dataListCategory = action.payload;
       state.loading = false;
     },
-    [getListCategory.rejected]: (state, action) => {
+    [getListCategory.rejected]: (state) => {
       state.dataListCategory = [];
       state.loading = false;
     },
     /** Get Approval History */
-    [getApprovalHistory.pending]: (state, action) => {
+    [getApprovalHistory.pending]: (state) => {
       state.loading = true;
     },
     [getApprovalHistory.fulfilled]: (state, action) => {
       state.dataApprovalHistory = action.payload;
       state.loading = false;
     },
-    [getApprovalHistory.rejected]: (state, action) => {
+    [getApprovalHistory.rejected]: (state) => {
       state.dataApprovalHistory = {};
       state.loading = false;
     },
     /** Inactive Late Charge Rule */
-    [inactiveLateChargeRule.pending]: (state, action) => {
+    [inactiveLateChargeRule.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveLateChargeRule.fulfilled]: (state, action) => {
+    [inactiveLateChargeRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [inactiveLateChargeRule.rejected]: (state, action) => {
+    [inactiveLateChargeRule.rejected]: (state) => {
       state.loading = false;
     },
     /** List Variable Name */
-    [getVariableNameList.pending]: (state, action) => {
+    [getVariableNameList.pending]: (state) => {
       state.loading = true;
     },
     [getVariableNameList.fulfilled]: (state, action) => {
       state.variableNameList = action.payload;
       state.loading = false;
     },
-    [getVariableNameList.rejected]: (state, action) => {
+    [getVariableNameList.rejected]: (state) => {
       state.variableNameList = [];
       state.loading = false;
     },
     /** List Formula Operation */
-    [getOperationFormulaList.pending]: (state, action) => {
+    [getOperationFormulaList.pending]: (state) => {
       state.loading = true;
     },
     [getOperationFormulaList.fulfilled]: (state, action) => {
       state.operationFormulaList = action.payload;
       state.loading = false;
     },
-    [getOperationFormulaList.rejected]: (state, action) => {
+    [getOperationFormulaList.rejected]: (state) => {
       state.operationFormulaList = [];
       state.loading = false;
     },
     /** List Formula Condition */
-    [getOperatorConditionList.pending]: (state, action) => {
+    [getOperatorConditionList.pending]: (state) => {
       state.loading = true;
     },
     [getOperatorConditionList.fulfilled]: (state, action) => {
       state.operationConditionList = action.payload;
       state.loading = false;
     },
-    [getOperatorConditionList.rejected]: (state, action) => {
+    [getOperatorConditionList.rejected]: (state) => {
       state.operationConditionList = [];
       state.loading = false;
     },
     /** List Data Type Condition */
-    [getDataTypeConditionList.pending]: (state, action) => {
+    [getDataTypeConditionList.pending]: (state) => {
       state.loading = true;
     },
     [getDataTypeConditionList.fulfilled]: (state, action) => {
       state.dataTypeConditionList = action.payload;
       state.loading = false;
     },
-    [getDataTypeConditionList.rejected]: (state, action) => {
+    [getDataTypeConditionList.rejected]: (state) => {
       state.dataTypeConditionList = [];
       state.loading = false;
     },
     /**detail late charge rule*/
-    [getDetailLateChargeRule.pending]: (state, action) => {
+    [getDetailLateChargeRule.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailLateChargeRule.rejected]: (state, action) => {
+    [getDetailLateChargeRule.rejected]: (state) => {
       state.loading = false;
       state.data_detail_late_charge_rule = null;
     },
@@ -1208,10 +1224,10 @@ const lateChargeSlice = createSlice({
       state.data_detail_late_charge_rule = action.payload;
     },
     /**detail draft late charge rule*/
-    [getDetailDraftLateChargeRule.pending]: (state, action) => {
+    [getDetailDraftLateChargeRule.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailDraftLateChargeRule.rejected]: (state, action) => {
+    [getDetailDraftLateChargeRule.rejected]: (state) => {
       state.loading = false;
       state.data_detail_draft_late_charge_rule = null;
     },
@@ -1220,33 +1236,33 @@ const lateChargeSlice = createSlice({
       state.data_detail_draft_late_charge_rule = action.payload;
     },
     /** Approve Late Charge Rule */
-    [approvalCreateLateChargeRule.pending]: (state, action) => {
+    [approvalCreateLateChargeRule.pending]: (state) => {
       state.loading = true;
     },
-    [approvalCreateLateChargeRule.fulfilled]: (state, action) => {
+    [approvalCreateLateChargeRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approvalCreateLateChargeRule.rejected]: (state, action) => {
+    [approvalCreateLateChargeRule.rejected]: (state) => {
       state.loading = false;
     },
     /** Approve Inactive Late Charge Rule */
-    [approvalInactiveLateChargeRule.pending]: (state, action) => {
+    [approvalInactiveLateChargeRule.pending]: (state) => {
       state.loading = true;
     },
-    [approvalInactiveLateChargeRule.fulfilled]: (state, action) => {
+    [approvalInactiveLateChargeRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approvalInactiveLateChargeRule.rejected]: (state, action) => {
+    [approvalInactiveLateChargeRule.rejected]: (state) => {
       state.loading = false;
     },
     /** delete late charge Rule */
-    [deleteLateChargeRule.pending]: (state, action) => {
+    [deleteLateChargeRule.pending]: (state) => {
       state.loading = true;
     },
-    [deleteLateChargeRule.fulfilled]: (state, action) => {
+    [deleteLateChargeRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [deleteLateChargeRule.rejected]: (state, action) => {
+    [deleteLateChargeRule.rejected]: (state) => {
       state.loading = false;
     },
   },

@@ -1,34 +1,39 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Radio, Tooltip } from "antd";
+import { Spin, Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
+import CardContainer from "../../../../components/CardContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   downloadRatingGas,
   getListRatingGasPaginate,
+  getListBillingPeriodForRating,
 } from "../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsRating } from "./TableRatingView";
 import RatingDetail from "./RatingDetail";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import SelectComponent from "../../../../components/SelectComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
-  // Selector
-  const { data, loading } = useSelector((state) => state.rating);
+  const { data, loading, list_billing_period } = useSelector((state) => state.rating);
 
-  // Declaration
+  // Debug: Log list_billing_period
+  useEffect(() => {
+    console.log('list_billing_period:', list_billing_period);
+  }, [list_billing_period]);
+
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -39,33 +44,84 @@ const RatingPage = () => {
   const [ratingCode, setRatingCode] = useState("");
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
+  const [activeRowKey, setActiveRowKey] = useState(null);
 
-  // Use Effect
+  // State untuk billing period filter
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action"],
+  }));
+
+  const detailRef = useRef(null);
+
+  // Load billing period list saat component mount
   useEffect(() => {
-    dispatch(
-      getListRatingGasPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [search, page, pageSize, sort, dispatch]);
+    dispatch(getListBillingPeriodForRating());
+  }, [dispatch]);
 
-  // Value Tab
-  const tabRating = [
+  // Set default billing period ke ID tertentu setelah data loaded
+  useEffect(() => {
+    if (list_billing_period && list_billing_period.length > 0 && !selectedBillingPeriod) {
+      // OPTION 1: Set ke ID spesifik (misal 453)
+      const defaultPeriod = list_billing_period.find(item => item.id === 453);
+      if (defaultPeriod) {
+        setSelectedBillingPeriod(defaultPeriod.id);
+      } else {
+        // Fallback ke yang pertama jika ID 453 tidak ada
+        setSelectedBillingPeriod(list_billing_period[0].id);
+      }
+      
+      // OPTION 2: Atau langsung set ke yang pertama
+      // setSelectedBillingPeriod(list_billing_period[0].id);
+    }
+  }, [list_billing_period]);
+
+  useEffect(() => {
+    if (pageDetail && activeRowKey && detailRef.current) {
+      setTimeout(() => {
+        detailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+      }, 100);
+    }
+  }, [activeRowKey, pageDetail]);
+
+  // Initial fetch - sekarang dengan billPeriodId
+  useEffect(() => {
+    // Hanya fetch jika billing period sudah dipilih
+    if (selectedBillingPeriod) {
+      dispatch(
+        getListRatingGasPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: 100,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  }, [dispatch, search, sort, selectedBillingPeriod]);
+
+  const tabItems = [
     {
+      key: "Rating Gas",
       label: "Rating Gas",
-      value: "Rating Gas",
+      children: null,
     },
     {
+      key: "Rating Non Gas",
       label: "Rating Non Gas",
-      value: "Rating Non Gas",
       disabled: true,
+      children: null,
     },
   ];
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -77,7 +133,6 @@ const RatingPage = () => {
     },
   ];
 
-  // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -93,44 +148,82 @@ const RatingPage = () => {
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // Load more handler dengan billPeriodId
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    if (nextPage <= totalPages && selectedBillingPeriod) {
+      await dispatch(
+        getListRatingGasPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
 
-  // Sort Table
-  const onSortApi = (_, __, sort) => {
+  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
+
+  const onSortApi = (_, __, sorter) => {
+    const fieldMapping = {
+      mreadingCode: "mReadingCode",
+    };
+
+    const field = fieldMapping[sorter.field] || sorter.field;
+
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
-  // Handle Value Tab
-  const onChangeTab = ({ target: { value } }) => {
-    setValueTab(value);
+  const onChangeTab = (key) => {
+    setValueTab(key);
   };
 
-  // Handle Detail
-  const handleDetail = (record) => {
-    setPageDetail(true);
-    setRatingCode(record.ratingCode);
-    setCalculationCode(record.calculationCode);
-    setSANumberId(record.saNumber);
+  const handleDetail = (record, rowKey) => {
+    const recordKey = rowKey || record.ratingCode;
+
+    if (activeRowKey === recordKey && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setRatingCode("");
+      setCalculationCode("");
+      setSANumberId("");
+    } else {
+      setRatingCode(record.ratingCode);
+      setCalculationCode(record.calculationCode);
+      setSANumberId(record.saNumber);
+      setActiveRowKey(recordKey);
+      setPageDetail(true);
+    }
   };
 
-  // Handle Download
   const handleDownload = () => {
-    dispatch(
-      downloadRatingGas({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
+    if (selectedBillingPeriod) {
+      dispatch(
+        downloadRatingGas({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize: loadMoreSize,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+        })
+      );
+    }
+  };
+
+  // Handle billing period change
+  const handleBillingPeriodChange = (value) => {
+    setSelectedBillingPeriod(value);
+    setPage(1);
   };
 
   const itemGrantAccess = [
@@ -138,89 +231,145 @@ const RatingPage = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={handleDownload}
+          disabled={!selectedBillingPeriod}
         >
           Download List
         </ButtonComponent>
       ),
     },
-
-    // Column Action Column
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
   ];
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.ratingCode,
+    }));
+  }, [dataSource]);
+
+  const baseColumns = useMemo(
+    () =>
+      columnsRating(
+        search,
+        0,
+        0,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [search, searchedColumn, searchText]
+  );
+
+  const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
 
-        <BaseContainer
-          header={"Rating List"}
-          type="tabs"
-          element={
-            <Radio.Group
-              options={tabRating}
-              onChange={onChangeTab}
-              value={valueTab}
-              optionType="button"
-              buttonStyle="solid"
-              style={{ gap: 12, display: "flex" }}
-            />
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px]">RATING LIST</p>
+              <div className="w-full flex justify-end gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
+            </div>
           }
         >
-          <TablePaginationNew
-            dataSource={dataSource}
-            columns={[
-              ...columnsRating(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-                // handleDetail
-              ),
-              ...useColumnActionPermission(["view"], itemGrantAccess),
-            ]}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-            totalData={data?.page?.totalElements || 0}
-            onSort={onSortApi}
-            tableScrolled={{ y: 525, x: 23000 }}
+          <Tabs
+            items={tabItems}
+            onChange={onChangeTab}
+            activeKey={valueTab}
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
           />
-        </BaseContainer>
 
-        {/* Detail Rating */}
-        {pageDetail === true ? (
-          <RatingDetail
-            calculationCode={calculationCode}
-            SAId={saNumberId}
-            ratingCodeId={ratingCode}
-          />
-        ) : null}
+          {/* Filter Section */}
+          <div className="flex gap-4 mb-1 items-end">
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-2">
+                Billing Period <span className="text-red-500">*</span>
+              </label>
+              <SelectComponent
+                value={selectedBillingPeriod}
+                onChange={handleBillingPeriodChange}
+                placeholder="Select Billing Period"
+                options={(list_billing_period || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </div>
+          </div>
+
+          <div className="my-0">
+            <TableRBI
+              idTable="rating-table"
+              size="small"
+              dataSource={dataSourceWithKeys}
+              columns={processedColumns}
+              totalData={data?.page?.totalElements || 0}
+              tableScrolled={{ y: 525, x: 3000 }}
+              onSort={onSortApi}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
+              enableRowClick={true}
+              selectedRowKey={activeRowKey}
+              onRowClick={handleDetail}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
+            />
+          </div>
+        </CardContainer>
+
+        {pageDetail && (
+          <div
+            ref={detailRef}
+            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
+          >
+            <RatingDetail
+              calculationCode={calculationCode}
+              SAId={saNumberId}
+              ratingCodeId={ratingCode}
+              onClose={() => {
+                setPageDetail(false);
+                setActiveRowKey(null);
+                setRatingCode("");
+                setCalculationCode("");
+                setSANumberId("");
+              }}
+            />
+          </div>
+        )}
       </Spin>
     </LayoutMenu>
   );

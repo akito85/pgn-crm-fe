@@ -15,7 +15,6 @@ import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { getBase64 } from "../../../../../../../../utils/getBase64";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import ExtensionFile from "../../../../../../../../utils/ExtensionFile";
-import { useSelector } from "react-redux";
 import { getSelectCategory } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 
 const MAX_FILE_SIZE = 5000000;
@@ -169,7 +168,7 @@ const ModalAttachment = ({
   const handleUploadLink = async (e) => {
     e.stopPropagation();
     const url = urlLink;
-    if (!!url) {
+    if (url) {
       try {
         const fileName = url.split("/").pop();
         const result = await fetch(url);

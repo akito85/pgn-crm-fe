@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
+import CardContainer from "../../../../../components/CardContainer";
 
 const InvoiceSectionForm = ({ data, type, listDataABI = [] }) => {
   const renderStatus = (status) => {
@@ -27,8 +27,8 @@ const InvoiceSectionForm = ({ data, type, listDataABI = [] }) => {
   return (
     <div>
       {type === "create" || type === "update" ? (
-        <BaseContainer header={"Invoice Information"}>
-          <div className="w-full grid grid-cols-4 gap-4">
+        <CardContainer subHeader={"Invoice Information"}>
+          <div className="w-full grid grid-cols-5 gap-3">
             <DetailText label={"Invoice Number"}>
               {data?.invoiceNumber}
             </DetailText>
@@ -108,7 +108,7 @@ const InvoiceSectionForm = ({ data, type, listDataABI = [] }) => {
               {renderStatus(data?.status)}
             </DetailText>
           </div>
-        </BaseContainer>
+        </CardContainer>
       ) : (
         <div className="w-full grid grid-cols-4 gap-4">
           <DetailText label={"Invoice Number"}>

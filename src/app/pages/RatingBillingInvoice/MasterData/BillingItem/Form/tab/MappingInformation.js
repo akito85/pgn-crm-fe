@@ -1,6 +1,6 @@
 import React, { useEffect, Fragment, useState, useRef } from "react";
 import columnsMapping from "../../Table/TableMappingInformation";
-import moment, { isMoment } from "moment";
+import moment from "moment";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 import { hasValue } from "../../../../../../../utils";
 

@@ -8,8 +8,10 @@ import { account_management } from "./account_management";
 import SwitchPage from "../app/pages/Authentication/SwitchPage";
 import { receipt_and_collection } from "./Receipt&Collection";
 import { rating_billing } from "./rating_billing";
+import { debt_and_collection } from "./DebtAndCollection";  
 import { invoice } from "./invoice";
 import report_setup from "./report";
+import { notification } from "./notification";
 export const index = [
   {
     path: "/",
@@ -40,4 +42,6 @@ export const index = [
   ...rating_billing,
   ...invoice,
   ...report_setup,
+  ...debt_and_collection,
+  ...notification
 ];

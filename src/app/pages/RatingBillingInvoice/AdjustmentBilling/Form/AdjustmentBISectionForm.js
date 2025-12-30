@@ -17,6 +17,7 @@ import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 import moment from "moment";
+import TableRBI from "../../../../../components/TableRBI";
 
 const AdjustmentBISectionForm = ({
   children,
@@ -26,7 +27,9 @@ const AdjustmentBISectionForm = ({
   invoiceNumber,
   dataInvoice,
   adjustmentId,
-  showAction
+  showAction,
+  showCreateButtonInHeader = false,
+  onCreateClick,
 }) => {
   // Selector
   const { dataListItem, dataDetailType } = useSelector(
@@ -54,7 +57,6 @@ const AdjustmentBISectionForm = ({
   const [typeBI, setTypeBI] = useState();
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState({});
-
 
   // Use Effect
   useEffect(() => {
@@ -290,8 +292,7 @@ const AdjustmentBISectionForm = ({
   const dataBillingItem =
     listDataABI?.length > 0 ? listDataABI?.map((item) => item?.item) : [];
 
-    // console.log(dataBillingItem);
-    
+  // console.log(dataBillingItem);
 
   const filterBillingItem = () => {
     return dataBillingItem.length > 0
@@ -345,7 +346,7 @@ const AdjustmentBISectionForm = ({
 
   // Handle Update
   const handleUpdate = (r) => {
-    setDataItem(r?.item)
+    setDataItem(r?.item);
     setDataUpdate(r);
     setKeyTable(r?.key);
     setTypeModal("update");
@@ -374,21 +375,30 @@ const AdjustmentBISectionForm = ({
     setDataHistory({});
   };
 
+  const handleCreateClick = useCallback(() => {
+    invoiceNumber === undefined
+      ? setModalValidation(true)
+      : setOpenModal(true);
+    setTypeModal("create");
+    setDataUpdate([]);
+    setAdjustmentAmount(0);
+  }, [invoiceNumber]);
+
+  // Expose handleCreateClick to parent via onCreateClick callback
+  useEffect(() => {
+    if (onCreateClick && showCreateButtonInHeader) {
+      onCreateClick(handleCreateClick);
+    }
+  }, [onCreateClick, showCreateButtonInHeader, handleCreateClick]);
+
   return (
     <div>
-      {type !== "detail" && type !== "show" ? (
-        <div className="w-full flex justify-end mb-[30px]">
+      {!showCreateButtonInHeader && type !== "detail" && type !== "show" ? (
+        <div className="w-full flex justify-end mb-3">
           <ButtonComponent
             type={"submit"}
-            onClick={() => {
-              invoiceNumber === undefined
-                ? setModalValidation(true)
-                : setOpenModal(true);
-              setTypeModal("create");
-              setDataUpdate([]);
-              setAdjustmentAmount(0);
-            }}
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            onClick={handleCreateClick}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
           >
             Create
           </ButtonComponent>
@@ -398,8 +408,9 @@ const AdjustmentBISectionForm = ({
       {children}
 
       <div className="w-full">
-        <TablePaginationNew
+        <TableRBI
           type="FE"
+          useInfiniteScroll
           dataSource={listDataABI}
           totalData={listDataABI.length}
           current={page}
@@ -687,9 +698,7 @@ const AdjustmentBISectionForm = ({
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">
-            {dataHistory.recordId}
-          </DetailText>
+          <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)

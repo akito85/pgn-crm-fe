@@ -4,7 +4,6 @@ import { Checkbox, Form, Select } from 'antd';
 import ButtonComponent from '../../../../../../components/ButtonComponent';
 import ModalCustom from '../../../../../../components/Modal/ModalCustom';
 import SelectComponent from '../../../../../../components/SelectComponent';
-import SVGIcon from "../../../../../../assets/Icon/index";
 import InputComponent from "../../../../../../components/InputComponent";
 
 

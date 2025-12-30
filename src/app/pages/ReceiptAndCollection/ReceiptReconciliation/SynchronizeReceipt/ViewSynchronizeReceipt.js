@@ -1,14 +1,17 @@
 import React, { useState, useRef } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Spin, Input, Space, Tooltip } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import { Input, Space, Tooltip } from "antd";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import { FilterOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined, 
+  FilterOutlined
+} from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { NumericFormat } from "react-number-format";
@@ -16,12 +19,14 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 
 const data = [];
 for (let i = 0; i < 100; i++) {
+  const randomAmount = Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000;
+
   data.push({
-    syncId: `SYNCRL${i}`,
-    syncDateTime: "2023-08-30T04:01:40.892Z",
-    totalReceipt: i,
+    syncId: `SYNCRL${i.toString().padStart(3, '0')}`,
+    syncDateTime: `2025-12-21T23:11:09.892Z`,
+    totalReceipt: i + 1,
     currency: "IDR",
-    totalAmount: 1000000,
+    totalAmount: randomAmount,
   });
 }
 
@@ -125,6 +130,7 @@ const ViewSynchronizeReceipt = () => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -132,19 +138,23 @@ const ViewSynchronizeReceipt = () => {
     {
       title: "SYNC ID",
       dataIndex: "syncId",
+      key: "syncId",
       sorter: true,
       ...getColumnSearchProps("syncId"),
     },
     {
-      title: "SYNCH DATE TIME",
+      title: "SYNC DATE TIME",
       dataIndex: "syncDateTime",
+      key: "syncDateTime",
       align: "center",
       sorter: true,
-      render: (syncDateTime) => moment(syncDateTime).format("DD MMM YYYY"),
+      ...getColumnSearchProps("syncDateTime"),
+      render: (syncDateTime) => moment(syncDateTime).format("DD MMM YYYY HH:MM:SS"),
     },
     {
       title: "TOTAL RECEIPT",
       dataIndex: "totalReceipt",
+      key: "totalReceipt",
       align: "center",
       sorter: true,
       ...getColumnSearchProps("totalReceipt"),
@@ -152,6 +162,7 @@ const ViewSynchronizeReceipt = () => {
     {
       title: "CURRENCY",
       dataIndex: "currency",
+      key: "currency",
       align: "center",
       sorter: true,
       ...getColumnSearchProps("currency"),
@@ -159,6 +170,7 @@ const ViewSynchronizeReceipt = () => {
     {
       title: "TOTAL AMOUNT",
       dataIndex: "totalAmount",
+      key: "totalAmount",
       align: "right",
       sorter: true,
       ...getColumnSearchProps("totalAmount"),
@@ -167,8 +179,10 @@ const ViewSynchronizeReceipt = () => {
           displayType="text"
           value={totalAmount}
           className="text-right"
-          thousandSeparator={true}
+          // thousandSeparator={true}
           decimalScale={2}
+          decimalSeparator=","
+          thousandSeparator="."
           fixedDecimalScale
         />
       ),
@@ -177,6 +191,7 @@ const ViewSynchronizeReceipt = () => {
       title: "ACTION",
       align: "center",
       dataIndex: "syncId",
+      key: "action",
       fixed: "right",
       width: 100,
       render: (id, record) => {
@@ -188,7 +203,10 @@ const ViewSynchronizeReceipt = () => {
                 state={{ id: id }}
               >
                 <ButtonComponent
-                  icon={<SVGIcon name="IconDetail" width={24} />}
+                  icon={
+                  // <SVGIcon name="IconDetail" width={24} />
+                  <EyeOutlined />
+                }
                   border={false}
                 />
               </Link>
@@ -204,6 +222,11 @@ const ViewSynchronizeReceipt = () => {
     setPageSize(pageSize);
   };
 
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
+
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -217,9 +240,9 @@ const ViewSynchronizeReceipt = () => {
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
-      <BaseContainer header={"SYNCRONIZE RECEIPT LIST"}>
+      <CardContainer header={"SYNCRONIZE RECEIPT LIST"}>
         <div className="w-full">
-          <TablePagination
+          <TableRBI
             dataSource={data}
             columns={columns}
             current={page}
@@ -232,9 +255,11 @@ const ViewSynchronizeReceipt = () => {
               x: 1300,
               y: 300,
             }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* </Spin> */}
     </LayoutMenu>

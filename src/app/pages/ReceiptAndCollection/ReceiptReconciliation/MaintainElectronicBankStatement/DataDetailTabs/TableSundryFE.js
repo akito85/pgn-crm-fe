@@ -5,15 +5,12 @@ import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
-import TablePagination from "../../../../../../components/TablePagination";
 import { getCustomerInfo } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
 import { dateFormatting } from "../../../../../../utils";
 import {
-  getColumnSearchProps,
   getColumnSearchPropsPaging,
 } from "../../../../../../utils/getColumnSearchProps";
-import { columnForce } from "./columnForce";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 const { Option } = Select;
 
 const columnSundry = (
@@ -31,12 +28,14 @@ const columnSundry = (
 ) => {
   const column = [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "receiptCode",
       title: "RECEIPT CODE",
       dataIndex: "receiptCode",
       sorter: (a, b) => a?.receiptCode?.localeCompare(b?.receiptCode),
@@ -56,10 +55,7 @@ const columnSundry = (
       render: (text) =>
         searchedColumn === "receiptCode" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -73,6 +69,7 @@ const columnSundry = (
         ),
     },
     {
+      key: "sor",
       title: "SOR",
       dataIndex: "sor",
       align: "left",
@@ -90,10 +87,7 @@ const columnSundry = (
       render: (text) =>
         searchedColumn === "sor" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -107,9 +101,9 @@ const columnSundry = (
         ),
     },
     {
+      key: "costCenter",
       title: "COST CENTER",
       dataIndex: "costCenter",
-      key: "costCenter",
       align: "left",
       sorter: (a, b) => a?.costCenter?.localeCompare(b?.costCenter),
       ...getColumnSearchPropsPaging(
@@ -125,16 +119,11 @@ const columnSundry = (
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) =>
         searchedColumn === "costCenter" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -148,6 +137,7 @@ const columnSundry = (
         ),
     },
     {
+      key: "customerName",
       title: "CUSTOMER",
       dataIndex: "customerName",
       align: "left",
@@ -165,16 +155,11 @@ const columnSundry = (
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) =>
         searchedColumn === "customerName" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -188,6 +173,7 @@ const columnSundry = (
         ),
     },
     {
+      key: "accountNumber",
       title: "ACCOUNT",
       dataIndex: "accountNumber",
       align: "left",
@@ -205,16 +191,11 @@ const columnSundry = (
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) =>
         searchedColumn === "accountNumber" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -228,6 +209,7 @@ const columnSundry = (
         ),
     },
     {
+      key: "receiptNumber",
       title: "RECEIPT NUMBER",
       dataIndex: "receiptNumber",
       align: "right",
@@ -245,16 +227,11 @@ const columnSundry = (
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) =>
         searchedColumn === "receiptNumber" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -268,6 +245,7 @@ const columnSundry = (
         ),
     },
     {
+      key: "receiptDate",
       title: "RECEIPT DATE",
       dataIndex: "receiptDate",
       align: "center",
@@ -279,7 +257,6 @@ const columnSundry = (
         searchText,
         handleSearch,
         true
-        // "date"
       ),
       onFilter: (value, record) =>
         record["receiptDate"]
@@ -289,10 +266,7 @@ const columnSundry = (
       render: (text) =>
         searchedColumn === "receiptDate" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[
               searchText
                 ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
@@ -308,9 +282,9 @@ const columnSundry = (
         ),
     },
     {
+      key: "cusinfo",
       title: "CUSTOMER INFORMATION",
       dataIndex: "cusinfo",
-      key: "cusinfo",
       width: 300,
       sorter: (a, b) => a.cusinfo - b.cusinfo,
       ...getColumnSearchPropsPaging(
@@ -320,9 +294,6 @@ const columnSundry = (
         searchText,
         handleSearch,
         true
-        // dataCustomer,
-        // selectCustomer,
-        // handleSelectCustomer
       ),
       onFilter: (value, record) =>
         record["cusinfo"]
@@ -339,7 +310,7 @@ const columnSundry = (
             .find((b) => b.label)?.label;
         } else {
           return (
-            <div className=" w-full ">
+            <div className="w-full">
               <SelectComponent
                 value={
                   selectCustomer[`${record.receiptReconcileId}`] || undefined
@@ -359,6 +330,7 @@ const columnSundry = (
       },
     },
     {
+      key: "currency",
       title: "CURRENCY",
       dataIndex: "currency",
       align: "center",
@@ -376,16 +348,11 @@ const columnSundry = (
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) =>
         searchedColumn === "currency" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -399,6 +366,7 @@ const columnSundry = (
         ),
     },
     {
+      key: "amount",
       title: "RECEIPT AMOUNT",
       dataIndex: "amount",
       align: "right",
@@ -416,16 +384,11 @@ const columnSundry = (
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) =>
         searchedColumn === "amount" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -439,6 +402,7 @@ const columnSundry = (
         ),
     },
     {
+      key: "statusApproval",
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
       align: "center",
@@ -474,30 +438,29 @@ const columnSundry = (
               : approvalStatus;
             break;
         }
+
         if (searchedColumn === "statusApproval") {
           return (
             <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
+              highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
               searchWords={[searchText]}
               autoEscape
               textToHighlight={text ? text.toString() : ""}
             />
           );
-        } else {
-          return text ? (
-            <div className={"flex justify-center"}>
-              <StatusComponent colour={text}>{text}</StatusComponent>
-            </div>
-          ) : (
-            text
-          );
         }
+
+        return text ? (
+          <div className="flex justify-center">
+            <StatusComponent colour={text}>{text}</StatusComponent>
+          </div>
+        ) : (
+          text
+        );
       },
     },
   ];
+
   return typeModal === "Request"
     ? column
     : column.filter((item) => item?.dataIndex !== "cusinfo");
@@ -523,6 +486,11 @@ const TableSundryFE = ({
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
   const dispatch = useDispatch();
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["statusApproval"],
+      }));
   //   const [selectCustomer, setSelectCustomer] = useState({});
 
   const { data_customer } = useSelector((state) => state.electronic);
@@ -619,7 +587,7 @@ const TableSundryFE = ({
   };
 
   return (
-    <TablePaginationNew
+    <TableRBI
       type="FE"
       // dataSource={paginationTable("data")}
       dataSource={data}
@@ -648,6 +616,9 @@ const TableSundryFE = ({
       )}
       onSort={onSort}
       rowSelection={type === 1 ? rowSelection : undefined}
+      showExport={false}
+      fixedColumns={fixedColumns}
+      setFixedColumns={setFixedColumns}
     />
   );
 };

@@ -1,5 +1,5 @@
 import { hasValue, renderColumn, separatorNumber } from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsRatingResult = (
   page = 1,
@@ -11,12 +11,14 @@ export const columnsRatingResult = (
   search
 ) => [
   {
+    key: "no",
     title: "NO",
-    align: "center",
+    isClassification: true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
     sorter: true,
@@ -41,10 +43,11 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "value",
     title: "VALUE",
     dataIndex: "value",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "value",
@@ -66,10 +69,11 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "uom",
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "uom",
@@ -91,10 +95,11 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "pricing",
     title: "PRICE",
     dataIndex: "pricing",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "pricing",
@@ -116,10 +121,11 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "totalAmount",
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmount",
@@ -141,10 +147,11 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "currency",

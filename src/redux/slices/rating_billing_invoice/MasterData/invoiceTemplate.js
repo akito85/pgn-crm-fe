@@ -147,7 +147,7 @@ export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
     try {
-      const url = `v1/dbs/api/invoice-template/approval-history-get/${id}`;
+      const url = `/v1/dbs/api/invoice-template/approval-history-get/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -298,7 +298,13 @@ export const downloadInvoiceTemplate = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_INVOICE_TEMPLATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_INVOICE_TEMPLATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -942,34 +948,34 @@ const invoiceTemplateSlice = createSlice({
   initialState,
   extraReducers: {
     // Create Invoice Template
-    [createInvoiceTemplate.pending]: (state, action) => {
+    [createInvoiceTemplate.pending]: (state) => {
       state.loading = true;
     },
     [createInvoiceTemplate.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [createInvoiceTemplate.rejected]: (state, action) => {
+    [createInvoiceTemplate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Create Invoice Template
-    [updateInvoiceTemplate.pending]: (state, action) => {
+    [updateInvoiceTemplate.pending]: (state) => {
       state.loading = true;
     },
     [updateInvoiceTemplate.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [updateInvoiceTemplate.rejected]: (state, action) => {
+    [updateInvoiceTemplate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Inactive Pricing Rule
-    [inactiveInvoiceTemplate.pending]: (state, action) => {
+    [inactiveInvoiceTemplate.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveInvoiceTemplate.fulfilled]: (state, action) => {
+    [inactiveInvoiceTemplate.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -980,10 +986,10 @@ const invoiceTemplateSlice = createSlice({
     },
 
     // Approve Or Reject Pricing Rule
-    [approveOrRejectInvoiceTemplate.pending]: (state, action) => {
+    [approveOrRejectInvoiceTemplate.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInvoiceTemplate.fulfilled]: (state, action) => {
+    [approveOrRejectInvoiceTemplate.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -994,10 +1000,10 @@ const invoiceTemplateSlice = createSlice({
     },
 
     // Approve Or Reject Inactive Pricing Rule
-    [approveOrRejectInactiveInvoiceTemplate.pending]: (state, action) => {
+    [approveOrRejectInactiveInvoiceTemplate.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInactiveInvoiceTemplate.fulfilled]: (state, action) => {
+    [approveOrRejectInactiveInvoiceTemplate.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -1008,36 +1014,36 @@ const invoiceTemplateSlice = createSlice({
     },
 
     // get pagination calculation
-    [getInvoiceTemplatePaginate.pending]: (state, action) => {
+    [getInvoiceTemplatePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getInvoiceTemplatePaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getInvoiceTemplatePaginate.rejected]: (state, action) => {
+    [getInvoiceTemplatePaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     /* Download Invoice Template */
-    [downloadInvoiceTemplate.pending]: (state, action) => {
+    [downloadInvoiceTemplate.pending]: (state) => {
       state.loading = true;
     },
-    [downloadInvoiceTemplate.fulfilled]: (state, action) => {
+    [downloadInvoiceTemplate.fulfilled]: (state) => {
       state.loading = false;
     },
-    [downloadInvoiceTemplate.rejected]: (state, action) => {
+    [downloadInvoiceTemplate.rejected]: (state) => {
       state.loading = false;
     },
 
     /* Preview Invoice Template */
-    [previewInvoiceTemplate.pending]: (state, action) => {
+    [previewInvoiceTemplate.pending]: (state) => {
       state.loading = true;
     },
-    [previewInvoiceTemplate.fulfilled]: (state, action) => {
+    [previewInvoiceTemplate.fulfilled]: (state) => {
       state.loading = false;
     },
-    [previewInvoiceTemplate.rejected]: (state, action) => {
+    [previewInvoiceTemplate.rejected]: (state) => {
       state.loading = false;
     },
 

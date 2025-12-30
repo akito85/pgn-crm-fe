@@ -1,9 +1,8 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import DetailText from "../../../../components/DetailText";
 import BaseContainer from "../../../../components/BaseContainer";
-import StatusComponent from "../../../../components/StatusComponent";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
   getAccountOneTimeDetail,
   getAccountStandardDetail,

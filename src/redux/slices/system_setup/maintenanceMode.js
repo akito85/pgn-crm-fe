@@ -60,7 +60,7 @@ export const createMaintenanceMode = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your data has been created.`,
-        return: false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -80,7 +80,7 @@ export const createMaintenanceMode = createAsyncThunk(
           const errorBody = {
             title: "Failed",
             description: `Your data was not created ${message}.`,
-            return: false
+            return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -99,7 +99,7 @@ export const updateMaintenanceMode = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your data has been updated.`,
-        return: false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -119,7 +119,7 @@ export const updateMaintenanceMode = createAsyncThunk(
           const errorBody = {
             title: "Failed",
             description: `Your data was not updated ${message}.`,
-            return: false
+            return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -134,26 +134,26 @@ const maintenanceModeSlice = createSlice({
   initialState,
   extraReducers: {
     //GET MAINTENANCE MODE
-    [getMaintenanceMode.pending]: (state, action) => {
+    [getMaintenanceMode.pending]: (state) => {
       state.loading = true;
     },
     [getMaintenanceMode.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_MaintenanceMode = action.payload;
     },
-    [getMaintenanceMode.rejected]: (state, action) => {
+    [getMaintenanceMode.rejected]: (state) => {
       state.loading = false;
     },
 
     //GET MAINTENANCE MODE DETAIL
-    [getMaintenanceModeDetail.pending]: (state, action) => {
+    [getMaintenanceModeDetail.pending]: (state) => {
       state.loading = true;
     },
     [getMaintenanceModeDetail.fulfilled]: (state, action) => {
       state.loading = false;
       state.detail_MaintenanceMode = action.payload;
     },
-    [getMaintenanceModeDetail.rejected]: (state, action) => {
+    [getMaintenanceModeDetail.rejected]: (state) => {
       state.loading = false;
     },
   },

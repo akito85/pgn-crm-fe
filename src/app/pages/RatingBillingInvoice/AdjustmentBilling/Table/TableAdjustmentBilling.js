@@ -1,11 +1,7 @@
 import Highlighter from "react-highlight-words";
-import { Popover, Space, Tooltip } from "antd";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import {
-  getColumnSearchPropsPaging,
-  getColumnSearchPropsUseFilteredValue,
-} from "../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 
 export const columnsAdjustmentBilling = (
   page = 1,
@@ -19,14 +15,18 @@ export const columnsAdjustmentBilling = (
   // handleDelete = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
-    align: "center",
+    isClassification: true,
     width: 60,
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    render: (text, object, index) => index + 1,
   },
   {
+    key: "referenceInvoiceNumber",
     title: "INVOICE NUMBER",
     dataIndex: "referenceInvoiceNumber",
+    isClassification: true,
+    width: 170,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -56,9 +56,12 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "adjustmentNumber",
     title: "ADJUSTMENT NUMBER",
     dataIndex: "adjustmentNumber",
+    isClassification: true,
     sorter: true,
+    width: 200,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "adjustmentNumber",
@@ -87,10 +90,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "adjustmentTypeName",
     title: "TYPE",
     dataIndex: "adjustmentTypeName",
     sorter: true,
-    align: "center",
+    width: 100,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "adjustmentTypeName",
@@ -119,6 +123,7 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "billingCycleName",
     title: "BILLING CYCLE",
     dataIndex: "billingCycleName",
     sorter: true,
@@ -150,9 +155,10 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "billingPeriodName",
     title: "BILLING PERIOD",
     sorter: true,
-    align: "center",
+    width: 170,
     dataIndex: "billingPeriodName",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -182,9 +188,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     sorter: true,
+    width: 190,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -213,9 +221,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
     sorter: true,
+    width: 185,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -244,9 +254,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     sorter: true,
+    width: 185,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -275,9 +287,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     sorter: true,
+    width: 165,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -306,10 +320,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
     sorter: true,
-    align: "center",
+    width: 200,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountGroupType",
@@ -338,6 +353,7 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "sor",
     title: "SOR",
     dataIndex: "sor",
     sorter: true,
@@ -369,6 +385,7 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
     sorter: true,
@@ -400,10 +417,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
     sorter: true,
-    align: "center",
+    width: 185,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountSegment",
@@ -432,9 +450,11 @@ export const columnsAdjustmentBilling = (
     // ),
   },
   {
+    key: "meterReadingCode",
     title: "METER READING CODE",
     dataIndex: "meterReadingCode",
     sorter: true,
+    width: 200,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "meterReadingCode",
@@ -456,10 +476,10 @@ export const columnsAdjustmentBilling = (
       ),
   },
   {
+    key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "currency",
@@ -481,10 +501,11 @@ export const columnsAdjustmentBilling = (
       ),
   },
   {
+    key: "totalAdjustmentAmountIdr",
     title: "TOTAL ADJUSTMENT AMOUNT IDR",
     dataIndex: "totalAdjustmentAmountIdr",
     sorter: true,
-    align: "right",
+    width: 260,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAdjustmentAmountIdr",
@@ -506,10 +527,11 @@ export const columnsAdjustmentBilling = (
       ),
   },
   {
+    key: "totalAdjustmentAmountUsd",
     title: "TOTAL ADJUSTMENT AMOUNT USD",
     dataIndex: "totalAdjustmentAmountUsd",
+    width: 270,
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAdjustmentAmountUsd",
@@ -531,10 +553,11 @@ export const columnsAdjustmentBilling = (
       ),
   },
   {
+    key: "termsOfPayment",
     title: "TERMS OF PAYMENT",
     dataIndex: "termsOfPayment",
+    width: 190,
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "termsOfPayment",
@@ -569,7 +592,11 @@ export const columnsAdjustmentBilling = (
               backgroundColor: "#ffc069",
               padding: 0,
             }}
-            searchWords={Object.values(search)?.includes(searchText) ? [search["termsOfPayment"]] : []}
+            searchWords={
+              Object.values(search)?.includes(searchText)
+                ? [search["termsOfPayment"]]
+                : []
+            }
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
@@ -580,9 +607,10 @@ export const columnsAdjustmentBilling = (
     },
   },
   {
+    key: "transactionDate",
     title: "TRANSACTION DATE",
     sorter: true,
-    align: "center",
+    width: 180,
     dataIndex: "transactionDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -625,9 +653,10 @@ export const columnsAdjustmentBilling = (
     //   ),
   },
   {
+    key: "documentDate",
     title: "DOCUMENT DATE",
     sorter: true,
-    align: "center",
+    width: 180,
     dataIndex: "documentDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -670,10 +699,11 @@ export const columnsAdjustmentBilling = (
     //   ),
   },
   {
+    key: "adjustmentReasonName",
     title: "ADJUSTMENT REASON",
     dataIndex: "adjustmentReasonName",
+    width: 200,
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "adjustmentReasonName",
@@ -695,10 +725,10 @@ export const columnsAdjustmentBilling = (
       ),
   },
   {
+    key: "rateType",
     title: "RATE TYPE",
     dataIndex: "rateType",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateType",
@@ -720,10 +750,10 @@ export const columnsAdjustmentBilling = (
       ),
   },
   {
+    key: "rate",
     title: "RATE",
     dataIndex: "rate",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rate",
@@ -745,9 +775,9 @@ export const columnsAdjustmentBilling = (
       ),
   },
   {
+    key: "rateDate",
     title: "RATE DATE",
     sorter: true,
-    align: "center",
     dataIndex: "rateDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -790,9 +820,9 @@ export const columnsAdjustmentBilling = (
     //   ),
   },
   {
+    key: "remark",
     dataIndex: "remark",
     title: "REMARK",
-    align: "left",
     sorter: true,
     ellipsis: {
       showTitle: false,
@@ -836,9 +866,9 @@ export const columnsAdjustmentBilling = (
     //   ),
   },
   {
+    key: "status",
     title: "STATUS",
     dataIndex: "status",
-    fixed: "right",
     width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -863,22 +893,22 @@ export const columnsAdjustmentBilling = (
           break;
       }
       return text
-          ? renderColumn(
-              "status",
-              hasValue(search["status"]),
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+        ? renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search
+          )
+        : text;
     },
   },
   {
+    key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    fixed: "right",
     width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -903,21 +933,21 @@ export const columnsAdjustmentBilling = (
           break;
       }
       return text
-          ? renderColumn(
-              "statusApproval",
-              hasValue(search["statusApproval"]),
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+        ? renderColumn(
+            "statusApproval",
+            hasValue(search["statusApproval"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search
+          )
+        : text;
     },
   },
   // {
   //   title: "ACTION",
-  //   align: "center",
+  //
   //   width: 100,
   //   dataIndex: "id",
   //   fixed: "right",

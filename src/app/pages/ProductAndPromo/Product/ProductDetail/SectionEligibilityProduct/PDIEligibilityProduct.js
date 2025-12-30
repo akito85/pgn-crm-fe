@@ -1,9 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import TablePagination from "../../../../../../components/TablePagination";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import moment from "moment";
-import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";

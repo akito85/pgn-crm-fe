@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Tooltip, Space, Popover, Checkbox } from "antd";
+import { Tooltip, Checkbox } from "antd";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
@@ -52,7 +52,7 @@ export const TablePromoView = (
       ),
   },
   {
-    title: "PROMO TYPE",
+    title: "TYPE",
     dataIndex: "typeName",
     sorter: true,
     align: "center",
@@ -69,6 +69,31 @@ export const TablePromoView = (
       renderColumn(
         "typeName",
         hasValue(search["typeName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PROMOTION TYPE",
+    dataIndex: "promotionTypeName",
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "promotionTypeName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "promotionTypeName",
+        hasValue(search["promotionTypeName"]),
         searchText,
         text,
         false,

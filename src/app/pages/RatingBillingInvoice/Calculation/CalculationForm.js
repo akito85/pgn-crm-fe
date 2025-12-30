@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Modal, Spin } from "antd";
+import { Form, Modal, Spin, Select, DatePicker } from "antd";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -36,6 +37,7 @@ import {
 import { IconModal } from "../../../../utils/Icon";
 import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
+import CardContainer from "../../../../components/CardContainer";
 
 const CalculationForm = ({ type }) => {
   // Selector
@@ -50,6 +52,8 @@ const CalculationForm = ({ type }) => {
     list_cost_center,
     list_meter_reading_code,
     list_specific_customer,
+    loading_specific_customer,
+    specific_customer_message,
     list_billing_cycle,
     list_billing_period,
     data_user_calculation,
@@ -63,23 +67,38 @@ const CalculationForm = ({ type }) => {
   const [openModal, setOpenModal] = useState(false);
   const [openBack, setOpenBack] = useState(false);
   const [billingCycle, setBillingCycle] = useState();
+  const [selectedScheduleType, setSelectedScheduleType] = useState(null);
   const [form] = Form.useForm();
   const formValue = form.getFieldsValue();
+
+  const DEFAULT_SEARCH_LIMIT = 50;
+  const MAX_SEARCH_LENGTH = 50;
+
   const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
     sorId: null,
     costCenterId: [],
     meterReadingCodeId: [],
     accountSegmentId: [],
     accountGroupTypeId: [],
+    search: "",
+    limit: DEFAULT_SEARCH_LIMIT,
   });
+
   const [remark, setRemark] = useState("");
   const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
-  const [mergedArrayGroupType, setMergedArrayGroupType] = useState([]);
   const [dataFinal, setDataFinal] = useState({});
   const [modalSuccess, setModalSuccess] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [defaultData, setDefaultData] = useState({});
+  const [selectedCustomersMap, setSelectedCustomersMap] = useState({});
+
+  const [searchCustomerValue, setSearchCustomerValue] = useState("");
+  const [filteredCustomerList, setFilteredCustomerList] = useState([]);
+  const searchTimeoutRef = useRef(null);
+
+  const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
+  const [pendingDataFinal, setPendingDataFinal] = useState(null);
 
   // Use Effect
   useEffect(() => {
@@ -110,6 +129,7 @@ const CalculationForm = ({ type }) => {
         ...prevState,
         sorId: data_user_calculation.sorId || null,
         costCenterId: data_user_calculation.ccId || null,
+        limit: DEFAULT_SEARCH_LIMIT,
       };
     });
     if (tempBody.costCenter) {
@@ -125,10 +145,31 @@ const CalculationForm = ({ type }) => {
   }, [data_user_calculation]);
 
   useEffect(() => {
-    if (dataSpecificCustomer?.sorId) {
+    if (
+      dataSpecificCustomer?.sorId &&
+      dataSpecificCustomer?.search &&
+      dataSpecificCustomer.search.length >= 3
+    ) {
       dispatch(getListSpecificCustomer(dataSpecificCustomer));
     }
-  }, [dispatch, dataSpecificCustomer]);
+  }, [
+    dispatch,
+    dataSpecificCustomer.sorId,
+    dataSpecificCustomer.costCenterId,
+    dataSpecificCustomer.meterReadingCodeId,
+    dataSpecificCustomer.accountSegmentId,
+    dataSpecificCustomer.accountGroupTypeId,
+    dataSpecificCustomer.search,
+    dataSpecificCustomer.limit,
+  ]);
+
+  useEffect(() => {
+    if (searchCustomerValue.length >= 3 && list_specific_customer) {
+      setFilteredCustomerList(list_specific_customer);
+    } else {
+      setFilteredCustomerList([]);
+    }
+  }, [list_specific_customer, searchCustomerValue]);
 
   useEffect(() => {
     let dataMrc = list_meter_reading_code?.reduce(
@@ -138,38 +179,118 @@ const CalculationForm = ({ type }) => {
     setMergedArrayMrc(dataMrc);
   }, [dispatch, list_meter_reading_code]);
 
-  useEffect(() => {
-    let dataGroupType = list_account_group?.reduce(
-      (result, current) => result?.concat(current?.dtoList),
-      []
-    );
-    setMergedArrayGroupType(dataGroupType);
-  }, [dispatch, list_account_group]);
+  const handleSearchCustomer = useCallback((value) => {
+    const trimmedValue = value.slice(0, MAX_SEARCH_LENGTH);
+    setSearchCustomerValue(trimmedValue);
 
-  // reset form
-  const handleReset = () => {
-    let tempData = [
-      "billing_cycle",
-      "billing_period",
-      "calculation_type",
-      "serviceType",
-      "sor",
-      "costCenter",
-      "meterReading",
-      "accountSegment",
-      "accountGroupType",
-      "specificCustomer",
-      "type",
-      "remark",
-    ];
-    if (defaultData?.costCenter.length > 0) {
-      tempData = tempData.filter((item) => item !== "costCenter");
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
-    if (defaultData?.sor.length > 0) {
-      tempData = tempData.filter((item) => item !== "sor");
-    }
-    form.resetFields(tempData);
-  };
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (trimmedValue && trimmedValue.length >= 3) {
+        setDataSpecificCustomer((prevState) => ({
+          ...prevState,
+          search: trimmedValue,
+          limit: DEFAULT_SEARCH_LIMIT,
+        }));
+      } else {
+        setDataSpecificCustomer((prevState) => ({
+          ...prevState,
+          search: "",
+          limit: DEFAULT_SEARCH_LIMIT,
+        }));
+        setFilteredCustomerList([]);
+      }
+    }, 500);
+  }, []);
+
+  const handleSelectCustomer = useCallback(
+    (value, option) => {
+      // Simpan data customer yang baru dipilih
+      const customerData = filteredCustomerList.find(
+        (item) => (item.accountNumber || item.code) === value
+      );
+
+      if (customerData) {
+        setSelectedCustomersMap((prev) => ({
+          ...prev,
+          [value]: {
+            accountName: customerData.accountName || customerData.name,
+            accountNumber: customerData.accountNumber || customerData.code,
+          },
+        }));
+      }
+
+      // Clear search
+      setSearchCustomerValue("");
+      setFilteredCustomerList([]);
+      setDataSpecificCustomer((prevState) => ({
+        ...prevState,
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      }));
+    },
+    [filteredCustomerList]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Untuk CalculationForm
+const handleReset = () => {
+  let tempData = [
+    "billing_cycle",
+    "billing_period",
+    "calculation_type",
+    "serviceType",
+    "sor",
+    "costCenter",
+    "meterReading",
+    "accountSegment",
+    "accountGroupType",
+    "specificCustomer",
+    "type",
+    "scheduleDateTime",
+    "remark",
+  ];
+  
+  // Jangan reset field yang memiliki default data
+  if (defaultData?.costCenter?.length > 0) {
+    tempData = tempData.filter((item) => item !== "costCenter");
+  }
+  if (defaultData?.sor) {
+    tempData = tempData.filter((item) => item !== "sor");
+  }
+  
+  // Reset form fields
+  form.resetFields(tempData);
+  
+  // Reset state-state yang terkait
+  setSelectedScheduleType(null);
+  setSearchCustomerValue("");
+  setFilteredCustomerList([]);
+  setBillingCycle(null); // Reset billing cycle state agar billing period jadi disabled
+  
+  // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
+  setDataSpecificCustomer({
+    sorId: defaultData?.sor || null,
+    costCenterId: defaultData?.costCenter || [],
+    meterReadingCodeId: [],
+    accountSegmentId: [],
+    accountGroupTypeId: [],
+    search: "",
+    limit: DEFAULT_SEARCH_LIMIT,
+  });
+  
+  // Reset selected customers map
+  setSelectedCustomersMap({});
+};
 
   // Validate Data before Modal
   const checkDataValidity = async (data) => {
@@ -195,12 +316,19 @@ const CalculationForm = ({ type }) => {
 
   // handle open modal
   const onFinish = async (formValue) => {
-    setDataFinal({
+    const tempDataFinal = {
       billingCycle: formValue?.billing_cycle,
       billingPeriod: formValue?.billing_period,
+      billingPeriodName:
+        list_billing_period?.data?.find(
+          (item) => item.id === formValue?.billing_period
+        )?.name || null,
       serviceType: formValue?.serviceType,
       sor: formValue?.sor,
       scheduleType: formValue?.type,
+      schedulerTime: formValue?.scheduleDateTime
+        ? moment(formValue.scheduleDateTime).format("YYYY-MM-DD HH:mm:ss")
+        : null,
       calculationType: formValue?.calculation_type,
       remark: formValue?.remark,
       rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
@@ -246,9 +374,28 @@ const CalculationForm = ({ type }) => {
           };
         }
       ),
-    });
+    };
 
+    const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
+
+    if (!hasSpecificCustomer) {
+      setPendingDataFinal(tempDataFinal);
+      setOpenWarningPopulate(true);
+    } else {
+      setDataFinal(tempDataFinal);
+      setOpenModal(true);
+    }
+  };
+
+  const handleConfirmPopulateAll = () => {
+    setOpenWarningPopulate(false);
+    setDataFinal(pendingDataFinal);
     setOpenModal(true);
+  };
+
+  const handleCancelPopulateAll = () => {
+    setOpenWarningPopulate(false);
+    setPendingDataFinal(null);
   };
 
   // handle save
@@ -266,7 +413,7 @@ const CalculationForm = ({ type }) => {
               return {
                 id: null,
                 calCode: null,
-                custNumb: item.code,
+                custNumb: item.code || item.accountNumber,
               };
             }),
     };
@@ -321,14 +468,18 @@ const CalculationForm = ({ type }) => {
     dispatch(getListBillingPeriod(e));
   };
 
-  // Handle Change Billing Cycle
+  // Handle Change SOR
   const handleChangeSOR = (e) => {
     setDataSpecificCustomer((prevState) => {
       return {
         ...prevState,
         sorId: e,
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
       };
     });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
     form.resetFields(["specificCustomer"]);
   };
 
@@ -337,10 +488,15 @@ const CalculationForm = ({ type }) => {
     setDataSpecificCustomer((prevState) => {
       return {
         ...prevState,
-        costCenterId: e || null,
+        costCenterId: e || [],
         meterReadingCodeId: [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
       };
     });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+
     const body = {
       ccIds: (e || []).map((data) => {
         return {
@@ -357,9 +513,13 @@ const CalculationForm = ({ type }) => {
     setDataSpecificCustomer((prevState) => {
       return {
         ...prevState,
-        meterReadingCodeId: e,
+        meterReadingCodeId: e || [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
       };
     });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
     form.resetFields(["specificCustomer"]);
   };
 
@@ -368,9 +528,13 @@ const CalculationForm = ({ type }) => {
     setDataSpecificCustomer((prevState) => {
       return {
         ...prevState,
-        accountGroupTypeId: e,
+        accountGroupTypeId: e || [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
       };
     });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
     form.resetFields(["specificCustomer"]);
   };
 
@@ -379,19 +543,29 @@ const CalculationForm = ({ type }) => {
     setDataSpecificCustomer((prevState) => {
       return {
         ...prevState,
-        accountSegmentId: e,
+        accountSegmentId: e || [],
         accountGroupTypeId: [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
       };
     });
-    const body = {
-      accSegment: (e || []).map((data) => {
-        return {
-          accSegmentId: data,
-        };
-      }),
-    };
-    dispatch(getListAccountGroup(body));
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+
+    if (e && e.length > 0) {
+      dispatch(getListAccountGroup(e));
+    }
+
     form.resetFields(["accountGroupType", "specificCustomer"]);
+  };
+
+  // Handle Schedule Type Change
+  const handleScheduleTypeChange = (value) => {
+    setSelectedScheduleType(value);
+    const selectedType = list_scheduler_type?.find((item) => item.id === value);
+    if (selectedType?.name?.toLowerCase() !== "schedule") {
+      form.setFieldValue("scheduleDateTime", null);
+    }
   };
 
   // Handle Change Create New
@@ -403,12 +577,16 @@ const CalculationForm = ({ type }) => {
       "accountGroupType",
       "specificCustomer",
       "type",
+      "scheduleDateTime",
       "remark",
     ];
     if (defaultData?.costCenter) {
       tempData = tempData.filter((item) => item !== "costCenter");
     }
     form.resetFields(tempData);
+    setSelectedScheduleType(null);
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
     setModalSuccess(false);
     setOpenModal(false);
   };
@@ -417,6 +595,7 @@ const CalculationForm = ({ type }) => {
     setModalError(false);
     setBodyError({});
   };
+
   const handleRetry = () => {
     handleSave();
     setModalError(false);
@@ -428,16 +607,25 @@ const CalculationForm = ({ type }) => {
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
-          <BaseContainer header={"BIlling Cycle Information"}>
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] text-primary">
+                  Billing Cycle Information
+                </p>
+              </div>
+            }
+          >
             <div className={"w-full grid grid-cols-2 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
                 name={"billing_cycle"}
                 rules={formMessageRequired("Billing Cycle")}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   onChange={handleChangeBillingCycle}
-                  options={list_billing_cycle?.data?.map((item) => {
+                  options={(list_billing_cycle || []).map((item) => {
                     return {
                       label: item?.name,
                       value: item?.id,
@@ -449,6 +637,7 @@ const CalculationForm = ({ type }) => {
                 label={"Billing Period"}
                 name={"billing_period"}
                 rules={formMessageRequired("Billing Period")}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   disabled={!billingCycle}
@@ -465,42 +654,59 @@ const CalculationForm = ({ type }) => {
                 />
               </Form.Item>
             </div>
-          </BaseContainer>
-          <BaseContainer header={"Input Parameter Information"}>
-            <div className={"w-full grid grid-cols-2 gap-2"}>
-              <Form.Item
-                label={"Calculation Type"}
-                name={"calculation_type"}
-                rules={formMessageRequired("Calculation Type")}
-              >
-                <SelectComponent
-                  options={list_calculation_type?.map((item) => {
-                    return {
-                      label: item?.name,
-                      value: item?.id,
-                    };
-                  })}
-                />
-              </Form.Item>
-              <Form.Item
-                label={"Service Type"}
-                name={"serviceType"}
-                rules={formMessageRequired("Service Type")}
-              >
-                <SelectComponent
-                  options={list_service_type?.map((item) => {
-                    return {
-                      label: item?.name,
-                      value: item?.id,
-                    };
-                  })}
-                />
-              </Form.Item>
-              <div className="col-span-2">
+          </CardContainer>
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] text-primary">
+                  INPUT PARAMETER INFORMATION
+                </p>
+              </div>
+            }
+          >
+            <div className={"w-full grid grid-cols-3 gap-2"}>
+              <div className="">
+                <Form.Item
+                  label={"Calculation Type"}
+                  name={"calculation_type"}
+                  rules={formMessageRequired("Calculation Type")}
+                  style={{ marginBottom: 0 }}
+                >
+                  <SelectComponent
+                    options={list_calculation_type?.map((item) => {
+                      return {
+                        label: item?.name,
+                        value: item?.id,
+                      };
+                    })}
+                  />
+                </Form.Item>
+              </div>
+
+              <div className="">
+                <Form.Item
+                  label={"Service Type"}
+                  name={"serviceType"}
+                  rules={formMessageRequired("Service Type")}
+                  style={{ marginBottom: 0 }}
+                >
+                  <SelectComponent
+                    options={list_service_type?.map((item) => {
+                      return {
+                        label: item?.name,
+                        value: item?.id,
+                      };
+                    })}
+                  />
+                </Form.Item>
+              </div>
+
+              <div className="">
                 <Form.Item
                   label={"SOR"}
                   name={"sor"}
                   rules={formMessageRequired("SOR")}
+                  style={{ marginBottom: 0 }}
                 >
                   <SelectComponent
                     onChange={handleChangeSOR}
@@ -514,7 +720,12 @@ const CalculationForm = ({ type }) => {
                   />
                 </Form.Item>
               </div>
-              <Form.Item label={"Cost Center"} name={"costCenter"}>
+
+              <Form.Item
+                label={"Cost Center"}
+                name={"costCenter"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -527,7 +738,12 @@ const CalculationForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Meter Reading Code"} name={"meterReading"}>
+
+              <Form.Item
+                label={"Meter Reading Code"}
+                name={"meterReading"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleMeterReadingRoute}
@@ -543,7 +759,12 @@ const CalculationForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Segment"} name={"accountSegment"}>
+
+              <Form.Item
+                label={"Account Segment"}
+                name={"accountSegment"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
@@ -555,7 +776,12 @@ const CalculationForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Group Type"} name={"accountGroupType"}>
+
+              <Form.Item
+                label={"Account Group Type"}
+                name={"accountGroupType"}
+                style={{ marginBottom: 0 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
@@ -563,56 +789,218 @@ const CalculationForm = ({ type }) => {
                     !dataSpecificCustomer?.accountSegmentId ||
                     dataSpecificCustomer?.accountSegmentId?.length === 0
                   }
-                  options={(mergedArrayGroupType || [])?.map((item) => {
+                  options={(list_account_group || [])?.map((item) => {
                     return {
-                      label: item?.name,
-                      value: item?.id,
+                      label: item?.glb_VALUE || item?.name,
+                      value: item?.glbTypeValId,
                     };
                   })}
                 />
               </Form.Item>
+
               <div className="col-span-2">
                 <Form.Item
                   label={"Specific Customer Account"}
                   name={"specificCustomer"}
+                  style={{ marginBottom: 0 }}
+                  help={
+                    specific_customer_message && (
+                      <span className="text-blue-600 text-xs">
+                        {specific_customer_message}
+                      </span>
+                    )
+                  }
                 >
-                  <SelectComponent
+                  <Select
                     mode={"multiple"}
                     disabled={!dataSpecificCustomer?.sorId}
-                    options={(list_specific_customer || []).map((item) => {
+                    loading={loading_specific_customer}
+                    showSearch
+                    filterOption={false}
+                    onSearch={handleSearchCustomer}
+                    searchValue={searchCustomerValue}
+                    maxLength={MAX_SEARCH_LENGTH}
+                    onSelect={handleSelectCustomer}
+                    onDeselect={(value) => {
+                      setSearchCustomerValue("");
+                      setFilteredCustomerList([]);
+                      setSelectedCustomersMap((prev) => {
+                        const newMap = { ...prev };
+                        delete newMap[value];
+                        return newMap;
+                      });
+                    }}
+                    onClear={() => {
+                      setSearchCustomerValue("");
+                      setFilteredCustomerList([]);
+                      setSelectedCustomersMap({});
+                      setDataSpecificCustomer((prevState) => ({
+                        ...prevState,
+                        search: "",
+                        limit: DEFAULT_SEARCH_LIMIT,
+                      }));
+                    }}
+                    allowClear
+                    placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
+                    tagRender={(props) => {
+                      const { value, closable, onClose } = props;
+                      const customerData = selectedCustomersMap[value];
+
+                      const displayText = customerData
+                        ? `${customerData.accountName} - ${customerData.accountNumber}`
+                        : value;
+
+                      return (
+                        <span
+                          className="ant-select-selection-item"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span className="ant-select-selection-item-content">
+                            {displayText}
+                          </span>
+                          {closable && (
+                            <span
+                              className="ant-select-selection-item-remove"
+                              onClick={onClose}
+                              style={{ cursor: "pointer" }}
+                            >
+                              ×
+                            </span>
+                          )}
+                        </span>
+                      );
+                    }}
+                    notFoundContent={
+                      loading_specific_customer ? (
+                        <div className="flex justify-center py-4">
+                          <Spin size="small" />
+                        </div>
+                      ) : searchCustomerValue.length > 0 &&
+                        searchCustomerValue.length < 3 ? (
+                        <div className="text-center py-4 text-gray-500">
+                          Please enter at least 3 characters
+                        </div>
+                      ) : (
+                        "No data"
+                      )
+                    }
+                    dropdownRender={(menu) => (
+                      <>
+                        {menu}
+                        {specific_customer_message && (
+                          <div className="px-2 py-2 border-t text-xs text-gray-500">
+                            {specific_customer_message}
+                          </div>
+                        )}
+                        {searchCustomerValue.length > 0 && (
+                          <div className="px-2 py-1 border-t text-xs text-right">
+                            <span
+                              className={
+                                searchCustomerValue.length >= MAX_SEARCH_LENGTH
+                                  ? "text-red-500 "
+                                  : "text-gray-500"
+                              }
+                            >
+                              {searchCustomerValue.length}/{MAX_SEARCH_LENGTH}{" "}
+                              characters
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  >
+                    {(filteredCustomerList || []).map((item) => (
+                      <Select.Option
+                        key={item.accountNumber || item.code}
+                        value={item.accountNumber || item.code}
+                      >
+                        {item.accountName || item.name} -{" "}
+                        {item.accountNumber || item.code}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+            </div>
+          </CardContainer>
+
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] text-primary">
+                  SCHEDULER INFORMATION
+                </p>
+              </div>
+            }
+          >
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex w-full gap-3">
+                <Form.Item
+                  label={"Type"}
+                  name={"type"}
+                  rules={formMessageRequired("Type")}
+                  style={{ marginBottom: 0 }}
+                >
+                  <SelectComponent
+                    onChange={handleScheduleTypeChange}
+                    options={(list_scheduler_type || []).map((item) => {
                       return {
-                        label: item.name,
-                        value: item.code,
+                        label: item?.name,
+                        value: item?.id,
                       };
                     })}
+                    placeholder={"Choose Type ..."}
+                  />
+                </Form.Item>
+
+                {selectedScheduleType &&
+                  list_scheduler_type
+                    ?.find((item) => item.id === selectedScheduleType)
+                    ?.name?.toLowerCase() === "scheduler" && (
+                    <Form.Item
+                      label={"Schedule"}
+                      name={"scheduleDateTime"}
+                      style={{ marginBottom: 0 }}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select schedule date and time",
+                        },
+                      ]}
+                    >
+                      <DatePicker
+                        showTime
+                        format="DD MMM YYYY HH:mm:ss"
+                        placeholder="Select date and time"
+                        className="w-full"
+                        disabledDate={(current) => {
+                          return current && current < moment().startOf("day");
+                        }}
+                      />
+                    </Form.Item>
+                  )}
+              </div>
+              <div className="w-full">
+                <Form.Item
+                  label={"Remark"}
+                  name={"remark"}
+                  rules={formMessageRequired("Remark")}
+                  style={{ marginBottom: 0 }}
+                >
+                  <InputComponent
+                    type="textarea"
+                    rows={3}
+                    value={remark}
+                    style={{ marginBottom: 4 }}
+                    onChange={(e) => setRemark(e.target.value)}
                   />
                 </Form.Item>
               </div>
             </div>
-          </BaseContainer>
-          <BaseContainer header={"Scheduler Information"}>
-            <Form.Item
-              label={"Type"}
-              name={"type"}
-              rules={formMessageRequired("Type")}
-            >
-              <SelectComponent
-                options={(list_scheduler_type || []).map((item) => {
-                  return {
-                    label: item?.name,
-                    value: item?.id,
-                  };
-                })}
-              />
-            </Form.Item>
-            <Form.Item label={"Remark"} name={"remark"}>
-              <InputComponent
-                type="textarea"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-              />
-            </Form.Item>
-          </BaseContainer>
+          </CardContainer>
           <div className={"w-full flex mt-5"}>
             <div className={"w-full justify-start"}>
               <Form.Item>
@@ -667,9 +1055,154 @@ const CalculationForm = ({ type }) => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
+          <p className="text-[18px]">
             Are you sure you want to back?
           </p>
+        </div>
+      </ModalConfirm>
+
+      {/* modal warning populate all */}
+      <ModalConfirm
+        isOpen={openWarningPopulate}
+        handleCancel={handleCancelPopulateAll}
+        handleOk={handleConfirmPopulateAll}
+        width={700}
+      >
+        <div className="flex flex-col justify-center mt-5 gap-[20px] px-4">
+          <div className="flex items-start gap-[20px]">
+            <WarningOutlined
+              style={{
+                fontSize: "32px",
+                color: "#FF9800",
+                marginTop: "4px",
+              }}
+            />
+            <div className="flex-1">
+              <p className="text-[18px] text-gray-800">
+                No Specific Customer Selected
+              </p>
+              <p className="text-[14px] text-gray-600 mt-3">
+                You have not selected any specific customer account.
+              </p>
+              <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+                <p className="text-[14px] text-orange-800">
+                  The system will process{" "}
+                  <span className="text-[16px]">ALL customers</span>{" "}
+                  that match your filter criteria
+                </p>
+              </div>
+
+              <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200 max-h-[300px] overflow-y-auto">
+                <p className="text-[13px] text-gray-700 mb-3">
+                  Current Filter Criteria:
+                </p>
+
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
+                    <span className="text-[13px] text-gray-700 min-w-[140px]">
+                      SOR:
+                    </span>
+                    <span className="text-[13px] text-gray-600">
+                      {list_sor?.data?.find(
+                        (item) => item.id === pendingDataFinal?.sor
+                      )?.name || "All"}
+                    </span>
+                  </div>
+
+                  {pendingDataFinal?.rRbiCalculationCostCenter?.length > 0 && (
+                    <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
+                        Cost Center:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {pendingDataFinal.rRbiCalculationCostCenter.length}{" "}
+                          selected
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {pendingDataFinal?.rRbiCalculationMeterReadingCode?.length >
+                    0 && (
+                    <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
+                        Meter Reading Code:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {
+                            pendingDataFinal.rRbiCalculationMeterReadingCode
+                              .length
+                          }{" "}
+                          selected
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {pendingDataFinal?.rRbiCalculationAccountSegment?.length >
+                    0 && (
+                    <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
+                        Account Segment:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {
+                            pendingDataFinal.rRbiCalculationAccountSegment
+                              .length
+                          }{" "}
+                          selected
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {pendingDataFinal?.rRbiCalculationAccountGroupType?.length >
+                    0 && (
+                    <div className="flex items-start gap-2 pb-2">
+                      <span className="text-[13px] text-gray-700 min-w-[140px]">
+                        Account Group Type:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {
+                            pendingDataFinal.rRbiCalculationAccountGroupType
+                              .length
+                          }{" "}
+                          selected
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {!pendingDataFinal?.rRbiCalculationCostCenter?.length &&
+                    !pendingDataFinal?.rRbiCalculationMeterReadingCode
+                      ?.length &&
+                    !pendingDataFinal?.rRbiCalculationAccountSegment?.length &&
+                    !pendingDataFinal?.rRbiCalculationAccountGroupType
+                      ?.length && (
+                      <div className="text-[13px] text-gray-500 italic">
+                        No additional filters applied - will process all
+                        customers for selected SOR
+                      </div>
+                    )}
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+                <p className="text-[13px] text-blue-800">
+                  <strong>Note:</strong> The backend will automatically populate
+                  all customers matching these criteria for processing.
+                </p>
+              </div>
+
+              <p className="text-[14px] text-gray-700 font-medium mt-4">
+                Do you want to continue?
+              </p>
+            </div>
+          </div>
         </div>
       </ModalConfirm>
 
@@ -695,7 +1228,6 @@ const CalculationForm = ({ type }) => {
       </ModalCustom>
 
       {/* Modal Success */}
-
       <Modal
         open={modalSuccess}
         onOk={() => navigate(-1)}
@@ -726,7 +1258,7 @@ const CalculationForm = ({ type }) => {
         <div className="px-8 py-8 justify-center">
           <div className="w-full flex gap-[20px]">
             {IconModal["icon_success_default"]}
-            <p className="text-[18px] font-bold">{"Successful"}</p>
+            <p className="text-[18px]">{"Successful"}</p>
           </div>
           <p className="pl-[70px]">{"Your data has been created."}</p>
         </div>
@@ -742,7 +1274,7 @@ const CalculationForm = ({ type }) => {
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">
             <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+            <p className="text-[18px]">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">{`Your data was not created. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>

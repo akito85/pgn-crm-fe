@@ -1,0 +1,238 @@
+# Default values for dbs-module-account.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: "pgn-frontend"
+fullnameOverride: "pgn-frontend"
+
+replicaCount: 1
+deployment:
+  enabled: true
+
+image:
+  name: "imagePath"
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets:
+  name: ""
+#nameOverride: ""
+#fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "default"
+#
+podAnnotations:
+  releaseNamespace: "default"
+  vault:
+    enabled: false
+    # authPath: ""
+    # role: "default"
+    # access_path: ""
+    # secretPath: "energy-development/db_access"
+    # inject: "update"
+    # access_properties_un: spring.crm-datasource.userName={{ .Data.data.username }}
+    # access_properties_pw: spring.crm-datasource.password={{ .Data.data.password }}
+# podLabels:
+#   helm.sh/chart: dbs-module-account
+#   app.kubernetes.io/name: dbs-module-account
+#   app.kubernetes.io/instance: dbs-module-account
+#   app.kubernetes.io/version: "1.0.0"
+#   app.kubernetes.io/managed-by: Helm
+
+
+# podLabels:
+#   app.kubernetes.io/name: pgn-frontend
+#   app.kubernetes.io/instance: pgn-frontend
+#   app.kubernetes.io/managed-by: Helm
+#   app.kubernetes.io/version: "1.0.0"        
+#   helm.sh/chart: pgn-frontend-0.1.0 
+
+#
+#podSecurityContext: {}
+## fsGroup: 2000
+#
+#securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  enabled: false
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: 
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 1024K
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx.ingress.kubernetes.io/use-regex: "true"
+  hosts:
+    - host: stg-energy.pgn.co.id
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: pgn-frontend
+          servicePort: 80
+
+        # - path: /rbi(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: rbi-management
+        #   servicePort: 8903
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /payment(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: dbs-module-payment
+        #   servicePort: 8905
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /acc(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: dbs-module-account
+        #   servicePort: 8902
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /rabbitmq(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: rabbitmq
+        #   servicePort: 15672 # port management nginx biasanya ini
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /ig(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: integration-service
+        #   servicePort: 8903
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+  tls:
+    - secretName: tls-secret
+      hosts:
+        - dev-energy.pgn.co.id
+
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 1
+    memory: 128Mi
+#
+
+
+
+# readinessProbe:
+#   tcpSocket:
+#     port: 80
+#   initialDelaySeconds: 15
+#   periodSeconds: 10
+#   failureThreshold: 3
+#   successThreshold: 1
+#   timeoutSeconds: 2
+
+# livenessProbe:
+#   tcpSocket:
+#     port: 80
+#   initialDelaySeconds: 30
+#   periodSeconds: 20
+#   failureThreshold: 3
+#   timeoutSeconds: 2
+
+# livenessProbe:
+#   initialDelaySeconds: 180
+#   timeoutSeconds: 20
+#   successThreshold: 1
+#   failureThreshold: 5
+
+# readinessProbe:
+#   initialDelaySeconds: 30
+#   timeoutSeconds: 10
+#   successThreshold: 1
+#   failureThreshold: 5
+
+
+# livenessProbe:
+#   tcpSocket: 80
+#   initialDelaySeconds: 180
+#   timeoutSeconds: 20
+#   successThreshold: 1
+#   failureThreshold: 5
+# readinessProbe:
+#   tcpSocket: 80
+#   initialDelaySeconds: 180
+#   timeoutSeconds: 20
+#   successThreshold: 1
+#   failureThreshold: 5
+
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: 80
+#   initialDelaySeconds: 30
+#   periodSeconds: 10
+#   timeoutSeconds: 2
+#   failureThreshold: 3
+
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: 80
+#   initialDelaySeconds: 5
+#   periodSeconds: 5
+#   timeoutSeconds: 2
+#   failureThreshold: 3
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+testconnection:
+  enabled: false

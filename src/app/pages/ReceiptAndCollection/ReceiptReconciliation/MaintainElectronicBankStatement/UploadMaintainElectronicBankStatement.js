@@ -1,11 +1,10 @@
-import { Form, Modal, Progress, Select, Spin, Typography } from "antd";
+import { Form, Progress, Select, Spin, Typography } from "antd";
 import React, { useState, useCallback, useEffect } from "react";
 import SelectComponent from "../../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import {
   CloseOutlined,
   FileOutlined,
-  InboxOutlined,
   LeftOutlined,
   UndoOutlined,
   UploadOutlined,
@@ -16,29 +15,27 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import { bytesConverter } from "../../../../../utils/bytesConverter";
 import { getBase64 } from "../../../../../utils/getBase64";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ExtensionFile from "../../../../../utils/ExtensionFile";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getBankDDLMaintain,
-  getListBank,
   getListType,
   uploadBank,
+  getListTypeCi
 } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { useNavigate } from "react-router-dom";
-import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { showModalSuccess } from "../../../../../redux/slices/general_slice";
 import { formMessageRequired } from "../../../../../utils";
 
 const { Option } = Select;
 const MAX_FILE_SIZE = 5000000;
 
-const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
-  const { bankDDL, data_type, data, loading } = useSelector(
+const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
+  const { bankDDL, data_type_ci, data, loading } = useSelector(
     (state) => state.electronic
   );
 
@@ -71,7 +68,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
 
   useEffect(() => {
     dispatch(getBankDDLMaintain());
-    dispatch(getListType());
+    dispatch(getListTypeCi());
   }, [dispatch]);
 
   const handleButton = (value) => {
@@ -177,7 +174,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
   const handleUploadLink = async (e) => {
     e.stopPropagation();
     const url = urlLink;
-    if (!!url) {
+    if (url) {
       try {
         const fileName = url.split("/").pop();
         const result = await fetch(url);
@@ -281,9 +278,9 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
                     onChange={handleButton}
                     labelInValue
                   >
-                    {data_type?.data?.map((a, index) => (
+                    {data_type_ci?.data?.map((a, index) => (
                       <Select.Option key={index.id} value={a.id}>
-                        {a.name}
+                        {a.ciCode} - {a.name}
                       </Select.Option>
                     ))}
                   </SelectComponent>
@@ -335,9 +332,8 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
                     {submit && (dataLink.file || !!errorMessage) ? (
                       <>
                         <p
-                          className={`mb-1 text-base${
-                            errorMessage ? " text-red-700" : ""
-                          }`}
+                          className={`mb-1 text-base${errorMessage ? " text-red-700" : ""
+                            }`}
                           style={!errorMessage ? { color: "#BBCF4B" } : null}
                         >
                           {errorMessage || "Link has been attached!"}

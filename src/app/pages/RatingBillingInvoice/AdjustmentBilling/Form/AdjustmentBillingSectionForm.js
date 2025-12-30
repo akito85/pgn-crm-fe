@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Select, Input, DatePicker } from "antd";
+import { Form, Select, DatePicker } from "antd";
 import AdjustmentBISectionForm from "./AdjustmentBISectionForm";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import SelectComponent from "../../../../../components/SelectComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import DateComponent from "../../../../../components/DateComponent";
 import InvoiceSectionForm from "./InvoiceSectionForm";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
 import {
   getListAccount,
   getListAdjustmentReason,
@@ -15,12 +17,11 @@ import {
   getListCurrency,
   getListInvoice,
   getListInvoiceInformation,
-  getListItem,
   getListType,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
 import DetailText from "../../../../../components/DetailText";
-import { dateFormatting, hasValue, renderDateConverter } from "../../../../../utils";
+import { dateFormatting, hasValue } from "../../../../../utils";
 import moment from "moment";
 
 const AdjustmentBillingSectionForm = ({
@@ -30,17 +31,17 @@ const AdjustmentBillingSectionForm = ({
   idInvoice,
   setIdInvoice,
   dataInvoice = {},
-  setDataInvoice = () => { },
+  setDataInvoice = () => {},
   form,
   listDataABI = [],
-  setListDataABI = () => { },
+  setListDataABI = () => {},
   adjustmentId,
   cycleId,
   setCycleId,
   billingPeriodId,
   setBillingPeriodId,
-  setRangeDisableDate = () => { },
-  rangeDisableDate
+  setRangeDisableDate = () => {},
+  rangeDisableDate,
 }) => {
   // Selector
   const {
@@ -86,7 +87,14 @@ const AdjustmentBillingSectionForm = ({
   }, [dispatch, cycleId, form]);
 
   useEffect(() => {
-    if (idAccount && cycleId && billingPeriodId && dataListAccount && dataListBillingCycle && dataListBillingPeriod) {
+    if (
+      idAccount &&
+      cycleId &&
+      billingPeriodId &&
+      dataListAccount &&
+      dataListBillingCycle &&
+      dataListBillingPeriod
+    ) {
       const getFilteredData = (dataList, id) => {
         return dataList?.find((v) => v.id === id);
       };
@@ -109,7 +117,15 @@ const AdjustmentBillingSectionForm = ({
 
       dispatch(getListInvoice({ body: params }));
     }
-  }, [dispatch, idAccount, cycleId, billingPeriodId, dataListAccount, dataListBillingCycle, dataListBillingPeriod]);
+  }, [
+    dispatch,
+    idAccount,
+    cycleId,
+    billingPeriodId,
+    dataListAccount,
+    dataListBillingCycle,
+    dataListBillingPeriod,
+  ]);
 
   useEffect(() => {
     if (idAccount && idAccount !== 0) {
@@ -175,7 +191,7 @@ const AdjustmentBillingSectionForm = ({
   //     setBillingPeriodId();
   //     setIdInvoice();
   //     form.resetFields(["billingPeriod", "referenceInvoiceNumber"]);
-  //   } 
+  //   }
   // }, [form, billingPeriodId, cycleId]);
 
   useEffect(() => {
@@ -197,21 +213,22 @@ const AdjustmentBillingSectionForm = ({
 
   useEffect(() => {
     if (hasValue(billingPeriodId)) {
-      const findPeriod = dataListBillingPeriod?.find(item => item?.id === billingPeriodId);
+      const findPeriod = dataListBillingPeriod?.find(
+        (item) => item?.id === billingPeriodId
+      );
       setRangeDisableDate({
         startDate: findPeriod?.startDate,
-        endDate: findPeriod?.endDate
-      })
+        endDate: findPeriod?.endDate,
+      });
     }
-  }, [billingPeriodId, dataListBillingPeriod, setRangeDisableDate])
+  }, [billingPeriodId, dataListBillingPeriod, setRangeDisableDate]);
 
   useEffect(() => {
     if (hasValue(rangeDisableDate?.startDate)) {
-      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone())
-      setKeyPicker(prev => prev + 1)
+      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone());
+      setKeyPicker((prev) => prev + 1);
     }
   }, [rangeDisableDate?.startDate]);
-
 
   const onChangeAccountNumber = (e) => {
     setIdAccount(e || undefined);
@@ -230,8 +247,6 @@ const AdjustmentBillingSectionForm = ({
     form.resetFields(["billingPeriod", "referenceInvoiceNumber"]);
     return e;
   };
-
-
 
   const onChangeBillingPeriod = (e) => {
     setBillingPeriodId(e || undefined);
@@ -259,88 +274,127 @@ const AdjustmentBillingSectionForm = ({
   );
 
   // Sum Total Adjustment EQV IDR
-  let dataEqvIdr = sumIDR + sumUSD * dataInvoice?.rate
+  let dataEqvIdr = sumIDR + sumUSD * dataInvoice?.rate;
 
   // Sum Total Adjustment EQV USD
   let dataEqvUSD = sumUSD + sumIDR / dataInvoice?.rate;
 
-  const disabledRangeDate = useCallback((current) => {
-    return current < moment(rangeDisableDate?.startDate) || current > moment(rangeDisableDate?.endDate).add(1, 'days')
-  }, [rangeDisableDate]);
-
-  
+  const disabledRangeDate = useCallback(
+    (current) => {
+      return (
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days")
+      );
+    },
+    [rangeDisableDate]
+  );
 
   return (
     <div>
       {/* Customer Information */}
-      <BaseContainer header={"Customer Information"}>
-        <div className="w-full grid grid-cols-4 gap-4">
-          <div className="col-span-4">
-            <Form.Item
-              label={"Account Number"}
-              name={"accountNumberWithName"}
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your Account Number!",
-                },
-              ]}
+      <CardContainer subHeader={"Customer Information"}>
+        <div className="w-full grid grid-cols-4 gap-3">
+          <Form.Item
+            label={"Account Number"}
+            name={"accountNumberWithName"}
+            rules={[
+              {
+                required: true,
+                message: "Please input your Account Number!",
+              },
+            ]}
+            style={{ marginBottom: 0 }}
+          >
+            <SelectComponent
+              onChange={onChangeAccountNumber}
+              disabled={type === "update" ? true : false}
             >
-              <SelectComponent
-                onChange={onChangeAccountNumber}
-                disabled={type === "update" ? true : false}
-              >
-                {dataListAccount &&
-                  dataListAccount?.map((data, index) => (
-                    <Select.Option value={data.accountId} key={index}>
-                      {data.accountNumberWithName}
-                    </Select.Option>
-                  ))}
-              </SelectComponent>
-            </Form.Item>
-          </div>
+              {dataListAccount &&
+                dataListAccount?.map((data, index) => (
+                  <Select.Option value={data.accountId} key={index}>
+                    {data.accountNumberWithName}
+                  </Select.Option>
+                ))}
+            </SelectComponent>
+          </Form.Item>
 
-          <Form.Item label={"Customer Number"} name={"customerNumber"}>
+          <Form.Item
+            label={"Customer Number"}
+            name={"customerNumber"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Customer Name"} name={"customerName"}>
+          <Form.Item
+            label={"Customer Name"}
+            name={"customerName"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Account Number"} name={"accountNumber"}>
+          <Form.Item
+            label={"Account Number"}
+            name={"accountNumber"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Account Name"} name={"accountName"}>
+          <Form.Item
+            label={"Account Name"}
+            name={"accountName"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Account Segment"} name={"accountSegment"}>
+          <Form.Item
+            label={"Account Segment"}
+            name={"accountSegment"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Account Group Type"} name={"accountGroupType"}>
+          <Form.Item
+            label={"Account Group Type"}
+            name={"accountGroupType"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"SOR"} name={"sor"}>
+          <Form.Item label={"SOR"} name={"sor"} style={{ marginBottom: 0 }}>
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Cost Center Code"} name={"costCenterCode"}>
+          <Form.Item
+            label={"Cost Center Code"}
+            name={"costCenterCode"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Cost Center Name"} name={"costCenterName"}>
+          <Form.Item
+            label={"Cost Center Name"}
+            name={"costCenterName"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
 
-          <Form.Item label={"Meter Reading Code"} name={"meterReadingCode"}>
+          <Form.Item
+            label={"Meter Reading Code"}
+            name={"meterReadingCode"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled={true} />
           </Form.Item>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* Invoice Information */}
       <InvoiceSectionForm
@@ -349,11 +403,12 @@ const AdjustmentBillingSectionForm = ({
         type={type}
       />
 
-      <BaseContainer header={"ADJUSTMENT BILLING INFORMATION"}>
-        <div className="w-full grid grid-cols-4 gap-4">
+      <CardContainer subHeader={"ADJUSTMENT BILLING INFORMATION"}>
+        <div className="w-full grid grid-cols-4 gap-3">
           <Form.Item
             label={"Type"}
             name={"adjustmentType"}
+            style={{ marginBottom: 0 }}
             rules={[{ required: true, message: "Please input your Type!" }]}
           >
             <SelectComponent>
@@ -369,6 +424,7 @@ const AdjustmentBillingSectionForm = ({
           <Form.Item
             label={"Billing Cycle"}
             name={"billingCycle"}
+            style={{ marginBottom: 0 }}
             rules={[
               { required: true, message: "Please input your Billing Cycle!" },
             ]}
@@ -391,6 +447,7 @@ const AdjustmentBillingSectionForm = ({
           <Form.Item
             label={"Billing Period"}
             name={"billingPeriod"}
+            style={{ marginBottom: 0 }}
             rules={[
               { required: true, message: "Please input your Billing Period!" },
             ]}
@@ -399,7 +456,7 @@ const AdjustmentBillingSectionForm = ({
               onChange={onChangeBillingPeriod}
               disabled={
                 !form.getFieldValue().billingCycle ||
-                  !form.getFieldValue().accountNumberWithName
+                !form.getFieldValue().accountNumberWithName
                   ? true
                   : false
               }
@@ -416,6 +473,7 @@ const AdjustmentBillingSectionForm = ({
           <Form.Item
             label={"Invoice Number"}
             name={"referenceInvoiceNumber"}
+            style={{ marginBottom: 0 }}
             rules={[
               { required: true, message: "Please input your Invoice Number!" },
             ]}
@@ -424,8 +482,8 @@ const AdjustmentBillingSectionForm = ({
               onChange={handleChangeInvoice}
               disabled={
                 !form.getFieldValue().accountNumberWithName ||
-                  !form.getFieldValue().billingCycle ||
-                  !form.getFieldValue().billingPeriod
+                !form.getFieldValue().billingCycle ||
+                !form.getFieldValue().billingPeriod
                   ? true
                   : false
               }
@@ -442,6 +500,7 @@ const AdjustmentBillingSectionForm = ({
           <Form.Item
             label={"Currency"}
             name={"currency"}
+            style={{ marginBottom: 0 }}
             rules={[{ required: true, message: "Please input your Currency!" }]}
           >
             <SelectComponent>
@@ -457,21 +516,26 @@ const AdjustmentBillingSectionForm = ({
           <Form.Item
             label={"Document Date"}
             name={"documentDate"}
+            style={{ marginBottom: 0 }}
             rules={[
               { required: true, message: "Please input your Document Date!" },
             ]}
           >
-            <DatePicker format={dateFormatting?.date} style={{
-              borderRadius: "6px",
-              boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-              padding: "4px 12px",
-            }}
-              className="w-full" />
+            <DatePicker
+              format={dateFormatting?.date}
+              style={{
+                borderRadius: "6px",
+                boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+                padding: "4px 12px",
+              }}
+              className="w-full"
+            />
           </Form.Item>
 
           <Form.Item
             label={"Transaction Date"}
             name={"transactionDate"}
+            style={{ marginBottom: 0 }}
             rules={[
               {
                 required: true,
@@ -479,21 +543,34 @@ const AdjustmentBillingSectionForm = ({
               },
             ]}
           >
-            <DateComponent dateDisable={disabledRangeDate} defaultPickerValue={defaultPicker} key={keyPicker} />
+            <DateComponent
+              dateDisable={disabledRangeDate}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
 
           <Form.Item
             label={"Accounting Date"}
             name={"accountingDate"}
+            style={{ marginBottom: 0 }}
             rules={[
               { required: true, message: "Please input your Accounting Date!" },
             ]}
           >
-            <DateComponent dateDisable={disabledRangeDate} defaultPickerValue={defaultPicker} key={keyPicker} />
+            <DateComponent
+              dateDisable={disabledRangeDate}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
 
           <div className="col-span-2">
-            <Form.Item label={"Terms Of Payment"} name={"termsOfPayment"}>
+            <Form.Item
+              label={"Terms Of Payment"}
+              name={"termsOfPayment"}
+              style={{ marginBottom: 0 }}
+            >
               <InputComponent disabled={true} />
             </Form.Item>
           </div>
@@ -502,6 +579,7 @@ const AdjustmentBillingSectionForm = ({
             <Form.Item
               label={"Adjustment Reason"}
               name={"adjustmentReason"}
+              style={{ marginBottom: 0 }}
               rules={[
                 {
                   required: true,
@@ -525,24 +603,42 @@ const AdjustmentBillingSectionForm = ({
               label={"Remark"}
               name={"remark"}
               className={"w-full"}
+              style={{ marginBottom: 0 }}
               rules={[{ required: true, message: "Please input your Remark!" }]}
             >
               <InputComponent
                 type="textarea"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                rows={1}
+                rows={3}
               />
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* Adjustment Billing Item Information */}
-      <BaseContainer header={"Adjustment Billing Item Information"}>
+      <CardContainer
+        subHeader={
+          <div className="flex -my-2 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              Adjustment Billing Item Information
+            </p>
+            {type !== "detail" && type !== "show" ? (
+              <ButtonComponent
+                type={"submit"}
+                icon={<SVGIcon name="IconButtonCreate" width={20} />}
+                id="create-abi-button"
+              >
+                Create
+              </ButtonComponent>
+            ) : null}
+          </div>
+        }
+      >
         <AdjustmentBISectionForm
           children={
-            <div className="w-full grid grid-cols-4 gap-4">
+            <div className="w-full grid grid-cols-4 gap-3">
               <DetailText label={"Total Adjustment IDR"}>
                 {sumIDR ? currencyFormatting(sumIDR, "idr") : sumIDR}
               </DetailText>
@@ -563,8 +659,15 @@ const AdjustmentBillingSectionForm = ({
           invoiceNumber={form.getFieldValue().referenceInvoiceNumber}
           dataInvoice={dataInvoice}
           adjustmentId={adjustmentId}
+          showCreateButtonInHeader={true}
+          onCreateClick={(handler) => {
+            const btn = document.getElementById("create-abi-button");
+            if (btn) {
+              btn.onclick = handler;
+            }
+          }}
         />
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

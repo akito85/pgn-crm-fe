@@ -260,7 +260,13 @@ export const getDowloadDailyRate = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_DAILY_RATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_DAILY_RATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -380,7 +386,7 @@ const dailyrateSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Rate Type Pagination
-    [getDailyRatePaginate.pending]: (state, action) => {
+    [getDailyRatePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getDailyRatePaginate.fulfilled]: (state, action) => {
@@ -393,14 +399,14 @@ const dailyrateSlice = createSlice({
     },
 
     // inactive app
-    [inactiveDailyRates.pending]: (state, action) => {
+    [inactiveDailyRates.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveDailyRates.fulfilled]: (state, action) => {
+    [inactiveDailyRates.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveDailyRates.rejected]: (state, action) => {
+    [inactiveDailyRates.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -518,26 +524,26 @@ const dailyrateSlice = createSlice({
     },
 
     // get detail
-    [getDetailDR.pending]: (state, action) => {
+    [getDetailDR.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDR.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailDR.rejected]: (state, action) => {
+    [getDetailDR.rejected]: (state) => {
       state.loading = true;
     },
 
     // get detail draft
-    [getDetailDraftDR.pending]: (state, action) => {
+    [getDetailDraftDR.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDraftDR.fulfilled]: (state, action) => {
       state.data_detail_draft = action.payload;
       state.loading = false;
     },
-    [getDetailDraftDR.rejected]: (state, action) => {
+    [getDetailDraftDR.rejected]: (state) => {
       state.loading = true;
     },
 
@@ -569,10 +575,10 @@ const dailyrateSlice = createSlice({
     },
 
     //aproocve reject create
-    [approveCreate.pending]: (state, action) => {
+    [approveCreate.pending]: (state) => {
       state.loading = true;
     },
-    [approveCreate.fulfilled]: (state, action) => {
+    [approveCreate.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -583,10 +589,10 @@ const dailyrateSlice = createSlice({
     },
 
     // approve reject inactive
-    [approveRejectInactive.pending]: (state, action) => {
+    [approveRejectInactive.pending]: (state) => {
       state.loading = true;
     },
-    [approveRejectInactive.fulfilled]: (state, action) => {
+    [approveRejectInactive.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },

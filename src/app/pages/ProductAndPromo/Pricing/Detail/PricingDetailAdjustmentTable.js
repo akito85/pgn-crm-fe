@@ -1,11 +1,9 @@
 import { MoreOutlined } from "@ant-design/icons";
 import { Checkbox, Popover, Tooltip } from "antd";
 import React, { useEffect, useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
 import StatusComponent from "../../../../../components/StatusComponent";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
-import TablePagination from "../../../../../components/TablePagination";
 import { Fragment } from "react";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -17,7 +15,7 @@ import {
   getListAppHierDetail,
   inactivePricingAdjust,
 } from "../../../../../redux/slices/product_promo/pricingAdjust";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import { PRODUCT_PROMO_ROUTES } from "../../../../../routes/product_promo/pp_routes";
 import { Link } from "react-router-dom";
 import { getPriceAdjustByIdPricingDetail } from "../../../../../redux/slices/product_promo/pricing";

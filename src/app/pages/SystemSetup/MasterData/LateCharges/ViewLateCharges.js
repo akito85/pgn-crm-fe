@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import {Checkbox, Spin, Tooltip } from "antd";
+import { Alert, Checkbox, Form, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
-  DownloadOutlined,
+  InfoCircleOutlined,
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -17,54 +16,28 @@ import {
   downloadLateCharge,
   getLateChargePaginate,
 } from "../../../../../redux/slices/account_management/MasterData/late_charges";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../assets/Icon/index";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import {
-  ModalError,
-} from "../../../../../components/Modal/ModalPopUp";
-import { IconModal } from "../../../../../utils/Icon";
-import {  renderColumn } from '../../../../../utils';
-import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import { getGrantedAccessAccount } from "../../../../../redux/slices/account_management/accountManagement";
-import ToolbarAccount from "../../../AccountManagement/ComponentAccount/ToolbarAccount";
-import { useColumnActionPermissionAccount } from "../../../AccountManagement/ComponentAccount/ColumnActionPermissionAccount";
-
-
-// Breadcrumbs
-const routes = [
-  {
-    path: "",
-    breadcrumbName: "System Setup",
-  },
-  {
-    path: "",
-    breadcrumbName: "Master Data",
-  },
-  {
-    path: "",
-    breadcrumbName: "Late Charge",
-  },
-];
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+} from "../../../../../utils";
+import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
+import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import Toolbar from "../../../../../components/Toolbar";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../../components/CardContainer";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import InputComponent from "../../../../../components/InputComponent";
 
 const ViewLateCharges = () => {
   const { data, loading } = useSelector((state) => state.late_charge);
-  const { user } = useSelector((state) => state.auth);
-  const { access_account } = useSelector((state) => state.accountManagement);
-  const filteredArray = {
-    actionList: access_account?.actionList?.filter(action =>
-      action.path.includes("/system-setup/late-charges/") &&
-      !action.path.includes("/system-setup/late-charges-rule/")
-    )
-  }
-  // Access Action Menu
-  const dataArr = user?.data?.actionList
-  const isUpdate = dataArr?.some(element => element.name === "Update");
-  const isInactive = dataArr?.some(element => element.name === "Inactivate");
-  const isCreate = dataArr?.some(element => element.name === "Create");
-
+  const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
-  // const [form] = Form.useForm();
+
   // Use State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -72,23 +45,32 @@ const ViewLateCharges = () => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const searchInput = useRef(null);
-  const [modalActive, setModalActive] = useState(false);
-  const [dataActivate, setDataActivate] = useState({});
+  const [openModalActivation, setOpenModalActivation] = useState(false);
+  const [typeStatus, setTypeStatus] = useState("");
+  const [lateChargeId, setLateChargeId] = useState(null);
+  const [lateChargeName, setLateChargeName] = useState("");
   const [modalError, setModalError] = useState(false);
-  const [bodyError, setBodyError] = useState({});
-
-  useEffect(() => {
-    dispatch(getGrantedAccessAccount('/system-setup/late-charges'))
-  }, [dispatch])
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "action"],
+  }));
+  const searchInput = useRef(null);
+  const [form] = Form.useForm();
 
   // use effect
   useEffect(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(search))
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
       getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
     );
   }, [dispatch, page, pageSize, search, sort]);
+
+  // trigger modal try again
+  useEffect(() => {
+    if (bodyError?.response?.data?.code === 500) {
+      setModalError(true);
+    }
+  }, [bodyError]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -105,238 +87,345 @@ const ViewLateCharges = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // handle activation
+  const handleActiveOrInactive = (record) => {
+    setOpenModalActivation(true);
+    setTypeStatus(record?.status);
+    setLateChargeId(record?.lateChargeId);
+    setLateChargeName(record?.name);
   };
 
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field === "maxAmount" ? "maxAmountReal" : sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
+  // handle cancel modal
+  const handleCancel = () => {
+    setOpenModalActivation(false);
+    form.resetFields();
   };
 
-  const openActiveModal = (data) => {
-    setDataActivate(data);
-    setModalActive(true);
+  // handle save activation
+  const handleSaveActivation = async (formValue) => {
+    const body = {
+      ...formValue,
+      lateChargeId: lateChargeId,
+    };
+    const activeOrInactive =
+      typeStatus === "ACTIVE" ? "inactivate" : "activate";
+    await dispatch(
+      activeInactiveLateCharge({ body, activeOrInactive })
+    ).unwrap();
+    setOpenModalActivation(false);
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    await dispatch(
+      getLateChargePaginate({ page, pageSize, sort, search: reqSearch })
+    ).unwrap();
+    form.resetFields();
   };
 
-  // columns
-  const columns = (
-    page,
-    pageSize,
-    searchInput,
-    searchedColumn,
-    searchText,
-    handleSearch = () => { },
-    handleActiveOrInactive = () => { },
-    isInactive,
-    isUpdate
-  ) => {
-    return [
+  // base columns with useMemo
+  const baseColumns = useMemo(
+    () => [
       {
+        key: "no",
         title: "NO",
         width: 60,
         align: "center",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "name",
         title: "LATE CHARGE NAME",
         dataIndex: "name",
-        width: 240,
         sorter: true,
+        width: 240,
         ellipsis: {
           showTitle: false,
         },
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.name] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "name",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "name",
+            hasValue(search["name"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
       {
+        key: "currency",
         title: "CURRENCY",
         dataIndex: "currency",
         align: "center",
-        width: 140,
         sorter: true,
-        ...getColumnSearchPropsPaging(
+        width: 140,
+        filteredValue: [search?.currency] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "currency",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('currency', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "currency",
+            hasValue(search["currency"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
       },
       {
+        key: "criteria",
         title: "CRITERIA",
         dataIndex: "criteria",
         align: "left",
-        width: 240,
         sorter: true,
+        width: 240,
         ellipsis: {
           showTitle: false,
         },
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.criteria] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "criteria",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('criteria', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "criteria",
+            hasValue(search["criteria"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
       {
+        key: "maxAmount",
         title: "LATE CHARGE MAXIMUM AMOUNT",
         dataIndex: "maxAmount",
         align: "right",
-        width: 320,
         sorter: true,
-        ...getColumnSearchPropsPaging(
+        width: 320,
+        filteredValue: [search?.maxAmountReal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "maxAmountReal",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('maxAmount', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "maxAmount",
+            hasValue(search["maxAmountReal"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
       {
+        key: "formula",
         title: "LATE CHARGE RULE FORMULA",
         dataIndex: "formula",
-        width: 320,
         sorter: true,
+        width: 320,
         ellipsis: {
           showTitle: false,
         },
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.formula] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "formula",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('formula', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "formula",
+            hasValue(search["formula"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
       {
+        key: "description",
         title: "DESCRIPTION",
         dataIndex: "description",
-        width: 240,
         sorter: true,
+        width: 240,
         ellipsis: {
           showTitle: false,
         },
-        ...getColumnSearchPropsPaging(
+        filteredValue: [search?.description] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "description",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "description",
+            hasValue(search["description"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
       {
+        key: "status",
         title: "STATUS",
         dataIndex: "status",
-        width: 150,
         sorter: true,
-        fixed: "right",
-        ...getColumnSearchPropsPaging(
+        width: 120,
+        filteredValue: [search?.status] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "status",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true
         ),
-        render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+        render: (text) =>
+          renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search
+          ),
       },
-    ];
+    ],
+    [page, pageSize, search, searchText, searchedColumn]
+  );
+
+  // Breadcrumbs
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
+    },
+    {
+      path: "",
+      breadcrumbName: "Late Charge",
+    },
+  ];
+
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
   };
 
-
-  const handleOk = (formValue, handleClear) => {
-    const body = {
-      lateChargeId: dataActivate.lateChargeId,
-      remark: formValue.remark
-    };
-    const activeOrInactive =
-      dataActivate.status === "ACTIVE" ? "inactivate" : "activate";
-    dispatch(activeInactiveLateCharge({ body, activeOrInactive }))
-      .unwrap()
-      .then(() => {
-        handleClear();
-        setDataActivate({});
-        setModalActive(false);
-        const reqSearch = encodeURIComponent(JSON.stringify(search))
-        dispatch(
-          getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
-        );
-      })
-      .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message || error.message || error.toString();
-          setBodyError({ message, activeOrInactive });
-          setModalError(true);
-        }
-      });
-    // form.resetFields();
+  // onsort
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter.order !== undefined
+        ? `${sorter.field === "maxAmount" ? "maxAmountReal" : sorter.field}~${
+            sorter.order === "ascend" ? "asc" : "desc"
+          }`
+        : "";
+    setSort(dataSort);
   };
 
+  // handle download
+  const handleDownload = () => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(downloadLateCharge({ search: reqSearch, sort, page, pageSize }));
+  };
+
+  // handle confirm retry
+  const handleConfirm = () => {
+    if (bodyError?.action === "GET_LATE_CHARGE_PAGINATE") {
+      const reqSearch = encodeURIComponent(JSON.stringify(search));
+      dispatch(
+        getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
+      );
+    } else if (bodyError?.action === "DOWNLOAD_LATE_CHARGE") {
+      handleDownload();
+    } else {
+      handleSaveActivation();
+    }
+    dispatch(clearBodyMessage());
+  };
+
+  // handle retry
+  const handleRetry = () => {
+    handleConfirm();
+    setModalError(false);
+    dispatch(clearBodyMessage());
+  };
+
+  // handle close modal
   const handleCloseModalError = () => {
     setModalError(false);
-    setBodyError({});
-  };
-  const handleRetry = () => {
-    handleOk();
-    setModalError(false);
-    setBodyError({});
-  };
-
-  const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadLateCharge({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
-  };
-
-  const handleClose = () => {
-    setModalActive(false);
+    dispatch(clearBodyMessage());
   };
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          type="submit"
-          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          onClick={() => {
+            handleDownload();
+          }}
         >
           Download List
         </ButtonComponent>
-
-      )
+      ),
     },
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
-        <NavLink to={""}>
+        <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_LATE_CHARGES}>
           <ButtonComponent
             icon={<UploadOutlined style={{ fontSize: "24px" }} />}
             type="submit"
@@ -344,11 +433,10 @@ const ViewLateCharges = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LATE_CHARGES}>
           <ButtonComponent
@@ -358,7 +446,7 @@ const ViewLateCharges = () => {
             Create Late Charge
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // Column Action Table
@@ -377,10 +465,9 @@ const ViewLateCharges = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
     {
       action: "Update",
       type: "table",
@@ -407,10 +494,9 @@ const ViewLateCharges = () => {
               </Link>
             )}
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
     {
       action: "Activate",
       type: "table",
@@ -422,86 +508,151 @@ const ViewLateCharges = () => {
             <div>
               <Checkbox
                 onClick={() => {
-                  openActiveModal(record);
+                  handleActiveOrInactive(record);
                 }}
-                checked={record?.status === "INACTIVE"}
+                checked={record?.status === "ACTIVE" ? false : true}
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
+  ];
 
-  ]
+  const actionCols = useColumnActionPermission(
+    ["Activate", "View", "Update"],
+    itemActions
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
+    <Spin spinning={loading}>
+      <LayoutMenu>
         <BreadCrumb routes={routes} />
 
-        <ToolbarAccount items={itemActions} advancedAccess={filteredArray} />
-
-        <BaseContainer header={"Late Charge List"}>
-          <div className="w-full">
-            <TablePaginationNew
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">LATE CHARGE LIST</p>
+              <div className="flex gap-[20px]">
+                <Toolbar items={itemActions} />
+              </div>
+            </div>
+          }
+        >
+          <div className="my-0">
+            <TableRBI
               dataSource={data?.result}
-              columns={[
-                ...columns(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  openActiveModal,
-                ),
-                ...useColumnActionPermissionAccount(
-                  ["Activate", "View", "Update"],
-                  itemActions,
-                  filteredArray
-                ),
-              ]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSort={onSort}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{
-                x: 1500,
-                y: 500,
-              }}
+              tableScrolled={{ x: 2000, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              handleDownload={handleDownload}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
-        </BaseContainer>
-      </Spin>
+        </CardContainer>
 
-      <ModalApproveOrReject
-        isOpen={modalActive}
-        handleCloseModal={handleClose}
-        onFinish={handleOk}
-        header={`${dataActivate?.status === "ACTIVE" ? "Inactivate" : "Activate"}`}
-        approveOrReject={`${dataActivate?.status === "ACTIVE" ? "Inactivate" : "Activate"}`}
-        menu={"Late Charge"}
-        named={dataActivate?.name}
-      />
+        <ModalCustom
+          isOpen={openModalActivation}
+          header={`${
+            typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"
+          } INFORMATION`}
+          width={700}
+          type={"confirmation"}
+          handleCancel={handleCancel}
+          footer={
+            <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+              <ButtonComponent onClick={handleCancel} type="default">
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                form="inactivateForm"
+                type="submit"
+                htmlType="submit"
+              >
+                Confirm
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <Form
+            id="inactivateForm"
+            form={form}
+            onFinish={handleSaveActivation}
+            layout="vertical"
+          >
+            <div className="flex flex-col gap-6">
+              <Alert
+                message={`Are you sure want to ${
+                  typeStatus === "ACTIVE" ? "inactivate" : "activate"
+                } late charge named ${lateChargeName}?`}
+                icon={<InfoCircleOutlined />}
+                type={"warning"}
+                showIcon
+                className="inactivate-alert"
+              />
+              <Form.Item
+                name={"remark"}
+                label={"Remark"}
+                rules={formMessageRequired("remark")}
+                className="w-full"
+              >
+                <InputComponent
+                  group
+                  rows={1}
+                  type="textarea"
+                  placeholder={"Type your remark"}
+                />
+              </Form.Item>
+            </div>
+          </Form>
+        </ModalCustom>
 
-      {/** Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal.icon_error_inactivate}
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">
+              {bodyError?.response?.data?.message?.toString()}
+            </p>
+            <p className="pl-[70px]">Please try again.</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${bodyError.activeOrInactive}. ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-    </LayoutMenu>
+        </ModalError>
+      </LayoutMenu>
+    </Spin>
   );
 };
 

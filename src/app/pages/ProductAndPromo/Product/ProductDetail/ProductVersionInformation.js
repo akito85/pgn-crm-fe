@@ -2,19 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { Form, Popover, Tooltip } from "antd";
-import { MoreOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
+import { Form, Tooltip } from "antd";
 import StatusComponent from "../../../../../components/StatusComponent";
 import { PRODUCT_PROMO_ROUTES } from "../../../../../routes/product_promo/pp_routes";
 import moment from "moment";
 import { Link, NavLink } from "react-router-dom";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
-import { hasValue, renderColumn, renderDateColumn, requiredMessage } from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import ModalExtendTerminate from "./ModalExtendTerminate";
-import InputComponent from "../../../../../components/InputComponent";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import {
   extendProductVersion,

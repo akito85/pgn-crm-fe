@@ -1,16 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import BaseContainer from "../../../../../../components/BaseContainer";
 import {
   columnsDetailTermOfService,
   columnsTermOfService,
 } from "../Table/TableTermsOfService";
 import { getAllTOSServiceAgreementPaginate } from "../../../../../../redux/slices/rating_billing_invoice/rating";
+import TableRBI from "../../../../../../components/TableRBI";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const TosSection = ({ SAId }) => {
   // Selector
-  const { data_termOfServiceSA } = useSelector((state) => state.rating);
+  const { data_termOfServiceSA, loading } = useSelector((state) => state.rating);
 
   // Declaration
   const dispatch = useDispatch();
@@ -22,43 +23,39 @@ const TosSection = ({ SAId }) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState({});
   const [dataTable, setDataTable] = useState([]);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
   // Use Effect
   useEffect(() => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
       getAllTOSServiceAgreementPaginate({
         id: SAId,
-        search: tempSearch,
+        search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
       })
     );
-  }, [SAId, search, page, pageSize, sort]);
+  }, [SAId, search, page, pageSize, sort, dispatch]);
 
   useEffect(() => {
     if (data_termOfServiceSA && data_termOfServiceSA?.result?.length > 0) {
       const data = data_termOfServiceSA?.result?.map((a, index) => ({
         ...a,
-        key: index + 1,
-        tosDetail: a.tosDetail?.map((b, index) => ({
+        key: a.tosId || index + 1,
+        tosDetail: a.tosDetail?.map((b, idx) => ({
           ...b,
-          key: index + 1,
+          key: b.tosDetailId || idx + 1,
         })),
       }));
       setDataTable(data);
+    } else {
+      setDataTable([]);
     }
   }, [data_termOfServiceSA]);
 
@@ -85,30 +82,57 @@ const TosSection = ({ SAId }) => {
   };
 
   // Sort Table
-  const onSortApi = (_, __, sort) => {
+  const onSortApi = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
+
+  const baseColumns = useMemo(
+    () =>
+      columnsTermOfService(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
-    <BaseContainer header={"Term Of Service Information"}>
+    <>
+      <div className="mb-4">
+        <p className="text-sm font-semibold text-primary uppercase">
+          TERM OF SERVICE INFORMATION
+        </p>
+      </div>
       <div className="w-full">
-        <TablePaginationNew
-          dataSource={
-            data_termOfServiceSA && data_termOfServiceSA.length === 0
-              ? null
-              : dataTable
-          }
-          columns={columnsTermOfService(
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch
-          )}
+        <TableRBI
+          dataSource={dataTable.length === 0 ? null : dataTable}
+          columns={processedColumns}
           current={page}
           pageSize={pageSize}
           onChange={handleChange}
@@ -116,6 +140,11 @@ const TosSection = ({ SAId }) => {
           totalData={data_termOfServiceSA?.page?.totalElements || 0}
           onSort={onSortApi}
           tableScrolled={{ y: 525, x: 800 }}
+          showExport={false}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={loading}
           expandable={{
             expandedRowRender: (record) => (
               <div>
@@ -134,14 +163,14 @@ const TosSection = ({ SAId }) => {
                     searchText,
                     handleSearch
                   )}
-                  className={"mb-4"}
+                  className="mb-4"
                 />
               </div>
             ),
           }}
         />
       </div>
-    </BaseContainer>
+    </>
   );
 };
 

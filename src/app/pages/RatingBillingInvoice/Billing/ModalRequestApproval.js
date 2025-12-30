@@ -1,14 +1,12 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Select, Radio, Checkbox } from "antd";
-import { RightOutlined } from "@ant-design/icons";
-import moment from "moment";
+import { Steps, Form, Select, Checkbox } from "antd";
+import { DownOutlined, RightOutlined } from "@ant-design/icons";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
-import SelectComponent from "../../../../components/SelectComponent";
 import {
   getAllApprovalList,
   getAllBillingRequestPaginate,
@@ -22,19 +20,22 @@ import {
 import DetailText from "../../../../components/DetailText";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
+import TableRBI from "../../../../components/TableRBI";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ModalRequestApproval = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
   const {
     data_approval,
     data_approval_list,
     data_list_billing_request_approval,
+    loading,
   } = useSelector((state) => state.billing);
 
   // Declaration
@@ -42,7 +43,7 @@ const ModalRequestApproval = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = data_list_billing_request_approval;
+  const dataSource = data_list_billing_request_approval?.result || [];
 
   // State
   const [current, setCurrent] = useState(0);
@@ -51,25 +52,41 @@ const ModalRequestApproval = ({
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
   const [remark, setRemark] = useState("");
 
   const [boolean, setBoolean] = useState(false);
   const [generateInvoice, setGenerateInvoice] = useState(false);
   const [dataTable, setDataTable] = useState([]);
-  const [tabHeader, setTabHeader] = useState("Billing");
-  const [tabHeader2, setTabHeader2] = useState("Billing");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  // Use Effect
+  const [fixedColumns, setFixedColumns] = useState({
+    left: ["no"],
+    right: [],
+  });
+
+  // Use Effect - Fetch approval list sekali saja
   useEffect(() => {
     dispatch(getAllApprovalList());
-    dispatch(getAllBillingRequestPaginate());
-  }, []);
+  }, [dispatch]);
+
+  // Use Effect - Fetch billing request dengan pagination setiap ada perubahan
+  useEffect(() => {
+    if (isOpen) {
+      dispatch(
+        getAllBillingRequestPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [dispatch, isOpen, search, page, pageSize, sort]);
 
   useEffect(() => {
     if (boolean === true) {
@@ -85,34 +102,38 @@ const ModalRequestApproval = ({
         setDataTable(data);
       }
     }
-  }, [data_approval_list]);
+  }, [data_approval_list, boolean]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
 
   // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
   // Sort Table
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
@@ -126,14 +147,15 @@ const ModalRequestApproval = ({
     onChange: onSelectChange,
   };
 
-  // Step
+  // Step - 3 steps
   const steps = [
     {
       title: "BILLING INFORMATION",
-      disabled:
-        dataTableSelect.length === 0 ||
-        !form.getFieldValue().apphierId ||
-        !form.getFieldValue().remark,
+      disabled: dataTableSelect.length === 0 || !form.getFieldValue().remark,
+    },
+    {
+      title: "APPROVAL INFORMATION",
+      disabled: !form.getFieldValue().apphierId,
     },
     {
       title: "CONFIRMATION",
@@ -143,13 +165,11 @@ const ModalRequestApproval = ({
   // Button Next
   const next = () => {
     setCurrent(current + 1);
-    setTabHeader("Billing");
   };
 
   // Button Previous
   const prev = () => {
     setCurrent(current - 1);
-    setTabHeader2("Billing");
   };
 
   // Scroll Left Handler
@@ -185,38 +205,6 @@ const ModalRequestApproval = ({
     title: item.title,
   }));
 
-  // data tabs
-  const dataTabs = [
-    {
-      label: "Billing",
-      value: "Billing",
-    },
-    {
-      label: "Approval",
-      value: "Approval",
-    },
-  ];
-
-  const dataTabs2 = [
-    {
-      label: "Billing",
-      value: "Billing",
-    },
-    {
-      label: "Approval",
-      value: "Approval",
-    },
-  ];
-
-  // change tabs
-  const changeTabHeader = ({ target: { value } }) => {
-    setTabHeader(value);
-  };
-
-  const changeTabHeader2 = ({ target: { value } }) => {
-    setTabHeader2(value);
-  };
-
   //  Handle Select Approval Hierarchy
   const handleSelect = (e) => {
     dispatch(getListApprovalById(e));
@@ -231,6 +219,12 @@ const ModalRequestApproval = ({
     setDataTable([]);
     setBoolean(false);
     setRemark("");
+    setCurrent(0);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
     form.resetFields();
   };
 
@@ -239,6 +233,7 @@ const ModalRequestApproval = ({
     handleOpenModal();
     setBodyError({});
   };
+
   const handleRetry = () => {
     handleSave();
     setModalError(false);
@@ -266,6 +261,11 @@ const ModalRequestApproval = ({
         setBoolean(false);
         setRemark("");
         setCurrent(0);
+        setSearch({});
+        setPage(1);
+        setSort("");
+        setSearchText("");
+        setSearchedColumn("");
         form.resetFields();
       })
       .catch((error) => {
@@ -278,17 +278,46 @@ const ModalRequestApproval = ({
           setModalError(true);
         }
       });
-
-    console.log(body, "body");
   };
 
-  const filterDataByPage = (type = "data") => {
-    let result = [...dataSource].map((a, index) => ({
-      ...a,
+  const baseColumns = useMemo(
+    () =>
+      columnsRequestBilling(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item, index) => ({
+      ...item,
       key: index + 1,
     }));
-    return type === "data" ? result : result.length;
-  };
+  }, [dataSource]);
 
   return (
     <div>
@@ -297,7 +326,7 @@ const ModalRequestApproval = ({
         type="confirmation"
         header="Request Approval"
         handleCancel={handleCancelForm}
-        width={1200}
+        width={1000}
         footer={
           <div className="flex w-full justify-end gap-x-5">
             {current < steps.length - 1 && (
@@ -359,106 +388,255 @@ const ModalRequestApproval = ({
           </div>
         </div>
 
-        <div
-          className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
+        <Form
+          layout="vertical"
+          form={form}
+          id={"formRequest"}
+          onFinish={handleSave}
         >
-          <Radio.Group
-            options={dataTabs}
-            onChange={changeTabHeader}
-            value={tabHeader}
-            optionType="button"
-            buttonStyle="solid"
-            style={{ gap: 12, display: "flex" }}
-          />
-
-          <Form
-            layout="vertical"
-            form={form}
-            id={"formRequest"}
-            onFinish={handleSave}
+          {/* STEP 1: BILLING INFORMATION */}
+          <div
+            className={`steps-content my-[30px] ${
+              current !== 0 ? "hidden" : ""
+            }`}
           >
-            <div className={`${tabHeader !== "Billing" ? "hidden" : ""}`}>
-              <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-                <p className="text-primary uppercase font-bold">Billing List</p>
-                <TablePaginationNew
-                  type="FE"
-                  dataSource={filterDataByPage("data")}
-                  columns={columnsRequestBilling(
-                    page,
-                    pageSize,
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                  )}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChange}
-                  onSizeChanger={handleChange}
-                  totalData={filterDataByPage("length")}
-                  onSort={onSort}
-                  tableScrolled={{ y: 525, x: 15000 }}
-                  rowSelection={rowSelection}
-                />
-                <div className="pt-[30px]">
-                  <Form.Item name={"generateInvoice"}>
-                    <Checkbox
-                      onChange={(e) => setGenerateInvoice(e.target.checked)}
-                    >
-                      Generate Invoice
-                    </Checkbox>
-                    <p className="text-[#4B465C] text-[8px]">
-                      Click or tap this checkbox to automatically generate
-                      invoice
-                    </p>
-                  </Form.Item>
-                  <Form.Item
-                    label={"Remark"}
-                    name={"remark"}
-                    rules={[
-                      { required: true, message: "Please input your Remark!" },
-                    ]}
+            <div className="w-full grid grid-cols-1 gap-x-4">
+              <div className="flex gap-2 justify-between">
+                <p className="text-primary uppercase font-bold mb-4">
+                  Billing List
+                </p>
+                {selectedRowKeys.length > 0 && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedRowKeys.length}{" "}
+                    {selectedRowKeys.length === 1 ? "row" : "rows"} selected
+                  </p>
+                )}
+              </div>
+              <TableRBI
+                dataSource={dataSourceWithKeys}
+                columns={processedColumns}
+                current={page}
+                pageSize={pageSize}
+                onChange={handleChange}
+                onSizeChanger={handleChange}
+                totalData={
+                  data_list_billing_request_approval?.page?.totalElements || 0
+                }
+                tableScrolled={{ y: 525, x: 15000 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
+                showExport={false}
+                rowSelection={rowSelection}
+              />
+              <div className="pt-[30px]">
+                <Form.Item name={"generateInvoice"}>
+                  <Checkbox
+                    onChange={(e) => setGenerateInvoice(e.target.checked)}
                   >
-                    <InputComponent
-                      rows={1}
-                      type="textarea"
-                      value={remark}
-                      onChange={(e) => setRemark(e.target.value)}
-                      placeholder={"Type your remark"}
-                    />
-                  </Form.Item>
-                </div>
+                    Generate Invoice
+                  </Checkbox>
+                  <p className="text-[#4B465C] text-[8px]">
+                    Click or tap this checkbox to automatically generate invoice
+                  </p>
+                </Form.Item>
+                <Form.Item
+                  label={"Remark"}
+                  name={"remark"}
+                  rules={[
+                    { required: true, message: "Please input your Remark!" },
+                  ]}
+                >
+                  <InputComponent
+                    rows={1}
+                    type="textarea"
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                    placeholder={"Type your remark"}
+                  />
+                </Form.Item>
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 2: APPROVAL INFORMATION */}
+          <div
+            className={`steps-content my-[30px] ${
+              current !== 1 ? "hidden" : ""
+            }`}
+          >
+            <div className="w-full grid grid-cols-1 gap-x-4">
+              <p className="text-primary uppercase font-bold mb-4">
+                Approval Information
+              </p>
+
+              {/* Hidden Form.Item untuk validasi */}
+              <Form.Item
+                name="apphierId"
+                hidden
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your Approval Hierarchy!",
+                  },
+                ]}
+              >
+                <input type="hidden" />
+              </Form.Item>
+
+              {/* Tabel dengan Dropdown di Header */}
+              <TableRBI
+                dataSource={dataTable}
+                columns={columnsApproval(
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch
+                )}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <div>
+                      <p className="text-primary text-xs font-bold uppercase pt-4">
+                        EMPLOYEE INFORMATION
+                      </p>
+                      <TableRBI
+                        dataSource={record?.employeeDetail || []}
+                        columns={columnsExpandApproval(
+                          page,
+                          pageSize,
+                          searchInput,
+                          searchedColumn,
+                          searchText,
+                          handleSearch
+                        )}
+                        className={"mb-4"}
+                        useSelect={false}
+                        usePagination={false}
+                      />
+                    </div>
+                  ),
+                }}
+                usePagination={false}
+                loading={loading}
+                customHeaderLeft={
+                  <div style={{ position: "relative" }}>
+                    <style>{`
+            .approval-hierarchy-select .ant-select-selector {
+              display: flex !important;
+              align-items: center !important;
+              gap: 8px !important;
+              border: 1px solid #BDBDBD !important;
+              height: 40px !important;
+              color: black !important;
+              border-radius: 6px !important;
+              font-size: 14px !important;
+              font-weight: 500 !important;
+              padding: 0 11px !important;
+              background: white !important;
+            }
+            .approval-hierarchy-select .ant-select-selection-placeholder {
+              color: rgba(0, 0, 0, 0.25) !important;
+              line-height: 40px !important;
+              font-size: 14px !important;
+              font-weight: 500 !important;
+            }
+            .approval-hierarchy-select .ant-select-selection-item {
+              line-height: 40px !important;
+              font-size: 14px !important;
+              font-weight: 500 !important;
+              color: black !important;
+            }
+            .approval-hierarchy-select .ant-select-arrow {
+              color: black !important;
+              font-size: 12px !important;
+            }
+            .approval-hierarchy-select:not(.ant-select-disabled):hover .ant-select-selector {
+              border-color: #BDBDBD !important;
+            }
+            .approval-hierarchy-select.ant-select-focused .ant-select-selector {
+              border-color: #40a9ff !important;
+              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+            }
+          `}</style>
+                    <Select
+                      value={form.getFieldValue("apphierId")}
+                      onChange={(value) => {
+                        form.setFieldsValue({ apphierId: value });
+                        handleSelect(value);
+                      }}
+                      placeholder="Approval Hierarchy"
+                      suffixIcon={<DownOutlined style={{ fontSize: "12px" }} />}
+                      style={{ minWidth: 200 }}
+                      className="approval-hierarchy-select"
+                    >
+                      {data_approval?.map((data, index) => (
+                        <Select.Option value={data.appHierId} key={index}>
+                          {data.approvalName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </div>
+                }
+              />
+            </div>
+          </div>
+          {/* STEP 3: CONFIRMATION */}
+          <div
+            className={`steps-content my-[30px] ${
+              current !== 2 ? "hidden" : ""
+            }`}
+          >
+            {/* Billing Information Review */}
+            <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
+              <p className="text-primary uppercase font-bold mb-4">
+                Billing List
+              </p>
+              <TableRBI
+                dataSource={dataTableSelect}
+                columns={processedColumns}
+                current={page}
+                pageSize={pageSize}
+                onChange={handleChange}
+                onSizeChanger={handleChange}
+                totalData={dataTableSelect.length || 0}
+                tableScrolled={{ y: 525, x: 15000 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={false}
+              />
+              <div className="pt-[30px]">
+                <DetailText label={"Generate Invoice"}>
+                  {generateInvoice === false ? "No" : "Yes"}
+                </DetailText>
+                <DetailText label={"Remark"}>
+                  {form.getFieldValue().remark}
+                </DetailText>
               </div>
             </div>
 
-            <div className={`${tabHeader !== "Approval" ? "hidden" : ""}`}>
-              <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-                <p className="text-primary uppercase font-bold">
-                  Approval Information
-                </p>
+            {/* Approval Information Review */}
+            <div className="w-full grid grid-cols-1 gap-x-4 border-t pt-8">
+              <p className="text-primary uppercase font-bold">
+                Approval Information
+              </p>
 
-                <div className="w-full grid grid-cols-1 gap-2">
-                  <div className="w-1/3">
-                    <Form.Item
-                      label="Approval Hierarchy"
-                      name="apphierId"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input your Approval Hierarchy!",
-                        },
-                      ]}
-                    >
-                      <SelectComponent onChange={(e) => handleSelect(e)}>
-                        {data_approval &&
-                          data_approval?.map((data, index) => (
-                            <Select.Option value={data.appHierId} key={index}>
-                              {data.approvalName}
-                            </Select.Option>
-                          ))}
-                      </SelectComponent>
-                    </Form.Item>
-                  </div>
+              <div className="w-full grid grid-cols-1 gap-2">
+                <div className="w-1/3">
+                  <DetailText label={"Approval Hierarchy"}>
+                    {
+                      data_approval
+                        ?.filter(
+                          (a) => a.appHierId === form.getFieldValue().apphierId
+                        )
+                        ?.find((b) => b.approvalName)?.approvalName
+                    }
+                  </DetailText>
                 </div>
               </div>
 
@@ -509,124 +687,8 @@ const ModalRequestApproval = ({
                 ) : null}
               </div>
             </div>
-          </Form>
-        </div>
-
-        {/* Confirmation */}
-        <div
-          className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
-        >
-          <Radio.Group
-            options={dataTabs2}
-            onChange={changeTabHeader2}
-            value={tabHeader2}
-            optionType="button"
-            buttonStyle="solid"
-            style={{ gap: 12, display: "flex" }}
-          />
-
-          <div className={`${tabHeader2 !== "Billing" ? "hidden" : ""}`}>
-            <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold">Billing List</p>
-              <TablePaginationNew
-                type="FE"
-                dataSource={dataTableSelect}
-                columns={columnsRequestBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={dataTableSelect.length || 0}
-                onSort={onSort}
-                tableScrolled={{ y: 525, x: 15000 }}
-              />
-              <div className="pt-[30px]">
-                <DetailText label={"Generate Invoice"}>
-                  {generateInvoice === false ? "No" : "Yes"}
-                </DetailText>
-                <DetailText label={"Remark"}>
-                  {form.getFieldValue().remark}
-                </DetailText>
-              </div>
-            </div>
           </div>
-
-          <div className={`${tabHeader2 !== "Approval" ? "hidden" : ""}`}>
-            <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold">
-                Approval Information
-              </p>
-
-              <div className="w-full grid grid-cols-1 gap-2">
-                <div className="w-1/3">
-                  <DetailText label={"Approval Hierarchy"}>
-                    {
-                      data_approval
-                        ?.filter(
-                          (a) => a.appHierId === form.getFieldValue().apphierId
-                        )
-                        ?.find((b) => b.approvalName)?.approvalName
-                    }
-                  </DetailText>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full">
-              {boolean === true ? (
-                <TablePaginationNew
-                  type="FE"
-                  dataSource={
-                    data_approval_list && data_approval_list.length === 0
-                      ? null
-                      : dataTable
-                  }
-                  columns={columnsApproval(
-                    page,
-                    pageSize,
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                  )}
-                  expandable={{
-                    expandedRowRender: (record) => (
-                      <div>
-                        <p className="text-primary text-xs font-bold uppercase pt-4">
-                          EMPLOYEE INFORMATION
-                        </p>
-                        <TablePaginationNew
-                          type="FE"
-                          useSelect={false}
-                          usePagination={false}
-                          dataSource={record?.employeeDetail}
-                          columns={columnsExpandApproval(
-                            page,
-                            pageSize,
-                            searchInput,
-                            searchedColumn,
-                            searchText,
-                            handleSearch
-                          )}
-                          className={"mb-4"}
-                        />
-                      </div>
-                    ),
-                  }}
-                  useSelect={false}
-                  usePagination={false}
-                />
-              ) : null}
-            </div>
-          </div>
-        </div>
+        </Form>
       </ModalCustom>
 
       {/** Modal Retry */}

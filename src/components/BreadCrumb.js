@@ -1,6 +1,5 @@
-import React from "react";
 import { Breadcrumb } from "antd";
-import { Link, Navigate, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { RightOutlined } from "@ant-design/icons";
 
 const BreadCrumb = ({ routes }) => {
@@ -13,7 +12,7 @@ const BreadCrumb = ({ routes }) => {
       itemRender={itemRender}
       routes={routes}
       separator={<RightOutlined />}
-      style={{ marginBottom: "30px" }}
+      style={{ marginBottom: "10px" }}
     />
   );
 };

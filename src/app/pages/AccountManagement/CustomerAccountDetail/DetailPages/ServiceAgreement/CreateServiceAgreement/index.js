@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Form, Steps, message, Button, Spin, Modal } from "antd";
+import { Form, Steps, Button, Spin, Modal } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LeftCircleOutlined,
@@ -38,13 +38,11 @@ import {
   resetDataDetail,
   getPriceCode,
   getPriceRule,
-  getListPriceRuleById,
   getListChooseTos,
   checkValidateCreateSa,
   getDetailServiceAgreement,
 } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import {
-  ModalConfirm,
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ConfirmationSa from "./Modal/ConfirmationSa";

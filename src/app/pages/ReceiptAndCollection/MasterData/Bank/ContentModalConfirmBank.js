@@ -1,12 +1,9 @@
-import moment from "moment";
 import { Fragment, useState } from "react";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
 import TablePagination from "../../../../../components/TablePagination";
-import { dateFormatting } from "../../../../../utils";
 import { intToNPWP } from "../../../../../utils/npwp";
-import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 
 const ContentModalConfirmBank = ({

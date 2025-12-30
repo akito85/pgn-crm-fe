@@ -19,6 +19,7 @@ const initialState = {
   data_approval_list: [],
   data_list_billing_request_approval: [],
   data_list_billing_approval: [],
+  data_list_billing_approved: [],
   data_prevBilling: [],
   loading: false,
   isFailed: false,
@@ -64,7 +65,7 @@ export const approvedBilling = createAsyncThunk(
   "APPROVED_BILLING",
   async ({ body, action }, thunkAPI) => {
     try {
-      const url = "//v1/dbs/api/billing/approval-billing";
+      const url = "/v1/dbs/api/billing/approval-billing";
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
@@ -96,14 +97,19 @@ export const approvedBilling = createAsyncThunk(
 
 export const getAllBillingPaginate = createAsyncThunk(
   "GET_ALL_BILLING_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+
+      // Return data dengan flag isLoadMore
+      return {
+        ...response.data,
+        isLoadMore, // Pass the flag to reducer
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -126,10 +132,13 @@ export const getAllBillingPaginate = createAsyncThunk(
 
 export const getAllBillingRequestPaginate = createAsyncThunk(
   "GET_ALL_BILLING_REQUEST_PAGINATE",
-  async (thunkAPI) => {
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/billing/request-billing-list`;
-      const response = await ratingBillingHttpService.getAll(url);
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/billing/request-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
       const message =
@@ -153,10 +162,13 @@ export const getAllBillingRequestPaginate = createAsyncThunk(
 
 export const getAllBillingApprovePaginate = createAsyncThunk(
   "GET_ALL_BILLING_APPROVE_PAGINATE",
-  async (thunkAPI) => {
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/billing/approval-billing-list`;
-      const response = await ratingBillingHttpService.getAll(url);
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/billing/approval-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
       const message =
@@ -248,7 +260,13 @@ export const downloadBillingList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_BILLING_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_BILLING_LIST",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -421,10 +439,10 @@ const billingSlice = createSlice({
   initialState,
   extraReducers: {
     // Requested Billing
-    [requestedBilling.pending]: (state, action) => {
+    [requestedBilling.pending]: (state) => {
       state.loading = true;
     },
-    [requestedBilling.fulfilled]: (state, action) => {
+    [requestedBilling.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -435,10 +453,10 @@ const billingSlice = createSlice({
     },
 
     // Requested Billing
-    [approvedBilling.pending]: (state, action) => {
+    [approvedBilling.pending]: (state) => {
       state.loading = true;
     },
-    [approvedBilling.fulfilled]: (state, action) => {
+    [approvedBilling.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -450,72 +468,133 @@ const billingSlice = createSlice({
 
     // Get All Billing Pagination
     [getAllBillingPaginate.pending]: (state, action) => {
-      state.loading = true;
+      // Hanya show loading saat initial fetch
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllBillingPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        // Append new data
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...newResult],
+        };
+      } else {
+        // Replace with new data
+        state.data = action.payload;
+      }
     },
     [getAllBillingPaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Jangan clear data saat load more gagal
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = [];
+      }
     },
 
     // Get All Billing Request Pagination
-    [getAllBillingRequestPaginate.pending]: (state, action) => {
+    [getAllBillingRequestPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllBillingRequestPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_list_billing_request_approval = action.payload;
     },
-    [getAllBillingRequestPaginate.rejected]: (state, action) => {
+    [getAllBillingRequestPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Billing Approve Pagination
     [getAllBillingApprovePaginate.pending]: (state, action) => {
-      state.loading = true;
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllBillingApprovePaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_list_billing_approval = action.payload;
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.data_list_billing_approval = {
+          result: [
+            ...(state.data_list_billing_approval?.result || []),
+            ...newData,
+          ],
+          page: {
+            totalElements: action.payload.page?.totalElements || 0,
+            totalPages: action.payload.page?.totalPages || 0,
+            number: action.payload.page?.number || 0,
+            size: action.payload.page?.size || 10,
+          },
+        };
+      } else {
+        state.data_list_billing_approval = {
+          result: newData,
+          page: {
+            totalElements: action.payload.page?.totalElements || 0,
+            totalPages: action.payload.page?.totalPages || 0,
+            number: action.payload.page?.number || 0,
+            size: action.payload.page?.size || 10,
+          },
+        };
+      }
     },
     [getAllBillingApprovePaginate.rejected]: (state, action) => {
       state.loading = false;
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_list_billing_approval = {
+          result: [],
+          page: {
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+            size: 10,
+          },
+        };
+      }
     },
 
     // Get All Billing Item Pagination
-    [getAllBillingItemPaginate.pending]: (state, action) => {
+    [getAllBillingItemPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllBillingItemPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billingItem = action.payload;
     },
-    [getAllBillingItemPaginate.rejected]: (state, action) => {
+    [getAllBillingItemPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Rating Result Pagination
-    [getAllRatingResultPaginate.pending]: (state, action) => {
+    [getAllRatingResultPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllRatingResultPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_ratingResult = action.payload;
     },
-    [getAllRatingResultPaginate.rejected]: (state, action) => {
+    [getAllRatingResultPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Download Billing
-    [downloadBillingList.pending]: (state, action) => {
+    [downloadBillingList.pending]: (state) => {
       state.loading = true;
     },
-    [downloadBillingList.fulfilled]: (state, action) => {
+    [downloadBillingList.fulfilled]: (state) => {
       state.loading = true;
     },
-    [downloadBillingList.rejected]: (state, action) => {
+    [downloadBillingList.rejected]: (state) => {
       state.loading = false;
     },
 

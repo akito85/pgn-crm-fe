@@ -1,18 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import { Checkbox, Popover, Spin, Switch, Tooltip } from "antd";
+import { Checkbox, Spin, Switch, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { MoreOutlined } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
-import moment from "moment";
-import Highlighter from "react-highlight-words";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../components/Modal/ModalInactivateWithHierarchy";
-import StatusComponent from "../../../../components/StatusComponent";
 import ModalWarningConfirmation from "../../../../components/Modal/ModalWarningConfirmation";
 import {
   downloadProduct,
@@ -24,7 +20,6 @@ import {
   getApprovalHistoryProduct,
 } from "../../../../redux/slices/product_promo/product";
 import {
-  getColumnSearchPropsPaging,
   getColumnSearchPropsUseFilteredValue,
 } from "../../../../utils/getColumnSearchProps";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";

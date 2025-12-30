@@ -1,20 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
   Button,
   Form,
   Input,
-  InputNumber,
   Select,
-  Tooltip,
-  Pagination,
-  Table,
 } from "antd";
 import SelectComponent from "../../../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../../../components/InputComponent";
-import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import { hasValue } from "../../../../../../../../utils";
 
 import RadioTabs from "../../../../../../../../components/RadioTabs";
@@ -28,7 +22,6 @@ import TableTos from "./TableTos";
 import ModalForm from "./TableTos/ModalForm";
 import ModalChooseTos from "./TableTos/ModalChooseTos";
 import {
-  getDetailProductSa,
   getListPriceRuleById,
   getListLateCharge,
   getListProduct,

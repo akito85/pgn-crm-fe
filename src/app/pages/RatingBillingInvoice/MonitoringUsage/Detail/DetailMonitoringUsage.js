@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { Alert, Form, Spin, Tooltip } from "antd";
+import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import RadioTabs from "../../../../../components/RadioTabs";
 import {
   addDeletedData,
   addUpdatedData,
@@ -16,27 +15,28 @@ import {
   getDetailBatch,
   getDownloadFailed,
   getListApprovalById,
+  updateSingleUsage,
+  deleteSingleUsage,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import { showModalError } from "../../../../../redux/slices/general_slice";
+import CardContainer from "../../../../../components/CardContainer";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
-import TablePagination from "../../../../../components/TablePagination";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { useMonitoringList } from "../useMonirotingList";
 import ModalUpdateUsage from "../ModalUpdateUsage";
 import moment from "moment";
 import ConfirmationUsage from "../ConfirmationUsage";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const DetailMonitoringUsage = () => {
   // Selector
-  const {
-    detail_batch,
-    loading,
-    list_approval_by_id,
-    list_approval,
-  } = useSelector((state) => state.monitoring_usage);
+  const { detail_batch, loading, list_approval_by_id, list_approval } =
+    useSelector((state) => state.monitoring_usage);
 
   // Declaration
   const navigate = useNavigate();
@@ -48,7 +48,6 @@ const DetailMonitoringUsage = () => {
     (item) =>
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "batchId" &&
-      item?.dataIndex !== "accountGroupType" &&
       item?.dataIndex !== "serviceType" &&
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "fileSource" &&
@@ -56,16 +55,9 @@ const DetailMonitoringUsage = () => {
   );
 
   // use state
-  const [valuePage, setValuePage] = useState("Upload");
-  const [tabPages, setTabPages] = useState([
-    {
-      value: "Upload",
-      paramValue: [],
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-  ]);
+  const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -79,6 +71,10 @@ const DetailMonitoringUsage = () => {
   const [flag, setFlag] = useState(1);
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [body, setBody] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "action"],
+  }));
 
   // assert function
   const assert = useCallback(
@@ -95,15 +91,20 @@ const DetailMonitoringUsage = () => {
     [form]
   );
 
-  // use effect
+  // Initial fetch with larger page size
   useEffect(() => {
     if (location?.state?.id) {
       dispatch(
-        getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        getDetailBatch({
+          batchId: location?.state?.id,
+          page: 1,
+          pageSize: 100,
+        })
       );
-      dispatch(getApprovalHierarchy({ page, pageSize }));
+      dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
+      setPage(1);
     }
-  }, [location, dispatch, page, pageSize]);
+  }, [location, dispatch]);
 
   useEffect(() => {
     if (
@@ -111,14 +112,16 @@ const DetailMonitoringUsage = () => {
       detail_batch?.batchInformation?.batchId === location?.state?.id
     ) {
       assert(detail_batch);
-      setDataTable(detail_batch?.usageList?.result);
+      setDataTable(detail_batch?.usageList?.result || []);
     }
   }, [detail_batch, assert, location]);
+
   useEffect(() => {
     if (hasValue(selectedHierarchy) === true) {
       dispatch(getListApprovalById(selectedHierarchy));
     }
   }, [selectedHierarchy, dispatch]);
+
   useEffect(() => {
     if (
       list_approval_by_id?.length > 0 &&
@@ -143,12 +146,32 @@ const DetailMonitoringUsage = () => {
   }, [
     list_approval_by_id,
     page,
-    pageSize,
-    valuePage,
+    tabHeader,
     dispatch,
     list_approval,
     selectedHierarchy,
   ]);
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = detail_batch?.usageList?.page?.totalPages || 0;
+
+    if (nextPage <= totalPages && location?.state?.id) {
+      await dispatch(
+        getDetailBatch({
+          batchId: location?.state?.id,
+          page: nextPage,
+          pageSize: loadMoreSize,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // Calculate if there's more data
+  const totalElements = detail_batch?.usageList?.page?.totalElements || 0;
+  const hasMore = dataTable.length < totalElements;
 
   // handle update row
   const handleUpdate = (record, values) => {
@@ -157,85 +180,129 @@ const DetailMonitoringUsage = () => {
     setOpenUpdateUsage(true);
   };
 
-  // handle error
-  // Handle Error Tab Form
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    // console.log(errorFields, " error");
-    setTabPages((prevState) => {
-      const res = prevState.map((item) => {
-        const errorBadge =
-          item.value !== "Attachment"
-            ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue.includes(next.name[0])
-                  ? current + 1
-                  : current,
-              0
-            )
-            : listDataAttachment.length < 1
-              ? 1
-              : 0;
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
-  };
   // handle save
   const handleSave = (formValue) => {
-    setBody({ ...detail_batch, usageList: dataTable, isSubmit: flag === 1 ? false : true });
+    if (!selectedHierarchy || !hasValue(selectedHierarchy)) {
+      const errorBody = {
+        title: "Validation Error",
+        description:
+          "Please select an Approval Hierarchy in the Approval tab before saving or submitting.",
+      };
+      dispatch(showModalError(errorBody));
+      setTabHeader("Approval");
+      return;
+    }
+
+    setBody({
+      ...detail_batch,
+      usageList: dataTable,
+      isSubmit: flag === 1 ? false : true,
+    });
     setOpenConfirmation(true);
   };
 
   const handleSaveUpdateUsage = async (formValue) => {
-    const newDataTable = [...dataTable];
-    const index = newDataTable.findIndex((item) => recordId === item.recordId);
-    const item = newDataTable[index];
-    const updatedRow = {
-      ...item,
-      ...formValue,
-      billingPeriod:
-        formValue?.billingPeriod === false
-          ? null
-          : moment(formValue?.billingPeriod).format(dateFormatting.datePeriod),
-      fdate:
-        formValue?.fdate === false
-          ? null
-          : moment(formValue?.fdate).format(dateFormatting.date),
-      fhour: hasValue(formValue?.fhour)
-        ? moment(formValue?.fhour).format(dateFormatting.hour_format)
-        : null,
-      measDate:
-        formValue?.measDate === false
-          ? null
-          : moment(formValue?.measDate).format(dateFormatting.dateTime),
-      status: "SUCCESS",
-      recordId: recordId,
-    };
-    // console.log(updatedRow, " updated row");
-    newDataTable.splice(index, 1, updatedRow);
-    setDataTable(newDataTable);
-    setOpenUpdateUsage(false);
-    dispatch(addUpdatedData(updatedRow));
+    try {
+      const requestBody = {
+        accountNumber: formValue?.accountNumber || null,
+        accountName: formValue?.accountName || null,
+        costCenter: formValue?.costCenter || null,
+        billingPeriod: formValue?.billingPeriod || null,
+        assetSerialNum: formValue?.assetSerialNum || null,
+        assetType: formValue?.assetType || null,
+        fdate:
+          formValue?.fdate === false
+            ? null
+            : moment(formValue?.fdate).format(dateFormatting.dateFormal),
+        fhour: hasValue(formValue?.fhour)
+          ? moment(formValue?.fhour).format(dateFormatting.fhour)
+          : null,
+        measDate: formValue?.measDate || null,
+        streamId: formValue?.streamId || null,
+        temperature: formValue?.temperature || null,
+        pressure: formValue?.pressure || null,
+        correctionFactor: formValue?.correctionFactor || null,
+        calorie: formValue?.calorie || null,
+        beginStand: formValue?.beginStand || null,
+        endStand: formValue?.endStand || null,
+        volMeasured27: formValue?.volMeasured27 || null,
+        volMeasured60: formValue?.volMeasured60 || null,
+        engMeasured: formValue?.engMeasured || null,
+        ghv: formValue?.ghv || null,
+        volMscf: formValue?.volMscf || null,
+        uncorrectedValue: formValue?.uncorrectedValue || null,
+        taxationRowId: formValue?.taxationRowId || null,
+        source: formValue?.source || null,
+        description: formValue?.description || null,
+      };
+
+      const resultAction = await dispatch(
+        updateSingleUsage({
+          recordId: recordId,
+          data: requestBody,
+        })
+      );
+
+      if (updateSingleUsage.fulfilled.match(resultAction)) {
+        const newDataTable = [...dataTable];
+        const index = newDataTable.findIndex(
+          (item) => recordId === item.recordId
+        );
+
+        if (index !== -1) {
+          const item = newDataTable[index];
+          const updatedRow = {
+            ...item,
+            ...formValue,
+            billingPeriod: requestBody.billingPeriod,
+            fdate: requestBody.fdate,
+            fhour: requestBody.fhour,
+            measDate: requestBody.measDate,
+            status: "SUCCESS",
+            recordId: recordId,
+          };
+          newDataTable.splice(index, 1, updatedRow);
+          setDataTable(newDataTable);
+        }
+
+        setOpenUpdateUsage(false);
+
+        // Refresh data from server
+        dispatch(
+          getDetailBatch({
+            batchId: location?.state?.id,
+            page: 1,
+            pageSize: page * loadMoreSize,
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error updating usage:", error);
+    }
   };
+
   // change tabs
-  const changeTabHeader = (e) => {
-    setValuePage(e.target.value);
+  const changeTab = (key) => {
+    setTabHeader(key);
   };
+
   // handle back page
   const handleBack = () => {
     navigate(-1);
-    // dispatch(clearUpdatedDeleted())
   };
 
   // handle cancel update usage
   const handleCancel = () => setOpenUpdateUsage(false);
 
   // handle clear
-  const handleClear = () => { };
+  const handleClear = () => {
+    form.setFieldsValue({
+      apphierId: undefined,
+    });
+
+    setSelectedHierarchy(null);
+    setAppHierDataDetail([]);
+  };
 
   // handle delete usage list
   const handleDeleteOk = () => {
@@ -243,90 +310,6 @@ const DetailMonitoringUsage = () => {
     setDataTable(newData);
     dispatch(addDeletedData(deletedRecord));
     setModalDelete(false);
-  };
-
-  // change page
-  const handleChangePage = (page, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-  // breadcrumbs routes
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "Rating Billing",
-    },
-    {
-      path: RBI_ROUTES.MONITORING_USAGE_VIEW,
-      breadcrumbName: "Monitoring Usage",
-    },
-    {
-      path: "",
-      breadcrumbName: "Detail Batch Usage",
-    },
-  ];
-
-  // column
-  const action = [
-    {
-      title: "ACTION",
-      dataIndex: "accountId",
-      align: "center",
-      fixed: "right",
-      width: 100,
-      render: (id, record, index) => {
-        return (
-          <div className="flex w-full justify-center gap-3">
-            <Tooltip title="Update">
-              <div className="pt-1">
-                {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    onClick={() => handleUpdate(record)}
-                  />
-                ) : (
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    color={"#C0BEC6"}
-                    className={"cursor-not-allowed"}
-                  />
-                )}
-              </div>
-            </Tooltip>
-            <Tooltip title="Delete">
-              <div className="pt-1">
-                {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
-                  <SVGIcon
-                    name="IconDelete"
-                    width={24}
-                    onClick={() => {
-                      setModalDelete(true);
-                      setDeletedRecord(record);
-                      setRecordId(record?.recordId);
-                    }}
-                  />
-                ) : (
-                  <SVGIcon
-                    name="IconDelete"
-                    width={24}
-                    color={"#C0BEC6"}
-                    className={"cursor-not-allowed"}
-                  />
-                )}
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ];
-
-  // pagination table
-  const paginationTable = (page, pageSize) => {
-    return dataTable?.slice((page - 1) * pageSize, page * pageSize);
   };
 
   const handleDownloadFailed = () => {
@@ -340,102 +323,225 @@ const DetailMonitoringUsage = () => {
       });
   };
 
+  // breadcrumbs routes
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "Rating Billing",
+    },
+    {
+      path: RBI_ROUTES.MONITORING_USAGE_VIEW,
+      breadcrumbName: "Monitoring Usage",
+    },
+    {
+      path: "",
+      breadcrumbName: "Batch List Detail",
+    },
+  ];
+
+  // column action
+  const actionColumns = [
+    {
+      key: "action",
+      title: "ACTION",
+      dataIndex: "accountId",
+      align: "center",
+      width: 100,
+      render: (id, record, index) => {
+        const isComplete =
+          detail_batch?.batchInformation?.status === "COMPLETE";
+        return (
+          <div className="flex w-full justify-center gap-3">
+            <Tooltip title="Update">
+              {!isComplete ? (
+                <SVGIcon
+                  name="IconEdit"
+                  width={20}
+                  onClick={() => handleUpdate(record)}
+                />
+              ) : (
+                <SVGIcon
+                  name="IconEdit"
+                  width={20}
+                  color={"#C0BEC6"}
+                  className={"cursor-not-allowed"}
+                />
+              )}
+            </Tooltip>
+            <Tooltip title="Delete">
+              {!isComplete ? (
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  onClick={() => {
+                    setModalDelete(true);
+                    setDeletedRecord(record);
+                    setRecordId(record?.recordId);
+                  }}
+                />
+              ) : (
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  color={"#C0BEC6"}
+                  className={"cursor-not-allowed"}
+                />
+              )}
+            </Tooltip>
+          </div>
+        );
+      },
+    },
+  ];
+
+  // All columns with keys
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...filteredColumns, ...actionColumns].map(
+      (col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+        width: col.width || 150,
+      })
+    );
+    return columnsWithKeys;
+  }, [filteredColumns, actionColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
-        <div className={"w-full flex justify-start"}>
-          <RadioTabs
-            data={tabPages}
-            onChange={changeTabHeader}
-            currentPosition={valuePage}
-          />
-        </div>
-        <div className={"w-full flex justify-end"}>
-          {valuePage === "Upload" && (
-            <ButtonComponent
-              type={"submit"}
-              icon={<SVGIcon name="IconButtonDownload" width={24} />}
-              onClick={handleDownloadFailed}
+        <Form layout="vertical" form={form} onFinish={handleSave}>
+          <CardContainer
+            header={
+              <div className="flex justify-between items-center -my-4">
+                <p className="mt-[15px] font-bold text-primary">
+                  BATCH LIST DETAIL
+                </p>
+              </div>
+            }
+          >
+            <Tabs
+              activeKey={tabHeader}
+              onChange={changeTab}
+              type="line"
+              size="small"
+              className="tabs-compact"
+              style={{ marginBottom: 0 }}
             >
-              Download Failed Data
-            </ButtonComponent>
-          )}
-        </div>
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSave}
-          onFinishFailed={handleError}
-        >
-          <div className={`${valuePage !== "Upload" ? "hidden" : ""}`}>
-            {/* <Form.Item> */}
-            <BaseContainer header={"batch information"}>
-              <div className={"w-full grid grid-cols-4"}>
-                <DetailText label={"Batch ID"}>
-                  {detail_batch?.batchInformation?.batchId}
-                </DetailText>
-                <DetailText label={"Upload Type"}>
-                  {detail_batch?.batchInformation?.uploadType}
-                </DetailText>
-                <DetailText label={"Upload Date"}>
-                  {detail_batch?.batchInformation?.uploadDate}
-                </DetailText>
-                <DetailText label={"Upload By"}>
-                  {detail_batch?.batchInformation?.uploadBy}
-                </DetailText>
-              </div>
-              <div className={"w-full grid grid-cols-4"}>
-                <DetailText label={"Total Data"}>
-                  {detail_batch?.batchInformation?.totalUsage}
-                </DetailText>
-                <DetailText label={"Total Succeed"}>
-                  {detail_batch?.batchInformation?.totalSucceed}
-                </DetailText>
-                <DetailText label={"Total Progress"}>
-                  {detail_batch?.batchInformation?.totalProgress}
-                </DetailText>
-                <DetailText label={"Total Failed"}>
-                  {detail_batch?.batchInformation?.totalFailed}
-                </DetailText>
-              </div>
-              <div className={"w-full grid grid-cols-4"}>
-                <DetailText label={"Status"}>
-                  {toTitleCase(detail_batch?.batchInformation?.status)}
-                </DetailText>
-              </div>
-            </BaseContainer>
-            <BaseContainer header={"USAGE LIST"}>
-              <div className="my-10">
-                <TablePaginationNew
-                  type="FE"
-                  columns={[...filteredColumns, ...action]}
-                  dataSource={dataTable}
-                  totalData={dataTable?.length}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChangePage}
-                  tableScrolled={{ x: 8000, y: 600 }}
-                // onSort={onSort}
-                />
-              </div>
-            </BaseContainer>
-            {/* </Form.Item> */}
-          </div>
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"Approval Information"}>
-              <ApprovalComponentGeneral
-                // type={type}
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
-              />
-            </BaseContainer>
-          </div>
+              <Tabs.TabPane
+                tab="Upload"
+                key="Upload"
+                className="flex flex-col gap-3"
+              >
+                <BaseContainer header={"Batch List"} border className="-mt-4">
+                  {/* Two Column Layout */}
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-0">
+                    <DetailText label="Batch ID">
+                      {detail_batch?.batchInformation?.batchId}
+                    </DetailText>
+                    <DetailText label="Upload Type">
+                      {detail_batch?.batchInformation?.uploadType}
+                    </DetailText>
 
-          <div className={"w-full flex mt-5"}>
-            <div className={"w-full justify-start"}>
+                    <DetailText label="Upload Date">
+                      {detail_batch?.batchInformation?.uploadDate}
+                    </DetailText>
+                    <DetailText label="Total Usage">
+                      {detail_batch?.batchInformation?.totalUsage}
+                    </DetailText>
+                    <DetailText label="Total Succeed">
+                      {detail_batch?.batchInformation?.totalSucceed}
+                    </DetailText>
+
+                    <DetailText label="Total Progress">
+                      {detail_batch?.batchInformation?.totalProgress}
+                    </DetailText>
+                    <DetailText label="Total Failed">
+                      {detail_batch?.batchInformation?.totalFailed}
+                    </DetailText>
+                    <DetailText label="Status">
+                      <StatusComponent
+                        colour={detail_batch?.batchInformation?.status}
+                      >
+                        {detail_batch?.batchInformation?.status}
+                      </StatusComponent>
+                    </DetailText>
+                  </div>
+                </BaseContainer>
+
+                <BaseContainer header={"Usage List"} border className="mt-1">
+                  <div className="my-5">
+                    <TableRBI
+                      idTable="monitoring-usage-detail-table"
+                      dataSource={dataTable}
+                      columns={processedColumns}
+                      totalData={totalElements}
+                      tableScrolled={{ x: 7000, y: 525 }}
+                      showExport={false}
+                      columnDefinitions={columnDefinitions}
+                      fixedColumns={fixedColumns}
+                      setFixedColumns={setFixedColumns}
+                      loading={loading}
+                      usePagination={false}
+                      useInfiniteScroll={true}
+                      onLoadMore={handleLoadMore}
+                      hasMore={hasMore}
+                      loadMoreThreshold={20}
+                    />
+                  </div>
+                </BaseContainer>
+                <BaseContainer
+                  header={"History Log Information"}
+                  className="mt-1"
+                  border
+                >
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                    <DetailText label="Record ID">
+                      {detail_batch?.batchInformation?.batchId}
+                    </DetailText>
+                    <DetailText label="Created Date">
+                      {detail_batch?.batchInformation?.uploadDate}
+                    </DetailText>
+                    <DetailText label="Created By">
+                      {detail_batch?.batchInformation?.uploadBy}
+                    </DetailText>
+                    <DetailText label="Updated Date">
+                      {detail_batch?.batchInformation?.uploadDate}
+                    </DetailText>
+                    <DetailText label="Updated By">
+                      {detail_batch?.batchInformation?.uploadBy}
+                    </DetailText>
+                  </div>
+                </BaseContainer>
+              </Tabs.TabPane>
+
+              <Tabs.TabPane tab="Approval" key="Approval">
+                <div className="bg-white mt-1">
+                  <ApprovalComponentGeneral
+                    dataTable={appHierDataDetail}
+                    dataOption={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    updateSelectedHierarchy={setSelectedHierarchy}
+                  />
+                </div>
+              </Tabs.TabPane>
+            </Tabs>
+          </CardContainer>
+
+          {/* Action Buttons */}
+          <div className="w-full flex mt-5">
+            <div className="w-full justify-start">
               <Form.Item>
                 <ButtonComponent
                   type={"submit"}
@@ -455,16 +561,14 @@ const DetailMonitoringUsage = () => {
               </Form.Item>
             </div>
             {detail_batch?.batchInformation?.status !== "COMPLETE" && (
-              <div className={"w-full flex justify-end gap-5"}>
+              <div className="w-full flex justify-end gap-5">
                 <Form.Item>
                   <ButtonComponent
                     icon={<SVGIcon name={`IconButtonClear`} width={24} />}
                     type="submit"
-                    onClick={() => {
-                      handleClear();
-                    }}
+                    onClick={handleClear}
                   >
-                    {"Clear"}
+                    Clear
                   </ButtonComponent>
                 </Form.Item>
                 <Form.Item>
@@ -489,14 +593,15 @@ const DetailMonitoringUsage = () => {
             )}
           </div>
         </Form>
+
         <ModalUpdateUsage
           isOpen={openUpdateUsage}
           handleCancel={handleCancel}
           record={selectedRecord}
           uploadType={detail_batch?.batchInformation?.uploadType}
           handleSave={handleSaveUpdateUsage}
-        // form={form}
         />
+
         <ModalConfirm
           isOpen={modalDelete}
           handleCancel={() => setModalDelete(false)}
@@ -506,8 +611,8 @@ const DetailMonitoringUsage = () => {
         >
           <div className="flex justify-center gap-[20px] mt-6">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
+            <p className="text-[18px] font-bold">
+              Are you sure want to delete it?
             </p>
           </div>
           <Alert
@@ -515,17 +620,18 @@ const DetailMonitoringUsage = () => {
             type={"error"}
           />
         </ModalConfirm>
+
+        <ConfirmationUsage
+          isOpen={openConfirmation}
+          setIsOpen={setOpenConfirmation}
+          dispatcher={dispatch}
+          dataOption={appHierOptions}
+          selectedHierarchy={selectedHierarchy}
+          listDataAppHierDetail={appHierDataDetail}
+          data_detail={body}
+          columns={filteredColumns}
+        />
       </Spin>
-      <ConfirmationUsage
-        isOpen={openConfirmation}
-        setIsOpen={setOpenConfirmation}
-        dispatcher={dispatch}
-        dataOption={appHierOptions}
-        selectedHierarchy={selectedHierarchy}
-        listDataAppHierDetail={appHierDataDetail}
-        data_detail={body}
-        columns={filteredColumns}
-      />
     </LayoutMenu>
   );
 };

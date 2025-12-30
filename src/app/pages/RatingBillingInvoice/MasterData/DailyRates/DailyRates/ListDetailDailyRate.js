@@ -1,5 +1,4 @@
 import { LeftOutlined } from "@ant-design/icons";
-import { Form } from "antd";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,7 +7,6 @@ import AttachmentComponent from "../../../../../../components/Attachment/Attachm
 import BaseContainer from "../../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import InputComponent from "../../../../../../components/InputComponent";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
@@ -106,7 +104,6 @@ const ListDetailDailyRate = () => {
   }, [id, data_detail, data_detail_draft]);
 
   const showButtonApproval = data_detail?.isApprover;
-
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
     if (data_detail?.approvalType === "DAILY_RATES") {
@@ -118,8 +115,7 @@ const ListDetailDailyRate = () => {
       };
       setModalConfirm(false);
       dispatch(approveCreate({ body: data }));
-      handleClear()
-
+      handleClear();
     } else {
       const data = {
         id: id,
@@ -129,7 +125,7 @@ const ListDetailDailyRate = () => {
       };
       setModalConfirm(false);
       dispatch(approveRejectInactive({ body: data }));
-     handleClear()
+      handleClear();
     }
   };
 
@@ -139,7 +135,7 @@ const ListDetailDailyRate = () => {
   const descimal = tempValue[1]
     ? `${decimalSeparator}${tempValue[1]}`
     : `${decimalSeparator}00`;
-    
+
   const convertedRate =
     tempValue.length > 0
       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
@@ -265,14 +261,14 @@ const ListDetailDailyRate = () => {
 
       {/* Modal Approve/Reject*/}
       <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCancel}
-          onFinish={handleConfirm}
-          header={approveOrReject}
-          approveOrReject={approveOrReject}
-          menu={"Daily Rate"}
-          named={data_detail?.rateType}
-        />
+        isOpen={modalConfirm}
+        handleCloseModal={handleCancel}
+        onFinish={handleConfirm}
+        header={approveOrReject}
+        approveOrReject={approveOrReject}
+        menu={"Daily Rate"}
+        named={data_detail?.rateType}
+      />
       {/* <ModalApproveOrReject
         key={modalConfirm ? true : false}
         isOpen={modalConfirm}

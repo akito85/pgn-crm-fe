@@ -13,12 +13,10 @@ import {
   ModalError,
 } from "../../../../../components/Modal/ModalPopUp";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { configApp } from "../../../../../constants/configApp";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
 import BillingItemSectionForm from "./Form/BillingItemSectionForm";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import {

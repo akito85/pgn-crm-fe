@@ -1,56 +1,31 @@
 import {
   DeleteOutlined,
-  FilterOutlined,
-  PlusCircleOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Form, Input, Select, Space, Spin, Tooltip } from "antd";
-import moment from "moment";
+import { Form, Spin, Tooltip } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
-import {
-  Link,
-  NavLink,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+
+
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import StatusComponent from "../../../../../components/StatusComponent";
 import TablePagination from "../../../../../components/TablePagination";
 import useGrantAccessHooks from "../../../../../components/useGrantAccessHooks";
-import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
+import { hasValue, toTitleCase } from "../../../../../utils";
 import SVGIcon from "../../../../../assets/Icon/index";
-import DynamicTableInlinePaymentAll from "../../DynamicTableInlinePaymentAll";
 // import ModalChooseContact from "./Modal/ModalChooseContact";
-import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import {
   getAllContactPaginate,
-  getContryContact,
-  getInputType,
-  getInputTypeContact,
-  getJobContact,
-  getPositionContact,
   getZoneContact,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
-import DynamicTableInlineWithoutBase from "../../../../../components/Table/DynamicTableInlineWithoutBase";
-import InputComponent from "../../../../../components/InputComponent";
-import SelectComponent from "../../../../../components/SelectComponent";
-import TableInlineContact from "../../../AccountManagement/CustomerAccountDetail/DetailPages/AccountContact/FormAccountContact/TableInlineContact";
-import ContactTableInlane from "./Table/ContactTableInlane";
 import {
   getColumnSearchProps,
   getColumnSearchPropsPaging,
 } from "../../../../../utils/getColumnSearchProps";
 import { showModalError } from "../../../../../redux/slices/general_slice";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
-import { object } from "prop-types";
-import { onInputUpperCase } from "../../../AccountManagement/Utils";
 import ModalContact from "../../../../../components/Modal/Contact/ModalContact";
-import ModalChooseContact from "../../../../../components/Modal/Contact/ModalChooseContact";
-import { getDetailContactAfterChoose, getListChooseContact } from "../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
+import { getDetailContactAfterChoose } from "../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
 
 const ContactListCreate = ({
   id,

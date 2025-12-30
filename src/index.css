@@ -50,7 +50,7 @@ table {
   background-color: var(--primary);
   color: #ffffff;
   letter-spacing: 1px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   text-align: center !important;
 }
@@ -70,13 +70,28 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
   background-color: #ffffff !important;
 }
 
+/* Hover effect - kuning pastel soft */
+.ant-table-tbody > tr:hover > td {
+  background-color: #fef9e7 !important;
+}
+
+/* Selected/clicked row - kuning soft */
+.ant-table-tbody > tr.row-selected > td {
+  background-color: #fffbea !important;
+}
+
+/* Hover pada selected row tetap kuning soft */
+.ant-table-tbody > tr.row-selected:hover > td {
+  background-color: #fffbea !important;
+}
+
 .ant-tag {
   border-radius: 4px !important;
   font-weight: 600;
   font-size: 13px;
   background: transparent;
   padding: 5px 10px !important;
-  color: #fff !important;
+  /* color: #fff !important; */
 }
 
 input[type="text"] {
@@ -299,7 +314,7 @@ span.anticon anticon-delete {
 
 .ant-radio-button-wrapper-disabled {
   color: #4b465c !important;
-  background-color: #8D91A0 !important;
+  background-color: #8d91a0 !important;
 }
 /* Chrome, Edge, and Safari */
 /* *::-webkit-scrollbar {
@@ -463,7 +478,7 @@ td.ant-table-column-sort {
   border-radius: 8px !important;
 }
 .ant-table-thead > tr > th {
-  padding: 8px !important;
+  padding: 4px 8px !important;
 }
 .ant-table-tbody > tr > td {
   padding: 0px 8px !important;
@@ -538,10 +553,10 @@ td.ant-table-column-sort {
   background: #a4be37;
 }
 .status-active {
-  background: #14a38b;
+  background: #388e3c;
 }
 .status-inactive {
-  background: #be3036;
+  background: #d32f2f;
 }
 .status-waiting {
   background: #c6d681;
@@ -595,10 +610,10 @@ td.ant-table-column-sort {
 .ant-alert-error {
   border: 1 !important;
   border-color: rgba(234, 84, 85, 0.16) !important;
-  background-color: #FCEBEC !important;
+  background-color: #fcebec !important;
 }
 .ant-alert-error .ant-alert-message {
-  color: #BE3036;
+  color: #be3036;
 }
 
 .ant-select:not(.ant-select-customize-input) .ant-select-selector {
@@ -660,7 +675,7 @@ span.ant-tree-title {
 .no-margin-form {
   margin-bottom: 0px !important;
 }
-/* 
+/*
 .ant-upload.ant-upload-drag{
   background: none !important;
   border: 3px dashed #d9d9d9 !important;
@@ -923,7 +938,7 @@ span.ant-tree-title {
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
 }
 
-.ant-picker-cell-disabled:before{
+.ant-picker-cell-disabled:before {
   background: #8382824d !important;
 }
 
@@ -932,37 +947,98 @@ span.ant-tree-title {
 }
 
 /* handle button expand table */
-.ant-table-row-level-0{
+.ant-table-row-level-0 {
   position: relative;
   z-index: 9;
 }
 
-.custom-focus:focus-visible{
+.custom-focus:focus-visible {
   border-color: #40a9ff !important;
   outline-offset: none;
   outline: none;
 }
-.custom-focus:hover{
+.custom-focus:hover {
   border-color: #40a9ff !important;
 }
- .ant-upload-list{
+.ant-upload-list {
   width: 100% !important;
- }
+}
 
-
- .card-login .ant-card-body{
+.card-login .ant-card-body {
   height: 100% !important;
-  position:  relative !important;
-  display: flex  !important;
+  position: relative !important;
+  display: flex !important;
   justify-content: space-around !important;
   flex-direction: column !important;
- }
+}
 
- .card-login .ant-card-body::after{
-  display: none  !important;
+.card-login .ant-card-body::after {
+  display: none !important;
   height: 100% !important;
- }
- .card-login .ant-card-body::before{
-  display: none  !important;
+}
+.card-login .ant-card-body::before {
+  display: none !important;
   height: 100% !important;
- }
+}
+
+/* Custom Modal Header Background */
+.custom-modal-header .ant-modal-header {
+  background-color: #e6f1f9 !important;
+}
+
+.custom-modal-header .ant-modal-title {
+  color: #333 !important;
+}
+
+/* Custom Modal Close Button */
+.custom-modal-header .ant-modal-close {
+  background-color: #ffffff !important;
+  border: 2px solid #d9d9d9 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  margin: 5px !important;
+  top: 5px !important;
+  right: 5px !important;
+}
+
+.custom-modal-header .ant-modal-close:hover {
+  background-color: #f5f5f5 !important;
+  border-color: #bfbfbf !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+.custom-modal-header .ant-modal-close-x {
+  color: #666 !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+}
+
+/* Colored panel used by Promo components */
+.colored-panel {
+  background-color: #e6f1f9;
+  border-radius: 8px;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Custom Radio Tabs - Match ButtonComponent size */
+.custom-radio-tabs .ant-radio-button-wrapper {
+  height: 32px !important;
+  line-height: 30px !important;
+  font-size: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.custom-radio-tabs .ant-radio-button-wrapper span {
+  font-size: 12px !important;
+}

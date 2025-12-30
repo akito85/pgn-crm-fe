@@ -1,40 +1,46 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Table } from "antd";
+import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
-import { useMonitoringList } from "./useMonirotingList";
 import {
   approveRejectData,
   getListApproval,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { tableApproval } from "./Table/TableApproval";
 import { formMessageRequired } from "../../../../utils";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 
-const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh = () => {} }) => {
+const ModalApprovalUsage = ({
+  isOpen,
+  handleCancel,
+  dataUsage,
+  handleListRefresh = () => {},
+}) => {
   // Selector
-  const { data_approval } = useSelector((state) => state.monitoring_usage);
+  const { data_approval, loading } = useSelector((state) => state.monitoring_usage);
 
   // Declaration
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const dataApproval = data_approval?.result;
+  const dataApproval = data_approval?.result || [];
 
   // Use State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(20); // Load 20 items at a time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("");
 
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -45,10 +51,46 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  // Use Effect
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: [],
+    right: [],
+  }));
+
+  // Initial fetch with 100 items
   useEffect(() => {
-    dispatch(getListApproval({ page, pageSize }));
-  }, [dispatch, page, pageSize]);
+    if (isOpen) {
+      dispatch(
+        getListApproval({
+          page: 0, // Backend uses 0-based indexing
+          pageSize: 100, // Initial load 100
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  }, [dispatch, isOpen]);
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data_approval?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getListApproval({
+          page: nextPage - 1, // Backend uses 0-based indexing
+          pageSize: pageSize, // Load 20 more
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
+  // Calculate if there's more data
+  const hasMore =
+    dataApproval.length < (data_approval?.page?.totalElements || 0);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -66,10 +108,13 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // Function onSort
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter && sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
@@ -81,12 +126,33 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
     fixed: true,
     selectedRowKeys,
     onChange: onSelectChange,
-    // selections: [
-    //   Table.SELECTION_ALL,
-    //   Table.SELECTION_INVERT,
-    //   Table.SELECTION_NONE,
-    // ],
   };
+
+  // Base Columns dengan useMemo
+  const baseColumns = useMemo(() => {
+    return tableApproval(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+  }, [search, page, pageSize, searchedColumn, searchText]);
+
+  // Processed Columns
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(baseColumns, fixedColumns);
+  }, [baseColumns, fixedColumns]);
+
+  // Column Definitions
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
 
   // Step
   const steps = [
@@ -148,6 +214,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
     setSelectedRowKeys([]);
     setDataTableSelect([]);
     setRemark("");
+    setCurrent(0);
     form.resetFields();
   };
 
@@ -179,7 +246,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
           setCurrent(0);
           setRemark("");
           setAction("");
-          handleListRefresh()
+          handleListRefresh();
           handleCancel();
         })
         .catch((error) => {
@@ -293,29 +360,38 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
             onFinish={handleSave}
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold">Usage List</p>
-              <TablePaginationNew
-                type="FE"
+              <div className="flex gap-2 justify-between">
+                <p className="text-primary uppercase font-bold">Usage List</p>
+                {selectedRowKeys.length > 0 && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedRowKeys.length}{" "}
+                    {selectedRowKeys.length === 1 ? "row" : "rows"} selected
+                  </p>
+                )}
+              </div>
+              <TableRBI
+                idTable="approval-usage-table"
                 dataSource={dataApproval?.map((a, index) => ({
                   ...a,
                   key: index + 1,
                 }))}
-                columns={tableApproval(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                totalData={dataApproval?.length}
+                columns={processedColumns}
+                totalData={data_approval?.page?.totalElements || 0}
                 tableScrolled={{ x: 8500, y: 300 }}
+                onSort={onSort}
+                showExport={false}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
                 rowSelection={rowSelection}
+                loading={loading}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
               />
+
               <div className="pt-[30px]">
                 <Form.Item
                   label={"Remark"}
@@ -340,24 +416,29 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
           className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-            <p className="text-primary uppercase font-bold">Usage List</p>
-            <TablePaginationNew
-              type="FE"
+            {/* TAMPILKAN INFO SELECTED RECORDS DI STEP KEDUA */}
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-primary uppercase font-bold">Usage List</p>
+              <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-md border border-blue-200">
+                <span className="text-blue-600 font-semibold">
+                  {dataTableSelect.length} record
+                  {dataTableSelect.length > 1 ? "s" : ""} selected
+                </span>
+              </div>
+            </div>
+
+            <TableRBI
               dataSource={dataTableSelect}
-              columns={tableApproval(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              totalData={dataTableSelect.length}
-              tableScrolled={{ x: 8500, y: 300 }}
+              columns={processedColumns}
+              totalData={dataTableSelect.length || 0}
+              tableScrolled={{ x: 9000, y: 300 }}
+              onSort={onSort}
+              showExport={false}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={false}
+              usePagination={false}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>

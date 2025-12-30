@@ -1,33 +1,34 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Spin, Tooltip } from "antd";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
+import { Spin, Tooltip, Tabs, Modal } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
 import { useDispatch, useSelector } from "react-redux";
-import { getApprovalHistory, getListUsagePaginate } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import {
+  getApprovalHistory,
+  getListUsagePaginate,
+  getListBatchPaginate,
+  deleteBatch,
+} from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
-import BaseContainer from "../../../../components/BaseContainer";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
-import RadioTabs from "../../../../components/RadioTabs";
-import TablePagination from "../../../../components/TablePagination";
+import TableRBI from "../../../../components/TableRBI";
 import ModalApprovalUsage from "./ModalApprovalUsage";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-
-const dataTabs = [
-  {
-    key: "usageList",
-    value: "Usage List",
-  },
-  {
-    key: "batchList",
-    value: "Batch List",
-  },
-];
+import CardContainer from "../../../../components/CardContainer";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const MonitoringUsagePage = () => {
   // Selector
@@ -38,6 +39,7 @@ const MonitoringUsagePage = () => {
   // Declaration
   const dispatch = useDispatch();
   const { path } = usePrevLocContext();
+  const searchInput = useRef(null);
   const [tabHeader, setTabHeader] = useState("Usage List");
   const {
     dataBatch,
@@ -46,10 +48,7 @@ const MonitoringUsagePage = () => {
     batchColumns,
     data_usage,
     loading,
-    page,
     setPage,
-    pageSize,
-    setPageSize,
     onSort,
     onClickApproval,
     data_approval,
@@ -59,7 +58,10 @@ const MonitoringUsagePage = () => {
     setSearchText,
     setSearchedColumn,
     setSort,
-    sort
+    sort,
+    handleLoadMore,
+    hasMoreUsage,
+    hasMoreBatch,
   } = useMonitoringList(tabHeader);
 
   // Use State
@@ -68,27 +70,19 @@ const MonitoringUsagePage = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-
-
-  // const [dataTabs] = useState([
-  //   {
-  //     key: "usageList",
-  //     value: "Usage List",
-  //   },
-  //   {
-  //     key: "batchList",
-  //     value: "Batch List",
-  //   },
-  // ]);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action", "status"],
+  }));
 
   useEffect(() => {
     if (
       path &&
       path?.pathname?.includes("/rating-billing/monitoring-usage/view")
     ) {
-      setTabHeader(dataTabs[1].value);
+      setTabHeader("Batch List");
     } else {
-      setTabHeader(dataTabs[0].value);
+      setTabHeader("Usage List");
     }
   }, [path]);
 
@@ -104,11 +98,6 @@ const MonitoringUsagePage = () => {
     }
   }, [data_approval_history]);
 
-  // onChangeColumns
-  const onSelectChange = (newSelectedRowKeys) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
-
   const handleApprovalHistory = async (record) => {
     try {
       setModalApprovalHistory(true);
@@ -118,26 +107,39 @@ const MonitoringUsagePage = () => {
     }
   };
 
-
-  // onChange page
-  const onChangePage = (page, sizeChange) => {
-    setPage(page);
-    setPageSize(sizeChange);
+  const handleDeleteBatch = (record) => {
+    Modal.confirm({
+      title: "Delete Batch",
+      icon: <WarningOutlined style={{ color: "#faad14" }} />,
+      content: `Are you sure you want to delete Batch ID: ${record?.batchId}? This action cannot be undone.`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteBatch(record?.batchId)).unwrap();
+          // No need to refresh, Redux will automatically update the state
+          // The reducer already handles removing the deleted batch from the list
+        } catch (error) {
+          console.error("Error deleting batch:", error);
+        }
+      },
+    });
   };
-  // onchang tabs
-  const changeTabHeader = useCallback((e) => {
-    setTabHeader(e.target.value);
-    setPage(1);
-    setPageSize(10);
-    setSearch({})
-    setSort('')
-    setSearchText("")
-    setSearchedColumn('')
-    setSearch({});
-    onSort("", "", "")
-  }, [onSort, setPage, setPageSize, setSearch, setSearchText, setSearchedColumn, setSort]);
 
-
+  // onchange tabs
+  const changeTab = (key) => {
+    setTabHeader((prevState) => {
+      if (prevState !== key) {
+        setPage(1);
+        setSearch({});
+        setSort("");
+        setSearchText("");
+        setSearchedColumn("");
+      }
+      return key;
+    });
+  };
 
   const routes = [
     {
@@ -152,9 +154,9 @@ const MonitoringUsagePage = () => {
 
   const tableScroll = (tabHeader) => {
     if (tabHeader === "Usage List") {
-      return { x: 10000, y: 500 };
+      return { x: 2000, y: 525 };
     } else {
-      return { x: 1300, y: 500 };
+      return { x: 800, y: 525 };
     }
   };
 
@@ -165,7 +167,7 @@ const MonitoringUsagePage = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -179,7 +181,7 @@ const MonitoringUsagePage = () => {
       render: (
         <ButtonComponent
           icon={
-            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={24} />
+            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={20} />
           }
           type={"submit"}
           border={false}
@@ -198,7 +200,7 @@ const MonitoringUsagePage = () => {
       render: (
         <NavLink to={RBI_ROUTES.MONITORING_USAGE_UPLOAD}>
           <ButtonComponent
-            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={24} />}
+            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={17} />}
             type={"submit"}
             border={false}
           >
@@ -216,36 +218,13 @@ const MonitoringUsagePage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record)}
-              />
-            </div>
+            <SVGIcon
+              name="IconLogHistory"
+              color={"#0075bf"}
+              width={20}
+              onClick={() => handleApprovalHistory(record)}
+            />
           </Tooltip>
-        );
-      },
-    },
-  ];
-
-  const grantAccessBatch = [
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
-            state={{ id: record?.batchId }}
-          >
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Tooltip>
-          </Link>
         );
       },
     },
@@ -254,65 +233,215 @@ const MonitoringUsagePage = () => {
   const columnActionUsage = useColumnActionPermission(
     ["history"],
     grantAccessUsage
-  );
+  ).map((col) => ({
+    ...col,
+    width: 80,
+    align: "center",
+  }));
 
-  const columnActionBatch = useColumnActionPermission(
-    ["view"],
-    grantAccessBatch
-  );
+  const columnActionBatch = [
+    {
+      title: "ACTION",
+      key: "action",
+      fixed: "right",
+      width: 120,
+      align: "center",
+      render: (text, record) => {
+        const isDraft = record?.status?.toLowerCase() === "draft";
 
+        return (
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {/* View Icon */}
+            <Link
+              to={RBI_ROUTES.MONITORING_USAGE_DETAIL}
+              state={{ id: record?.batchId }}
+            >
+              <Tooltip title="Detail">
+                <SVGIcon name="IconDetail" width={20} />
+              </Tooltip>
+            </Link>
 
-  const columns = useMemo(() => {
-    if (tabHeader === "Usage List") {
-      return [
-        ...columnUsage,
-        ...columnActionUsage,
-      ]
-    } else {
-      return [...batchColumns, ...columnActionBatch];
-    }
-  }, [batchColumns, columnActionBatch, columnActionUsage, columnUsage, tabHeader])
-  
+            <Tooltip
+              // title={
+              //   isDraft ? "Delete Batch" : "Cannot delete (Status not Draft)"
+              // }
+            >
+              <div
+                style={{
+                  cursor: isDraft ? "pointer" : "not-allowed",
+                  transition: "all 0.2s ease",
+                  display: "inline-flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => {
+                  if (isDraft) {
+                    e.currentTarget.style.transform = "scale(1.1)";
+                    e.currentTarget.style.opacity = "0.7";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (isDraft) {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.opacity = "1";
+                  }
+                }}
+                onClick={(e) => {
+                  if (isDraft) {
+                    e.stopPropagation();
+                    handleDeleteBatch(record);
+                  }
+                }}
+              >
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  color={isDraft ? undefined : "#C0BEC6"}
+                />
+              </div>
+            </Tooltip>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const allColumns = useMemo(() => {
+    let baseColumns = tabHeader === "Usage List" ? columnUsage : batchColumns;
+    let actionColumns =
+      tabHeader === "Usage List" ? columnActionUsage : columnActionBatch;
+
+    const columnsWithKeys = [...baseColumns, ...actionColumns].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+      width: col.width || 150,
+    }));
+
+    return columnsWithKeys;
+  }, [
+    batchColumns,
+    columnActionBatch,
+    columnActionUsage,
+    columnUsage,
+    tabHeader,
+  ]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   const handleList = (tabHeader) => {
     if (tabHeader === "Usage List") {
       return dataUsage;
     } else {
       return dataBatch;
     }
-  }
-  
-  const handleListRefresh = () =>{
-    dispatch(getListUsagePaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))
-  }
+  };
+
+  const handleListRefresh = () => {
+    dispatch(
+      getListUsagePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  };
+
+  const handleBatchListRefresh = () => {
+    dispatch(
+      getListBatchPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  };
 
   return (
     <Spin spinning={loading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex justify-end gap-2"}>
-          <Toolbar items={grantAccessButton} />
-        </div>
 
-        <BaseContainer header={"MONITORING USAGE"}>
-          <RadioTabs
-            data={dataTabs}
-            onChange={changeTabHeader}
-            currentPosition={tabHeader}
-          />
-          <div className="my-5">
-            <TablePagination
-              totalData={handleList(tabHeader)?.page?.totalElements}
-              dataSource={handleList(tabHeader)?.result}
-              columns={columns}
-              current={page}
-              pageSize={pageSize}
-              tableScrolled={tableScroll(tabHeader)}
-              onChange={onChangePage}
-              onSizeChanger={onChangePage}
-              onSort={onSort}
-            />
-          </div>
-        </BaseContainer>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] text-primary">MONITORING USAGE</p>
+              <Toolbar items={grantAccessButton} />
+            </div>
+          }
+        >
+          <Tabs
+            activeKey={tabHeader}
+            onChange={changeTab}
+            type="line"
+            size="small"
+          >
+            <Tabs.TabPane tab="Usage List" key="Usage List">
+              <div className="my-0">
+                <TableRBI
+                  idTable="monitoring-usage-table"
+                  totalData={handleList(tabHeader)?.page?.totalElements}
+                  dataSource={handleList(tabHeader)?.result}
+                  columns={processedColumns}
+                  tableScrolled={tableScroll(tabHeader)}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={loading}
+                  handleDownload={handleDownload}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMoreUsage}
+                  loadMoreThreshold={20}
+                />
+              </div>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="Batch List" key="Batch List">
+              <div className="my-0">
+                <TableRBI
+                  idTable="monitoring-batch-table"
+                  totalData={handleList(tabHeader)?.page?.totalElements}
+                  dataSource={handleList(tabHeader)?.result}
+                  columns={processedColumns}
+                  tableScrolled={tableScroll(tabHeader)}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={loading}
+                  handleDownload={handleDownload}
+                  usePagination={false}
+                  useInfiniteScroll={true}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMoreBatch}
+                  loadMoreThreshold={20}
+                />
+              </div>
+            </Tabs.TabPane>
+          </Tabs>
+        </CardContainer>
       </LayoutMenu>
 
       {modalApproval ? (

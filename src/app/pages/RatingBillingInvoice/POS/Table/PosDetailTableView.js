@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Fragment } from "react";
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import Highlighter from "react-highlight-words";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNewTablePOS from "./TablePaginationNewTablePOS";
 import { hasValue, renderColumn } from "../../../../../utils";
 import { separatorCurrency } from "../Utils";
@@ -119,13 +117,11 @@ const columnDetail = (
     {
       title: "NO",
       width: 60,
-      align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "TYPE",
       dataIndex: "type",
-      align: "center",
       // onFilter: (value, record) => onFilter("type", value, record),
       // sorter: (a, b) => sorter("type", a, b),
       sorter: true,
@@ -192,7 +188,6 @@ const columnDetail = (
     {
       title: "CURRENCY",
       dataIndex: "currency",
-      align: "center",
       // onFilter: (value, record) => onFilter("currency", value, record),
       // sorter: (a, b) => sorter("currency", a, b),
       sorter: true,
@@ -226,7 +221,6 @@ const columnDetail = (
     {
       title: "QUANTITY",
       dataIndex: "quantity",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -260,7 +254,6 @@ const columnDetail = (
     {
       title: "PRICE",
       dataIndex: "price",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -336,7 +329,6 @@ const columnDetail = (
     {
       title: "AMOUNT",
       dataIndex: "amount",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -460,7 +452,6 @@ const columnDetail = (
     {
       title: "UOM",
       dataIndex: "uom",
-      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -494,7 +485,6 @@ const columnDetail = (
     {
       title: "POS NUMBER",
       dataIndex: "posNumber",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -528,7 +518,6 @@ const columnDetail = (
     {
       title: "AMOUNT EQV IDR",
       dataIndex: "amountEqvIdr",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -604,7 +593,6 @@ const columnDetail = (
     {
       title: "AMOUNT EQV USD",
       dataIndex: "amountEqvUsd",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -681,7 +669,6 @@ const columnDetail = (
     {
       title: "AMOUNT IDR ( TAX PURPOSE )",
       dataIndex: "eqvIdr",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -758,7 +745,6 @@ const columnDetail = (
     {
       title: "DISCOUNT",
       dataIndex: "discount",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -834,7 +820,6 @@ const columnDetail = (
     {
       title: "TOTAL",
       dataIndex: "total",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -910,7 +895,6 @@ const columnDetail = (
     {
       title: "TOTAL EQUIVALENT IDR",
       dataIndex: "totalEqvIdr",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -987,7 +971,6 @@ const columnDetail = (
     {
       title: "TOTAL EQUIVALENT USD",
       dataIndex: "totalEqvUsd",
-      align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -1128,7 +1111,6 @@ const columnDetail = (
       title: "ACTION",
       dataIndex: "action",
       fixed: "right",
-      align: "center",
       width: 100,
       render: (v, r, i) => {
         return (

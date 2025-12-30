@@ -192,7 +192,7 @@ const masterJobSlice = createSlice({
   initialState,
   extraReducers: {
     // get list
-    [getListMasterJob.pending]: (state, action) => {
+    [getListMasterJob.pending]: (state) => {
       state.isFailed = false;
       state.isSuccess = false;
       state.loading = true;
@@ -203,46 +203,46 @@ const masterJobSlice = createSlice({
       state.isSuccess = false;
       state.loading = false;
     },
-    [getListMasterJob.rejected]: (state, action) => {
+    [getListMasterJob.rejected]: (state) => {
       state.loading = false;
     },
     // get all
-    [getAllMasterJob.pending]: (state, action) => {
+    [getAllMasterJob.pending]: (state) => {
       state.loading = true;
     },
     [getAllMasterJob.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
-    [getAllMasterJob.rejected]: (state, action) => {
+    [getAllMasterJob.rejected]: (state) => {
       state.loading = false;
     },
     // create
-    [createMasterJob.pending]: (state, action) => {
+    [createMasterJob.pending]: (state) => {
       state.loading = true;
     },
-    [createMasterJob.fulfilled]: (state, action) => {
+    [createMasterJob.fulfilled]: (state) => {
       state.loading = false;
     },
-    [createMasterJob.rejected]: (state, action) => {
+    [createMasterJob.rejected]: (state) => {
       state.loading = false;
     },
     // get detail
-    [getDetailMasterJob.pending]: (state, action) => {
+    [getDetailMasterJob.pending]: (state) => {
       state.loading = true;
     },
     [getDetailMasterJob.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailMasterJob.rejected]: (state, action) => {
+    [getDetailMasterJob.rejected]: (state) => {
       state.loading = false;
     },
     // inactive master job
-    [inactiveMasterJob.pending]: (state, action) => {
+    [inactiveMasterJob.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveMasterJob.fulfilled]: (state, action) => {
+    [inactiveMasterJob.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -252,17 +252,17 @@ const masterJobSlice = createSlice({
       state.message = action.payload;
     },
     // update master job
-    [updateMasterJob.pending]: (state, action) => {
+    [updateMasterJob.pending]: (state) => {
       state.loading = true;
     },
-    [updateMasterJob.fulfilled]: (state, action) => {
+    [updateMasterJob.fulfilled]: (state) => {
       state.loading = false;
     },
-    [updateMasterJob.rejected]: (state, action) => {
+    [updateMasterJob.rejected]: (state) => {
       state.loading = false;
     },
     // download master job
-    [downloadMasterJob.pending]: (state, action) => {
+    [downloadMasterJob.pending]: (state) => {
       // state.isSuccess = true;
       state.loading = true;
     },

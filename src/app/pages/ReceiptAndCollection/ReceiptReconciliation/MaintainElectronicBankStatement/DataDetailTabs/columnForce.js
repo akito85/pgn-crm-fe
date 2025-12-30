@@ -5,10 +5,8 @@ import Highlighter from "react-highlight-words";
 import { Link } from "react-router-dom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
-import { getCustomerInfo } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
 import { dateFormatting } from "../../../../../../utils";
 import {
-  getColumnSearchProps,
   getColumnSearchPropsPaging,
 } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -22,12 +20,14 @@ export const columnForce = (
   handleSearch = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
     width: 60,
     align: "center",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "sor",
     title: "SOR",
     dataIndex: "sor",
     align: "left",
@@ -45,10 +45,7 @@ export const columnForce = (
     render: (text) =>
       searchedColumn === "sor" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -62,6 +59,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
     align: "left",
@@ -79,16 +77,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "costCenter" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -102,6 +95,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "customerName",
     title: "CUSTOMER",
     dataIndex: "customerName",
     align: "left",
@@ -119,16 +113,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "customerName" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -142,6 +131,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     align: "left",
@@ -159,16 +149,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "accountNumber" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -182,6 +167,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "receiptNumber",
     title: "RECEIPT NUMBER",
     dataIndex: "receiptNumber",
     align: "left",
@@ -199,16 +185,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "receiptNumber" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -222,6 +203,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "receiptDate",
     title: "RECEIPT DATE",
     dataIndex: "receiptDate",
     align: "center",
@@ -243,10 +225,7 @@ export const columnForce = (
     render: (text) =>
       searchedColumn === "receiptDate" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[
             searchText
               ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
@@ -262,6 +241,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     align: "center",
@@ -279,16 +259,11 @@ export const columnForce = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "currency" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -302,6 +277,7 @@ export const columnForce = (
       ),
   },
   {
+    key: "amount",
     title: "RECEIPT AMOUNT",
     dataIndex: "amount",
     align: "right",
@@ -316,16 +292,11 @@ export const columnForce = (
     ),
     onFilter: (value, record) =>
       record["amount"]?.toString().toLowerCase().includes(value.toLowerCase()),
-    ellipsis: {
-      showTitle: false,
-    },
+    ellipsis: { showTitle: false },
     render: (text) =>
       searchedColumn === "amount" ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -339,9 +310,9 @@ export const columnForce = (
       ),
   },
   {
+    key: "statusApproval",
     title: "APPROVAL STATUS",
     dataIndex: "statusApproval",
-    key: "statusApproval",
     fixed: "right",
     sorter: (a, b) => a?.statusApproval?.localeCompare(b?.statusApproval),
     ...getColumnSearchPropsPaging(
@@ -373,27 +344,25 @@ export const columnForce = (
             : approvalStatus;
           break;
       }
+
       if (searchedColumn === "statusApproval") {
         return (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         );
-      } else {
-        return text ? (
-          <div className={"flex justify-center"}>
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          text
-        );
       }
+
+      return text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text}>{text}</StatusComponent>
+        </div>
+      ) : (
+        text
+      );
     },
   },
 ];
@@ -1162,142 +1131,142 @@ export const columnsAwalForce = (
       }
     },
   },
-  {
-    title: "ACTION",
-    align: "center",
-    dataIndex: "id",
-    fixed: "right",
-    width: 130,
-    render: (id, r) => {
-      return (
-        <Space>
-          <Popover
-            content={
-              <Space direction="vertical">
-                {r?.statusApproval !== "Waiting Approval" &&
-                r?.status !== "Inactive" ? (
-                  <Link
-                    className="w-full"
-                    // to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-                    // state={{ id: id }}
-                  >
-                    <ButtonComponent
-                      className="gap-5 w-full"
-                      icon={
-                        <SVGIcon name="IconEdit" width={24} color={"#0075BF"} />
-                      }
-                      border={false}
-                      disabled={true}
-                    >
-                      <span
-                        className={
-                          "text-black gap-2 text-xl text-center w-full"
-                        }
-                      >
-                        Update
-                      </span>
-                    </ButtonComponent>
-                  </Link>
-                ) : (
-                  <ButtonComponent
-                    className="gap-5 w-full"
-                    icon={
-                      <SVGIcon name="IconEdit" width={24} color={"#d3d3d3"} />
-                    }
-                    border={false}
-                    disabled={true}
-                  >
-                    <span
-                      className={"text-black gap-2 text-xl text-center w-full"}
-                    >
-                      Update
-                    </span>
-                  </ButtonComponent>
-                )}
+  // {
+  //   title: "ACTION",
+  //   align: "center",
+  //   dataIndex: "id",
+  //   fixed: "right",
+  //   width: 130,
+  //   render: (id, r) => {
+  //     return (
+  //       <Space>
+  //         <Popover
+  //           content={
+  //             <Space direction="vertical">
+  //               {r?.statusApproval !== "Waiting Approval" &&
+  //               r?.status !== "Inactive" ? (
+  //                 <Link
+  //                   className="w-full"
+  //                   // to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
+  //                   // state={{ id: id }}
+  //                 >
+  //                   <ButtonComponent
+  //                     className="gap-5 w-full"
+  //                     icon={
+  //                       <SVGIcon name="IconEdit" width={24} color={"#0075BF"} />
+  //                     }
+  //                     border={false}
+  //                     disabled={true}
+  //                   >
+  //                     <span
+  //                       className={
+  //                         "text-black gap-2 text-xl text-center w-full"
+  //                       }
+  //                     >
+  //                       Update
+  //                     </span>
+  //                   </ButtonComponent>
+  //                 </Link>
+  //               ) : (
+  //                 <ButtonComponent
+  //                   className="gap-5 w-full"
+  //                   icon={
+  //                     <SVGIcon name="IconEdit" width={24} color={"#d3d3d3"} />
+  //                   }
+  //                   border={false}
+  //                   disabled={true}
+  //                 >
+  //                   <span
+  //                     className={"text-black gap-2 text-xl text-center w-full"}
+  //                   >
+  //                     Update
+  //                   </span>
+  //                 </ButtonComponent>
+  //               )}
 
-                <Link>
-                  {
-                    // r?.status === "ACTIVE" &&
-                    r?.statusApproval !== "Waiting Approval" &&
-                    r?.status !== "Inactive" ? (
-                      <ButtonComponent
-                        border={false}
-                        // disabled={r?.status === "Draft"}
-                        disabled={true}
-                        // onClick={() => handleInactive(r)}
-                      >
-                        <Checkbox
-                          // checked={r?.status === "Active" ? true : false}
-                          className="gap-7"
-                        />
-                        <span
-                          className={"text-black gap-2 text-xl text-center"}
-                        >
-                          {r?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-                        </span>
-                      </ButtonComponent>
-                    ) : (
-                      <ButtonComponent border={false} disabled={true}>
-                        <Checkbox
-                          checked={
-                            r?.status === "Active"
-                              ? true
-                              : false || r?.status === "Draft"
-                              ? true
-                              : null
-                          }
-                          disabled={true}
-                          className="gap-7"
-                        />
-                        <span
-                          className={"text-black gap-2 text-xl text-center"}
-                        >
-                          {r?.status === "Active" ? "Inactivate" : "Activate"}
-                        </span>
-                      </ButtonComponent>
-                    )
-                  }
-                </Link>
-                <Link>
-                  <ButtonComponent
-                    className="gap-5"
-                    icon={
-                      <SVGIcon
-                        name="IconLogHistory"
-                        color={"#0075bf"}
-                        width={24}
-                      />
-                    }
-                    disabled={true}
-                    border={false}
-                    // onClick={() => handleApprovalHistory(r)}
-                  >
-                    <span className={"text-black text-xl text-center"}>
-                      Approval History
-                    </span>
-                  </ButtonComponent>
-                </Link>
-              </Space>
-            }
-            trigger={"click"}
-            placement="bottomRight"
-          >
-            <div className="pt-1">
-              <MoreOutlined style={{ fontSize: "22px", color: "#0075BF" }} />
-            </div>
-          </Popover>
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <Link
-              // to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK}
-              // state={{ id: id }}
-              >
-                <SVGIcon name="IconDetail" width={24} />
-              </Link>
-            </div>
-          </Tooltip>
-        </Space>
-      );
-    },
-  },
+  //               <Link>
+  //                 {
+  //                   // r?.status === "ACTIVE" &&
+  //                   r?.statusApproval !== "Waiting Approval" &&
+  //                   r?.status !== "Inactive" ? (
+  //                     <ButtonComponent
+  //                       border={false}
+  //                       // disabled={r?.status === "Draft"}
+  //                       disabled={true}
+  //                       // onClick={() => handleInactive(r)}
+  //                     >
+  //                       <Checkbox
+  //                         // checked={r?.status === "Active" ? true : false}
+  //                         className="gap-7"
+  //                       />
+  //                       <span
+  //                         className={"text-black gap-2 text-xl text-center"}
+  //                       >
+  //                         {r?.status === "ACTIVE" ? "Inactivate" : "Activate"}
+  //                       </span>
+  //                     </ButtonComponent>
+  //                   ) : (
+  //                     <ButtonComponent border={false} disabled={true}>
+  //                       <Checkbox
+  //                         checked={
+  //                           r?.status === "Active"
+  //                             ? true
+  //                             : false || r?.status === "Draft"
+  //                             ? true
+  //                             : null
+  //                         }
+  //                         disabled={true}
+  //                         className="gap-7"
+  //                       />
+  //                       <span
+  //                         className={"text-black gap-2 text-xl text-center"}
+  //                       >
+  //                         {r?.status === "Active" ? "Inactivate" : "Activate"}
+  //                       </span>
+  //                     </ButtonComponent>
+  //                   )
+  //                 }
+  //               </Link>
+  //               <Link>
+  //                 <ButtonComponent
+  //                   className="gap-5"
+  //                   icon={
+  //                     <SVGIcon
+  //                       name="IconLogHistory"
+  //                       color={"#0075bf"}
+  //                       width={24}
+  //                     />
+  //                   }
+  //                   disabled={true}
+  //                   border={false}
+  //                   // onClick={() => handleApprovalHistory(r)}
+  //                 >
+  //                   <span className={"text-black text-xl text-center"}>
+  //                     Approval History
+  //                   </span>
+  //                 </ButtonComponent>
+  //               </Link>
+  //             </Space>
+  //           }
+  //           trigger={"click"}
+  //           placement="bottomRight"
+  //         >
+  //           <div className="pt-1">
+  //             <MoreOutlined style={{ fontSize: "22px", color: "#0075BF" }} />
+  //           </div>
+  //         </Popover>
+  //         <Tooltip title="Detail">
+  //           <div className="pt-1">
+  //             <Link
+  //             // to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK}
+  //             // state={{ id: id }}
+  //             >
+  //               <SVGIcon name="IconDetail" width={24} />
+  //             </Link>
+  //           </div>
+  //         </Tooltip>
+  //       </Space>
+  //     );
+  //   },
+  // },
 ];

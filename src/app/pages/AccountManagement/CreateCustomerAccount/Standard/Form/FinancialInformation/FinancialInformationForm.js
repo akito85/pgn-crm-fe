@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Space, Spin, Collapse, Badge } from "antd";
+import { Space, Collapse, Badge } from "antd";
 import PaymentChannelForm from "./PaymentChannelForm";
 import TaxIdentifierForm from "./TaxIdentifierForm";
 import WithholdingTaxForm from "./WithholdingTaxForm";

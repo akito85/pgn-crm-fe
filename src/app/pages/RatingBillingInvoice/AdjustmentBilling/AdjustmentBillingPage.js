@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
@@ -24,7 +24,9 @@ import { WarningOutlined } from "@ant-design/icons";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import moment from "moment";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const AdjustmentBillingPage = () => {
   // Selector
@@ -39,7 +41,7 @@ const AdjustmentBillingPage = () => {
 
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20); // Load 20 data each time
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
@@ -52,17 +54,24 @@ const AdjustmentBillingPage = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [idDelete, setIdDelete] = useState();
 
-  // Use Effect
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["statusApproval", "action"],
+  }));
+
+  // Use Effect - Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
       getAdjustmentBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: 100, // Initial load 100 data
         sort,
+        isLoadMore: false, // Flag untuk initial load
       })
     );
-  }, [dispatch, search, page, pageSize, sort]);
+    setPage(1);
+  }, [dispatch, search, sort]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -78,11 +87,11 @@ const AdjustmentBillingPage = () => {
     }
   }, [data_approval_history]);
 
-  // Function Search Column
+  // Function Search Column - Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -94,16 +103,33 @@ const AdjustmentBillingPage = () => {
     });
   };
 
-  // Function Change Pagination
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getAdjustmentBillingPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true, // Flag untuk load more
+        })
+      );
+      setPage(nextPage);
+    }
   };
 
-  const onSort = (_, __, sort) => {
+  // Calculate if there's more data
+  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
+
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -126,7 +152,7 @@ const AdjustmentBillingPage = () => {
       downloadAdjustmentBilling({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
@@ -153,11 +179,13 @@ const AdjustmentBillingPage = () => {
         dispatch(
           getAdjustmentBillingPaginate({
             search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: 100,
             sort,
+            isLoadMore: false,
           })
         );
+        setPage(1);
         handleCancel();
         handleClear();
       })
@@ -181,7 +209,7 @@ const AdjustmentBillingPage = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={() => handleDownload()}
         >
@@ -189,25 +217,25 @@ const AdjustmentBillingPage = () => {
         </ButtonComponent>
       ),
     },
-    {
-      action: "Upload",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={24} />}
-          type={"submit"}
-          border={false}
-          disabled={true}
-        >
-          Upload
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Upload",
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={18} />}
+    //       type={"submit"}
+    //       border={false}
+    //       disabled={true}
+    //     >
+    //       Upload
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Create",
       render: (
         <NavLink to={RBI_ROUTES.ADJUSTMENT_BILLING_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Adjustment BIlling
@@ -228,7 +256,7 @@ const AdjustmentBillingPage = () => {
               state={{ id: record.id }}
             >
               <ButtonComponent
-                icon={<SVGIcon name="IconDetail" width={24} />}
+                icon={<SVGIcon name="IconDetail" width={20} />}
                 border={false}
               >
                 <span className={"text-black ml-3"}> Detail</span>
@@ -241,7 +269,7 @@ const AdjustmentBillingPage = () => {
             >
               <Tooltip title="Detail">
                 <div className="pt-1">
-                  <SVGIcon name="IconDetail" width={24} />
+                  <SVGIcon name="IconDetail" width={20} />
                 </div>
               </Tooltip>
             </Link>
@@ -261,7 +289,7 @@ const AdjustmentBillingPage = () => {
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={24} />}
+              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isEditable}
             >
@@ -272,7 +300,7 @@ const AdjustmentBillingPage = () => {
               <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -308,7 +336,7 @@ const AdjustmentBillingPage = () => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 color={isDelete ? "#D90000" : "#8D91A0"}
                 className={isDelete ? undefined : "disabled cursor-not-allowed"}
                 onClick={isDelete ? () => handleDelete(record.id) : undefined}
@@ -326,7 +354,7 @@ const AdjustmentBillingPage = () => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
@@ -339,7 +367,7 @@ const AdjustmentBillingPage = () => {
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() => handleApprovalHistory(record.id)}
                 />
               </div>
@@ -350,47 +378,93 @@ const AdjustmentBillingPage = () => {
       },
     },
   ];
+
+  const actionCols = useColumnActionPermission(
+    ["view", "update", "delete", "history"],
+    itemGrantAccess,
+    "Delete"
+  ).map((col) => ({
+    ...col,
+    width: 100,
+    align: "center",
+  }));
+
+  const baseColumns = useMemo(() => {
+    return columnsAdjustmentBilling(
+      0, // Tidak digunakan untuk infinite scroll
+      0, // Tidak digunakan untuk infinite scroll
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search
+    );
+  }, [searchInput, searchedColumn, searchText, search]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.id || item.adjustmentNumber,
+    }));
+  }, [dataSource]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] text-primary">
+                Adjustment Billing List
+              </p>
 
-        <BaseContainer header={"Adjustment Billing List"}>
+              <Toolbar items={itemGrantAccess} />
+            </div>
+          }
+        >
           <div className="w-full">
-            <TablePaginationNew
-              dataSource={dataSource}
-              columns={[
-                ...columnsAdjustmentBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search
-                  // handleApprovalHistory,
-                  // handleDelete
-                ),
-                ...useColumnActionPermission(
-                  ["view", "update", "delete", "history"],
-                  itemGrantAccess,
-                  "Delete"
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+            <TableRBI
+              idTable="adjustment-billing-table"
+              showExport={false}
+              dataSource={dataSourceWithKeys}
+              columns={processedColumns}
               totalData={data?.page?.totalElements || 0}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 10100 }}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
+              tableScrolled={{ y: 525, x: 3000 }}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modal Delete */}
         <ModalConfirm

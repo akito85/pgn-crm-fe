@@ -1,7 +1,5 @@
 import React,{ useState } from 'react'
 import TablePagination from '../../../../../../../../components/TablePagination';
-import GridLayout from '../../../../../../../../components/GridLayout';
-import DetailText from '../../../../../../../../components/DetailText';
 
 const Detail = () => {
   const [page, setPage] = useState(1);

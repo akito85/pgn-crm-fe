@@ -1,11 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
 import DetailText from "../../../../components/DetailText";
 import {
@@ -14,34 +13,37 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ModalApprovalBilling = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
-  const { data_list_billing_approval } = useSelector((state) => state.billing);
+  const { data_list_billing_approval, loading } = useSelector(
+    (state) => state.billing
+  );
 
   // Declaration
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = data_list_billing_approval;
+  const dataSource = data_list_billing_approval?.result || [];
 
   // State
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20); // Load more 20 data each time
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
   const [remark, setRemark] = useState("");
   const [generateInvoice, setGenerateInvoice] = useState(false);
   const [action, setAction] = useState("");
@@ -51,37 +53,74 @@ const ModalApprovalBilling = ({
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  // Use State
+  const [fixedColumns, setFixedColumns] = useState({
+    left: ["no"],
+    right: [] 
+  });
+
+  // Initial fetch - Load 100 data pertama
   useEffect(() => {
-    dispatch(getAllBillingApprovePaginate());
-  }, [dispatch]);
+    if (isOpen) {
+      dispatch(
+        getAllBillingApprovePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: 100, // Initial load 100
+          sort,
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  }, [dispatch, isOpen, search, sort]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data_list_billing_approval?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getAllBillingApprovePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize, // Load 20 more
+          sort,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  // Calculate if there's more data
+  const hasMore =
+    dataSource.length < (data_list_billing_approval?.page?.totalElements || 0);
 
   // Sort Table
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
@@ -156,6 +195,12 @@ const ModalApprovalBilling = ({
     setDataTableSelect([]);
     setGenerateInvoice(false);
     setRemark("");
+    setCurrent(0);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
     form.resetFields();
   };
 
@@ -194,6 +239,11 @@ const ModalApprovalBilling = ({
         handleCancel();
         setSelectedRowKeys([]);
         setDataTableSelect([]);
+        setSearch({});
+        setPage(1);
+        setSort("");
+        setSearchText("");
+        setSearchedColumn("");
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
@@ -205,8 +255,6 @@ const ModalApprovalBilling = ({
           setModalError(true);
         }
       });
-
-    console.log(body, "body");
   };
 
   const handleCloseModalError = () => {
@@ -214,19 +262,51 @@ const ModalApprovalBilling = ({
     handleOpenModal();
     setBodyError({});
   };
+
   const handleRetry = () => {
     handleSave();
     setModalError(false);
     setBodyError({});
   };
 
-  const filterDataByPage = (type = "data") => {
-    let result = [...dataSource].map((a, index) => ({
-      ...a,
+  const baseColumns = useMemo(
+    () =>
+      columnsRequestBilling(
+        page,
+        loadMoreSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, loadMoreSize, searchedColumn, searchText]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item, index) => ({
+      ...item,
       key: index + 1,
     }));
-    return type === "data" ? result : result.length;
-  };
+  }, [dataSource]);
 
   return (
     <div>
@@ -236,7 +316,7 @@ const ModalApprovalBilling = ({
         header="Approval Billing Information"
         handleCancel={handleCancelForm}
         onFinish={handleSave}
-        width={1200}
+        width={1000}
         footer={
           <div className="flex w-full justify-end gap-5">
             {current < steps.length - 1 && (
@@ -283,6 +363,7 @@ const ModalApprovalBilling = ({
                   htmlType={"submit"}
                   form={"formApprove"}
                   onClick={() => setAction("REJECT")}
+                  loading={loading}
                 >
                   Reject
                 </ButtonComponent>
@@ -291,6 +372,7 @@ const ModalApprovalBilling = ({
                   htmlType={"submit"}
                   form={"formApprove"}
                   onClick={() => setAction("APPROVE")}
+                  loading={loading}
                 >
                   Approve
                 </ButtonComponent>
@@ -309,6 +391,7 @@ const ModalApprovalBilling = ({
           </div>
         </div>
 
+        {/* STEP 1: BILLING INFORMATION */}
         <div
           className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
         >
@@ -319,26 +402,33 @@ const ModalApprovalBilling = ({
             onFinish={handleSave}
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold">Billing List</p>
-              <TablePaginationNew
-                type="FE"
-                dataSource={filterDataByPage("data")}
-                columns={columnsRequestBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-primary uppercase font-bold">
+                  Billing List - Ready to Approve
+                </p>
+                {selectedRowKeys.length > 0 && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedRowKeys.length} {selectedRowKeys.length === 1 ? 'row' : 'rows'} selected
+                  </p>
                 )}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={filterDataByPage("length")}
-                onSort={onSort}
+              </div>
+              <TableRBI
+                dataSource={dataSourceWithKeys}
+                columns={processedColumns}
+                totalData={data_list_billing_approval?.page?.totalElements || 0}
                 tableScrolled={{ y: 525, x: 15000 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
+                showExport={false}
                 rowSelection={rowSelection}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
               />
               <div className="pt-[30px]">
                 <Form.Item
@@ -353,7 +443,7 @@ const ModalApprovalBilling = ({
                     type="textarea"
                     value={remark}
                     onChange={(e) => setRemark(e.target.value)}
-                    placeholder={"Type your remark"}
+                    placeholder={"Type your remark for approval/rejection"}
                   />
                 </Form.Item>
               </div>
@@ -361,30 +451,31 @@ const ModalApprovalBilling = ({
           </Form>
         </div>
 
-        {/* Confirmation */}
+        {/* STEP 2: CONFIRMATION */}
         <div
           className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-            <p className="text-primary uppercase font-bold">Billing List</p>
-            <TablePaginationNew
-              type="FE"
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-primary uppercase font-bold">
+                Confirmation
+              </p>
+              <p className="text-sm font-semibold text-blue-600">
+                {dataTableSelect.length} {dataTableSelect.length === 1 ? 'row' : 'rows'} will be {action === 'APPROVE' ? 'approved' : action === 'REJECT' ? 'rejected' : 'processed'}
+              </p>
+            </div>
+            <TableRBI
               dataSource={dataTableSelect}
-              columns={columnsRequestBilling(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              columns={processedColumns}
               totalData={dataTableSelect.length || 0}
-              onSort={onSort}
               tableScrolled={{ y: 525, x: 15000 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={false}
+              usePagination={false}
+              useInfiniteScroll={false}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>
@@ -409,8 +500,9 @@ const ModalApprovalBilling = ({
               : IconModal["icon_error_default"]}
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${action === "APPROVE" ? "approved" : "rejected"
-            }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${
+            action === "APPROVE" ? "approved" : "rejected"
+          }. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

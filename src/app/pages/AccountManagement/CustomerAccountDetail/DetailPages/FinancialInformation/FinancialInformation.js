@@ -1,40 +1,31 @@
-import React, { useEffect, useRef } from "react";
-import {
-  DownloadOutlined,
-  PlusOutlined,
-  UnorderedListOutlined,
-  EditOutlined,
-  WarningOutlined,
-  MoreOutlined,
-  ExclamationCircleOutlined,
-  CheckSquareOutlined,
-  CheckSquareFilled,
-} from "@ant-design/icons";
+import { useEffect } from "react";
 import { Collapse, Space } from "antd";
-import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Fragment } from "react";
 import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";
-import HeaderDetail from "../../HeaderDetail";
 import WitholdingTax from "./WitholdingTax/WitholdingTax";
 import PaymentChannel from "./Payment Channel/PaymentChannel";
 import TaxIdentifierAndRelation from "./TaxIdentifier/TaxIdentifierAndRelation";
 import AccountingRule from "./AccountingRule/AccountingRule";
 import TaxImplication from "./TaxImplication/TaxImplication";
 import BillingBucket from "./BillingBucket/BillingBucket";
-import useGrantAccessHooks from "../../../../../../components/useGrantAccessHooks";
+import PaymentRelation from "./PaymentRelation/PaymentRelation";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
+import InvoiceRelation from "./InvoiceRelation/InvoiceRelation";
 
-const { Panel } = Collapse;
-
-const FinancialInformation = ({id = 0}) => {
+const FinancialInformation = ({
+  id = 0,
+  idCustomer = 0,
+  isApproval = false,
+  setIsApproval = () => {},
+  setShowApprovalButton = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
+}) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
-  const [page, setPage] = useState(1);
-  const navigate = useNavigate;
-  const [pageSize, setPageSize] = useState(10);
-  const [status, setStatus] = useState();
 	const [current, setCurrent] = useState(0)
   const dispatch = useDispatch();
   const location = useLocation();
@@ -84,6 +75,36 @@ const FinancialInformation = ({id = 0}) => {
     {
       header: "Tax Implication",
       children: <TaxImplication id={id}/>,
+    },
+    {
+      header: "Payment Relation",
+      children: (
+        <PaymentRelation
+          id={id}
+          idCustomer={idCustomer}
+          isActive={current === 6}
+          isApproval={isApproval}
+          setIsApproval={setIsApproval}
+          setShowApprovalButton={setShowApprovalButton}
+          submitApprovalCondition={submitApprovalCondition}
+          setSubmitApprovalCondition={setSubmitApprovalCondition}
+        />
+      ),
+    },
+    {
+      header: "Invoice Relation",
+      children: (
+        <InvoiceRelation
+          id={id}
+          idCustomer={idCustomer}
+          isActive={current === 7}
+          isApproval={isApproval}
+          setIsApproval={setIsApproval}
+          setShowApprovalButton={setShowApprovalButton}
+          submitApprovalCondition={submitApprovalCondition}
+          setSubmitApprovalCondition={setSubmitApprovalCondition}
+        />
+      ),
     },
   ];
 

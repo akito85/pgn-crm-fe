@@ -1,5 +1,14 @@
-const BASE_URL = process.env.REACT_APP_PGN_SERVER;
+// const BASE_URL = process.env.REACT_APP_PGN_SERVER;
 // const BASE_URL = process.env.REACT_APP_LOCAL;
+
+// Notification configuration
+export const NOTIFICATION_CONFIG = {
+  ENABLED: true, // Set to false to disable notifications globally
+  SSE_BASE_URL: "/ntf", // SSE server URL (through configured proxy)
+  NOTIFICATION_SERVICE: `/ntf`,
+  RECONNECT_DELAY: 30000, // Reconnection delay in ms (30 seconds to prevent spam)
+  MAX_RECONNECT_ATTEMPTS: 5, // Maximum reconnection attempts before giving up
+};
 
 // explort constant app service
 export const configApp = {
@@ -17,5 +26,6 @@ export const configApp = {
   PAYMENT_SERVICE: `/payment`,
   INTEGRATION_SERVICE: `/service/integration`,
   JP_SERVICE: `/service/jp`,
-  REPORT_SERVICE: '/rpt'
+  REPORT_SERVICE: `/rpt`,
+  NOTIFICATION_SERVICE: `/ntf`, // Notification REST API service
 };

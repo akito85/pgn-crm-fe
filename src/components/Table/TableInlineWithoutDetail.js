@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Table,
   Input,
@@ -8,19 +8,11 @@ import {
   Checkbox,
   Tooltip,
   DatePicker,
-  Popover,
   Pagination,
-  Space
 } from "antd";
-import moment from "moment";
 import BaseContainer from "../BaseContainer";
 import ButtonComponent from "../ButtonComponent";
-import {
-  DeleteOutlined,
-  MoreOutlined,
-  PlusOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { useEffect } from "react";
 import SVGIcon from "../../assets/Icon/index";
 import InputComponent from "../InputComponent";
@@ -45,21 +37,21 @@ const EditableCell = ({
   const encrypt = record?.encrypt;
   const defaultRule = required
     ? [
-      {
-        ...required,
-        message: `${required.message} ${dataIndex}!`,
-      },
-    ]
-    : undefined;
-  const validationForm =
-    inputType === "input_regex"
-      ? [
         {
           ...required,
           message: `${required.message} ${dataIndex}!`,
         },
-        regex,
       ]
+    : undefined;
+  const validationForm =
+    inputType === "input_regex"
+      ? [
+          {
+            ...required,
+            message: `${required.message} ${dataIndex}!`,
+          },
+          regex,
+        ]
       : defaultRule;
   const getInputNode = (inputType, options) => {
     switch (inputType) {
@@ -173,8 +165,8 @@ const TableInlineWithoutDetail = (props) => {
     action,
     useSelect = false,
     usePagination = false,
-    onChangePage = () => { },
-    onSizeChanger = () => { },
+    onChangePage = () => {},
+    onSizeChanger = () => {},
     pageSize,
     current,
     totalData,
@@ -188,7 +180,7 @@ const TableInlineWithoutDetail = (props) => {
   const [isInsert, setIsInsert] = useState(false);
   const [visiblePassword, setVisiblePassword] = useState({});
   const isEditing = (record) => record.key === editingKey;
-  const [statusAction, setStatusAction] = useState('');
+  const [statusAction, setStatusAction] = useState("");
 
   useEffect(() => {
     if (mode === "update") {
@@ -198,20 +190,20 @@ const TableInlineWithoutDetail = (props) => {
     }
   }, [mode, tableData]);
   const edit = (record, field) => {
-    setStatusAction('edit');
+    setStatusAction("edit");
     form.setFieldsValue(record);
     setEditingKey(record.key);
   };
 
   const cancel = (key) => {
-    if (statusAction === 'add') {
+    if (statusAction === "add") {
       const newData = data.filter((item) => item.key !== key);
       setData(newData);
       onDataChange(newData);
     }
     setEditingKey("");
     setStoredData(false);
-    setStatusAction('');
+    setStatusAction("");
   };
 
   const handleVisiblePassword = (data) => {
@@ -251,10 +243,10 @@ const TableInlineWithoutDetail = (props) => {
     form.resetFields();
     setStoredData(true);
     setIsInsert(true);
-    setStatusAction('add');
+    setStatusAction("add");
     const newRow = {
       key: (data.length + 1).toString(),
-      status: 'ACTIVE'
+      status: "ACTIVE",
     };
     setData((prevData) => [...prevData, newRow]);
     setEditingKey(newRow.key);
@@ -272,7 +264,7 @@ const TableInlineWithoutDetail = (props) => {
     {
       title: "ACTIONS",
       dataIndex: "operation",
-      align: 'center',
+      align: "center",
       render: (_, record) => {
         const editable = record.key === editingKey;
         return (
@@ -281,7 +273,10 @@ const TableInlineWithoutDetail = (props) => {
               action(record, editable)
             ) : editable ? (
               <>
-                <ButtonComponent onClick={() => cancel(record.key)} type="default">
+                <ButtonComponent
+                  onClick={() => cancel(record.key)}
+                  type="default"
+                >
                   Cancel
                 </ButtonComponent>
                 <ButtonComponent onClick={() => save(record.key)} type="submit">
@@ -290,40 +285,36 @@ const TableInlineWithoutDetail = (props) => {
               </>
             ) : (
               <>
-                <Tooltip title={'Update'}>
+                <Tooltip title={"Update"}>
                   <div
                     onClick={() => edit(record)}
                     disabled={editingKey !== ""}
                   >
-                        <SVGIcon name="IconEdit" width={24} />
+                    <SVGIcon name="IconEdit" width={24} />
                   </div>
                 </Tooltip>
-                <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-                  <div border={false}
-                    onClick={() => onInactive(record)}
-                  >
+                <Tooltip
+                  title={
+                    record?.status === "ACTIVE" ? "Inactivate" : "Activate"
+                  }
+                >
+                  <div border={false} onClick={() => onInactive(record)}>
                     <Checkbox
                       className="action-checkbox"
                       checked={record.status === "ACTIVE" ? true : false}
                     />
-
                   </div>
                 </Tooltip>
                 {/* {record.status === "ACTIVE" || record.status === "INACTIVE" ? ( */}
-                <Tooltip title={'Delete'}>
+                <Tooltip title={"Delete"}>
                   {record.id ? (
-                    <div
-                      disabled
-                      border={false}
-                    >
-                      <SVGIcon name="IconDelete" width={24} color={'#C0BEC6'} />
-
+                    <div disabled border={false}>
+                      <SVGIcon name="IconDelete" width={24} color={"#C0BEC6"} />
                     </div>
                   ) : (
                     <div
                       onClick={() => deleteRow(record.key)}
                       disabled={editingKey !== ""}
-
                       border={false}
                     >
                       <SVGIcon name="IconDelete" width={24} />

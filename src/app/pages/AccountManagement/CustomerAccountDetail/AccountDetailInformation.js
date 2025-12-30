@@ -1,8 +1,8 @@
 import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import AccountInformation from "./DetailPages/AccountInformation/AccountInformation";
 import LastActivity from "./DetailPages/LastActivity";
-import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
+// import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
 import RadioTabs from "../../../../components/RadioTabs";
 import DistributionMedia from "./DetailPages/DistributionMedia/DistributionMedia";
 import GasSourceInformation from "./DetailPages/GasSource/GasSourceInformation";
@@ -22,6 +22,8 @@ import RawMaterialSource from "./DetailPages/RawMaterialSource/RawMaterialSource
 import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { Switch } from "antd";
+import AccountPromo from "./DetailPages/Promo/AccountPromo";
+import MultiDestination from "./DetailPages/MultiDestination/MultiDestination";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -46,21 +48,27 @@ const dataTabs = {
   pd: "Product Distribution",
   ras: "Raw Material Source",
   gu: "Gas Utilization",
+  promo: "Promo",
+  md: "Multi Destination",
 };
 const AccountDetailInformation = ({
   id = 0,
   section = "",
   options = [],
   handleChangeOption = () => {},
+  idAccount = 0,
   idCustomer = 0,
   type = "",
   setTypeAccountInfoDetailSection = () => {},
   dispatch,
   // handleChangeInteraction = () => {},
+  isApproval = false,
+  setIsApproval = () => {},
+  setShowApprovalButton = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
 }) => {
   const { path } = usePrevLocContext();
-  console.log(path);
-
   // useEffect(() => {
   //   switch (section) {
   //     case dataTabs.adi:
@@ -180,7 +188,71 @@ const AccountDetailInformation = ({
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.ras);
-    } else {
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/relationship/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/relationship/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/relationship/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/relationship/details"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.rs);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/update"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.fi);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/multi-destination/update"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.md);
+    }
+    else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     }
   }, [path]);
@@ -221,7 +293,7 @@ const AccountDetailInformation = ({
             ]}
             idCustomer={idCustomer}
             type={type}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.la:
@@ -235,12 +307,13 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.sr:
-        return <ServiceRequest />;
+        return <></>;
+      // return <ServiceRequest />;
       case dataTabs.dm:
         return (
           <DistributionMedia
             id={id}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.premise:
@@ -249,7 +322,7 @@ const AccountDetailInformation = ({
             id={id}
             idCustomer={idCustomer}
             type={type}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.gs:
@@ -261,7 +334,17 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.fi:
-        return <FinancialInformation id={id} />;
+        return (
+          <FinancialInformation
+            id={id}
+            idCustomer={idCustomer}
+            isApproval={isApproval}
+            setIsApproval={setIsApproval}
+            setShowApprovalButton={setShowApprovalButton}
+            submitApprovalCondition={submitApprovalCondition}
+            setSubmitApprovalCondition={setSubmitApprovalCondition}
+          />
+        )
       case dataTabs.accountAddress:
         return <AccountAddress id={id} idCustomer={idCustomer} type={type} />;
       case dataTabs.accountContact:
@@ -278,14 +361,15 @@ const AccountDetailInformation = ({
         return (
           <Relationship
             id={id}
-            // handleChangeInteraction={handleChangeInteraction}
+            type={type}
+            idCustomer={idCustomer}
           />
         );
       case dataTabs.adi:
         return (
           <AdditionalInformation
             idAccount={id}
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.eq:
@@ -300,6 +384,20 @@ const AccountDetailInformation = ({
         return (
           <GasUtilization idAccount={id} idCustomer={idCustomer} type={type} />
         );
+      case dataTabs.promo:
+        return <AccountPromo id={id} />;
+      case dataTabs.md:
+        return (
+          <MultiDestination
+            id={id}
+            idCustomer={idCustomer}
+            isApproval={isApproval}
+            setIsApproval={setIsApproval}
+            setShowApprovalButton={setShowApprovalButton}
+            submitApprovalCondition={submitApprovalCondition}
+            setSubmitApprovalCondition={setSubmitApprovalCondition}
+          />
+        )
       default:
         return <></>;
     }

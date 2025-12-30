@@ -13,15 +13,11 @@ import {
   Space,
 } from "antd";
 import moment from "moment";
-import BaseContainer from "../../../../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import {
-  DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
   InfoCircleOutlined,
-  DeleteColumnOutlined,
-  DeleteFilled,
 } from "@ant-design/icons";
 import { useEffect } from "react";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";

@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import React from "react";
 import CardComponent from "../../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
