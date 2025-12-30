@@ -350,8 +350,8 @@ export const inactivateMultiDestination = createAsyncThunk(
   "INACTIVATE_MULTI_DESTINATION",
   async ({ body }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/inactive";
-      // const response = await accountManagementService.activationWithRemark(url, body);
+      const url = "/v1/dbs/api/multi-destination/inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
@@ -359,8 +359,7 @@ export const inactivateMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
