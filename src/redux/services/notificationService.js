@@ -129,7 +129,9 @@ class NotificationService {
 
           // Determine message direction
           const isForUser = notification.toUserId === userId;
-          const isForAll = notification.toUserId === "ALL" || notification.broadcast === true;
+          const isForAll = notification.toUserId === "ALL" ||
+                          notification.toUserId === "BROADCAST" ||
+                          notification.broadcast === true;
 
 
           // Enrich notification with metadata

@@ -75,8 +75,10 @@ const NotificationDropdown = () => {
     const isForThisUser = notification.direction === "broadcast" ||
            notification.TO_USER_ID === userId ||
            notification.TO_USER_ID === "ALL" ||
+           notification.TO_USER_ID === "BROADCAST" ||
            notification.toUserId === userId ||
-           notification.toUserId === "ALL";
+           notification.toUserId === "ALL" ||
+           notification.toUserId === "BROADCAST";
 
     // Log warning if backend sent notifications for other users (data leakage detection)
     if (!isForThisUser && process.env.NODE_ENV === 'development') {
