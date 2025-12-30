@@ -30,6 +30,7 @@ import {
   getListServiceType,
   getListSor,
   getListSpecificCustomer,
+  getListComponentPrabilling,
   createPrabilling,
   getUserDetailCalculation,
   getUserProfile,
@@ -51,6 +52,7 @@ const PrabillingForm = ({ type }) => {
     specific_customer_message,
     list_billing_cycle,
     list_billing_period,
+    list_component_prabilling,
     data_user_calculation,
     user_profile,
     loading_user_profile,
@@ -103,6 +105,7 @@ const PrabillingForm = ({ type }) => {
     dispatch(getListSchedulerType());
     dispatch(getListCostCenter());
     dispatch(getListBillingCycle());
+    dispatch(getListComponentPrabilling());
     dispatch(getUserDetailCalculation());
     dispatch(getUserProfile());
   }, [dispatch]);
@@ -248,6 +251,7 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
@@ -297,6 +301,7 @@ const PrabillingForm = ({ type }) => {
         : null,
       calculationType: formValue?.calculation_type,
       remark: formValue?.remark,
+      specificComponentPrabilling: formValue?.specificComponentPrabilling || [],
       rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
         return {
           id: null,
@@ -425,6 +430,7 @@ const PrabillingForm = ({ type }) => {
       sorId: dataFinal?.sor,
       calculationTypeId: dataFinal?.calculationType,
       remark: dataFinal?.remark,
+      runDtl: dataFinal?.specificComponentPrabilling || [],
       createdBy: user_profile.username || "",
     };
 
@@ -577,6 +583,7 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
@@ -892,6 +899,24 @@ const PrabillingForm = ({ type }) => {
                   </Select>
                 </Form.Item>
               </div>
+
+              {/* Specific Component Prabilling - Left column */}
+              <Form.Item
+                label={"Specific Component Prabilling"}
+                name={"specificComponentPrabilling"}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  mode={"multiple"}
+                  options={(list_component_prabilling || []).map((item) => {
+                    return {
+                      label: item?.componentName,
+                      value: item?.componenetCode,
+                    };
+                  })}
+                  placeholder={"Choose Multiple..."}
+                />
+              </Form.Item>
             </div>
           </CardContainer>
           <CardContainer
