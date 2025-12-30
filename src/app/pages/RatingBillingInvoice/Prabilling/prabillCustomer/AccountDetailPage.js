@@ -16,30 +16,24 @@ import {
   getCustomerSaData,
   getCustomerUsageData,
   getCustomerTaxData,
-  getCustomerSaTosData,
-  getCustomerTosSubData,
   getCustomerBillingBucketData,
   getCustomerBillingItemData,
-  getCustomerSaPrcRuleDetData,
   resetCustomerDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/praBilling";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import {
   createUsageColumns,
   createTaxColumns,
-  createSaTosColumns,
-  createTosSubColumns,
   createBillingBucketColumns,
   createBillingItemColumns,
-  createSaPrcRuleDetColumns,
   createSAColumns,
 } from "./columns";
 import BaseContainer from "../../../../../components/BaseContainer";
 import StatusComponent from "../../../../../components/StatusComponent";
-import PrabillSaDetailSection from "./ServiceAgreement/PrabillSaDetailSection";
-import PrabillSaCalcRuleSection from "./ServiceAgreement/PrabillSaCalcRuleSection";
-import PrabillSaPricingSection from "./ServiceAgreement/PrabillSaPricingSection";
-import PrabillSaTosSection from "./ServiceAgreement/PrabillSaTosSection";
+import PrabillSaDetailSection from "./serviceAgreement/PrabillSaDetailSection";
+import PrabillSaCalcRuleSection from "./serviceAgreement/PrabillSaCalcRuleSection";
+import PrabillSaPricingSection from "./serviceAgreement/PrabillSaPricingSection";
+import PrabillSaTosSection from "./serviceAgreement/PrabillSaTosSection";
 
 const { TabPane } = Tabs;
 
@@ -77,34 +71,13 @@ const TAB_CONFIGS = [
   },
   {
     key: "3",
-    label: "SA Price Rule",
-    dataKey: "saPrcRuleDetData",
-    scrollX: 1100,
-    action: "getCustomerSaPrcRuleDetData",
-  },
-  {
-    key: "4",
-    label: "SA TOS Detail",
-    dataKey: "saTosDet",
-    scrollX: 800,
-    action: "getCustomerSaTosData",
-  },
-  {
-    key: "5",
-    label: "TOS Sub Detail",
-    dataKey: "tosSubDet",
-    scrollX: 800,
-    action: "getCustomerTosSubData",
-  },
-  {
-    key: "6",
     label: "Billing Bucket",
     dataKey: "billingBucketData",
     scrollX: 900,
     action: "getCustomerBillingBucketData",
   },
   {
-    key: "7",
+    key: "4",
     label: "Billing Item",
     dataKey: "billingItemData",
     scrollX: 1500,
@@ -123,9 +96,6 @@ const AccountDetailPage = () => {
     2: { current: 1, pageSize: 10 },
     3: { current: 1, pageSize: 10 },
     4: { current: 1, pageSize: 10 },
-    5: { current: 1, pageSize: 10 },
-    6: { current: 1, pageSize: 10 },
-    7: { current: 1, pageSize: 10 },
   });
 
   // State untuk SA Detail
@@ -149,15 +119,6 @@ const AccountDetailPage = () => {
     createFixedColumnsState(["no"])
   );
   const [fixedColumnsTax, setFixedColumnsTax] = useState(() =>
-    createFixedColumnsState()
-  );
-  const [fixedColumnsPrice, setFixedColumnsPrice] = useState(() =>
-    createFixedColumnsState()
-  );
-  const [fixedColumnsSaTos, setFixedColumnsSaTos] = useState(() =>
-    createFixedColumnsState()
-  );
-  const [fixedColumnsTosSub, setFixedColumnsTosSub] = useState(() =>
     createFixedColumnsState()
   );
   const [fixedColumnsBillingBucket, setFixedColumnsBillingBucket] = useState(
@@ -203,9 +164,6 @@ const AccountDetailPage = () => {
     // Load all other tab data immediately
     dispatch(getCustomerUsageData({ ...baseParams, sort: "measDate~desc" }));
     dispatch(getCustomerTaxData(baseParams));
-    dispatch(getCustomerSaPrcRuleDetData(baseParams));
-    dispatch(getCustomerSaTosData(baseParams));
-    dispatch(getCustomerTosSubData(baseParams));
     dispatch(getCustomerBillingBucketData(baseParams));
     dispatch(getCustomerBillingItemData(baseParams));
 
@@ -245,7 +203,6 @@ const AccountDetailPage = () => {
 
       switch (tabConfig.action) {
         case "getCustomerSaData":
-          // SA data hanya butuh customerNumber dan billPeriod
           dispatch(
             getCustomerSaData({
               customerNumber,
@@ -262,15 +219,6 @@ const AccountDetailPage = () => {
         case "getCustomerTaxData":
           dispatch(getCustomerTaxData(params));
           break;
-        case "getCustomerSaPrcRuleDetData":
-          dispatch(getCustomerSaPrcRuleDetData(params));
-          break;
-        case "getCustomerSaTosData":
-          dispatch(getCustomerSaTosData(params));
-          break;
-        case "getCustomerTosSubData":
-          dispatch(getCustomerTosSubData(params));
-          break;
         case "getCustomerBillingBucketData":
           dispatch(getCustomerBillingBucketData(params));
           break;
@@ -284,7 +232,7 @@ const AccountDetailPage = () => {
     [dispatch, customerNumber, billPeriod, inSor, accNumber, saNumber]
   );
 
-  // Handle tab change - no lazy loading needed
+  // Handle tab change
   const handleTabChange = useCallback((key) => {
     setActiveTab(key);
   }, []);
@@ -324,14 +272,6 @@ const AccountDetailPage = () => {
   const usagePage = customer_account_detail?.usageData?.page || {};
   const taxData = customer_account_detail?.taxData?.result || [];
   const taxPage = customer_account_detail?.taxData?.page || {};
-  const saPrcRuleDetData =
-    customer_account_detail?.saPrcRuleDetData?.result || [];
-  const saPrcRuleDetPage =
-    customer_account_detail?.saPrcRuleDetData?.page || {};
-  const saTosDet = customer_account_detail?.saTosDet?.result || [];
-  const saTosPage = customer_account_detail?.saTosDet?.page || {};
-  const tosSubDet = customer_account_detail?.tosSubDet?.result || [];
-  const tosSubPage = customer_account_detail?.tosSubDet?.page || {};
   const billingBucketData =
     customer_account_detail?.billingBucketData?.result || [];
   const billingBucketPage =
@@ -352,12 +292,6 @@ const AccountDetailPage = () => {
   const saColumnsBase = useMemo(() => createSAColumns(renderValue), []);
   const usageColumns = useMemo(() => createUsageColumns(renderValue), []);
   const taxColumns = useMemo(() => createTaxColumns(renderValue), []);
-  const saPrcRuleDetColumns = useMemo(
-    () => createSaPrcRuleDetColumns(renderValue),
-    []
-  );
-  const saTosColumns = useMemo(() => createSaTosColumns(renderValue), []);
-  const tosSubColumns = useMemo(() => createTosSubColumns(renderValue), []);
   const billingBucketColumns = useMemo(
     () => createBillingBucketColumns(renderValue),
     []
@@ -367,7 +301,7 @@ const AccountDetailPage = () => {
     []
   );
 
-  // SA Columns dengan Action Button menggunakan SVGIcon
+  // SA Columns dengan Action Button
   const saColumnsWithAction = useMemo(() => {
     return [
       ...saColumnsBase,
@@ -408,18 +342,6 @@ const AccountDetailPage = () => {
       () => applyFixedColumns(taxColumns, fixedColumnsTax),
       [taxColumns, fixedColumnsTax]
     ),
-    saPrcRuleDet: useMemo(
-      () => applyFixedColumns(saPrcRuleDetColumns, fixedColumnsPrice),
-      [saPrcRuleDetColumns, fixedColumnsPrice]
-    ),
-    saTos: useMemo(
-      () => applyFixedColumns(saTosColumns, fixedColumnsSaTos),
-      [saTosColumns, fixedColumnsSaTos]
-    ),
-    tosSub: useMemo(
-      () => applyFixedColumns(tosSubColumns, fixedColumnsTosSub),
-      [tosSubColumns, fixedColumnsTosSub]
-    ),
     billingBucket: useMemo(
       () => applyFixedColumns(billingBucketColumns, fixedColumnsBillingBucket),
       [billingBucketColumns, fixedColumnsBillingBucket]
@@ -444,19 +366,6 @@ const AccountDetailPage = () => {
     tax: useMemo(
       () => taxColumns.map((col) => ({ key: col.key, title: col.title })),
       [taxColumns]
-    ),
-    saPrcRuleDet: useMemo(
-      () =>
-        saPrcRuleDetColumns.map((col) => ({ key: col.key, title: col.title })),
-      [saPrcRuleDetColumns]
-    ),
-    saTos: useMemo(
-      () => saTosColumns.map((col) => ({ key: col.key, title: col.title })),
-      [saTosColumns]
-    ),
-    tosSub: useMemo(
-      () => tosSubColumns.map((col) => ({ key: col.key, title: col.title })),
-      [tosSubColumns]
     ),
     billingBucket: useMemo(
       () =>
@@ -500,33 +409,6 @@ const AccountDetailPage = () => {
       loading: loading_customer_detail.tax,
     },
     3: {
-      data: saPrcRuleDetData,
-      columns: processedColumns.saPrcRuleDet,
-      defs: columnDefs.saPrcRuleDet,
-      fixed: fixedColumnsPrice,
-      setFixed: setFixedColumnsPrice,
-      page: saPrcRuleDetPage,
-      loading: loading_customer_detail.saPrcRuleDet,
-    },
-    4: {
-      data: saTosDet,
-      columns: processedColumns.saTos,
-      defs: columnDefs.saTos,
-      fixed: fixedColumnsSaTos,
-      setFixed: setFixedColumnsSaTos,
-      page: saTosPage,
-      loading: loading_customer_detail.saTos,
-    },
-    5: {
-      data: tosSubDet,
-      columns: processedColumns.tosSub,
-      defs: columnDefs.tosSub,
-      fixed: fixedColumnsTosSub,
-      setFixed: setFixedColumnsTosSub,
-      page: tosSubPage,
-      loading: loading_customer_detail.tosSub,
-    },
-    6: {
       data: billingBucketData,
       columns: processedColumns.billingBucket,
       defs: columnDefs.billingBucket,
@@ -535,7 +417,7 @@ const AccountDetailPage = () => {
       page: billingBucketPage,
       loading: loading_customer_detail.billingBucket,
     },
-    7: {
+    4: {
       data: billingItemData,
       columns: processedColumns.billingItem,
       defs: columnDefs.billingItem,
@@ -731,7 +613,7 @@ const AccountDetailPage = () => {
         </Tabs>
       )}
 
-      {/* SA Detail Section - Muncul ketika user klik detail */}
+      {/* SA Detail Section */}
       {showSaDetail && selectedPrabillSaId && (
         <div ref={saDetailRef} className="mt-8">
           <CardContainer

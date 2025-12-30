@@ -1199,49 +1199,6 @@ export const getCustomerTaxData = createAsyncThunk(
   }
 );
 
-// Get SA TOS Detail Data
-export const getCustomerSaTosData = createAsyncThunk(
-  "GET_CUSTOMER_SA_TOS_DATA",
-  async (params, thunkAPI) => {
-    try {
-      const {
-        customerNumber,
-        billPeriod,
-        inSor,
-        accNumber,
-        saNumber,
-        page = 0,
-        size = 10,
-      } = params;
-
-      let url = `/v1/dbs/api/data-sa-tos-detail?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
-        customerNumber
-      )}&billPeriod=${encodeURIComponent(
-        billPeriod
-      )}&inSor=${encodeURIComponent(inSor)}`;
-
-      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
-      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
-
-      const response = await ratingBillingHttpService.getAll(url);
-      const apiData = response.data?.data || response.data;
-
-      return {
-        result: apiData?.result || [],
-        page: apiData?.page || {
-          size: 10,
-          totalElements: 0,
-          totalPages: 0,
-          number: 0,
-        },
-      };
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
 
 // Get TOS Sub Detail Data
 export const getCustomerTosSubData = createAsyncThunk(
@@ -1825,19 +1782,6 @@ const prabillingSlice = createSlice({
     [getCustomerTaxData.rejected]: (state) => {
       state.loading_customer_detail.tax = false;
       state.customer_account_detail.taxData = { result: [], page: {} };
-    },
-
-    // SA TOS Data
-    [getCustomerSaTosData.pending]: (state) => {
-      state.loading_customer_detail.saTos = true;
-    },
-    [getCustomerSaTosData.fulfilled]: (state, action) => {
-      state.loading_customer_detail.saTos = false;
-      state.customer_account_detail.saTosDet = action.payload;
-    },
-    [getCustomerSaTosData.rejected]: (state) => {
-      state.loading_customer_detail.saTos = false;
-      state.customer_account_detail.saTosDet = { result: [], page: {} };
     },
 
     // TOS Sub Data
