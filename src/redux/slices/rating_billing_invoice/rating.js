@@ -280,7 +280,7 @@ export const getDetailPricing = createAsyncThunk(
   "GET_PRICING",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rating/list-sa-pricing/${id}`;
+      const url = `/v1/dbs/api/rating/list-sa-pricing?saNumber=${id}`;
       const data = await ratingBillingHttpService.getDetail(url);
       return data?.data;
     } catch (error) {
@@ -308,7 +308,7 @@ export const getAllPricingRuleSAPaginate = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "" : sort;
-      const url = `/v1/dbs/api/rating/list-sa-pricing-rule/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/rating/list-sa-pricing-rule?saNumber=${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
