@@ -80,16 +80,6 @@ const NotificationDropdown = () => {
            notification.toUserId === "ALL" ||
            notification.toUserId === "BROADCAST";
 
-    // Log warning if backend sent notifications for other users (data leakage detection)
-    if (!isForThisUser && process.env.NODE_ENV === 'development') {
-      console.warn('[NotificationDropdown] Backend sent notification for different user:', {
-        notificationId: notification.id,
-        toUserId: notification.toUserId || notification.TO_USER_ID,
-        currentUserId: userId,
-        title: notification.title || notification.TITLE
-      });
-    }
-
     return isForThisUser;
   });
 
@@ -116,16 +106,6 @@ const NotificationDropdown = () => {
   // This protects against backend returning count for all users
   // If Redux unreadCount doesn't match our filtered count, use the filtered count as it's more reliable
   const safeUnreadCount = userUnreadCount !== undefined ? Math.min(userUnreadCount, unreadCountForTab) : unreadCountForTab;
-
-  // Log warning if counts don't match (potential backend issue)
-  if (userUnreadCount !== unreadCountForTab && process.env.NODE_ENV === 'development') {
-    console.warn('[NotificationDropdown] Unread count mismatch detected:', {
-      reduxUnreadCount: userUnreadCount,
-      clientCalculatedCount: unreadCountForTab,
-      usingSafeCount: safeUnreadCount,
-      possibleCause: 'Backend may be returning count for all users or counts are out of sync'
-    });
-  }
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
@@ -163,7 +143,6 @@ const NotificationDropdown = () => {
           // Step 4: Fetch all existing user notifications from API (list endpoint)
           dispatch(fetchAllUserNotifications({ userId }));
         } catch (error) {
-          console.error("[NotificationDropdown] Failed to initialize notifications:", error);
           // Continue anyway - user might still see notifications if backend allows
           dispatch(connectNotifications({ userId }));
           dispatch(fetchUnreadCount());
@@ -172,8 +151,6 @@ const NotificationDropdown = () => {
       };
 
       initializeNotifications();
-    } else {
-      console.warn("[NotificationDropdown] No userId found in token");
     }
 
     // Cleanup: Disconnect from SSE on unmount
@@ -290,37 +267,26 @@ const NotificationDropdown = () => {
    * Handle notification click - State-based navigation with proper NAVIGATION_STATE parsing
    */
   const handleNotificationClick = (notification) => {
-    console.log('=== Notification Click Debug ===');
-    console.log('Full notification object:', notification);
-
     // Mark as read if not already read
     const notificationId = notification.id || notification.ID;
     const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
 
-    console.log('Notification ID:', notificationId);
-    console.log('Is Read:', isRead);
-
     if (!isRead && notificationId) {
-      console.log('Marking notification as read:', notificationId);
       dispatch(markAsRead(notificationId));
     }
 
     // Navigate using state-based routing pattern
     const link = notification.link || notification.LINK;
-    console.log('Navigation link:', link);
 
     if (link) {
       // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
       let parsedNavigationState = {};
       const navState = notification.navigationState || notification.NAVIGATION_STATE;
-      console.log('Raw NAVIGATION_STATE:', navState);
 
       if (navState) {
         try {
           parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
-          console.log('Parsed NAVIGATION_STATE:', parsedNavigationState);
         } catch (e) {
-          console.error('Failed to parse NAVIGATION_STATE:', e);
           parsedNavigationState = {};
         }
       }
@@ -345,25 +311,17 @@ const NotificationDropdown = () => {
         routeState.approvalLevel = approvalLevel;
       }
 
-      console.log('Final route state:', routeState);
-      console.log('Navigating to:', link);
-
       // Navigate based on presence of entity_id
       if (notification.entityId || notification.ENTITY_ID) {
-        console.log('Navigation with entity state');
         navigate(link, { state: routeState });
       } else {
-        console.log('Navigation without entity');
         navigate(link, {
           state: Object.keys(parsedNavigationState).length > 0
             ? parsedNavigationState
             : undefined
         });
       }
-    } else {
-      console.log('No link found - skipping navigation');
     }
-    console.log('=== End Notification Click Debug ===');
   };
 
   /**
@@ -412,15 +370,7 @@ const NotificationDropdown = () => {
 
         const notificationId = notification.id || notification.ID;
 
-        console.log(`Scheduling animation for notification ${index + 1}/${visualOrderNotifications.length}:`, {
-          id: notificationId,
-          title: notification.title || notification.TITLE,
-          delay: `${delay}ms`,
-          reverseIndex,
-        });
-
         setTimeout(() => {
-          console.log(`Animating notification: ${notification.title || notification.TITLE} (ID: ${notificationId})`);
           setAnimatingNotifications(prev => new Set([...prev, notificationId]));
         }, delay);
       });
@@ -433,7 +383,6 @@ const NotificationDropdown = () => {
         const dateGroupDelay = lastNotificationDelay + dateGroupAnimationDelay;
 
         setTimeout(() => {
-          console.log(`Animating date group: ${date}`);
           setAnimatingDateGroups(prev => new Set([...prev, date]));
         }, dateGroupDelay);
       });
@@ -786,7 +735,6 @@ const NotificationDropdown = () => {
 
   // Safety check: Don't render if no userId (prevents showing wrong user's data)
   if (!userId) {
-    console.warn('[NotificationDropdown] No userId found - notifications disabled');
     return null;
   }
 

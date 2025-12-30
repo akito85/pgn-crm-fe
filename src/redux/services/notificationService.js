@@ -87,8 +87,6 @@ class NotificationService {
               connectedVia: "readyState-check"
             });
           }
-        } else if (this.eventSource) {
-          console.warn("[NotificationService] Connection check: readyState =", this.eventSource.readyState);
         }
       }, 2000); // Check after 2 seconds
 
@@ -105,8 +103,6 @@ class NotificationService {
             readyState: this.eventSource.readyState,
             connectedVia: "onopen-event"
           });
-        } else {
-          console.warn("[NotificationService] No onConnectCallback registered!");
         }
       };
 
@@ -121,9 +117,6 @@ class NotificationService {
 
           // Validate required fields
           if (!notification.id || !notification.notificationType) {
-            console.warn("[NotificationService] Invalid notification format:", notification);
-            console.warn("[NotificationService] Missing id:", !notification.id);
-            console.warn("[NotificationService] Missing notificationType:", !notification.notificationType);
             return;
           }
 
@@ -146,13 +139,9 @@ class NotificationService {
 
           if (this.onMessageCallback) {
             this.onMessageCallback(enrichedNotification);
-          } else {
-            console.warn("[NotificationService] No onMessageCallback registered!");
           }
 
         } catch (error) {
-          console.error("[NotificationService] Failed to parse notification:", error);
-          console.error("[NotificationService] Error stack:", error.stack);
           if (this.onErrorCallback) {
             this.onErrorCallback({
               type: "PARSE_ERROR",
@@ -167,11 +156,6 @@ class NotificationService {
 
       // Handle errors
       this.eventSource.onerror = (event) => {
-        console.error("[NotificationService] SSE Error:", event);
-        console.error("[NotificationService] EventSource readyState on error:", this.eventSource.readyState);
-        console.error("[NotificationService] Event target:", event.target);
-        console.error("[NotificationService] Event type:", event.type);
-
         // Serialize error event for Redux (avoid non-serializable values)
         const errorPayload = {
           type: "CONNECTION_ERROR",
@@ -206,7 +190,6 @@ class NotificationService {
             });
           }, this.reconnectDelay);
         } else {
-          console.error("[NotificationService] Max reconnect attempts reached");
           this.disconnect();
 
           if (this.onDisconnectCallback) {
@@ -231,7 +214,6 @@ class NotificationService {
             });
           }
         } catch (error) {
-          console.error("[NotificationService] Failed to parse notification update:", error);
           if (this.onErrorCallback) {
             this.onErrorCallback({
               type: "PARSE_ERROR",
@@ -254,7 +236,6 @@ class NotificationService {
             });
           }
         } catch (error) {
-          console.error("[NotificationService] Failed to parse notification delete:", error);
           if (this.onErrorCallback) {
             this.onErrorCallback({
               type: "PARSE_ERROR",
@@ -267,7 +248,6 @@ class NotificationService {
       });
 
     } catch (error) {
-      console.error("[NotificationService] Failed to create SSE connection:", error);
       if (this.onErrorCallback) {
         this.onErrorCallback({
           type: "INIT_ERROR",
@@ -322,7 +302,7 @@ class NotificationService {
           ? JSON.parse(stateValue)
           : stateValue;
       } catch (e) {
-        console.warn("[NotificationService] Failed to parse NAVIGATION_STATE:", e);
+        // Ignore parsing error
       }
     }
 
@@ -335,7 +315,7 @@ class NotificationService {
           ? JSON.parse(dataValue)
           : dataValue;
       } catch (e) {
-        console.warn("[NotificationService] Failed to parse ADDITIONAL_DATA:", e);
+        // Ignore parsing error
       }
     }
 

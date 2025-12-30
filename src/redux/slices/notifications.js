@@ -83,7 +83,6 @@ export const connectNotifications = createAsyncThunk(
             dispatch(addNotification(notification));
           },
           onError: (error) => {
-            console.error("[Notifications Slice] Connection error:", error);
             dispatch(setConnectionError(error));
           },
           onConnect: (data) => {
@@ -98,7 +97,6 @@ export const connectNotifications = createAsyncThunk(
         dispatch(setConnectionStatus("connecting"));
       });
     } catch (error) {
-      console.error("[Notifications Slice] Connect error:", error);
       return rejectWithValue({
         message: error.message || "Failed to connect to notification stream",
         error,
@@ -117,7 +115,6 @@ export const fetchUserNotifications = createAsyncThunk(
       const response = await notificationApi.getUserNotifications(params);
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching user notifications:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch notifications",
         error,
@@ -136,7 +133,6 @@ export const fetchAllUserNotifications = createAsyncThunk(
       const response = await notificationApi.getAllUserNotifications(userId, params);
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching all user notifications:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch all notifications",
         error,
@@ -155,7 +151,6 @@ export const fetchUnreadCount = createAsyncThunk(
       const response = await notificationApi.getUnreadNotificationsCount();
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching unread count:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch unread count",
         error,
@@ -174,7 +169,6 @@ export const fetchUnreadNotifications = createAsyncThunk(
       const response = await notificationApi.getUnreadNotifications(params);
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching unread notifications:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch unread notifications",
         error,
@@ -196,7 +190,6 @@ export const markNotificationAsReadApi = createAsyncThunk(
       // Return a simple success indicator instead of the full response to avoid rendering issues
       return { success: true };
     } catch (error) {
-      console.error("[Notifications Slice] Error marking notification as read:", error);
       return rejectWithValue({
         message: error.message || "Failed to mark notification as read",
         error,
@@ -218,7 +211,6 @@ export const markAllNotificationsAsReadApi = createAsyncThunk(
       // Return a simple success indicator instead of the full response to avoid rendering issues
       return { success: true };
     } catch (error) {
-      console.error("[Notifications Slice] Error marking all notifications as read:", error);
       return rejectWithValue({
         message: error.message || "Failed to mark all notifications as read",
         error,
@@ -240,7 +232,6 @@ export const deleteNotificationApi = createAsyncThunk(
       // Return a simple success indicator instead of the full response to avoid rendering issues
       return { success: true };
     } catch (error) {
-      console.error("[Notifications Slice] Error deleting notification:", error);
       return rejectWithValue({
         message: error.message || "Failed to delete notification",
         error,
@@ -442,8 +433,6 @@ const notificationsSlice = createSlice({
       state.connectionError = action.payload;
       state.connectionStatus = "error";
       state.reconnectAttempts += 1;
-
-      console.error("[Notifications Slice] Connection error:", action.payload);
     },
 
     /**
@@ -494,8 +483,6 @@ const notificationsSlice = createSlice({
 
       })
       .addCase(connectNotifications.rejected, (state, action) => {
-        console.error("[Notifications Slice - Reducer] connectNotifications.rejected triggered");
-        console.error("[Notifications Slice - Reducer] Action payload:", action.payload);
         state.isLoading = false;
         state.connectionStatus = "error";
         state.error = action.payload?.message || "Failed to connect";
@@ -627,8 +614,6 @@ const notificationsSlice = createSlice({
       .addCase(disconnectNotifications.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload?.message || "Failed to disconnect";
-
-        console.error("[Notifications Slice] Disconnect failed:", action.payload);
       });
   },
 });
