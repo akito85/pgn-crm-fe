@@ -715,6 +715,12 @@ const promoHistoryRepository = {
       disableSorter: true,
     },
     {
+      title: "Invoice Number",
+      dataIndex: "invoiceNumber",
+      key: "invoiceNumber",
+      width: 180,
+    },
+    {
       title: "Billing No.",
       dataIndex: "billingCode",
       key: "billingCode",
