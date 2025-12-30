@@ -336,20 +336,6 @@ export default function InfoPaymentRelation({
       ...getColumnSearchProps("latitude"),
     },
     {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("startDate"),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("endDate"),
-    },
-    {
       title: "ACTION",
       align: "center",
       width: 120,
