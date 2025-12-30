@@ -41,6 +41,13 @@ const InvoiceRelationTable = ({
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      title: "ACCOUNT NAME",
+      dataIndex: "relatedAccountName",
+      width: 250,
+      sorter: true,
+      ...getColumnSearchProps("relatedAccountName"),
+    },
+    {
       title: "ACCOUNT NUMBER",
       dataIndex: "relatedAccountNumber",
       width: 250,
