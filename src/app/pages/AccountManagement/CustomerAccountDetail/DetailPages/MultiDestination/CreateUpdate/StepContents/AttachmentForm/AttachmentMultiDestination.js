@@ -236,18 +236,18 @@ const AttachmentSectionForm = ({
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const { data_prAttachmentCategory, getConfigFile } = useSelector((state) => state.financialInformation);
+  const { data_mdAttachmentCategory, getConfigFile } = useSelector((state) => state.multiDestination);
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
   useEffect(() => {
-    if (data_prAttachmentCategory && data_prAttachmentCategory.length > 0) {
-      const tempCategory = data_prAttachmentCategory.map((category) => ({
+    if (data_mdAttachmentCategory && data_mdAttachmentCategory.length > 0) {
+      const tempCategory = data_mdAttachmentCategory.map((category) => ({
         id: category.id,
         text: category.text,
       }));
       setCategoryOptions(tempCategory);
     }
-  }, [data_prAttachmentCategory]);
+  }, [data_mdAttachmentCategory]);
 
   useEffect(() => {
     dispatch(getAPIGuard());
