@@ -786,6 +786,22 @@ const NotificationHistory = () => {
                                       {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
                                     </div>
                                   )}
+                                {/* Broadcast Badge */}
+                                {notification.direction === "broadcast" && (
+                                  <div
+                                    style={{
+                                      fontSize: 9,
+                                      fontWeight: 600,
+                                      color: '#722ed1',
+                                      verticalAlign: 'super',
+                                      lineHeight: 1,
+                                      margin: 0,
+                                      padding: 0
+                                    }}
+                                  >
+                                    BROADCAST
+                                  </div>
+                                )}
                                 {/* New Badge */}
                                 {(() => {
                                   const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
@@ -824,22 +840,6 @@ const NotificationHistory = () => {
                                       getNotificationTimestamp(notification)
                                     )}
                                   </Text>
-                                  {notification.direction === "broadcast" && (
-                                    <div
-                                      style={{
-                                        fontSize: 9,
-                                        fontWeight: 600,
-                                        color: '#722ed1',
-                                        verticalAlign: 'super',
-                                        lineHeight: 1,
-                                        margin: 0,
-                                        padding: 0,
-                                        marginLeft: 4
-                                      }}
-                                    >
-                                      BROADCAST
-                                    </div>
-                                  )}
                                 </div>
                               </div>
                             }
