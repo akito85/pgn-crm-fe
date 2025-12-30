@@ -146,7 +146,8 @@ const RelationshipCreateAndUpdate = ({
 
       // Set relationshipObj for submit
       setRelationshipObj({
-        objectId: detail.objectId,
+        relatedObjectId: detail.relatedObjectId,
+        relatedObjectNumber: detail.relatedObjectNumber,
         objectName: detail.objectName,
         objectValue: detail.objectNumber,
         relationshipType: detail.relationshipType,
@@ -335,7 +336,7 @@ const RelationshipCreateAndUpdate = ({
           relationshipTypeName: typeName,
           relationshipCategory: categoryId,
           relationshipCategoryName: categoryName,
-          objectId: relationshipObj.objectId,
+          relatedObjectId: relationshipObj.relatedObjectId,
           objectName: relationshipObj.objectName || values.relatedName,
           objectValue: relationshipObj.objectValue || values.relatedNumber,
           relatedName: relationshipObj.objectName || values.relatedName,
@@ -355,7 +356,7 @@ const RelationshipCreateAndUpdate = ({
           subjectId: idAccount,
           relationshipType: typeId,
           relationshipCategory: categoryId,
-          objectId: relationshipObj.objectId,
+          objectId: relationshipObj.relatedObjectId,
           objectName: relationshipObj.objectName || values.relatedName,
           objectValue: relationshipObj.objectValue || values.relatedNumber,
           startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
@@ -512,7 +513,7 @@ const RelationshipCreateAndUpdate = ({
 
         // Restore relationshipObj
         setRelationshipObj({
-          objectId: detail.objectId,
+          relatedObjectId: detail.relatedObjectId,
           objectName: detail.objectName,
           objectValue: detail.objectNumber,
           relationshipType: detail.relationshipType,

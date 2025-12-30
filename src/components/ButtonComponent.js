@@ -34,6 +34,7 @@ const ButtonComponent = ({
           color: isPrimary && "#fff",
           height: "32px",
           fontSize: "12px",
+          cursor: disabled ? "not-allowed" : "pointer",
         }}
       >
         <div
