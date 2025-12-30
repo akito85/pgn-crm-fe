@@ -260,8 +260,8 @@ export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_MULTI_DESTINATION",
   async ({ body, action }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/approve-inactive";
-      // const response = await accountManagementService.activationWithRemark(url, body);
+      const url = "/v1/dbs/api/multi-destination/approve-inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
@@ -269,8 +269,7 @@ export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
