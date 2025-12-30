@@ -100,21 +100,21 @@ export const updateMultiDestination = createAsyncThunk(
   "UPDATE_MULTI_DESTINATION",
   async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
     try {
-      // const updateUrl = `/v1/dbs/api/multi-destination/${id}`;
-      // const response = await accountManagementService.updateData(updateUrl, updateBody);
+      const updateUrl = `/v1/dbs/api/multi-destination/${id}`;
+      const response = await accountManagementService.updateData(updateUrl, updateBody);
 
-      // const uploadUrl = `/v1/dbs/api/multi-destination/upload-attachment`;
+      const uploadUrl = `/v1/dbs/api/multi-destination/upload-attachment`;
 
-      // const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
-      //   uploadUrl,
-      //   {
-      //     files:  attachment.file,
-      //     category: attachment.fileCategoryId,
-      //     refId: id,
-      //   }
-      // ));
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
+        uploadUrl,
+        {
+          files:  attachment.file,
+          category: attachment.fileCategoryId,
+          refId: id,
+        }
+      ));
 
-      // await Promise.all(uploadPromises);
+      await Promise.all(uploadPromises);
 
       const successBody = {
         title: `Successful`,
@@ -122,8 +122,7 @@ export const updateMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&

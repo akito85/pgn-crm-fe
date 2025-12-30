@@ -368,8 +368,8 @@ export default function InfoMultiDestination({
                       objectId: r?.accountId,
                       accountNumber: r?.accountNumber,
                       accountName: r?.accountName,
-                      sor: r?.sor,
-                      costCenter: r?.costCenter,
+                      accountSor: r?.sor,
+                      accountCostCenter: r?.costCenter,
                       meterReadingCode: r?.meterReadingCode,
                       accountSegment: r?.accountSegment,
                       accountGroupType: r?.accountGroupType,
@@ -435,8 +435,8 @@ export default function InfoMultiDestination({
           </div>
 
           <Form.Item
-            key="sor"
-            name={"sor"}
+            key="accountSor"
+            name={"accountSor"}
             label={"Account SOR"}
             className="no-margin-form"
             rules={[
@@ -450,8 +450,8 @@ export default function InfoMultiDestination({
           </Form.Item>
 
           <Form.Item
-            key="costCenter"
-            name={"costCenter"}
+            key="accountCostCenter"
+            name={"accountCostCenter"}
             label={"Account Cost Center"}
             className="no-margin-form"
             rules={[
@@ -641,11 +641,11 @@ export default function InfoMultiDestination({
                 required: true,
               },
             ]}
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format("DD-MM-YYYY") : null}
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, "DD-MM-YYYY") : null
-            })}
             className="no-margin-form"
+            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format(dateFormatting.f_date) : null}
+            getValueProps={(dateString) => ({
+              value: dateString ? moment(dateString, dateFormatting.f_date) : null
+            })}
           >
             <DateComponent />
           </Form.Item>
@@ -655,9 +655,9 @@ export default function InfoMultiDestination({
             name={"endDate"}
             label={"End Date"}
             className="no-margin-form"
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format("DD-MM-YYYY") : null}
+            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format(dateFormatting.f_date) : null}
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, "DD-MM-YYYY") : null
+              value: dateString ? moment(dateString, dateFormatting.f_date) : null
             })}
           >
             <DateComponent />

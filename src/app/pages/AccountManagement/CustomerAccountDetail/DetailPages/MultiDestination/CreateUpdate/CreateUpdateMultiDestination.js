@@ -125,17 +125,18 @@ const CreateUpdateMultiDestination = ({ type }) => {
   useEffect(() => {
     if (
       type === "update" &&
-      detail_multiDestination?.result &&
+      detail_multiDestination &&
       data_mdApprovalHierarchy?.length
     ) {
       const {
         subjectId,
         objectId,
-        account,
-        accountSor,
-        accountCostCenter,
-        meterReadingCode,
-        accountSegment,
+        accountName,
+        accountNumber,
+        sor: accountSor,
+        costCenter: accountCostCenter,
+        meterReadingCodes: meterReadingCode,
+        segment: accountSegment,
         accountGroupType,
         accountType,
         premiseAddress,
@@ -149,12 +150,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_multiDestination.result;
+      } = detail_multiDestination;
 
       formCreate.setFieldsValue({
         subjectId,
         objectId,
-        account,
+        account: `${accountNumber}-${accountName}`,
         accountSor,
         accountCostCenter,
         meterReadingCode,
@@ -316,8 +317,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
       objectId,
       accountNumber,
       accountName,
-      sor,
-      costCenter,
+      accountSor,
+      accountCostCenter,
       meterReadingCode,
       accountSegment,
       accountGroupType,
@@ -334,8 +335,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
     formCreate.setFieldsValue({
       objectId,
       account: `${accountNumber}-${accountName}`,
-      sor,
-      costCenter,
+      accountSor,
+      accountCostCenter,
       meterReadingCode,
       accountSegment,
       accountGroupType,
@@ -531,16 +532,18 @@ const CreateUpdateMultiDestination = ({ type }) => {
       setCurrent(0);
     } else if (type === "update") {
       if (
-        detail_multiDestination?.result &&
+        detail_multiDestination &&
         data_mdApprovalHierarchy?.length
       ) {
         const {
           subjectId,
           objectId,
-          accountSor,
-          accountCostCenter,
-          meterReadingCode,
-          accountSegment,
+          accountName,
+          accountNumber,
+          sor: accountSor,
+          costCenter: accountCostCenter,
+          meterReadingCodes: meterReadingCode,
+          segment: accountSegment,
           accountGroupType,
           accountType,
           premiseAddress,
@@ -554,11 +557,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
           endDate,
           description,
           appHierId,
-        } = detail_multiDestination.result;
+        } = detail_multiDestination;
 
         formCreate.setFieldsValue({
           subjectId,
           objectId,
+          account: `${accountNumber}-${accountName}`,
           accountSor,
           accountCostCenter,
           meterReadingCode,
