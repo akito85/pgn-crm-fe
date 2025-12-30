@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Tabs, Spin, Tag } from "antd";
+import { Tabs, Button, Tooltip } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
+import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -12,6 +13,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
   getCustomerHeaderData,
+  getCustomerSaData,
   getCustomerUsageData,
   getCustomerTaxData,
   getCustomerSaTosData,
@@ -34,6 +36,10 @@ import {
 } from "./columns";
 import BaseContainer from "../../../../../components/BaseContainer";
 import StatusComponent from "../../../../../components/StatusComponent";
+import PrabillSaDetailSection from "./ServiceAgreement/PrabillSaDetailSection";
+import PrabillSaCalcRuleSection from "./ServiceAgreement/PrabillSaCalcRuleSection";
+import PrabillSaPricingSection from "./ServiceAgreement/PrabillSaPricingSection";
+import PrabillSaTosSection from "./ServiceAgreement/PrabillSaTosSection";
 
 const { TabPane } = Tabs;
 
@@ -42,9 +48,9 @@ const renderValue = (val) => {
   return val;
 };
 
-const createFixedColumnsState = (leftCols = ["no"]) => ({
+const createFixedColumnsState = (leftCols = ["no"], rightCols = []) => ({
   left: leftCols,
-  right: [],
+  right: rightCols,
 });
 
 const TAB_CONFIGS = [
@@ -52,8 +58,8 @@ const TAB_CONFIGS = [
     key: "0",
     label: "Service Agreement",
     dataKey: "saData",
-    scrollX: 2500,
-    action: null,
+    scrollX: 2800,
+    action: "getCustomerSaData",
   },
   {
     key: "1",
@@ -122,6 +128,13 @@ const AccountDetailPage = () => {
     7: { current: 1, pageSize: 10 },
   });
 
+  // State untuk SA Detail
+  const [showSaDetail, setShowSaDetail] = useState(false);
+  const [selectedPrabillSaId, setSelectedPrabillSaId] = useState(null);
+  const [selectedSaNumber, setSelectedSaNumber] = useState("");
+  const [saDetailTab, setSaDetailTab] = useState("Detail");
+  const saDetailRef = useRef(null);
+
   const { customerNumber, billPeriod, inSor, accNumber, saNumber } =
     location.state || {};
   const { customer_account_detail, loading_customer_detail } = useSelector(
@@ -130,7 +143,7 @@ const AccountDetailPage = () => {
 
   // Fixed columns states
   const [fixedColumnsSA, setFixedColumnsSA] = useState(() =>
-    createFixedColumnsState(["no"])
+    createFixedColumnsState(["no"], ["action"])
   );
   const [fixedColumnsUsage, setFixedColumnsUsage] = useState(() =>
     createFixedColumnsState(["no"])
@@ -177,7 +190,17 @@ const AccountDetailPage = () => {
     // Load header data
     dispatch(getCustomerHeaderData(baseParams));
 
-    // Load all tab data immediately
+    // Load SA data dengan parameter berbeda (tanpa inSor, accNumber, saNumber)
+    dispatch(
+      getCustomerSaData({
+        customerNumber,
+        billPeriod,
+        page: 0,
+        size: 10,
+      })
+    );
+
+    // Load all other tab data immediately
     dispatch(getCustomerUsageData({ ...baseParams, sort: "measDate~desc" }));
     dispatch(getCustomerTaxData(baseParams));
     dispatch(getCustomerSaPrcRuleDetData(baseParams));
@@ -190,6 +213,19 @@ const AccountDetailPage = () => {
       dispatch(resetCustomerDetail());
     };
   }, [dispatch, customerNumber, billPeriod, inSor, accNumber, saNumber]);
+
+  // Auto scroll to SA detail when opened
+  useEffect(() => {
+    if (showSaDetail && saDetailRef.current) {
+      setTimeout(() => {
+        saDetailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+      }, 100);
+    }
+  }, [showSaDetail, selectedPrabillSaId]);
 
   // Function to fetch data for a specific tab when pagination changes
   const fetchTabData = useCallback(
@@ -208,6 +244,17 @@ const AccountDetailPage = () => {
       };
 
       switch (tabConfig.action) {
+        case "getCustomerSaData":
+          // SA data hanya butuh customerNumber dan billPeriod
+          dispatch(
+            getCustomerSaData({
+              customerNumber,
+              billPeriod,
+              page: page - 1,
+              size: pageSize,
+            })
+          );
+          break;
         case "getCustomerUsageData":
           params.sort = "measDate~desc";
           dispatch(getCustomerUsageData(params));
@@ -254,8 +301,25 @@ const AccountDetailPage = () => {
     [fetchTabData]
   );
 
+  // Handler untuk view SA detail
+  const handleViewSaDetail = useCallback((record) => {
+    setSelectedPrabillSaId(record.prabillSaId);
+    setSelectedSaNumber(record.saNumber || "");
+    setShowSaDetail(true);
+    setSaDetailTab("Detail");
+  }, []);
+
+  // Handler untuk close SA detail
+  const handleCloseSaDetail = useCallback(() => {
+    setShowSaDetail(false);
+    setSelectedPrabillSaId(null);
+    setSelectedSaNumber("");
+  }, []);
+
   // Data dari Redux
   const headerData = customer_account_detail?.headerData || {};
+  const saData = customer_account_detail?.saData?.result || [];
+  const saPage = customer_account_detail?.saData?.page || {};
   const usageData = customer_account_detail?.usageData?.result || [];
   const usagePage = customer_account_detail?.usageData?.page || {};
   const taxData = customer_account_detail?.taxData?.result || [];
@@ -276,81 +340,6 @@ const AccountDetailPage = () => {
     customer_account_detail?.billingItemData?.result || [];
   const billingItemPage = customer_account_detail?.billingItemData?.page || {};
 
-  // SA Data - transform dari headerData menjadi array untuk tabel
-  const saData = useMemo(() => {
-    if (!headerData) return [];
-
-    // Jika headerData langsung adalah array
-    if (Array.isArray(headerData)) {
-      return headerData.map((item) => ({
-        saNumber: item.saNumber,
-        saReferenceNumber: item.saReferenceNumber,
-        saDate: item.saDate,
-        commitmentDate: item.commitmentDate,
-        invoiceTemplate: item.invoiceTemplate,
-        pjbgType: item.pjbgType,
-        saServiceType: item.saServiceType,
-        saType: item.saType,
-        termOfPayment: item.termOfPayment,
-        pricingRule: item.pricingRule,
-        productName: item.productName,
-        productType: item.productType,
-        ppnTaxImp: item.ppnTaxImp,
-        pphTaxImp: item.pphTaxImp,
-        minUsage: item.minUsage,
-        maxUsage: item.maxUsage,
-        saDetTimeUnit: item.saDetTimeUnit,
-        unitMeasure: item.unitMeasure,
-        saDetCurrency: item.saDetCurrency,
-        paymentType: item.paymentType,
-        chargingMethod: item.chargingMethod,
-        oupType: item.oupType,
-        oupValue: item.oupValue,
-        calculationRule: item.calculationRule,
-        vatCurrency: item.vatCurrency,
-        oupTimeUnit: item.oupTimeUnit,
-        mpricingCode: item.mpricingCode,
-      }));
-    }
-
-    // Jika headerData adalah object tunggal
-    if (headerData.saNumber) {
-      return [
-        {
-          saNumber: headerData.saNumber,
-          saReferenceNumber: headerData.saReferenceNumber,
-          saDate: headerData.saDate,
-          commitmentDate: headerData.commitmentDate,
-          invoiceTemplate: headerData.invoiceTemplate,
-          pjbgType: headerData.pjbgType,
-          saServiceType: headerData.saServiceType,
-          saType: headerData.saType,
-          termOfPayment: headerData.termOfPayment,
-          pricingRule: headerData.pricingRule,
-          productName: headerData.productName,
-          productType: headerData.productType,
-          ppnTaxImp: headerData.ppnTaxImp,
-          pphTaxImp: headerData.pphTaxImp,
-          minUsage: headerData.minUsage,
-          maxUsage: headerData.maxUsage,
-          saDetTimeUnit: headerData.saDetTimeUnit,
-          unitMeasure: headerData.unitMeasure,
-          saDetCurrency: headerData.saDetCurrency,
-          paymentType: headerData.paymentType,
-          chargingMethod: headerData.chargingMethod,
-          oupType: headerData.oupType,
-          oupValue: headerData.oupValue,
-          calculationRule: headerData.calculationRule,
-          vatCurrency: headerData.vatCurrency,
-          oupTimeUnit: headerData.oupTimeUnit,
-          mpricingCode: headerData.mpricingCode,
-        },
-      ];
-    }
-
-    return [];
-  }, [headerData]);
-
   // Get first item for customer/account info display
   const firstHeaderData = useMemo(() => {
     if (Array.isArray(headerData) && headerData.length > 0) {
@@ -359,8 +348,8 @@ const AccountDetailPage = () => {
     return headerData || {};
   }, [headerData]);
 
-  // Columns
-  const saColumns = useMemo(() => createSAColumns(renderValue), []);
+  // Base Columns
+  const saColumnsBase = useMemo(() => createSAColumns(renderValue), []);
   const usageColumns = useMemo(() => createUsageColumns(renderValue), []);
   const taxColumns = useMemo(() => createTaxColumns(renderValue), []);
   const saPrcRuleDetColumns = useMemo(
@@ -378,11 +367,38 @@ const AccountDetailPage = () => {
     []
   );
 
+  // SA Columns dengan Action Button menggunakan SVGIcon
+  const saColumnsWithAction = useMemo(() => {
+    return [
+      ...saColumnsBase,
+      {
+        key: "action",
+        title: "ACTION",
+        width: 50,
+        align: "center",
+        fixed: "right",
+        render: (text, record) => (
+          <div className="flex w-full justify-center gap-6">
+            <Tooltip title="Detail">
+              <div className="pt-1 cursor-pointer">
+                <SVGIcon 
+                  name="IconDetail" 
+                  width={20} 
+                  onClick={() => handleViewSaDetail(record)} 
+                />
+              </div>
+            </Tooltip>
+          </div>
+        ),
+      },
+    ];
+  }, [saColumnsBase, handleViewSaDetail]);
+
   // Processed columns with fixed
   const processedColumns = {
     sa: useMemo(
-      () => applyFixedColumns(saColumns, fixedColumnsSA),
-      [saColumns, fixedColumnsSA]
+      () => applyFixedColumns(saColumnsWithAction, fixedColumnsSA),
+      [saColumnsWithAction, fixedColumnsSA]
     ),
     usage: useMemo(
       () => applyFixedColumns(usageColumns, fixedColumnsUsage),
@@ -417,8 +433,9 @@ const AccountDetailPage = () => {
   // Column definitions
   const columnDefs = {
     sa: useMemo(
-      () => saColumns.map((col) => ({ key: col.key, title: col.title })),
-      [saColumns]
+      () =>
+        saColumnsWithAction.map((col) => ({ key: col.key, title: col.title })),
+      [saColumnsWithAction]
     ),
     usage: useMemo(
       () => usageColumns.map((col) => ({ key: col.key, title: col.title })),
@@ -461,8 +478,8 @@ const AccountDetailPage = () => {
       defs: columnDefs.sa,
       fixed: fixedColumnsSA,
       setFixed: setFixedColumnsSA,
-      page: { totalElements: saData.length },
-      loading: loading_customer_detail.header,
+      page: saPage,
+      loading: loading_customer_detail.sa,
     },
     1: {
       data: usageData,
@@ -528,6 +545,37 @@ const AccountDetailPage = () => {
       loading: loading_customer_detail.billingItem,
     },
   };
+
+  // Tab items untuk SA Detail
+  const saDetailTabItems = useMemo(
+    () => [
+      {
+        key: "Detail",
+        label: "Detail",
+        children: <PrabillSaDetailSection prabillSaId={selectedPrabillSaId} />,
+      },
+      {
+        key: "Pricing",
+        label: "Pricing",
+        children: (
+          <PrabillSaPricingSection prabillSaId={selectedPrabillSaId} />
+        ),
+      },
+      {
+        key: "Calculation Rule",
+        label: "Calculation Rule",
+        children: (
+          <PrabillSaCalcRuleSection prabillSaId={selectedPrabillSaId} />
+        ),
+      },
+      {
+        key: "Term Of Service",
+        label: "Term Of Service",
+        children: <PrabillSaTosSection prabillSaId={selectedPrabillSaId} />,
+      },
+    ],
+    [selectedPrabillSaId]
+  );
 
   const renderInfoCard = (title, children) => (
     <CardContainer
@@ -660,10 +708,8 @@ const AccountDetailPage = () => {
                   columns={tabData.columns}
                   dataSource={tabData.data}
                   totalData={tabData.page?.totalElements || 0}
-                  current={tab.key === "0" ? 1 : currentPag.current}
-                  pageSize={
-                    tab.key === "0" ? tabData.data.length : currentPag.pageSize
-                  }
+                  current={currentPag.current}
+                  pageSize={currentPag.pageSize}
                   onChange={(page, pageSize) =>
                     handlePaginationChange(tab.key, page, pageSize)
                   }
@@ -677,12 +723,41 @@ const AccountDetailPage = () => {
                   showExport={false}
                   setFixedColumns={tabData.setFixed}
                   loading={tabData.loading}
-                  pagination={tab.key !== "0"}
+                  pagination={true}
                 />
               </TabPane>
             );
           })}
         </Tabs>
+      )}
+
+      {/* SA Detail Section - Muncul ketika user klik detail */}
+      {showSaDetail && selectedPrabillSaId && (
+        <div ref={saDetailRef} className="mt-8">
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">
+                  SERVICE AGREEMENT DETAIL
+                  {selectedSaNumber && ` - ${selectedSaNumber}`}
+                </p>
+                <Button
+                  type="default"
+                  onClick={handleCloseSaDetail}
+                  size="small"
+                >
+                  Close Detail
+                </Button>
+              </div>
+            }
+          >
+            <Tabs
+              items={saDetailTabItems}
+              onChange={(key) => setSaDetailTab(key)}
+              activeKey={saDetailTab}
+            />
+          </CardContainer>
+        </div>
       )}
 
       <div className="w-full flex justify-start my-5">

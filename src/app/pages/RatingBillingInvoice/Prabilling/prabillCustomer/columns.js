@@ -1,6 +1,6 @@
 import { Tag } from "antd";
 
-// ============= NEW: SA COLUMNS =============
+
 export const createSAColumns = (renderValue) => [
   {
     key: "no",
@@ -31,7 +31,15 @@ export const createSAColumns = (renderValue) => [
     dataIndex: "saDate",
     width: 180,
     isClassification: true,
-    render: renderValue,
+    render: (val) => {
+      if (!val) return "";
+      const date = new Date(val);
+      return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+      });
+    },
   },
   {
     key: "commitmentDate",
@@ -39,7 +47,15 @@ export const createSAColumns = (renderValue) => [
     dataIndex: "commitmentDate",
     width: 180,
     isClassification: true,
-    render: renderValue,
+    render: (val) => {
+      if (!val) return "";
+      const date = new Date(val);
+      return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+      });
+    },
   },
   {
     key: "invoiceTemplate",
@@ -122,102 +138,6 @@ export const createSAColumns = (renderValue) => [
     render: renderValue,
   },
   {
-    key: "minUsage",
-    title: "MIN USAGE",
-    dataIndex: "minUsage",
-    width: 120,
-    isNumber: true,
-    render: renderValue,
-  },
-  {
-    key: "maxUsage",
-    title: "MAX USAGE",
-    dataIndex: "maxUsage",
-    width: 120,
-    isNumber: true,
-    render: renderValue,
-  },
-  {
-    key: "saDetTimeUnit",
-    title: "TIME UNIT",
-    dataIndex: "saDetTimeUnit",
-    width: 120,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "unitMeasure",
-    title: "UNIT MEASURE",
-    dataIndex: "unitMeasure",
-    width: 150,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "saDetCurrency",
-    title: "CURRENCY",
-    dataIndex: "saDetCurrency",
-    width: 120,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "paymentType",
-    title: "PAYMENT TYPE",
-    dataIndex: "paymentType",
-    width: 150,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "chargingMethod",
-    title: "CHARGING METHOD",
-    dataIndex: "chargingMethod",
-    width: 180,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "oupType",
-    title: "OUP TYPE",
-    dataIndex: "oupType",
-    width: 120,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "oupValue",
-    title: "OUP VALUE",
-    dataIndex: "oupValue",
-    width: 120,
-    isNumber: true,
-    render: renderValue,
-  },
-  {
-    key: "calculationRule",
-    title: "CALCULATION RULE",
-    dataIndex: "calculationRule",
-    width: 180,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "vatCurrency",
-    title: "VAT CURRENCY",
-    dataIndex: "vatCurrency",
-    width: 150,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
-    key: "oupTimeUnit",
-    title: "OUP TIME UNIT",
-    dataIndex: "oupTimeUnit",
-    width: 150,
-    isClassification: true,
-    render: renderValue,
-  },
-  {
     key: "mpricingCode",
     title: "PRICING CODE",
     dataIndex: "mpricingCode",
@@ -227,7 +147,6 @@ export const createSAColumns = (renderValue) => [
   },
 ];
 
-// ============= USAGE COLUMNS =============
 export const createUsageColumns = (renderValue) => [
   {
     key: "no",

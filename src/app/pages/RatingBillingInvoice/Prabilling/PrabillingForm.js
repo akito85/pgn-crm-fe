@@ -87,7 +87,7 @@ const PrabillingForm = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
   const [defaultData, setDefaultData] = useState({});
 
-  const [searchCustomerValue, setSearchCustomerValue] = useState("");
+  const [searchCustomerValue, setSearchCustomerValue] = useState(""); 
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const searchTimeoutRef = useRef(null);
   const [selectedCustomersMap, setSelectedCustomersMap] = useState({});
