@@ -28,6 +28,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   const [search, setSearch] = useState({});
   const [tabSection, setTabSection] = useState("Detail");
   const [ratingSaId, setRatingSaId] = useState();
+  const [saNumber, setSaNumber] = useState();
   const [pageDetail, setPageDetail] = useState(false);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
@@ -86,7 +87,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
         : "";
     setSort(dataSort);
   };
-
+  
   const serviceTabItems = [
     {
       key: "Detail",
@@ -96,7 +97,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
     {
       key: "Pricing",
       label: "Pricing",
-      children: <PricingSection SAId={ratingSaId} />,
+      children: <PricingSection SAId={saNumber} />,
     },
     {
       key: "Calculation Rule",
@@ -117,6 +118,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   const handleDetail = (record) => {
     setPageDetail(true);
     setRatingSaId(record.ratingSaId);
+    setSaNumber(record.saNumber);
     setTabSection("Detail");
   };
 
@@ -208,4 +210,4 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   );
 };
 
-export default ServiceAgreementSection;
+export default ServiceAgreementSection; 

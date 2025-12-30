@@ -1,34 +1,119 @@
+// File: PrabillSaPricingSection.jsx
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DetailText from "../../../../../../components/DetailText";
 import TableRBI from "../../../../../../components/TableRBI";
 import {
-  getAllPricingRuleSAPaginate,
-  getDetailPricing,
-} from "../../../../../../redux/slices/rating_billing_invoice/rating";
-import { columnsPricingRule } from "../Table/TablePricingRule";
+  getPrabillSaPriceRule,
+  getPrabillSaPriceDet,
+} from "../../../../../../redux/slices/rating_billing_invoice/praBilling";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const PricingSection = ({ SAId }) => {
+export const columnsPrabillPricingRule = (page = 1, pageSize = 10) => [
+  {
+    title: "NO",
+    dataIndex: "no",
+    key: "no",
+    align: "center",
+    width: 60,
+    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "LINE NUMBER",
+    dataIndex: "lineNumber",
+    key: "lineNumber",
+    sorter: true,
+    align: "center",
+    width: 120,
+  },
+  {
+    title: "MIN",
+    dataIndex: "min",
+    key: "min",
+    sorter: true,
+    align: "right",
+    width: 150,
+    render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
+  },
+  {
+    title: "MAX",
+    dataIndex: "max",
+    key: "max",
+    sorter: true,
+    align: "right",
+    width: 150,
+    render: (val) => {
+      if (!val) return "";
+      if (isNaN(val)) return val;
+      if (val === "0" || parseFloat(val) === 0) return "Unlimited";
+      return parseFloat(val).toLocaleString();
+    },
+  },
+  {
+    title: "PRICE CODE",
+    dataIndex: "priceCode",
+    key: "priceCode",
+    sorter: true,
+    align: "center",
+    width: 150,
+  },
+  {
+    title: "PRICE CODE RULE",
+    dataIndex: "priceCodeRule",
+    key: "priceCodeRule",
+    sorter: true,
+    align: "center",
+    width: 200,
+  },
+  {
+    title: "VALUE",
+    dataIndex: "value",
+    key: "value",
+    sorter: true,
+    align: "right",
+    width: 150,
+    render: (val) =>
+      val
+        ? parseFloat(val).toLocaleString("en-US", {
+            maximumFractionDigits: 4,
+          })
+        : "",
+  },
+  {
+    title: "UOM",
+    dataIndex: "uom",
+    key: "uom",
+    sorter: true,
+    align: "center",
+    width: 100,
+  },
+  {
+    title: "CURRENCY",
+    dataIndex: "priceCurrency",
+    key: "priceCurrency",
+    sorter: true,
+    align: "center",
+    width: 100,
+  },
+];
+
+const PrabillSaPricingSection = ({ prabillSaId }) => {
   // Selector
-  const { data_pricing, data_pricingRule, loading } = useSelector(
-    (state) => state.rating
+  const { prabill_sa_detail, loading_prabill_sa } = useSelector(
+    (state) => state.rbi_prabilling
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_pricingRule?.result?.pricingRules || [];
-  const pricingRuleName = data_pricingRule?.result?.priceCode;
+  const dataSource = prabill_sa_detail?.saPriceRule?.result || [];
+  const priceDet = prabill_sa_detail?.saPriceDet?.result?.[0] || null;
 
   // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [dataTable, setDataTable] = useState([]);
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: [],
@@ -36,46 +121,19 @@ const PricingSection = ({ SAId }) => {
 
   // Use Effect
   useEffect(() => {
-    dispatch(
-      getAllPricingRuleSAPaginate({
-        id: SAId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [dispatch, SAId, search, page, pageSize, sort]);
-
-  useEffect(() => {
-    dispatch(getDetailPricing(SAId));
-  }, [dispatch, SAId]);
-
-  useEffect(() => {
-    const mappedData = dataSource.map((item, index) => ({
-      ...item,
-      number: index,
-      key: item.ratingSaPricingRuleId || index,
-    }));
-    
-    setDataTable(mappedData);
-  }, [dataSource]);
-
-  // Function Search API
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
+    if (prabillSaId) {
+      dispatch(
+        getPrabillSaPriceRule({
+          prabillSaId,
+          search: JSON.stringify(search),
+          page: page - 1,
+          size: pageSize,
+          sort,
+        })
+      );
+      dispatch(getPrabillSaPriceDet(prabillSaId));
+    }
+  }, [dispatch, prabillSaId, search, page, pageSize, sort]);
 
   // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
@@ -101,16 +159,8 @@ const PricingSection = ({ SAId }) => {
   };
 
   const baseColumns = useMemo(
-    () =>
-      columnsPricingRule(
-        page,
-        pageSize,
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    [page, pageSize, searchedColumn, searchText]
+    () => columnsPrabillPricingRule(page, pageSize),
+    [page, pageSize]
   );
 
   const allColumns = useMemo(() => {
@@ -143,7 +193,9 @@ const PricingSection = ({ SAId }) => {
             <p className="font-bold text-xs text-gray-600 uppercase mb-1">
               Price Code
             </p>
-            <DetailText label="Price Code">{data_pricing?.pricing}</DetailText>
+            <DetailText label="Price Code">
+              {priceDet?.fullPriceCode || "-"}
+            </DetailText>
           </div>
 
           <div>
@@ -151,7 +203,7 @@ const PricingSection = ({ SAId }) => {
               Price Adjustment
             </p>
             <DetailText label="Price Adjustment">
-              {data_pricing?.pricingAdjustment}
+              {priceDet?.pricingAdjustment || "-"}
             </DetailText>
           </div>
 
@@ -160,7 +212,7 @@ const PricingSection = ({ SAId }) => {
               Pricing Rule
             </p>
             <DetailText label="Pricing Rule">
-              {pricingRuleName ? pricingRuleName : ""}
+              {priceDet?.priceCode || "-"}
             </DetailText>
           </div>
         </div>
@@ -168,24 +220,24 @@ const PricingSection = ({ SAId }) => {
 
       <div className="w-full">
         <TableRBI
-          dataSource={dataTable}
+          dataSource={dataSource}
           columns={processedColumns}
           current={page}
           pageSize={pageSize}
           onChange={handleChange}
           onSizeChanger={handleChange}
-          totalData={data_pricingRule?.page?.totalElements || 0}
+          totalData={prabill_sa_detail?.saPriceRule?.page?.totalElements || 0}
           onSort={onSortApi}
           tableScrolled={{ y: 525, x: 800 }}
           showExport={false}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loading_prabill_sa?.saPriceRule}
         />
       </div>
     </>
   );
 };
 
-export default PricingSection;
+export default PrabillSaPricingSection;
