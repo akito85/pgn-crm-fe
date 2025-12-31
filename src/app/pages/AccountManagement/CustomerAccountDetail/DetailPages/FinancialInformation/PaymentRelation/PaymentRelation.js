@@ -458,6 +458,7 @@ const PaymentRelation = ({
           handleDownload={handleDownload}
           tempFilters={tempFilters}
           setShowFilterModal={setShowFilterModal}
+          setIsApproval={setIsApproval}
         />
 
         {/* Advanced Filter Modal */}
