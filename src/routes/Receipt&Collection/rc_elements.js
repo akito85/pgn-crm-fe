@@ -62,6 +62,10 @@ import ViewTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentW
 import ListDetailTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListDetailTransferToReceipt";
 import ListFormTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListFormTransferToReceipt";
 
+import ViewWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -178,4 +182,10 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_TRANSFER_TO_RECEIPT: <ListDetailTransferToReceipt />,
   CREATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"create"} />,
   UPDATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"update"} />,
+  
+  // Transfer to Receipt
+  VIEW_WARRANTY: <ViewWarranty />,
+  DETAIL_WARRANTY: <ListDetailWarranty />,
+  CREATE_WARRANTY: <ListFormWarranty type={"create"} />,
+  UPDATE_WARRANTY: <ListFormWarranty type={"update"} />,
 };

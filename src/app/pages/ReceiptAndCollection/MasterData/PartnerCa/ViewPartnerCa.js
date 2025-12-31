@@ -477,8 +477,15 @@ const ViewPartnerCa = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <CardContainer header={"PARTNER LIST"}>
+        {/* <Toolbar items={itemActions} /> */}
+        <CardContainer header={
+          <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">PARTNER CA List</p>
+              <div className="flex gap-2">
+                  <Toolbar items={itemActions} />
+              </div>
+          </div>
+        }>
           <TableRBI
             dataSource={data?.result}
             pageSize={pageSize}

@@ -1,5 +1,5 @@
 import { NumericFormat } from "react-number-format";
-import { getColumnSearchPropsUseFilteredValue} from "../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 
 export const columnsReceipt = (
@@ -90,7 +90,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT TYPE",
       dataIndex: "accountType",
-      align: "center",
+      isClassification: true,
       sorter: true,
       width: 180,
       ...getColumnSearchPropsUseFilteredValue(
@@ -107,7 +107,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT GROUP",
       dataIndex: "accountGroup",
-      align: "center",
+      isClassification: true,
       sorter: true,
       width: 180,
       ...getColumnSearchPropsUseFilteredValue(
@@ -125,7 +125,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT",
       dataIndex: "account",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -142,7 +142,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT SEGMENT",
       dataIndex: "accountSegment",
-      align: "center",
+      isClassification: true,
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -179,7 +179,7 @@ export const columnsReceipt = (
       dataIndex: "receiptDate",
       key: "receiptDate",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 220,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -200,7 +200,7 @@ export const columnsReceipt = (
       key: "paymentType",
       sorter: true,
       width: 180,
-      align: "center",
+      isClassification: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "paymentType",
@@ -217,7 +217,7 @@ export const columnsReceipt = (
       title: "CURRENCY",
       dataIndex: "currency",
       key: "currency",
-      align: "center",
+      isClassification: true,
       sorter: true,
       width: 150,
       ...getColumnSearchPropsUseFilteredValue(
@@ -236,7 +236,7 @@ export const columnsReceipt = (
       title: "AMOUNT",
       dataIndex: "amount",
       key: "amount",
-      align: "Right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -290,7 +290,7 @@ export const columnsReceipt = (
       key: "isReconciled",
       sorter: true,
       width: 160,
-      align: "center",
+      isClassification: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "isReconciled",
@@ -324,7 +324,7 @@ export const columnsReceipt = (
       dataIndex: "isMisc",
       sorter: true,
       width: 180,
-      align: "center",
+      isClassification: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "isMisc",
@@ -443,7 +443,7 @@ export const columnsReceipt = (
       key: "rateType",
       sorter: true,
       width: 130,
-      align: "center",
+      isClassification: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "rateType",
@@ -459,7 +459,7 @@ export const columnsReceipt = (
     {
       title: "RATE DATE",
       dataIndex: "rateDate",
-      align: "center",
+      isClassification: true,
       key: "rateDate",
       sorter: true,
       width: 150,
@@ -480,7 +480,7 @@ export const columnsReceipt = (
       title: "RATE",
       dataIndex: "rateAmount",
       key: "rateAmount",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -497,7 +497,7 @@ export const columnsReceipt = (
       title: "CONVERTED CURRENCY",
       dataIndex: "convertedCurrency",
       key: "convertedCurrency",
-      align: "center",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -516,7 +516,7 @@ export const columnsReceipt = (
       dataIndex: "equivalentAmount",
       key: "equivalentAmount",
       sorter: true,
-      align: "right",
+      isNumber: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "equivalentAmount",
@@ -569,7 +569,7 @@ export const columnsReceipt = (
       key: "source",
       sorter: true,
       width: 180,
-      align: "center",
+      isClassification: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "source",
@@ -587,7 +587,7 @@ export const columnsReceipt = (
       dataIndex: "bankStatementDate",
       key: "bankStatementDate",
       sorter: true,
-      align: "center",
+      isClassification: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "bankStatementDate",
@@ -605,7 +605,7 @@ export const columnsReceipt = (
       title: "APPLIED AMOUNT",
       dataIndex: "appliedAmount",
       key: "appliedAmount",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -631,7 +631,7 @@ export const columnsReceipt = (
       title: "APPLIED AMOUNT EQUIVALENT",
       dataIndex: "equivalentAppliedAmount",
       key: "equivalentAppliedAmount",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -657,7 +657,7 @@ export const columnsReceipt = (
       title: "UNAPPLIED AMOUNT",
       dataIndex: "unAppliedAmount",
       key: "unAppliedAmount",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -683,7 +683,7 @@ export const columnsReceipt = (
       title: "UNAPPLIED AMOUNT EQUIVALENT",
       dataIndex: "equivalentUnAppliedAmount",
       key: "equivalentUnAppliedAmount",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -709,7 +709,7 @@ export const columnsReceipt = (
       title: "REFUND AMOUNT",
       dataIndex: "refundAmount",
       key: "refundAmount",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -735,7 +735,7 @@ export const columnsReceipt = (
       title: "TRANSFER AMOUNT",
       dataIndex: "transferAmount",
       key: "transferAmount",
-      align: "right",
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -761,7 +761,7 @@ export const columnsReceipt = (
       title: "CREATED DATE",
       dataIndex: "createdDate",
       key: "createdDate",
-      align: "center",
+      isClassification: true,
       sorter: true,
       width: 220,
       ...getColumnSearchPropsUseFilteredValue(
@@ -796,7 +796,6 @@ export const columnsReceipt = (
         showTitle: false,
       },
       render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-
     },
     {
       title: "STATUS",
