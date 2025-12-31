@@ -684,18 +684,20 @@ const RelationshipCreateAndUpdate = ({
               <ButtonComponent
                 type="submit"
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                onClick={() => navigate(
-                  type === "standard"
-                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
-                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
-                  {
-                    state: {
-                      section: "Relationship",
-                      idAccount,
-                      idCustomer,
-                    }
-                  }
-                )}
+                onClick={() => navigate(-1)}
+                
+                // onClick={() => navigate(
+                //   type === "standard"
+                //     ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+                //     : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
+                //   {
+                //     state: {
+                //       section: "Relationship",
+                //       idAccount,
+                //       idCustomer,
+                //     }
+                //   }
+                // )}
               >
                 Back
               </ButtonComponent>
