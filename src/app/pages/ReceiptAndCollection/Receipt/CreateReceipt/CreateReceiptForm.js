@@ -69,8 +69,8 @@ const CreateReceiptForm = ({
   };
 
   // handle change amount
-  const handleChangeAmount = (e) => {
-    setAmount(e?.target?.value);
+  const handleChangeAmount = (value) => {
+    setAmount(value);
   };
 
   // handleChange currency
@@ -318,10 +318,10 @@ const CreateReceiptForm = ({
               formatter={(value) =>
                 value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
               }
-              parser={(value) => value?.replace(/\./g, "")}
+              parser={(value) => value?.toString().replace(/\./g, "")}
               decimalSeparator=","
               precision={2}
-              onChange={(value) => setAmount(value)}
+              onChange={handleChangeAmount}
               placeholder="0,00"
               controls={false}
             />
