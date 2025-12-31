@@ -31,6 +31,7 @@ const PaymentRelationTable = ({
   handleDownload = () => {},
   tempFilters = [],
   setShowFilterModal = () => {},
+  setIsApproval = () => {},
 }) => {
   const navigate = useNavigate();
 
@@ -305,7 +306,16 @@ const PaymentRelationTable = ({
 
   return (
     <div className="flex flex-col gap-y-6">
-      {!isApproval && (
+      {isApproval ? (
+        <div className="flex justify-end gap-5 mb-5">
+          <ButtonComponent
+            type="reject"
+            onClick={() => setIsApproval(false)}
+          >
+            Cancel
+          </ButtonComponent>
+        </div>
+      ) : (
         <div className="flex justify-between items-center gap-5 mb-5">
           <Badge count={tempFilters.length}>
             <ButtonComponent
