@@ -20,7 +20,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const prabillData = data?.prabillInitPopulate || {};
 
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); // Load more 20 data each time
+  const [loadMoreSize] = useState(20);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -37,8 +37,8 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
       dispatch(
         getDetailPrabillingLog({
           initCode: prabillData.initCode,
-          page: 0, // Initial page is 0
-          size: 100, // Initial load 100
+          page: 0,
+          size: 100,
           sort: sort || "createdDtm~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
           isLoadMore: false,
@@ -349,7 +349,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     : [];
   const totalElements = detail_prabilling_log?.totalElements || 0;
 
-  // Calculate if there's more data
   const hasMore = logData.length < totalElements;
 
   return (

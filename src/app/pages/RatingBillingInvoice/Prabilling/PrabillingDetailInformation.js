@@ -26,7 +26,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  // Destructure data dengan benar
   const prabillData = data?.prabillInitPopulate || {};
   const detailsData = data?.details || [];
 
@@ -42,14 +41,13 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     right: ["action"],
   }));
 
-  // Initial fetch - load 100 data pertama
   useEffect(() => {
     if (tabHeader === "Prabilling Information" && prabillData?.initCode) {
       dispatch(
         getDetailPrabillingResult({
           initCode: prabillData.initCode,
           page: 0,
-          pageSize: 100, // Initial load 100
+          pageSize: 100,
           sort,
           search: Object.keys(search).length > 0 ? search : {},
           isLoadMore: false,
@@ -80,13 +78,12 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     const pageInfo = detail_prabilling_result?.page || {};
     const totalPages = pageInfo?.totalPages || 0;
 
-    // Check if there's more data to load
     if (nextPage < totalPages) {
       await dispatch(
         getDetailPrabillingResult({
           initCode: prabillData.initCode,
           page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
+          pageSize: loadMoreSize,
           sort,
           search: Object.keys(search).length > 0 ? search : {},
           isLoadMore: true,
