@@ -12,21 +12,6 @@ const promoCriteriaRepository = {
       disableFilter: true,
     },
     {
-      title: "Service Type",
-      dataIndex: "serviceType",
-      key: "serviceType",
-    },
-    {
-      title: "Customer Segment",
-      dataIndex: "customerSegment",
-      key: "customerSegment",
-    },
-    {
-      title: "Account Group",
-      dataIndex: "accountGroup",
-      key: "accountGroup",
-    },
-    {
       title: "Adjustment Type",
       dataIndex: "adjustmentType",
       key: "adjustmentType",
@@ -42,9 +27,40 @@ const promoCriteriaRepository = {
       key: "uom",
     },
     {
+      title: "Max Value UOM",
+      dataIndex: "maxValueUom",
+      key: "maxValueUom",
+    },
+    {
+      title: "From Item",
+      dataIndex: "fromItem",
+      key: "fromItem",
+    },
+    {
+      title: "Tiering",
+      dataIndex: "tiering",
+      key: "tiering",
+    },
+    {
+      title: "Start Date",
+      dataIndex: "startDate",
+      key: "startDate",
+    },
+    {
+      title: "End Date",
+      dataIndex: "endDate",
+      key: "endDate",
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+    },
+    {
       title: "Action",
       dataIndex: "action",
       key: "action",
+      fixed: 'right',
       disableFilter: true,
       disableSorter: true,
       render: (_, record) => (

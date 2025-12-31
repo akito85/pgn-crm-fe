@@ -10,6 +10,7 @@ import { useColumnActionPermission } from "../../../../../../../components/Colum
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { CheckOutlined, DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import Toolbar from "../../../../../../../components/Toolbar";
+import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 
 const InvoiceRelationTable = ({
   data = [],
@@ -41,6 +42,13 @@ const InvoiceRelationTable = ({
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      title: "ACCOUNT NAME",
+      dataIndex: "relatedAccountName",
+      width: 250,
+      sorter: true,
+      ...getColumnSearchProps("relatedAccountName"),
+    },
+    {
       title: "ACCOUNT NUMBER",
       dataIndex: "relatedAccountNumber",
       width: 250,
@@ -50,14 +58,15 @@ const InvoiceRelationTable = ({
     {
       title: "PRIORITY",
       dataIndex: "priority",
-      width: 250,
+      width: 150,
+      align: "center",
       sorter: true,
       ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
-      width: 250,
+      width: 200,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
       render: (startDate) => moment(startDate, "DD-MM-YYYY").format(dateFormatting.date),
@@ -65,7 +74,7 @@ const InvoiceRelationTable = ({
     {
       title: "END DATE",
       dataIndex: "endDate",
-      width: 250,
+      width: 200,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
       render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
@@ -73,7 +82,7 @@ const InvoiceRelationTable = ({
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 300,
+      width: 200,
       sorter: true,
       align: "center",
       fixed: "right",
@@ -98,9 +107,9 @@ const InvoiceRelationTable = ({
     {
       title: "STATUS",
       dataIndex: "status",
+      width: 120,
       sorter: true,
       fixed: "right",
-      width: 150,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
@@ -241,7 +250,7 @@ const InvoiceRelationTable = ({
               idAccount,
               idCustomer,
             }})}
-            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE"}
+            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE" || r.status === "ACTIVE"}
           >
             <Tooltip title="Update">
               <div className="pt-1">
@@ -326,14 +335,13 @@ const InvoiceRelationTable = ({
           <Toolbar items={itemActions} type="detail" />
         </div>
       )}
-      <TablePagination
+      <TablePaginationNew
         dataSource={data}
         totalData={totalElement}
         current={page}
         pageSize={pageSize}
-        onChange={handleChange}
-        onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 400, x: 2000 }}
+        onChange={handleChangeSize}
+        tableScrolled={{ y: 400, x: data.length ? "max-content" : "100%" }}
         onSort={onSort}
         columns={[
           ...columns,

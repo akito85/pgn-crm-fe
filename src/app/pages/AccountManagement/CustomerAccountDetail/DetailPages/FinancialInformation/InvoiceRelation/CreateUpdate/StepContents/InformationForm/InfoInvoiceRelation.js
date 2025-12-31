@@ -335,20 +335,6 @@ export default function InfoInvoiceRelation({
       ...getColumnSearchProps("latitude"),
     },
     {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("startDate"),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("endDate"),
-    },
-    {
       title: "ACTION",
       align: "center",
       width: 120,
@@ -483,7 +469,6 @@ export default function InfoInvoiceRelation({
             <InputComponent
               type={"textarea"}
               rows={4}
-              placeholder="Asset meter baru PGN"
               maxLength={255}
             />
           </Form.Item>

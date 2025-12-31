@@ -8,13 +8,13 @@ const renderHistoryData = (label, value) => {
   return (
     <Space direction="vertical" size={"small"}>
       <strong>{label}</strong>
-      <span>{value || "-"}</span>
+      <span>{value || ""}</span>
     </Space>
   );
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return "-";
+  if (!dateString) return "";
   // Format from "2025-12-05T04:47:09.210+00:00" to "12 Dec 2025"
   return moment(dateString).format("DD MMM YYYY");
 };

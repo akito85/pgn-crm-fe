@@ -120,6 +120,8 @@ import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccou
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
 import warrantyReducer from "../slices/receipt_collection/warranty";
+import notificationsReducer from "../slices/notifications";
+import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -266,6 +268,10 @@ const reducer = combineReducers({
   activityAction: activityActionReducer,
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
+
+  // notifications
+  notifications: notificationsReducer,
+  multiDestination: multiDestinationReducer,
 });
 
 // add throttle middlewares

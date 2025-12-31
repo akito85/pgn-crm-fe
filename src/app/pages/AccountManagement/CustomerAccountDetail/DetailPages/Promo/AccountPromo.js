@@ -222,7 +222,6 @@ const PromoViewData = ({
           enableDragColumn={true}
           enableColumnSorter={dataSource.length > 0}
           enableColumnFilter={dataSource.length > 0}
-          freezeColumns={[{ key: "action", position: "right" }]}
           tableScrolled={{ x: 800 }}
           columns={columns}
           dataSource={dataSource}
@@ -497,10 +496,6 @@ const PromoHistoryViewData = ({
           enableDragColumn={true}
           enableColumnSorter={dataSource.length > 0}
           enableColumnFilter={dataSource.length > 0}
-          freezeColumns={[
-            { key: "no", position: "left" },
-            { key: "action", position: "right" }
-          ]}
           tableScrolled={{ x: 800 }}
           columns={columns}
           dataSource={dataSource}
@@ -548,7 +543,7 @@ const selectedRender = ({
   );
 };
 const formatDate = (dateString) => {
-  if (!dateString) return "-";
+  if (!dateString) return "";
   // Format from "2025-12-05" or "2025-12-05T04:47:09.210+00:00" to "05 Dec 2025"
   return moment(dateString).format("DD MMM YYYY");
 };
@@ -557,7 +552,7 @@ const renderLabelDataValue = (label, value) => {
   return (
     <Space direction="vertical" size={"small"}>
       <strong>{label}</strong>
-      <span>{value || "-"}</span>
+      <span>{value || ""}</span>
     </Space>
   );
 };

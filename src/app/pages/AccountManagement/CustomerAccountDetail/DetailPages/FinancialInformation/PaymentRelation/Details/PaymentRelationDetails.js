@@ -186,9 +186,9 @@ const PaymentRelationDetails = ({
 
   useEffect(() => {
     if (detail_paymentRelation?.result) {
-      const { statusApproval } = detail_paymentRelation.result;
+      const { approvalType } = detail_paymentRelation.result;
 
-      if (statusApproval === "WAITING_APPROVAL")
+      if (approvalType === "PAYMENT_RELATION" || approvalType === "INACTIVE_PAYMENT_RELATION")
         setIsApproval(true);
       else
         setIsApproval(false);

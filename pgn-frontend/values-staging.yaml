@@ -34,13 +34,13 @@ podAnnotations:
   releaseNamespace: "default"
   vault:
     enabled: false
-    authPath: ""
-    role: "default"
-    access_path: ""
-    secretPath: "energy-development/db_access"
-    inject: "update"
-    access_properties_un: spring.crm-datasource.userName={{ .Data.data.username }}
-    access_properties_pw: spring.crm-datasource.password={{ .Data.data.password }}
+    # authPath: ""
+    # role: "default"
+    # access_path: ""
+    # secretPath: "energy-development/db_access"
+    # inject: "update"
+    # access_properties_un: spring.crm-datasource.userName={{ .Data.data.username }}
+    # access_properties_pw: spring.crm-datasource.password={{ .Data.data.password }}
 # podLabels:
 #   helm.sh/chart: dbs-module-account
 #   app.kubernetes.io/name: dbs-module-account
@@ -85,7 +85,7 @@ ingress:
     # nginx.ingress.kubernetes.io/rewrite-target: /$2
     # nginx.ingress.kubernetes.io/use-regex: "true"
   hosts:
-    - host: dev-energy.pgn.co.id
+    - host: stg-energy.pgn.co.id
       paths:
         - path: /
           pathType: Prefix

@@ -187,9 +187,9 @@ const InvoiceRelationDetails = ({
 
   useEffect(() => {
     if (detail_invoiceRelation?.result) {
-      const { statusApproval } = detail_invoiceRelation.result;
+      const { approvalType } = detail_invoiceRelation.result;
 
-      if (statusApproval === "WAITING_APPROVAL")
+      if (approvalType === "INVOICE_RELATION" || approvalType === "INACTIVE_INVOICE_RELATION")
         setIsApproval(true);
       else
         setIsApproval(false);

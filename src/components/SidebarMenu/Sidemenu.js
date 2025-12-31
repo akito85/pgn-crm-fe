@@ -48,6 +48,7 @@ const whitelistMenu = [
   "Account Equipment",
   "Detail Product",
   "Relationship",
+  "Notifications",
 ];
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
