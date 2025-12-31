@@ -36,12 +36,41 @@ const FinancialInformation = ({
 
     // Use Effect
     useEffect(() => {
-      if(location?.pathname.includes('account-standard')) {
-        dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information'))
-      }else{
-        dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information'))
+      let collapse = "";
+
+      switch (current) {
+        case 0:
+          collapse = "/payment-channel"
+          break;
+        case 1:
+          collapse = "/tax-identifier"
+          break;
+        case 2:
+          collapse = "/witholding-tax"
+          break;
+        case 3:
+          collapse = "/accounting-rule"
+          break;
+        case 4:
+          collapse = "/billing-bucket"
+          break;
+        case 5:
+          collapse = "/tax-implication"
+          break;
+        case 6:
+          collapse = "/payment-relation"
+          break;
+        case 7:
+          collapse = "/invoice-relation"
+          break;
       }
-    }, [dispatch])
+
+      if(location?.pathname.includes('account-standard')) {
+        dispatch(getGrantedAccessAccount(`/account-management/account-standard/financial-information${collapse}`))
+      }else{
+        dispatch(getGrantedAccessAccount(`/account-management/account-onetime/financial-information${collapse}`))
+      }
+    }, [current]);
 
   const financialList = [
     // {
