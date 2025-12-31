@@ -17,6 +17,7 @@ import ExportButton from "./components/ExportButton";
 import { usePromo } from "./hooks/usePromo";
 import { transformValidPromoResponse, transformPromoHistoryResponse } from "./utils/promoHelpers";
 import moment from "moment";
+import { UnorderedListOutlined } from "@ant-design/icons";
 
 const HeaderAccountPromo = ({ onChangeTab, isPromoHistory }) => {
   const keys = [
@@ -237,18 +238,24 @@ const PromoViewData = ({
 
 const PromoHistoryViewData = ({
   isModalHistoryVisible,
+  isModalHistoryDetailVisible,
   setIsModalHistoryVisible,
+  setIsModalHistoryDetailVisible,
   setDetailHistoryData,
+  setDetailDetailHistoryData,
   customerId,
   accountId,
 }) => {
   const {
     promoHistoryList,
     promoHistoryDetail,
+    promoHistoryDetailDetail,
     loadPromoHistoryList,
     loadPromoHistoryDetail,
+    loadPromoHistoryDetailDetail,
     downloadPromoHistory,
     clearPromoHistory,
+    clearDetailOfPromoHistory,
   } = usePromo();
 
   const [dataSource, setDataSource] = useState([]);
@@ -300,6 +307,15 @@ const PromoHistoryViewData = ({
     }
   }, [promoHistoryDetail, setDetailHistoryData, setIsModalHistoryVisible]);
 
+  // Update detail of history data detail when promoHistoryDetailDetail changes and open modal
+  useEffect(() => {
+    if (promoHistoryDetailDetail?.data?.data && !promoHistoryDetailDetail.loading) {
+      setDetailDetailHistoryData(promoHistoryDetailDetail.data.data);
+      // Open modal only after data is loaded
+      setIsModalHistoryDetailVisible(true);
+    }
+  }, [promoHistoryDetailDetail, setDetailHistoryData, setIsModalHistoryDetailVisible]);
+
   // Clear detail state when modal is closed
   useEffect(() => {
     if (!isModalHistoryVisible) {
@@ -308,6 +324,14 @@ const PromoHistoryViewData = ({
     }
   }, [isModalHistoryVisible, clearPromoHistory, setDetailHistoryData]);
 
+  // Clear detail detail state when modal is closed
+  useEffect(() => {
+    if (!isModalHistoryDetailVisible) {
+      clearDetailOfPromoHistory();
+      setDetailDetailHistoryData({});
+    }
+  }, [isModalHistoryDetailVisible, clearDetailOfPromoHistory, setDetailDetailHistoryData]);
+
   // Clear detail state when component unmounts (tab switch)
   useEffect(() => {
     return () => {
@@ -315,6 +339,14 @@ const PromoHistoryViewData = ({
       setDetailHistoryData({});
     };
   }, [clearPromoHistory, setDetailHistoryData]);
+
+  // Clear detail detail state when component unmounts (tab switch)
+  useEffect(() => {
+    return () => {
+      clearDetailOfPromoHistory();
+      setDetailDetailHistoryData({});
+    };
+  }, [clearDetailOfPromoHistory, setDetailDetailHistoryData]);
 
   const handleDownload = async () => {
     if (accountId) {
@@ -394,6 +426,14 @@ const PromoHistoryViewData = ({
     }
   };
 
+  // Handle view detail detail - fetch detail detail from API
+  const handleViewDetailDetail = (record, detailRecord) => {
+    if (record?.billingCode, detailRecord?.id) {
+      console.log('Fetching detail for billing code:', record.billingCode, 'accountId:', accountId);
+      loadPromoHistoryDetailDetail(record.billingCode, detailRecord.id, accountId);
+    }
+  };
+
   const expandedRowRender = (record) => {
     const detailColumns = [
       {
@@ -445,6 +485,21 @@ const PromoHistoryViewData = ({
         dataIndex: "description",
         key: "description",
         width: 200,
+      },
+      {
+        title: "Action",
+        dataIndex: "action",
+        key: "action",
+        width: 80,
+        fixed: 'right',
+        render: (_, detailRecord) => (
+          <Col span={24} className="text-center">
+            <UnorderedListOutlined
+              style={{ cursor: "pointer" }}
+              onClick={() => handleViewDetailDetail(record, detailRecord)}
+            />
+          </Col>
+        ),
       },
     ];
 
@@ -516,8 +571,11 @@ const selectedRender = ({
   setIsModalPromoVisible,
   setDetailPromoData,
   isModalHistoryVisible,
+  isModalHistoryDetailVisible,
   setIsModalHistoryVisible,
+  setIsModalHistoryDetailVisible,
   setDetailHistoryData,
+  setDetailDetailHistoryData,
   customerId,
   accountId,
 }) => {
@@ -525,8 +583,11 @@ const selectedRender = ({
     return (
       <PromoHistoryViewData
         isModalHistoryVisible={isModalHistoryVisible}
+        isModalHistoryDetailVisible={isModalHistoryDetailVisible}
         setIsModalHistoryVisible={setIsModalHistoryVisible}
+        setIsModalHistoryDetailVisible={setIsModalHistoryDetailVisible}
         setDetailHistoryData={setDetailHistoryData}
+        setDetailDetailHistoryData={setDetailDetailHistoryData}
         customerId={customerId}
         accountId={accountId}
       />
@@ -565,8 +626,11 @@ const renderModalAccountPromo = ({
   selectedTabCriteriaAndCondition,
   setSelectedTabCriteriaAndCondition,
   isModalHistoryVisible,
+  isModalHistoryDetailVisible,
   setIsModalHistoryVisible,
+  setIsModalHistoryDetailVisible,
   detailHistoryData,
+  detailDetailHistoryData,
   onChangeDetailPromo,
   setOnChangeDetailPromo,
   onChangeDetailHistory,
@@ -723,57 +787,101 @@ const renderModalAccountPromo = ({
       ];
 
       return (
-        <ModalCustomPromo
-          title={"DETAIL PROMO HISTORY"}
-          isOpen={isModalHistoryVisible}
-          setIsOpen={setIsModalHistoryVisible}
-        >
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-            {/* Basic Information Section */}
-            <div>
-              <Row gutter={[16, 16]}>
-                <Col span={8}>
-                  {renderLabelDataValue("Billing No.", detailHistoryData?.billingCode)}
-                </Col>
-                <Col span={8}>
-                  {renderLabelDataValue("Billing Period", detailHistoryData?.billingPeriod)}
-                </Col>
-                <Col span={8}>
-                  {renderLabelDataValue("Billing Cycle", detailHistoryData?.billingCycle)}
-                </Col>
-              </Row>
-              <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
-                <Col span={8}>
-                  {renderLabelDataValue("Promo Applied", detailHistoryData?.promosApplied)}
-                </Col>
-              </Row>
-            </div>
+        <>
+          <ModalCustomPromo
+            title={"DETAIL PROMO HISTORY"}
+            isOpen={isModalHistoryVisible}
+            setIsOpen={setIsModalHistoryVisible}
+          >
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              {/* Basic Information Section */}
+              <div>
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    {renderLabelDataValue("Billing No.", detailHistoryData?.billingCode)}
+                  </Col>
+                  <Col span={8}>
+                    {renderLabelDataValue("Billing Period", detailHistoryData?.billingPeriod)}
+                  </Col>
+                  <Col span={8}>
+                    {renderLabelDataValue("Billing Cycle", detailHistoryData?.billingCycle)}
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
+                  <Col span={8}>
+                    {renderLabelDataValue("Promo Applied", detailHistoryData?.promosApplied)}
+                  </Col>
+                </Row>
+              </div>
 
-            {/* Promo History Detail Table */}
-            <div>
-              <p className="text-primary text-xs font-bold uppercase mb-2">
-                PROMO HISTORY DETAIL
-              </p>
-              <TablePaginationNew
-                enableDragColumn={true}
-                enableColumnSorter={true}
-                enableColumnFilter={true}
-                dataSource={detailHistoryData?.details || []}
-                columns={historyDetailColumns}
-                tableScrolled={{
-                  x: 1200,
-                }}
-                useSelect={false}
-                usePagination={false}
+              {/* Promo History Detail Table */}
+              <div>
+                <p className="text-primary text-xs font-bold uppercase mb-2">
+                  PROMO HISTORY DETAIL
+                </p>
+                <TablePaginationNew
+                  enableDragColumn={true}
+                  enableColumnSorter={true}
+                  enableColumnFilter={true}
+                  dataSource={detailHistoryData?.details || []}
+                  columns={historyDetailColumns}
+                  tableScrolled={{
+                    x: 1200,
+                  }}
+                  useSelect={false}
+                  usePagination={false}
+                />
+              </div>
+
+              {/* History Log Information */}
+              <HistoryLogInformation
+                data={detailHistoryData?.historyLog}
               />
-            </div>
+            </Space>
+          </ModalCustomPromo>
 
-            {/* History Log Information */}
-            <HistoryLogInformation
-              data={detailHistoryData?.historyLog}
-            />
-          </Space>
-        </ModalCustomPromo>
+          <ModalCustomPromo
+            title={"DETAIL OF PROMO HISTORY DETAIL"}
+            isOpen={isModalHistoryVisible}
+            setIsOpen={setIsModalHistoryVisible}
+          >
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              {/* Basic Information Section */}
+              <div>
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    {renderLabelDataValue("Billing Date", detailDetailHistoryData?.billingDate)}
+                  </Col>
+                  <Col span={8}>
+                    {renderLabelDataValue("Name", detailDetailHistoryData?.name)}
+                  </Col>
+                  <Col span={8}>
+                    {renderLabelDataValue("Promotion Type", detailDetailHistoryData?.promotionType)}
+                  </Col>
+                  <Col span={8}>
+                    {renderLabelDataValue("Type", detailDetailHistoryData?.type)}
+                  </Col>
+                  <Col span={8}>
+                    {renderLabelDataValue("Category", detailDetailHistoryData?.category)}
+                  </Col>
+                  <Col span={8}>
+                    {renderLabelDataValue("Criteria", detailDetailHistoryData?.criteria)}
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
+                  <Col span={8}>
+                    {renderLabelDataValue("Description", detailDetailHistoryData?.description)}
+                  </Col>
+                </Row>
+              </div>
+
+              {/* History Log Information */}
+              <HistoryLogInformation
+                data={detailDetailHistoryData?.historyLog}
+              />
+            </Space>
+          </ModalCustomPromo>
+        </>
       );
     default:
       return "";
@@ -792,7 +900,9 @@ const AccountPromo = ({ id }) => {
   const [isModalPromoVisible, setIsModalPromoVisible] = useState(false);
   const [detailPromoData, setDetailPromoData] = useState({});
   const [isModalHistoryVisible, setIsModalHistoryVisible] = useState(false);
+  const [isModalHistoryDetailVisible, setIsModalHistoryDetailVisible] = useState(false);
   const [detailHistoryData, setDetailHistoryData] = useState({});
+  const [detailDetailHistoryData, setDetailDetailHistoryData] = useState({});
   const [onChangeDetailPromo, setOnChangeDetailPromo] = useState("criteria");
   const [onChangeDetailHistory, setOnChangeDetailHistory] = useState("promoHistoryInformation");
   const isPromoHistory = selectedTab === "promoHistory";
@@ -822,8 +932,11 @@ const AccountPromo = ({ id }) => {
               setIsModalPromoVisible,
               setDetailPromoData,
               isModalHistoryVisible,
+              isModalHistoryDetailVisible,
               setIsModalHistoryVisible,
+              setIsModalHistoryDetailVisible,
               setDetailHistoryData,
+              setDetailDetailHistoryData,
               customerId: idCustomer,
               accountId: id,
             })}
@@ -838,8 +951,11 @@ const AccountPromo = ({ id }) => {
         selectedTabCriteriaAndCondition,
         setSelectedTabCriteriaAndCondition,
         isModalHistoryVisible,
+        isModalHistoryDetailVisible,
         setIsModalHistoryVisible,
+        setIsModalHistoryDetailVisible,
         detailHistoryData,
+        detailDetailHistoryData,
         onChangeDetailPromo,
         setOnChangeDetailPromo,
         onChangeDetailHistory,
