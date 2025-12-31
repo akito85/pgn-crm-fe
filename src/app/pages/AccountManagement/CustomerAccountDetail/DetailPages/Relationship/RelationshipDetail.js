@@ -11,11 +11,15 @@ import DetailText from "../../../../../../components/DetailText";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import RadioTabs from "../../../../../../components/RadioTabs";
+import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import {
   downloadAttachment,
   getAttachmentList,
-  getRelationshipDetail
+  getRelationshipDetail,
+  approveOrRejectRelationship,
+  approveOrRejectInactiveRelationship
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { showModalError } from "../../../../../../redux/slices/general_slice";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../utils";
 import HeaderDetail from "../../HeaderDetail";
@@ -41,6 +45,9 @@ const RelationshipDetail = () => {
   const [data, setData] = useState({});
   const [attachmentData, setAttachmentData] = useState([]);
   const [activeTab, setActiveTab] = useState("Relationship Information");
+  const [isApproval, setIsApproval] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approveOrReject, setApproveOrReject] = useState("");
 
   // Tab options for RadioTabs
   const tabOptions = [
@@ -66,6 +73,17 @@ const RelationshipDetail = () => {
       );
     }
   }, [dispatch, idAccount, idRelationship]);
+
+  useEffect(() => {
+    if (data_relationshipDetail) {
+      const { approvalType } = data_relationshipDetail;
+
+      if (approvalType === "ACCOUNT_RELATIONSHIP" || approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP")
+        setIsApproval(true);
+      else
+        setIsApproval(false);
+    }
+  }, [data_relationshipDetail]);
 
   // Update local data when API response changes
   useEffect(() => {
@@ -108,6 +126,75 @@ const RelationshipDetail = () => {
   // Handle tab change
   const handleTabChange = (e) => {
     setActiveTab(e.target.value);
+  };
+
+  /**
+   * @param {boolean} show
+   * @param {"approve"|"reject"} action
+   */
+  const handleApprovalModal = (show, action) => {
+    if (show) {
+      setShowApprovalModal(true);
+      setApproveOrReject(action);
+    } else {
+      setShowApprovalModal(false);
+      setApproveOrReject("");
+    }
+  };
+
+  /**
+   * @param {"approve"|"reject"} action
+   */
+  const handleApproveOrReject = (description, action, handleClear) => {
+    if (data_relationshipDetail) {
+      const body = [{
+        id: data_relationshipDetail.id,
+        approvalId: data_relationshipDetail.tappId,
+        action: action.toUpperCase(),
+        description,
+      }];
+
+      if (data_relationshipDetail.approvalType === "ACCOUNT_RELATIONSHIP") {
+        dispatch(approveOrRejectRelationship({
+          idAccount,
+          body,
+          action: action.toUpperCase(),
+        }))
+        .unwrap()
+        .then(() => {
+          dispatch(getRelationshipDetail({
+            idAccount,
+            idRelationship,
+          }));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+      } else if (data_relationshipDetail.approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP") {
+        dispatch(approveOrRejectInactiveRelationship({
+          idAccount,
+          body,
+          action: action.toUpperCase(),
+        }))
+        .unwrap()
+        .then(() => {
+          dispatch(getRelationshipDetail({
+            idAccount,
+            idRelationship,
+          }));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `The approval type is invalid.`,
+        };
+
+        dispatch(showModalError(errorBody));
+      }
+    }
   };
 
   // Breadcrumb configuration
@@ -169,17 +256,17 @@ const RelationshipDetail = () => {
 
                 <div className="w-full grid grid-cols-3 gap-5">
                   <DetailText label="Related Number">
-                    {data?.subjectValue || data?.objectValue || "-"}
+                    {data?.subjectNumber || data?.objectNumber || ""}
                   </DetailText>
                   <DetailText label="Start Date">
                     {data?.startDate
                       ? moment(data.startDate).format("DD MMM YYYY")
-                      : "-"}
+                      : ""}
                   </DetailText>
                   <DetailText label="End Date">
                     {data?.endDate
                       ? moment(data.endDate).format("DD MMM YYYY")
-                      : "-"}
+                      : ""}
                   </DetailText>
                 </div>
 
@@ -187,7 +274,7 @@ const RelationshipDetail = () => {
                   <DetailText label="Status">
                     <div className="flex items-center">
                       <StatusComponent colour={data?.status}>
-                        {data?.status || "-"}
+                        {data?.status || ""}
                       </StatusComponent>
                     </div>
                   </DetailText>
@@ -285,23 +372,36 @@ const RelationshipDetail = () => {
                 }}
               />
             }
-            onClick={() => navigate(
-              type === "standard"
-                ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
-                : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
-              {
-                state: {
-                  section: "Relationship",
-                  idAccount,
-                  idCustomer,
-                }
-              }
-            )}
+            onClick={() => navigate(-1)}
           >
             Back
           </ButtonComponent>
+
+          {isApproval && (
+            <div className={"w-full flex justify-end gap-5"}>
+              <ButtonComponent
+                type="reject"
+                onClick={() => handleApprovalModal(true, "reject")}
+              >
+                Reject
+              </ButtonComponent>
+              <ButtonComponent
+                type="approve"
+                onClick={() => handleApprovalModal(true, "approve")}
+              >
+                Approve
+              </ButtonComponent>
+            </div>
+          )}
         </div>
       </Spin>
+      <ModalApproveOrReject
+        isOpen={showApprovalModal}
+        header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
+        handleCloseModal={() => handleApprovalModal(false)}
+        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${data?.subjectName || data?.objectName || ""}?`}
+        onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
+      />
     </LayoutMenu>
   );
 };

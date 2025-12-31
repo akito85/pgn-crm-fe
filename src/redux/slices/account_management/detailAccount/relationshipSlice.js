@@ -562,6 +562,48 @@ export const approveOrRejectRelationship = createAsyncThunk(
   }
 );
 
+// Approve or Reject Inactive Relationship
+export const approveOrRejectInactiveRelationship = createAsyncThunk(
+  "APPROVE_OR_REJECT_INACTIVE_RELATIONSHIP",
+  async ({ idAccount, body, action }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approve-inactive`;
+      const response = await accountManagementService.activationWithRemark(url, body, {
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      let message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occurred";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Download Relationship to Excel
 export const downloadRelationship = createAsyncThunk(
   "DOWNLOAD_RELATIONSHIP",
@@ -836,6 +878,17 @@ const relationshipSlice = createSlice({
       state.loading = false;
     },
     [approveOrRejectRelationship.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // Approve or Reject Inactive Relationship
+    [approveOrRejectInactiveRelationship.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactiveRelationship.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectInactiveRelationship.rejected]: (state) => {
       state.loading = false;
     },
   },

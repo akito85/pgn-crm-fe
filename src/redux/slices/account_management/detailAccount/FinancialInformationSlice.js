@@ -519,7 +519,7 @@ export const updatePaymentRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
+        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
@@ -534,7 +534,7 @@ export const updatePaymentRelation = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
+          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       } else {
@@ -681,7 +681,7 @@ export const updateInvoiceRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
+        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))

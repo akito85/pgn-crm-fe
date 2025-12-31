@@ -19,12 +19,12 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   DELETE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/delete",
 
   // Payment Relation Detail
-  VIEW_DETAIL_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/details",
+  VIEW_DETAIL_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/view",
   CREATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/create",
   UPDATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/update",
 
   // Invoice Relation Detail
-  VIEW_DETAIL_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/details",
+  VIEW_DETAIL_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/view",
   CREATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/create",
   UPDATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/update",
 
@@ -80,7 +80,7 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPLOAD_GAS_SOURCE: "/system-setup/gas-sources/upload",
 
   // Multi Destination
-  VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/details",
+  VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/view",
   CREATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/create",
   UPDATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/update",
 
