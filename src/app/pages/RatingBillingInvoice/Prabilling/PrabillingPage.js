@@ -506,7 +506,6 @@ const PrabillingPage = () => {
   }, [allColumns]);
 
   return (
-    <Spin spinning={loading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
@@ -540,7 +539,6 @@ const PrabillingPage = () => {
           </div>
         </CardContainer>
       </LayoutMenu>
-    </Spin>
   );
 };
 

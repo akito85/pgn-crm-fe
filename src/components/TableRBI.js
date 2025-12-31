@@ -535,20 +535,20 @@ const TableRBI = ({
             width: 8px;
             height: 8px;
             position: relative;
-            z-index: 9999 !important;
+            z-index: 2 !important;
           }
 
           #${idTable} .ant-table-body::-webkit-scrollbar-track {
             background: #f1f1f1;
             position: relative;
-            z-index: 9999 !important;
+            z-index: 2 !important;
           }
 
           #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 6px;
             position: relative;
-            z-index: 9999 !important;
+            z-index: 2 !important;
           }
 
           #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {

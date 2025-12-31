@@ -509,7 +509,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
 
   return (
     <Spin spinning={loading}>
-      {/* Prabilling Information Section */}
       <div className="-mt-6">
         <CardContainer
           header={

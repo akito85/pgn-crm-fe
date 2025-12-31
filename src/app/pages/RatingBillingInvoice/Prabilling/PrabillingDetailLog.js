@@ -352,7 +352,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const hasMore = logData.length < totalElements;
 
   return (
-    <Spin spinning={loading_log}>
       <div className="-mt-6">
         <CardContainer
           header={
@@ -384,7 +383,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           </div>
         </CardContainer>
       </div>
-    </Spin>
   );
 };
 
