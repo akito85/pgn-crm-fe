@@ -10,6 +10,7 @@ import { useColumnActionPermission } from "../../../../../../../components/Colum
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { CheckOutlined, DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import Toolbar from "../../../../../../../components/Toolbar";
+import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 
 const InvoiceRelationTable = ({
   data = [],
@@ -39,6 +40,13 @@ const InvoiceRelationTable = ({
       width: 100,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "ACCOUNT NAME",
+      dataIndex: "relatedAccountName",
+      width: 250,
+      sorter: true,
+      ...getColumnSearchProps("relatedAccountName"),
     },
     {
       title: "ACCOUNT NUMBER",
@@ -327,14 +335,13 @@ const InvoiceRelationTable = ({
           <Toolbar items={itemActions} type="detail" />
         </div>
       )}
-      <TablePagination
+      <TablePaginationNew
         dataSource={data}
         totalData={totalElement}
         current={page}
         pageSize={pageSize}
-        onChange={handleChange}
-        onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 400, x: "max-content" }}
+        onChange={handleChangeSize}
+        tableScrolled={{ y: 400, x: data.length ? "max-content" : "100%" }}
         onSort={onSort}
         columns={[
           ...columns,
