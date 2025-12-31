@@ -53,7 +53,7 @@ const SettingsForm = (props) => {
 
   return (
     <div>
-      <BaseContainer header={"DEDUCTION"}>
+      <BaseContainer header={"TRANSFER TO RECIPT"}>
         <div className="w-full grid grid-cols-2 gap-5">
           <Form.Item
             label={"Partner Code"}
@@ -71,10 +71,7 @@ const SettingsForm = (props) => {
             <Input allowClear maxLength={10} />
           </Form.Item>
 
-          <Form.Item
-            label={"Payment Channel Code"}
-            name={"ciCode"}
-          >
+          <Form.Item label={"Payment Channel Code"} name={"ciCode"}>
             <Input allowClear maxLength={10} />
           </Form.Item>
 
@@ -172,7 +169,6 @@ const SettingsForm = (props) => {
             </SelectComponent>
           </Form.Item>
         </div>
-        
       </BaseContainer>
     </div>
   );
