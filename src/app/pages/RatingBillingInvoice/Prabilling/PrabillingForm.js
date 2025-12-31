@@ -22,12 +22,10 @@ import {
   getListAccountGroup,
   getListBillingCycle,
   getListBillingPeriod,
-  getListCalculationType,
   getListCostCenter,
   getListCustomerSegment,
   getListMeterReadingCode,
   getListSchedulerType,
-  getListServiceType,
   getListSor,
   getListSpecificCustomer,
   getListComponentPrabilling,
@@ -99,9 +97,7 @@ const PrabillingForm = ({ type }) => {
 
   useEffect(() => {
     dispatch(getListSor());
-    dispatch(getListServiceType());
     dispatch(getListCustomerSegment());
-    dispatch(getListCalculationType());
     dispatch(getListSchedulerType());
     dispatch(getListCostCenter());
     dispatch(getListBillingCycle());
@@ -272,9 +268,8 @@ const PrabillingForm = ({ type }) => {
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setBillingCycle(null); // Reset billing cycle state
+    setBillingCycle(null); 
 
-    // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
     setDataSpecificCustomer({
       sorId: defaultData?.sor || null,
       costCenterId: defaultData?.costCenter || [],
@@ -284,8 +279,6 @@ const PrabillingForm = ({ type }) => {
       search: "",
       limit: DEFAULT_SEARCH_LIMIT,
     });
-
-    // Reset selected customers map
     setSelectedCustomersMap({});
   };
 

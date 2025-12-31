@@ -26,7 +26,7 @@ const PrabillingPage = () => {
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); // Load more 20 data each time
+  const [loadMoreSize] = useState(20); 
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -506,7 +506,6 @@ const PrabillingPage = () => {
   }, [allColumns]);
 
   return (
-    <Spin spinning={loading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
@@ -540,7 +539,6 @@ const PrabillingPage = () => {
           </div>
         </CardContainer>
       </LayoutMenu>
-    </Spin>
   );
 };
 

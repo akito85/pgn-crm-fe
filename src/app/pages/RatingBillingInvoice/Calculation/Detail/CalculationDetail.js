@@ -76,7 +76,6 @@ const CalculationDetail = () => {
   };
 
   return (
-    <Spin spinning={loading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
@@ -107,7 +106,6 @@ const CalculationDetail = () => {
           </ButtonComponent>
         </div>
       </LayoutMenu>
-    </Spin>
   );
 };
 
