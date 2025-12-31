@@ -11,6 +11,7 @@ import SVGIcon from "../../../../assets/Icon/index";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import { useNavigate } from "react-router-dom";
 import {
   getDetailPrabillingResult,
   downloadPrabillingResult,
@@ -22,6 +23,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const { detail_prabilling_result, loading } = useSelector(
     (state) => state.rbi_prabilling
   );
+
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -35,6 +38,18 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+
+  const handleViewDetail = (record) => {
+    navigate(RBI_ROUTES.PRABILLING_DETAIL_CUSTOMER, {
+      state: {
+        customerNumber: record?.customerNumber,
+        billPeriod: record?.billPeriod,
+        inSor: record?.sor || prabillData?.sor,
+        accNumber: record?.accountNumber,
+        saNumber: record?.saNumber,
+      },
+    });
+  };
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -438,21 +453,14 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         isClassification: true,
         fixed: "right",
         render: (text, record) => (
-          <Link
-            to={RBI_ROUTES.PRABILLING_DETAIL_CUSTOMER}
-            state={{
-              customerNumber: record?.customerNumber,
-              billPeriod: record?.billPeriod,
-              inSor: record?.sor || prabillData?.sor,
-              accNumber: record?.accountNumber,
-              saNumber: record?.saNumber,
-            }}
-            style={{ lineHeight: 0 }}
-          >
-            <Tooltip title="View Account Detail">
+          <Tooltip title="View Account Detail">
+            <div
+              onClick={() => handleViewDetail(record)}
+              style={{ cursor: "pointer", display: "inline-block" }}
+            >
               <SVGIcon name="IconDetail" width={20} />
-            </Tooltip>
-          </Link>
+            </div>
+          </Tooltip>
         ),
       },
     ],
