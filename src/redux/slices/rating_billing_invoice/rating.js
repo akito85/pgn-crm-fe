@@ -4,6 +4,7 @@ import { showModalError, setBodyError, validateError } from "../general_slice";
 
 const initialState = {
   data: [],
+  list_billing_period: [],
   data_calculationUsage: [],
   data_serviceAgreement: [],
   data_detailServiceAgreement: [],
@@ -20,19 +21,68 @@ const initialState = {
 // list gas
 export const getListRatingGasPaginate = createAsyncThunk(
   "GET_LIST_RATING_GAS_PAGINATE",
-  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
+  async (
+    { search, page, pageSize, sort, billPeriodId, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rating/list-rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
+      // Tambahkan billPeriodId ke URL
+      const url = `/v1/dbs/api/rating/list-rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
+
       const response = await ratingBillingHttpService.getPagination(url);
-      
-      // Return data dengan flag isLoadMore
+
       return {
         ...response.data,
-        isLoadMore, // Pass the flag to reducer
+        isLoadMore,
       };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const getListBillingPeriodForRating = createAsyncThunk(
+  "GET_LIST_BILLING_PERIOD_FOR_RATING",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
+      const response = await ratingBillingHttpService.getAll(url);
+
+      // Transform data sesuai struktur response
+      const rawData =
+        response?.body?.data?.data ||
+        response?.data?.data ||
+        response?.data ||
+        [];
+
+      const transformedData = Array.isArray(rawData)
+        ? rawData.map((item) => ({
+            id: item.id,
+            name: item.name,
+            code: item.code,
+            ...item,
+          }))
+        : [];
+
+      return transformedData;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -230,7 +280,7 @@ export const getDetailPricing = createAsyncThunk(
   "GET_PRICING",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rating/list-sa-pricing/${id}`;
+      const url = `/v1/dbs/api/rating/list-sa-pricing?saNumber=${id}`;
       const data = await ratingBillingHttpService.getDetail(url);
       return data?.data;
     } catch (error) {
@@ -258,7 +308,7 @@ export const getAllPricingRuleSAPaginate = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "" : sort;
-      const url = `/v1/dbs/api/rating/list-sa-pricing-rule/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/rating/list-sa-pricing-rule?saNumber=${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -365,7 +415,7 @@ const ratingSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Rating Gas Pagination
-   [getListRatingGasPaginate.pending]: (state, action) => {
+    [getListRatingGasPaginate.pending]: (state, action) => {
       // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
@@ -375,16 +425,13 @@ const ratingSlice = createSlice({
       state.loading = false;
       const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
-      
+
       // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
         // Append new data to existing data
         state.data = {
           ...action.payload,
-          result: [
-            ...(state.data?.result || []),
-            ...newResult
-          ]
+          result: [...(state.data?.result || []), ...newResult],
         };
       } else {
         // Replace with new data (initial load or after search/sort)
@@ -521,6 +568,19 @@ const ratingSlice = createSlice({
     },
     [downloadRatingGas.rejected]: (state) => {
       state.loading = false;
+    },
+
+    // Get List Billing Period For Rating
+    [getListBillingPeriodForRating.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListBillingPeriodForRating.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_billing_period = action.payload;
+    },
+    [getListBillingPeriodForRating.rejected]: (state) => {
+      state.loading = false;
+      state.list_billing_period = [];
     },
 
     // get detail rating gas

@@ -2,37 +2,29 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumb from "../../../../components/BreadCrumb";
-import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
-import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
-import {
-  deleteAdjustmentBilling,
-  downloadAdjustmentBilling,
-  getAdjustmentBillingPaginate,
-  getApprovalHistory,
-} from "../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
-import { columnsAdjustmentBilling } from "./Table/TableAdjustmentBilling";
-import ModalHistory from "../../../../components/Modal/ModalHistory";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import SVGIcon from "../../../../../assets/Icon/index";
+import BaseContainer from "../../../../../components/BaseContainer";
+import { INVOICE_ROUTES } from "../../../../../routes/invoice/invoice_routes";
+import { WarningOutlined } from "@ant-design/icons";
+import Toolbar from "../../../../../components/Toolbar";
+import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../components/CardContainer";
+import TableRBI from "../../../../../components/TableRBI";
+import { columnsAdjustmentInvoice } from "./Table/TableAdjustmentInvoice";
 import {
   ModalConfirm,
   ModalError,
-} from "../../../../components/Modal/ModalPopUp";
-import { WarningOutlined } from "@ant-design/icons";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
-import Toolbar from "../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import CardContainer from "../../../../components/CardContainer";
-import TableRBI from "../../../../components/TableRBI";
-import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+} from "../../../../../components/Modal/ModalPopUp";
+import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const AdjustmentBillingPage = () => {
-  // Selector
-  const { data, loading, data_approval_history, message } = useSelector(
-    (state) => state.adjustmentBilling
-  );
+const AdjustmentInvoicePage = () => {
+  // Selector - Placeholder for Redux state
+  const loading = false;
+  const data = { result: [], page: { totalElements: 0 } };
 
   // Declaration
   const dispatch = useDispatch();
@@ -46,7 +38,6 @@ const AdjustmentBillingPage = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-
   const [modalDelete, setModalDelete] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -61,31 +52,15 @@ const AdjustmentBillingPage = () => {
 
   // Use Effect - Initial fetch dengan 100 data
   useEffect(() => {
-    dispatch(
-      getAdjustmentBillingPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: 100, // Initial load 100 data
-        sort,
-        isLoadMore: false, // Flag untuk initial load
-      })
-    );
+    // TODO: dispatch(getAdjustmentInvoicePaginate({
+    //   search: encodeURIComponent(JSON.stringify(search)),
+    //   page: 1,
+    //   pageSize: 100, // Initial load 100 data
+    //   sort,
+    //   isLoadMore: false,
+    // }))
     setPage(1);
   }, [dispatch, search, sort]);
-
-  useEffect(() => {
-    if (data_approval_history?.dataApprover) {
-      const temp = {
-        dataApprover:
-          data_approval_history?.dataApprover?.ADJUSTMENT_BILLING || [],
-        dataHistory:
-          data_approval_history?.dataHistory?.ADJUSTMENT_BILLING || [],
-      };
-      setDataApprovalHistory(temp);
-    } else {
-      setDataApprovalHistory({});
-    }
-  }, [data_approval_history]);
 
   // Function Search Column - Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -110,15 +85,13 @@ const AdjustmentBillingPage = () => {
 
     // Check if there's more data to load
     if (nextPage <= totalPages) {
-      await dispatch(
-        getAdjustmentBillingPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
-          sort,
-          isLoadMore: true, // Flag untuk load more
-        })
-      );
+      // TODO: await dispatch(getAdjustmentInvoicePaginate({
+      //   search: encodeURIComponent(JSON.stringify(search)),
+      //   page: nextPage,
+      //   pageSize: loadMoreSize, // Load 20 more
+      //   sort,
+      //   isLoadMore: true,
+      // }))
       setPage(nextPage);
     }
   };
@@ -126,10 +99,10 @@ const AdjustmentBillingPage = () => {
   // Calculate if there's more data
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
-  const onSort = (_, __, sorter) => {
+  const onSort = (_, __, sort) => {
     const dataSort =
-      sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -141,21 +114,14 @@ const AdjustmentBillingPage = () => {
       breadcrumbName: "Rating & Billing",
     },
     {
-      path: RBI_ROUTES.ADJUSTMENT_BILLING_VIEW,
-      breadcrumbName: "Adjustment Billing",
+      path: INVOICE_ROUTES.ADJUSTMENT_INVOICE_VIEW,
+      breadcrumbName: "Adjustment Invoice",
     },
   ];
 
   // Handle Download
   const handleDownload = () => {
-    dispatch(
-      downloadAdjustmentBilling({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize: loadMoreSize,
-        sort,
-      })
-    );
+    // TODO: dispatch(downloadAdjustmentInvoice(...))
   };
 
   // Handle Delete
@@ -173,34 +139,14 @@ const AdjustmentBillingPage = () => {
   // Handle Delete OK
   const handleDeleteOk = (res, handleClear) => {
     setModalDelete(false);
-    dispatch(deleteAdjustmentBilling(idDelete))
-      .unwrap()
-      .then(() => {
-        dispatch(
-          getAdjustmentBillingPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: 1,
-            pageSize: 100,
-            sort,
-            isLoadMore: false,
-          })
-        );
-        setPage(1);
-        handleCancel();
-        handleClear();
-      })
-      .catch((error) => {
-        if (Math.floor((error.response.status || 0) / 100) === 5) {
-          setBodyError({ body: { ...res }, handleClear });
-          setModalError(true);
-        }
-      });
+    // TODO: dispatch(deleteAdjustmentInvoice(idDelete))
+    handleCancel();
+    handleClear();
   };
 
   // Handle Approval History
   const handleApprovalHistory = (id) => {
-    // console.log(id);
-    dispatch(getApprovalHistory(id));
+    // TODO: dispatch(getApprovalHistory(id))
     setModalApprovalHistory(true);
   };
 
@@ -217,28 +163,15 @@ const AdjustmentBillingPage = () => {
         </ButtonComponent>
       ),
     },
-    // {
-    //   action: "Upload",
-    //   render: (
-    //     <ButtonComponent
-    //       icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={18} />}
-    //       type={"submit"}
-    //       border={false}
-    //       disabled={true}
-    //     >
-    //       Upload
-    //     </ButtonComponent>
-    //   ),
-    // },
     {
       action: "Create",
       render: (
-        <NavLink to={RBI_ROUTES.ADJUSTMENT_BILLING_CREATE}>
+        <NavLink to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_CREATE}>
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
-            Create Adjustment BIlling
+            Generate Adjustment Invoice
           </ButtonComponent>
         </NavLink>
       ),
@@ -252,7 +185,7 @@ const AdjustmentBillingPage = () => {
         const content =
           data > 3 ? (
             <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
+              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_DETAIL}
               state={{ id: record.id }}
             >
               <ButtonComponent
@@ -264,7 +197,7 @@ const AdjustmentBillingPage = () => {
             </Link>
           ) : (
             <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
+              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_DETAIL}
               state={{ id: record.id }}
             >
               <Tooltip title="Detail">
@@ -300,7 +233,7 @@ const AdjustmentBillingPage = () => {
               <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={20}
+                  width={24}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -310,10 +243,10 @@ const AdjustmentBillingPage = () => {
 
         return isEditable ? (
           <Link
-            to={RBI_ROUTES.ADJUSTMENT_BILLING_UPDATE}
+            to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_CREATE}
             state={{
               id: record.id,
-              adjustmentNumber: record.adjustmentNumber,
+              invoiceNumber: record.invoiceNumber,
             }}
           >
             {content}
@@ -385,12 +318,12 @@ const AdjustmentBillingPage = () => {
     "Delete"
   ).map((col) => ({
     ...col,
-    width: 100,
+    width: 70,
     align: "center",
   }));
 
   const baseColumns = useMemo(() => {
-    return columnsAdjustmentBilling(
+    return columnsAdjustmentInvoice(
       0, // Tidak digunakan untuk infinite scroll
       0, // Tidak digunakan untuk infinite scroll
       searchInput,
@@ -423,7 +356,7 @@ const AdjustmentBillingPage = () => {
   const dataSourceWithKeys = useMemo(() => {
     return dataSource?.map((item) => ({
       ...item,
-      key: item.id || item.adjustmentNumber,
+      key: item.id || item.invoiceNumber,
     }));
   }, [dataSource]);
 
@@ -436,7 +369,7 @@ const AdjustmentBillingPage = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="w-full mt-[15px] text-primary">
-                Adjustment Billing List
+                ADJUSTMENT INVOICE LIST
               </p>
 
               <Toolbar items={itemGrantAccess} />
@@ -445,7 +378,7 @@ const AdjustmentBillingPage = () => {
         >
           <div className="w-full">
             <TableRBI
-              idTable="adjustment-billing-table"
+              idTable="adjustment-invoice-table"
               showExport={false}
               dataSource={dataSourceWithKeys}
               columns={processedColumns}
@@ -461,7 +394,7 @@ const AdjustmentBillingPage = () => {
               onLoadMore={handleLoadMore}
               hasMore={hasMore}
               loadMoreThreshold={20}
-              tableScrolled={{ y: 525, x: 3000 }}
+              tableScrolled={{ y: 525, x: 5000 }}
             />
           </div>
         </CardContainer>
@@ -502,7 +435,7 @@ const AdjustmentBillingPage = () => {
               <p className="text-[18px] font-bold">Failed</p>
             </div>
             <p className="pl-[70px]">
-              {`Your data was not deleted, ${message?.data?.message}. Please try again.`}
+              {`Your data was not deleted. Please try again.`}
             </p>
           </div>
         </ModalError>
@@ -521,4 +454,4 @@ const AdjustmentBillingPage = () => {
   );
 };
 
-export default AdjustmentBillingPage;
+export default AdjustmentInvoicePage;
