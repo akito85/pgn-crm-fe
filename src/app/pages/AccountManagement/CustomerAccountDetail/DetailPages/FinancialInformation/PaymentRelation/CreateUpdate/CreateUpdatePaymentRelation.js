@@ -205,9 +205,10 @@ const CreatePaymentRelation = ({ type }) => {
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (current === 2)
+        if (current === 2) {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
+        }
         else
           await formCreate.validateFields(formFields[current]);
       } catch (err) {
@@ -334,9 +335,10 @@ const CreatePaymentRelation = ({ type }) => {
   
   const next = async () => {
     try {
-      if (current === 2)
+      if (current === 2) {
         if (attachmentIsRequired && !dataAttachment.length)
           throw new Error("At least provide one attachment");
+      }
       else
         await formCreate.validateFields(formFields[current]);
     } catch (err) {
@@ -352,9 +354,10 @@ const CreatePaymentRelation = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        if (i === 2)
+        if (i === 2) {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
+        }
         else
           await formCreate.validateFields(formFields[i]);
       } catch (err) {
