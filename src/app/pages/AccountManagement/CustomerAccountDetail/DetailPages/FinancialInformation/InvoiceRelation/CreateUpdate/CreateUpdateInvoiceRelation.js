@@ -404,6 +404,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
+      remark,
     } = formCreate.getFieldsValue();
 
     const body = {
@@ -415,7 +416,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
-      action: confirmationType
+      action: confirmationType,
+      remark,
     };
 
     if (type === "create")
@@ -648,29 +650,28 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               )}
             </div>
           </div>
+          <ConfirmationModal
+            form={"invoiceRelationForm"}
+            isOpen={showConfirmationModal}
+            handleCancel={() => handleSetShowConfirmationModal(false)}
+            selectedAppHierId={selectedAppHierId}
+            selectedApprovalName={selectedApprovalName}
+            hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
+              ...detail,
+              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                ...employeeDetail,
+                key: `employee-detail-${index}`
+              })),
+              key: `detail-detail-${index}`,
+            }))}
+            hieararchyOptionData={data_irApprovalHierarchy}
+            type={confirmationType}
+            dataAttachment={dataAttachment}
+            data={formCreate.getFieldsValue()}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
+          />
         </Form>
-
-        <ConfirmationModal
-          form={"invoiceRelationForm"}
-          isOpen={showConfirmationModal}
-          handleCancel={() => handleSetShowConfirmationModal(false)}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-          hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          hieararchyOptionData={data_irApprovalHierarchy}
-          type={confirmationType}
-          dataAttachment={dataAttachment}
-          data={formCreate.getFieldsValue()}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-        />
       </div>
     </LayoutMenu>
   );
