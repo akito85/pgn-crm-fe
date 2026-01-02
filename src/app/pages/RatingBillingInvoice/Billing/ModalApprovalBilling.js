@@ -39,7 +39,7 @@ const ModalApprovalBilling = ({
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); // Load more 20 data each time
+  const [loadMoreSize] = useState(20); 
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -65,7 +65,7 @@ const ModalApprovalBilling = ({
         getAllBillingApprovePaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: 100, // Initial load 100
+          pageSize: 100,
           sort,
           isLoadMore: false,
         })
@@ -101,7 +101,7 @@ const ModalApprovalBilling = ({
         getAllBillingApprovePaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
+          pageSize: loadMoreSize,
           sort,
           isLoadMore: true,
         })
@@ -110,7 +110,6 @@ const ModalApprovalBilling = ({
     }
   };
 
-  // Calculate if there's more data
   const hasMore =
     dataSource.length < (data_list_billing_approval?.page?.totalElements || 0);
 
