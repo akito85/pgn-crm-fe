@@ -1213,12 +1213,13 @@ const handleReset = () => {
         header={"CONFIRMATION"}
         width={900}
         type={"confirmation"}
+        loading={loading}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loading}  >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loading} disabled={loading}>
               Confirm
             </ButtonComponent>
           </div>
