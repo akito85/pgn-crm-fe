@@ -1,30 +1,35 @@
 import { LeftOutlined } from "@ant-design/icons";
-import { Spin, Tabs } from "antd";
+import { Spin } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../components/DetailText";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import StatusComponent from "../../../../../../components/StatusComponent";
+import RadioTabs from "../../../../../../components/RadioTabs";
+import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import {
   downloadAttachment,
   getAttachmentList,
-  getRelationshipDetail
+  getRelationshipDetail,
+  approveOrRejectRelationship,
+  approveOrRejectInactiveRelationship
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { showModalError } from "../../../../../../redux/slices/general_slice";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../utils";
 import HeaderDetail from "../../HeaderDetail";
 import RelationshipAttachment from "./RelationshipAttachment";
-
-const { TabPane } = Tabs;
+import RelatedDetailCard from "./RelationshipInformation/RelatedDetailCard";
 
 const RelationshipDetail = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Get params from location state
   const idAccount = location?.state?.idAccount;
@@ -32,12 +37,23 @@ const RelationshipDetail = () => {
   const idCustomer = location?.state?.idCustomer;
   const type = location?.state?.type || "standard";
 
+
   const { data_relationshipDetail, loadingDetail, data_attachmentList } = useSelector(
     (state) => state.relationship
   );
 
   const [data, setData] = useState({});
   const [attachmentData, setAttachmentData] = useState([]);
+  const [activeTab, setActiveTab] = useState("Relationship Information");
+  const [isApproval, setIsApproval] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approveOrReject, setApproveOrReject] = useState("");
+
+  // Tab options for RadioTabs
+  const tabOptions = [
+    { value: "Relationship Information" },
+    { value: "Attachment" },
+  ];
 
   // Fetch relationship detail
   useEffect(() => {
@@ -58,6 +74,17 @@ const RelationshipDetail = () => {
     }
   }, [dispatch, idAccount, idRelationship]);
 
+  useEffect(() => {
+    if (data_relationshipDetail) {
+      const { approvalType } = data_relationshipDetail;
+
+      if (approvalType === "ACCOUNT_RELATIONSHIP" || approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP")
+        setIsApproval(true);
+      else
+        setIsApproval(false);
+    }
+  }, [data_relationshipDetail]);
+
   // Update local data when API response changes
   useEffect(() => {
     if (data_relationshipDetail && Object.keys(data_relationshipDetail).length > 0) {
@@ -70,10 +97,12 @@ const RelationshipDetail = () => {
     if (data_attachmentList && data_attachmentList.length > 0) {
       const formattedAttachments = data_attachmentList.map((item, index) => ({
         key: index + 1,
-        type: item.categoryName || item.type || "-",
+        type: item.fileCategoryName || item.categoryName || item.type || "-",
         fileName: item.fileName || "-",
         fileSize: item.fileSize || 0,
-        fileId: item.fileId,
+        fileId: item.fileId || item.id,
+        urlFile1: item.urlFile1,
+        fileType: item.fileType,
         dataType: "exist",
       }));
       setAttachmentData(formattedAttachments);
@@ -82,13 +111,89 @@ const RelationshipDetail = () => {
 
   // Handle download attachment
   const handleDownloadAttachment = (record) => {
-    if (record.fileId) {
+    if (record.urlFile1 || record.fileId) {
       dispatch(
         downloadAttachment({
           idAccount,
           idFile: record.fileId,
+          urlFile1: record.urlFile1,
+          fileName: record.fileName,
         })
       );
+    }
+  };
+
+  // Handle tab change
+  const handleTabChange = (e) => {
+    setActiveTab(e.target.value);
+  };
+
+  /**
+   * @param {boolean} show
+   * @param {"approve"|"reject"} action
+   */
+  const handleApprovalModal = (show, action) => {
+    if (show) {
+      setShowApprovalModal(true);
+      setApproveOrReject(action);
+    } else {
+      setShowApprovalModal(false);
+      setApproveOrReject("");
+    }
+  };
+
+  /**
+   * @param {"approve"|"reject"} action
+   */
+  const handleApproveOrReject = (description, action, handleClear) => {
+    if (data_relationshipDetail) {
+      const body = [{
+        id: data_relationshipDetail.id,
+        approvalId: data_relationshipDetail.tappId,
+        action: action.toUpperCase(),
+        description,
+      }];
+
+      if (data_relationshipDetail.approvalType === "ACCOUNT_RELATIONSHIP") {
+        dispatch(approveOrRejectRelationship({
+          idAccount,
+          body,
+          action: action.toUpperCase(),
+        }))
+        .unwrap()
+        .then(() => {
+          dispatch(getRelationshipDetail({
+            idAccount,
+            idRelationship,
+          }));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+      } else if (data_relationshipDetail.approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP") {
+        dispatch(approveOrRejectInactiveRelationship({
+          idAccount,
+          body,
+          action: action.toUpperCase(),
+        }))
+        .unwrap()
+        .then(() => {
+          dispatch(getRelationshipDetail({
+            idAccount,
+            idRelationship,
+          }));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `The approval type is invalid.`,
+        };
+
+        dispatch(showModalError(errorBody));
+      }
     }
   };
 
@@ -124,24 +229,12 @@ const RelationshipDetail = () => {
     ];
   };
 
-  return (
-    <LayoutMenu>
-      <Spin spinning={loadingDetail} className={"w-full top-20"}>
-        <BreadCrumbAdvanced routes={routes()} />
-
-        <div className="w-full">
-          <HeaderDetail
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
-            type={type}
-          />
-        </div>
-
-        {/* Tabs for Relationship Information and Attachment */}
-        <Tabs defaultActiveKey="1" className="mt-4">
-          <TabPane tab="Relationship Information" key="1">
+  // Render content based on active tab
+  const renderContent = () => {
+    switch (activeTab) {
+      case "Relationship Information":
+        return (
+          <>
             {/* Relationship Information Section */}
             <BaseContainer header={"RELATIONSHIP INFORMATION"}>
               <div className="flex flex-col gap-5">
@@ -163,17 +256,17 @@ const RelationshipDetail = () => {
 
                 <div className="w-full grid grid-cols-3 gap-5">
                   <DetailText label="Related Number">
-                    {data?.subjectValue || data?.objectValue || "-"}
+                    {data?.subjectNumber || data?.objectNumber || ""}
                   </DetailText>
                   <DetailText label="Start Date">
                     {data?.startDate
                       ? moment(data.startDate).format("DD MMM YYYY")
-                      : "-"}
+                      : ""}
                   </DetailText>
                   <DetailText label="End Date">
                     {data?.endDate
                       ? moment(data.endDate).format("DD MMM YYYY")
-                      : "-"}
+                      : ""}
                   </DetailText>
                 </div>
 
@@ -181,7 +274,7 @@ const RelationshipDetail = () => {
                   <DetailText label="Status">
                     <div className="flex items-center">
                       <StatusComponent colour={data?.status}>
-                        {data?.status || "-"}
+                        {data?.status || ""}
                       </StatusComponent>
                     </div>
                   </DetailText>
@@ -194,6 +287,12 @@ const RelationshipDetail = () => {
                 </div>
               </div>
             </BaseContainer>
+
+            {/* Related Detail Section */}
+            <RelatedDetailCard
+              data={data?.relatedDetail || []}
+              className="mt-4"
+            />
 
             {/* History Log Information */}
             <BaseContainer header={"HISTORY LOG INFORMATION"}>
@@ -217,52 +316,92 @@ const RelationshipDetail = () => {
                 </DetailText>
               </div>
             </BaseContainer>
-          </TabPane>
+          </>
+        );
+      case "Attachment":
+        return (
+          <RelationshipAttachment
+            data={attachmentData}
+            hideActions={true}
+            showUploadButton={false}
+            onDownload={handleDownloadAttachment}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
-          <TabPane tab="Attachment" key="2">
-            {/* Attachment Section */}
-            <BaseContainer header={"ATTACHMENT"}>
-              <RelationshipAttachment
-                data={attachmentData}
-                hideActions={true}
-                showUploadButton={false}
-                onDownload={handleDownloadAttachment}
-              />
-            </BaseContainer>
-          </TabPane>
-        </Tabs>
+  return (
+    <LayoutMenu>
+      <Spin spinning={loadingDetail} className={"w-full top-20"}>
+        <BreadCrumbAdvanced routes={routes()} />
+
+        <div className="w-full">
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            type={type}
+          />
+        </div>
+
+        {/* Toggle Buttons for Relationship Information and Attachment */}
+        <div className="mt-4 mb-4">
+          <RadioTabs
+            currentPosition={activeTab}
+            data={tabOptions}
+            onChange={handleTabChange}
+          />
+        </div>
+
+        {/* Render content based on active tab */}
+        {renderContent()}
 
         {/* Back Button */}
         <div className="my-5 flex">
-          <Link
-            to={
-              type === "standard"
-                ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
-                : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
+          <ButtonComponent
+            type={"submit"}
+            icon={
+              <LeftOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 24,
+                  justifyItems: "center",
+                }}
+              />
             }
-            state={{
-              section: "Relationship",
-              idAccount: idAccount,
-              idCustomer: idCustomer,
-            }}
+            onClick={() => navigate(-1)}
           >
-            <ButtonComponent
-              type={"submit"}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-          </Link>
+            Back
+          </ButtonComponent>
+
+          {isApproval && (
+            <div className={"w-full flex justify-end gap-5"}>
+              <ButtonComponent
+                type="reject"
+                onClick={() => handleApprovalModal(true, "reject")}
+              >
+                Reject
+              </ButtonComponent>
+              <ButtonComponent
+                type="approve"
+                onClick={() => handleApprovalModal(true, "approve")}
+              >
+                Approve
+              </ButtonComponent>
+            </div>
+          )}
         </div>
       </Spin>
+      <ModalApproveOrReject
+        isOpen={showApprovalModal}
+        header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
+        handleCloseModal={() => handleApprovalModal(false)}
+        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${data?.subjectName || data?.objectName || ""}?`}
+        onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
+      />
     </LayoutMenu>
   );
 };

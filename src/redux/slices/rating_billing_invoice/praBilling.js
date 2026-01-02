@@ -8,10 +8,8 @@ const initialState = {
   loading: false,
   loadingModal: false,
   list_sor: [],
-  list_service_type: [],
   list_account_group: [],
   list_customer_segment: [],
-  list_calculation_type: [],
   list_scheduler_type: [],
   list_cost_center: [],
   list_meter_reading_code: [],
@@ -21,10 +19,6 @@ const initialState = {
   list_billing_cycle: [],
   list_billing_period: [],
   list_component_prabilling: [],
-  detail_calculation_job: null,
-  list_calculation_log: [],
-  list_calculation_result: [],
-  list_calculation_no_paging: [],
   data_user_calculation: {},
   list_prabilling_init: [],
   user_profile: null,
@@ -60,20 +54,8 @@ const initialState = {
     saPrcRuleDet: false,
   },
   loading_list_prabilling: false,
-  list_log_activities: [],
   loading_log: false,
-  detail_log_activity: null,
   loading_detail_log: false,
-
-  customer_account_detail: {
-    content: [],
-    groupedByDate: {},
-    totalElements: 0,
-    totalPages: 0,
-    pageable: {},
-  },
-  loading_customer_detail: false,
-
   detail_prabilling_init: null,
   detail_prabilling_result: { result: [], page: {} },
   detail_prabilling_log: {
@@ -101,51 +83,6 @@ const initialState = {
   loading_detail_prabilling: false,
 };
 
-// downlaod slice
-export const donwloadedExcel = createAsyncThunk(
-  "DOWNLOAD_CALCULATION_EXCEL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
-    try {
-      const searchParams = search || "";
-      const sortParams = sort || "generateDate~desc";
-      const url = `/v1/dbs/api/rbi/calculation/download-filter?size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.downloadData(url);
-      return response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "DOWNLOAD_CALCULATION_EXCEL",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const donwloadedHistoryExcel = createAsyncThunk(
-  "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
-    try {
-      const searchParams = search || "";
-      const sortParams = sort || "createdDate~desc";
-      const url = `/v1/dbs/api/rbi/calculation/download-filter-history?size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.downloadData(url);
-      return response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
-);
-
 // get lov slice
 export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
   try {
@@ -171,32 +108,6 @@ export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
   }
 });
 
-export const getListServiceType = createAsyncThunk(
-  "GET_LIST_SERVICE_TYPE",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/rbi/calculation/servicetype`;
-      const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
 
 export const getListAccountGroup = createAsyncThunk(
   "GET_LIST_ACCOUNT_GROUP",
@@ -246,33 +157,6 @@ export const getListCustomerSegment = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/calculation/accountsegment`;
-      const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
-
-export const getListCalculationType = createAsyncThunk(
-  "GET_LIST_CALCULATION_TYPE",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/rbi/calculation/calculationtype`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -610,55 +494,6 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
   }
 );
 
-// Get Log Activities
-export const getLogActivities = createAsyncThunk(
-  "GET_LOG_ACTIVITIES",
-  async (_, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/log/view-activity";
-
-      const response = await ratingBillingHttpService.getAll(url);
-
-      return response.data || response;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-// Get Log Activity Detail
-export const getLogActivityDetail = createAsyncThunk(
-  "GET_LOG_ACTIVITY_DETAIL",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/log/view-activity-detail/${id}`;
-
-      const response = await ratingBillingHttpService.getDetail(url);
-      return response.data || response;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to fetch log detail: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
 // Update untuk getDetailPrabillingInit thunk
 export const getDetailPrabillingInit = createAsyncThunk(
   "GET_DETAIL_PRABILLING_INIT",
@@ -745,7 +580,7 @@ export const getDetailPrabillingInit = createAsyncThunk(
   }
 );
 
-// Update thunk getDetailPrabillingResult - dengan pagination dari backend
+
 export const getDetailPrabillingResult = createAsyncThunk(
   "GET_DETAIL_PRABILLING_RESULT",
   async (
@@ -1964,20 +1799,6 @@ const prabillingSlice = createSlice({
       state.loading = false;
     },
 
-    // Get Log Activity Detail
-    [getLogActivityDetail.pending]: (state) => {
-      state.loading_detail_log = true;
-      state.detail_log_activity = null;
-    },
-    [getLogActivityDetail.fulfilled]: (state, action) => {
-      state.loading_detail_log = false;
-      state.detail_log_activity = action.payload;
-    },
-    [getLogActivityDetail.rejected]: (state) => {
-      state.loading_detail_log = false;
-      state.detail_log_activity = null;
-    },
-
     // Get list prabilling init populate
     [getListPrabillingInitPopulate.pending]: (state, action) => {
       // Only show loading on initial fetch, not on load more
@@ -2020,40 +1841,6 @@ const prabillingSlice = createSlice({
         };
       }
     },
-    // Get Log Activities
-    [getLogActivities.pending]: (state) => {
-      state.loading_log = true;
-    },
-    [getLogActivities.fulfilled]: (state, action) => {
-      state.loading_log = false;
-      state.list_log_activities = action.payload || [];
-    },
-    [getLogActivities.rejected]: (state) => {
-      state.loading_log = false;
-      state.list_log_activities = [];
-    },
-    // download excel
-    [donwloadedExcel.pending]: (state) => {
-      state.loading = true;
-    },
-    [donwloadedExcel.fulfilled]: (state) => {
-      state.loading = false;
-      // state.data = action.payload;
-    },
-    [donwloadedExcel.rejected]: (state) => {
-      state.loading = false;
-    },
-    // download excel
-    [donwloadedHistoryExcel.pending]: (state) => {
-      state.loading = true;
-    },
-    [donwloadedHistoryExcel.fulfilled]: (state) => {
-      state.loading = false;
-      // state.data = action.payload;
-    },
-    [donwloadedHistoryExcel.rejected]: (state) => {
-      state.loading = false;
-    },
     // lov sor
     [getListSor.pending]: (state) => {
       state.loading = true;
@@ -2063,17 +1850,6 @@ const prabillingSlice = createSlice({
       state.list_sor = action.payload;
     },
     [getListSor.rejected]: (state) => {
-      state.loading = false;
-    },
-    // lov service type
-    [getListServiceType.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListServiceType.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_service_type = action.payload;
-    },
-    [getListServiceType.rejected]: (state) => {
       state.loading = false;
     },
     // lov scheduler type
@@ -2118,17 +1894,6 @@ const prabillingSlice = createSlice({
       state.list_cost_center = action.payload;
     },
     [getListCostCenter.rejected]: (state) => {
-      state.loading = false;
-    },
-    // lov calculation type
-    [getListCalculationType.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListCalculationType.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_calculation_type = action.payload;
-    },
-    [getListCalculationType.rejected]: (state) => {
       state.loading = false;
     },
     //profile

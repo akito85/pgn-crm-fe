@@ -1,4 +1,4 @@
-// TableRBI.js (with resizable columns + customHeaderLeft + showExport control)
+// TableRBI.js (with resizable columns + customHeaderLeft + showExport control + Fixed Horizontal Scrollbar)
 import React, { useMemo, useState, useCallback } from "react";
 import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
@@ -122,10 +122,10 @@ const TableRBI = ({
   className,
   useSelect = true,
   usePagination = true,
-  useInfiniteScroll = false, // PROPS BARU untuk infinite scroll
-  onLoadMore = () => {}, // PROPS BARU callback untuk load more
-  hasMore = false, // PROPS BARU indicator apakah masih ada data
-  loadMoreThreshold = 20, // PROPS BARU jumlah row dari bawah untuk trigger load more
+  useInfiniteScroll = false,
+  onLoadMore = () => {},
+  hasMore = false,
+  loadMoreThreshold = 20,
   onSort = () => {},
   handleDownload = () => {},
   columnDefinitions,
@@ -523,6 +523,68 @@ const TableRBI = ({
           #${idTable} .ant-table-column-sorters {
             padding-right: 0px;
           }
+
+          /* SOLUSI: Scrollbar di layer paling atas dengan z-index tinggi */
+          #${idTable} .ant-table-body {
+            position: relative;
+            z-index: 1;
+          }
+
+          /* Pastikan table header berada di atas table body */
+          #${idTable} .ant-table-thead > tr > th {
+            position: relative;
+            z-index: 10 !important;
+          }
+
+          /* Pastikan filter trigger dan sorter icons memiliki z-index tinggi dan pointer-events aktif */
+          #${idTable} .ant-table-filter-trigger,
+          #${idTable} .ant-table-filter-trigger-container,
+          #${idTable} .ant-table-column-sorter {
+            position: relative;
+            z-index: 11 !important;
+            pointer-events: auto !important;
+          }
+
+          /* Scrollbar styling - kembali ke style default tapi dengan z-index tinggi */
+          #${idTable} .ant-table-body::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            position: relative;
+            z-index: 100 !important;
+          }
+
+          #${idTable} .ant-table-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            position: relative;
+            z-index: 100 !important;
+          }
+
+          #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 6px;
+            position: relative;
+            z-index: 100 !important;
+          }
+
+          #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
+            background: #555;
+          }
+
+          /* Pastikan row hover tidak menutupi scrollbar dengan z-index lebih rendah */
+          #${idTable} .ant-table-tbody > tr {
+            position: relative;
+            z-index: 1;
+          }
+
+          #${idTable} .ant-table-tbody > tr:hover {
+            z-index: 1 !important;
+          }
+
+          /* Pastikan table content tidak menutupi scrollbar */
+          #${idTable} .ant-table-content {
+            position: relative;
+            z-index: 1;
+          }
         `}
       </style>
       {useSelect ? (
@@ -580,7 +642,6 @@ const TableRBI = ({
 
               {showSearchBar && (
                 <div style={{ width: "200px" }}>
-                  {" "}
                   <SearchBar />
                 </div>
               )}

@@ -1,4 +1,5 @@
 import { Tag } from "antd";
+import moment from "moment";
 
 // ============= NEW: SA COLUMNS =============
 export const createSAColumns = (renderValue) => [
@@ -31,7 +32,9 @@ export const createSAColumns = (renderValue) => [
     dataIndex: "saDate",
     width: 180,
     isClassification: true,
-    render: renderValue,
+    render: (text) => {
+      return text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "";
+    },
   },
   {
     key: "commitmentDate",
@@ -241,7 +244,7 @@ export const createUsageColumns = (renderValue) => [
     title: "MEAS DATE",
     dataIndex: "measDate",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -249,7 +252,7 @@ export const createUsageColumns = (renderValue) => [
     title: "ASSET SERIAL",
     dataIndex: "assetSerialNum",
     width: 130,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -257,7 +260,7 @@ export const createUsageColumns = (renderValue) => [
     title: "ASSET TYPE",
     dataIndex: "assetType",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -265,7 +268,7 @@ export const createUsageColumns = (renderValue) => [
     title: "STREAM",
     dataIndex: "stream",
     width: 100,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -273,7 +276,7 @@ export const createUsageColumns = (renderValue) => [
     title: "TEMPERATURE",
     dataIndex: "temperature",
     width: 120,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -281,7 +284,7 @@ export const createUsageColumns = (renderValue) => [
     title: "PRESSURE",
     dataIndex: "pressure",
     width: 120,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -289,7 +292,7 @@ export const createUsageColumns = (renderValue) => [
     title: "CORRECTION FACTOR",
     dataIndex: "correctionFactor",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -297,7 +300,7 @@ export const createUsageColumns = (renderValue) => [
     title: "CALORIE",
     dataIndex: "calorie",
     width: 120,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -305,7 +308,7 @@ export const createUsageColumns = (renderValue) => [
     title: "BEGIN STAND",
     dataIndex: "beginStand",
     width: 130,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -313,7 +316,7 @@ export const createUsageColumns = (renderValue) => [
     title: "END STAND",
     dataIndex: "endStand",
     width: 130,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -321,16 +324,18 @@ export const createUsageColumns = (renderValue) => [
     title: "ENG MEASURED",
     dataIndex: "engMeasured",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: (val) =>
-      val ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 }) : "",
+      val
+        ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 })
+        : "",
   },
   {
     key: "ghv",
     title: "GHV",
     dataIndex: "ghv",
     width: 120,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -345,7 +350,7 @@ export const createUsageColumns = (renderValue) => [
     title: "TAXATION",
     dataIndex: "taxation",
     width: 100,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -353,7 +358,7 @@ export const createUsageColumns = (renderValue) => [
     title: "VOL MEASURED 27",
     dataIndex: "volMeasured27",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
   },
   {
@@ -361,7 +366,7 @@ export const createUsageColumns = (renderValue) => [
     title: "VOL MEASURED 60",
     dataIndex: "volMeasured60",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
   },
   {
@@ -369,7 +374,7 @@ export const createUsageColumns = (renderValue) => [
     title: "VOL MSCF",
     dataIndex: "volMscf",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
   },
   {
@@ -377,7 +382,7 @@ export const createUsageColumns = (renderValue) => [
     title: "COST CENTER",
     dataIndex: "costCenter",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -385,7 +390,7 @@ export const createUsageColumns = (renderValue) => [
     title: "INIT CODE",
     dataIndex: "usageInitCode",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -393,16 +398,18 @@ export const createUsageColumns = (renderValue) => [
     title: "ENERGY",
     dataIndex: "energy",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: (val) =>
-      val ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 }) : "",
+      val
+        ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 })
+        : "",
   },
   {
     key: "uncorrectedValue",
     title: "UNCORRECTED VALUE",
     dataIndex: "uncorrectedValue",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -410,7 +417,7 @@ export const createUsageColumns = (renderValue) => [
     title: "RATING CODE",
     dataIndex: "ratingCode",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
 ];
@@ -428,14 +435,14 @@ export const createTaxColumns = (renderValue) => [
     title: "CATEGORY",
     dataIndex: "category",
     width: 100,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
     key: "taxImpName",
     title: "TAX IMP NAME",
     dataIndex: "taxImpName",
-    isClassification:true,
+    isClassification: true,
     width: 300,
     render: renderValue,
   },
@@ -444,7 +451,7 @@ export const createTaxColumns = (renderValue) => [
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -452,7 +459,7 @@ export const createTaxColumns = (renderValue) => [
     title: "IMP TYPE",
     dataIndex: "impType",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -460,14 +467,14 @@ export const createTaxColumns = (renderValue) => [
     title: "GUNGGUNG",
     dataIndex: "gunggung",
     width: 100,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
     key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
-    isClassification:true,
+    isClassification: true,
     width: 150,
     render: renderValue,
   },
@@ -486,7 +493,7 @@ export const createSaPriceRuleColumns = (renderValue) => [
     title: "LINE NUMBER",
     dataIndex: "lineNumber",
     width: 100,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -494,7 +501,7 @@ export const createSaPriceRuleColumns = (renderValue) => [
     title: "MIN",
     dataIndex: "min",
     width: 120,
-    isNumber:true,
+    isNumber: true,
     render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
   },
   {
@@ -502,7 +509,7 @@ export const createSaPriceRuleColumns = (renderValue) => [
     title: "MAX",
     dataIndex: "max",
     width: 120,
-    isNumber:true,
+    isNumber: true,
     render: (val) => {
       if (!val) return "";
       if (isNaN(val)) return val;
@@ -515,14 +522,14 @@ export const createSaPriceRuleColumns = (renderValue) => [
     title: "PRICE CODE",
     dataIndex: "priceCode",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
     key: "priceCodeRule",
     title: "PRICE CODE RULE",
     dataIndex: "priceCodeRule",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -531,16 +538,18 @@ export const createSaPriceRuleColumns = (renderValue) => [
     title: "VALUE",
     dataIndex: "value",
     width: 150,
-    isNumber:true,
+    isNumber: true,
     render: (val) =>
-      val ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 }) : "",
+      val
+        ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 })
+        : "",
   },
   {
     key: "uom",
     title: "UOM",
     dataIndex: "uom",
     width: 100,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -548,7 +557,7 @@ export const createSaPriceRuleColumns = (renderValue) => [
     title: "CURRENCY",
     dataIndex: "priceCurrency",
     width: 100,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
 ];
@@ -565,7 +574,7 @@ export const createSaTosColumns = (renderValue) => [
     key: "saTosName",
     title: "SA TOS NAME",
     dataIndex: "saTosName",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -573,7 +582,7 @@ export const createSaTosColumns = (renderValue) => [
     key: "attributeName",
     title: "ATTRIBUTE NAME",
     dataIndex: "attributeName",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -581,7 +590,7 @@ export const createSaTosColumns = (renderValue) => [
     key: "value",
     title: "VALUE",
     dataIndex: "value",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -599,7 +608,7 @@ export const createTosSubmissionColumns = (renderValue) => [
     key: "tosName",
     title: "TOS NAME",
     dataIndex: "tosName",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -608,7 +617,7 @@ export const createTosSubmissionColumns = (renderValue) => [
     title: "START DATE",
     dataIndex: "startDate",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -616,14 +625,14 @@ export const createTosSubmissionColumns = (renderValue) => [
     title: "END DATE",
     dataIndex: "endDate",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
     key: "remark",
     title: "REMARK",
     dataIndex: "remark",
-    isClassification:true,
+    isClassification: true,
     width: 250,
     render: renderValue,
   },
@@ -641,7 +650,7 @@ export const createTosSubColumns = (renderValue) => [
     key: "tosName",
     title: "TOS NAME",
     dataIndex: "tosName",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -649,7 +658,7 @@ export const createTosSubColumns = (renderValue) => [
     key: "attributeName",
     title: "ATTRIBUTE NAME",
     dataIndex: "attributeName",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -658,14 +667,14 @@ export const createTosSubColumns = (renderValue) => [
     title: "UNIT",
     dataIndex: "unit",
     width: 100,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
     key: "value",
     title: "VALUE",
     dataIndex: "value",
-    isClassification:true,
+    isClassification: true,
     width: 150,
     render: renderValue,
   },
@@ -673,7 +682,7 @@ export const createTosSubColumns = (renderValue) => [
     key: "fromItem",
     title: "FROM ITEM",
     dataIndex: "fromItem",
-    isClassification:true,
+    isClassification: true,
     width: 150,
     render: renderValue,
   },
@@ -692,14 +701,14 @@ export const createBillingBucketColumns = (renderValue) => [
     title: "BUCKET CODE",
     dataIndex: "bucketCode",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
     key: "bucketName",
     title: "BUCKET NAME",
     dataIndex: "bucketName",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -708,7 +717,7 @@ export const createBillingBucketColumns = (renderValue) => [
     title: "BUCKET PRIORITY",
     dataIndex: "bucketPriority",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -716,7 +725,7 @@ export const createBillingBucketColumns = (renderValue) => [
     title: "VALID START DATE",
     dataIndex: "validStartDate",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -724,7 +733,7 @@ export const createBillingBucketColumns = (renderValue) => [
     title: "VALID END DATE",
     dataIndex: "validEndDate",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
 ];
@@ -742,7 +751,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "BUCKET CODE",
     dataIndex: "bucketCode",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -750,7 +759,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "BUCKET NAME",
     dataIndex: "bucketName",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -758,14 +767,14 @@ export const createBillingItemColumns = (renderValue) => [
     title: "ITEM CODE",
     dataIndex: "itemCode",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
     key: "itemName",
     title: "ITEM NAME",
     dataIndex: "itemName",
-    isClassification:true,
+    isClassification: true,
     width: 200,
     render: renderValue,
   },
@@ -774,7 +783,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "BILLING TYPE",
     dataIndex: "billingType",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -782,7 +791,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "ITEM CATEGORY",
     dataIndex: "itemCategory",
     width: 150,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -790,7 +799,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "IS LATE CHARGE",
     dataIndex: "isLateCharge",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -798,7 +807,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "SEQUENCE",
     dataIndex: "sequence",
     width: 100,
-    isNumber:true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -806,7 +815,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "CURRENCY ID",
     dataIndex: "currencyId",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
   {
@@ -814,7 +823,7 @@ export const createBillingItemColumns = (renderValue) => [
     title: "ITEM PRIORITY",
     dataIndex: "itemPriority",
     width: 120,
-    isClassification:true,
+    isClassification: true,
     render: renderValue,
   },
 ];
@@ -859,7 +868,12 @@ export const createSaPrcRuleDetColumns = (renderValue) => [
     isNumber: true,
     align: "right",
     render: (val) =>
-      val ? parseFloat(val).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "",
+      val
+        ? parseFloat(val).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        : "",
   },
   {
     key: "lateChargeVal",
@@ -869,6 +883,11 @@ export const createSaPrcRuleDetColumns = (renderValue) => [
     isNumber: true,
     align: "right",
     render: (val) =>
-      val ? parseFloat(val).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "-",
+      val
+        ? parseFloat(val).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        : "-",
   },
 ];

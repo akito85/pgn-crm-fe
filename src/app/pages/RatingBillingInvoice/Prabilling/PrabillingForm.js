@@ -22,12 +22,10 @@ import {
   getListAccountGroup,
   getListBillingCycle,
   getListBillingPeriod,
-  getListCalculationType,
   getListCostCenter,
   getListCustomerSegment,
   getListMeterReadingCode,
   getListSchedulerType,
-  getListServiceType,
   getListSor,
   getListSpecificCustomer,
   getListComponentPrabilling,
@@ -55,8 +53,9 @@ const PrabillingForm = ({ type }) => {
     list_component_prabilling,
     data_user_calculation,
     user_profile,
-    loading_user_profile,
   } = useSelector((state) => state.rbi_prabilling);
+
+  console.log(loading,"loading")
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -99,9 +98,7 @@ const PrabillingForm = ({ type }) => {
 
   useEffect(() => {
     dispatch(getListSor());
-    dispatch(getListServiceType());
     dispatch(getListCustomerSegment());
-    dispatch(getListCalculationType());
     dispatch(getListSchedulerType());
     dispatch(getListCostCenter());
     dispatch(getListBillingCycle());
@@ -272,9 +269,8 @@ const PrabillingForm = ({ type }) => {
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setBillingCycle(null); // Reset billing cycle state
+    setBillingCycle(null); 
 
-    // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
     setDataSpecificCustomer({
       sorId: defaultData?.sor || null,
       costCenterId: defaultData?.costCenter || [],
@@ -284,8 +280,6 @@ const PrabillingForm = ({ type }) => {
       search: "",
       limit: DEFAULT_SEARCH_LIMIT,
     });
-
-    // Reset selected customers map
     setSelectedCustomersMap({});
   };
 
@@ -439,6 +433,7 @@ const PrabillingForm = ({ type }) => {
       .then((data) => {
         if (data) {
           setModalSuccess(true);
+          console.log(loading,"kesini")
         }
       })
       .catch((error) => {
@@ -1197,12 +1192,13 @@ const PrabillingForm = ({ type }) => {
         header={"CONFIRMATION"}
         width={900}
         type={"confirmation"}
+        loading={loading}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loading}  > 
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loading} disabled={loading}>
               Confirm
             </ButtonComponent>
           </div>

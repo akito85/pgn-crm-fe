@@ -287,7 +287,6 @@ const RatingPage = () => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -370,7 +369,6 @@ const RatingPage = () => {
             />
           </div>
         )}
-      </Spin>
     </LayoutMenu>
   );
 };

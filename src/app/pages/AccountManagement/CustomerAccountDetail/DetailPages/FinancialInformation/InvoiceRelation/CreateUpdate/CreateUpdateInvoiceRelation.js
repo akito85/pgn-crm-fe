@@ -77,6 +77,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
+  const attachmentIsRequired = true;
+
   const formFields = [
     [
       "accountNumber",
@@ -202,6 +204,12 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
+      if (current === 2)
+        if (attachmentIsRequired && !dataAttachment.length)
+          throw new Error("At least provide one attachment");
+      else
+        await formCreate.validateFields(formFields[current]);
+
       const {
         objectId,
         priority,
@@ -311,6 +319,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           getAPICategory={getIrAttachmentCategory}
           service={accountManagementService}
           configApplication={configApp.ACCOUNT_SERVICE}
+          mandatory={attachmentIsRequired}
         />
       ),
       disabled: false
@@ -321,7 +330,11 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   
   const next = async () => {
     try {
-      await formCreate.validateFields(formFields[current]);
+      if (current === 2)
+        if (attachmentIsRequired && !dataAttachment.length)
+          throw new Error("At least provide one attachment");
+      else
+        await formCreate.validateFields(formFields[current]);
     } catch (err) {
       return;
     }
@@ -335,7 +348,11 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        await formCreate.validateFields(formFields[i]);
+        if (i === 2)
+          if (attachmentIsRequired && !dataAttachment.length)
+            throw new Error("At least provide one attachment");
+        else
+          await formCreate.validateFields(formFields[i]);
       } catch (err) {
         setCurrent(i);
         return;

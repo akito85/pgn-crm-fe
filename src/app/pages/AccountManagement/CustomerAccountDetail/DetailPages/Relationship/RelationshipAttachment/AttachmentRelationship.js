@@ -219,7 +219,7 @@ const AttachmentRelationship = ({
     type,
     dispatch = () => { },
     getAPICategory = () => { },
-    configApplication = configApp.MASTER_MANAGEMENT,
+    configApplication = configApp.ACCOUNT_SERVICE,
     getAPIGuard = getGlobalPropertiesAttachment,
     mandatory = false,
     className,

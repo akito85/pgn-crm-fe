@@ -6,8 +6,9 @@ import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
-import TablePagination from "../../../../../../../components/TablePagination";
+import { TablePaginationNew } from "poc-table-dragandrop";
 import { getRelatedObjectData } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import moment from "moment";
 
 const ModalChooseRelated = ({
   isOpen = false,
@@ -87,7 +88,7 @@ const ModalChooseRelated = ({
   if (dataSource.length > 0) {
     dataSource = dataSource.map(item => ({
       ...item,
-      key: item.id || item.objectId
+      key: item.id || item.relatedObjectId
     }));
   }
 
@@ -152,7 +153,7 @@ const ModalChooseRelated = ({
   const customerColumns = [
     {
       title: "NO",
-      width: 60,
+      width: 50,
       align: "center",
       render: (text, object, index) => (
         <div className="py-2.5">{(page - 1) * pageSize + index + 1}</div>
@@ -161,18 +162,21 @@ const ModalChooseRelated = ({
     {
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
+      width: 220,
       sorter: true,
       ...getColumnSearchProps("customerNumber"),
     },
     {
       title: "IDENTIFICATION TYPE",
       dataIndex: "partyType",
+      width: 231,
       sorter: true,
       ...getColumnSearchProps("partyType"),
     },
     {
       title: "CUSTOMER IDENTIFICATION NUMBER",
       dataIndex: "customerIdentificationNumber",
+      width: 343,
       sorter: true,
       ...getColumnSearchProps("customerIdentificationNumber"),
     },
@@ -180,19 +184,21 @@ const ModalChooseRelated = ({
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       sorter: true,
+      width: 200,
       ...getColumnSearchProps("customerName"),
     },
     {
       title: "CUSTOMER TYPE",
       dataIndex: "customerType",
       sorter: true,
+      width: 194,
       ...getColumnSearchProps("customerType"),
       render: (text) => text || "-",
     },
     {
       title: "ACTION",
       align: "center",
-      width: 100,
+      width: 127,
       fixed: "right",
       render: (_, record) => (
         <div className="flex justify-center">
@@ -220,7 +226,7 @@ const ModalChooseRelated = ({
   const accountColumns = [
     {
       title: "NO",
-      width: 60,
+      width: 50,
       align: "center",
       render: (text, object, index) => (
         <div className="py-2.5">{(page - 1) * pageSize + index + 1}</div>
@@ -229,22 +235,22 @@ const ModalChooseRelated = ({
     {
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
-      width: 170,
+      width: 220,
       sorter: true,
       ...getColumnSearchProps("customerNumber"),
     },
     {
       title: "IDENTIFICATION TYPE",
-      dataIndex: "customerType",
-      width: 180,
+      dataIndex: "identificationType",
+      width: 231,
       sorter: true,
-      ...getColumnSearchProps("customerType"),
+      ...getColumnSearchProps("identificationType"),
       render: (text) => text || "-",
     },
     {
       title: "CUSTOMER IDENTIFICATION NUMBER",
       dataIndex: "customerIdentificationNumber",
-      width: 250,
+      width: 343,
       sorter: true,
       ...getColumnSearchProps("customerIdentificationNumber"),
       render: (text) => text || "-",
@@ -259,7 +265,7 @@ const ModalChooseRelated = ({
     {
       title: "CUSTOMER TYPE",
       dataIndex: "customerTypeName",
-      width: 150,
+      width: 194,
       sorter: true,
       ...getColumnSearchProps("customerTypeName"),
       render: (text) => text || "-",
@@ -267,21 +273,21 @@ const ModalChooseRelated = ({
     {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
-      width: 180,
+      width: 209,
       sorter: true,
       ...getColumnSearchProps("accountNumber"),
     },
     {
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
-      width: 200,
+      width: 189,
       sorter: true,
       ...getColumnSearchProps("accountName"),
     },
     {
       title: "CATEGORY",
       dataIndex: "accountCategory",
-      width: 120,
+      width: 148,
       sorter: true,
       ...getColumnSearchProps("accountCategory"),
       render: (text) => text || "-",
@@ -289,7 +295,7 @@ const ModalChooseRelated = ({
     {
       title: "SOR",
       dataIndex: "sor",
-      width: 120,
+      width: 100,
       sorter: true,
       ...getColumnSearchProps("sor"),
       render: (text) => text || "-",
@@ -304,16 +310,16 @@ const ModalChooseRelated = ({
     },
     {
       title: "METER READING CODES",
-      dataIndex: "meterReadingCodes",
-      width: 180,
+      dataIndex: "meterReadingCode",
+      width: 173,
       sorter: true,
-      ...getColumnSearchProps("meterReadingCodes"),
+      ...getColumnSearchProps("meterReadingCode"),
       render: (text) => text || "-",
     },
     {
       title: "CUSTOMER MANAGEMENT",
       dataIndex: "customerManagement",
-      width: 200,
+      width: 246,
       sorter: true,
       ...getColumnSearchProps("customerManagement"),
       render: (text) => text || "-",
@@ -321,23 +327,23 @@ const ModalChooseRelated = ({
     {
       title: "CLASSIFICATION TYPE",
       dataIndex: "classificationType",
-      width: 180,
+      width: 235,
       sorter: true,
       ...getColumnSearchProps("classificationType"),
       render: (text) => text || "-",
     },
     {
       title: "SEGMENT",
-      dataIndex: "segment",
-      width: 150,
+      dataIndex: "accountSegment",
+      width: 142,
       sorter: true,
-      ...getColumnSearchProps("segment"),
+      ...getColumnSearchProps("accountSegment"),
       render: (text) => text || "-",
     },
     {
       title: "ACCOUNT GROUP TYPE",
       dataIndex: "accountGroupType",
-      width: 180,
+      width: 239,
       sorter: true,
       ...getColumnSearchProps("accountGroupType"),
       render: (text) => text || "-",
@@ -345,23 +351,23 @@ const ModalChooseRelated = ({
     {
       title: "PREMISE ADDRESS",
       dataIndex: "premiseAddress",
-      width: 250,
+      width: 280,
       sorter: true,
       ...getColumnSearchProps("premiseAddress"),
       render: (text) => text || "-",
     },
     {
       title: "SUBDISTRICT",
-      dataIndex: "subdistrict",
-      width: 150,
+      dataIndex: "subDistrict",
+      width: 169,
       sorter: true,
-      ...getColumnSearchProps("subdistrict"),
+      ...getColumnSearchProps("subDistrict"),
       render: (text) => text || "-",
     },
     {
       title: "DISTRICT",
       dataIndex: "district",
-      width: 150,
+      width: 138,
       sorter: true,
       ...getColumnSearchProps("district"),
       render: (text) => text || "-",
@@ -377,7 +383,7 @@ const ModalChooseRelated = ({
     {
       title: "COUNTRY",
       dataIndex: "country",
-      width: 150,
+      width: 141,
       sorter: true,
       ...getColumnSearchProps("country"),
       render: (text) => text || "-",
@@ -385,7 +391,7 @@ const ModalChooseRelated = ({
     {
       title: "LONGITUDE",
       dataIndex: "longitude",
-      width: 120,
+      width: 155,
       sorter: true,
       ...getColumnSearchProps("longitude"),
       render: (text) => text || "-",
@@ -393,7 +399,7 @@ const ModalChooseRelated = ({
     {
       title: "LATITUDE",
       dataIndex: "latitude",
-      width: 120,
+      width: 141,
       sorter: true,
       ...getColumnSearchProps("latitude"),
       render: (text) => text || "-",
@@ -401,15 +407,15 @@ const ModalChooseRelated = ({
     {
       title: "START DATE",
       dataIndex: "startDate",
-      width: 150,
+      width: 171,
       sorter: true,
       ...getColumnSearchProps("startDate"),
-      render: (text) => text || "-",
+      render: (text) => moment(text).format("DD MMM YYYY") || "-",
     },
     {
       title: "END DATE",
       dataIndex: "endDate",
-      width: 150,
+      width: 171,
       sorter: true,
       ...getColumnSearchProps("endDate"),
       render: (text) => text || "-",
@@ -417,7 +423,7 @@ const ModalChooseRelated = ({
     {
       title: "ACTION",
       align: "center",
-      width: 100,
+      width: 127,
       fixed: "right",
       render: (_, record) => (
         <div className="flex justify-center">
@@ -443,6 +449,7 @@ const ModalChooseRelated = ({
 
   // Select appropriate columns based on type
   const columns = isAccountType ? accountColumns : isCustomerType ? customerColumns : customerColumns;
+  const tableScrolledWidth = isAccountType ? 3500 : 1400;
 
   // Determine modal header based on type
   const modalHeader = isAccountType ? "CHOOSE ACCOUNT" : isCustomerType ? "CHOOSE CUSTOMER" : "CHOOSE RELATED";
@@ -457,7 +464,8 @@ const ModalChooseRelated = ({
   });
 
   const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
@@ -472,7 +480,7 @@ const ModalChooseRelated = ({
   return (
     <ModalCustom
       isOpen={isOpen}
-      type="default"
+      type="confirmation"
       header={modalHeader}
       width={1400}
       handleCancel={() => {
@@ -494,20 +502,20 @@ const ModalChooseRelated = ({
       }
     >
       <div className="w-full">
-        <TablePagination
+        <TablePaginationNew
           loading={loadingRelatedObject}
           dataSource={dataSource}
           totalData={totalData}
           current={page}
           pageSize={pageSize}
           onChange={handleChange}
-          onShowSizeChange={handleChange}
           columns={columns}
-          tableScrolled={{ x: 3500 }}
+          tableScrolled={{ x: tableScrolledWidth, y: 400 }}
           rowClassName={(record) =>
             record.id === selectedRow?.id ? "bg-blue-50" : ""
           }
           rowKey="id"
+          enableDragColumn={true}
         />
       </div>
     </ModalCustom>
@@ -515,3 +523,4 @@ const ModalChooseRelated = ({
 };
 
 export default ModalChooseRelated;
+
