@@ -30,10 +30,10 @@ import {
 } from "./columns";
 import BaseContainer from "../../../../../components/BaseContainer";
 import StatusComponent from "../../../../../components/StatusComponent";
-import PrabillSaDetailSection from "./serviceAgreement/PrabillSaDetailSection";
-import PrabillSaCalcRuleSection from "./serviceAgreement/PrabillSaCalcRuleSection";
-import PrabillSaPricingSection from "./serviceAgreement/PrabillSaPricingSection";
-import PrabillSaTosSection from "./serviceAgreement/PrabillSaTosSection";
+import PrabillSaDetailSection from "./ServiceAgreement/PrabillSaDetailSection";
+import PrabillSaCalcRuleSection from "./ServiceAgreement/PrabillSaCalcRuleSection";
+import PrabillSaPricingSection from "./ServiceAgreement/PrabillSaPricingSection";
+import PrabillSaTosSection from "./ServiceAgreement/PrabillSaTosSection";
 
 const { TabPane } = Tabs;
 
