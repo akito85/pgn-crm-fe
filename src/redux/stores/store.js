@@ -124,6 +124,7 @@ import transferToReceiptReducer from "../slices/receipt_collection/transferToRec
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
+import deductionReducer from "../slices/receipt_collection/deduction";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -252,6 +253,7 @@ const reducer = combineReducers({
   warranty: warrantyReducer,
   transferToReceipt: transferToReceiptReducer,
   transferToCustomer: transferToCustomerReducer,
+  deduction: deductionReducer,
 
   // Attachment
   attachment: attachmentReducer,
