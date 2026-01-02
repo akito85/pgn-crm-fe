@@ -527,7 +527,22 @@ const TableRBI = ({
           /* SOLUSI: Scrollbar di layer paling atas dengan z-index tinggi */
           #${idTable} .ant-table-body {
             position: relative;
-            z-index: 100;
+            z-index: 1;
+          }
+
+          /* Pastikan table header berada di atas table body */
+          #${idTable} .ant-table-thead > tr > th {
+            position: relative;
+            z-index: 10 !important;
+          }
+
+          /* Pastikan filter trigger dan sorter icons memiliki z-index tinggi dan pointer-events aktif */
+          #${idTable} .ant-table-filter-trigger,
+          #${idTable} .ant-table-filter-trigger-container,
+          #${idTable} .ant-table-column-sorter {
+            position: relative;
+            z-index: 11 !important;
+            pointer-events: auto !important;
           }
 
           /* Scrollbar styling - kembali ke style default tapi dengan z-index tinggi */
@@ -535,20 +550,20 @@ const TableRBI = ({
             width: 8px;
             height: 8px;
             position: relative;
-            z-index: 2 !important;
+            z-index: 100 !important;
           }
 
           #${idTable} .ant-table-body::-webkit-scrollbar-track {
             background: #f1f1f1;
             position: relative;
-            z-index: 2 !important;
+            z-index: 100 !important;
           }
 
           #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 6px;
             position: relative;
-            z-index: 2 !important;
+            z-index: 100 !important;
           }
 
           #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
