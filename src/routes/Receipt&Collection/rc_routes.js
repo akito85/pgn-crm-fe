@@ -69,7 +69,7 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PARTNER: "/receipt-and-collection/partner/view",
   CREATE_PARTNER: "/receipt-and-collection/partner/create",
   UPDATE_PARTNER: "/receipt-and-collection/partner/update",
-  
+
   //Payment
   VIEW_PAYMENT: "/receipt-and-collection/payment",
   VIEW_PARTNER_CA: "/receipt-and-collection/partner-ca",
@@ -88,19 +88,19 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_SETTINGS: "/receipt-and-collection/settings/view",
   CREATE_SETTINGS: "/receipt-and-collection/settings/create",
   UPDATE_SETTINGS: "/receipt-and-collection/settings/update",
-  
+
   // Collection Agent
   VIEW_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent",
   DETAIL_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/view",
   CREATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/create",
   UPDATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/update",
-  
+
   // Payment Channel
   VIEW_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel",
   DETAIL_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/view",
   CREATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/create",
   UPDATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/update",
-  
+
   // Accounting
   VIEW_ACCOUNTING: "/receipt-and-collection/accounting",
 
@@ -109,17 +109,24 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/view",
   CREATE_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/create",
   UPDATE_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/update",
-  
+
   // Transfer to Receipt
   VIEW_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt",
   DETAIL_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/view",
   CREATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/create",
-  UPDATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/update",
+
+  // Transfer to Customer
+  VIEW_TRANSFER_TO_CUSTOMER: "/receipt-and-collection/payment-warranty/transfer-to-customer",
+  DETAIL_TRANSFER_TO_CUSTOMER: "/receipt-and-collection/payment-warranty/transfer-to-customer/view",
+  CREATE_TRANSFER_TO_CUSTOMER: "/receipt-and-collection/payment-warranty/transfer-to-customer/create",
 
   // Warranty List
   VIEW_WARRANTY: "/receipt-and-collection/payment-warranty/warranty",
   DETAIL_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/view",
   CREATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/create",
   UPDATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/update",
-  
+
+  // History Payment Warranty
+  VIEW_HISTORY_PAYMENT_WARRANTY: "/receipt-and-collection/payment-warranty/history",
+
 };
