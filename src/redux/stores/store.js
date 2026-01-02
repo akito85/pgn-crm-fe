@@ -120,13 +120,10 @@ import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccou
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
 import warrantyReducer from "../slices/receipt_collection/warranty";
-<<<<<<< HEAD
 import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
-=======
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
->>>>>>> 86244f993fc1938e942e46399cf2d7fd3c609cc4
 
 const reducer = combineReducers({
   job: jobSlice,
