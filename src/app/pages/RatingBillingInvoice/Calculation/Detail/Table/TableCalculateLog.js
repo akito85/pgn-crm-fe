@@ -152,7 +152,6 @@ const TableCalculateLog = ({ calculationCode }) => {
         key: "logMsg",
         title: "LOG MESSAGE",
         dataIndex: "logMsg",
-        isClassification: true,
         sorter: true,
         filteredValue: [search?.logMsg] || null,
         ellipsis: { showTitle: false },

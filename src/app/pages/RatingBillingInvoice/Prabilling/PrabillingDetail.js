@@ -68,6 +68,16 @@ const PrabillingDetail = () => {
         />
       ),
     },
+    {
+      key: "logAccount",
+      label: "Prabilling Account Log",
+      children: (
+        <PrabillingDetailLog
+          data={detail_prabilling_init}
+          tabHeader="Prabilling Account Log"
+        />
+      ),
+    },
   ];
 
   const handleTabChange = (key) => {
