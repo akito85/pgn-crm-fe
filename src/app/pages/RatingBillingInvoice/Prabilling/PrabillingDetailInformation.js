@@ -656,7 +656,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                 : ""}
             </DetailText>
             <DetailText label={"Updated By"}>
-              {prabillData?.updatedBy || ""}
+              {prabillData?.createdBy || ""}
             </DetailText>
           </div>
         </CardContainer>
