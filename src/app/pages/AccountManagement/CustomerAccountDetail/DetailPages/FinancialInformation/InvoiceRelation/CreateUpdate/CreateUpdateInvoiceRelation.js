@@ -511,7 +511,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       endDate,
       appHierId,
       action: confirmationType,
-      remark,
+      remarks: remark,
     };
 
     if (type === "create")
