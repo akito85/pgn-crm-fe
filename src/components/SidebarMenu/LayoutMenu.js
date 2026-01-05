@@ -85,6 +85,7 @@ const LayoutMenu = ({ children }) => {
   const [showIdleModal, setShowIdleModal] = useState(false);
   // const [showModalExpired, setShowModalExpired] = useState(false);
   const [showModalExtendToken, setShowModalExtendToken] = useState(false);
+  const [loadingLogout, setLoadingLogout] = useState(false);
 
   // use effect check grant access
   useEffect(() => {
@@ -183,6 +184,7 @@ const LayoutMenu = ({ children }) => {
 
   const handleLogout = async () => {
     try {
+      setLoadingLogout(true);
       dispatch(clearBodyMessage());
       setModalConfirmation(false);
       await dispatch(logout())?.unwrap();
@@ -195,6 +197,7 @@ const LayoutMenu = ({ children }) => {
     } catch (error) {
       dispatch(clearBodyMessage());
       setModalConfirmation(false);
+      setLoadingLogout(false);
     }
   };
   const initialAvatar = (fullName) => {
@@ -590,6 +593,7 @@ const LayoutMenu = ({ children }) => {
             header={"LOGOUT"}
             width={500}
             handleOk={handleLogout}
+            loading={loadingLogout}
           >
             <div className="px-5 pt-5 pb-[10px] justify-center">
               <div className="w-full flex gap-[20px] my-5">
