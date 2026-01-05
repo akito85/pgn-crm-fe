@@ -19,7 +19,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getRelationshipListAdvanced,
-  toggleRelationshipStatus,
+  inactivateRelationship,
   approveOrRejectRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 
@@ -442,6 +442,7 @@ const RelationshipTable = ({
   // Inactivate modal states
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateRelationshipId, setInactivateRelationshipId] = useState(0);
+  const [inactivateAppHierId, setInactivateAppHierId] = useState(0);
   const [inactivateRelationshipName, setInactivateRelationshipName] = useState("");
 
   // Memoized fetch function (DRY + performance optimization)
@@ -478,12 +479,18 @@ const RelationshipTable = ({
       // Add key to each row for proper row selection
       const dataWithKeys = data_relationship.result.map((item, index) => ({
         ...item,
-        key: item.id || `relationship-${index}`,
+        key: `relationship-${item.id}-${index}`,
       }));
+
+      console.log("dataWithKeys", dataWithKeys)
       setDataTable(dataWithKeys);
       setTotalElements(totalData || 0);
     }
   }, [data_relationship]);
+
+  useEffect(() => {
+    console.log("dataTable", dataTable);
+  }, [dataTable])
 
   // Reset selected rows when exiting approval mode
   useEffect(() => {
@@ -529,13 +536,15 @@ const RelationshipTable = ({
   /**
    * Open or close inactivate modal
    */
-  const handleInactivateModal = (show, relationshipId = 0, relationshipName = "") => {
+  const handleInactivateModal = (show, relationshipId = 0, appHierId = 0,  relationshipName = "") => {
     if (show) {
       setInactivateRelationshipId(relationshipId);
+      setInactivateAppHierId(appHierId);
       setInactivateRelationshipName(relationshipName);
       setShowInactiveModal(true);
     } else {
       setInactivateRelationshipId(0);
+      setInactivateAppHierId(0);
       setInactivateRelationshipName("");
       setShowInactiveModal(false);
     }
@@ -546,11 +555,16 @@ const RelationshipTable = ({
    */
   const handleInactivateRelationship = (remark, handleClear) => {
     dispatch(
-      toggleRelationshipStatus({
-        accountId: idAccount,
-        relationshipId: inactivateRelationshipId,
-        remarks: remark,
-      })
+      inactivateRelationship(
+        {
+          accountId: idAccount,
+          body: {
+            id: inactivateRelationshipId,
+            appHierId: inactivateAppHierId,
+            remark,
+          }
+        }
+      )
     )
       .unwrap()
       .then(() => {
@@ -775,7 +789,7 @@ const RelationshipTable = ({
               className="inactive-check"
               disabled={r?.status === "ACTIVE" ? false : true}
               checked={r?.status === "ACTIVE" ? false : true}
-              onClick={() => handleInactivateModal(true, r?.id, r?.subjectName || r?.objectName || "")}
+              onClick={() => handleInactivateModal(true, r?.id, r.appHierId, r?.subjectName || r?.objectName || "")}
             />
           </Tooltip>
         )
