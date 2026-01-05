@@ -28,7 +28,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Spin, Steps } from "antd";
 import { RightOutlined } from "@ant-design/icons";
-import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import { showModalError, validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 
 const obj = {
@@ -310,7 +310,11 @@ const RelationshipCreateAndUpdate = ({
   // Reusable validation and confirmation handler
   const handleValidateAndConfirm = (action) => {
     if (listDataAttachment.length === 0) {
-      alert("Please upload at least one attachment");
+      const errorBody = {
+        title: "Failed",
+        description: `Please upload at least one attachment`,
+      };
+      dispatch(showModalError(errorBody));
       return;
     }
 
@@ -318,7 +322,7 @@ const RelationshipCreateAndUpdate = ({
 
     form
       .validateFields()
-      .then((values) => {
+      .then(async (values) => {
         // Get display names for type and category
         const typeId = values.relationshipType || relationshipObj.relationshipType;
         const categoryId = values.relationshipCategory || relationshipObj.relationshipCategory;
@@ -383,10 +387,6 @@ const RelationshipCreateAndUpdate = ({
       .catch((error) => {
         console.error("Validation failed:", error);
         console.error("Error fields:", error.errorFields);
-        alert(
-          "Please fill all required fields: " +
-          JSON.stringify(error.errorFields?.map((f) => f.name[0]).join(", "))
-        );
       });
   };
 

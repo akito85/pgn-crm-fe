@@ -4,13 +4,13 @@ import { Col } from "antd";
 
 const promoCriteriaRepository = {
   getColumns: (handleClickDetail) => [
-    {
-      title: "No",
-      dataIndex: "no",
-      key: "no",
-      width: 60,
-      disableFilter: true,
-    },
+    // {
+    //   title: "No",
+    //   dataIndex: "no",
+    //   key: "no",
+    //   width: 60,
+    //   disableFilter: true,
+    // },
     {
       title: "Adjustment Type",
       dataIndex: "adjustmentType",
