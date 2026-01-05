@@ -285,6 +285,45 @@ export const toggleRelationshipStatus = createAsyncThunk(
   }
 );
 
+export const inactivateRelationship = createAsyncThunk(
+  "INACTIVATE_RELATIONSHIP",
+  async ({ accountId, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/inactive`;
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been submitted`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Create Relationship
 export const createRelationship = createAsyncThunk(
   "CREATE_RELATIONSHIP",
@@ -762,6 +801,17 @@ const relationshipSlice = createSlice({
       state.loading = false;
     },
     [toggleRelationshipStatus.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // Inactivate Relationship
+    [inactivateRelationship.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivateRelationship.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [inactivateRelationship.rejected]: (state) => {
       state.loading = false;
     },
 
