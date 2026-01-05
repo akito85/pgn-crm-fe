@@ -2,14 +2,18 @@
 import { Fragment, useRef, useState, useEffect, useMemo, useCallback } from "react";
 
 // Ant Design imports
-import { Checkbox, Tooltip, Spin, Popover, Space } from "antd";
+import { Checkbox, Tooltip, Spin, Popover, Space, Button, Badge } from "antd";
 import {
+  CheckOutlined,
+  DownloadOutlined,
+  FilterOutlined,
   MoreOutlined,
+  PlusOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 
 // React Router imports
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 // Redux imports
 import { useDispatch, useSelector } from "react-redux";
@@ -44,6 +48,8 @@ import moment from "moment";
 
 // Import TablePagination for nested table in expandable rows
 import TablePagination from "../../../../../../components/TablePagination";
+import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import Toolbar from "../../../../../../components/Toolbar";
 
 // ============================================
 // CONSTANTS (moved outside component for performance)
@@ -406,6 +412,8 @@ const RelationshipTable = ({
   tempInputFields = [],
   listType = "all",
   isAccessGranted = true,
+  handleDownload = () => {},
+  handleOpenFilter = () => {},
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -435,8 +443,6 @@ const RelationshipTable = ({
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateRelationshipId, setInactivateRelationshipId] = useState(0);
   const [inactivateRelationshipName, setInactivateRelationshipName] = useState("");
-
-
 
   // Memoized fetch function (DRY + performance optimization)
   const fetchRelationshipData = useCallback(() => {
@@ -617,266 +623,183 @@ const RelationshipTable = ({
     setSort(dataSort);
   };
 
-  // Action items for table
-  const itemsActionView = (
-    handleDetail,
-    handleInactivateModal,
-    handleApprovalHistory,
-    handleApprovalDetail
-  ) => [
-      // Outside popover - Detail icon
-      {
-        action: "View",
-        type: "table",
-        render: (record, data_length) => {
-          return (
-            <Tooltip title="Detail">
-              <SVGIcon
-                name="IconDetail"
-                color="#0075bf"
-                width={24}
-                onClick={() => handleDetail(record)}
-                className="cursor-pointer"
-              />
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "Update",
-        type: "table",
-        render: (record, data_length) => {
-
-          // editable only for :
-          // 1. status DRAFT && statusApproval DRAFT
-          // 2. status REJECTED && statusApproval DRAFT
-
-          const isEditable =
-            (record.status === "DRAFT" && record.statusApproval === "DRAFT") ||
-            (record.status === "REJECTED" && record.statusApproval === "DRAFT") ||
-            (record.status === "DRAFT" && record.statusApproval === "REJECTED") ||
-            (record.status === "REJECTED" && record.statusApproval === "REJECTED");
-
-          const render =
-            data_length > 3 ? (
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name="IconEdit"
-                    color={!isEditable ? "#8D91A0" : "#0075bf"}
-                    width={24}
-                  />
-                }
-                border={false}
-                disabled={!isEditable}
-              >
-                <span
-                  className={`${!isEditable ? "text-gray-400" : "text-black"
-                    } ml-3`}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
-            ) : (
-              <Tooltip title="Update">
-                <div className="pt-1">
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    color={!isEditable ? "#8D91A0" : "#ACC424"}
-                    className={!isEditable ? "cursor-not-allowed" : undefined}
-                  />
-                </div>
-              </Tooltip>
-            );
-
-          return isEditable ? (
-            <NavLink
-              to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP}
-              state={{ id: record.id, idAccount, idCustomer, type }}
-            >
-              {render}
-            </NavLink>
-          ) : (
-            render
-          );
-        },
-      },
-      {
-        action: "Inactive",
-        type: "table",
-        render: (record, data_length) => {
-          // Enable only when status is ACTIVE and statusApproval is APPROVED
-          const isApproved = record?.statusApproval === "APPROVED" || record?.statusApproval === "approved";
-          const isActive = record?.status === "ACTIVE" || record?.status === "Active";
-          const isEnabled = isApproved && isActive;
-          const isChecked = !isActive; // Checked when inactive
-
-          return data_length > 3 ? (
-            <ButtonComponent
-              icon={
-                <Checkbox
-                  className="inactive-check"
-                  checked={isChecked}
-                  disabled={!isEnabled}
-                />
-              }
-              border={false}
-              disabled={!isEnabled}
-              onClick={() => isEnabled && handleInactivateModal(true, record?.id, record?.subjectName || record?.objectName || "")}
-            >
-              <span className={`${!isEnabled ? "text-gray-400" : "text-black"} ml-5`}>
-                Inactive
-              </span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Inactive">
-              <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  disabled={!isEnabled}
-                  checked={isChecked}
-                  onClick={() => handleInactivateModal(true, record?.id, record?.subjectName || record?.objectName || "")}
-                />
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "Approval History",
-        type: "table",
-        render: (record, data_length) => {
-          return data_length > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <span className="text-black ml-3">Approval History</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Approval History">
-              <SVGIcon
-                name="IconLogHistory"
-                color="#0075bf"
-                width={24}
-                onClick={() => handleApprovalHistory(record)}
-                className="cursor-pointer"
-              />
-            </Tooltip>
-          );
-        },
-      },
-    ];
-
-  // Approval mode action items
-  const itemsApprovalMode = [
+  const itemActions = [
     {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="cursor-pointer">
-              <UnorderedListOutlined
-                onClick={() => handleApprovalDetail(record)}
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          onClick={handleDownload}
+          icon={
+            <DownloadOutlined
+              style={{
+                color: "#fff",
+                fontSize: 20,
+              }}
+            />
+          }
+          style={{
+            backgroundColor: "#0075bf",
+            color: "#fff",
+            borderColor: "#0075bf",
+            border: "1px solid #0075bf",
+            borderRadius: "5px",
+            height: "48px"
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      )
+    },
+    {
+      action: "Approve",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          onClick={() => handleIsApproval(true)}
+          icon={
+            <CheckOutlined
+              style={{
+                color: "#fff",
+                fontSize: 20,
+              }}
+            />
+          }
+          style={{
+            backgroundColor: "#0075bf",
+            color: "#fff",
+            borderColor: "#0075bf",
+            border: "1px solid #0075bf",
+            borderRadius: "5px",
+            height: "48px"
+          }}
+        >
+          Approval
+        </ButtonComponent>
+      )
+    },
+    {
+      action: "Create",
+      render: (
+        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP} state={{
+          idAccount,
+          idCustomer,
+          type,
+        }}>
+          <ButtonComponent
+            type={"submit"}
+            icon={
+              <PlusOutlined
                 style={{
-                  fontSize: "20px",
-                  color: "#0075bf",
+                  color: "#fff",
+                  fontSize: 20,
                 }}
               />
-            </div>
-          </Tooltip>
-        );
-      },
+            }
+            style={{
+              backgroundColor: "#0075bf",
+              color: "#fff",
+              borderColor: "#0075bf",
+              border: "1px solid #0075bf",
+              borderRadius: "5px",
+              height: "48px"
+            }}
+          >
+            Create
+          </ButtonComponent>
+        </Link>
+      )
     },
     {
-      action: "Approval History",
-      type: "table",
-      render: (record) => {
+      action: 'View',
+      type: 'table',
+      render: (r, data_length) => {
         return (
-          <Tooltip title="Approval History">
-            <div
-              className="cursor-pointer"
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <SVGIcon name="IconLogHistory" color="#0075bf" width={24} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
-
-  // Manual action column (without permission hook for now)
-  const actionColumn = {
-    title: "ACTION",
-    dataIndex: "action",
-    fixed: "right",
-    width: 150,
-    render: (text, record, index) => {
-      const items = approvalMode
-        ? itemsApprovalMode
-        : itemsActionView(
-          handleDetail,
-          handleInactivateModal,
-          handleApprovalHistory,
-          handleApprovalDetail
-        );
-
-      const totalLength = items.length;
-
-      if (totalLength > 3) {
-        // Show popover with actions
-        return (
-          <div className="w-full flex justify-center items-center gap-4">
-            <Popover
-              trigger="click"
-              placement="bottomRight"
-              open={openPopoverId === record.id}
-              onOpenChange={(visible) => setOpenPopoverId(visible ? record.id : null)}
-              content={
-                <Space direction="vertical">
-                  {items
-                    ?.filter((item) => item?.action !== "View")
-                    ?.map((item, idx) => (
-                      <div key={idx}>{item?.render(record, totalLength)}</div>
-                    ))}
-                </Space>
-              }
-            >
+          <Link to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP} state={{
+            idAccount,
+            idRelationship: r.id,
+            idCustomer,
+            type,
+          }}>
+            <Tooltip title="Detail">
               <div className="pt-1">
-                <MoreOutlined
-                  style={{
-                    fontSize: "24px",
-                    color: "#0075bf",
-                    cursor: "pointer",
-                  }}
+                <SVGIcon
+                  name="IconDetail"
+                  color={"#0075bf"}
+                  width={24}
                 />
               </div>
-            </Popover>
-            <div className="pt-1">
-              {items
-                ?.filter((item) => item?.action === "View")
-                ?.map((item, idx) => (
-                  <div key={idx}>{item?.render(record, totalLength)}</div>
-                ))}
-            </div>
-          </div>
-        );
-      } else {
-        // Show all actions inline
-        return (
-          <div className="w-full flex justify-center gap-4 mt-1 items-start">
-            {items?.map((item, idx) => (
-              <div key={idx}>{item?.render(record, totalLength)}</div>
-            ))}
-          </div>
-        );
+            </Tooltip>
+          </Link>
+        )
       }
     },
-  };
+    {
+      action: 'Update',
+      type: 'table',
+      render: (r, data_length) => {
+        return (
+          <Button
+            type="text"
+            style={{ padding: 0, height: 'auto', border: 'none' }}
+            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP, { state: {
+              id: r.id,
+              idAccount,
+              idCustomer,
+              type
+            }})}
+            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE" || r.status === "ACTIVE"}
+          >
+            <Tooltip title="Update">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconUpdateAction"
+                  color={"#0075bf"}
+                  width={24}
+                />
+              </div>
+            </Tooltip>
+          </Button>
+        )
+      }
+    },
+    {
+      action: 'Inactivate',
+      type: 'table',
+      render: (r, data_length) => {
+        return (
+          <Tooltip
+            title="Inactivate"
+          >
+            <Checkbox
+              className="inactive-check"
+              disabled={r?.status === "ACTIVE" ? false : true}
+              checked={r?.status === "ACTIVE" ? false : true}
+              onClick={() => handleInactivateModal(true, r?.id, r?.subjectName || r?.objectName || "")}
+            />
+          </Tooltip>
+        )
+      }
+    },
+    {
+      action: 'History',
+      type: 'table',
+      render: (r, data_length) => {
+        return (
+          <Tooltip title="History">
+            <div className="pt-1">
+              <SVGIcon
+                name="IconLogHistory"
+                color={"#0075bf"}
+                width={24}
+                onClick={() => handleApprovalHistory(r)}
+              />
+            </div>
+          </Tooltip>
+        )
+      }
+    }
+  ];
 
   // Memoized row selection config for approval mode (performance optimization)
   const rowSelection = useMemo(() => approvalMode
@@ -893,23 +816,48 @@ const RelationshipTable = ({
     }
     : null, [approvalMode, selectedRowKeys, onSelectChange]);
 
-  // Memoized columns array (performance optimization)
-  const memoizedColumns = useMemo(() => [
-    ...columns(
-      search,
-      page,
-      pageSize,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    actionColumn,
-  ], [search, page, pageSize, searchedColumn, searchText, actionColumn]);
-
   return (
     <Fragment>
       <Spin spinning={loading}>
+        {approvalMode ? (
+          <div className="flex justify-end gap-5 mb-5">
+            <ButtonComponent
+              type="reject"
+              onClick={() => {}}
+            >
+              Cancel
+            </ButtonComponent>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center gap-5 mb-5">
+            <Badge count={tempInputFields.length}>
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => handleOpenFilter(true)}
+                icon={
+                  <FilterOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  width: "128px",
+                  height: "48px",
+                  borderRadius: "5px"
+                }}
+              >
+                Filters
+              </ButtonComponent>
+            </Badge>
+            <Toolbar items={itemActions} type="detail" />
+          </div>
+        )}
         <TablePaginationNew
           dataSource={dataTable}
           totalData={totalElements}
@@ -918,7 +866,23 @@ const RelationshipTable = ({
           tableScrolled={{ y: 400, x: 2000 }}
           onChange={handleChangeSize}
           onSort={onSort}
-          columns={memoizedColumns}
+          columns={[
+            ...columns(
+              search,
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch
+            ),
+            ...useColumnActionPermission(
+              ["Inactivate", "View", "Update", "History"],
+              itemActions,
+              "View",
+              "detail"
+            ),
+          ]}
           rowSelection={rowSelection}
           rowKey="id"
           rowClassName={(record) =>
