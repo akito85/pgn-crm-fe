@@ -26,7 +26,7 @@ const PrabillingPage = () => {
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); 
+  const [loadMoreSize] = useState(20);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -504,41 +504,40 @@ const PrabillingPage = () => {
       title: col.title,
     }));
   }, [allColumns]);
-
   return (
-      <LayoutMenu>
-        <BreadCrumb routes={routes} />
+    <LayoutMenu>
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] text-primary">PRABILLING LIST</p>
-              <Toolbar items={itemGrantAccess} />
-            </div>
-          }
-        >
-          <div className="-pt-3">
-            <TableRBI
-              idTable="prabilling-table"
-              dataSource={list_prabilling_init}
-              columns={processedColumns}
-              totalData={prabilling_pagination?.totalElements || 0}
-              tableScrolled={{ x: 2000, y: 525 }}
-              onSort={onSort}
-              showExport={false}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-            />
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">PRABILLING LIST</p>
+            <Toolbar items={itemGrantAccess} />
           </div>
-        </CardContainer>
-      </LayoutMenu>
+        }
+      >
+        <div className="-pt-3">
+          <TableRBI
+            idTable="prabilling-table"
+            dataSource={list_prabilling_init}
+            columns={processedColumns}
+            totalData={prabilling_pagination?.totalElements || 0}
+            tableScrolled={{ x: 2000, y: 525 }}
+            onSort={onSort}
+            showExport={false}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+          />
+        </div>
+      </CardContainer>
+    </LayoutMenu>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Radio, Tooltip, Dropdown } from "antd";
+import { Spin, Radio, Tooltip, Dropdown, Menu } from "antd";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -36,7 +36,9 @@ import {
 // Modal
 import ModalRefund from "./Modal/ModalRefund";
 import ModalHold from "./Modal/ModalHold";
-import ModalRelease from "./Modal/ModalRelease";
+import ModalRelease from "./Modal/ModalRefund";
+// import ModalHold from "./Modal/ModalHold";
+// import ModalRelease from "./Modal/ModalRelease";
 import { render } from "@testing-library/react";
 
 const BillingPage = () => {
@@ -207,43 +209,30 @@ const BillingPage = () => {
     // dispatch(getAllBillingApprovePaginate());
   };
 
+  const moreMenu = (
+    <Menu>
+      <Menu.Item key="Refund" onClick={() => setModalRefund(true)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconRefund" color={"#241919ff"} width={16} />
+          <span>Refund</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="Hold" onClick={() => setModalHold(true)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconHold" color={"#000000"} width={16} />
+          <span>Hold</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="Release" onClick={() => setModalRelease(true)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconSend" color={"#000000"} width={16} />
+          <span>Release</span>
+        </div>
+      </Menu.Item>
+    </Menu>
+  );
+  
   const itemGrantAccess = [
-    {
-      action: "View",
-      render: (
-        <ButtonComponent
-        icon={<ReloadOutlined />}  
-        type="submit"
-          onClick={() => setModalRefund(true)}
-        >
-          Refund
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "View",
-      render: (
-        <ButtonComponent
-        icon={<PauseCircleOutlined />}  
-        type="submit"
-          onClick={() => setModalHold(true)}
-        >
-          Hold
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "View",
-      render: (
-        <ButtonComponent
-        icon={<MailOutlined />}  
-        type="submit"
-          onClick={() => setModalRelease(true)}
-        >
-          Release
-        </ButtonComponent>
-      ),
-    },
     {
       action: "Hapus",
       type: "table",
@@ -369,16 +358,21 @@ const BillingPage = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
+        {/* <CardContainer header={"Warranty List"}> */}
+        <CardContainer header={
+          <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Warranty List</p>
-              <div className="mt-[15px] flex gap-[20px]">
-                <Toolbar items={itemGrantAccess} />
+              <div className="flex gap-2">
+                  <Dropdown overlay={moreMenu} trigger={['click']}>
+                    <ButtonComponent
+                      type="default"
+                    >
+                      More Actions <DownOutlined />
+                    </ButtonComponent>
+                  </Dropdown>
               </div>
-            </div>
-          }
-        >
+          </div>
+        }>
           <div className="my-5">
             <TableRBI
               dataSource={dataSourceForTab}

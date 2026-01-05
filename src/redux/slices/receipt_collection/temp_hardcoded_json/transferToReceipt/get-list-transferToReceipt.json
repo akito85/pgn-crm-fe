@@ -1,0 +1,69 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Data Transfer To Receipt",
+    "data": {
+        "result": [
+            {
+                "id": 1,
+                "paymentWarrantyNo": "PW001",
+                "typePaymentWarranty": "Type A",
+                "mutationDocumentationNo": "MDN001",
+                "mutationDate": "2025-01-01",
+                "fromCustomer": "Customer A",
+                "fromReceipt": "Receipt A",
+                "toCustomer": "Customer B",
+                "toReceipt": "Receipt B",
+                "currency": "IDR",
+                "amount": 5000000,
+                "equivalent": 5000000,
+                "remark": "Transfer for invoice #123",
+                "approvalStatus": "Approved",
+                "rateDate": "2025-01-01",
+                "status": "DRAFT"
+            },
+            {
+                "id": 2,
+                "paymentWarrantyNo": "PW002",
+                "typePaymentWarranty": "Type B",
+                "mutationDocumentationNo": "MDN002",
+                "mutationDate": "2025-01-02",
+                "fromCustomer": "Customer C",
+                "fromReceipt": "Receipt C",
+                "toCustomer": "Customer D",
+                "toReceipt": "Receipt D",
+                "currency": "USD",
+                "amount": 500,
+                "equivalent": 500,
+                "remark": "Payment for services",
+                "approvalStatus": "Pending",
+                "rateDate": "2025-01-02",
+                "status": "APPROVED"
+            },
+            {
+                "id": 3,
+                "paymentWarrantyNo": "PW003",
+                "typePaymentWarranty": "Type C",
+                "mutationDocumentationNo": "MDN003",
+                "mutationDate": "2025-01-03",
+                "fromCustomer": "Customer E",
+                "fromReceipt": "Receipt E",
+                "toCustomer": "Customer F",
+                "toReceipt": "Receipt F",
+                "currency": "IDR",
+                "amount": 7500000,
+                "equivalent": 7500000,
+                "remark": "Correction adjustment",
+                "approvalStatus": "In_Progress",
+                "rateDate": "2025-01-02",
+                "status": "REJECTED"
+            }
+        ],
+        "page": {
+            "size": 10,
+            "totalElements": 3,
+            "totalPages": 1,
+            "number": 0
+        }
+    }
+}

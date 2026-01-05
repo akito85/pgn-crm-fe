@@ -45,6 +45,7 @@ const ModalError = ({
   children,
   onlyBackButton = false,
   customText = "OK",
+  loading = false,
 }) => {
   return (
     <Modal
@@ -58,11 +59,11 @@ const ModalError = ({
       footer={[
         <div className={"w-full justify-end flex gap-[20px]"}>
           {onlyBackButton === true ? (
-            <ButtonComponent type={"default"} onClick={handleOk}>
+            <ButtonComponent type={"default"} onClick={handleOk} loading={loading}>
               Back
             </ButtonComponent>
           ) : (
-            <ButtonComponent type={"reject"} onClick={handleOk} border={false}>
+            <ButtonComponent type={"reject"} onClick={handleOk} border={false} loading={loading}>
               {customText}
             </ButtonComponent>
           )}
