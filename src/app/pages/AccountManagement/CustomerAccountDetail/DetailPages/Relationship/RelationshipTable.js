@@ -837,7 +837,7 @@ const RelationshipTable = ({
           <div className="flex justify-end gap-5 mb-5">
             <ButtonComponent
               type="reject"
-              onClick={() => {}}
+              onClick={() => handleIsApproval(false)}
             >
               Cancel
             </ButtonComponent>
