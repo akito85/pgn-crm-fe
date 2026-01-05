@@ -13,10 +13,10 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
   getAllApprovalList,
-  getDetailSetting,
+  getDetailDeduction,
   getListApprovalById,
   getListCategory,
-} from "../../../../../redux/slices/receipt_collection/setting";
+} from "../../../../../redux/slices/receipt_collection/deduction";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DeductionForm from "./DeductionForm";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -44,7 +44,7 @@ const ListFormDeduction = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
-  } = useSelector((state) => state.receiptSetting);
+  } = useSelector((state) => state.deduction);
 
   // Declaration
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ const ListFormDeduction = (props) => {
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailSetting(id));
+      dispatch(getDetailDeduction(id));
     }
   }, [dispatch, id, type]);
 
@@ -335,10 +335,7 @@ const ListFormDeduction = (props) => {
                 columns={customerColumns}
                 dataSource={customerList}
                 rowKey="id"
-                pagination={false}
-                current={1}
-                pageSize={customerList.length > 0 ? customerList.length : 10}
-                totalData={customerList.length}
+                usePagination={false}
               />
             </BaseContainer>
 
@@ -368,7 +365,7 @@ const ListFormDeduction = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="receiptSetting"
+                typeSelector="deduction"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}
@@ -436,8 +433,15 @@ const ListFormDeduction = (props) => {
         }
       >
         <div className="p-4">
-          <p>Are you sure you want to {type === "create" ? "create" : "update"} this deduction?</p>
-          {/* Can use ContentModalConfirm if properly adapted */}
+          <ContentModalConfirm
+            data={sendBody}
+            listDataAttachment={listDataAttachment}
+            listDataAppHierDetail={appHierDataDetail}
+            tabData={tabData}
+            dataOption={appHierOptions}
+            selectedHierarchy={selectedHierarchy}
+            typeSelector="deduction"
+          />
         </div>
       </ModalCustom>
 

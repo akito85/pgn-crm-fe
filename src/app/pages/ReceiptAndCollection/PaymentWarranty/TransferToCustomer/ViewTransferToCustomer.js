@@ -14,7 +14,7 @@ import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
 import Toolbar from "../../../../../components/Toolbar";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-// import SVGIcon from "../../../../../assets/Icon/index"; // Temporarily commented out
+import SVGIcon from "../../../../../assets/Icon/index";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 
 // Column Configuration
@@ -151,11 +151,25 @@ const ViewTransferToCustomer = () => {
                     </Tooltip>
                 );
             },
+        },
+
+        {
+            action: "Delete",
+            type: "table",
+            render: (record) => {
+                return (
+                    <Tooltip title={"Delete"}>
+                        <div onClick={() => console.log('Delete', record)} style={{ cursor: 'pointer' }}>
+                            <SVGIcon name="IconDelete" width={24} />
+                        </div>
+                    </Tooltip>
+                );
+            },
         }
     ];
 
     const actionCols = useColumnActionPermission(
-        ["view"],
+        ["view", "delete"],
         itemActions
     );
 

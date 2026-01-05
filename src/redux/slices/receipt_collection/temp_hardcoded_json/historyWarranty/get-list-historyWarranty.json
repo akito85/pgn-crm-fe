@@ -1,0 +1,62 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Data History Payment Warranty",
+    "data": {
+        "result": [
+            {
+                "id": 1,
+                "paymentWarrantyCode": "PW-HIST-001",
+                "areaCode": "01",
+                "areaName": "MEDAN",
+                "customerNumber": "CUST001",
+                "receiptDate": "2025-01-01",
+                "currency": "IDR",
+                "amount": 10000000,
+                "type": "CASH",
+                "method": "Transfer",
+                "receiptNumber": "REC-001",
+                "receiptChannel": "Mobile Banking",
+                "bank": "MANDIRI",
+                "collectionAgent": "AGENT A",
+                "deliveryChannel": "ATM",
+                "spiFlag": "Y",
+                "reconciler": "System",
+                "invoiceList": [
+                    {
+                        "no": 1,
+                        "relationshipId": "REL-001",
+                        "relationshipName": "Invoice A",
+                        "relationshipType": "Primary"
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "paymentWarrantyCode": "PW-HIST-002",
+                "areaCode": "02",
+                "areaName": "BATAM",
+                "customerNumber": "CUST002",
+                "receiptDate": "2025-01-02",
+                "currency": "USD",
+                "amount": 5000,
+                "type": "BG",
+                "method": "Clearing",
+                "receiptNumber": "REC-002",
+                "receiptChannel": "Internet Banking",
+                "bank": "BCA",
+                "collectionAgent": "AGENT B",
+                "deliveryChannel": "TELLER",
+                "spiFlag": "N",
+                "reconciler": "Manual",
+                "invoiceList": []
+            }
+        ],
+        "page": {
+            "size": 10,
+            "totalElements": 2,
+            "totalPages": 1,
+            "number": 0
+        }
+    }
+}

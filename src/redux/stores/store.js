@@ -125,6 +125,8 @@ import transferToCustomerReducer from "../slices/receipt_collection/transferToCu
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
 import deductionReducer from "../slices/receipt_collection/deduction";
+import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
+import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -254,6 +256,8 @@ const reducer = combineReducers({
   transferToReceipt: transferToReceiptReducer,
   transferToCustomer: transferToCustomerReducer,
   deduction: deductionReducer,
+  gapuraManagement: gapuraManagementReducer,
+  historyWarranty: historyWarrantyReducer,
 
   // Attachment
   attachment: attachmentReducer,
