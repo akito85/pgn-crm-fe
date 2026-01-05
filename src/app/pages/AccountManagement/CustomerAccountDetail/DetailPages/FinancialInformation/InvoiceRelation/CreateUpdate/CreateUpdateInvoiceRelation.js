@@ -209,8 +209,39 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
         }
-        else
+        else {
           await formCreate.validateFields(formFields[current]);
+
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            stepNumber: current + 1,
+            data : {
+              subjectId: data_accountDetail?.accountInformation?.accountId, 
+              objectId,
+              priority,
+              description, 
+              startDate,
+              endDate,
+              appHierId,
+            }
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+            type,
+          }))
+          .unwrap();
+        }  
       } catch (err) {
         return;
       }
@@ -339,14 +370,46 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         if (attachmentIsRequired && !dataAttachment.length)
           throw new Error("At least provide one attachment");
       }
-      else
+      else {
         await formCreate.validateFields(formFields[current]);
+
+        const {
+          objectId,
+          priority,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+        } = formCreate.getFieldsValue();
+
+        const body = {
+          stepNumber: current + 1,
+          data : {
+            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          }
+        };
+
+        await dispatch(validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+          type,
+        }))
+        .unwrap()
+      }
     } catch (err) {
       return;
     }
-    
+
     setCurrent(current + 1);
   };
+
   const prev = () => {
     setCurrent(current - 1);
   };
@@ -358,8 +421,39 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
         }
-        else
+        else {
           await formCreate.validateFields(formFields[i]);
+          
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            stepNumber: i + 1,
+            data : {
+              subjectId: data_accountDetail?.accountInformation?.accountId, 
+              objectId,
+              priority,
+              description, 
+              startDate,
+              endDate,
+              appHierId,
+            }
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+            type,
+          }))
+          .unwrap()
+        }
       } catch (err) {
         setCurrent(i);
         return;
@@ -417,7 +511,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       endDate,
       appHierId,
       action: confirmationType,
-      remark,
+      remarks: remark,
     };
 
     if (type === "create")

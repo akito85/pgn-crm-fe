@@ -93,6 +93,8 @@ const CreatePaymentRelation = ({ type }) => {
     ],
     []
   ];
+
+  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
  
   const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
@@ -209,8 +211,38 @@ const CreatePaymentRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
         }
-        else
+        else {
           await formCreate.validateFields(formFields[current]);
+
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idPr : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[current],
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
+            type,
+          }))
+          .unwrap();
+        }
       } catch (err) {
         return;
       }
@@ -339,8 +371,38 @@ const CreatePaymentRelation = ({ type }) => {
         if (attachmentIsRequired && !dataAttachment.length)
           throw new Error("At least provide one attachment");
       }
-      else
+      else {
         await formCreate.validateFields(formFields[current]);
+
+        const {
+          objectId,
+          priority,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+        } = formCreate.getFieldsValue();
+
+        const body = {
+          id: type === "update" ? idPr : undefined,
+          subjectId: data_accountDetail?.accountInformation?.accountId, 
+          objectId,
+          priority,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+          validationType: validationTypes[current],
+        };
+        
+        await dispatch(validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
+          type,
+        }))
+        .unwrap();
+      }
     } catch (err) {
       return;
     }
@@ -358,8 +420,38 @@ const CreatePaymentRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
         }
-        else
+        else {
           await formCreate.validateFields(formFields[i]);
+
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idPr : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[i],
+          };
+          
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
+            type,
+          }))
+          .unwrap();
+        }
       } catch (err) {
         setCurrent(i);
         return;
@@ -417,7 +509,7 @@ const CreatePaymentRelation = ({ type }) => {
       endDate,
       appHierId,
       action: confirmationType,
-      remark,
+      remarks: remark,
     };
 
     if (type === "create")
