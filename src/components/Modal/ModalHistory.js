@@ -255,7 +255,7 @@ const ModalHistory = (props) => {
                           }`}
                         </p>
                       </div>
-                      {item.status !== "SUBMIT" && item.description ? (
+                      {item.description ? (
                         <p
                           className={`text-[11px] m-0 w-full font-semibold cursor-pointer break-words ${
                             expandedDescriptions[item.id]
