@@ -233,12 +233,12 @@ const columns = (
     },
     {
       title: "RELATED NUMBER",
-      dataIndex: "subjectValue",
+      dataIndex: "subjectNumber",
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "subjectValue",
+        "subjectNumber",
         searchInput,
         searchedColumn,
         searchText,
@@ -246,10 +246,10 @@ const columns = (
         true
       ),
       render: (text, record) => {
-        const displayText = record.subjectValue || record.objectValue || "";
+        const displayText = record.subjectNumber || record.objectNumber || "";
         return renderColumn(
-          "subjectValue",
-          hasValue(search["subjectValue"]),
+          "subjectNumber",
+          hasValue(search["subjectNumber"]),
           searchText,
           displayText,
           false,

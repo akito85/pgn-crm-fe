@@ -3,12 +3,6 @@ import ConfirmationModalTabs from "./ConfirmationModalTabs";
 import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 
-const tabs = [
-  { value: "Payment Relation Information" },
-  { value: "Approval" },
-  { value: "Attachment" },
-];
-
 const ConfirmationModal = ({
   form,
   isOpen,
@@ -22,6 +16,22 @@ const ConfirmationModal = ({
   service,
   configApplication,
 }) => {
+  const tabs = type === "submit" ? [
+    { value: "Payment Relation Information" },
+    { value: "Approval" },
+    { value: "Attachment" },
+    { value: "Remark" },
+  ] : type === "draft" ? [
+    { value: "Payment Relation Information" },
+    { value: "Approval" },
+    { value: "Attachment" },
+  ] : [
+    { value: "Payment Relation Information" },
+    { value: "Approval" },
+    { value: "Attachment" },
+    { value: "Remark" },
+  ];
+
   const [currentTab, setCurrentTab] = useState(0);
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
 
@@ -92,6 +102,7 @@ const ConfirmationModal = ({
         dataAttachment={dataAttachment}
         data={data}
         service={service}
+        type={type}
         configApplication={configApplication}
       />
     </ModalCustom>

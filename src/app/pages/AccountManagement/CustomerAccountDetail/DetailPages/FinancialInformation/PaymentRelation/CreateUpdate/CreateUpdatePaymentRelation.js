@@ -93,6 +93,8 @@ const CreatePaymentRelation = ({ type }) => {
     ],
     []
   ];
+
+  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
  
   const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
@@ -205,11 +207,42 @@ const CreatePaymentRelation = ({ type }) => {
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (current === 2)
+        if (current === 2) {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
-        else
+        }
+        else {
           await formCreate.validateFields(formFields[current]);
+
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idPr : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[current],
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
+            type,
+          }))
+          .unwrap();
+        }
       } catch (err) {
         return;
       }
@@ -334,11 +367,42 @@ const CreatePaymentRelation = ({ type }) => {
   
   const next = async () => {
     try {
-      if (current === 2)
+      if (current === 2) {
         if (attachmentIsRequired && !dataAttachment.length)
           throw new Error("At least provide one attachment");
-      else
+      }
+      else {
         await formCreate.validateFields(formFields[current]);
+
+        const {
+          objectId,
+          priority,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+        } = formCreate.getFieldsValue();
+
+        const body = {
+          id: type === "update" ? idPr : undefined,
+          subjectId: data_accountDetail?.accountInformation?.accountId, 
+          objectId,
+          priority,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+          validationType: validationTypes[current],
+        };
+        
+        await dispatch(validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
+          type,
+        }))
+        .unwrap();
+      }
     } catch (err) {
       return;
     }
@@ -352,11 +416,42 @@ const CreatePaymentRelation = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        if (i === 2)
+        if (i === 2) {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
-        else
+        }
+        else {
           await formCreate.validateFields(formFields[i]);
+
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idPr : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[i],
+          };
+          
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
+            type,
+          }))
+          .unwrap();
+        }
       } catch (err) {
         setCurrent(i);
         return;
@@ -401,6 +496,7 @@ const CreatePaymentRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
+      remark,
     } = formCreate.getFieldsValue();
 
     const body = {
@@ -412,7 +508,8 @@ const CreatePaymentRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
-      action: confirmationType
+      action: confirmationType,
+      remarks: remark,
     };
 
     if (type === "create")
@@ -645,29 +742,28 @@ const CreatePaymentRelation = ({ type }) => {
               )}
             </div>
           </div>
+          <ConfirmationModal
+            form={"paymentRelationForm"}
+            isOpen={showConfirmationModal}
+            handleCancel={() => handleSetShowConfirmationModal(false)}
+            selectedAppHierId={selectedAppHierId}
+            selectedApprovalName={selectedApprovalName}
+            hierarchyTableData={(detail_prApprovalHierarchy || []).map((detail, index) => ({
+              ...detail,
+              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                ...employeeDetail,
+                key: `employee-detail-${index}`
+              })),
+              key: `detail-detail-${index}`,
+            }))}
+            hieararchyOptionData={data_prApprovalHierarchy}
+            type={confirmationType}
+            dataAttachment={dataAttachment}
+            data={formCreate.getFieldsValue()}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
+          />
         </Form>
-
-        <ConfirmationModal
-          form={"paymentRelationForm"}
-          isOpen={showConfirmationModal}
-          handleCancel={() => handleSetShowConfirmationModal(false)}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-          hierarchyTableData={(detail_prApprovalHierarchy || []).map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          hieararchyOptionData={data_prApprovalHierarchy}
-          type={confirmationType}
-          dataAttachment={dataAttachment}
-          data={formCreate.getFieldsValue()}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-        />
       </div>
     </LayoutMenu>
   );
