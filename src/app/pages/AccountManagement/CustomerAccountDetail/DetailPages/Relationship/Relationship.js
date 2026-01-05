@@ -77,18 +77,6 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
     setPage(1);
   };
 
-  const handleFirstQuery = () => {
-    const queries = formQuery.getFieldValue("query");
-    if (queries && queries.length > 0) {
-      formQuery.setFieldsValue({
-        query: queries.map((item, index) => ({
-          ...item,
-          condition: index === 0 ? 1311 : item.condition,
-        })),
-      });
-    }
-  };
-
   /**
    * Handle entering or exiting approval mode
    * When entering: set listType = "approval"
