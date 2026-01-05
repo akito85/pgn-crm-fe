@@ -1,8 +1,11 @@
 import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
+import { InputNumber } from "antd";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
+import { Form } from "antd";
+import DateComponent from "../../../../../../../components/DateComponent";
+import InputComponent from "../../../../../../../components/InputComponent";
 
 export const columnsRefundInfo = (
   page = 1,
@@ -10,7 +13,11 @@ export const columnsRefundInfo = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
+  refundAmountData = {},
+  handleRefundAmountChange = () => {},
+  refundDateData = {},
+  handleRefundDateChange = () => {}
 ) => [
   {
     key: "no",
@@ -113,28 +120,14 @@ export const columnsRefundInfo = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    render: (text) =>
-      searchedColumn === "date" ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[
-            searchText
-              ? moment(searchText, "YYYY-MMM-DD").format(dateFormatting.dateCapital)
-              : "",
-          ]}
-          autoEscape
-          textToHighlight={
-            text ? moment(text).format(dateFormatting.dateCapital) : ""
-          }
-        />
-      ) : text === null ? (
-        ""
-      ) : (
-        moment(text).format(dateFormatting.dateCapital)
-      ),
+    render: (_, record) => (
+      <DateComponent
+        style={{ width: '100%' }}
+        value={refundDateData[record.key]}
+        onChange={(val) => handleRefundDateChange(val, record.key)}
+        controls={false}
+      />
+    )
   },
   {
     key: "refundAmount",
@@ -154,5 +147,15 @@ export const columnsRefundInfo = (
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
+    render: (_, record) => (
+      <InputNumber
+        style={{ width: '100%' }}
+        formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+        parser={value => value.replace(/\$\s?|(\.*)/g, '')}
+        value={refundAmountData[record.key]}
+        onChange={(val) => handleRefundAmountChange(val, record.key)}
+        controls={false}
+      />
+    )
   }
 ];

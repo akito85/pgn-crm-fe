@@ -500,7 +500,7 @@ export const getColumnSearchPropsUseFilteredValueFE = (
         handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
       };
 
-      return storedData === false ? (
+      return (
         <div
           style={{
             padding: 8,
@@ -601,7 +601,7 @@ export const getColumnSearchPropsUseFilteredValueFE = (
             />
           ) : null}
         </div>
-      ) : null;
+      );
     },
     filterIcon: (filtered) => (
       <FilterOutlined
