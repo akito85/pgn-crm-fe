@@ -6,10 +6,12 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
   DownloadOutlined,
 } from "@ant-design/icons";
@@ -92,8 +94,8 @@ const ViewSettings = () => {
       breadcrumbName: "Payment Warranty",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
-      breadcrumbName: "Deduction List",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT,
+      breadcrumbName: "Transfer To Recipt",
     },
   ];
 
@@ -446,7 +448,7 @@ const ViewSettings = () => {
     {
       action: "Create",
       render: (
-        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION}>
+        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_TRANSFER_TO_RECEIPT}>
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
@@ -483,55 +485,89 @@ const ViewSettings = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
-
         // console.log({
         //   disabled: disabledActionByStatus('update', record?.status, record?.statusApproval),
         //   to: !disabledActionByStatus('update', record?.status, record?.statusApproval) ? RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS : undefined
         // });
-        const isDisabled = disabledActionByStatus('update', record?.status, record?.statusApproval);
-        return (
-          data_length > 3 ? (
-            <Link
-              to={!isDisabled ? RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS : undefined}
-              state={!isDisabled ? { id: record?.id } : undefined}
+        const isDisabled = disabledActionByStatus(
+          "update",
+          record?.status,
+          record?.statusApproval
+        );
+        return data_length > 3 ? (
+          <Link
+            to={
+              !isDisabled
+                ? RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS
+                : undefined
+            }
+            state={!isDisabled ? { id: record?.id } : undefined}
+          >
+            <ButtonComponent
+              className="gap-5 w-full"
+              icon={<SVGIcon name="IconEdit" width={24} color={"#0075BF"} />}
+              border={false}
             >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={"#0075BF"} />
-                }
-                border={false}
-              >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
+              <span className={"text-black gap-2 text-xl text-center w-full"}>
+                Update
+              </span>
+            </ButtonComponent>
+          </Link>
+        ) : (
+          <Tooltip
+            title="Update"
+            className={
+              disabledActionByStatus(
+                "update",
+                record?.status,
+                record?.statusApproval
+              )
+                ? "cursor-not-allowed"
+                : "cursor-pointer"
+            }
+          >
+            <Link
+              to={
+                disabledActionByStatus(
+                  "update",
+                  record?.status,
+                  record?.statusApproval
+                ) === false && RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS
+              }
+              state={
+                disabledActionByStatus(
+                  "update",
+                  record?.status,
+                  record?.statusApproval
+                ) === false && { id: record?.id }
+              }
+            >
+              <div border={false}>
+                <SVGIcon
+                  name="IconEdit"
+                  color={
+                    disabledActionByStatus(
+                      "update",
+                      record?.status,
+                      record?.statusApproval
+                    )
+                      ? "#d3d3d3"
+                      : "#ACC424"
+                  }
+                  width={24}
+                  className={
+                    disabledActionByStatus(
+                      "update",
+                      record?.status,
+                      record?.statusApproval
+                    )
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
+              </div>
             </Link>
-          ) : (
-            <Tooltip title="Update" className={
-              disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-            }>
-              <Link
-                to={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS}
-                state={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  { id: record?.id }
-                }
-              >
-                <div border={false}>
-                  <SVGIcon name="IconEdit"
-                    color={disabledActionByStatus('update', record?.status, record?.statusApproval) ? "#d3d3d3" : "#ACC424"} width={24}
-                    className={
-                      disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-                    } />
-                </div>
-              </Link>
-            </Tooltip>
-          )
+          </Tooltip>
         );
       },
     },
@@ -540,71 +576,86 @@ const ViewSettings = () => {
       action: "Activate",
       type: "table",
       render: (record, data_length) => {
-        const statusLowerCase = record?.status?.toLowerCase()
+        const statusLowerCase = record?.status?.toLowerCase();
 
-        return (
-          data_length > 3 ?
-            <div className="w-full">
-              <ButtonComponent
-                border={false}
-                className={'gap-5 w-full'}
+        return data_length > 3 ? (
+          <div className="w-full">
+            <ButtonComponent
+              border={false}
+              className={"gap-5 w-full"}
+              onClick={() => handleInactive(record)}
+              disabled={disabledActionByStatus(
+                "activate",
+                record?.status,
+                record?.statusApproval
+              )}
+            >
+              <Checkbox
                 onClick={() => handleInactive(record)}
-                disabled={
-                  disabledActionByStatus('activate', record?.status, record?.statusApproval)
-                }
+                checked={record?.status !== "Active"}
+                disabled={disabledActionByStatus(
+                  "activate",
+                  record?.status,
+                  record?.statusApproval
+                )}
+              />
+              <span
+                className={"text-black ml-6 gap-2 text-xl text-center w-full"}
               >
-                <Checkbox
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-                <span
-                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
-                >
-                  {record?.status === "Active" ? "Inactivate" : "Activate"}
-                </span>
-              </ButtonComponent>
+                {record?.status === "Active" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          </div>
+        ) : (
+          <Tooltip
+            title={
+              statusLowerCase === "active" || statusLowerCase === "draft"
+                ? "Inactivate"
+                : "Activate"
+            }
+          >
+            <div>
+              <Checkbox
+                border={false}
+                onClick={() => handleInactive(record)}
+                checked={record?.status !== "Active"}
+                disabled={disabledActionByStatus(
+                  "activate",
+                  record?.status,
+                  record?.statusApproval
+                )}
+              />
             </div>
-            :
-            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
-              <div >
-                <Checkbox
-                  border={false}
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-              </div>
-            </Tooltip>
+          </Tooltip>
         );
-      }
+      },
     },
     {
       action: "history",
       type: "table",
       render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
+        return data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
+            border={false}
+            onClick={() => handleApprovalHistory(record?.id)}
+          >
+            <span className={"text-black gap-2 text-xl text-center"}>
+              Approval History
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title={"Approval History"}>
+            <div
               border={false}
               onClick={() => handleApprovalHistory(record?.id)}
             >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
-                onClick={() => handleApprovalHistory(record?.id)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -679,15 +730,15 @@ const ViewSettings = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
-        <BaseContainer header={"DEDUCTION LIST"}>
-          <TablePagination
+        <CardContainer header={"TRANSFER TO RECIPT"}>
+          <TableRBI
             dataSource={data?.result}
             pageSize={pageSize}
             // columns={columns}
             columns={[
               ...columns,
               ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
+                ["view", "history", "update", "activate"],
                 itemActions
               ),
             ]}
@@ -701,7 +752,7 @@ const ViewSettings = () => {
               y: 525,
             }}
           />
-        </BaseContainer>
+        </CardContainer>
 
         <ModalActiveInactive
           dispatch={dispatch}

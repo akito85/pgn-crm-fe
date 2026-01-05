@@ -75,7 +75,6 @@ const PrabillingDetail = () => {
   };
 
   return (
-    <Spin spinning={loading_detail_prabilling}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
@@ -107,7 +106,6 @@ const PrabillingDetail = () => {
           </ButtonComponent>
         </div>
       </LayoutMenu>
-    </Spin>
   );
 };
 

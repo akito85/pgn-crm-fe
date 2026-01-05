@@ -634,7 +634,7 @@ const ViewMaintainElectronicBankStatement = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
+        {/* <Toolbar items={itemActions} /> */}
         {/* <div className="w-full flex justify-end gap-[20px]">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonDownload" width={24} />}
@@ -676,7 +676,14 @@ const ViewMaintainElectronicBankStatement = () => {
           </NavLink>
         </div> */}
 
-        <CardContainer header={"BANK STATEMENT LIST"}>
+        <CardContainer header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">BANK STATEMENT LIST</p>
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
+          </div>
+        }>
           <TableRBI
             dataSource={data?.result}
             columns={[

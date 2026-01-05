@@ -278,7 +278,7 @@ const ViewFaktur = () => {
     [page, pageSize, search, searchText, searchedColumn]
   );
 
-  // Action Dropdown Menu - Updated Design
+  // Action Dropdown Menu
   const actionMenu = (
     <Menu
       items={[

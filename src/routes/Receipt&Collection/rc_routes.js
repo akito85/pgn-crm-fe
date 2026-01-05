@@ -115,4 +115,11 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/view",
   CREATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/create",
   UPDATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/update",
+
+  // Warranty List
+  VIEW_WARRANTY: "/receipt-and-collection/payment-warranty/warranty",
+  DETAIL_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/view",
+  CREATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/create",
+  UPDATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/update",
+  
 };

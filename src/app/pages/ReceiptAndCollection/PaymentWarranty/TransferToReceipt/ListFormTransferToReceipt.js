@@ -295,18 +295,18 @@ const ListFormSettings = (props) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "Payment & Collection",
     },
     {
       path: "",
       breadcrumbName: "Payment Warranty",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
-      breadcrumbName: "Deduction",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT,
+      breadcrumbName: "Trasfer to Recipt",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION,
+      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_TRANSFER_TO_RECEIPT,
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
