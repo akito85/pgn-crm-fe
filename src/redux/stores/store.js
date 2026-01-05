@@ -120,8 +120,11 @@ import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccou
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
 import warrantyReducer from "../slices/receipt_collection/warranty";
+import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
+import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
+import deductionReducer from "../slices/receipt_collection/deduction";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -185,7 +188,6 @@ const reducer = combineReducers({
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
   relationship: relationshipReducer,
-  warranty: warrantyReducer,
 
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
@@ -248,6 +250,10 @@ const reducer = combineReducers({
   collectingAgent: collectingAgentReducer,
   paymentChannel: paymentChannelReducer,
   accounting: accountingReducer,
+  warranty: warrantyReducer,
+  transferToReceipt: transferToReceiptReducer,
+  transferToCustomer: transferToCustomerReducer,
+  deduction: deductionReducer,
 
   // Attachment
   attachment: attachmentReducer,

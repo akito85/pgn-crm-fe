@@ -1,0 +1,15 @@
+{
+    "code": 200,
+    "status": "OK",
+    "message": "Success",
+    "data": [
+        {
+            "value": "Gas",
+            "label": "Gas"
+        },
+        {
+            "value": "Non-Gas",
+            "label": "Non-Gas"
+        }
+    ]
+}
