@@ -204,11 +204,16 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
-      if (current === 2)
-        if (attachmentIsRequired && !dataAttachment.length)
-          throw new Error("At least provide one attachment");
-      else
-        await formCreate.validateFields(formFields[current]);
+      try {
+        if (current === 2) {
+          if (attachmentIsRequired && !dataAttachment.length)
+            throw new Error("At least provide one attachment");
+        }
+        else
+          await formCreate.validateFields(formFields[current]);
+      } catch (err) {
+        return;
+      }
 
       const {
         objectId,
@@ -330,9 +335,10 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   
   const next = async () => {
     try {
-      if (current === 2)
+      if (current === 2) {
         if (attachmentIsRequired && !dataAttachment.length)
           throw new Error("At least provide one attachment");
+      }
       else
         await formCreate.validateFields(formFields[current]);
     } catch (err) {
@@ -348,9 +354,10 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        if (i === 2)
+        if (i === 2) {
           if (attachmentIsRequired && !dataAttachment.length)
             throw new Error("At least provide one attachment");
+        }
         else
           await formCreate.validateFields(formFields[i]);
       } catch (err) {
@@ -397,6 +404,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
+      remark,
     } = formCreate.getFieldsValue();
 
     const body = {
@@ -408,7 +416,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
-      action: confirmationType
+      action: confirmationType,
+      remark,
     };
 
     if (type === "create")
@@ -641,29 +650,28 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               )}
             </div>
           </div>
+          <ConfirmationModal
+            form={"invoiceRelationForm"}
+            isOpen={showConfirmationModal}
+            handleCancel={() => handleSetShowConfirmationModal(false)}
+            selectedAppHierId={selectedAppHierId}
+            selectedApprovalName={selectedApprovalName}
+            hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
+              ...detail,
+              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                ...employeeDetail,
+                key: `employee-detail-${index}`
+              })),
+              key: `detail-detail-${index}`,
+            }))}
+            hieararchyOptionData={data_irApprovalHierarchy}
+            type={confirmationType}
+            dataAttachment={dataAttachment}
+            data={formCreate.getFieldsValue()}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
+          />
         </Form>
-
-        <ConfirmationModal
-          form={"invoiceRelationForm"}
-          isOpen={showConfirmationModal}
-          handleCancel={() => handleSetShowConfirmationModal(false)}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-          hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          hieararchyOptionData={data_irApprovalHierarchy}
-          type={confirmationType}
-          dataAttachment={dataAttachment}
-          data={formCreate.getFieldsValue()}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-        />
       </div>
     </LayoutMenu>
   );

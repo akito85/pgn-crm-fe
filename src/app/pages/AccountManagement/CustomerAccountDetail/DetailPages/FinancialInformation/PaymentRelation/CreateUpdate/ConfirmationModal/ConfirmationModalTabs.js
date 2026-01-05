@@ -3,12 +3,7 @@ import RadioTabs from "../../../../../../../../../components/RadioTabs";
 import ConfirmationModalInfo from "./ConfirmationModalInfo";
 import ConfirmationModalApproval from "./ConfirmationModalApproval";
 import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
-
-const dataTabs = {
-  info: "Payment Relation Information",
-  apprv: "Approval",
-  attch: "Attachment",
-};
+import ConfirmationModalRemark from "./ConfirmationModalRemark";
 
 const ConfirmationModalTabs = ({
   section = "",
@@ -21,14 +16,24 @@ const ConfirmationModalTabs = ({
   dataAttachment,
   data = {},
   service,
+  type = "",
   configApplication,
 }) => {
-  // Use provided options or fall back to default tabs
-  const tabOptions = options.length > 0 ? options : [
-    { value: "info", label: "Payment Relation Information" },
-    { value: "apprv", label: "Approval" },
-    { value: "attch", label: "Attachment" },
-  ];
+  const dataTabs = type === "submit" ? {
+    info: "Payment Relation Information",
+    apprv: "Approval",
+    attch: "Attachment",
+    rmrk: "Remark",
+  } : type === "draft" ? {
+    info: "Payment Relation Information",
+    apprv: "Approval",
+    attch: "Attachment",
+  } : {
+    info: "Payment Relation Information",
+    apprv: "Approval",
+    attch: "Attachment",
+    rmrk: "Remark",
+  };
 
   const renderSection = () => {
     switch (section) {
@@ -49,8 +54,10 @@ const ConfirmationModalTabs = ({
           service={service}
           configApplication={configApplication}
         />;
+      case dataTabs.rmrk:
+        return <ConfirmationModalRemark />
       default:
-        return "Payment Relation Information";
+        return null;
     }
   };
 
@@ -62,7 +69,7 @@ const ConfirmationModalTabs = ({
           <div className="w-full">
             <RadioTabs
               currentPosition={section}
-              data={tabOptions}
+              data={options}
               onChange={handleChangeOption}
             />
           </div>
