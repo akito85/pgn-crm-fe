@@ -48,7 +48,6 @@ const CalculationPage = () => {
     right: ["status", "action"],
   }));
 
-  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     if (tabHeader === "Calculation List") {
       dispatch(
