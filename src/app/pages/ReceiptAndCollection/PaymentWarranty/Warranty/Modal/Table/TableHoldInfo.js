@@ -7,7 +7,7 @@ import { Form } from "antd";
 import DateComponent from "../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../components/InputComponent";
 
-export const columnsRefundInfo = (
+export const columnsHoldInfo = (
   page = 1,
   pageSize = 10,
   searchInput,
