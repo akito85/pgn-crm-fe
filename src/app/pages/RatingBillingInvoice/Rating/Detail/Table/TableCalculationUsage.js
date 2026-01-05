@@ -137,6 +137,7 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "usage",
@@ -152,6 +153,7 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "uom",
@@ -182,7 +184,7 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
-    render: (text) => text ?? "-",
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "periodicMaxUsage",
@@ -198,7 +200,7 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
-    render: (text) => text ?? "-",
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "minContract",
