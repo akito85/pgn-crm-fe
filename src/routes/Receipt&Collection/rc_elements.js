@@ -72,6 +72,9 @@ import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarran
 
 import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/History/ListHistoryPaymentWarranty";
 
+import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
+import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -201,4 +204,8 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
 
   // History Payment Warranty
   VIEW_HISTORY_PAYMENT_WARRANTY: <ListHistoryPaymentWarranty />,
+
+  // Gapura Management
+  VIEW_GAPURA_MANAGEMENT_PAGE: <ViewGapuraManagement />,
+  DETAIL_GAPURA_MANAGEMENT_PAGE: <ListDetailGapuraManagement />,
 };

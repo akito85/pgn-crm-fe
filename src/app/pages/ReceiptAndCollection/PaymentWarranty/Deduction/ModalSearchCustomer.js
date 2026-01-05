@@ -1,34 +1,38 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import TableRBI from "../../../../../components/TableRBI";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { searchCustomerDeduction } from "../../../../../redux/slices/receipt_collection/deduction";
 import { getCustomerListColumns } from "./CustomerColumns";
 
 const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
     const dispatch = useDispatch();
-    const { customerData } = useSelector((state) => state.deduction);
+    const { customerData, loading } = useSelector((state) => state.deduction);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [dataSource, setDataSource] = useState([]);
 
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
     useEffect(() => {
         if (isOpen) {
-            dispatch(searchCustomerDeduction({ page: 1, pageSize: 10 }));
-
-            console.log("customerData", customerData);
+            dispatch(searchCustomerDeduction({ page, pageSize }));
         }
-    }, [dispatch, isOpen]);
+    }, [dispatch, isOpen, page, pageSize]);
 
     useEffect(() => {
-        if (customerData) {
-            console.log("customerData::", customerData);
-            setDataSource(customerData);
+        if (customerData && customerData.result) {
+            setDataSource(customerData.result);
+        } else {
+            setDataSource([]);
         }
     }, [customerData]);
 
     const columns = getCustomerListColumns({
+        page,
+        pageSize,
         actionType: "none",
     });
 
@@ -53,21 +57,30 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
         onClose();
         setSelectedRowKeys([]);
         setSelectedRows([]);
+        setPage(1);
     }
+
+    const onPageChange = (newPage, newPageSize) => {
+        setPage(newPage);
+        if (newPageSize !== pageSize) {
+            setPageSize(newPageSize);
+            setPage(1);
+        }
+    };
 
     return (
         <ModalCustom
             isOpen={isOpen}
             handleCancel={handleCancel}
-            header="Search Receipt"
-            width={1000}
+            header="Search Customer"
+            width={1200}
             type="confirmation"
             footer={
                 <div className="flex justify-end gap-3 pt-4">
                     <ButtonComponent type="default" onClick={handleCancel}>
                         Cancel
                     </ButtonComponent>
-                    <ButtonComponent type="primary" onClick={handleConfirm}>
+                    <ButtonComponent type="primary" onClick={handleConfirm} disabled={selectedRows.length === 0}>
                         Confirm
                     </ButtonComponent>
                 </div>
@@ -75,13 +88,17 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
         >
             <div className="mt-4">
                 <TableRBI
-                    rowKey="id"
                     columns={columns}
-                    dataSource={customerData?.result || []}
+                    dataSource={dataSource}
                     rowSelection={rowSelection}
-                    pagination={false}
-                    tableScrolled={{ x: 1500, y: 400 }}
-                    usePagination={false}
+                    loading={loading}
+                    pagination={true}
+                    current={page}
+                    pageSize={pageSize}
+                    totalData={customerData?.page?.totalElements || 0}
+                    onChange={onPageChange}
+                    tableScrolled={{ x: 1800, y: 400 }}
+                    rowKey="id"
                 />
             </div>
         </ModalCustom>

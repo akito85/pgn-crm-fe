@@ -129,4 +129,8 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   // History Payment Warranty
   VIEW_HISTORY_PAYMENT_WARRANTY: "/receipt-and-collection/payment-warranty/history",
 
+  // Gapura Management
+  VIEW_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management",
+  DETAIL_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management/view",
+
 };

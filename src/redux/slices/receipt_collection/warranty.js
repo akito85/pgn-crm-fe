@@ -369,6 +369,7 @@ export const downloadWarrantyList = createAsyncThunk(
     }
   }
 );
+
 const warrantySlice = createSlice({
   name: "warranty",
   initialState,
@@ -457,7 +458,7 @@ const warrantySlice = createSlice({
       state.loading = false;
     },
 
-    
+
     /** Get List Category */
     [getListCategory.pending]: (state, action) => {
       state.dataListCategory = action.payload;
@@ -477,12 +478,12 @@ const warrantySlice = createSlice({
       state.loading = true;
     },
     [downloadWarrantyList.fulfilled]: (state) => {
-      state.loading = true;
+      state.loading = false;
     },
     [downloadWarrantyList.rejected]: (state) => {
       state.loading = false;
     },
-    
+
     // Requested Refund
     [requestedRefund.pending]: (state) => {
       state.loading = true;
@@ -496,7 +497,7 @@ const warrantySlice = createSlice({
       state.isFailed = true;
       state.result = action.payload;
     },
-    
+
     // Requested Hold
     [requestedHold.pending]: (state) => {
       state.loading = true;

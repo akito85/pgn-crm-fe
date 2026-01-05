@@ -101,7 +101,7 @@ const ViewDeduction = () => {
           <Tooltip title={"Detail"}>
             <Link
               // Ensure this route exists or use a placeholder if DETAIL_DEDUCTION is not yet defined
-              to={`${RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION}/detail/${record.id}`}
+              to={`${RECEIPT_AND_COLLECTION_ROUTES.DETAIL_DEDUCTION}`}
               state={{ id: record?.id }}
             >
               <EyeOutlined />
@@ -145,7 +145,7 @@ const ViewDeduction = () => {
     searchInput,
     searchedColumn,
     searchText,
-    search, // search dependency might trigger re-render of columns if getColumns uses it internally, currently it's for filtering props
+    search,
   ]);
 
   return (
