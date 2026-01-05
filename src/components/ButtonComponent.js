@@ -5,6 +5,7 @@ const ButtonComponent = ({
   disabled,
   children,
   icon,
+  isLoading = false,
   onClick = () => {},
   type,
   border,
@@ -22,6 +23,7 @@ const ButtonComponent = ({
       <Button
         form={form || undefined}
         onClick={onClick}
+        loading={isLoading}
         icon={icon ? icon : null}
         className={`flex w-full justify-center ${className}`}
         type={type}

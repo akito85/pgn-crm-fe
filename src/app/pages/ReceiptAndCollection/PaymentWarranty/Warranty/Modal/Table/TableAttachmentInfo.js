@@ -20,58 +20,58 @@ export const columnsAttachmentInfo = (
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
-    key: "costCenter",
-    title: "COST CENTER",
-    dataIndex: "costCenter",
+    key: "category",
+    title: "CATEGORY",
+    dataIndex: "category",
     width: 180,
-    sorter: (a, b) => a?.costCenter?.localeCompare(b?.costCenter),
+    sorter: (a, b) => a?.category?.localeCompare(b?.category),
     ...getColumnSearchPropsPaging(
-      "costCenter",
+      "category",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
     ),
     onFilter: (value, record) =>
-      record["costCenter"]
+      record["category"]
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
   },
   {
-    key: "customerNumber",
-    title: "CUSTOMER NUMBER",
-    dataIndex: "customerNumber",
+    key: "fileName",
+    title: "FILENAME",
+    dataIndex: "fileName",
     width: 150,
-    sorter: (a, b) => a?.customerNumber?.localeCompare(b?.customerNumber),
+    sorter: (a, b) => a?.fileName?.localeCompare(b?.fileName),
     ...getColumnSearchPropsPaging(
-      "customerNumber",
+      "fileName",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
     ),
     onFilter: (value, record) =>
-      record["customerNumber"]
+      record["fileName"]
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
   },
   {
-    key: "customerName",
-    title: "CUSTOMER NAME",
-    dataIndex: "customerName",
+    key: "fileSize",
+    title: "FILE SIZE",
+    dataIndex: "fileSize",
     width: 180,
-    sorter: (a, b) => a?.customerName?.localeCompare(b?.customerName),
+    sorter: (a, b) => a?.fileSize?.localeCompare(b?.fileSize),
     ...getColumnSearchPropsPaging(
-      "customerName",
+      "fileSize",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
     ),
     onFilter: (value, record) =>
-      record["customerName"]
+      record["fileSize"]
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),

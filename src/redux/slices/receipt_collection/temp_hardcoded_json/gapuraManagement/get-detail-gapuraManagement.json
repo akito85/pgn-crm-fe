@@ -1,0 +1,69 @@
+{
+    "code": 200,
+    "status": "SUCCESS",
+    "message": "Success Get Data",
+    "data": {
+        "gapuraManagement": {
+            "id": 1,
+            "paymentGateway": "GAPURA",
+            "totalBank": 10
+        },
+        "historyJob": [
+            {
+                "id": 1,
+                "jobPublishBill": "INV009123123012023",
+                "jobCode": "JOB001",
+                "customer": "PT PLN",
+                "accountNumber": "CUS001",
+                "value": 300,
+                "type": "Debit",
+                "createdAt": "12 Jan 2023",
+                "createdBy": "Putri"
+            },
+            {
+                "id": 2,
+                "jobPublishBill": "INV009123123012023",
+                "jobCode": "JOB002",
+                "customer": "PT WASKITA",
+                "accountNumber": "CUS002",
+                "value": 300,
+                "type": "Credit",
+                "createdAt": "12 Jan 2023",
+                "createdBy": "Putri"
+            },
+            {
+                "id": 3,
+                "jobPublishBill": "INV009123123012023",
+                "jobCode": "JOB003",
+                "customer": "PT PP",
+                "accountNumber": "CUS003",
+                "value": 300,
+                "type": "Credit",
+                "createdAt": "12 Jan 2023",
+                "createdBy": "Putri"
+            },
+            {
+                "id": 4,
+                "jobPublishBill": "INV009123123012023",
+                "jobCode": "JOB004",
+                "customer": "PT WASKITA",
+                "accountNumber": "CUS004",
+                "value": 300,
+                "type": "Debit",
+                "createdAt": "12 Jan 2023",
+                "createdBy": "Putri"
+            },
+            {
+                "id": 5,
+                "jobPublishBill": "INV009123123012023",
+                "jobCode": "JOB005",
+                "customer": "PT PLN",
+                "accountNumber": "CUS001",
+                "value": 300,
+                "type": "Credit",
+                "createdAt": "12 Jan 2023",
+                "createdBy": "Putri"
+            }
+        ]
+    }
+}
