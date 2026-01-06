@@ -1,0 +1,29 @@
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "result": [
+            {
+                "value": "CUS001",
+                "label": "CUS001 - PT Pertamina Gas Negara Tbk",
+                "name": "PT Pertamina Gas Negara Tbk",
+                "area": "JAKARTA PUSAT",
+                "segment": "Komersial Industri"
+            },
+            {
+                "value": "CUS008",
+                "label": "CUS008 - PT Gagas Energi Indonesia",
+                "name": "PT Gagas Energi Indonesia",
+                "area": "JAKARTA BARAT",
+                "segment": "Komersial Industri"
+            },
+            {
+                "value": "CUS012",
+                "label": "CUS012 - PT PGAS Solution",
+                "name": "PT PGAS Solution",
+                "area": "JAKARTA SELATAN",
+                "segment": "Komersial Industri"
+            }
+        ]
+    }
+}

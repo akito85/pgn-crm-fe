@@ -240,6 +240,7 @@ const DetailMonitoringUsage = () => {
         updateSingleUsage({
           recordId: recordId,
           data: requestBody,
+          batchId: location?.state?.id,
         })
       );
 

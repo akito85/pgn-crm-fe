@@ -1,6 +1,6 @@
 // TableRBI.js (with resizable columns + customHeaderLeft + showExport control + Fixed Horizontal Scrollbar)
 import React, { useMemo, useState, useCallback } from "react";
-import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
+import { DownloadOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
 import ColumnSettings from "./ColumnSettings/ColumnSettings";
 import SearchBar from "./SearchBar";
@@ -138,6 +138,8 @@ const TableRBI = ({
   showExport = false,
   showAdvanceSearch = true,
   showSearchBar = true,
+  showRefresh = false,
+  onRefresh,
   enableRowClick = false,
   selectedRowKey = null,
   onRowClick = () => {},
@@ -146,6 +148,11 @@ const TableRBI = ({
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [clickedRowKey, setClickedRowKey] = useState(null);
+
+  // Default refresh handler jika tidak disediakan
+  const handleRefresh = onRefresh || (() => {
+    window.location.reload();
+  });
 
   // State untuk menyimpan width setiap column
   const [columnWidths, setColumnWidths] = useState({});
@@ -211,6 +218,50 @@ const TableRBI = ({
     onLoadMore,
     idTable,
   ]);
+
+  // Keyboard arrow navigation for horizontal scroll
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Only handle arrow keys when not typing in input/textarea
+      const activeElement = document.activeElement;
+      const isTyping =
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.isContentEditable;
+
+      if (isTyping) return;
+
+      // Check if mouse is hovering over the table or table is focused
+      const tableContainer = document.querySelector(`#${idTable}`);
+      if (!tableContainer) return;
+
+      const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
+      if (!tableBody) return;
+
+      const scrollAmount = 100; // pixels to scroll per key press
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        tableBody.scrollTo({
+          left: tableBody.scrollLeft - scrollAmount,
+          behavior: 'smooth'
+        });
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        tableBody.scrollTo({
+          left: tableBody.scrollLeft + scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    // Add event listener to document
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [idTable]);
 
   // Handler untuk resize column
   const handleResize = useCallback(
@@ -418,7 +469,7 @@ const TableRBI = ({
   };
 
   // Check if any right side controls should be shown
-  const hasRightControls = showExport || showAdvanceSearch || showSearchBar;
+  const hasRightControls = showExport || showAdvanceSearch || showSearchBar || showRefresh;
 
   // Sync internal state with external selectedRowKey
   React.useEffect(() => {
@@ -650,9 +701,26 @@ const TableRBI = ({
             {customHeaderLeft && customHeaderLeft}
           </div>
 
-          {/* BAGIAN KANAN: Export, Advance Search, Search Bar */}
+          {/* BAGIAN KANAN: Refresh, Export, Advance Search, Search Bar */}
           {hasRightControls && (
             <div className="flex justify-end gap-2">
+              {showRefresh && (
+                <Button
+                  icon={<ReloadOutlined style={{ fontSize: "14px" }} />}
+                  onClick={handleRefresh}
+                  loading={loading}
+                  style={{
+                    border: "1px solid #BDBDBD",
+                    color: "black",
+                    borderRadius: "8px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Refresh
+                </Button>
+              )}
+
               {showExport && (
                 <Button
                   icon={<DownloadOutlined style={{ fontSize: "14px" }} />}

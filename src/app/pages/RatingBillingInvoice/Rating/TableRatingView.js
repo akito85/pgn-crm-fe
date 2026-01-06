@@ -1183,58 +1183,58 @@ export const columnsRating = (
         search
       ),
   },
-  {
-    key: "totalAmountMinEqvIdr",
-    title: "TOTAL AMOUNT MINIMUM EQV IDR",
-    dataIndex: "totalAmountMinEqvIdr",
-    width: 270,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountMinEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountMinEqvIdr",
-        hasValue(search["totalAmountMinEqvIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountMinEqvUsd",
-    title: "TOTAL AMOUNT MINIMUM EQV USD",
-    dataIndex: "totalAmountMinEqvUsd",
-    width: 270,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountMinEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountMinEqvUsd",
-        hasValue(search["totalAmountMinEqvUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
+  // {
+  //   key: "totalAmountMinEqvIdr",
+  //   title: "TOTAL AMOUNT MINIMUM EQV IDR",
+  //   dataIndex: "totalAmountMinEqvIdr",
+  //   width: 270,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountMinEqvIdr",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountMinEqvIdr",
+  //       hasValue(search["totalAmountMinEqvIdr"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
+  // {
+  //   key: "totalAmountMinEqvUsd",
+  //   title: "TOTAL AMOUNT MINIMUM EQV USD",
+  //   dataIndex: "totalAmountMinEqvUsd",
+  //   width: 270,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountMinEqvUsd",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountMinEqvUsd",
+  //       hasValue(search["totalAmountMinEqvUsd"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
   {
     key: "totalAmountNormalIdr",
     title: "TOTAL AMOUNT NORMAL IDR",
@@ -1287,58 +1287,58 @@ export const columnsRating = (
         search
       ),
   },
-  {
-    key: "totalAmountNormalEqvIdr",
-    title: "TOTAL AMOUNT NORMAL EQV IDR",
-    dataIndex: "totalAmountNormalEqvIdr",
-    width: 270,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountNormalEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountNormalEqvIdr",
-        hasValue(search["totalAmountNormalEqvIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountNormalEqvUsd",
-    title: "TOTAL AMOUNT NORMAL EQV USD",
-    dataIndex: "totalAmountNormalEqvUsd",
-    width: 270,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountNormalEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountNormalEqvUsd",
-        hasValue(search["totalAmountNormalEqvUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
+  // {
+  //   key: "totalAmountNormalEqvIdr",
+  //   title: "TOTAL AMOUNT NORMAL EQV IDR",
+  //   dataIndex: "totalAmountNormalEqvIdr",
+  //   width: 270,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountNormalEqvIdr",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountNormalEqvIdr",
+  //       hasValue(search["totalAmountNormalEqvIdr"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
+  // {
+  //   key: "totalAmountNormalEqvUsd",
+  //   title: "TOTAL AMOUNT NORMAL EQV USD",
+  //   dataIndex: "totalAmountNormalEqvUsd",
+  //   width: 270,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountNormalEqvUsd",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountNormalEqvUsd",
+  //       hasValue(search["totalAmountNormalEqvUsd"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
   {
     key: "totalAmountOupIdr",
     title: "TOTAL AMOUNT OUP IDR",
@@ -1391,58 +1391,58 @@ export const columnsRating = (
         search
       ),
   },
-  {
-    key: "totalAmountOupEqvIdr",
-    title: "TOTAL AMOUNT OUP EQV IDR",
-    dataIndex: "totalAmountOupEqvIdr",
-    width: 250,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountOupEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountOupEqvIdr",
-        hasValue(search["totalAmountOupEqvIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountOupEqvUsd",
-    title: "TOTAL AMOUNT OUP EQV USD",
-    dataIndex: "totalAmountOupEqvUsd",
-    width: 250,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountOupEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountOupEqvUsd",
-        hasValue(search["totalAmountOupEqvUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
+  // {
+  //   key: "totalAmountOupEqvIdr",
+  //   title: "TOTAL AMOUNT OUP EQV IDR",
+  //   dataIndex: "totalAmountOupEqvIdr",
+  //   width: 250,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountOupEqvIdr",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountOupEqvIdr",
+  //       hasValue(search["totalAmountOupEqvIdr"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
+  // {
+  //   key: "totalAmountOupEqvUsd",
+  //   title: "TOTAL AMOUNT OUP EQV USD",
+  //   dataIndex: "totalAmountOupEqvUsd",
+  //   width: 250,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountOupEqvUsd",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountOupEqvUsd",
+  //       hasValue(search["totalAmountOupEqvUsd"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
   {
     key: "amountIdr",
     title: "AMOUNT IDR",
@@ -1493,58 +1493,58 @@ export const columnsRating = (
         search
       ),
   },
-  {
-    key: "amountEqvIdr",
-    title: "AMOUNT EQV IDR",
-    dataIndex: "amountEqvIdr",
-    width: 170,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "amountEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "amountEqvIdr",
-        hasValue(search["amountEqvIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "amountEqvUsd",
-    title: "AMOUNT EQV USD",
-    dataIndex: "amountEqvUsd",
-    width: 170,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "amountEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "amountEqvUsd",
-        hasValue(search["amountEqvUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
+  // {
+  //   key: "amountEqvIdr",
+  //   title: "AMOUNT EQV IDR",
+  //   dataIndex: "amountEqvIdr",
+  //   width: 170,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "amountEqvIdr",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "amountEqvIdr",
+  //       hasValue(search["amountEqvIdr"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
+  // {
+  //   key: "amountEqvUsd",
+  //   title: "AMOUNT EQV USD",
+  //   dataIndex: "amountEqvUsd",
+  //   width: 170,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "amountEqvUsd",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "amountEqvUsd",
+  //       hasValue(search["amountEqvUsd"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
   {
     key: "discountAmount",
     title: "DISCOUNT AMOUNT",
@@ -1623,58 +1623,58 @@ export const columnsRating = (
         search
       ),
   },
-  {
-    key: "totalAmountEqvIdr",
-    title: "TOTAL AMOUNT EQV IDR",
-    dataIndex: "totalAmountEqvIdr",
-    width: 210,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountEqvIdr",
-        hasValue(search["totalAmountEqvIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountEqvUsd",
-    title: "TOTAL AMOUNT EQV USD",
-    dataIndex: "totalAmountEqvUsd",
-    width: 210,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountEqvUsd",
-        hasValue(search["totalAmountEqvUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
+  // {
+  //   key: "totalAmountEqvIdr",
+  //   title: "TOTAL AMOUNT EQV IDR",
+  //   dataIndex: "totalAmountEqvIdr",
+  //   width: 210,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountEqvIdr",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountEqvIdr",
+  //       hasValue(search["totalAmountEqvIdr"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
+  // {
+  //   key: "totalAmountEqvUsd",
+  //   title: "TOTAL AMOUNT EQV USD",
+  //   dataIndex: "totalAmountEqvUsd",
+  //   width: 210,
+  //   sorter: true,
+  //   isNumber: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAmountEqvUsd",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "totalAmountEqvUsd",
+  //       hasValue(search["totalAmountEqvUsd"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
   {
     key: "transactionDate",
     title: "TRANSACTION DATE",
