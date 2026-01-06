@@ -7,7 +7,7 @@ import axios from "axios";
 import { notificationTokenHeader } from "../utils/notificationTokenHeader";
 
 // Use relative path for notification API to go through configured proxy
-const NOTIFICATION_API_URL = "http://167.71.200.144:8080/ntf/v1/dbs/api/notifications";
+const NOTIFICATION_API_URL = "/ntf/v1/dbs/api/notifications";
 
 const notificationApi = {
   /**
