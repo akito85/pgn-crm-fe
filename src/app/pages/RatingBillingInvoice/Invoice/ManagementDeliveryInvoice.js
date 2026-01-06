@@ -3,14 +3,15 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "antd";
 import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SummaryStatistics from "./_components/ManagementDeliveryComponent/SummaryStatistics";
-import CreateFormDelivery from "./_components/ManagementDeliveryComponent/CreateFormDelivery";
 import DetailInvoiceModal from "./_components/DetailnvoiceModal";
 import PreviewMessageModal from "./_components/ManagementDeliveryComponent/PreviewMessageModal";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import StatusComponent from "../../../../components/StatusComponent";
+import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 
 import {
   getDeliveryList,
@@ -19,6 +20,7 @@ import {
 
 const ManagementDeliveryInvoice = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Redux state
   const { data_list, data_summary, loading } = useSelector(
@@ -26,7 +28,6 @@ const ManagementDeliveryInvoice = () => {
   );
 
   // Modal & selection
-  const [modalVisible, setModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -290,7 +291,7 @@ const ManagementDeliveryInvoice = () => {
               type="primary"
               size="large"
               icon={<PlusOutlined />}
-              onClick={() => setModalVisible(true)}
+              onClick={() => navigate(INVOICE_ROUTES.CREATE_DELIVERY_JOB)}
               style={{
                 height: "48px",
                 fontSize: "15px",
@@ -328,12 +329,6 @@ const ManagementDeliveryInvoice = () => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-        />
-
-        {/* Create Job Modal */}
-        <CreateFormDelivery
-          visible={modalVisible}
-          onCancel={() => setModalVisible(false)}
         />
 
         {/* Detail Modal */}
