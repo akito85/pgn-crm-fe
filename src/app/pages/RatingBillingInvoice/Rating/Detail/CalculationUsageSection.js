@@ -245,7 +245,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         </CardComponent>
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
           <DetailText label="Record ID">
-            {detailCalculationItem?.idCalcUsage}
+            {detailCalculationItem?.recordId}
           </DetailText>
           <DetailText label="Created Date">
             {hasValue(detailCalculationItem?.createdDate) &&
