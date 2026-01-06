@@ -204,7 +204,7 @@ export const columnsCalculationUsage = (
   },
   {
     key: "minContract",
-    title: "MIN CONTRACT",
+    title: "MININIMUM",
     dataIndex: "minContract",
     sorter: true,
     isNumber: true,
@@ -219,7 +219,7 @@ export const columnsCalculationUsage = (
   },
   {
     key: "maxContract",
-    title: "MAX CONTRACT",
+    title: "MAXIMUM",
     dataIndex: "maxContract",
     sorter: true,
     isNumber: true,
