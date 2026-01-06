@@ -593,7 +593,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                 : ""}
             </DetailText>
             <DetailText label={"Updated By"}>
-              {prabillData?.createdBy || ""}
+              {prabillData?.updateBy || ""}
             </DetailText>
           </div>
         </CardContainer>
