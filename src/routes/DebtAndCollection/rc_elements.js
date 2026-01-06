@@ -27,6 +27,10 @@ import ViewActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan
 import DetailActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/DetailActivitiesPlan";
 import FormActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/FormActivitiesPlan";
 
+import ViewRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ViewRestructure";
+import ListFormRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListFormRestructure";
+import ListDetailRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListDetailRestructure";
+
 export const DEBT_AND_COLLECTION_ELEMENTS = {
   // Grace Period
   VIEW_GRACE_PERIOD_PAGE: <ViewGracePeriod />,
@@ -63,7 +67,7 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   DETAIL_ACTIVITIES_PAGE: <DetailActivities />,
   CREATE_ACTIVITIES_PAGE: <FormActivities type="create" />,
   UPDATE_ACTIVITIES_PAGE: <FormActivities type="update" />,
-  
+
   // Transaction Report
   VIEW_TRANSACTION_REPORT_PAGE: <ViewTransactionReport />,
 
@@ -72,4 +76,10 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   DETAIL_ACTIVITIES_PLAN_PAGE: <DetailActivitiesPlan />,
   CREATE_ACTIVITIES_PLAN_PAGE: <FormActivitiesPlan type="create" />,
   UPDATE_ACTIVITIES_PLAN_PAGE: <FormActivitiesPlan type="update" />,
+
+  // Restructure
+  VIEW_RESTRUCTURE_PAGE: <ViewRestructure />,
+  CREATE_RESTRUCTURE_PAGE: <ListFormRestructure type="create" />,
+  UPDATE_RESTRUCTURE_PAGE: <ListFormRestructure type="update" />,
+  DETAIL_RESTRUCTURE_PAGE: <ListDetailRestructure />,
 };

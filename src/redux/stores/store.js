@@ -122,6 +122,7 @@ import relationshipReducer from "../slices/account_management/detailAccount/rela
 import warrantyReducer from "../slices/receipt_collection/warranty";
 import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
+import restructureReducer from "../slices/receipt_collection/restructure";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
 import deductionReducer from "../slices/receipt_collection/deduction";
@@ -255,6 +256,7 @@ const reducer = combineReducers({
   warranty: warrantyReducer,
   transferToReceipt: transferToReceiptReducer,
   transferToCustomer: transferToCustomerReducer,
+  restructure: restructureReducer,
   deduction: deductionReducer,
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
