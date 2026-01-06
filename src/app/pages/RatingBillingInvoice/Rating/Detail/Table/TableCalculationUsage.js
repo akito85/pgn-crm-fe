@@ -139,22 +139,22 @@ export const columnsCalculationUsage = (
     ),
     render: (text) => (text !== null && text !== undefined ? text : ""),
   },
-  {
-    key: "usage",
-    title: "USAGE",
-    dataIndex: "usage",
-    sorter: true,
-    isNumber: true,
-    width: 50,
-    ...getColumnSearchPropsPaging(
-      "usage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) => (text !== null && text !== undefined ? text : ""),
-  },
+  // {
+  //   key: "usage",
+  //   title: "USAGE",
+  //   dataIndex: "usage",
+  //   sorter: true,
+  //   isNumber: true,
+  //   width: 50,
+  //   ...getColumnSearchPropsPaging(
+  //     "usage",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) => (text !== null && text !== undefined ? text : ""),
+  // },
   {
     key: "uom",
     title: "UOM",
