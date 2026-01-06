@@ -842,8 +842,8 @@ const renderModalAccountPromo = ({
 
           <ModalCustomPromo
             title={"DETAIL OF PROMO HISTORY DETAIL"}
-            isOpen={isModalHistoryVisible}
-            setIsOpen={setIsModalHistoryVisible}
+            isOpen={isModalHistoryDetailVisible}
+            setIsOpen={setIsModalHistoryDetailVisible}
           >
             <Space direction="vertical" size="middle" style={{ width: "100%" }}>
               {/* Basic Information Section */}
