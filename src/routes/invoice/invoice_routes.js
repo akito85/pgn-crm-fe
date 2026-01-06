@@ -12,6 +12,8 @@ export const INVOICE_ROUTES = {
   E_METERAI_MANAGEMENT: "/invoice/e-meterai-management",
   // management delivery invoice
   MANAGEMENT_DELIVERY_INVOICE: "/invoice/management-delivery-invoice",
+  // create delivery job (new page)
+  CREATE_DELIVERY_JOB: "/invoice/management-delivery-invoice/create",
 
   //E-Faktur
   EFAKTUR_VIEW: "/invoice/e-faktur-management",

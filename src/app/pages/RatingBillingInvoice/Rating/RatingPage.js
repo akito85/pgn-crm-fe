@@ -21,12 +21,9 @@ import SelectComponent from "../../../../components/SelectComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
-  const { data, loading, list_billing_period } = useSelector((state) => state.rating);
-
-  // Debug: Log list_billing_period
-  useEffect(() => {
-    console.log('list_billing_period:', list_billing_period);
-  }, [list_billing_period]);
+  const { data, loading, list_billing_period } = useSelector(
+    (state) => state.rating
+  );
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -45,8 +42,6 @@ const RatingPage = () => {
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
   const [activeRowKey, setActiveRowKey] = useState(null);
-
-  // State untuk billing period filter
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
@@ -56,25 +51,32 @@ const RatingPage = () => {
 
   const detailRef = useRef(null);
 
-  // Load billing period list saat component mount
   useEffect(() => {
     dispatch(getListBillingPeriodForRating());
   }, [dispatch]);
 
-  // Set default billing period ke ID tertentu setelah data loaded
   useEffect(() => {
-    if (list_billing_period && list_billing_period.length > 0 && !selectedBillingPeriod) {
-      // OPTION 1: Set ke ID spesifik (misal 453)
-      const defaultPeriod = list_billing_period.find(item => item.id === 453);
-      if (defaultPeriod) {
-        setSelectedBillingPeriod(defaultPeriod.id);
+    if (
+      list_billing_period &&
+      list_billing_period.length > 0 &&
+      !selectedBillingPeriod
+    ) {
+      const now = new Date();
+      const currentMonth = now.toLocaleString("en-US", { month: "short" });
+      const currentYear = now.getFullYear();
+      const currentPeriodName = `${currentMonth} ${currentYear}`;
+
+      const currentPeriod = list_billing_period.find(
+        (item) => item.name === currentPeriodName
+      );
+
+      if (currentPeriod) {
+        setSelectedBillingPeriod(currentPeriod.id);
       } else {
-        // Fallback ke yang pertama jika ID 453 tidak ada
-        setSelectedBillingPeriod(list_billing_period[0].id);
+        const latestPeriod =
+          list_billing_period[list_billing_period.length - 1];
+        setSelectedBillingPeriod(latestPeriod.id);
       }
-      
-      // OPTION 2: Atau langsung set ke yang pertama
-      // setSelectedBillingPeriod(list_billing_period[0].id);
     }
   }, [list_billing_period]);
 
@@ -90,9 +92,7 @@ const RatingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // Initial fetch - sekarang dengan billPeriodId
   useEffect(() => {
-    // Hanya fetch jika billing period sudah dipilih
     if (selectedBillingPeriod) {
       dispatch(
         getListRatingGasPaginate({
@@ -287,88 +287,88 @@ const RatingPage = () => {
 
   return (
     <LayoutMenu>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px]">RATING LIST</p>
-              <div className="w-full flex justify-end gap-[20px]">
-                <Toolbar items={itemGrantAccess} />
-              </div>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px]">RATING LIST</p>
+            <div className="w-full flex justify-end gap-[20px]">
+              <Toolbar items={itemGrantAccess} />
             </div>
-          }
-        >
-          <Tabs
-            items={tabItems}
-            onChange={onChangeTab}
-            activeKey={valueTab}
-            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+          </div>
+        }
+      >
+        <Tabs
+          items={tabItems}
+          onChange={onChangeTab}
+          activeKey={valueTab}
+          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+        />
+
+        {/* Filter Section */}
+        <div className="flex gap-4 mb-1 items-end">
+          <div className="w-1/4">
+            <label className="block text-sm font-medium mb-2">
+              Billing Period <span className="text-red-500">*</span>
+            </label>
+            <SelectComponent
+              value={selectedBillingPeriod}
+              onChange={handleBillingPeriodChange}
+              placeholder="Select Billing Period"
+              options={(list_billing_period || []).map((item) => ({
+                label: item?.name,
+                value: item?.id,
+              }))}
+            />
+          </div>
+        </div>
+
+        <div className="my-0">
+          <TableRBI
+            idTable="rating-table"
+            size="small"
+            dataSource={dataSourceWithKeys}
+            columns={processedColumns}
+            totalData={data?.page?.totalElements || 0}
+            tableScrolled={{ y: 525, x: 3000 }}
+            onSort={onSortApi}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            enableRowClick={true}
+            selectedRowKey={activeRowKey}
+            onRowClick={handleDetail}
+            showExport={false}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
           />
+        </div>
+      </CardContainer>
 
-          {/* Filter Section */}
-          <div className="flex gap-4 mb-1 items-end">
-            <div className="w-1/4">
-              <label className="block text-sm font-medium mb-2">
-                Billing Period <span className="text-red-500">*</span>
-              </label>
-              <SelectComponent
-                value={selectedBillingPeriod}
-                onChange={handleBillingPeriodChange}
-                placeholder="Select Billing Period"
-                options={(list_billing_period || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
-                }))}
-              />
-            </div>
-          </div>
-
-          <div className="my-0">
-            <TableRBI
-              idTable="rating-table"
-              size="small"
-              dataSource={dataSourceWithKeys}
-              columns={processedColumns}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 3000 }}
-              onSort={onSortApi}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              enableRowClick={true}
-              selectedRowKey={activeRowKey}
-              onRowClick={handleDetail}
-              showExport={false}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-            />
-          </div>
-        </CardContainer>
-
-        {pageDetail && (
-          <div
-            ref={detailRef}
-            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
-          >
-            <RatingDetail
-              calculationCode={calculationCode}
-              SAId={saNumberId}
-              ratingCodeId={ratingCode}
-              onClose={() => {
-                setPageDetail(false);
-                setActiveRowKey(null);
-                setRatingCode("");
-                setCalculationCode("");
-                setSANumberId("");
-              }}
-            />
-          </div>
-        )}
+      {pageDetail && (
+        <div
+          ref={detailRef}
+          className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
+        >
+          <RatingDetail
+            calculationCode={calculationCode}
+            SAId={saNumberId}
+            ratingCodeId={ratingCode}
+            onClose={() => {
+              setPageDetail(false);
+              setActiveRowKey(null);
+              setRatingCode("");
+              setCalculationCode("");
+              setSANumberId("");
+            }}
+          />
+        </div>
+      )}
     </LayoutMenu>
   );
 };

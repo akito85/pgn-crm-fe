@@ -486,106 +486,151 @@ const TableRBI = ({
     <div className={"flex flex-col w-full"}>
       <style>
         {`
-          /* Override cursor for sort and filter icons in table headers */
-          #${idTable} .ant-table-column-sorter,
-          #${idTable} .ant-table-filter-trigger,
-          #${idTable} .ant-table-column-sorter-up,
-          #${idTable} .ant-table-column-sorter-down,
-          #${idTable} .ant-table-filter-trigger-container {
-            cursor: pointer !important;
-          }
+            /* Level 1: Base - Table Content & Body */
+            #${idTable} .ant-table-content {
+              position: relative;
+              z-index: 1;
+            }
 
-          /* Keep drag cursor for the header cell text area only when draggable */
-          #${idTable} th[draggable="true"] {
-            cursor: move;
-          }
+            #${idTable} .ant-table-body {
+              position: relative;
+              z-index: 1;
+            }
 
-          /* Override cursor back to pointer when hovering over interactive elements */
-          #${idTable} th[draggable="true"] .ant-table-column-sorter,
-          #${idTable} th[draggable="true"] .ant-table-filter-trigger,
-          #${idTable} th[draggable="true"] .ant-table-column-sorter-up,
-          #${idTable} th[draggable="true"] .ant-table-column-sorter-down,
-          #${idTable} th[draggable="true"] .ant-table-filter-trigger-container,
-          #${idTable} th[draggable="true"] .ant-table-column-sorters {
-            cursor: pointer !important;
-          }
+            #${idTable} .ant-table-tbody > tr {
+              position: relative;
+              z-index: 1;
+            }
 
-          /* Geser icon sort dan filter lebih ke kiri agar tidak mepet kanan */
-          #${idTable} .ant-table-column-sorter {
-            margin-left: 4px;
-            margin-right: 0px;
-          }
+            /* Level 2: Interactive Rows - Hover & Selected */
+            #${idTable} .ant-table-tbody > tr:hover {
+              z-index: 2;
+            }
 
-          #${idTable} .ant-table-filter-trigger {
-            margin-right: 6px;
-          }
+            #${idTable} .ant-table-tbody > tr.row-selected {
+              z-index: 2;
+            }
 
-          #${idTable} .ant-table-column-sorters {
-            padding-right: 0px;
-          }
+            /* Level 3: Fixed Columns Body */
+            #${idTable} .ant-table-tbody .ant-table-cell-fix-left,
+            #${idTable} .ant-table-tbody .ant-table-cell-fix-right {
+              z-index: 3;
+            }
 
-          /* SOLUSI: Scrollbar di layer paling atas dengan z-index tinggi */
-          #${idTable} .ant-table-body {
-            position: relative;
-            z-index: 1;
-          }
+            #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-left,
+            #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-right,
+            #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-left,
+            #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-right {
+              z-index: 3;
+            }
 
-          /* Pastikan table header berada di atas table body */
-          #${idTable} .ant-table-thead > tr > th {
-            position: relative;
-            z-index: 10 !important;
-          }
+            /* Level 4: Table Header (Normal) */
+            #${idTable} .ant-table-thead > tr > th {
+              position: relative;
+              z-index: 4;
+            }
 
-          /* Pastikan filter trigger dan sorter icons memiliki z-index tinggi dan pointer-events aktif */
-          #${idTable} .ant-table-filter-trigger,
-          #${idTable} .ant-table-filter-trigger-container,
-          #${idTable} .ant-table-column-sorter {
-            position: relative;
-            z-index: 11 !important;
-            pointer-events: auto !important;
-          }
+            /* Level 5: Fixed Columns Header */
+            #${idTable} .ant-table-thead .ant-table-cell-fix-left,
+            #${idTable} .ant-table-thead .ant-table-cell-fix-right {
+              z-index: 5;
+            }
 
-          /* Scrollbar styling - kembali ke style default tapi dengan z-index tinggi */
-          #${idTable} .ant-table-body::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-            position: relative;
-            z-index: 100 !important;
-          }
+            /* Level 6: Interactive Header Elements (Sorter, Filter) - HIGHEST */
+            #${idTable} .ant-table-filter-trigger,
+            #${idTable} .ant-table-filter-trigger-container,
+            #${idTable} .ant-table-column-sorter {
+              position: relative;
+              z-index: 6;
+              pointer-events: auto;
+            }
 
-          #${idTable} .ant-table-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            position: relative;
-            z-index: 100 !important;
-          }
+            /* Scrollbar - Separate layer, tidak bentrok dengan table elements */
+            #${idTable} .ant-table-body::-webkit-scrollbar {
+              width: 8px;
+              height: 8px;
+              z-index: 10;
+            }
 
-          #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 6px;
-            position: relative;
-            z-index: 100 !important;
-          }
+            #${idTable} .ant-table-body::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              z-index: 10;
+            }
 
-          #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
-            background: #555;
-          }
+            #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
+              background: #888;
+              border-radius: 6px;
+              z-index: 10;
+            }
 
-          /* Pastikan row hover tidak menutupi scrollbar dengan z-index lebih rendah */
-          #${idTable} .ant-table-tbody > tr {
-            position: relative;
-            z-index: 1;
-          }
+            #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
+              background: #555;
+            }
 
-          #${idTable} .ant-table-tbody > tr:hover {
-            z-index: 1 !important;
-          }
+            /* Firefox scrollbar styling - prevent overlapping content */
+            #${idTable} .ant-table-body {
+              scrollbar-width: thin;
+              scrollbar-color: #888 #f1f1f1;
+              padding-bottom: 8px;
+            }
 
-          /* Pastikan table content tidak menutupi scrollbar */
-          #${idTable} .ant-table-content {
-            position: relative;
-            z-index: 1;
-          }
-        `}
+            /* Ensure table content has proper padding for Firefox scrollbar */
+            @supports (-moz-appearance:none) {
+              #${idTable} .ant-table-body {
+                padding-bottom: 12px;
+              }
+
+              #${idTable} .ant-table-content {
+                padding-bottom: 4px;
+              }
+            }
+
+            /* ========================================
+              CURSOR STYLES
+              ======================================== */
+            
+            /* Interactive elements cursor */
+            #${idTable} .ant-table-column-sorter,
+            #${idTable} .ant-table-filter-trigger,
+            #${idTable} .ant-table-column-sorter-up,
+            #${idTable} .ant-table-column-sorter-down,
+            #${idTable} .ant-table-filter-trigger-container {
+              cursor: pointer;
+            }
+
+            /* Draggable header cursor */
+            #${idTable} th[draggable="true"] {
+              cursor: move;
+            }
+
+            /* Override cursor for interactive elements in draggable headers */
+            #${idTable} th[draggable="true"] .ant-table-column-sorter,
+            #${idTable} th[draggable="true"] .ant-table-filter-trigger,
+            #${idTable} th[draggable="true"] .ant-table-column-sorter-up,
+            #${idTable} th[draggable="true"] .ant-table-column-sorter-down,
+            #${idTable} th[draggable="true"] .ant-table-filter-trigger-container,
+            #${idTable} th[draggable="true"] .ant-table-column-sorters {
+              cursor: pointer;
+            }
+
+            /* ========================================
+              SPACING & POSITIONING
+              ======================================== */
+            
+            /* Adjust sorter and filter icon spacing */
+            #${idTable} .ant-table-column-sorter {
+              margin-left: 4px;
+              margin-right: 0px;
+            }
+
+            #${idTable} .ant-table-filter-trigger {
+              margin-right: 6px;
+            }
+
+            #${idTable} .ant-table-column-sorters {
+              padding-right: 0px;
+            }
+          `}
       </style>
       {useSelect ? (
         <div className={"w-full flex mb-3 justify-between items-center"}>
