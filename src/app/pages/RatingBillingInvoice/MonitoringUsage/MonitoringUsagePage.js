@@ -303,6 +303,7 @@ const MonitoringUsagePage = () => {
                   name="IconDelete"
                   width={20}
                   color={isDraft ? undefined : "#C0BEC6"}
+                  className={"cursor-not-allowed"}
                 />
               </div>
             </Tooltip>
