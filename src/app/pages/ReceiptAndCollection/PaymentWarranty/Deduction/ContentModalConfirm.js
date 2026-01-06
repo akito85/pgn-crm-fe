@@ -13,7 +13,7 @@ const ContentModalConfirm = ({
   tabData = [],
   dataOption,
   selectedHierarchy,
-  typeSelector = "receiptSetting",
+  typeSelector = "deduction",
 }) => {
   const [valuePage, setValuePage] = useState(tabData[0].value);
 

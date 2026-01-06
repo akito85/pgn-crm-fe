@@ -3,12 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { searchCustomerDeduction } from "../../../../../redux/slices/receipt_collection/deduction";
+import { searchCustomerOffset } from "../../../../../redux/slices/receipt_collection/offset";
 import { getCustomerListColumns } from "./CustomerColumns";
 
 const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
     const dispatch = useDispatch();
-    const { customerData, loading } = useSelector((state) => state.deduction);
+    const { customerData, loading } = useSelector((state) => state.offset);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [dataSource, setDataSource] = useState([]);
@@ -18,13 +18,13 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
 
     useEffect(() => {
         if (isOpen) {
-            dispatch(searchCustomerDeduction({ page, pageSize }));
+            dispatch(searchCustomerOffset({ page, pageSize }));
         }
     }, [dispatch, isOpen, page, pageSize]);
 
     useEffect(() => {
-        if (customerData && customerData.result) {
-            setDataSource(customerData.result);
+        if (customerData && customerData.data) {
+            setDataSource(customerData.data);
         } else {
             setDataSource([]);
         }
@@ -33,7 +33,6 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
     const columns = getCustomerListColumns({
         page,
         pageSize,
-        actionType: "none",
     });
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -97,7 +96,7 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
                     pageSize={pageSize}
                     totalData={customerData?.page?.totalElements || 0}
                     onChange={onPageChange}
-                    tableScrolled={{ x: 1800, y: 400 }}
+                    tableScrolled={{ x: 1200, y: 400 }}
                     rowKey="id"
                 />
             </div>
