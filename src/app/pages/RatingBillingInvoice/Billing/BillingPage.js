@@ -219,15 +219,32 @@ const BillingPage = () => {
 
   const handleRefresh = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(
-      getAllBillingPaginate({
-        search: reqSearch,
-        page: 1,
-        pageSize: 100,
-        sort,
-        isLoadMore: false,
-      })
-    );
+    const pageSize = page * loadMoreSize || 100;
+
+    // Refresh based on current tab
+    if (valueTab === "Billing Gas") {
+      dispatch(
+        getAllBillingPaginate({
+          search: reqSearch,
+          page: 1,
+          pageSize: pageSize,
+          sort,
+          isLoadMore: false,
+        })
+      );
+    } else if (valueTab === "All") {
+      dispatch(
+        getAllBillingPaginate({
+          search: reqSearch,
+          page: 1,
+          pageSize: pageSize,
+          sort,
+          isLoadMore: false,
+        })
+      );
+    }
+
+    // Refresh approval lists
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
     setPage(1);
@@ -402,6 +419,8 @@ const BillingPage = () => {
                     useInfiniteScroll={true}
                     onLoadMore={handleLoadMore}
                     hasMore={hasMore}
+                    showRefresh={true}
+                    onRefresh={handleRefresh}
                     loadMoreThreshold={20}
                     enableRowClick={true}
                     selectedRowKey={activeRowKey}

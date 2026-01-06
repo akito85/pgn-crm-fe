@@ -26,11 +26,12 @@ const initialState = {
   data_approval_history: [],
   updatedData: [],
   deletedData: [],
+  updatedBatchIds: [],
 };
 
 export const updateSingleUsage = createAsyncThunk(
   "UPDATE_SINGLE_USAGE",
-  async ({ recordId, data }, thunkAPI) => {
+  async ({ recordId, data, batchId }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/usage/detail-batch/${recordId}`;
       const response = await ratingBillingHttpService.updateData(url, data);
@@ -40,7 +41,7 @@ export const updateSingleUsage = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response.data;
+      return { data: response.data, batchId };
     } catch (response) {
       const message =
         (response.response &&
@@ -55,6 +56,19 @@ export const updateSingleUsage = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
+    }
+  }
+);
+
+export const getSingleBatch = createAsyncThunk(
+  "GET_SINGLE_BATCH",
+  async (batchId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/usage/list-batch?searchs=batchId~eq~${batchId}&page=1&size=1&sort=createdDate~desc`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return { batchId, data: response.data?.result?.[0] };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -607,6 +621,9 @@ const monitoringUsageSlice = createSlice({
       state.updatedData = [];
       state.deletedData = [];
     },
+    clearUpdatedBatchIds: (state) => {
+      state.updatedBatchIds = [];
+    },
   },
   extraReducers: (builder) => {
     // pagination monitoring usage list
@@ -853,9 +870,35 @@ const monitoringUsageSlice = createSlice({
             };
           }
         }
+
+        // Track batchId yang diupdate untuk refresh di list
+        if (action.payload?.batchId && !state.updatedBatchIds.includes(action.payload.batchId)) {
+          state.updatedBatchIds.push(action.payload.batchId);
+        }
       })
       .addCase(updateSingleUsage.rejected, (state) => {
         state.loading = false;
+      });
+
+    // Get single batch (untuk refresh specific row di list)
+    builder
+      .addCase(getSingleBatch.fulfilled, (state, action) => {
+        // Update specific batch di data_list_batch
+        if (state.data_list_batch?.result && action.payload?.data) {
+          const index = state.data_list_batch.result.findIndex(
+            (item) => item.batchId === action.payload.batchId
+          );
+          if (index !== -1) {
+            state.data_list_batch.result[index] = action.payload.data;
+            // Update state.data juga
+            state.data = state.data_list_batch;
+          }
+        }
+
+        // Remove from updatedBatchIds setelah berhasil refresh
+        state.updatedBatchIds = state.updatedBatchIds.filter(
+          (id) => id !== action.payload.batchId
+        );
       });
 
     // Delete single usage
@@ -945,5 +988,5 @@ const monitoringUsageSlice = createSlice({
 
 const { reducer } = monitoringUsageSlice;
 export default reducer;
-export const { setClearData,addDeletedData, clearUpdated, clearUpdatedDeleted } =
+export const { setClearData, addDeletedData, clearUpdated, clearUpdatedDeleted, clearUpdatedBatchIds } =
   monitoringUsageSlice.actions;
