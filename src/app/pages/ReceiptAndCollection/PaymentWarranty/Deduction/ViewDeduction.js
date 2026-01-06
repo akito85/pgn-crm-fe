@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip } from "antd";
 import { NavLink, Link } from "react-router-dom";
-import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined } from "@ant-design/icons";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -104,7 +104,7 @@ const ViewDeduction = () => {
               to={`${RECEIPT_AND_COLLECTION_ROUTES.DETAIL_DEDUCTION}`}
               state={{ id: record?.id }}
             >
-              <EyeOutlined />
+              <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
             </Link>
           </Tooltip>
         );
@@ -145,7 +145,6 @@ const ViewDeduction = () => {
     searchInput,
     searchedColumn,
     searchText,
-    search,
   ]);
 
   return (

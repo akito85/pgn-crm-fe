@@ -1,0 +1,40 @@
+{
+    "code": 200,
+    "status": "OK",
+    "message": "Success",
+    "offset": {
+        "id": "OFF001",
+        "customerNumber": "CUS001",
+        "accountNumber": "130252597",
+        "customerName": "PT. PLN Persero",
+        "areaCode": "001",
+        "areaName": "BEKASI",
+        "segment": "PT",
+        "reference": "REF001",
+        "referenceCurrency": "IDR",
+        "amount": 50000.0,
+        "rate": 13000.0,
+        "rateDate": "2022-01-14T00:00:00.000+00:00",
+        "rateType": "JIBOR",
+        "equivalentAmount": 650000000.0,
+        "offsetDate": "2022-01-15T00:00:00.000+00:00",
+        "description": "-",
+        "appHierId": 1,
+        "createdDate": "2023-01-15T12:00:00.000+00:00",
+        "createdBy": "Admin",
+        "updatedDate": "2023-01-15T14:00:00.000+00:00",
+        "updatedBy": "Admin"
+    },
+    "attachmentDtoList": [
+        {
+            "id": 1,
+            "fileName": "document.pdf",
+            "fileCategoryName": "Others",
+            "createdDate": "2023-01-15T12:00:00.000+00:00"
+        }
+    ],
+    "tApprovalDto": {
+        "isApprover": true,
+        "tAppId": 123
+    }
+}

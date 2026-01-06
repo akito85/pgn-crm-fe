@@ -1,0 +1,45 @@
+{
+    "code": 200,
+    "status": "OK",
+    "message": "Success",
+    "data": [
+        {
+            "id": 1,
+            "accountNumber": "00005787531",
+            "accountName": "PLN (PERSERO), PT",
+            "customerNumber": "CST0022",
+            "customerName": "PLN (PERSERO), PT",
+            "segment": "RT"
+        },
+        {
+            "id": 2,
+            "accountNumber": "00005787531",
+            "accountName": "PLN (PERSERO), PT",
+            "customerNumber": "CST0022",
+            "customerName": "PLN (PERSERO), PT",
+            "segment": "KI"
+        },
+        {
+            "id": 3,
+            "accountNumber": "00005787532",
+            "accountName": "PATIMURA (RESTAURAN SEDERHANA), CV",
+            "customerNumber": "CST0023",
+            "customerName": "PATIMURA (RESTAURAN SEDERHANA), CV",
+            "segment": "PK"
+        },
+        {
+            "id": 4,
+            "accountNumber": "00005787532",
+            "accountName": "PATIMURA (RESTAURAN SEDERHANA), CV",
+            "customerNumber": "CST0023",
+            "customerName": "PATIMURA (RESTAURAN SEDERHANA), CV",
+            "segment": "KI"
+        }
+    ],
+    "page": {
+        "size": 10,
+        "totalElements": 4,
+        "totalPages": 1,
+        "number": 1
+    }
+}
