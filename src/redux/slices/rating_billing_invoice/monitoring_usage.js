@@ -37,6 +37,7 @@ export const updateSingleUsage = createAsyncThunk(
       const successMessage = {
         title: "Successful",
         description: "Your data has been updated successfully.",
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
