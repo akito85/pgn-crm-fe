@@ -2,8 +2,10 @@ import { useState } from "react";
 import DetailText from "../../../../../../components/DetailText";
 import RelationshipApproval from "./RelationshipApproval";
 import RelationshipAttachment from "./RelationshipAttachment";
-import { Button, Divider } from "antd";
+import { Button, Divider, Form } from "antd";
 import { downloadAttachment } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import InputComponent from "../../../../../../components/InputComponent";
+import { requiredMessage } from "../../../../../../utils";
 
 const RelationshipConfirm = ({
   data = {},
@@ -12,9 +14,10 @@ const RelationshipConfirm = ({
   approvalHierarchyName = "Hierarchy SA 1", // Nama approval hierarchy yang dipilih
   idAccount,
   dispatch,
+  activeTab,
+  setActiveTab,
+  isDraftSubmission,
 }) => {
-  const [activeTab, setActiveTab] = useState("1");
-
   // Handle download for existing attachments
   const handleDownloadAttachment = (record) => {
     if ((record.urlFile1 || record.fileId) && dispatch) {
@@ -31,9 +34,9 @@ const RelationshipConfirm = ({
 
   const renderContent = () => {
     switch (activeTab) {
-      case "1":
+      case 0:
         return (
-          <div>
+          <div className={`${activeTab !== 0 ? "hidden" : ""}`}>
             <div className="text-primary text-sm font-bold uppercase mb-4">
               RELATIONSHIP INFORMATION
             </div>
@@ -63,54 +66,89 @@ const RelationshipConfirm = ({
               </DetailText>
             </div>
           </div>
-        );
-      case "2":
+        )
+      
+      case 1:
         return (
           <RelationshipApproval
             dataDetailApproval={approvalData}
             hideSelector={true}
             approvalHierarchyLabel={approvalHierarchyName}
+            className={`${activeTab !== 1 ? "hidden" : ""}`}
           />
-        );
-      case "3":
+        )
+
+      case 2:
         return (
           <RelationshipAttachment
             data={attachmentData}
             hideActions={true}
             showUploadButton={false}
             onDownload={handleDownloadAttachment}
+            className={`${activeTab !== 2 ? "hidden" : ""}`}
           />
-        );
-      default:
-        return null;
+        )
+      
+      case 3:
+        return (
+          <div className={`${activeTab !== 3 ? "hidden" : ""}`}>
+            <div className="text-primary text-xs font-bold uppercase">
+              REMARK
+            </div>
+            <Form.Item
+              key="remark"
+              name={"remark"}
+              label={"Remark"}
+              rules={[{ message: requiredMessage("Remark"), required: !isDraftSubmission }]}
+              labelCol={{ span: 24 }}
+            >
+              <InputComponent
+                group
+                type="textarea"
+                placeholder={"Type your remark"}
+              />
+            </Form.Item>
+          </div>
+        )
     }
-  };
+  }
 
   return (
     <div className="w-full">
       {/* Custom Tab Buttons - Sesuai Design Figma */}
       <div className="flex gap-3 mb-6 border-b border-gray-200 pb-1">
         <Button
-          onClick={() => setActiveTab("1")}
+          onClick={() => setActiveTab(0)}
           size="large"
-          type={activeTab === "1" ? "primary" : "default"}
+          type={activeTab === 0 ? "primary" : "default"}
         >
           Relationship Information
         </Button>
         <Button
-          onClick={() => setActiveTab("2")}
+          onClick={() => setActiveTab(1)}
           size="large"
-          type={activeTab === "2" ? "primary" : "default"}
+          type={activeTab === 1 ? "primary" : "default"}
         >
           Approval
         </Button>
         <Button
-          onClick={() => setActiveTab("3")}
+          onClick={() => setActiveTab(2)}
           size="large"
-          type={activeTab === "3" ? "primary" : "default"}
+          type={activeTab === 2 ? "primary" : "default"}
         >
           Attachment
         </Button>
+        {
+          !isDraftSubmission && (
+            <Button
+              onClick={() => setActiveTab(3)}
+              size="large"
+              type={activeTab === 3 ? "primary" : "default"}
+            >
+              Remark
+            </Button>
+          )
+        }
       </div>
       <Divider />
 
