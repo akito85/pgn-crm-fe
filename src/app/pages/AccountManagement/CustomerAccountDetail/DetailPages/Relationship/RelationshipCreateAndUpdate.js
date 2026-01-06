@@ -95,6 +95,8 @@ const RelationshipCreateAndUpdate = ({
   const [dataDetailApproval, setDataDetailApproval] = useState([]);
   const [relatedDetailData, setRelatedDetailData] = useState([]);
 
+  const [activeTab, setActiveTab] = useState(0);
+
   // Step State
   const [scrollLeft, setScrollLeft] = useState(0);
 
@@ -212,6 +214,11 @@ const RelationshipCreateAndUpdate = ({
     }
   }, [data_approvalHierarchyDetail]);
 
+  useEffect(() => {
+    if (!modalConfirm)
+      setActiveTab(0);
+  }, [modalConfirm])
+
   // Handle Relationship Object
   const handleRelationshipObj = (e, field) => {
     let result;
@@ -266,6 +273,7 @@ const RelationshipCreateAndUpdate = ({
         relationshipCategory: value?.relationshipCategory?.toString(),
         relationshipType: value?.relationshipType?.toString(),
         action: isDraft ? "DRAFT" : "SUBMIT",
+        remark: form.getFieldValue("remark"),
       };
 
       // Filter only new attachments (not existing ones)
@@ -351,7 +359,7 @@ const RelationshipCreateAndUpdate = ({
           endDateDisplay: endDateValue ? moment(endDateValue).format("DD MMM YYYY") : "-",
           description: values.description || relationshipObj.description || "",
           appHierId: values.appHierId || approvalObj.appHierId,
-          appHierName: values.appHierName || approvalObj.appHierName
+          appHierName: values.appHierName || approvalObj.appHierName,
         };
 
         // Validate before showing confirmation modal
@@ -765,6 +773,56 @@ const RelationshipCreateAndUpdate = ({
                 )}
               </div>
             </div>
+            {/* Modal Confirmation */}
+            <ModalCustom
+              isOpen={modalConfirm}
+              type="confirmation"
+              header={isDraftSubmission ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
+              width={1000}
+              centered={false}
+              style={{ top: 20 }}
+              handleCancel={() => setModalConfirm(false)}
+              footer={[
+                <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
+                  {activeTab > 0 ? (
+                    <ButtonComponent type={"default"} onClick={() => setActiveTab(prev => prev - 1)}>
+                      Previous
+                    </ButtonComponent>
+                  ) : (
+                    <ButtonComponent type={"default"} onClick={() => setModalConfirm(false)}>
+                      Cancel
+                    </ButtonComponent>
+                  )}
+                  {(activeTab < 3)  && (
+                    <ButtonComponent type={"submit"} onClick={() => setActiveTab(prev => prev + 1)}>
+                      Next
+                    </ButtonComponent>
+                  )}
+                  {(activeTab === 3) && (
+                    <ButtonComponent
+                      type={"submit"}
+                      onClick={() => {
+                        sendData(dataConfirm, isDraftSubmission);
+                        setModalConfirm(false);
+                      }}
+                    >
+                      {isDraftSubmission ? "Save as Draft" : "Submit"}
+                    </ButtonComponent>
+                  )}
+                </div>,
+              ]}
+            >
+              <RelationshipConfirm
+                data={dataConfirm || {}}
+                approvalData={dataDetailApproval}
+                attachmentData={listDataAttachment}
+                idAccount={idAccount}
+                dispatch={dispatch}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                isDraftSubmission={isDraftSubmission}
+              />
+            </ModalCustom>
           </Form>
         </Spin>
 
@@ -802,48 +860,6 @@ const RelationshipCreateAndUpdate = ({
         </ModalCustom>
         */}
       </LayoutMenu>
-
-      {/* Modal Confirmation */}
-      <ModalCustom
-        isOpen={modalConfirm}
-        type="confirmation"
-        header={isDraftSubmission ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
-        width={1000}
-        centered={false}
-        style={{ top: 20 }}
-        handleCancel={() => {
-          setModalConfirm(false);
-        }}
-        footer={
-          <div className="w-full flex justify-end gap-3">
-            <ButtonComponent
-              onClick={() => {
-                setModalConfirm(false);
-              }}
-              type="default"
-            >
-              Cancel
-            </ButtonComponent>
-            <ButtonComponent
-              type="submit"
-              onClick={() => {
-                sendData(dataConfirm, isDraftSubmission);
-                setModalConfirm(false);
-              }}
-            >
-              {isDraftSubmission ? "Save as Draft" : "Submit"}
-            </ButtonComponent>
-          </div>
-        }
-      >
-        <RelationshipConfirm
-          data={dataConfirm || {}}
-          approvalData={dataDetailApproval}
-          attachmentData={listDataAttachment}
-          idAccount={idAccount}
-          dispatch={dispatch}
-        />
-      </ModalCustom>
 
       {/* Modal Upload Attachment */}
       <ModalAttachment
