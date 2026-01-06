@@ -447,10 +447,43 @@ const RelationshipCreateAndUpdate = ({
     []
   ];
 
+  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
+
   // Navigation handlers
   const next = async () => {
     try {
       await form.validateFields(formFields[current]);
+
+      // Get display names for type and category
+      const typeId = relationshipObj.relationshipType;
+      const categoryId = relationshipObj.relationshipCategory;
+
+      // Convert moment objects to strings
+      const startDateValue = relationshipObj.startDate;
+      const endDateValue = relationshipObj.endDate;
+
+      const validateBody = {
+        id: type === "update" ? id : undefined,
+        subjectId: idAccount,
+        relationshipType: typeId,
+        relationshipCategory: categoryId,
+        objectId: relationshipObj.relatedObjectId,
+        objectName: relationshipObj.objectName,
+        objectValue: relationshipObj.objectValue,
+        startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+        endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+        description: relationshipObj.description || "",
+        appHierId: approvalObj.appHierId,
+        validationType: validationTypes[current],
+      };
+
+      await dispatch(validateCreateUpdate({
+        body: validateBody,
+        services: accountManagementService,
+        endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
+        type,
+      })).unwrap();
+
     } catch (err) {
       return;
     }
@@ -472,6 +505,36 @@ const RelationshipCreateAndUpdate = ({
     for (let i = current; i < newCurrent; i++) {
       try {
         await form.validateFields(formFields[i]);
+
+          // Get display names for type and category
+        const typeId = relationshipObj.relationshipType;
+        const categoryId = relationshipObj.relationshipCategory;
+
+        // Convert moment objects to strings
+        const startDateValue = relationshipObj.startDate;
+        const endDateValue = relationshipObj.endDate;
+
+        const validateBody = {
+          id: type === "update" ? id : undefined,
+          subjectId: idAccount,
+          relationshipType: typeId,
+          relationshipCategory: categoryId,
+          objectId: relationshipObj.relatedObjectId,
+          objectName: relationshipObj.objectName,
+          objectValue: relationshipObj.objectValue,
+          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+          description: relationshipObj.description || "",
+          appHierId: approvalObj.appHierId,
+          validationType: validationTypes[i],
+        };
+
+        await dispatch(validateCreateUpdate({
+          body: validateBody,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
+          type,
+        })).unwrap();
       } catch (err) {
         setCurrent(i);
         return;
