@@ -168,6 +168,23 @@ const RatingPage = () => {
     }
   };
 
+  // Refresh handler
+  const handleRefresh = () => {
+    if (selectedBillingPeriod) {
+      dispatch(
+        getListRatingGasPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: page * loadMoreSize || 100,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  };
+
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
@@ -345,6 +362,8 @@ const RatingPage = () => {
             useInfiniteScroll={true}
             onLoadMore={handleLoadMore}
             hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
             loadMoreThreshold={20}
           />
         </div>

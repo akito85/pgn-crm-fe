@@ -90,6 +90,20 @@ const PrabillingPage = () => {
   const hasMore =
     list_prabilling_init.length < (prabilling_pagination?.totalElements || 0);
 
+  // Refresh handler
+  const handleRefresh = () => {
+    dispatch(
+      getListPrabillingInitPopulate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: page * loadMoreSize || 100,
+        sort,
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  };
+
   const baseColumns = useMemo(
     () => [
       {
@@ -533,6 +547,8 @@ const PrabillingPage = () => {
             useInfiniteScroll={true}
             onLoadMore={handleLoadMore}
             hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
             loadMoreThreshold={20}
           />
         </div>
