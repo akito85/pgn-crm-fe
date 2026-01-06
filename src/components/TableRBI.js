@@ -567,6 +567,24 @@ const TableRBI = ({
               background: #555;
             }
 
+            /* Firefox scrollbar styling - prevent overlapping content */
+            #${idTable} .ant-table-body {
+              scrollbar-width: thin;
+              scrollbar-color: #888 #f1f1f1;
+              padding-bottom: 8px;
+            }
+
+            /* Ensure table content has proper padding for Firefox scrollbar */
+            @supports (-moz-appearance:none) {
+              #${idTable} .ant-table-body {
+                padding-bottom: 12px;
+              }
+
+              #${idTable} .ant-table-content {
+                padding-bottom: 4px;
+              }
+            }
+
             /* ========================================
               CURSOR STYLES
               ======================================== */
