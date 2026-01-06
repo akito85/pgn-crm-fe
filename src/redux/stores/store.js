@@ -128,6 +128,7 @@ import multiDestinationReducer from "../slices/account_management/detailAccount/
 import deductionReducer from "../slices/receipt_collection/deduction";
 import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
+import offsetReducer from "../slices/receipt_collection/offset";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -260,6 +261,7 @@ const reducer = combineReducers({
   deduction: deductionReducer,
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
+  offset: offsetReducer,
 
   // Attachment
   attachment: attachmentReducer,

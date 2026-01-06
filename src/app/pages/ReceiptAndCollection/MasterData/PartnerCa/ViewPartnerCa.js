@@ -1,6 +1,4 @@
 import {
-  Checkbox,
-  Form,
   Spin,
   Tooltip,
 } from "antd";
@@ -26,7 +24,6 @@ import {
   getDownloadPartner,
   getPaginatePartner,
 } from "../../../../../redux/slices/receipt_collection/partnerCa";
-import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
@@ -133,12 +130,12 @@ const ViewPartnerCa = () => {
   const handleApprovalHistory = async (data) => {
     try {
       setBody(data);
-     await dispatch(getApprovalHistory(data))?.unwrap();
+      await dispatch(getApprovalHistory(data))?.unwrap();
       setOpenModalHistory(true);
-      
+
     } catch (error) {
       setOpenModalHistory(false);
-      
+
     }
   };
 
@@ -316,9 +313,9 @@ const ViewPartnerCa = () => {
     setSort(dataSort);
   };
 
-  
 
-  
+
+
 
   // handle download
   const handleDownload = () => {
@@ -365,7 +362,7 @@ const ViewPartnerCa = () => {
                   icon={<EyeOutlined />}
                   border={false}
                 /> */}
-              <EyeOutlined />
+              <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
             </Link>
           </Tooltip>
         );
@@ -375,9 +372,9 @@ const ViewPartnerCa = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
-        const isEditable = record.statusApproval === "Rejected" 
-          // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
-          // (record.status !== "Active" && record.statusApproval !== "Approved") 
+        const isEditable = record.statusApproval === "Rejected"
+        // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
+        // (record.status !== "Active" && record.statusApproval !== "Approved") 
 
         return (
           data_length > 3 ? (
@@ -388,7 +385,7 @@ const ViewPartnerCa = () => {
               <ButtonComponent
                 className="gap-5 w-full"
                 icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"} />
+                  <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
                 }
                 border={false}
                 disabled={!isEditable}
@@ -417,7 +414,7 @@ const ViewPartnerCa = () => {
                     <SVGIcon name="IconEdit" color="#ACC424" width={24} />
                   </Link>
                 ) : (
-                  <SVGIcon name="IconEdit" color="#8D91A0" width={24}  className={"cursor-not-allowed"}/>
+                  <SVGIcon name="IconEdit" color="#8D91A0" width={24} className={"cursor-not-allowed"} />
                 )}
               </div>
             </Tooltip>
@@ -480,10 +477,10 @@ const ViewPartnerCa = () => {
         {/* <Toolbar items={itemActions} /> */}
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">PARTNER CA List</p>
-              <div className="flex gap-2">
-                  <Toolbar items={itemActions} />
-              </div>
+            <p className="mt-[15px] font-bold">PARTNER CA List</p>
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
           </div>
         }>
           <TableRBI
@@ -513,7 +510,7 @@ const ViewPartnerCa = () => {
           />
         </CardContainer>
 
-        
+
 
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}

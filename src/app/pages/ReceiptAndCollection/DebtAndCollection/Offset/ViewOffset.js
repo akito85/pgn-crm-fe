@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { EyeOutlined } from "@ant-design/icons";
-import { Spin, Tooltip, Alert, message, Input } from "antd";
+import { Spin, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 
 // Routes
@@ -17,18 +17,16 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 
 // Column Configuration
-import { columns as columnRestructure } from "./Columns";
+import { columns as columnOffset } from "./Columns";
 
 // Redux / Service
 import {
-    getAllRestructureListPaginate,
-    deleteRestructure
-} from "../../../../../redux/slices/receipt_collection/restructure";
-import ModalCustom from "../../../../../components/Modal/ModalCustom";
+    getAllOffsetListPaginate
+} from "../../../../../redux/slices/receipt_collection/offset";
 
-const ViewRestructure = () => {
+const ViewOffset = () => {
     const { data, loading } = useSelector(
-        (state) => state.restructure
+        (state) => state.offset
     );
 
     const dispatch = useDispatch();
@@ -41,13 +39,10 @@ const ViewRestructure = () => {
     const [searchText, setSearchText] = useState("");
     const [sort, setSort] = useState("");
     const [search, setSearch] = useState({});
-    const [modalDelete, setModalDelete] = useState(false);
-    const [recordToDelete, setRecordToDelete] = useState(null);
-    const [remark, setRemark] = useState("");
 
     useEffect(() => {
         dispatch(
-            getAllRestructureListPaginate({
+            getAllOffsetListPaginate({
                 search: encodeURIComponent(JSON.stringify(search)),
                 page,
                 pageSize,
@@ -66,8 +61,8 @@ const ViewRestructure = () => {
             breadcrumbName: "Bad Debt and Collection",
         },
         {
-            path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE,
-            breadcrumbName: "Restructure",
+            path: DEBT_AND_COLLECTION_ROUTES.VIEW_OFFSET,
+            breadcrumbName: "Offset",
         },
     ];
 
@@ -104,28 +99,8 @@ const ViewRestructure = () => {
         // Implement download logic
     };
 
-    const handleDeleteOk = () => {
-        if (recordToDelete) {
-            dispatch(deleteRestructure(recordToDelete.id)).then((res) => {
-                if (!res.error) {
-                    message.success("Successfully deleted!");
-                    setModalDelete(false);
-                    setRemark("");
-                    dispatch(
-                        getAllRestructureListPaginate({
-                            search: encodeURIComponent(JSON.stringify(search)),
-                            page,
-                            pageSize,
-                            sort,
-                        })
-                    );
-                }
-            });
-        }
-    };
-
     const baseColumns = useMemo(() => {
-        return columnRestructure(
+        return columnOffset(
             page,
             pageSize,
             searchInput,
@@ -148,12 +123,12 @@ const ViewRestructure = () => {
         {
             action: "Create",
             render: (
-                <Link to={DEBT_AND_COLLECTION_ROUTES.CREATE_RESTRUCTURE}>
+                <Link to={DEBT_AND_COLLECTION_ROUTES.CREATE_OFFSET}>
                     <ButtonComponent
                         icon={<SVGIcon name="IconButtonCreate" width={24} />}
                         type="submit"
                     >
-                        Create Restructure
+                        Create Offset
                     </ButtonComponent>
                 </Link>
             ),
@@ -167,7 +142,7 @@ const ViewRestructure = () => {
                 return (
                     <Tooltip title={"Detail"}>
                         <Link
-                            to={DEBT_AND_COLLECTION_ROUTES.DETAIL_RESTRUCTURE}
+                            to={DEBT_AND_COLLECTION_ROUTES.DETAIL_OFFSET}
                             state={{ id: record?.id }}
                         >
                             <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
@@ -175,44 +150,11 @@ const ViewRestructure = () => {
                     </Tooltip>
                 );
             },
-        },
-        {
-            action: "Update",
-            type: "table",
-            render: (record) => {
-                return (
-                    <Tooltip title={"Update"}>
-                        <Link
-                            to={DEBT_AND_COLLECTION_ROUTES.UPDATE_RESTRUCTURE}
-                            state={{ id: record?.id }}
-                        >
-                            <SVGIcon name="IconEdit" width={24} color={"#ACC424"} />
-                        </Link>
-                    </Tooltip>
-                );
-            },
-        },
-
-        {
-            action: "Delete",
-            type: "table",
-            render: (record) => {
-                return (
-                    <Tooltip title={"Delete"}>
-                        <div onClick={() => {
-                            setRecordToDelete(record);
-                            setModalDelete(true);
-                        }} style={{ cursor: 'pointer' }}>
-                            <SVGIcon name="IconDelete" width={24} />
-                        </div>
-                    </Tooltip>
-                );
-            },
         }
     ];
 
     const actionCols = useColumnActionPermission(
-        ["view", "update", "delete"],
+        ["view"],
         itemActions
     );
 
@@ -222,14 +164,14 @@ const ViewRestructure = () => {
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
                     <div className="flex -my-4 justify-between items-center w-full">
-                        <p className="mt-[15px] font-bold">RESTRUCTURE LIST</p>
+                        <p className="mt-[15px] font-bold uppercase">Offset LIST</p>
                         <div className="flex gap-2">
-                            <Link to={DEBT_AND_COLLECTION_ROUTES.CREATE_RESTRUCTURE}>
+                            <Link to={DEBT_AND_COLLECTION_ROUTES.CREATE_OFFSET}>
                                 <ButtonComponent
                                     icon={<SVGIcon name="IconButtonCreate" width={24} />}
                                     type="primary"
                                 >
-                                    Create Restructure
+                                    Create Offset
                                 </ButtonComponent>
                             </Link>
                         </div>
@@ -247,66 +189,14 @@ const ViewRestructure = () => {
                         totalData={data?.page?.totalElements || 0}
                         onSort={onSort}
                         tableScrolled={{
-                            x: 2000,
+                            x: 2500,
                             y: 525,
                         }}
                     />
                 </CardContainer>
             </Spin>
-
-            <ModalCustom
-                isOpen={modalDelete}
-                handleCancel={() => {
-                    setModalDelete(false);
-                    setRemark("");
-                }}
-                header={"Delete Information"}
-                width={1000}
-                type={"confirmation"}
-                footer={
-                    <div className="w-full flex justify-end gap-3 p-4">
-                        <ButtonComponent
-                            onClick={() => {
-                                setModalDelete(false);
-                                setRemark("");
-                            }}
-                            type="default"
-                            className="border-primary text-primary"
-                        >
-                            Cancel
-                        </ButtonComponent>
-                        <ButtonComponent
-                            type="primary"
-                            onClick={handleDeleteOk}
-                        >
-                            Confirm
-                        </ButtonComponent>
-                    </div>
-                }
-            >
-                <div className="flex flex-col gap-4">
-                    <Alert
-                        message="Warning! if you delete this data, it will be permanently."
-                        type={"error"}
-                        showIcon={false}
-                        className="bg-red-50 border-red-200 text-red-600 text-center"
-                    />
-                    <div className="flex flex-col gap-1">
-                        <Input.TextArea
-                            placeholder="Type your remark"
-                            rows={4}
-                            value={remark}
-                            onChange={(e) => setRemark(e.target.value)}
-                            maxLength={255}
-                        />
-                        <div className="text-gray-400 text-[12px]">
-                            You have {remark.length} of 255 characters remaining
-                        </div>
-                    </div>
-                </div>
-            </ModalCustom>
         </LayoutMenu>
     );
 };
 
-export default ViewRestructure;
+export default ViewOffset;

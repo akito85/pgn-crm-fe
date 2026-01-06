@@ -52,4 +52,9 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   CREATE_RESTRUCTURE: "/debt-and-collection/restructure/create",
   DETAIL_RESTRUCTURE: "/debt-and-collection/restructure/view",
   UPDATE_RESTRUCTURE: "/debt-and-collection/restructure/update",
+
+  // Offset
+  VIEW_OFFSET: "/debt-and-collection/offset",
+  CREATE_OFFSET: "/debt-and-collection/offset/create",
+  DETAIL_OFFSET: "/debt-and-collection/offset/view",
 };
