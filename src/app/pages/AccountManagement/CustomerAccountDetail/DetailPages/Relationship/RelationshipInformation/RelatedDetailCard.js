@@ -136,20 +136,6 @@ const RelatedDetailCard = ({
             sorter: (a, b) => (a.latitude || "").localeCompare(b.latitude || ""),
             render: (text) => text || "-",
         },
-        {
-            title: "START DATE",
-            dataIndex: "startDate",
-            width: 150,
-            sorter: (a, b) => (a.startDate || "").localeCompare(b.startDate || ""),
-            render: (text) => text ? moment(text).format("DD MMM YYYY") : "-",
-        },
-        {
-            title: "END DATE",
-            dataIndex: "endDate",
-            width: 150,
-            sorter: (a, b) => (a.endDate || "").localeCompare(b.endDate || ""),
-            render: (text) => text ? moment(text).format("DD MMM YYYY") : "-",
-        },
     ];
 
     // Select appropriate columns based on type

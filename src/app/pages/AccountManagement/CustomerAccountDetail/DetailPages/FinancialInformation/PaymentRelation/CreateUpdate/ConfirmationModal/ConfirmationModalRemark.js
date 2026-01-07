@@ -6,8 +6,13 @@ import { requiredMessage } from "../../../../../../../../../utils";
 const ConfirmationModalRemark = () => {
   return (
     <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        REMARK
+      <div className="flex">
+        <div className="text-primary text-xs font-bold uppercase">
+          REMARK
+        </div>
+        <span className={"pl-1"} style={{ color: "red" }}>
+          *
+        </span>
       </div>
       <Form.Item
         key="remark"

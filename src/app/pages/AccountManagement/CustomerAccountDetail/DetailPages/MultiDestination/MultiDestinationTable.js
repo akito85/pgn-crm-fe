@@ -410,7 +410,7 @@ const MultiDestinationTable = ({
               idAccount,
               idCustomer,
             }})}
-            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE"}
+            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE" || r.status === "ACTIVE"}
           >
             <Tooltip title="Update">
               <div className="pt-1">

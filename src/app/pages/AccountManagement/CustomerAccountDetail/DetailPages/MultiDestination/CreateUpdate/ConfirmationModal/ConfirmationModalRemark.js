@@ -1,7 +1,7 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Form } from "antd";
-import InputComponent from "../../../../../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../../../../../utils";
+import InputComponent from "../../../../../../../../components/InputComponent";
+import { requiredMessage } from "../../../../../../../../utils";
 
 const ConfirmationModalRemark = () => {
   return (
@@ -17,6 +17,7 @@ const ConfirmationModalRemark = () => {
       <Form.Item
         key="remark"
         name={"remark"}
+        label={"Remark"}
         rules={[{ message: requiredMessage("Remark"), required: true }]}
         labelCol={{ span: 24 }}
       >
