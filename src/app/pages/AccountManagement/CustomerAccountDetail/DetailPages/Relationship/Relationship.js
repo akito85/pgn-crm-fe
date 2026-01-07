@@ -172,6 +172,7 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
             maxFilters={5}
             loading={loading}
             formId="relationshipFilterForm"
+            accountId={id}
           />
         </Form>
       </ModalCustom>
