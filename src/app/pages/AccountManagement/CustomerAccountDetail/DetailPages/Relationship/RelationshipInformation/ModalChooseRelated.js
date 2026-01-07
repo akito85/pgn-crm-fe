@@ -405,22 +405,6 @@ const ModalChooseRelated = ({
       render: (text) => text || "-",
     },
     {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 171,
-      sorter: true,
-      ...getColumnSearchProps("startDate"),
-      render: (text) => moment(text).format("DD MMM YYYY") || "-",
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 171,
-      sorter: true,
-      ...getColumnSearchProps("endDate"),
-      render: (text) => text || "-",
-    },
-    {
       title: "ACTION",
       align: "center",
       width: 127,
