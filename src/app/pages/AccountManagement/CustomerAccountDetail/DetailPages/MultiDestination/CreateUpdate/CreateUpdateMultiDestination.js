@@ -105,6 +105,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
     ],
     []
   ];
+
+  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
  
   const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
@@ -254,6 +256,61 @@ const CreateUpdateMultiDestination = ({ type }) => {
         }
         else {
           await formCreate.validateFields(formFields[current]);
+
+          const {
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idMd : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId,
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[current],
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
+            type,
+          }))
+          .unwrap();
         }
       } catch (err) {
         return;
@@ -451,6 +508,61 @@ const CreateUpdateMultiDestination = ({ type }) => {
         }
       } else {
         await formCreate.validateFields(formFields[current]);
+
+        const {
+          objectId,
+          account,
+          accountSor,
+          accountCostCenter,
+          meterReadingCode,
+          accountSegment,
+          accountGroupType,
+          accountType,
+          premiseAddress,
+          subdistrict,
+          district,
+          city,
+          country,
+          longitude,
+          latitude,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+        } = formCreate.getFieldsValue();
+
+        const body = {
+          id: type === "update" ? idMd : undefined,
+          subjectId: data_accountDetail?.accountInformation?.accountId,
+          objectId,
+          account,
+          accountSor,
+          accountCostCenter,
+          meterReadingCode,
+          accountSegment,
+          accountGroupType,
+          accountType,
+          premiseAddress,
+          subdistrict,
+          district,
+          city,
+          country,
+          longitude,
+          latitude,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+          validationType: validationTypes[current],
+        };
+
+        await dispatch(validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
+          type,
+        }))
+        .unwrap();
       }
     } catch (err) {
       return;
@@ -479,6 +591,61 @@ const CreateUpdateMultiDestination = ({ type }) => {
           }
         } else {
           await formCreate.validateFields(formFields[i]);
+
+          const {
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idMd : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId,
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[i],
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
+            type,
+          }))
+          .unwrap();
         }
       } catch (err) {
         setCurrent(i);
