@@ -281,7 +281,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         startDate,
         endDate,
         appHierId,
-        action: submitType
+        action: submitType,
       };
 
       dispatch(validateCreateUpdate({
@@ -474,6 +474,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       startDate,
       endDate,
       appHierId,
+      remark,
     } = formCreate.getFieldsValue();
 
     const body = {
@@ -485,7 +486,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
       startDate,
       endDate,
       appHierId,
-      action: confirmationType
+      action: confirmationType,
+      remarks: remark,
     };
 
     if (type === "create")
@@ -655,17 +657,16 @@ const CreateUpdateMultiDestination = ({ type }) => {
             </div>
           </div>
         </BaseContainer>
-
-        <Spin
-          spinning={loading}
+        <Form
+          id="multiDestinationForm"
+          form={formCreate}
+          layout={"vertical"}
+          onFinish={handleSubmitForm}
+          // onFinishFailed={handleErrorSubmit}
+          scrollToFirstError={true}
         >
-          <Form
-            id="multiDestinationForm"
-            form={formCreate}
-            layout={"vertical"}
-            onFinish={handleSubmitForm}
-            // onFinishFailed={handleErrorSubmit}
-            scrollToFirstError={true}
+          <Spin
+            spinning={loading}
           >
             {/* Step Contents */}
             <div className="flex flex-row gap-x-6 justify-center">
@@ -744,30 +745,29 @@ const CreateUpdateMultiDestination = ({ type }) => {
                 )}
               </div>
             </div>
-          </Form>
-        </Spin>
-
-        <ConfirmationModal
-          form={"multiDestinationForm"}
-          isOpen={showConfirmationModal}
-          handleCancel={() => handleSetShowConfirmationModal(false)}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-          hierarchyTableData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          hieararchyOptionData={data_mdApprovalHierarchy}
-          type={confirmationType}
-          dataAttachment={dataAttachment}
-          data={formCreate.getFieldsValue()}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-        />
+          </Spin>
+          <ConfirmationModal
+            form={"multiDestinationForm"}
+            isOpen={showConfirmationModal}
+            handleCancel={() => handleSetShowConfirmationModal(false)}
+            selectedAppHierId={selectedAppHierId}
+            selectedApprovalName={selectedApprovalName}
+            hierarchyTableData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
+              ...detail,
+              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                ...employeeDetail,
+                key: `employee-detail-${index}`
+              })),
+              key: `detail-detail-${index}`,
+            }))}
+            hieararchyOptionData={data_mdApprovalHierarchy}
+            type={confirmationType}
+            dataAttachment={dataAttachment}
+            data={formCreate.getFieldsValue()}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
+          />
+        </Form>
       </div>
     </LayoutMenu>
   );
