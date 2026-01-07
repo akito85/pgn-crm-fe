@@ -36,7 +36,7 @@ import {
   getMdAttachmentCategory,
   updateMultiDestination,
 } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
-import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
+import { showModalError, validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../constants/configApp";
 
@@ -77,6 +77,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
+
+  const attachmentIsRequired = true;
 
   const formFields = [
     [
@@ -237,6 +239,26 @@ const CreateUpdateMultiDestination = ({ type }) => {
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
+      try {
+        if (current === 2) {
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+
+            dispatch(showModalError(errorBody));
+
+            throw new Error("There was no file attached");
+          }
+        }
+        else {
+          await formCreate.validateFields(formFields[current]);
+        }
+      } catch (err) {
+        return;
+      }
+
       const {
         objectId,
         account,
@@ -405,6 +427,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
           getAPICategory={getMdAttachmentCategory}
           service={accountManagementService}
           configApplication={configApp.ACCOUNT_SERVICE}
+          mandatory={attachmentIsRequired}
         />
       ),
       disabled: false
@@ -415,10 +438,24 @@ const CreateUpdateMultiDestination = ({ type }) => {
   
   const next = async () => {
     try {
-      await formCreate.validateFields(formFields[current]);
+      if (current === 2) {
+        if (attachmentIsRequired && !dataAttachment.length) {
+          const errorBody = {
+            title: "Failed",
+            description: `Please upload at least one attachment`,
+          };
+
+          dispatch(showModalError(errorBody));
+
+          throw new Error("There was no file attached");
+        }
+      } else {
+        await formCreate.validateFields(formFields[current]);
+      }
     } catch (err) {
       return;
     }
+    
     
     setCurrent(current + 1);
   };
@@ -429,7 +466,20 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        await formCreate.validateFields(formFields[i]);
+        if (i === 2) {
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+
+            dispatch(showModalError(errorBody));
+
+            throw new Error("There was no file attached");
+          }
+        } else {
+          await formCreate.validateFields(formFields[i]);
+        }
       } catch (err) {
         setCurrent(i);
         return;
