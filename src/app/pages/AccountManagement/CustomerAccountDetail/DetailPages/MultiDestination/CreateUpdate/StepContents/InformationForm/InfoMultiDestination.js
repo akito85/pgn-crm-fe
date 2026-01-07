@@ -642,9 +642,8 @@ export default function InfoMultiDestination({
               },
             ]}
             className="no-margin-form"
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format(dateFormatting.f_date) : null}
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.f_date) : null
+              value: dateString ? moment(dateString, dateFormatting.date) : null
             })}
           >
             <DateComponent />
@@ -655,9 +654,8 @@ export default function InfoMultiDestination({
             name={"endDate"}
             label={"End Date"}
             className="no-margin-form"
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format(dateFormatting.f_date) : null}
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.f_date) : null
+              value: dateString ? moment(dateString, dateFormatting.date) : null
             })}
           >
             <DateComponent />
