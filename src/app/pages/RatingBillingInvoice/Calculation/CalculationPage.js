@@ -48,7 +48,6 @@ const CalculationPage = () => {
     right: ["status", "action"],
   }));
 
-  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     if (tabHeader === "Calculation List") {
       dispatch(
@@ -141,6 +140,32 @@ const CalculationPage = () => {
   const hasMore =
     (data_calculation.result?.length || 0) <
     (data_calculation?.page?.totalElements || 0);
+
+  // Refresh handler
+  const handleRefresh = () => {
+    if (tabHeader === "Calculation List") {
+      dispatch(
+        getCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: page * loadMoreSize || 100,
+          sort,
+          isLoadMore: false,
+        })
+      );
+    } else {
+      dispatch(
+        getHistoryCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: page * loadMoreSize || 100,
+          sort,
+          isLoadMore: false,
+        })
+      );
+    }
+    setPage(1);
+  };
 
   const baseColumns = useMemo(
     () => [
@@ -1436,6 +1461,8 @@ const CalculationPage = () => {
                 useInfiniteScroll={true}
                 onLoadMore={handleLoadMore}
                 hasMore={hasMore}
+                showRefresh={true}
+                onRefresh={handleRefresh}
                 loadMoreThreshold={20}
               />
             </div>
@@ -1460,6 +1487,8 @@ const CalculationPage = () => {
                 useInfiniteScroll={true}
                 onLoadMore={handleLoadMore}
                 hasMore={hasMore}
+                showRefresh={true}
+                onRefresh={handleRefresh}
                 loadMoreThreshold={20}
               />
             </div>

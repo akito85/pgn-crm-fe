@@ -1,0 +1,76 @@
+{
+    "data": {
+        "restructure": {
+            "id": "RES001",
+            "customerNumber": "CST0182",
+            "accountNumber": "00005787531",
+            "customerName": "PT. PLN PERSERO",
+            "area": "BEKASI",
+            "areaCode": "001",
+            "segment": "KI",
+            "totalMonth": 3,
+            "startPeriod": "2026-01-01",
+            "appHierId": 502,
+            "createdDate": "2026-01-06T10:00:00Z",
+            "createdBy": "Dedi",
+            "updatedDate": "2026-01-06T11:00:00Z",
+            "updatedBy": "Antigravity"
+        },
+        "badDebtList": [
+            {
+                "key": 1,
+                "invoiceNo": "INV001",
+                "invoicePeriod": "JAN 2023",
+                "currency": "IDR",
+                "totalAmount": 1000000
+            },
+            {
+                "key": 2,
+                "invoiceNo": "INV002",
+                "invoicePeriod": "FEB 2023",
+                "currency": "IDR",
+                "totalAmount": 2000000
+            },
+            {
+                "key": 3,
+                "invoiceNo": "INV003",
+                "invoicePeriod": "MAR 2023",
+                "currency": "IDR",
+                "totalAmount": 3000000
+            }
+        ],
+        "calculationList": [
+            {
+                "key": 1,
+                "invoicePeriod": "JAN 2026",
+                "totalAmount": 1000000
+            },
+            {
+                "key": 2,
+                "invoicePeriod": "FEB 2026",
+                "totalAmount": 2000000
+            },
+            {
+                "key": 3,
+                "invoicePeriod": "MAR 2026",
+                "totalAmount": 3000000
+            }
+        ],
+        "attachmentDtoList": [
+            {
+                "id": 1,
+                "fileName": "document1.pdf",
+                "fileSize": "1.2 MB",
+                "fileType": "application/pdf",
+                "fileCategoryId": "C001",
+                "fileCategoryName": "Legal",
+                "createdBy": "Dedi",
+                "createdDate": "2026-01-06T10:00:00Z"
+            }
+        ],
+        "tApprovalDto": {
+            "isApprover": true,
+            "tAppId": "APP001"
+        }
+    }
+}

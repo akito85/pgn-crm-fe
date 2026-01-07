@@ -1,10 +1,11 @@
 import {
   LeftOutlined,
   WarningOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
-import { Form,Spin } from "antd";
+import { Form, Spin, Tooltip } from "antd";
 import moment from "moment";
-import  { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -12,15 +13,12 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  getTypeDDL,
-  createSetting,
-  createValidasiSetting,
+  submitTransferToReceipt,
   getAllApprovalList,
-  getDetailSetting,
+  getDetailTransferToReceipt,
   getListApprovalById,
   getListCategory,
-  updateSetting,
-} from "../../../../../redux/slices/receipt_collection/setting";
+} from "../../../../../redux/slices/receipt_collection/transferToReceipt";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
 import TransferToReceiptForm from "./TransferToReceiptForm";
@@ -38,16 +36,23 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import TableRBI from "../../../../../components/TableRBI";
 
-const ListFormSettings = (props) => {
+import ModalSearchReceipt from "./ModalSearchReceipt";
+import { getReceiptListColumns } from "./ReceiptListColumns";
+
+const ListFormTransferToReceipt = (props) => {
   const { type } = props;
   const {
     data_detail,
     dataListAppHierId,
     dataListAppHierDetail,
-    loading,
-    dataType,
-  } = useSelector((state) => state.receiptSetting);
+    // loading, // Loading might be needed from here
+  } = useSelector((state) => state.transferToReceipt);
+
+  // Combine loading? Or just use local loadingForm state initialized from one of them.
+  // const [loadingForm, setLoadingForm] = useState(loading);
+  const loading = useSelector((state) => state.transferToReceipt.loading);
 
   // Declaration
   const navigate = useNavigate();
@@ -63,25 +68,29 @@ const ListFormSettings = (props) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
+  const [receiptList, setReceiptList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [showSearchReceiptModal, setShowSearchReceiptModal] = useState(false);
 
-  
+  const handlePageChange = (page) => {
+    setPage(page);
+  };
 
-  
+  const handleSizeChange = (current, size) => {
+    setPage(1);
+    setPageSize(size);
+  };
 
-  
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailSetting(id));
+      dispatch(getDetailTransferToReceipt(id));
     }
   }, [dispatch, id, type]);
 
-
- 
-
   useEffect(() => {
     dispatch(getAllApprovalList());
-    dispatch(getTypeDDL());
   }, [dispatch]);
 
   useEffect(() => {
@@ -93,7 +102,7 @@ const ListFormSettings = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-  
+
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -129,49 +138,19 @@ const ListFormSettings = (props) => {
   }, [formValue, appHierOptions, form]);
 
   useEffect(() => {
-    if (id  && data_detail) {
-
-      form.setFieldsValue({
-        id: data_detail?.settings.id,
-        dateStart: data_detail?.settings?.dateStart ?? "",
-        dateEnd: data_detail?.settings?.dateEnd ?? "",
-        hourStart: data_detail?.settings?.hourStart ?? "",
-        hourEnd: data_detail?.settings?.hourEnd ?? "",
-        minuteStart: data_detail?.settings?.minuteStart ?? "",
-        minuteEnd: data_detail?.settings?.minuteEnd ?? "",
-        caCode: data_detail?.settings?.caCode ?? "",
-        partnerCode: data_detail?.settings?.partnerCode ?? "",
-        ciCode: data_detail?.settings?.ciCode ?? "",
-        type: data_detail?.settings?.type,
-        apphierId: data_detail?.settings?.appHierId,
-      });
-
-      setSelectedHierarchy(data_detail?.settings?.appHierId);
-
-      setListDataAttachment(
-        (data_detail?.attachmentDtoList || []).map((attachData) => ({
-          ...attachData,
-          fileSize: bytesConverter(attachData.fileSize || 0),
-          dataType: "exist",
-        }))
-      );
+    if (id && data_detail) {
+      // Mapping detail data to form if needed.
+      // Assuming data_detail structure matches new fields, or leave generic for now.
     }
   }, [data_detail, id]);
 
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Transfer to Receipt", paramValue: ["dateStart",
-                                      "dateEnd",
-                                      "hourStart",
-                                      "hourEnd",
-                                      "minuteStart",
-                                      "minuteEnd",
-                                      "caCode",
-                                      "partnerCode",
-                                      "ciCode",
-                                      "type"
-                                     ] },
+    {
+      value: "Transfer to Receipt",
+      paramValue: ["deductionPeriod", "type", "deductionDate"],
+    },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
@@ -182,64 +161,15 @@ const ListFormSettings = (props) => {
     setValuePage(e.target.value);
   };
 
-  useEffect(() => {
-    if (
-      formValue.apphierId &&
-      !appHierOptions.map((item) => item.value).includes(formValue.apphierId)
-    ) {
-      form.setFieldsValue({ apphierId: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
-
-  
-
-  const handleSubmitForm = (formValue) => {
-      const dataValue = {
-        dateStart: formValue.dateStart,
-        dateEnd: formValue.dateEnd,
-        hourStart: formValue.hourStart,
-        hourEnd: formValue.hourEnd,
-        minuteStart: formValue.minuteStart,
-        minuteEnd: formValue.minuteEnd,
-        caCode: formValue.caCode,
-        partnerCode: formValue.partnerCode,
-        ciCode: formValue.ciCode,
-        type: formValue.type,
-        apphierId: formValue.apphierId,
-      };
-
-      setSendBody(dataValue);
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: data_detail?.settings?.id,
-      };
-      if (type !== "update") {
-        dispatch(createValidasiSetting(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-          });
-      }else{
-        dispatch(createValidasiSetting(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-            setSendBody(bodyValidasiUpdate)
-          });
-      }
-      
+  const handleSubmitForm = (values) => {
+    const formattedBody = {
+      ...values,
+      deductionDate: values.deductionDate ? moment(values.deductionDate).format("DD MMM YYYY") : "-",
+    };
+    setSendBody(formattedBody);
+    setModalConfirm(true);
   };
 
-  
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
@@ -261,34 +191,16 @@ const ListFormSettings = (props) => {
       form.resetFields();
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setReceiptList([]);
     } else {
-      dispatch(getDetailSetting(id));
+      dispatch(getDetailTransferToReceipt(id));
+      setReceiptList([]); // Or reset to original if update
     }
   };
 
   //handle Error
   const handleError = ({ values, errorFields, outOfDate }) => {
-    setTabData((prevState) => {
-      const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length < 0) {
-          return {
-            value: item.value,
-            paramValue: item.paramValue,
-          };
-        }
-        const errorBadge = errorFields.reduce(
-          (current, next) =>
-            item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
-        );
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
+    console.log("Validation Failed:", errorFields);
   };
 
   // Breadcrumbs
@@ -303,109 +215,59 @@ const ListFormSettings = (props) => {
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT,
-      breadcrumbName: "Trasfer to Recipt",
+      breadcrumbName: "Transfer to Receipt",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_TRANSFER_TO_RECEIPT,
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
-  
 
-  //kriim bodyy
   const handleSave = async () => {
     setModalConfirm(false);
-    const successMessageCreate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
+    const payload = {
+      ...sendBody,
+      receiptList: receiptList,
     };
 
-    const successMessageUpdate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
-    };
-
-    if (type === "update") {
-      dispatch(updateSetting(sendBody))
-        .unwrap()
-        .then(async () => {
-          const id = data_detail?.settings?.id;
-          setLoadingForm(true);
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
-          for (let icon = 0; icon < filterDataAttach.length; icon++) {
-            const element = filterDataAttach[icon];
-            const body = {
-              referensiId: data_detail?.settings?.id,
-              files: element.file,
-              category: "RECEIPT_SETTING",
-              fileCategoryId: element.fileCategoryId,
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          form.resetFields();
-          setSelectedHierarchy("");
-          setListDataAttachment([]);
-          dispatch(showModalSuccess(successMessageUpdate));
-          handleClear();
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
-    } else {
-      dispatch(createSetting(sendBody))
-        .unwrap()
-        .then(async (data) => {
-          let id = data.id;
-          setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
-            const element = listDataAttachment[icon];
-
-            const body = {
-              files: element.file,
-              fileCategoryId: element.fileCategoryId,
-              referensiId: id,
-              category: "RECEIPT_SETTING",
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          handleClear();
-          dispatch(showModalSuccess(successMessageCreate));
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
-    }
+    dispatch(submitTransferToReceipt(payload))
+      .unwrap()
+      .then((response) => {
+        dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: "Success Submit Data",
+            onOk: () => {
+              navigate(-1);
+            }
+          })
+        );
+      })
+      .catch((error) => {
+        // Error handling is managed by slice
+      });
   };
+
+  const handleDeleteReceipt = (record) => {
+    const updatedList = receiptList.filter((item) => item.no !== record.no);
+    setReceiptList(updatedList);
+  };
+
+  const handleConfirmSearchReceipt = (selectedRows) => {
+    setReceiptList(prev => {
+      // Filter out duplicates based on 'no' or 'receiptId' if needed
+      const newItems = selectedRows.filter(newItem => !prev.some(prevItem => prevItem.no === newItem.no));
+      return [...prev, ...newItems];
+    });
+  };
+
+
+  const columnsReceipt = getReceiptListColumns({
+    page,
+    pageSize,
+    onDelete: handleDeleteReceipt,
+    actionType: "delete",
+  });
 
   return (
     <LayoutMenu>
@@ -427,10 +289,32 @@ const ListFormSettings = (props) => {
               display: valuePage !== tabData[0].value ? "none" : undefined,
             }}
           >
-            <TransferToReceiptForm
-              dataType={dataType}
-              form={form}
-            />
+            <TransferToReceiptForm form={form} />
+            <div className="mt-5">
+              <BaseContainer header={
+                <div className="flex justify-between items-center w-full">
+                  <span>RECEIPT INFORMATION</span>
+                  <ButtonComponent
+                    type="primary"
+                    onClick={() => setShowSearchReceiptModal(true)}
+                  >
+                    Search Receipt
+                  </ButtonComponent>
+                </div>
+              }>
+                <TableRBI
+                  columns={columnsReceipt}
+                  dataSource={receiptList.slice((page - 1) * pageSize, page * pageSize)}
+                  pagination={false}
+                  tableScrolled={{ x: 1800 }}
+                  totalData={receiptList?.length || 0}
+                  current={page}
+                  pageSize={pageSize}
+                  onChange={handlePageChange}
+                  onSizeChanger={handleSizeChange}
+                />
+              </BaseContainer>
+            </div>
           </div>
           <div
             style={{
@@ -456,7 +340,7 @@ const ListFormSettings = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="receiptSetting"
+                typeSelector="transferToReceipt"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}
@@ -499,8 +383,6 @@ const ListFormSettings = (props) => {
               <ButtonComponent
                 htmlType="submit"
                 type="submit"
-              // onClick={() => setModalConfirm(true)}
-              // disabled={disableSubmit}
               >
                 Save & Submit
               </ButtonComponent>
@@ -532,6 +414,7 @@ const ListFormSettings = (props) => {
           listDataAppHierDetail={appHierDataDetail}
           dataOption={appHierOptions}
           selectedHierarchy={selectedHierarchy}
+          receiptList={receiptList}
         />
       </ModalCustom>
 
@@ -549,8 +432,13 @@ const ListFormSettings = (props) => {
           </p>
         </div>
       </ModalConfirm>
+      <ModalSearchReceipt
+        isOpen={showSearchReceiptModal}
+        onClose={() => setShowSearchReceiptModal(false)}
+        onConfirm={handleConfirmSearchReceipt}
+      />
     </LayoutMenu>
   );
 };
 
-export default ListFormSettings;
+export default ListFormTransferToReceipt;

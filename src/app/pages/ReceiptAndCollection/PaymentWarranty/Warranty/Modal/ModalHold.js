@@ -1,28 +1,41 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Select, Checkbox } from "antd";
-import { DownOutlined, RightOutlined } from "@ant-design/icons";
+import { Steps, Form, Select, Checkbox, Tooltip } from "antd";
+import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
+import SVGIcon from "../../../../../../assets/Icon/index";
+
+// Utils
+import { IconModal } from "../../../../../../utils/Icon";
+import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
+
+// Global Custom Components
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import SVGIcon from "../../../../../../assets/Icon/index";
 import InputComponent from "../../../../../../components/InputComponent";
-import { columnsCustomerInfo } from "./Table/TableCustomerInfo";
-import {
-  getAllApprovalList,
-  getAllBillingRequestPaginate,
-  getListApprovalById,
-  requestedBilling,
-} from "../../../../../../redux/slices/receipt_collection/warranty";
-import {
-  columnsApproval,
-  columnsExpandApproval,
-} from "../Detail/Table/TableApproval";
 import DetailText from "../../../../../../components/DetailText";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
-import { IconModal } from "../../../../../../utils/Icon";
 import TableRBI from "../../../../../../components/TableRBI";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
+import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import RadioTabs from "../../../../../../components/RadioTabs";
+import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
+
+// Column Configuration
+import { columnsCustomerInfo } from "./Table/TableCustomerInfo";
+import { columnsWarrantyInfo } from "./Table/TableWarrantyInfo";
+import { columnsHoldInfo } from "./Table/TableHoldInfo";
+import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
+
+// Redux / Service
+import { configApp } from "../../../../../../constants/configApp";
+import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
+import {
+  getAllWarrantyInfoPaginate,
+  getAllHoldInfoPaginate,
+  getAllAttachmentInfoPaginate,
+  getListCategory,
+  requestedHold,
+} from "../../../../../../redux/slices/receipt_collection/warranty";
 
 const ModalHold = ({
   isOpen,
@@ -32,13 +45,10 @@ const ModalHold = ({
 }) => {
   // Selector
   const {
-    data_customer,
-    data_refund,
-    data_attachment,
-
-    data_approval,
-    data_approval_list,
-    data_list_billing_request_approval,
+    data_customer_info,
+    data_warranty_info,
+    data_hold_info,
+    data_attachment_info,
     loading,
   } = useSelector((state) => state.warranty);
 
@@ -47,23 +57,29 @@ const ModalHold = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = data_list_billing_request_approval?.result || [];
+  const dataSourceCustomerInfo = data_customer_info?.result || [];
+  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
+  const dataSourceHoldInfo = data_hold_info?.result || [];
+  const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
-  // State
+  // Global State
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [remark, setRemark] = useState("");
 
   const [boolean, setBoolean] = useState(false);
   const [dataTable, setDataTable] = useState([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [dataCustomerSelect, setDataCustomerSelect] = useState([]);
+  const [selectedCustomerInfoRowKeys, setSelectedCustomerInfoRowKeys] = useState([]);
+  const [dataCustomerInfoSelect, setDataCustomerInfoSelect] = useState([]);
+  const [selectedWarrantyInfoRowKeys, setSelectedWarrantyInfoRowKeys] = useState([]);
+  const [dataWarrantyInfoSelect, setDataWarrantyInfoSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
@@ -71,41 +87,6 @@ const ModalHold = ({
     left: ["no"],
     right: [] 
   });
-
-  // Use Effect - Fetch approval list sekali saja
-  // useEffect(() => {
-  //   dispatch(getAllApprovalList());
-  // }, [dispatch]);
-
-  // Use Effect - Fetch data dengan pagination setiap ada perubahan
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     dispatch(
-  //       getAllBillingRequestPaginate({
-  //         search: encodeURIComponent(JSON.stringify(search)),
-  //         page,
-  //         pageSize,
-  //         sort,
-  //       })
-  //     );
-  //   }
-  // }, [dispatch, isOpen, search, page, pageSize, sort]);
-
-  useEffect(() => {
-    if (boolean === true) {
-      if (data_approval_list && data_approval_list.length > 0) {
-        const data = data_approval_list?.map((a, index) => ({
-          ...a,
-          key: index + 1,
-          employeeDetail: a.employeeDetail.map((b, index) => ({
-            ...b,
-            key: index + 1,
-          })),
-        }));
-        setDataTable(data);
-      }
-    }
-  }, [data_approval_list, boolean]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -139,33 +120,23 @@ const ModalHold = ({
     setSort(dataSort);
   };
 
-  const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
-    setDataCustomerSelect(newSelectedRow);
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
-
-  const rowSelection = {
-    fixed: true,
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
-
-  // Step - 3 steps
+  // Define Wizard Step
   const steps = [
     {
-      title: "Customer Information",
-    },
-    {
       title: "Warranty Information",
+      disabled: false
     },
     {
-      title: "Refund Information",
+      title: "Hold Information",
+      disabled: false
     },
     {
       title: "Attachment Information",
+      disabled: false
     },
     {
       title: "Confirmation",
+      disabled: false
     },
   ];
 
@@ -214,18 +185,18 @@ const ModalHold = ({
 
   //  Handle Select Approval Hierarchy
   const handleSelect = (e) => {
-    dispatch(getListApprovalById(e));
     setBoolean(true);
   };
 
   // Handle Cancel Form
   const handleCancelForm = () => {
     handleCancel();
-    setSelectedRowKeys([]);
-    setDataCustomerSelect([]);
+    setSelectedCustomerInfoRowKeys([]);
+    setDataCustomerInfoSelect([]);
+    setDataWarrantyInfoSelect([]);
     setDataTable([]);
     setBoolean(false);
-    setRemark("");
+    setRemarkHoldInformation("");
     setCurrent(0);
     setSearch({});
     setPage(1);
@@ -233,6 +204,16 @@ const ModalHold = ({
     setSearchText("");
     setSearchedColumn("");
     form.resetFields();
+  };
+
+  const [tabData, setTabData] = useState([
+    { value: "Hold"},
+    { value: "Attachment" },
+  ]);
+  
+  const [valuePage, setValuePage] = useState(tabData[0].value);
+  const onChange = (e) => {
+    setValuePage(e.target.value);
   };
 
   const handleCloseModalError = () => {
@@ -252,43 +233,63 @@ const ModalHold = ({
     handleCancel();
 
     const body = {
-      ...formValue,
-      billingCodes: dataCustomerSelect.map((a) => a.billingCode)
     };
-
-    // dispatch(requestedBilling({ body: body }))
-    //   .unwrap()
-    //   .then(() => {
-    //     handleRefresh();
-    //     handleCancel();
-    //     setSelectedRowKeys([]);
-    //     setDataCustomerSelect([]);
-    //     setDataTable([]);
-    //     setBoolean(false);
-    //     setRemark("");
-    //     setCurrent(0);
-    //     setSearch({});
-    //     setPage(1);
-    //     setSort("");
-    //     setSearchText("");
-    //     setSearchedColumn("");
-    //     form.resetFields();
-    //   })
-    //   .catch((error) => {
-    //     if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-    //       const message =
-    //         error?.response?.data?.message ||
-    //         error?.message ||
-    //         error?.toString();
-    //       setBodyError({ message, type: "requested" });
-    //       setModalError(true);
-    //     }
-    //   });
+    
+    dispatch(requestedHold({ body: body }))
+      .unwrap()
+      .then(() => {
+        handleRefresh();
+        handleCancel();
+        setSelectedCustomerInfoRowKeys([]);
+        setDataCustomerInfoSelect([]);
+        setDataWarrantyInfoSelect([]);
+        setDataTable([]);
+        setBoolean(false);
+        setRemarkHoldInformation("");
+        setCurrent(0);
+        setSearch({});
+        setPage(1);
+        setSort("");
+        setSearchText("");
+        setSearchedColumn("");
+        form.resetFields();
+      })
+      .catch((error) => {
+        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
+          const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            error?.toString();
+          setBodyError({ message, type: "requested" });
+          setModalError(true);
+        }
+      });
   };
 
-  const baseColumns = useMemo(
+  // Warranti Information Step
+  useEffect(() => {
+    if (isOpen) {
+      dispatch(
+        getAllWarrantyInfoPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [dispatch, isOpen, search, page, pageSize, sort]);
+
+  const dataSourceWarrantyInfoWithKeys = useMemo(() => {
+    return dataSourceWarrantyInfo?.map((item, index) => ({
+      ...item,
+      key: index + 1,
+    }));
+  }, [dataSourceWarrantyInfo]);
+  
+  const baseColumnsWarrantyInfo = useMemo(
     () =>
-      columnsCustomerInfo(
+      columnsWarrantyInfo(
         page,
         pageSize,
         searchInput,
@@ -299,31 +300,191 @@ const ModalHold = ({
     [page, pageSize, searchedColumn, searchText]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
+  const allColumnsWarrantyInfo = useMemo(() => {
+    const columnsWithKeys = baseColumnsWarrantyInfo.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
     return columnsWithKeys;
-  }, [baseColumns]);
+  }, [baseColumnsWarrantyInfo]);
 
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
+  const processedColumnsWarrantyInfo = useMemo(() => {
+    return applyFixedColumns(allColumnsWarrantyInfo, fixedColumns);
+  }, [allColumnsWarrantyInfo, fixedColumns]);
 
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
+  const columnDefinitionsWarrantyInfo = useMemo(() => {
+    return allColumnsWarrantyInfo.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [allColumns]);
+  }, [allColumnsWarrantyInfo]);
 
-  const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
+  const onSelectChangeWarrantyInfo = (newSelectedWarrantyInfoRowKeys, newSelectedRow) => {
+    setDataWarrantyInfoSelect(newSelectedRow);
+    setSelectedWarrantyInfoRowKeys(newSelectedWarrantyInfoRowKeys);
+  };
+
+  const rowSelectionWarrantyInfo = {
+    fixed: true,
+    selectedWarrantyInfoRowKeys,
+    onChange: onSelectChangeWarrantyInfo,
+  };
+
+  // Hold Information Step
+  const [holdAmountData, setHoldAmountData] = useState({});
+  const handleHoldAmountChange = (value, recordKey) => {
+    setHoldAmountData(prev => ({ ...prev, [recordKey]: value }));
+  };
+
+  const [holdDateData, setHoldDateData] = useState({});
+  const handleHoldDateChange = (value, recordKey) => {
+    setHoldDateData(prev => ({ ...prev, [recordKey]: value }));
+  };
+
+  const [remarkHoldInformation, setRemarkHoldInformation] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      dispatch(
+        getAllHoldInfoPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [dispatch, isOpen, search, page, pageSize, sort]);
+
+  const dataSourceHoldInfoWithKeys = useMemo(() => {
+    return dataSourceHoldInfo?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSource]);
+  }, [dataSourceHoldInfo]);
+  
+  const baseColumnsHoldInfo = useMemo(
+    () =>
+      columnsHoldInfo(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        holdAmountData,
+        handleHoldAmountChange,
+        holdDateData,
+        handleHoldDateChange
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumnsHoldInfo = useMemo(() => {
+    const columnsWithKeys = baseColumnsHoldInfo.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumnsHoldInfo]);
+
+  const processedColumnsHoldInfo = useMemo(() => {
+    return applyFixedColumns(allColumnsHoldInfo, fixedColumns);
+  }, [allColumnsHoldInfo, fixedColumns]);
+
+  const columnDefinitionsHoldInfo = useMemo(() => {
+    return allColumnsHoldInfo.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumnsHoldInfo]);
+
+  // Attachment Information Step
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  
+  useEffect(() => {
+    if (isOpen) {
+      dispatch(
+        getAllAttachmentInfoPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [dispatch, isOpen, search, page, pageSize, sort]);
+
+  const dataSourceAttachmentInfoWithKeys = useMemo(() => {
+    return dataSourceAttachmentInfo?.map((item, index) => ({
+      ...item,
+      key: index + 1,
+    }));
+  }, [dataSourceAttachmentInfo]);
+  
+  const itemGrantAccess = [
+    {
+      action: "Hapus",
+      type: "table",
+      render: (record) => {
+        const status = record.approvalStatus?.toUpperCase(); // Menggunakan 's' dan optional chaining
+        const isDelete = status === "DRAFT" || status === "REJECTED";
+        return (
+          <Tooltip title="Delete">
+            <SVGIcon
+              name="IconDelete"
+              width={24}
+              color={isDelete ? "#D90000" : "#8D91A0"}
+              className={isDelete ? undefined : "disabled cursor-not-allowed"}
+              onClick={isDelete ? () => undefined : undefined}
+            />
+          </Tooltip>
+        );
+      },
+    },
+  ];
+  
+  
+  const actionColsAttachmentInfo = useColumnActionPermission(
+    ["view", "history", "hapus"],
+    itemGrantAccess
+  ).map((col) => ({
+    ...col,
+    width: 80,
+    align: "center",
+  }));
+
+  const baseColumnsAttachmentInfo = useMemo(
+    () =>
+      columnsAttachmentInfo(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumnsAttachmentInfo = useMemo(() => {
+    const columnsWithKeys = [...baseColumnsAttachmentInfo, ...actionColsAttachmentInfo].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumnsAttachmentInfo, actionColsAttachmentInfo]);
+
+  const processedColumnsAttachmentInfo = useMemo(() => {
+    return applyFixedColumns(allColumnsAttachmentInfo, fixedColumns);
+  }, [allColumnsAttachmentInfo, fixedColumns]);
+
+  const columnDefinitionsAttachmentInfo = useMemo(() => {
+    return allColumnsAttachmentInfo.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumnsAttachmentInfo]);
 
   return (
     <div>
@@ -337,7 +498,7 @@ const ModalHold = ({
           <div className="flex w-full justify-end gap-x-5">
             {current < steps.length - 1 && (
               <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                Cancel
+                <span className="p-1 text-[18px] text-center">Cancel</span>
               </ButtonComponent>
             )}
             {current > 0 && (
@@ -347,9 +508,15 @@ const ModalHold = ({
                   scrollLeftHandler();
                 }}
                 type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
               >
-                Previous
+                <LeftOutlined
+                  style={{
+                    justifyItems: "center",
+                    fontSize: "18px",
+                    color: "#fff",
+                  }}
+                />
+                <span className="p-1 text-[18px] text-center">Previous</span>
               </ButtonComponent>
             )}
 
@@ -378,7 +545,7 @@ const ModalHold = ({
                 htmlType={"submit"}
                 form={"formRequest"}
               >
-                Confirm
+                <span className="p-1 text-[18px] text-center">Confirm</span>
               </ButtonComponent>
             )}
           </div>
@@ -400,136 +567,135 @@ const ModalHold = ({
           id={"formRequest"}
           onFinish={handleSave}
         >
-          {/* STEP 1: CUSTOMER INFORMATION */}
+          {/* STEP : WARRANTY INFORMATION */}
           <div className={`steps-content my-[30px] ${ current !== 0 ? "hidden" : "" }`} >
-            <div className="w-full grid grid-cols-1 gap-x-4">
-              <p className="text-primary uppercase font-bold mb-4">
-                CUSTOMER INFORMATION
-              </p>
-
-              <TableRBI
-                dataSource={dataSourceWithKeys}
-                columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={data_list_billing_request_approval?.page?.totalElements || 0}
-                tableScrolled={{ y: 525, x: 1000 }}
-                onSort={onSort}
-                columnDefinitions={columnDefinitions}
-                fixedColumns={fixedColumns}
-                setFixedColumns={setFixedColumns}
-                loading={loading}
-                showExport={false}
-                rowSelection={rowSelection}
-              />
-            </div>
-          </div>
-
-          {/* STEP 2: WARRANTY INFORMATION */}
-          <div className={`steps-content my-[30px] ${ current !== 1 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
                 WARRANTY INFORMATION
               </p>
 
               <TableRBI
-                dataSource={dataSourceWithKeys}
-                columns={processedColumns}
+                dataSource={dataSourceWarrantyInfoWithKeys}
+                columns={processedColumnsWarrantyInfo}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_list_billing_request_approval?.page?.totalElements || 0}
+                totalData={data_warranty_info?.page?.totalElements || 0}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
-                columnDefinitions={columnDefinitions}
+                columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={loading}
                 showExport={false}
-                rowSelection={rowSelection}
+                rowSelection={rowSelectionWarrantyInfo}
               />
             </div>
           </div>
-          {/* STEP 3: REFUND INFORMATION */}
-          <div className={`steps-content my-[30px] ${ current !== 2 ? "hidden" : "" }`} >
-            {/* Billing Information Review */}
+          {/* STEP : HOLD INFORMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 1 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
               <p className="text-primary uppercase font-bold mb-4">
-                REFUND INFORMATION
+                HOLD INFORMATION
               </p>
 
               <TableRBI
-                dataSource={dataSourceWithKeys}
-                columns={processedColumns}
+                dataSource={dataSourceHoldInfoWithKeys}
+                columns={processedColumnsHoldInfo}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_list_billing_request_approval?.page?.totalElements || 0}
+                totalData={data_hold_info?.page?.totalElements || 0}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
-                columnDefinitions={columnDefinitions}
+                columnDefinitions={columnDefinitionsHoldInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={loading}
-                showExport={false}
-                rowSelection={rowSelection}
               />
+              
+              <div className="pt-[30px]">
+                <Form.Item
+                  label={"Remark"}
+                  name={"remark"}
+                  rules={[
+                    { required: true, message: "Please input your Remark!" },
+                  ]}
+                >
+                  <InputComponent
+                    rows={6}
+                    type="textarea"
+                    value={remarkHoldInformation}
+                    onChange={(e) => setRemarkHoldInformation(e.target.value)}
+                    placeholder={"Type your remark"}
+                  />
+                </Form.Item>
+              </div>
             </div>
           </div>
 
-          {/* STEP 4: ATTACHMENT INFORMATION */}
-          <div className={`steps-content my-[30px] ${ current !== 3 ? "hidden" : "" }`} >
+          {/* STEP : ATTACHMENT INFORMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 2 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
                 ATTACHMENT INFORMATION
               </p>
-
-              <TableRBI
-                dataSource={dataSourceWithKeys}
-                columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={data_list_billing_request_approval?.page?.totalElements || 0}
-                tableScrolled={{ y: 525, x: 1000 }}
-                onSort={onSort}
-                columnDefinitions={columnDefinitions}
-                fixedColumns={fixedColumns}
-                setFixedColumns={setFixedColumns}
-                loading={loading}
-                showExport={false}
-                rowSelection={rowSelection}
+              <AttachmentComponent
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                dispatch={dispatch}
+                getAPICategory={getListCategory}
+                typeSelector="warranty"
+                service={receiptCollectionHttpService}
+                configApplication={configApp.PAYMENT_SERVICE}
+                typeRBI={"data"}
               />
             </div>
           </div>
 
-          {/* STEP 5: CONFIRMATION */}
-          <div className={`steps-content my-[30px] ${ current !== 4 ? "hidden" : "" }`} >
+          {/* STEP : CONFIRMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 3 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
-              <p className="text-primary uppercase font-bold mb-4">
-                CONFIRMATION
-              </p>
+              <RadioTabs data={tabData} onChange={onChange} currentPosition={valuePage}/>
+              <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
+                <p className="text-primary uppercase font-bold my-4">
+                  HOLD INFORMATION
+                </p>
+                <TableRBI
+                  dataSource={dataSourceHoldInfoWithKeys}
+                  columns={processedColumnsHoldInfo}
+                  current={page}
+                  pageSize={pageSize}
+                  onChange={handleChange}
+                  onSizeChanger={handleChange}
+                  totalData={dataSourceHoldInfoWithKeys.length || 0}
+                  tableScrolled={{ y: 525, x: 1000 }}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitionsHoldInfo}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={false}
+                />
+              </div>
 
-              <TableRBI
-                dataSource={dataCustomerSelect}
-                columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={dataCustomerSelect.length || 0}
-                tableScrolled={{ y: 525, x: 15000 }}
-                onSort={onSort}
-                columnDefinitions={columnDefinitions}
-                fixedColumns={fixedColumns}
-                setFixedColumns={setFixedColumns}
-                loading={false}
-              />
+              <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
+                <p className="text-primary uppercase font-bold my-4">
+                  ATTACHMENT INFORMATION
+                </p>
+                <AttachmentComponent
+                  type={"preview"}
+                  data={listDataAttachment}
+                  updateData={setListDataAttachment}
+                  typeSelector="partner"
+                  dispatch={dispatch}
+                  getAPICategory={getListCategory}
+                  service={receiptCollectionHttpService}
+                  configApplication={configApp.PAYMENT_SERVICE}
+                  typeRBI={"data"}
+                />
+              </div>
             </div>
           </div>
         </Form>

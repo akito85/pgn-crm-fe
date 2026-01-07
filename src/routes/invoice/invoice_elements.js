@@ -4,6 +4,7 @@ import GenerateInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/Ge
 import GenerateProformaInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/GenerateProformaInvoicePage";
 import EMeteraiManagement from "../../app/pages/RatingBillingInvoice/Invoice/EMeteraiManagement";
 import ManagementDeliveryInvoice from "../../app/pages/RatingBillingInvoice/Invoice/ManagementDeliveryInvoice";
+import CreateDeliveryJobPage from "../../app/pages/RatingBillingInvoice/Invoice/CreateDeliveryJobPage";
 import ViewFaktur from "../../app/pages/RatingBillingInvoice/Management E-Faktur/ViewFaktur";
 import DetailEFaktur from "../../app/pages/RatingBillingInvoice/Management E-Faktur/DetailEFaktur";
 import AdjustmentInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/AdjustmentInvoice/AdjustmentInvoicePage";
@@ -23,6 +24,8 @@ export const INVOICE_ELEMENTS = {
   E_METERAI_MANAGEMENT_PAGE: <EMeteraiManagement />,
   // Management Delivery Invoice
   MANAGEMENT_DELIVERY_INVOICE_PAGE: <ManagementDeliveryInvoice />,
+  // Create Delivery Job (new page)
+  CREATE_DELIVERY_JOB_PAGE: <CreateDeliveryJobPage />,
   //manajemen e-faktur
   EFAKTUR_VIEW_PAGE: <ViewFaktur />,
   EFAKTUR_DETAIL_PAGE: <DetailEFaktur />,
