@@ -68,6 +68,11 @@ const initialState = {
     loading: false,
     error: null,
   },
+  promoHistoryDetailDetail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
   advancedSearch: {
     conditions: [],
     operators: [],
@@ -218,6 +223,18 @@ export const fetchPromoHistoryDetail = createAsyncThunk(
   }
 );
 
+export const fetchPromoHistoryDetailDetail = createAsyncThunk(
+  'promo/fetchPromoHistoryDetailDetail',
+  async ({ billingCode, detailId, accountId }, { rejectWithValue }) => {
+    try {
+      const response = await promoService.getDetailDetailPromoHistoryById(billingCode, detailId, accountId);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 export const downloadPromoHistoryList = createAsyncThunk(
   'promo/downloadPromoHistoryList',
   async ({ params, advancedSearch }, { rejectWithValue }) => {
@@ -275,6 +292,9 @@ const promoSlice = createSlice({
     },
     clearPromoHistoryDetail: (state) => {
       state.promoHistoryDetail = initialState.promoHistoryDetail;
+    },
+    clearPromoHistoryDetailDetail: (state) => {
+      state.promoHistoryDetailDetail = initialState.promoHistoryDetailDetail;
     },
     resetPromoState: () => initialState,
   },
@@ -410,6 +430,21 @@ const promoSlice = createSlice({
         state.promoHistoryDetail.error = action.payload;
       });
 
+    // ==================== PROMO HISTORY DETAIL DETAIL ====================
+    builder
+      .addCase(fetchPromoHistoryDetailDetail.pending, (state) => {
+        state.promoHistoryDetailDetail.loading = true;
+        state.promoHistoryDetailDetail.error = null;
+      })
+      .addCase(fetchPromoHistoryDetailDetail.fulfilled, (state, action) => {
+        state.promoHistoryDetailDetail.loading = false;
+        state.promoHistoryDetailDetail.data = action.payload;
+      })
+      .addCase(fetchPromoHistoryDetailDetail.rejected, (state, action) => {
+        state.promoHistoryDetailDetail.loading = false;
+        state.promoHistoryDetailDetail.error = action.payload;
+      });
+
     // ==================== ADVANCED SEARCH METADATA ====================
     builder
       .addCase(fetchAdvancedSearchMetadata.pending, (state) => {
@@ -487,6 +522,7 @@ export const {
   clearPromoCriteriaDetail,
   clearPromoConditionDetail,
   clearPromoHistoryDetail,
+  clearPromoHistoryDetailDetail,
   resetPromoState,
 } = promoSlice.actions;
 
@@ -499,6 +535,7 @@ export const selectPromoConditionList = (state) => state.accountPromo.promoCondi
 export const selectPromoConditionDetail = (state) => state.accountPromo.promoConditionDetail;
 export const selectPromoHistoryList = (state) => state.accountPromo.promoHistoryList;
 export const selectPromoHistoryDetail = (state) => state.accountPromo.promoHistoryDetail;
+export const selectPromoHistoryDetailDetail = (state) => state.accountPromo.promoHistoryDetailDetail;
 export const selectAdvancedSearchMetadata = (state) => state.accountPromo.advancedSearch;
 
 // Reducer

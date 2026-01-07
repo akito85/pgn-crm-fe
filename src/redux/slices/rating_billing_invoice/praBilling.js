@@ -8,10 +8,8 @@ const initialState = {
   loading: false,
   loadingModal: false,
   list_sor: [],
-  list_service_type: [],
   list_account_group: [],
   list_customer_segment: [],
-  list_calculation_type: [],
   list_scheduler_type: [],
   list_cost_center: [],
   list_meter_reading_code: [],
@@ -20,10 +18,7 @@ const initialState = {
   specific_customer_message: "",
   list_billing_cycle: [],
   list_billing_period: [],
-  detail_calculation_job: null,
-  list_calculation_log: [],
-  list_calculation_result: [],
-  list_calculation_no_paging: [],
+  list_component_prabilling: [],
   data_user_calculation: {},
   list_prabilling_init: [],
   user_profile: null,
@@ -36,6 +31,7 @@ const initialState = {
   },
   customer_account_detail: {
     headerData: null,
+    saData: { result: [], page: {} },
     usageData: { result: [], page: {} },
     taxData: { result: [], page: {} },
     pricingData: { result: [], page: {} },
@@ -47,6 +43,7 @@ const initialState = {
   },
   loading_customer_detail: {
     header: false,
+    sa: false,
     usage: false,
     tax: false,
     pricing: false,
@@ -57,20 +54,8 @@ const initialState = {
     saPrcRuleDet: false,
   },
   loading_list_prabilling: false,
-  list_log_activities: [],
   loading_log: false,
-  detail_log_activity: null,
   loading_detail_log: false,
-
-  customer_account_detail: {
-    content: [],
-    groupedByDate: {},
-    totalElements: 0,
-    totalPages: 0,
-    pageable: {},
-  },
-  loading_customer_detail: false,
-
   detail_prabilling_init: null,
   detail_prabilling_result: { result: [], page: {} },
   detail_prabilling_log: {
@@ -79,53 +64,24 @@ const initialState = {
     totalPages: 0,
     totalElements: 0,
   },
+  prabill_sa_detail: {
+    saDetail: { result: [], page: {} },
+    saCalcRule: { result: [], page: {} },
+    saPriceRule: { result: [], page: {} },
+    saPriceDet: null,
+    saTosDetail: { result: [], page: {} },
+    saTos: { result: [], page: {} },
+  },
+  loading_prabill_sa: {
+    saDetail: false,
+    saCalcRule: false,
+    saPriceRule: false,
+    saPriceDet: false,
+    saTosDetail: false,
+    saTos: false,
+  },
   loading_detail_prabilling: false,
 };
-
-// downlaod slice
-export const donwloadedExcel = createAsyncThunk(
-  "DOWNLOAD_CALCULATION_EXCEL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
-    try {
-      const searchParams = search || "";
-      const sortParams = sort || "generateDate~desc";
-      const url = `/v1/dbs/api/rbi/calculation/download-filter?size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.downloadData(url);
-      return response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "DOWNLOAD_CALCULATION_EXCEL",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const donwloadedHistoryExcel = createAsyncThunk(
-  "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
-    try {
-      const searchParams = search || "";
-      const sortParams = sort || "createdDate~desc";
-      const url = `/v1/dbs/api/rbi/calculation/download-filter-history?size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.downloadData(url);
-      return response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
-);
 
 // get lov slice
 export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
@@ -152,32 +108,6 @@ export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
   }
 });
 
-export const getListServiceType = createAsyncThunk(
-  "GET_LIST_SERVICE_TYPE",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/rbi/calculation/servicetype`;
-      const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
 
 export const getListAccountGroup = createAsyncThunk(
   "GET_LIST_ACCOUNT_GROUP",
@@ -227,33 +157,6 @@ export const getListCustomerSegment = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/calculation/accountsegment`;
-      const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
-
-export const getListCalculationType = createAsyncThunk(
-  "GET_LIST_CALCULATION_TYPE",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/rbi/calculation/calculationtype`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -470,6 +373,33 @@ export const getListBillingPeriod = createAsyncThunk(
   }
 );
 
+export const getListComponentPrabilling = createAsyncThunk(
+  "GET_LIST_COMPONENT_PRABILLING",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/prabill/component`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+
 export const getUserDetailCalculation = createAsyncThunk(
   "GET_USER_DETAIL_CALCULATION_JOB",
   async (thunkAPI) => {
@@ -564,55 +494,6 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
   }
 );
 
-// Get Log Activities
-export const getLogActivities = createAsyncThunk(
-  "GET_LOG_ACTIVITIES",
-  async (_, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/log/view-activity";
-
-      const response = await ratingBillingHttpService.getAll(url);
-
-      return response.data || response;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-// Get Log Activity Detail
-export const getLogActivityDetail = createAsyncThunk(
-  "GET_LOG_ACTIVITY_DETAIL",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/log/view-activity-detail/${id}`;
-
-      const response = await ratingBillingHttpService.getDetail(url);
-      return response.data || response;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to fetch log detail: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
 // Update untuk getDetailPrabillingInit thunk
 export const getDetailPrabillingInit = createAsyncThunk(
   "GET_DETAIL_PRABILLING_INIT",
@@ -699,7 +580,7 @@ export const getDetailPrabillingInit = createAsyncThunk(
   }
 );
 
-// Update thunk getDetailPrabillingResult - dengan pagination dari backend
+
 export const getDetailPrabillingResult = createAsyncThunk(
   "GET_DETAIL_PRABILLING_RESULT",
   async (
@@ -760,7 +641,14 @@ export const getDetailPrabillingResult = createAsyncThunk(
 export const getDetailPrabillingLog = createAsyncThunk(
   "GET_DETAIL_PRABILLING_LOG",
   async (
-    { initCode, page = 0, size = 10, sort = "", search = "" },
+    {
+      initCode,
+      page = 0,
+      size = 10,
+      sort = "",
+      search = "",
+      isLoadMore = false,
+    },
     thunkAPI
   ) => {
     try {
@@ -784,6 +672,7 @@ export const getDetailPrabillingLog = createAsyncThunk(
           totalPages: 0,
           number: 0,
         },
+        isLoadMore, // Pass the flag to reducer
       };
     } catch (error) {
       const message =
@@ -1173,94 +1062,6 @@ export const getCustomerTaxData = createAsyncThunk(
   }
 );
 
-// Get SA TOS Detail Data
-export const getCustomerSaTosData = createAsyncThunk(
-  "GET_CUSTOMER_SA_TOS_DATA",
-  async (params, thunkAPI) => {
-    try {
-      const {
-        customerNumber,
-        billPeriod,
-        inSor,
-        accNumber,
-        saNumber,
-        page = 0,
-        size = 10,
-      } = params;
-
-      let url = `/v1/dbs/api/data-sa-tos-detail?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
-        customerNumber
-      )}&billPeriod=${encodeURIComponent(
-        billPeriod
-      )}&inSor=${encodeURIComponent(inSor)}`;
-
-      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
-      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
-
-      const response = await ratingBillingHttpService.getAll(url);
-      const apiData = response.data?.data || response.data;
-
-      return {
-        result: apiData?.result || [],
-        page: apiData?.page || {
-          size: 10,
-          totalElements: 0,
-          totalPages: 0,
-          number: 0,
-        },
-      };
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
-// Get TOS Sub Detail Data
-export const getCustomerTosSubData = createAsyncThunk(
-  "GET_CUSTOMER_TOS_SUB_DATA",
-  async (params, thunkAPI) => {
-    try {
-      const {
-        customerNumber,
-        billPeriod,
-        inSor,
-        accNumber,
-        saNumber,
-        page = 0,
-        size = 10,
-      } = params;
-
-      let url = `/v1/dbs/api/data-tos-sub-det?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
-        customerNumber
-      )}&billPeriod=${encodeURIComponent(
-        billPeriod
-      )}&inSor=${encodeURIComponent(inSor)}`;
-
-      if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
-      if (saNumber) url += `&saNumber=${encodeURIComponent(saNumber)}`;
-
-      const response = await ratingBillingHttpService.getAll(url);
-      const apiData = response.data?.data || response.data;
-
-      return {
-        result: apiData?.result || [],
-        page: apiData?.page || {
-          size: 10,
-          totalElements: 0,
-          totalPages: 0,
-          number: 0,
-        },
-      };
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
 // Get Billing Bucket Data
 export const getCustomerBillingBucketData = createAsyncThunk(
   "GET_CUSTOMER_BILLING_BUCKET_DATA",
@@ -1393,6 +1194,237 @@ export const getCustomerSaPrcRuleDetData = createAsyncThunk(
   }
 );
 
+// get sa cust data
+export const getCustomerSaData = createAsyncThunk(
+  "GET_CUSTOMER_SA_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        billPeriod,
+        page = 0,
+        size = 10,
+        sort = "saNumber~asc",
+      } = params;
+
+      if (!customerNumber || !billPeriod) {
+        throw new Error(
+          "Missing required parameters: customerNumber or billPeriod"
+        );
+      }
+
+      let url = `/v1/dbs/api/prabill/service-agreement?customerNumber=${encodeURIComponent(
+        customerNumber
+      )}&billPeriod=${encodeURIComponent(
+        billPeriod
+      )}&page=${page}&size=${size}&sort=${sort}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA Detail
+export const getPrabillSaDetail = createAsyncThunk(
+  "GET_PRABILL_SA_DETAIL",
+  async (
+    { prabillSaId, page = 0, size = 10, search = "", sort = "" },
+    thunkAPI
+  ) => {
+    try {
+      const searchParams = search
+        ? `&searchs=${encodeURIComponent(search)}`
+        : "";
+      const sortParams = sort ? `&sort=${sort}` : "";
+
+      const url = `/v1/dbs/api/prabill/sa-detail/${prabillSaId}?page=${page}&size=${size}${searchParams}${sortParams}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA Calculation Rule
+export const getPrabillSaCalcRule = createAsyncThunk(
+  "GET_PRABILL_SA_CALC_RULE",
+  async (
+    { prabillSaId, page = 0, size = 10, search = "", sort = "" },
+    thunkAPI
+  ) => {
+    try {
+      const searchParams = search
+        ? `&searchs=${encodeURIComponent(search)}`
+        : "";
+      const sortParams = sort ? `&sort=${sort}` : "";
+
+      const url = `/v1/dbs/api/prabill/sa-calcrule/${prabillSaId}?page=${page}&size=${size}${searchParams}${sortParams}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA Price Rule
+export const getPrabillSaPriceRule = createAsyncThunk(
+  "GET_PRABILL_SA_PRICE_RULE",
+  async (
+    { prabillSaId, page = 0, size = 10, search = "", sort = "" },
+    thunkAPI
+  ) => {
+    try {
+      const searchParams = search
+        ? `&searchs=${encodeURIComponent(search)}`
+        : "";
+      const sortParams = sort ? `&sort=${sort}` : "";
+
+      const url = `/v1/dbs/api/prabill/sa-prcrule/${prabillSaId}?page=${page}&size=${size}${searchParams}${sortParams}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA Price Detail
+export const getPrabillSaPriceDet = createAsyncThunk(
+  "GET_PRABILL_SA_PRICE_DET",
+  async (prabillSaId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/prabill/sa-pricedet/${prabillSaId}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data?.data || response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA TOS Detail
+export const getPrabillSaTosDetail = createAsyncThunk(
+  "GET_PRABILL_SA_TOS_DETAIL",
+  async (
+    { prabillSaId, page = 0, size = 10, search = "", sort = "" },
+    thunkAPI
+  ) => {
+    try {
+      const searchParams = search
+        ? `&searchs=${encodeURIComponent(search)}`
+        : "";
+      const sortParams = sort ? `&sort=${sort}` : "";
+
+      const url = `/v1/dbs/api/prabill/sa-tos-det/${prabillSaId}?page=${page}&size=${size}${searchParams}${sortParams}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA TOS
+export const getPrabillSaTos = createAsyncThunk(
+  "GET_PRABILL_SA_TOS",
+  async (
+    { prabillSaId, page = 0, size = 10, search = "", sort = "" },
+    thunkAPI
+  ) => {
+    try {
+      const searchParams = search
+        ? `&searchs=${encodeURIComponent(search)}`
+        : "";
+      const sortParams = sort ? `&sort=${sort}` : "";
+
+      const url = `/v1/dbs/api/prabill/sa-tos/${prabillSaId}?page=${page}&size=${size}${searchParams}${sortParams}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const prabillingSlice = createSlice({
   name: "prabilling",
   initialState,
@@ -1400,6 +1432,7 @@ const prabillingSlice = createSlice({
     resetCustomerDetail: (state) => {
       state.customer_account_detail = {
         headerData: null,
+        saData: { result: [], page: {} },
         usageData: { result: [], page: {} },
         taxData: { result: [], page: {} },
         pricingData: { result: [], page: {} },
@@ -1411,6 +1444,7 @@ const prabillingSlice = createSlice({
       };
       state.loading_customer_detail = {
         header: false,
+        sa: false,
         usage: false,
         tax: false,
         pricing: false,
@@ -1420,9 +1454,115 @@ const prabillingSlice = createSlice({
         billingItem: false,
         saPrcRuleDet: false,
       };
+      state.prabill_sa_detail = {
+        saDetail: { result: [], page: {} },
+        saCalcRule: { result: [], page: {} },
+        saPriceRule: { result: [], page: {} },
+        saPriceDet: null,
+        saTosDetail: { result: [], page: {} },
+        saTos: { result: [], page: {} },
+      };
+      state.loading_prabill_sa = {
+        saDetail: false,
+        saCalcRule: false,
+        saPriceRule: false,
+        saPriceDet: false,
+        saTosDetail: false,
+        saTos: false,
+      };
     },
   },
   extraReducers: {
+
+    //sa data
+    [getCustomerSaData.pending]: (state) => {
+      state.loading_customer_detail.sa = true;
+    },
+    [getCustomerSaData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.sa = false;
+      state.customer_account_detail.saData = action.payload;
+    },
+    [getCustomerSaData.rejected]: (state) => {
+      state.loading_customer_detail.sa = false;
+      state.customer_account_detail.saData = { result: [], page: {} };
+    },
+    // SA Detail
+[getPrabillSaDetail.pending]: (state) => {
+  state.loading_prabill_sa.saDetail = true;
+},
+[getPrabillSaDetail.fulfilled]: (state, action) => {
+  state.loading_prabill_sa.saDetail = false;
+  state.prabill_sa_detail.saDetail = action.payload;
+},
+[getPrabillSaDetail.rejected]: (state) => {
+  state.loading_prabill_sa.saDetail = false;
+  state.prabill_sa_detail.saDetail = { result: [], page: {} };
+},
+
+// SA Calc Rule
+[getPrabillSaCalcRule.pending]: (state) => {
+  state.loading_prabill_sa.saCalcRule = true;
+},
+[getPrabillSaCalcRule.fulfilled]: (state, action) => {
+  state.loading_prabill_sa.saCalcRule = false;
+  state.prabill_sa_detail.saCalcRule = action.payload;
+},
+[getPrabillSaCalcRule.rejected]: (state) => {
+  state.loading_prabill_sa.saCalcRule = false;
+  state.prabill_sa_detail.saCalcRule = { result: [], page: {} };
+},
+
+// SA Price Rule
+[getPrabillSaPriceRule.pending]: (state) => {
+  state.loading_prabill_sa.saPriceRule = true;
+},
+[getPrabillSaPriceRule.fulfilled]: (state, action) => {
+  state.loading_prabill_sa.saPriceRule = false;
+  state.prabill_sa_detail.saPriceRule = action.payload;
+},
+[getPrabillSaPriceRule.rejected]: (state) => {
+  state.loading_prabill_sa.saPriceRule = false;
+  state.prabill_sa_detail.saPriceRule = { result: [], page: {} };
+},
+
+// SA Price Det
+[getPrabillSaPriceDet.pending]: (state) => {
+  state.loading_prabill_sa.saPriceDet = true;
+},
+[getPrabillSaPriceDet.fulfilled]: (state, action) => {
+  state.loading_prabill_sa.saPriceDet = false;
+  state.prabill_sa_detail.saPriceDet = action.payload;
+},
+[getPrabillSaPriceDet.rejected]: (state) => {
+  state.loading_prabill_sa.saPriceDet = false;
+  state.prabill_sa_detail.saPriceDet = null;
+},
+
+// SA TOS Detail
+[getPrabillSaTosDetail.pending]: (state) => {
+  state.loading_prabill_sa.saTosDetail = true;
+},
+[getPrabillSaTosDetail.fulfilled]: (state, action) => {
+  state.loading_prabill_sa.saTosDetail = false;
+  state.prabill_sa_detail.saTosDetail = action.payload;
+},
+[getPrabillSaTosDetail.rejected]: (state) => {
+  state.loading_prabill_sa.saTosDetail = false;
+  state.prabill_sa_detail.saTosDetail = { result: [], page: {} };
+},
+
+// SA TOS
+[getPrabillSaTos.pending]: (state) => {
+  state.loading_prabill_sa.saTos = true;
+},
+[getPrabillSaTos.fulfilled]: (state, action) => {
+  state.loading_prabill_sa.saTos = false;
+  state.prabill_sa_detail.saTos = action.payload;
+},
+[getPrabillSaTos.rejected]: (state) => {
+  state.loading_prabill_sa.saTos = false;
+  state.prabill_sa_detail.saTos = { result: [], page: {} };
+},
     // Header Data
     [getCustomerHeaderData.pending]: (state) => {
       state.loading_customer_detail.header = true;
@@ -1460,32 +1600,6 @@ const prabillingSlice = createSlice({
     [getCustomerTaxData.rejected]: (state) => {
       state.loading_customer_detail.tax = false;
       state.customer_account_detail.taxData = { result: [], page: {} };
-    },
-
-    // SA TOS Data
-    [getCustomerSaTosData.pending]: (state) => {
-      state.loading_customer_detail.saTos = true;
-    },
-    [getCustomerSaTosData.fulfilled]: (state, action) => {
-      state.loading_customer_detail.saTos = false;
-      state.customer_account_detail.saTosDet = action.payload;
-    },
-    [getCustomerSaTosData.rejected]: (state) => {
-      state.loading_customer_detail.saTos = false;
-      state.customer_account_detail.saTosDet = { result: [], page: {} };
-    },
-
-    // TOS Sub Data
-    [getCustomerTosSubData.pending]: (state) => {
-      state.loading_customer_detail.tosSub = true;
-    },
-    [getCustomerTosSubData.fulfilled]: (state, action) => {
-      state.loading_customer_detail.tosSub = false;
-      state.customer_account_detail.tosSubDet = action.payload;
-    },
-    [getCustomerTosSubData.rejected]: (state) => {
-      state.loading_customer_detail.tosSub = false;
-      state.customer_account_detail.tosSubDet = { result: [], page: {} };
     },
 
     // Billing Bucket Data
@@ -1624,29 +1738,54 @@ const prabillingSlice = createSlice({
     },
 
     // Get Detail Prabilling Log
-    [getDetailPrabillingLog.pending]: (state) => {
-      state.loading_log = true;
+    [getDetailPrabillingLog.pending]: (state, action) => {
+      // Only show loading on initial fetch, not on load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_log = true;
+      }
     },
     [getDetailPrabillingLog.fulfilled]: (state, action) => {
       state.loading_log = false;
-      state.detail_prabilling_log = {
-        content: action.payload.result || [],
-        totalPages: action.payload.page?.totalPages || 0,
-        totalElements: action.payload.page?.totalElements || 0,
-        pageable: {
-          pageNumber: action.payload.page?.number || 0,
-          pageSize: action.payload.page?.size || 10,
-        },
-      };
+      const newData = action.payload.result || [];
+      const isLoadMore = action.payload.isLoadMore;
+
+      // If it's load more, append data. Otherwise, replace data
+      if (isLoadMore) {
+        state.detail_prabilling_log = {
+          content: [
+            ...(state.detail_prabilling_log?.content || []),
+            ...newData,
+          ],
+          totalPages: action.payload.page?.totalPages || 0,
+          totalElements: action.payload.page?.totalElements || 0,
+          pageable: {
+            pageNumber: action.payload.page?.number || 0,
+            pageSize: action.payload.page?.size || 10,
+          },
+        };
+      } else {
+        state.detail_prabilling_log = {
+          content: newData,
+          totalPages: action.payload.page?.totalPages || 0,
+          totalElements: action.payload.page?.totalElements || 0,
+          pageable: {
+            pageNumber: action.payload.page?.number || 0,
+            pageSize: action.payload.page?.size || 10,
+          },
+        };
+      }
     },
-    [getDetailPrabillingLog.rejected]: (state) => {
+    [getDetailPrabillingLog.rejected]: (state, action) => {
       state.loading_log = false;
-      state.detail_prabilling_log = {
-        content: [],
-        pageable: {},
-        totalPages: 0,
-        totalElements: 0,
-      };
+      // Only clear data on initial fetch failure, not on load more failure
+      if (!action.meta.arg?.isLoadMore) {
+        state.detail_prabilling_log = {
+          content: [],
+          pageable: {},
+          totalPages: 0,
+          totalElements: 0,
+        };
+      }
     },
 
     // Download Prabilling Result
@@ -1658,20 +1797,6 @@ const prabillingSlice = createSlice({
     },
     [downloadPrabillingResult.rejected]: (state) => {
       state.loading = false;
-    },
-
-    // Get Log Activity Detail
-    [getLogActivityDetail.pending]: (state) => {
-      state.loading_detail_log = true;
-      state.detail_log_activity = null;
-    },
-    [getLogActivityDetail.fulfilled]: (state, action) => {
-      state.loading_detail_log = false;
-      state.detail_log_activity = action.payload;
-    },
-    [getLogActivityDetail.rejected]: (state) => {
-      state.loading_detail_log = false;
-      state.detail_log_activity = null;
     },
 
     // Get list prabilling init populate
@@ -1716,40 +1841,6 @@ const prabillingSlice = createSlice({
         };
       }
     },
-    // Get Log Activities
-    [getLogActivities.pending]: (state) => {
-      state.loading_log = true;
-    },
-    [getLogActivities.fulfilled]: (state, action) => {
-      state.loading_log = false;
-      state.list_log_activities = action.payload || [];
-    },
-    [getLogActivities.rejected]: (state) => {
-      state.loading_log = false;
-      state.list_log_activities = [];
-    },
-    // download excel
-    [donwloadedExcel.pending]: (state) => {
-      state.loading = true;
-    },
-    [donwloadedExcel.fulfilled]: (state) => {
-      state.loading = false;
-      // state.data = action.payload;
-    },
-    [donwloadedExcel.rejected]: (state) => {
-      state.loading = false;
-    },
-    // download excel
-    [donwloadedHistoryExcel.pending]: (state) => {
-      state.loading = true;
-    },
-    [donwloadedHistoryExcel.fulfilled]: (state) => {
-      state.loading = false;
-      // state.data = action.payload;
-    },
-    [donwloadedHistoryExcel.rejected]: (state) => {
-      state.loading = false;
-    },
     // lov sor
     [getListSor.pending]: (state) => {
       state.loading = true;
@@ -1759,17 +1850,6 @@ const prabillingSlice = createSlice({
       state.list_sor = action.payload;
     },
     [getListSor.rejected]: (state) => {
-      state.loading = false;
-    },
-    // lov service type
-    [getListServiceType.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListServiceType.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_service_type = action.payload;
-    },
-    [getListServiceType.rejected]: (state) => {
       state.loading = false;
     },
     // lov scheduler type
@@ -1814,17 +1894,6 @@ const prabillingSlice = createSlice({
       state.list_cost_center = action.payload;
     },
     [getListCostCenter.rejected]: (state) => {
-      state.loading = false;
-    },
-    // lov calculation type
-    [getListCalculationType.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListCalculationType.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_calculation_type = action.payload;
-    },
-    [getListCalculationType.rejected]: (state) => {
       state.loading = false;
     },
     //profile
@@ -1893,6 +1962,17 @@ const prabillingSlice = createSlice({
       state.list_billing_period = action.payload;
     },
     [getListBillingPeriod.rejected]: (state) => {
+      state.loading = false;
+    },
+    // lov component prabilling
+    [getListComponentPrabilling.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListComponentPrabilling.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_component_prabilling = action.payload;
+    },
+    [getListComponentPrabilling.rejected]: (state) => {
       state.loading = false;
     },
     // lov user detail calculation

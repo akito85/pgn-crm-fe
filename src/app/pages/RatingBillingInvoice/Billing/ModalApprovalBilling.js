@@ -39,7 +39,7 @@ const ModalApprovalBilling = ({
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20); 
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -58,19 +58,21 @@ const ModalApprovalBilling = ({
     right: [] 
   });
 
-  // Use Effect - Fetch data dengan pagination setiap ada perubahan
+  // Initial fetch - Load 100 data pertama
   useEffect(() => {
     if (isOpen) {
       dispatch(
         getAllBillingApprovePaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 1,
+          pageSize: 100,
           sort,
+          isLoadMore: false,
         })
       );
+      setPage(1);
     }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  }, [dispatch, isOpen, search, sort]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -88,12 +90,28 @@ const ModalApprovalBilling = ({
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = data_list_billing_approval?.page?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getAllBillingApprovePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
+
+  const hasMore =
+    dataSource.length < (data_list_billing_approval?.page?.totalElements || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -254,13 +272,13 @@ const ModalApprovalBilling = ({
     () =>
       columnsRequestBilling(
         page,
-        pageSize,
+        loadMoreSize,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, loadMoreSize, searchedColumn, searchText]
   );
 
   const allColumns = useMemo(() => {
@@ -396,10 +414,6 @@ const ModalApprovalBilling = ({
               <TableRBI
                 dataSource={dataSourceWithKeys}
                 columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
                 totalData={data_list_billing_approval?.page?.totalElements || 0}
                 tableScrolled={{ y: 525, x: 15000 }}
                 onSort={onSort}
@@ -409,6 +423,11 @@ const ModalApprovalBilling = ({
                 loading={loading}
                 showExport={false}
                 rowSelection={rowSelection}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
               />
               <div className="pt-[30px]">
                 <Form.Item
@@ -447,10 +466,6 @@ const ModalApprovalBilling = ({
             <TableRBI
               dataSource={dataTableSelect}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
               totalData={dataTableSelect.length || 0}
               tableScrolled={{ y: 525, x: 15000 }}
               onSort={onSort}
@@ -458,6 +473,8 @@ const ModalApprovalBilling = ({
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={false}
+              usePagination={false}
+              useInfiniteScroll={false}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>

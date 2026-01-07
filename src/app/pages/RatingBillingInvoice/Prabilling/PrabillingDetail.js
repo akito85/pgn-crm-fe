@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin } from "antd";
+import { Spin, Tabs } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import RadioTabs from "../../../../components/RadioTabs";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import PrabillingDetailInformation from "./PrabillingDetailInformation";
@@ -25,7 +24,7 @@ const PrabillingDetail = () => {
   const initId = location?.state?.id;
 
   // State
-  const [tabHeader, setTabHeader] = useState("Prabilling Information");
+  const [activeTab, setActiveTab] = useState("information");
 
   useEffect(() => {
     if (initId) {
@@ -48,43 +47,49 @@ const PrabillingDetail = () => {
     },
   ];
 
-  const dataTabs = [
-    { value: "Prabilling Information" },
-    { value: "Prabilling Log" },
+  const tabItems = [
+    {
+      key: "information",
+      label: "Prabilling Information",
+      children: (
+        <PrabillingDetailInformation
+          data={detail_prabilling_init}
+          tabHeader="Prabilling Information"
+        />
+      ),
+    },
+    {
+      key: "log",
+      label: "Prabilling Log",
+      children: (
+        <PrabillingDetailLog
+          data={detail_prabilling_init}
+          tabHeader="Prabilling Log"
+        />
+      ),
+    },
   ];
 
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
+  const handleTabChange = (key) => {
+    setActiveTab(key);
   };
 
   return (
-    <Spin spinning={loading_detail_prabilling}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
-        <div className={"w-full justify-start mt-5"}>
-          <RadioTabs
-            data={dataTabs}
-            onChange={changeTabHeader}
-            currentPosition={tabHeader}
+        <div className="w-full">
+          <Tabs
+            activeKey={activeTab}
+            items={tabItems}
+            onChange={handleTabChange}
+            style={{ marginBottom: '-24px' }}
           />
         </div>
 
-        {tabHeader === "Prabilling Information" ? (
-          <PrabillingDetailInformation
-            data={detail_prabilling_init}
-            tabHeader={tabHeader}
-          />
-        ) : (
-          <PrabillingDetailLog
-            data={detail_prabilling_init}
-            tabHeader={tabHeader}
-          />
-        )}
-
-        <div className={"w-full flex justify-start my-5"}>
+        <div className="w-full flex justify-start mt-4">
           <ButtonComponent
-            type={"submit"}
+            type="submit"
             border={false}
             icon={
               <LeftOutlined
@@ -101,7 +106,6 @@ const PrabillingDetail = () => {
           </ButtonComponent>
         </div>
       </LayoutMenu>
-    </Spin>
   );
 };
 

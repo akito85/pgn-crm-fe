@@ -1,21 +1,25 @@
 // React imports
-import { Fragment, useRef, useState, useEffect } from "react";
+import { Fragment, useRef, useState, useEffect, useMemo, useCallback } from "react";
 
 // Ant Design imports
-import { Checkbox, Tooltip, Spin, Popover, Space } from "antd";
+import { Checkbox, Tooltip, Spin, Popover, Space, Button, Badge } from "antd";
 import {
+  CheckOutlined,
+  DownloadOutlined,
+  FilterOutlined,
   MoreOutlined,
+  PlusOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 
 // React Router imports
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 // Redux imports
 import { useDispatch, useSelector } from "react-redux";
 import {
   getRelationshipListAdvanced,
-  toggleRelationshipStatus,
+  inactivateRelationship,
   approveOrRejectRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 
@@ -24,10 +28,11 @@ import { hasValue, renderColumn } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 // Component imports
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 
 // Local imports
 import RelationshipDetail from "./RelationshipDetail";
@@ -43,87 +48,86 @@ import moment from "moment";
 
 // Import TablePagination for nested table in expandable rows
 import TablePagination from "../../../../../../components/TablePagination";
+import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import Toolbar from "../../../../../../components/Toolbar";
 
-// Expandable row renderer for Related Detail
+// ============================================
+// CONSTANTS (moved outside component for performance)
+// ============================================
+
+// Mock attachment data for approval detail
+const MOCK_ATTACHMENT_DATA = [
+  {
+    key: 1,
+    type: "Contract",
+    fileName: "relationship_contract.pdf",
+    fileSize: "2.5 MB",
+  },
+  {
+    key: 2,
+    type: "Agreement",
+    fileName: "partnership_agreement.docx",
+    fileSize: "1.8 MB",
+  },
+];
+
+/**
+ * Format status text to Title Case with special handling
+ * @param {string} status - Raw status string
+ * @param {Object} statusMap - Optional mapping for specific status values
+ * @returns {string} Formatted status text
+ */
+const formatStatusText = (status, statusMap = {}) => {
+  if (!status) return status;
+
+  // Check for specific mappings first
+  const upperStatus = status.toUpperCase().replace(/_/g, " ");
+  if (statusMap[upperStatus]) return statusMap[upperStatus];
+  if (statusMap[status]) return statusMap[status];
+
+  // Default: Title Case
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+};
+
+/**
+ * Create nested column configuration (DRY helper)
+ * @param {string} title - Column title
+ * @param {string} dataIndex - Data index for the column
+ * @returns {Object} Column configuration
+ */
+const createNestedColumn = (title, dataIndex) => ({
+  title: () => (
+    <div className="flex items-center justify-between w-full">
+      <span>{title}</span>
+    </div>
+  ),
+  dataIndex,
+  align: "left",
+  sorter: (a, b) => (a[dataIndex] || "").localeCompare(b[dataIndex] || ""),
+  render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
+});
+
+// Nested columns configuration (memoized outside component)
+const NESTED_COLUMNS = [
+  {
+    title: "NO",
+    align: "center",
+    width: 60,
+    render: (text, object, index) => (
+      <div style={{ padding: "8px 0" }}>{index + 1}</div>
+    ),
+  },
+  createNestedColumn("ACCOUNT NUMBER", "accountNumber"),
+  createNestedColumn("ACCOUNT NAME", "accountName"),
+  createNestedColumn("ACCOUNT CATEGORY", "accountCategory"),
+  createNestedColumn("SOR", "sor"),
+  createNestedColumn("COST CENTER", "costCenter"),
+  createNestedColumn("METER READING CODE", "meterReadingCode"),
+];
+
+// Expandable row renderer for Related Detail (uses memoized NESTED_COLUMNS)
 const expandedRowRender = (record) => {
   const relatedDetailData = record?.relatedDetail || [];
-
-  const nestedColumns = [
-    {
-      title: "NO",
-      align: "center",
-      width: 60,
-      render: (text, object, index) => (
-        <div style={{ padding: "8px 0" }}>{index + 1}</div>
-      ),
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>ACCOUNT NUMBER</span>
-        </div>
-      ),
-      dataIndex: "accountNumber",
-      align: "left",
-      sorter: (a, b) => (a.accountNumber || "").localeCompare(b.accountNumber || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>ACCOUNT NAME</span>
-        </div>
-      ),
-      dataIndex: "accountName",
-      align: "left",
-      sorter: (a, b) => (a.accountName || "").localeCompare(b.accountName || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>ACCOUNT CATEGORY</span>
-        </div>
-      ),
-      dataIndex: "accountCategory",
-      align: "left",
-      sorter: (a, b) => (a.accountCategory || "").localeCompare(b.accountCategory || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>SOR</span>
-        </div>
-      ),
-      dataIndex: "sor",
-      align: "left",
-      sorter: (a, b) => (a.sor || "").localeCompare(b.sor || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>COST CENTER</span>
-        </div>
-      ),
-      dataIndex: "costCenter",
-      align: "left",
-      sorter: (a, b) => (a.costCenter || "").localeCompare(b.costCenter || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-    {
-      title: () => (
-        <div className="flex items-center justify-between w-full">
-          <span>METER READING CODE</span>
-        </div>
-      ),
-      dataIndex: "meterReadingCode",
-      align: "left",
-      sorter: (a, b) => (a.meterReadingCode || "").localeCompare(b.meterReadingCode || ""),
-      render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-    },
-  ];
 
   return (
     <div className="bg-blue-50 -mx-2 pl-6 py-2">
@@ -132,7 +136,7 @@ const expandedRowRender = (record) => {
         useSelect={false}
         usePagination={false}
         dataSource={relatedDetailData}
-        columns={nestedColumns}
+        columns={NESTED_COLUMNS}
         className="related-detail-nested-table"
       />
     </div>
@@ -235,12 +239,12 @@ const columns = (
     },
     {
       title: "RELATED NUMBER",
-      dataIndex: "subjectValue",
+      dataIndex: "subjectNumber",
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "subjectValue",
+        "subjectNumber",
         searchInput,
         searchedColumn,
         searchText,
@@ -248,10 +252,10 @@ const columns = (
         true
       ),
       render: (text, record) => {
-        const displayText = record.subjectValue || record.objectValue || "";
+        const displayText = record.subjectNumber || record.objectNumber || "";
         return renderColumn(
-          "subjectValue",
-          hasValue(search["subjectValue"]),
+          "subjectNumber",
+          hasValue(search["subjectNumber"]),
           searchText,
           displayText,
           false,
@@ -334,20 +338,12 @@ const columns = (
         true
       ),
       render: (statusApproval) => {
-        let text;
-        switch (statusApproval) {
-          case "WAITING APPROVAL":
-          case "WAITING_FOR_APPROVAL":
-          case "WAITING_APPROVAL":
-            text = "Waiting Approval";
-            break;
-          default:
-            text = statusApproval
-              ? statusApproval.charAt(0).toUpperCase() +
-              statusApproval.slice(1).toLowerCase()
-              : statusApproval;
-            break;
-        }
+        const statusMap = {
+          "WAITING APPROVAL": "Waiting Approval",
+          "WAITING FOR APPROVAL": "Waiting Approval",
+          "WAITING_APPROVAL": "Waiting Approval",
+        };
+        const text = formatStatusText(statusApproval, statusMap);
         return text
           ? renderColumn(
             "statusApproval",
@@ -377,23 +373,7 @@ const columns = (
         true
       ),
       render: (status) => {
-        let text;
-        switch (status) {
-          case "ACTIVE":
-            text = "Active";
-            break;
-          case "INACTIVE":
-            text = "Inactive";
-            break;
-          case "DRAFT":
-            text = "Draft";
-            break;
-          default:
-            text = status
-              ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-              : status;
-            break;
-        }
+        const text = formatStatusText(status);
         return text
           ? renderColumn(
             "status",
@@ -431,6 +411,9 @@ const RelationshipTable = ({
   inputFields = [],
   tempInputFields = [],
   listType = "all",
+  isAccessGranted = true,
+  handleDownload = () => {},
+  handleOpenFilter = () => {},
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -456,24 +439,14 @@ const RelationshipTable = ({
   const [modalConfirmReject, setModalConfirmReject] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState(null);
 
-  // Mock attachment data for approval detail
-  const mockAttachmentData = [
-    {
-      key: 1,
-      type: "Contract",
-      fileName: "relationship_contract.pdf",
-      fileSize: "2.5 MB",
-    },
-    {
-      key: 2,
-      type: "Agreement",
-      fileName: "partnership_agreement.docx",
-      fileSize: "1.8 MB",
-    },
-  ];
+  // Inactivate modal states
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactivateRelationshipId, setInactivateRelationshipId] = useState(0);
+  const [inactivateAppHierId, setInactivateAppHierId] = useState(0);
+  const [inactivateRelationshipName, setInactivateRelationshipName] = useState("");
 
-  // Fetch relationship data from API
-  useEffect(() => {
+  // Memoized fetch function (DRY + performance optimization)
+  const fetchRelationshipData = useCallback(() => {
     if (idAccount) {
       dispatch(
         getRelationshipListAdvanced({
@@ -492,6 +465,13 @@ const RelationshipTable = ({
     }
   }, [dispatch, idAccount, page, pageSize, sort, search, tempInputFields, listType]);
 
+  // check access granted
+  useEffect(() => {
+    if (isAccessGranted) {
+      fetchRelationshipData();
+    }
+  }, [fetchRelationshipData, isAccessGranted]);
+
   // Update table data when API response changes
   useEffect(() => {
     if (data_relationship && data_relationship.result) {
@@ -499,12 +479,18 @@ const RelationshipTable = ({
       // Add key to each row for proper row selection
       const dataWithKeys = data_relationship.result.map((item, index) => ({
         ...item,
-        key: item.id || `relationship-${index}`,
+        key: `relationship-${item.id}-${index}`,
       }));
+
+      console.log("dataWithKeys", dataWithKeys)
       setDataTable(dataWithKeys);
       setTotalElements(totalData || 0);
     }
   }, [data_relationship]);
+
+  useEffect(() => {
+    console.log("dataTable", dataTable);
+  }, [dataTable])
 
   // Reset selected rows when exiting approval mode
   useEffect(() => {
@@ -547,34 +533,46 @@ const RelationshipTable = ({
     });
   };
 
-  const handleActiveOrInactive = (record) => {
-    console.log("Toggle activation for:", record.id);
+  /**
+   * Open or close inactivate modal
+   */
+  const handleInactivateModal = (show, relationshipId = 0, appHierId = 0,  relationshipName = "") => {
+    if (show) {
+      setInactivateRelationshipId(relationshipId);
+      setInactivateAppHierId(appHierId);
+      setInactivateRelationshipName(relationshipName);
+      setShowInactiveModal(true);
+    } else {
+      setInactivateRelationshipId(0);
+      setInactivateAppHierId(0);
+      setInactivateRelationshipName("");
+      setShowInactiveModal(false);
+    }
+  };
 
-    // Call API to toggle relationship status
+  /**
+   * Handle inactivate relationship
+   */
+  const handleInactivateRelationship = (remark, handleClear) => {
     dispatch(
-      toggleRelationshipStatus({
-        relationshipId: record.id,
-        remarks: "test", // Hardcoded as requested
+      inactivateRelationship(
+        {
+          accountId: idAccount,
+          body: {
+            id: inactivateRelationshipId,
+            appHierId: inactivateAppHierId,
+            remark,
+          }
+        }
+      )
+    )
+      .unwrap()
+      .then(() => {
+        fetchRelationshipData(); // Use memoized fetch function
+        setShowInactiveModal(false);
+        handleClear();
       })
-    ).then((result) => {
-      // Only refresh the list if the API call was successful
-      if (result.type === "TOGGLE_RELATIONSHIP_STATUS/fulfilled") {
-        dispatch(
-          getRelationshipListAdvanced({
-            idAccount,
-            page,
-            pageSize,
-            sort,
-            search: encodeURIComponent(JSON.stringify(search)),
-            body: {
-              inputFields: tempInputFields,
-              searchs: search,
-              listType: listType,
-            },
-          })
-        );
-      }
-    });
+      .catch(() => { });
   };
 
   // Approval handlers
@@ -598,9 +596,8 @@ const RelationshipTable = ({
     setModalConfirmReject(true);
   };
 
-  const handleConfirmApprove = (remark) => {
-    const action = "APPROVE";
-
+  // Unified handler for approve/reject actions (DRY optimization)
+  const handleConfirmAction = useCallback((remark, action) => {
     const body = selectedRows.map((row) => ({
       id: row.id,
       approvalId: row.approvalId || row.tappId,
@@ -611,40 +608,22 @@ const RelationshipTable = ({
     dispatch(approveOrRejectRelationship({ idAccount, body, action }))
       .unwrap()
       .then(() => {
-        setModalConfirmApprove(false);
+        if (action === "APPROVE") {
+          setModalConfirmApprove(false);
+        } else {
+          setModalConfirmReject(false);
+        }
         setSelectedRowKeys([]);
         setSelectedRows([]);
-        // Stay in approval mode and refresh data
+        // Refresh table data after action
+        fetchRelationshipData();
+        // Stay in approval mode
         handleIsApproval(true);
       })
       .catch(() => {
         // Error already handled in thunk
       });
-  };
-
-  const handleConfirmReject = (remark) => {
-    const action = "REJECT";
-
-    const body = selectedRows.map((row) => ({
-      id: row.id,
-      approvalId: row.approvalId || row.tappId,
-      action,
-      description: remark,
-    }));
-
-    dispatch(approveOrRejectRelationship({ idAccount, body, action }))
-      .unwrap()
-      .then(() => {
-        setModalConfirmReject(false);
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
-        // Stay in approval mode and refresh data
-        handleIsApproval(true);
-      })
-      .catch(() => {
-        // Error already handled in thunk
-      });
-  };
+  }, [dispatch, idAccount, selectedRows, handleIsApproval, fetchRelationshipData]);
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -658,266 +637,186 @@ const RelationshipTable = ({
     setSort(dataSort);
   };
 
-  // Action items for table
-  const itemsActionView = (
-    handleDetail,
-    handleActiveOrInactive,
-    handleApprovalHistory,
-    handleApprovalDetail
-  ) => [
-      // Outside popover - Detail icon
-      {
-        action: "View",
-        type: "table",
-        render: (record, data_length) => {
-          return (
-            <Tooltip title="Detail">
-              <SVGIcon
-                name="IconDetail"
-                color="#0075bf"
-                width={24}
-                onClick={() => handleDetail(record)}
-                className="cursor-pointer"
-              />
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "Update",
-        type: "table",
-        render: (record, data_length) => {
-
-          // editable only for :
-          // 1. status DRAFT && statusApproval DRAFT
-          // 2. status REJECTED && statusApproval DRAFT
-
-          const isEditable =
-            (record.status === "DRAFT" && record.statusApproval === "DRAFT") ||
-            (record.status === "REJECTED" && record.statusApproval === "DRAFT") ||
-            (record.status === "DRAFT" && record.statusApproval === "REJECTED") ||
-            (record.status === "REJECTED" && record.statusApproval === "REJECTED");
-
-          const render =
-            data_length > 3 ? (
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name="IconEdit"
-                    color={!isEditable ? "#8D91A0" : "#0075bf"}
-                    width={24}
-                  />
-                }
-                border={false}
-                disabled={!isEditable}
-              >
-                <span
-                  className={`${!isEditable ? "text-gray-400" : "text-black"
-                    } ml-3`}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
-            ) : (
-              <Tooltip title="Update">
-                <div className="pt-1">
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    color={!isEditable ? "#8D91A0" : "#ACC424"}
-                    className={!isEditable ? "cursor-not-allowed" : undefined}
-                  />
-                </div>
-              </Tooltip>
-            );
-
-          return isEditable ? (
-            <NavLink
-              to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP}
-              state={{ id: record.id, idAccount, idCustomer, type }}
-            >
-              {render}
-            </NavLink>
-          ) : (
-            render
-          );
-        },
-      },
-      {
-        action: "Active",
-        type: "table",
-        render: (record, data_length) => {
-          const isActive = record?.status === "Active" || record?.status === "ACTIVE";
-
-          return data_length > 3 ? (
-            <ButtonComponent
-              icon={
-                <Checkbox
-                  className="inactive-check"
-                  checked={isActive}
-                  disabled={false}
-                />
-              }
-              border={false}
-              onClick={() => handleActiveOrInactive(record)}
-            >
-              <span className="text-black ml-5">
-                {isActive ? "Active" : "Inactive"}
-              </span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title={isActive ? "Active" : "Inactive"}>
-              <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  onClick={() => handleActiveOrInactive(record)}
-                  checked={isActive}
-                  disabled={false}
-                />
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "Approval History",
-        type: "table",
-        render: (record, data_length) => {
-          return data_length > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <span className="text-black ml-3">Approval History</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Approval History">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconLogHistory"
-                  color="#0075bf"
-                  width={24}
-                  onClick={() => handleApprovalHistory(record)}
-                  className="cursor-pointer"
-                />
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-    ];
-
-  // Approval mode action items
-  const itemsApprovalMode = [
+  const itemActions = [
     {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="cursor-pointer">
-              <UnorderedListOutlined
-                onClick={() => handleApprovalDetail(record)}
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          onClick={handleDownload}
+          icon={
+            <DownloadOutlined
+              style={{
+                color: "#fff",
+                fontSize: 20,
+              }}
+            />
+          }
+          style={{
+            backgroundColor: "#0075bf",
+            color: "#fff",
+            borderColor: "#0075bf",
+            border: "1px solid #0075bf",
+            borderRadius: "5px",
+            height: "48px"
+          }}
+        >
+          Download List
+        </ButtonComponent>
+      )
+    },
+    {
+      action: "Approve",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          onClick={() => handleIsApproval(true)}
+          icon={
+            <CheckOutlined
+              style={{
+                color: "#fff",
+                fontSize: 20,
+              }}
+            />
+          }
+          style={{
+            backgroundColor: "#0075bf",
+            color: "#fff",
+            borderColor: "#0075bf",
+            border: "1px solid #0075bf",
+            borderRadius: "5px",
+            height: "48px"
+          }}
+        >
+          Approval
+        </ButtonComponent>
+      )
+    },
+    {
+      action: "Create",
+      render: (
+        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP} state={{
+          idAccount,
+          idCustomer,
+          type,
+        }}>
+          <ButtonComponent
+            type={"submit"}
+            icon={
+              <PlusOutlined
                 style={{
-                  fontSize: "20px",
-                  color: "#0075bf",
+                  color: "#fff",
+                  fontSize: 20,
                 }}
               />
-            </div>
-          </Tooltip>
-        );
-      },
+            }
+            style={{
+              backgroundColor: "#0075bf",
+              color: "#fff",
+              borderColor: "#0075bf",
+              border: "1px solid #0075bf",
+              borderRadius: "5px",
+              height: "48px"
+            }}
+          >
+            Create
+          </ButtonComponent>
+        </Link>
+      )
     },
     {
-      action: "Approval History",
-      type: "table",
-      render: (record) => {
+      action: 'View',
+      type: 'table',
+      render: (r, data_length) => {
         return (
-          <Tooltip title="Approval History">
-            <div
-              className="cursor-pointer pt-1"
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <SVGIcon name="IconLogHistory" color="#0075bf" width={24} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
-
-  // Manual action column (without permission hook for now)
-  const actionColumn = {
-    title: "ACTION",
-    dataIndex: "action",
-    fixed: "right",
-    width: 150,
-    render: (text, record, index) => {
-      const items = approvalMode
-        ? itemsApprovalMode
-        : itemsActionView(
-          handleDetail,
-          handleActiveOrInactive,
-          handleApprovalHistory,
-          handleApprovalDetail
-        );
-
-      const totalLength = items.length;
-
-      if (totalLength > 3) {
-        // Show popover with actions
-        return (
-          <div className="w-full flex justify-center items-center gap-4">
-            <Popover
-              trigger="click"
-              placement="bottomRight"
-              open={openPopoverId === record.id}
-              onOpenChange={(visible) => setOpenPopoverId(visible ? record.id : null)}
-              content={
-                <Space direction="vertical">
-                  {items
-                    ?.filter((item) => item?.action !== "View")
-                    ?.map((item, idx) => (
-                      <div key={idx}>{item?.render(record, totalLength)}</div>
-                    ))}
-                </Space>
-              }
-            >
+          <Link to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP} state={{
+            idAccount,
+            idRelationship: r.id,
+            idCustomer,
+            type,
+          }}>
+            <Tooltip title="Detail">
               <div className="pt-1">
-                <MoreOutlined
-                  style={{
-                    fontSize: "24px",
-                    color: "#0075bf",
-                    cursor: "pointer",
-                  }}
+                <SVGIcon
+                  name="IconDetail"
+                  color={"#0075bf"}
+                  width={24}
                 />
               </div>
-            </Popover>
-            <div className="pt-1">
-              {items
-                ?.filter((item) => item?.action === "View")
-                ?.map((item, idx) => (
-                  <div key={idx}>{item?.render(record, totalLength)}</div>
-                ))}
-            </div>
-          </div>
-        );
-      } else {
-        // Show all actions inline
-        return (
-          <div className="w-full flex justify-center gap-4 mt-1 items-start">
-            {items?.map((item, idx) => (
-              <div key={idx}>{item?.render(record, totalLength)}</div>
-            ))}
-          </div>
-        );
+            </Tooltip>
+          </Link>
+        )
       }
     },
-  };
+    {
+      action: 'Update',
+      type: 'table',
+      render: (r, data_length) => {
+        return (
+          <Button
+            type="text"
+            style={{ padding: 0, height: 'auto', border: 'none' }}
+            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP, { state: {
+              id: r.id,
+              idAccount,
+              idCustomer,
+              type
+            }})}
+            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE" || r.status === "ACTIVE"}
+          >
+            <Tooltip title="Update">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconUpdateAction"
+                  color={"#0075bf"}
+                  width={24}
+                />
+              </div>
+            </Tooltip>
+          </Button>
+        )
+      }
+    },
+    {
+      action: 'Inactivate',
+      type: 'table',
+      render: (r, data_length) => {
+        return (
+          <Tooltip
+            title="Inactivate"
+          >
+            <Checkbox
+              className="inactive-check"
+              disabled={r?.status === "ACTIVE" ? false : true}
+              checked={r?.status === "ACTIVE" ? false : true}
+              onClick={() => handleInactivateModal(true, r?.id, r.appHierId, r?.subjectName || r?.objectName || "")}
+            />
+          </Tooltip>
+        )
+      }
+    },
+    {
+      action: 'History',
+      type: 'table',
+      render: (r, data_length) => {
+        return (
+          <Tooltip title="History">
+            <div className="pt-1">
+              <SVGIcon
+                name="IconLogHistory"
+                color={"#0075bf"}
+                width={24}
+                onClick={() => handleApprovalHistory(r)}
+              />
+            </div>
+          </Tooltip>
+        )
+      }
+    }
+  ];
 
-  // Row selection config for approval mode
-  const rowSelection = approvalMode
+  // Memoized row selection config for approval mode (performance optimization)
+  const rowSelection = useMemo(() => approvalMode
     ? {
       selectedRowKeys,
       onChange: onSelectChange,
@@ -929,17 +828,56 @@ const RelationshipTable = ({
         },
       }),
     }
-    : null;
+    : null, [approvalMode, selectedRowKeys, onSelectChange]);
 
   return (
     <Fragment>
       <Spin spinning={loading}>
+        {approvalMode ? (
+          <div className="flex justify-end gap-5 mb-5">
+            <ButtonComponent
+              type="reject"
+              onClick={() => handleIsApproval(false)}
+            >
+              Cancel
+            </ButtonComponent>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center gap-5 mb-5">
+            <Badge count={tempInputFields.length}>
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => handleOpenFilter(true)}
+                icon={
+                  <FilterOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  width: "128px",
+                  height: "48px",
+                  borderRadius: "5px"
+                }}
+              >
+                Filters
+              </ButtonComponent>
+            </Badge>
+            <Toolbar items={itemActions} type="detail" />
+          </div>
+        )}
         <TablePaginationNew
           dataSource={dataTable}
           totalData={totalElements}
           current={page}
           pageSize={pageSize}
-          tableScrolled={{ y: 525, x: 1800 }}
+          tableScrolled={{ y: 400, x: 2000 }}
           onChange={handleChangeSize}
           onSort={onSort}
           columns={[
@@ -952,7 +890,12 @@ const RelationshipTable = ({
               searchText,
               handleSearch
             ),
-            actionColumn,
+            ...useColumnActionPermission(
+              ["Inactivate", "View", "Update", "History"],
+              itemActions,
+              "View",
+              "detail"
+            ),
           ]}
           rowSelection={rowSelection}
           rowKey="id"
@@ -965,6 +908,8 @@ const RelationshipTable = ({
             expandedRowRender,
             rowExpandable: (record) => record?.relatedDetail && record.relatedDetail.length > 0,
           }}
+          // dragcolumn sementara bisa di semua kondisi
+          enableDragColumn={true}
         />
       </Spin>
 
@@ -1020,7 +965,7 @@ const RelationshipTable = ({
       >
         <RelationshipApprovalDetail
           data={approvalDetailData}
-          attachmentData={mockAttachmentData}
+          attachmentData={MOCK_ATTACHMENT_DATA}
         />
       </ModalCustom>
 
@@ -1039,7 +984,7 @@ const RelationshipTable = ({
       <ModalConfirmApproval
         isOpen={modalConfirmApprove}
         handleCancel={() => setModalConfirmApprove(false)}
-        handleConfirm={handleConfirmApprove}
+        handleConfirm={(remark) => handleConfirmAction(remark, "APPROVE")}
         type="approve"
         selectedData={selectedRows}
       />
@@ -1048,9 +993,18 @@ const RelationshipTable = ({
       <ModalConfirmApproval
         isOpen={modalConfirmReject}
         handleCancel={() => setModalConfirmReject(false)}
-        handleConfirm={handleConfirmReject}
+        handleConfirm={(remark) => handleConfirmAction(remark, "REJECT")}
         type="reject"
         selectedData={selectedRows}
+      />
+
+      {/* Modal Inactivate Confirmation */}
+      <ModalApproveOrReject
+        isOpen={showInactiveModal}
+        header={"INACTIVATE"}
+        handleCloseModal={() => handleInactivateModal(false)}
+        customMessage={`Are you sure you want to inactivate relationship - ${inactivateRelationshipName}?`}
+        onFinish={({ remark }, handleClear) => handleInactivateRelationship(remark, handleClear)}
       />
     </Fragment>
   );

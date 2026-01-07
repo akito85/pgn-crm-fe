@@ -119,6 +119,8 @@ import contentManagementReducer from "../slices/rating_billing_invoice/MasterDat
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
+import warrantyReducer from "../slices/receipt_collection/warranty";
+import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
 
 const reducer = combineReducers({
@@ -183,6 +185,7 @@ const reducer = combineReducers({
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
   relationship: relationshipReducer,
+  warranty: warrantyReducer,
 
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
@@ -266,6 +269,8 @@ const reducer = combineReducers({
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
 
+  // notifications
+  notifications: notificationsReducer,
   multiDestination: multiDestinationReducer,
 });
 

@@ -31,6 +31,7 @@ const PaymentRelationTable = ({
   handleDownload = () => {},
   tempFilters = [],
   setShowFilterModal = () => {},
+  setIsApproval = () => {},
 }) => {
   const navigate = useNavigate();
 
@@ -40,6 +41,13 @@ const PaymentRelationTable = ({
       align: "center",
       dataIndex: "no",
       width: 100,
+    },
+    {
+      title: "ACCOUNT NAME",
+      dataIndex: "relatedAccountName",
+      width: 250,
+      sorter: true,
+      ...getColumnSearchProps("relatedAccountName"),
     },
     {
       title: "ACCOUNT NUMBER",
@@ -298,7 +306,16 @@ const PaymentRelationTable = ({
 
   return (
     <div className="flex flex-col gap-y-6">
-      {!isApproval && (
+      {isApproval ? (
+        <div className="flex justify-end gap-5 mb-5">
+          <ButtonComponent
+            type="reject"
+            onClick={() => setIsApproval(false)}
+          >
+            Cancel
+          </ButtonComponent>
+        </div>
+      ) : (
         <div className="flex justify-between items-center gap-5 mb-5">
           <Badge count={tempFilters.length}>
             <ButtonComponent

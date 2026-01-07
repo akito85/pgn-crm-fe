@@ -31,9 +31,9 @@ spec:
         vault.hashicorp.com/auth-path: {{ .Values.podAnnotations.vault.authPath | quote}}
         vault.hashicorp.com/agent-inject: {{ .Values.podAnnotations.vault.enabled | quote}}
         vault.hashicorp.com/agent-inject-status: {{ .Values.podAnnotations.vault.inject | quote}}
-        vault.hashicorp.com/agent-inject-secret-db-access.properties: {{ .Values.podAnnotations.vault.secretPath | quote}}
-        vault.hashicorp.com/agent-inject-template-db-access.properties: | 
-          {{ "{{- with secret \""}}energy-development/db_access{{ "\" -}}" }}
+        vault.hashicorp.com/agent-inject-secret-secret-access.properties: {{ .Values.podAnnotations.vault.secretPath | quote}}
+        vault.hashicorp.com/agent-inject-template-secret-access.properties: | 
+          {{ "{{- with secret \""}}energy-staging/secret_access{{ "\" -}}" }}
           {{ .Values.podAnnotations.vault.access_properties_un }} 
           {{ .Values.podAnnotations.vault.access_properties_pw }}
           {{ "{{- end }}" }}
@@ -63,7 +63,7 @@ spec:
               protocol: TCP
           env:
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
-              value: "file:/vault/secrets/db-access.properties"
+              value: "file:/vault/secrets/secret-access.properties"
           livenessProbe:
             tcpSocket:
               port: {{.Values.service.port }}

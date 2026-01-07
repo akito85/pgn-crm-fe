@@ -3,6 +3,7 @@ import ColoredPanel from "./components/ColoredPanel";
 import HeaderText from "./components/HeaderText";
 import { Col, Row, Space } from "antd";
 import moment from "moment";
+import { dateFormatting } from "../../../../../../utils";
 
 const renderHistoryData = (label, value) => {
   return (
@@ -13,10 +14,10 @@ const renderHistoryData = (label, value) => {
   );
 };
 
-const formatDate = (dateString) => {
+const formatDateTime = (dateString) => {
   if (!dateString) return "";
   // Format from "2025-12-05T04:47:09.210+00:00" to "12 Dec 2025"
-  return moment(dateString).format("DD MMM YYYY");
+  return moment(dateString).format(dateFormatting.dateTime);
 };
 
 const renderHistoryLogContent = (data) => {
@@ -38,10 +39,10 @@ const renderHistoryLogContent = (data) => {
       <HeaderText text="HISTORY LOG INFORMATION" />
       <Row className="mt-4">
         <Col span={6}>{renderHistoryData("Record Id", data?.recordId || data?.id)}</Col>
-        <Col span={6}>{renderHistoryData("Created Date", formatDate(data?.createdDate))}</Col>
+        <Col span={6}>{renderHistoryData("Created Date", formatDateTime(data?.createdDate))}</Col>
         <Col span={6}>{renderHistoryData("Created By", data?.createdBy)}</Col>
         <Col span={6}>
-          {renderHistoryData("Updated Date", formatDate(data?.updatedDate))}
+          {renderHistoryData("Updated Date", formatDateTime(data?.updatedDate))}
         </Col>
         <Col span={6}>{renderHistoryData("Updated By", data?.updatedBy)}</Col>
       </Row>

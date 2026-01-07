@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
 import {
-  deleteSingleUsage,
+  // deleteSingleUsage, // ❌ Hapus import ini
   getFormatUsageType,
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
@@ -58,7 +58,7 @@ const UploadLayout = ({
     useMonitoringList(tabHeader, id);
   const [tableDataSource, setTableDataSource] = useState([]);
   const dispatch = useDispatch();
-
+  const [isLinkModalVisible, setLinkModalVisible] = useState(false);
   const { list_usage_type } = useSelector((state) => state.monitoring_usage);
 
   useEffect(() => {
@@ -85,30 +85,20 @@ const UploadLayout = ({
     setSelectedRecord(null);
   };
 
-  const handleDeleteOk = async () => {
-    try {
-      if (!recordId) {
-        console.error("No recordId found");
-        return;
-      }
-
-      const resultAction = await dispatch(deleteSingleUsage(recordId));
-
-      if (deleteSingleUsage.fulfilled.match(resultAction)) {
-        // Update local state setelah API berhasil
-        const newData = dataTable.filter((item) => item.recordId !== recordId);
-        setDataTable(newData);
-        setModalDelete(false);
-
-        // Refresh data dari parent component jika ada
-        if (refreshData && typeof refreshData === "function") {
-          refreshData();
-        }
-      }
-    } catch (error) {
-      console.error("Error deleting usage:", error);
-      setModalDelete(false);
-    }
+  // ✅ Handle delete - hanya update state lokal (seperti versi sebelumnya)
+  const handleDeleteOk = () => {
+    // Filter data berdasarkan recordId
+    const newData = dataTable.filter((item) => item.recordId !== recordId);
+    
+    // Update state lokal
+    setDataTable(newData);
+    
+    // Tutup modal
+    setModalDelete(false);
+    
+    // Optional: Jika ada callback untuk tracking deleted data
+    // Anda bisa menambahkan dispatch(addDeletedData(deletedRecord)) di sini
+    // jika ingin menyimpan history data yang dihapus
   };
 
   // column action dengan recordId
@@ -235,7 +225,15 @@ const UploadLayout = ({
   };
 
   // handle upload by link
-  const handleUploadLink = async () => {
+  const handleUploadLink = async (e) => {
+    e.stopPropagation();
+
+    // Validasi: cek apakah urlLink sudah diisi
+    if (!urlLink || urlLink.trim() === "") {
+      setLinkModalVisible(true);
+      return;
+    }
+
     try {
       setFileProgress(0);
       const body = {
@@ -249,15 +247,11 @@ const UploadLayout = ({
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
+
+      // Reset urlLink setelah berhasil upload
+      setUrlLink("");
     } catch (error) {
-      setFileList((prevFileList) =>
-        prevFileList.map((file) => {
-          if (file.name === fileName.name) {
-            return { ...file, status: "error" };
-          }
-          return file;
-        })
-      );
+      console.error("Upload error:", error);
     }
   };
 
@@ -356,7 +350,6 @@ const UploadLayout = ({
       return (
         <Form>
           <div className={"w-full flex flex-col"}>
-            {/* <span className={"text-xl"}>Upload Usage List</span> */}
             <div className={"w-full flex no-margin-form"}>
               <Form.Item className="w-1/4">
                 <SelectComponent
@@ -400,11 +393,17 @@ const UploadLayout = ({
                     <p className="ant-upload-text">
                       Put Google Drive link or local file
                     </p>
-                    <div className="flex my-5 justify-center items-center">
+                    <div
+                      className="flex my-5 justify-center items-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="flex gap-3 justify-center items-center">
                         <InputComponent
                           onChange={updateLink}
                           disabled={!isFileUploadEnabled}
+                          onClick={(e) => e.stopPropagation()}
+                          value={urlLink}
+                          placeholder="Paste your link here"
                         />
                         <ButtonComponent
                           icon={<UploadOutlined />}
@@ -501,6 +500,15 @@ const UploadLayout = ({
         textList={"format usage type before uploading a file"}
         header="Failed"
       />
+
+      <ModalAttention
+        isOpen={isLinkModalVisible}
+        handleCancel={() => setLinkModalVisible(false)}
+        handleOk={() => setLinkModalVisible(false)}
+        textList={" a valid link before uploading"}
+        header="Link Required"
+      />
+
       <ModalConfirm
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}

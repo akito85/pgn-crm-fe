@@ -1,17 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Spin, Tabs } from "antd";
+import { LeftOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
-import { useState } from "react";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import DetailInformation from "./DetailInformation";
 import DetailLog from "./DetailLog";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Spin } from "antd";
 import { getDetailCalculationJob } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 
 const CalculationDetail = () => {
@@ -26,8 +23,8 @@ const CalculationDetail = () => {
   const navigate = useNavigate();
   const calJobId = location?.state?.id;
 
-  // state
-  const [tabHeader, setTabHeader] = useState("Calculation Information");
+  // State
+  const [activeTab, setActiveTab] = useState("information");
 
   // Use Effect
   useEffect(() => {
@@ -50,38 +47,49 @@ const CalculationDetail = () => {
       breadcrumbName: "Detail Calculation",
     },
   ];
-  const dataTabs = [
-    { value: "Calculation Information" },
-    { value: "Calculation Log" },
+
+  const tabItems = [
+    {
+      key: "information",
+      label: "Calculation Information",
+      children: (
+        <DetailInformation
+          data={detail_calculation_job}
+          tabHeader="Calculation Information"
+        />
+      ),
+    },
+    {
+      key: "log",
+      label: "Calculation Log",
+      children: (
+        <DetailLog
+          data={detail_calculation_job}
+          tabHeader="Calculation Log"
+        />
+      ),
+    },
   ];
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
+
+  const handleTabChange = (key) => {
+    setActiveTab(key);
   };
 
-
-
   return (
-    <Spin spinning={loading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
-        <div className={"w-full justify-start mt-5"}>
-          <RadioTabs
-            data={dataTabs}
-            onChange={changeTabHeader}
-            currentPosition={tabHeader}
+
+        <div className="w-full mt-0">
+          <Tabs
+            activeKey={activeTab}
+            items={tabItems}
+            onChange={handleTabChange}
           />
         </div>
-        {tabHeader === "Calculation Information" ? (
-          <DetailInformation
-            data={detail_calculation_job}
-            tabHeader={tabHeader}
-          />
-        ) : (
-          <DetailLog data={detail_calculation_job} tabHeader={tabHeader} />
-        )}
-        <div className={"w-full flex justify-start my-5"}>
+
+        <div className="w-full flex justify-start">
           <ButtonComponent
-            type={"submit"}
+            type="submit"
             border={false}
             icon={
               <LeftOutlined
@@ -98,7 +106,6 @@ const CalculationDetail = () => {
           </ButtonComponent>
         </div>
       </LayoutMenu>
-    </Spin>
   );
 };
 

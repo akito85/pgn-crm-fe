@@ -17,11 +17,10 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  // Destructure data dengan benar - sama seperti di PrabillingDetailInformation
   const prabillData = data?.prabillInitPopulate || {};
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -32,28 +31,22 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     right: ["status"],
   }));
 
+  // Initial fetch
   useEffect(() => {
-    // Gunakan prabillData.initCode instead of data.initCode
     if (tabHeader === "Prabilling Log" && prabillData?.initCode) {
       dispatch(
         getDetailPrabillingLog({
           initCode: prabillData.initCode,
-          page: page - 1,
-          size: pageSize,
-          sort: sort,
+          page: 0,
+          size: 100,
+          sort: sort || "createdDtm~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
+          isLoadMore: false,
         })
       );
+      setPage(1);
     }
-  }, [
-    tabHeader,
-    dispatch,
-    prabillData?.initCode,
-    page,
-    pageSize,
-    sort,
-    search,
-  ]);
+  }, [tabHeader, dispatch, prabillData?.initCode, sort, search]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -70,9 +63,30 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     });
   };
 
+  // Load more handler
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = detail_prabilling_log?.totalPages || 0;
+
+    // Check if there's more data to load
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getDetailPrabillingLog({
+          initCode: prabillData.initCode,
+          page: nextPage - 1, // Backend uses 0-based indexing
+          size: loadMoreSize, // Load 20 more
+          sort: sort || "createdDtm~desc",
+          search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
+
   const onSort = (_, __, sorter) => {
     const dataSort =
-      sorter.order !== undefined
+      sorter && sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
 
@@ -86,14 +100,13 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         title: "NO",
         width: 60,
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         key: "seq",
         title: "SEQUENCE",
         dataIndex: "seq",
-        width: 100,
-        isNumber:true,
+        width: 110,
         sorter: true,
         filteredValue: [search?.seq] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -120,7 +133,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         key: "processName",
         title: "PROCESS NAME",
         dataIndex: "processName",
-        width: 250,
+        width: 170,
         sorter: true,
         filteredValue: [search?.processName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -147,7 +160,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         key: "activityName",
         title: "ACTIVITY NAME",
         dataIndex: "activityName",
-        width: 250,
+        width: 170,
         sorter: true,
         filteredValue: [search?.activityName] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -190,7 +203,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         render: (status) => {
           const statusUpper = status ? status.toUpperCase() : "INFO";
 
-          // Map status to the same format as Prabilling page
           const statusConfig = {
             SUCCESS: { text: "Success", type: "status" },
             ERROR: { text: "Failed", type: "status" },
@@ -223,7 +235,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         key: "message",
         title: "MESSAGE",
         dataIndex: "message",
-        width: 400,
+        width: 280,
         sorter: true,
         filteredValue: [search?.message] || null,
         ellipsis: {
@@ -253,7 +265,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         key: "createdDtm",
         title: "CREATED DATE",
         dataIndex: "createdDtm",
-        width: 180,
+        width: 150,
         align: "center",
         sorter: true,
         filteredValue: [search?.createdDtm] || null,
@@ -285,7 +297,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         key: "createdBy",
         title: "CREATED BY",
         dataIndex: "createdBy",
-        width: 150,
+        width: 100,
         align: "center",
         sorter: true,
         filteredValue: [search?.createdBy] || null,
@@ -310,7 +322,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn]
   );
 
   const allColumns = useMemo(() => {
@@ -332,46 +344,45 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     }));
   }, [allColumns]);
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   const logData = Array.isArray(detail_prabilling_log?.content)
     ? detail_prabilling_log.content
     : [];
   const totalElements = detail_prabilling_log?.totalElements || 0;
 
+  const hasMore = logData.length < totalElements;
+
   return (
-    <Spin spinning={loading_log}>
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px]">PRABILLING PROCESS LOG</p>
+      <div className="-mt-6">
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px]">PRABILLING PROCESS LOG</p>
+            </div>
+          }
+        >
+          <div className="my-0">
+            <TableRBI
+              idTable="prabilling-log-table"
+              dataSource={logData}
+              columns={processedColumns}
+              totalData={totalElements}
+              tableScrolled={{ x: 700, y: 600 }}
+              onSort={onSort}
+              showExport={false}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading_log}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
+              rowKey={(record) => record.id}
+            />
           </div>
-        }
-      >
-        <div className="my-0">
-          <TableRBI
-            dataSource={logData}
-            columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={totalElements}
-            tableScrolled={{ x: 1800, y: 600 }}
-            onSort={onSort}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading_log}
-            rowKey={(record) => record.id}
-          />
-        </div>
-      </CardContainer>
-    </Spin>
+        </CardContainer>
+      </div>
   );
 };
 

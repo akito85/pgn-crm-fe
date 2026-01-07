@@ -6,7 +6,7 @@ import ApprovalComponentGeneral from '../../../../components/Approval/ApprovalCo
 import ModalCustom from '../../../../components/Modal/ModalCustom';
 import DetailText from '../../../../components/DetailText';
 import { toTitleCase } from '../../../../utils';
-import TablePagination from '../../../../components/TablePagination';
+import TableRBI from '../../../../components/TableRBI';
 import { useSelector } from 'react-redux';
 
 const ConfirmationUsage = ({
@@ -21,21 +21,17 @@ const ConfirmationUsage = ({
 }) => {
     const { updatedData, deletedData } = useSelector((state) => state?.monitoring_usage);
 
-
     // state
     const [valuePage, setValuePage] = useState("Upload");
-    const [tabPages, setTabPages] = useState([
+    const [tabPages] = useState([
         { value: "Upload" },
         { value: "Approval" },
     ]);
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
 
     // change tabs
     const changeTabHeader = (e) => {
         setValuePage(e.target.value);
     };
-
 
     // handle save
     const handleConfirm = () => {
@@ -58,7 +54,6 @@ const ConfirmationUsage = ({
             }
         });
 
-
         const payload = {
             batchId: data_detail?.batchInformation?.batchId,
             apphierId: selectedHierarchy,
@@ -71,23 +66,15 @@ const ConfirmationUsage = ({
         handleCancel()
         dispatcher(clearUpdated())
         dispatcher(clearUpdatedDeleted())
-
     }
 
     // handle cancel
     const handleCancel = () => setIsOpen(false);
 
-    // change page
-    const handleChangePage = (page, pageSizeChange) => {
-        const tempPage = pageSize !== pageSizeChange ? 1 : page;
-        setPage(tempPage);
-        setPageSize(pageSizeChange);
-    };
+    // Get usage list data - already loaded from parent component
+    const usageListData = data_detail?.usageList || [];
+    const totalElements = usageListData.length;
 
-    // handle pagination
-    const paginationTable = (page, pageSize) => {
-        return data_detail?.usageList?.slice((page - 1) * pageSize, page * pageSize);
-    }
     // render section
     const renderSection = (valuePage) => {
         switch (valuePage) {
@@ -132,22 +119,22 @@ const ConfirmationUsage = ({
                             <DetailText label={'Status'}>{toTitleCase(data_detail?.batchInformation?.status)}</DetailText>
                         </div>
                         <div className='my-10'>
-                            <TablePagination
+                            <TableRBI
+                                idTable="confirmation-usage-table"
                                 columns={columns}
-                                dataSource={paginationTable(page, pageSize)}
-                                totalData={data_detail?.usageList?.length}
-                                current={page}
-                                pageSize={pageSize}
-                                onChange={handleChangePage}
+                                dataSource={usageListData}
+                                totalData={totalElements}
                                 tableScrolled={{ x: 8000, y: 600 }}
-                            // onSort={onSort}
+                                showExport={false}
+                                usePagination={false}
+                                useInfiniteScroll={false}
                             />
                         </div>
                     </>
-
                 )
         }
     }
+
     return (
         <ModalCustom
             isOpen={isOpen}

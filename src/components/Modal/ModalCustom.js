@@ -3,6 +3,7 @@ import React from "react";
 
 const ModalCustom = (props) => {
   const {
+    loading,
     isOpen,
     handleCancel = () => {},
     handleOk = () => {},
@@ -16,6 +17,7 @@ const ModalCustom = (props) => {
     title,
     maxHeight,
   } = props;
+
 
   const typeModal = (type) => {
     switch (type) {

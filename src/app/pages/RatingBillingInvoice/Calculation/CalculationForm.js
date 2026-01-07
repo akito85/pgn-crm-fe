@@ -242,34 +242,55 @@ const CalculationForm = ({ type }) => {
     };
   }, []);
 
-  // reset form
-  const handleReset = () => {
-    let tempData = [
-      "billing_cycle",
-      "billing_period",
-      "calculation_type",
-      "serviceType",
-      "sor",
-      "costCenter",
-      "meterReading",
-      "accountSegment",
-      "accountGroupType",
-      "specificCustomer",
-      "type",
-      "scheduleDateTime",
-      "remark",
-    ];
-    if (defaultData?.costCenter?.length > 0) {
-      tempData = tempData.filter((item) => item !== "costCenter");
-    }
-    if (defaultData?.sor) {
-      tempData = tempData.filter((item) => item !== "sor");
-    }
-    form.resetFields(tempData);
-    setSelectedScheduleType(null);
-    setSearchCustomerValue("");
-    setFilteredCustomerList([]);
-  };
+  // Untuk CalculationForm
+const handleReset = () => {
+  let tempData = [
+    "billing_cycle",
+    "billing_period",
+    "calculation_type",
+    "serviceType",
+    "sor",
+    "costCenter",
+    "meterReading",
+    "accountSegment",
+    "accountGroupType",
+    "specificCustomer",
+    "type",
+    "scheduleDateTime",
+    "remark",
+  ];
+  
+  // Jangan reset field yang memiliki default data
+  if (defaultData?.costCenter?.length > 0) {
+    tempData = tempData.filter((item) => item !== "costCenter");
+  }
+  if (defaultData?.sor) {
+    tempData = tempData.filter((item) => item !== "sor");
+  }
+  
+  // Reset form fields
+  form.resetFields(tempData);
+  
+  // Reset state-state yang terkait
+  setSelectedScheduleType(null);
+  setSearchCustomerValue("");
+  setFilteredCustomerList([]);
+  setBillingCycle(null); // Reset billing cycle state agar billing period jadi disabled
+  
+  // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
+  setDataSpecificCustomer({
+    sorId: defaultData?.sor || null,
+    costCenterId: defaultData?.costCenter || [],
+    meterReadingCodeId: [],
+    accountSegmentId: [],
+    accountGroupTypeId: [],
+    search: "",
+    limit: DEFAULT_SEARCH_LIMIT,
+  });
+  
+  // Reset selected customers map
+  setSelectedCustomersMap({});
+};
 
   // Validate Data before Modal
   const checkDataValidity = async (data) => {
@@ -971,6 +992,7 @@ const CalculationForm = ({ type }) => {
                 >
                   <InputComponent
                     type="textarea"
+                    rows={3}
                     value={remark}
                     style={{ marginBottom: 4 }}
                     onChange={(e) => setRemark(e.target.value)}
@@ -1191,12 +1213,13 @@ const CalculationForm = ({ type }) => {
         header={"CONFIRMATION"}
         width={900}
         type={"confirmation"}
+        loading={loading}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loading}  >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loading} disabled={loading}>
               Confirm
             </ButtonComponent>
           </div>

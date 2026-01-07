@@ -77,6 +77,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
+  const attachmentIsRequired = true;
+
   const formFields = [
     [
       "accountNumber",
@@ -202,6 +204,48 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
+      try {
+        if (current === 2) {
+          if (attachmentIsRequired && !dataAttachment.length)
+            throw new Error("At least provide one attachment");
+        }
+        else {
+          await formCreate.validateFields(formFields[current]);
+
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            stepNumber: current + 1,
+            data : {
+              subjectId: data_accountDetail?.accountInformation?.accountId, 
+              objectId,
+              priority,
+              description, 
+              startDate,
+              endDate,
+              appHierId,
+            }
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+            type,
+          }))
+          .unwrap();
+        }  
+      } catch (err) {
+        return;
+      }
+
       const {
         objectId,
         priority,
@@ -311,6 +355,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           getAPICategory={getIrAttachmentCategory}
           service={accountManagementService}
           configApplication={configApp.ACCOUNT_SERVICE}
+          mandatory={attachmentIsRequired}
         />
       ),
       disabled: false
@@ -321,13 +366,50 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   
   const next = async () => {
     try {
-      await formCreate.validateFields(formFields[current]);
+      if (current === 2) {
+        if (attachmentIsRequired && !dataAttachment.length)
+          throw new Error("At least provide one attachment");
+      }
+      else {
+        await formCreate.validateFields(formFields[current]);
+
+        const {
+          objectId,
+          priority,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+        } = formCreate.getFieldsValue();
+
+        const body = {
+          stepNumber: current + 1,
+          data : {
+            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          }
+        };
+
+        await dispatch(validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+          type,
+        }))
+        .unwrap()
+      }
     } catch (err) {
       return;
     }
-    
+
     setCurrent(current + 1);
   };
+
   const prev = () => {
     setCurrent(current - 1);
   };
@@ -335,7 +417,43 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        await formCreate.validateFields(formFields[i]);
+        if (i === 2) {
+          if (attachmentIsRequired && !dataAttachment.length)
+            throw new Error("At least provide one attachment");
+        }
+        else {
+          await formCreate.validateFields(formFields[i]);
+          
+          const {
+            objectId,
+            priority,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            stepNumber: i + 1,
+            data : {
+              subjectId: data_accountDetail?.accountInformation?.accountId, 
+              objectId,
+              priority,
+              description, 
+              startDate,
+              endDate,
+              appHierId,
+            }
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+            type,
+          }))
+          .unwrap()
+        }
       } catch (err) {
         setCurrent(i);
         return;
@@ -380,6 +498,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
+      remark,
     } = formCreate.getFieldsValue();
 
     const body = {
@@ -391,7 +510,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       startDate,
       endDate,
       appHierId,
-      action: confirmationType
+      action: confirmationType,
+      remark,
     };
 
     if (type === "create")
@@ -624,29 +744,28 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               )}
             </div>
           </div>
+          <ConfirmationModal
+            form={"invoiceRelationForm"}
+            isOpen={showConfirmationModal}
+            handleCancel={() => handleSetShowConfirmationModal(false)}
+            selectedAppHierId={selectedAppHierId}
+            selectedApprovalName={selectedApprovalName}
+            hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
+              ...detail,
+              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                ...employeeDetail,
+                key: `employee-detail-${index}`
+              })),
+              key: `detail-detail-${index}`,
+            }))}
+            hieararchyOptionData={data_irApprovalHierarchy}
+            type={confirmationType}
+            dataAttachment={dataAttachment}
+            data={formCreate.getFieldsValue()}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
+          />
         </Form>
-
-        <ConfirmationModal
-          form={"invoiceRelationForm"}
-          isOpen={showConfirmationModal}
-          handleCancel={() => handleSetShowConfirmationModal(false)}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-          hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          hieararchyOptionData={data_irApprovalHierarchy}
-          type={confirmationType}
-          dataAttachment={dataAttachment}
-          data={formCreate.getFieldsValue()}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-        />
       </div>
     </LayoutMenu>
   );

@@ -22,14 +22,13 @@ import {
   getListAccountGroup,
   getListBillingCycle,
   getListBillingPeriod,
-  getListCalculationType,
   getListCostCenter,
   getListCustomerSegment,
   getListMeterReadingCode,
   getListSchedulerType,
-  getListServiceType,
   getListSor,
   getListSpecificCustomer,
+  getListComponentPrabilling,
   createPrabilling,
   getUserDetailCalculation,
   getUserProfile,
@@ -51,10 +50,12 @@ const PrabillingForm = ({ type }) => {
     specific_customer_message,
     list_billing_cycle,
     list_billing_period,
+    list_component_prabilling,
     data_user_calculation,
     user_profile,
-    loading_user_profile,
   } = useSelector((state) => state.rbi_prabilling);
+
+  console.log(loading,"loading")
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -87,7 +88,7 @@ const PrabillingForm = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
   const [defaultData, setDefaultData] = useState({});
 
-  const [searchCustomerValue, setSearchCustomerValue] = useState("");
+  const [searchCustomerValue, setSearchCustomerValue] = useState(""); 
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const searchTimeoutRef = useRef(null);
   const [selectedCustomersMap, setSelectedCustomersMap] = useState({});
@@ -97,12 +98,11 @@ const PrabillingForm = ({ type }) => {
 
   useEffect(() => {
     dispatch(getListSor());
-    dispatch(getListServiceType());
     dispatch(getListCustomerSegment());
-    dispatch(getListCalculationType());
     dispatch(getListSchedulerType());
     dispatch(getListCostCenter());
     dispatch(getListBillingCycle());
+    dispatch(getListComponentPrabilling());
     dispatch(getUserDetailCalculation());
     dispatch(getUserProfile());
   }, [dispatch]);
@@ -248,20 +248,39 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
     ];
+
+    // Jangan reset field yang memiliki default data
     if (defaultData?.costCenter?.length > 0) {
       tempData = tempData.filter((item) => item !== "costCenter");
     }
     if (defaultData?.sor) {
       tempData = tempData.filter((item) => item !== "sor");
     }
+
+    // Reset form fields
     form.resetFields(tempData);
+
+    // Reset state-state yang terkait
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
+    setBillingCycle(null); 
+
+    setDataSpecificCustomer({
+      sorId: defaultData?.sor || null,
+      costCenterId: defaultData?.costCenter || [],
+      meterReadingCodeId: [],
+      accountSegmentId: [],
+      accountGroupTypeId: [],
+      search: "",
+      limit: DEFAULT_SEARCH_LIMIT,
+    });
+    setSelectedCustomersMap({});
   };
 
   const onFinish = async (formValue) => {
@@ -276,6 +295,7 @@ const PrabillingForm = ({ type }) => {
         : null,
       calculationType: formValue?.calculation_type,
       remark: formValue?.remark,
+      specificComponentPrabilling: formValue?.specificComponentPrabilling || [],
       rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
         return {
           id: null,
@@ -404,6 +424,7 @@ const PrabillingForm = ({ type }) => {
       sorId: dataFinal?.sor,
       calculationTypeId: dataFinal?.calculationType,
       remark: dataFinal?.remark,
+      runDtl: dataFinal?.specificComponentPrabilling || [],
       createdBy: user_profile.username || "",
     };
 
@@ -412,6 +433,7 @@ const PrabillingForm = ({ type }) => {
       .then((data) => {
         if (data) {
           setModalSuccess(true);
+          console.log(loading,"kesini")
         }
       })
       .catch((error) => {
@@ -556,6 +578,7 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
@@ -871,14 +894,30 @@ const PrabillingForm = ({ type }) => {
                   </Select>
                 </Form.Item>
               </div>
+
+              {/* Specific Component Prabilling - Left column */}
+              <Form.Item
+                label={"Specific Component Prabilling"}
+                name={"specificComponentPrabilling"}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  mode={"multiple"}
+                  options={(list_component_prabilling || []).map((item) => {
+                    return {
+                      label: item?.componentName,
+                      value: item?.componenetCode,
+                    };
+                  })}
+                  placeholder={"Choose Multiple..."}
+                />
+              </Form.Item>
             </div>
           </CardContainer>
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] text-primary">
-                  SCHEDULER INFORMATION
-                </p>
+                <p className="mt-[15px] text-primary">SCHEDULER INFORMATION</p>
               </div>
             }
           >
@@ -999,9 +1038,7 @@ const PrabillingForm = ({ type }) => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px]">
-            Are you sure you want to back?
-          </p>
+          <p className="text-[18px]">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
 
@@ -1030,8 +1067,8 @@ const PrabillingForm = ({ type }) => {
               <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
                 <p className="text-[14px] text-orange-800">
                   The system will process{" "}
-                  <span className="text-[16px]">ALL customers</span>{" "}
-                  that match your filter criteria
+                  <span className="text-[16px]">ALL customers</span> that match
+                  your filter criteria
                 </p>
               </div>
 
@@ -1155,12 +1192,13 @@ const PrabillingForm = ({ type }) => {
         header={"CONFIRMATION"}
         width={900}
         type={"confirmation"}
+        loading={loading}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loading}  > 
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loading} disabled={loading}>
               Confirm
             </ButtonComponent>
           </div>

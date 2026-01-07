@@ -3,11 +3,13 @@ name: Frontend Service Workflow
 on:
   pull_request:
     branches:
+      - '*devops*'
       - dev
       - stg
       - prod
   push:
     branches:
+      - '*devops*'
       - dev
       - stg
       - prod
@@ -22,7 +24,7 @@ jobs:
     secrets: inherit
 
   remote-workflow:
-    uses: PT-Perusahaan-Gas-Negara-Tbk/reusable-workflow/.github/workflows/energy-frontendservice-template.yml@energy-template
+    uses: PT-Perusahaan-Gas-Negara-Tbk/reusable-workflow/.github/workflows/energy-fe.yml@energy-template
     needs: Preparation
     secrets: inherit
     with:
@@ -35,3 +37,5 @@ jobs:
       MERGED_RULES: ${{ needs.Preparation.outputs.MERGED_RULES }}
       MANUAL_RULES: ${{ needs.Preparation.outputs.MANUAL_RULES }}
       DOCKERFILE_NAME: Dockerfile
+      FILE_VALUES: pgn-frontend/values-${{ needs.Preparation.outputs.ENV_SERVER }}.yaml
+      SONAR_SOURCES: ./src
