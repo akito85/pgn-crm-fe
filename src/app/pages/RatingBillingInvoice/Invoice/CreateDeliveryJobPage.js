@@ -5,6 +5,7 @@ import {
   PlusOutlined,
   InboxOutlined,
   ArrowLeftOutlined,
+  PlusCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -121,13 +122,15 @@ const CreateDeliveryJobPage = () => {
     const newValues = { ...currentValues };
 
     // Get channels from selected codes
-    const selectedChannels = selectedCodes.map((code) => {
-      const jobName = jobNames.find((job) => job.code === code);
-      return jobName ? jobName.code.toLowerCase() : null;
-    }).filter(Boolean);
+    const selectedChannels = selectedCodes
+      .map((code) => {
+        const jobName = jobNames.find((job) => job.code === code);
+        return jobName ? jobName.code.toLowerCase() : null;
+      })
+      .filter(Boolean);
 
     // Clear template fields that are no longer relevant
-    ['email', 'whatsapp', 'wa', 'sms'].forEach((channel) => {
+    ["email", "whatsapp", "wa", "sms"].forEach((channel) => {
       const fieldName = `template_${channel}`;
       if (!selectedChannels.includes(channel) && currentValues[fieldName]) {
         newValues[fieldName] = undefined;
@@ -175,7 +178,10 @@ const CreateDeliveryJobPage = () => {
         formData.append("emailTemplateId", values.template_email);
       }
       if (values.template_whatsapp || values.template_wa) {
-        formData.append("whatsappTemplateId", values.template_whatsapp || values.template_wa);
+        formData.append(
+          "whatsappTemplateId",
+          values.template_whatsapp || values.template_wa
+        );
       }
       if (values.template_sms) {
         formData.append("smsTemplateId", values.template_sms);
@@ -309,81 +315,104 @@ const CreateDeliveryJobPage = () => {
                 </div>
 
                 {/* Description */}
-                <div style={{ flex: 1, marginTop: "-25px" }}>
-                  <Form.Item
-                    name="description"
-                    rules={[
-                      { required: true, message: "Deskripsi wajib diisi!" },
-                    ]}
-                  >
-                    <InputComponent
-                      label="Description"
-                      mandatory={true}
-                      type="textarea"
-                      placeholder='Contoh: "Pengiriman invoice untuk semua pelanggan industri"'
-                      rows={3}
-                      maxLength={255}
-                    />
-                  </Form.Item>
-                </div>
+                <Form.Item noStyle shouldUpdate>
+                  {({ getFieldError }) => {
+                    const hasJobNameError = getFieldError("jobNames").length > 0;
+                    return (
+                      <div
+                        style={{
+                          flex: 1,
+                          marginTop: hasJobNameError ? "0px" : "-25px",
+                        }}
+                      >
+                        <Form.Item
+                          name="description"
+                          rules={[
+                            { required: true, message: "Deskripsi wajib diisi!" },
+                          ]}
+                        >
+                          <InputComponent
+                            label="Description"
+                            mandatory={true}
+                            type="textarea"
+                            placeholder='Contoh: "Pengiriman invoice untuk semua pelanggan industri"'
+                            rows={3}
+                            maxLength={255}
+                          />
+                        </Form.Item>
+                      </div>
+                    );
+                  }}
+                </Form.Item>
               </div>
 
-              <div className="flex w-full gap-3">
-                {/* Active Date Range */}
-                <div style={{ flex: 1, marginTop: "-15px" }}>
-                  <Form.Item
-                    label={
-                      <span style={{ fontWeight: "400", fontSize: "14px" }}>
-                        Active Date Range
-                      </span>
-                    }
-                    name="activeDateRange"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Rentang tanggal wajib diisi!",
-                      },
-                    ]}
-                  >
-                    <DatePicker.RangePicker
-                      format="YYYY-MM-DD"
-                      style={{ width: "100%" }}
-                      placeholder={["Start Date", "End Date"]}
-                      size="medium"
-                      disabledDate={(current) => {
-                        // Disable dates before today
-                        return current && current < dayjs().startOf("day");
-                      }}
-                    />
-                  </Form.Item>
-                </div>
+              <Form.Item noStyle shouldUpdate>
+                {({ getFieldError }) => {
+                  const hasDescriptionError =
+                    getFieldError("description").length > 0;
+                  return (
+                    <div
+                      className="flex w-full gap-3"
+                      style={{ marginTop: hasDescriptionError ? "0px" : "-15px" }}
+                    >
+                      {/* Active Date Range */}
+                      <div style={{ flex: 1 }}>
+                        <Form.Item
+                          label={
+                            <span style={{ fontWeight: "400", fontSize: "14px" }}>
+                              Active Date Range
+                            </span>
+                          }
+                          name="activeDateRange"
+                          rules={[
+                            {
+                              required: true,
+                              message: "Rentang tanggal wajib diisi!",
+                            },
+                          ]}
+                        >
+                          <DatePicker.RangePicker
+                            format="YYYY-MM-DD"
+                            style={{ width: "100%" }}
+                            placeholder={["Start Date", "End Date"]}
+                            size="medium"
+                            disabledDate={(current) => {
+                              // Disable dates before today
+                              return current && current < dayjs().startOf("day");
+                            }}
+                          />
+                        </Form.Item>
+                      </div>
 
-                {/* Customer Criteria */}
-                <div style={{ flex: 1, marginTop: "-15px" }}>
-                  <Form.Item
-                    label={
-                      <span style={{ fontWeight: "400", fontSize: "14px" }}>
-                        Customer Criteria
-                      </span>
-                    }
-                    name="customerSegment"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Customer criteria wajib dipilih!",
-                      },
-                    ]}
-                  >
-                    <SelectComponent
-                      placeholder="Select Customer Criteria"
-                      options={customerSegments.map((segment) => ({
-                        label: segment.text,
-                        value: segment.code,
-                      }))}
-                    />
-                  </Form.Item>
-                </div>
-              </div>
+                      {/* Customer Criteria */}
+                      <div style={{ flex: 1 }}>
+                        <Form.Item
+                          label={
+                            <span style={{ fontWeight: "400", fontSize: "14px" }}>
+                              Customer Criteria
+                            </span>
+                          }
+                          name="customerSegment"
+                          rules={[
+                            {
+                              required: true,
+                              message: "Customer criteria wajib dipilih!",
+                            },
+                          ]}
+                        >
+                          <SelectComponent
+                            placeholder="Select Customer Criteria"
+                            options={customerSegments.map((segment) => ({
+                              label: segment.text,
+                              value: segment.code,
+                            }))}
+                          />
+                        </Form.Item>
+                      </div>
+                    </div>
+                  );
+                }}
+              </Form.Item>
             </BaseContainer>
             <BaseContainer header={"Message Template"} border>
               <div
@@ -391,70 +420,143 @@ const CreateDeliveryJobPage = () => {
               >
                 {selectedJobNames.length > 0 ? (
                   <>
-                    {selectedJobNames.map((jobCode) => {
-                      const jobName = jobNames.find((job) => job.code === jobCode);
-                      if (!jobName) return null;
+                    {(() => {
+                      const availableTemplates = [];
+                      const unavailableTemplates = [];
 
-                      const channelCode = jobName.code.toLowerCase();
-                      const channelText = jobName.text;
+                      selectedJobNames.forEach((jobCode) => {
+                        const jobName = jobNames.find(
+                          (job) => job.code === jobCode
+                        );
+                        if (!jobName) return;
 
-                      // Determine which template list to use based on channel
-                      let templateOptions = [];
-                      let fieldName = `template_${channelCode}`;
+                        const channelCode = jobName.code.toLowerCase();
+                        const channelText = jobName.text;
 
-                      if (channelCode === "email") {
-                        templateOptions = emailTemplates;
-                      } else if (channelCode === "whatsapp" || channelCode === "wa") {
-                        templateOptions = whatsappTemplates;
-                      } else if (channelCode === "sms") {
-                        templateOptions = smsTemplates;
-                      } else {
-                        // For any other channel, try to find matching templates
-                        // You can add more template lists here if needed
-                        templateOptions = [];
-                      }
+                        // Determine which template list to use based on channel
+                        let templateOptions = [];
+                        let fieldName = `template_${channelCode}`;
 
-                      // Skip if no templates available
-                      if (templateOptions.length === 0) return null;
+                        if (channelCode === "email") {
+                          templateOptions = emailTemplates;
+                        } else if (
+                          channelCode === "whatsapp" ||
+                          channelCode === "wa"
+                        ) {
+                          templateOptions = whatsappTemplates;
+                        } else if (channelCode === "sms") {
+                          templateOptions = smsTemplates;
+                        }
+
+                        // Categorize templates
+                        if (templateOptions.length > 0) {
+                          availableTemplates.push({
+                            jobCode,
+                            channelCode,
+                            channelText,
+                            fieldName,
+                            templateOptions,
+                          });
+                        } else {
+                          unavailableTemplates.push({
+                            channelText,
+                          });
+                        }
+                      });
 
                       return (
-                        <Form.Item
-                          key={jobCode}
-                          name={fieldName}
-                          style={{ marginBottom: 0 }}
-                          rules={[
-                            {
-                              required: true,
-                              message: `${channelText} template wajib dipilih!`,
-                            },
-                          ]}
-                        >
-                          <SelectComponent
-                            label={channelText}
-                            mandatory={true}
-                            placeholder={`Select ${channelText} Template`}
-                            allowClear
-                            options={templateOptions.map((template) => ({
-                              label: template.text,
-                              value: template.code,
-                            }))}
-                          />
-                        </Form.Item>
-                      );
-                    })}
+                        <>
+                          {/* Render available template fields */}
+                          {availableTemplates.map(
+                            ({
+                              jobCode,
+                              channelText,
+                              fieldName,
+                              templateOptions,
+                            }) => (
+                              <Form.Item
+                                key={jobCode}
+                                name={fieldName}
+                                style={{ marginBottom: 0 }}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: `${channelText} template wajib dipilih!`,
+                                  },
+                                ]}
+                              >
+                                <SelectComponent
+                                  label={channelText}
+                                  mandatory={true}
+                                  placeholder={`Select ${channelText} Template`}
+                                  allowClear
+                                  options={templateOptions.map((template) => ({
+                                    label: template.text,
+                                    value: template.code,
+                                  }))}
+                                />
+                              </Form.Item>
+                            )
+                          )}
 
-                    <Button
-                      type="dashed"
-                      icon={<PlusOutlined />}
-                      style={{
-                        width: "100%",
-                        marginTop: "8px",
-                        marginBottom: "16px",
-                      }}
-                      size="large"
-                    >
-                      Add New Message Template
-                    </Button>
+                          {/* Show message for unavailable templates */}
+                          {unavailableTemplates.length > 0 && (
+                            <div
+                              style={{
+                                padding: "12px 16px",
+                                background: "#fff7e6",
+                                border: "1px solid #ffd591",
+                                borderRadius: "6px",
+                                marginTop:
+                                  availableTemplates.length > 0 ? "8px" : "0",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  color: "#d46b08",
+                                  fontSize: "14px",
+                                  marginBottom: "4px",
+                                  fontWeight: "500",
+                                }}
+                              >
+                                Template Not Available
+                              </div>
+                              <div
+                                style={{ color: "#8c8c8c", fontSize: "13px" }}
+                              >
+                                Template Message{" "}
+                                <strong>
+                                  {unavailableTemplates
+                                    .map((t) => t.channelText)
+                                    .join(", ")}
+                                </strong>{" "}
+                                has not been created yet. Please add a template
+                                via Content Management to continue.
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Add New Template Button */}
+                          <Button
+                            type="dashed"
+                            icon={<PlusOutlined />}
+                            style={{
+                              width: "100%",
+                              marginTop: "16px",
+                              marginBottom: "16px",
+                            }}
+                            size="large"
+                            onClick={() =>
+                              navigate(
+                                "/system-setup/content-management/create"
+                              )
+                            }
+                          >
+                            Add New Message Template
+                          </Button>
+                        </>
+                      );
+                    })()}
                   </>
                 ) : (
                   <div
@@ -471,25 +573,7 @@ const CreateDeliveryJobPage = () => {
             </BaseContainer>
 
             {/* INVOICE ATTACHMENT Section */}
-            <div
-              style={{
-                background: "#f0f5ff",
-                padding: "24px",
-                borderRadius: "8px",
-                marginBottom: "24px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  color: "#1677ff",
-                  marginBottom: "20px",
-                }}
-              >
-                INVOICE ATTACHMENT
-              </div>
-
+            <BaseContainer header={"Invoice Attachment"} border>
               <Form.Item
                 label={
                   <span style={{ fontWeight: "500", fontSize: "14px" }}>
@@ -499,17 +583,35 @@ const CreateDeliveryJobPage = () => {
               >
                 <Upload.Dragger {...uploadProps}>
                   <p className="ant-upload-drag-icon">
-                    <InboxOutlined style={{ color: "#1677ff" }} />
+                    <PlusCircleOutlined
+                      style={{ color: "var(--primary)", fontSize: "32px" }}
+                    />
                   </p>
-                  <p className="ant-upload-text" style={{ fontWeight: "500" }}>
-                    Click or Drag file to this area to upload
+                  <p
+                    className="ant-upload-text"
+                    style={{ fontWeight: "500", fontSize: "14px" }}
+                  >
+                    <span
+                      style={{
+                        color: "var(--primary)",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Click
+                    </span>{" "}
+                    or Drag file to this area to upload
                   </p>
-                  <p className="ant-upload-hint" style={{ color: "#8c8c8c" }}>
-                    PDF, JPG, PNG - Max 5MB
+                  <p
+                    className="ant-upload-hint"
+                    style={{ color: "#8c8c8c", fontSize: "14px" }}
+                  >
+                    <InboxOutlined style={{ marginRight: "4px" }} />
+                    PDF, JPG, PNG • Max 5MB
                   </p>
                 </Upload.Dragger>
               </Form.Item>
-            </div>
+            </BaseContainer>
 
             {/* Action Buttons */}
             <div
