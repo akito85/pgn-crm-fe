@@ -20,7 +20,6 @@ const ModalUpdateUsage = ({
     
     // form
 }) => {
-    // console.log(uploadType, ' upload type');
     const { data_asset_type, data_account_number, data_source, loading } = useSelector((state) => state.monitoring_usage);
     const dispatch = useDispatch();
     const [selectedAccount, setSelectedAccount] = useState(null);
@@ -29,7 +28,7 @@ const ModalUpdateUsage = ({
     const [date, setDate] = useState("");
     const [measDate, setMeasDate] = useState("");
     const [form] = Form.useForm();
-    // console.log(record, ' record');
+
     // use effect
     useEffect(() => {
         if (isOpen === true) {
@@ -38,14 +37,14 @@ const ModalUpdateUsage = ({
             dispatch(getSource())
         }
     }, [dispatch, isOpen]);
+
     useEffect(() => {
         if (record) {
             form.setFieldsValue({
                 accountNumber: record?.accountNumber,
                 accountName: record?.accountName,
                 costCenter: record?.costCenter,
-                billingPeriod: hasValue(record?.billingPeriod) && moment(record?.billingPeriod),
-              assetSerialNum: record?.assetSerialNumber,
+                assetSerialNum: record?.assetSerialNumber,
                 assetType: record?.assetType,
                 fdate: hasValue(record?.fdate) && moment(record?.fdate),
                 fhour: hasValue(record?.fhour) && moment(record?.fhour, 'HH:mm'),
@@ -63,7 +62,8 @@ const ModalUpdateUsage = ({
                 ghv: record?.ghv,
                 volMscf: record?.volMscf,
                 uncorrectedValue: record?.uncorrectedValue,
-                taxationRowId: record?.taxationRowId,
+                sourceRowId: record?.sourceRowId,
+                sourceName: record?.sourceName,
                 source: record?.source,
                 description: record?.description
             })
@@ -82,10 +82,6 @@ const ModalUpdateUsage = ({
         }
     };
 
-
-    const save = (formValue) => {
-        // console.log(formValue, ' dorm value');
-    }
     return (
       <ModalCustom
         isOpen={isOpen}
@@ -135,24 +131,6 @@ const ModalUpdateUsage = ({
               </Form.Item>
               <Form.Item label={"Cost Center"} name={"costCenter"}>
                 <InputComponent disabled />
-              </Form.Item>
-              <Form.Item
-                label={"Billing Period"}
-                name={"billingPeriod"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Billing Period!",
-                  },
-                ]}
-              >
-                {/* <Input/> */}
-                <DatePicker
-                  format={"MMM YYYY"}
-                  picker="month"
-                  onChange={(date, dateString) => setPeriod(dateString)}
-                  className="w-full"
-                />
               </Form.Item>
               <Form.Item
                 label={"Asset Serial No"}
@@ -252,13 +230,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -277,13 +248,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -300,13 +264,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -325,13 +282,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -350,13 +300,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -375,13 +318,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={12}
                   thousandSeparator={","}
@@ -397,13 +333,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={7}
                   thousandSeparator={","}
@@ -430,7 +359,7 @@ const ModalUpdateUsage = ({
                   }
                 />
               </Form.Item>
-              <Form.Item label={"Taxation"} name={"taxationRowId"}>
+              <Form.Item label={"Source Row ID"} name={"sourceRowId"}>
                 <InputComponent
                   onInput={(e) =>
                     (e.target.value = e.target.value
@@ -439,10 +368,13 @@ const ModalUpdateUsage = ({
                   }
                 />
               </Form.Item>
+              <Form.Item label={"Source Name"} name={"sourceName"}>
+                <InputComponent />
+              </Form.Item>
               <Form.Item
                 label={"Source"}
                 name={"source"}
-                rules={[{ required: true, message: "Please input end stand!" }]}
+                rules={[{ required: true, message: "Please input source!" }]}
               >
                 <Select>
                   {data_source?.map((val) => (
@@ -453,7 +385,7 @@ const ModalUpdateUsage = ({
                 </Select>
               </Form.Item>
             </div>
-            <div w-full grid grid-cols-1>
+            <div className="w-full grid grid-cols-1">
               <Form.Item label={"Description"} name={"description"}>
                 <InputComponent type={"textarea"} />
               </Form.Item>
