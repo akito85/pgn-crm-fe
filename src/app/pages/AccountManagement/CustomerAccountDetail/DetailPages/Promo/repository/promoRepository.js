@@ -501,19 +501,19 @@ const promoRepository = {
         ellipsis: true,
       },
       {
+        title: "Type",
+        dataIndex: "typeName",
+        key: "typeName",
+        width: 200,
+      },
+      {
         title: "Promotion Type",
         dataIndex: "promotionType",
         key: "promotionType",
-        width: 130,
-      },
-      {
-        title: "Type Name",
-        dataIndex: "typeName",
-        key: "typeName",
         width: 150,
       },
       {
-        title: "Category Name",
+        title: "Promo Category",
         dataIndex: "categoryName",
         key: "categoryName",
         width: 130,
@@ -529,13 +529,13 @@ const promoRepository = {
         title: "Start Date",
         dataIndex: "startDate",
         key: "startDate",
-        width: 120,
+        width: 150,
       },
       {
         title: "End Date",
         dataIndex: "endDate",
         key: "endDate",
-        width: 120,
+        width: 150,
       },
       {
         title: "Description",
@@ -549,6 +549,9 @@ const promoRepository = {
         dataIndex: "status",
         key: "status",
         width: 100,
+        fixed: 'right',
+        disableFilter: true,
+        disableSorter: true,
         render: (status) => {
           const displayText = {
             "ACTIVE": "Active",
