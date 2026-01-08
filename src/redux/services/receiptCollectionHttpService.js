@@ -200,6 +200,17 @@ const updateDataTransaction = async (url, data) => {
     throw error;
   }
 };
+
+const deleteData = async (url) => {
+  try {
+    const response = await axios.delete(configApp.PAYMENT_SERVICE + url, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
 const receiptCollectionHttpService = {
   getAll,
   inactiveWithApproval,
@@ -215,6 +226,7 @@ const receiptCollectionHttpService = {
   updateDataTransaction,
   updateDataPost,
   uploadBulk,
+  deleteData
 };
 
 export default receiptCollectionHttpService;

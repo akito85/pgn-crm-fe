@@ -84,6 +84,9 @@ const NxFilter = ({
   // Badge configuration
   showBadge = false,
   badgeCount = 0,
+
+  // For get thunk API that needs account ID
+  accountId,
 }) => {
   // Get options from Redux state (loaded from global type APIs)
   const options = useMemo(() => ({
@@ -95,9 +98,9 @@ const NxFilter = ({
   // Fetch options from APIs on mount
   useEffect(() => {
     if (dispatch && getColumnApi && getOperatorApi && getConditionApi) {
-      dispatch(getColumnApi());
-      dispatch(getConditionApi());
-      dispatch(getOperatorApi());
+      dispatch(getColumnApi({ accountId }));
+      dispatch(getConditionApi({ accountId }));
+      dispatch(getOperatorApi({ accountId }));
     }
   }, [dispatch, getColumnApi, getOperatorApi, getConditionApi]);
 

@@ -16,6 +16,7 @@ const ButtonComponent = ({
   className,
   fullButton = false,
   isPrimary = false,
+  loading = false,
 }) => {
   return (
     <div>
@@ -29,6 +30,7 @@ const ButtonComponent = ({
         disabled={disabled}
         htmlType={htmlType}
         size={size || "small"}
+        loading={loading}
         style={{
           borderColor: `${border === false ? "#0075bf00" : "var(--primary)"}`,
           ...(fullButton ? { width: "100%" } : {}),

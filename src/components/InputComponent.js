@@ -34,6 +34,12 @@ const InputComponent = ({
     padding: "4px 12px",
   };
 
+  const styleTextarea = {
+    borderRadius: "6px",
+    boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    padding: "0px",
+  };
+
   const styleNumeric = {
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
@@ -61,7 +67,7 @@ const InputComponent = ({
         <>
           <Input.TextArea
             rows={rows || 3}
-            style={style}
+            style={styleTextarea}
             onChange={onChange}
             value={value}
             maxLength={255}

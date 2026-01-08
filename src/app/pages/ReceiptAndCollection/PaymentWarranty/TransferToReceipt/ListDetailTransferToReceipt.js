@@ -1,63 +1,84 @@
 import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
-import  { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Form } from "antd"; // Import Form
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  approveOrRejectSetting,
-  approveOrRejectInactive,
-  getDetailSetting,
-} from "../../../../../redux/slices/receipt_collection/setting";
+  getDetailTransferToReceipt,
+  approveOrRejectTransferToReceipt,
+  getListCategory,
+  getAllApprovalList,
+  getListApprovalById
+} from "../../../../../redux/slices/receipt_collection/transferToReceipt";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailTransferToReceipt from "./DetailTransferToReceipt";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
+import TableRBI from "../../../../../components/TableRBI";
+import { getReceiptListColumns } from "./ReceiptListColumns";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 
-const ListDetailSettings = () => {
+const ListDetailTransferToReceipt = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const [form] = Form.useForm(); // Initialize Form
   const [modalApprove, setModalApprove] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
   const id = location?.state?.id;
   const [dataHeader, setDataHeader] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
 
-  // Define tabData before using it in useState
-  const [tabData, setTabData] = useState([
-    { value: "Setting" },
+  // Tabs
+  const [tabData] = useState([
+    { value: "Transfer to Receipt" },
+    { value: "Approval" },
     { value: "Attachment" },
   ]);
 
-  const { loading, data_detail } = useSelector(
-    (state) => state.receiptSetting
-  );
+  const {
+    loading,
+    data_detail,
+    dataListAppHierId,
+    dataListAppHierDetail
+  } = useSelector((state) => state.transferToReceipt);
+
   const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState(null);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+
+  // Table state (for receipt list)
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleSegmentedPage = (e) => {
     setSegmentedPage(e.target.value);
   };
 
   useEffect(() => {
-    dispatch(getDetailSetting(id));
-  }, [ dispatch, id]);
-
-
+    if (id) {
+      dispatch(getDetailTransferToReceipt(id));
+      dispatch(getAllApprovalList());
+    }
+  }, [dispatch, id]);
 
   useEffect(() => {
-    if (
-      id &&
-      data_detail?.settings?.id &&
-      data_detail &&
-      data_detail?.settings?.id === id
-    ) {
+    if (data_detail && data_detail.transferToReceipt?.appHierId) {
+      setSelectedHierarchy(data_detail.transferToReceipt.appHierId);
+      form.setFieldsValue({ apphierId: data_detail.transferToReceipt.appHierId }); // Set Form Value
+    }
+
+    if (data_detail) {
+      // Map attachment data if available
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
         (item) => {
           return {
@@ -80,31 +101,94 @@ const ListDetailSettings = () => {
         }
       );
       setListDataAttachment(dataAttachment);
-      setDataHeader(data_detail?.settings);
+      // Assuming dataHeader comes from data_detail directly or a property
+      // Adjust this based on actual API response structure for Transfer To Receipt
+      setDataHeader(data_detail.transferToReceipt);
     }
+  }, [data_detail, form]);
 
-    
-  }, [id, data_detail]);
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
+    }
+  }, [dataListAppHierId]);
 
+  useEffect(() => {
+    if (selectedHierarchy) {
+      dispatch(getListApprovalById({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
 
-  
+  useEffect(() => {
+    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  const columnsReceipt = useMemo(() => {
+    return getReceiptListColumns({
+      page,
+      pageSize,
+      actionType: "none",
+    });
+  }, [page, pageSize]);
+
+  const onChangePage = (page, pageSize) => {
+    setPage(page);
+    setPageSize(pageSize);
+  };
+
   const renderSection = (segmentedPage) => {
     switch (segmentedPage) {
-      case "Setting":
+      case "Transfer to Receipt":
         return (
-          <DetailTransferToReceipt
-            key={"active"}
-            data_detail={dataHeader}
-            data_req={data_detail?.tApprovalDto}
-          />
+          <>
+            <DetailTransferToReceipt data_detail={dataHeader} />
+            <BaseContainer header={"RECEIPT INFORMATION"}>
+              <TableRBI
+                columns={columnsReceipt}
+                dataSource={IndexReceipt(dataHeader?.receiptList || [], page, pageSize).slice((page - 1) * pageSize, page * pageSize)}
+                pagination={false}
+                tableScrolled={{ x: 1000 }}
+                // Providing required props for TableRBI if it handles pagination internally or display
+                current={page}
+                pageSize={pageSize}
+                totalData={dataHeader?.receiptList?.length || 0}
+                onChange={onChangePage}
+                onSizeChanger={onChangePage}
+              />
+            </BaseContainer>
+          </>
         );
-      case "Draft":
+      case "Approval":
         return (
-          <DetailTransferToReceipt
-            key={"draft"}
-            data_detail={dataHeader}
-            data_req={data_detail?.tApprovalDto}
-          />
+          <div className="mt-5">
+            <BaseContainer header={"TRANSFER TO RECEIPT APPROVAL"}>
+              <Form form={form}>
+                <ApprovalComponentGeneral
+                  dataTable={appHierDataDetail}
+                  dataOption={appHierOptions}
+                  selectedHierarchy={selectedHierarchy}
+                  updateSelectedHierarchy={setSelectedHierarchy}
+                  disableSelect={true}
+                />
+              </Form>
+            </BaseContainer>
+          </div>
         );
       case "Attachment":
         return (
@@ -113,10 +197,11 @@ const ListDetailSettings = () => {
               type={"detail"}
               data={listDataAttachment}
               updateData={setListDataAttachment}
-              typeSelector="receiptSetting"
+              typeSelector="transferToReceipt"
+              dispatch={dispatch}
+              getAPICategory={getListCategory}
               service={receiptCollectionHttpService}
               configApplication={configApp.PAYMENT_SERVICE}
-              // getAPIGuard={getConfigFileRBIData}
             />
           </BaseContainer>
         );
@@ -127,52 +212,44 @@ const ListDetailSettings = () => {
 
   const isShowButton = data_detail?.tApprovalDto?.isApprover;
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
-      breadcrumbName: "Settings",
+      path: "",
+      breadcrumbName: "Payment Warranty",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_SETTINGS,
-      breadcrumbName: `Detail ${segmentedPage}`,
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT,
+      breadcrumbName: "Transfer to Receipt",
+    },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSFER_TO_RECEIPT,
+      breadcrumbName: "Detail Transfer to Receipt",
     },
   ];
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_RECEIPT_SETTING") {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectInactive({ body: data }));
-      handleClear();
-      setModalApprove(false);
-    } else {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectSetting({ body: data }));
-      handleClear();
-      setModalApprove(false);
-    }
-  };
+    // Reuse existing logic from setting.js if applicable, or migrate to transferToReceipt.js
+    // For now assuming we still use setting slice for approval actions or need to migrate them
+    const data = {
+      id: id,
+      remark: res.remark,
+      approvalId: data_detail?.tApprovalDto?.tAppId,
+      action: approveOrReject.toUpperCase(),
+    };
 
-  const handleCancel = () => {
-    // setRemark("");
+    // Check if we need to use a different action for Transfer to Receipt
+    dispatch(approveOrRejectTransferToReceipt({ body: data }));
+    handleClear();
     setModalApprove(false);
   };
 
+  const handleCancel = () => {
+    setModalApprove(false);
+  };
 
   return (
     <LayoutMenu>
@@ -188,9 +265,8 @@ const ListDetailSettings = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Setting"}
-        named={ data_detail?.settings?.partnerCode
-        }
+        menu={"Transfer To Receipt"}
+        named={dataHeader?.id}
       />
 
       <div className="flex mt-[30px] justify-between py-5">
@@ -237,4 +313,14 @@ const ListDetailSettings = () => {
   );
 };
 
-export default ListDetailSettings;
+const IndexReceipt = (data, page, pageSize) => {
+  return data.map((item, index) => {
+    return {
+      ...item,
+      key: index,
+      no: (page - 1) * pageSize + index + 1
+    }
+  })
+}
+
+export default ListDetailTransferToReceipt;

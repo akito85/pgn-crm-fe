@@ -2,7 +2,7 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, Form } from "antd";
+import { Steps, Button, Form, Spin } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
@@ -55,6 +55,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   } = useSelector((state) => state.accountManagement);
 
   const {
+    loading,
     data_irApprovalHierarchy,
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
@@ -511,7 +512,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       endDate,
       appHierId,
       action: confirmationType,
-      remark,
+      remarks: remark,
     };
 
     if (type === "create")
@@ -659,113 +660,117 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           </div>
         </BaseContainer>
 
-        <Form
-          id="invoiceRelationForm"
-          form={formCreate}
-          layout={"vertical"}
-          onFinish={handleSubmitForm}
-          // onFinishFailed={handleErrorSubmit}
-          scrollToFirstError={true}
+        <Spin
+          spinning={loading}
         >
-          {/* Step Contents */}
-          <div className="flex flex-row gap-x-6 justify-center">
-            <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+          <Form
+            id="invoiceRelationForm"
+            form={formCreate}
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            // onFinishFailed={handleErrorSubmit}
+            scrollToFirstError={true}
+          >
+            {/* Step Contents */}
+            <div className="flex flex-row gap-x-6 justify-center">
+              <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+              </div>
             </div>
-          </div>
-          <div className="steps-content my-6">
-          {
-            steps.map((step) => step.content)
-          }
-          </div>
+            <div className="steps-content my-6">
+            {
+              steps.map((step) => step.content)
+            }
+            </div>
 
-          {/* Section Action Steps */}
-          <div className="steps-action my-8 flex w-full justify-between gap-x-2">
-            <ButtonComponent
-              type={"submit"}
-              icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{navigate(-1)}}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex w-full justify-end gap-x-4">
+            {/* Section Action Steps */}
+            <div className="steps-action my-8 flex w-full justify-between gap-x-2">
               <ButtonComponent
-                onClick={handleClear}
                 type={"submit"}
-                icon={<SVGIcon name="IconButtonClear" width={24} />}
+                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                onClick={()=>{navigate(-1)}}
               >
-                { type === "update" ? "Reset" : "Clear" }
+                Back
               </ButtonComponent>
-              {current > 0 && current !== (steps.length-1) && (
+              <div className="flex w-full justify-end gap-x-4">
                 <ButtonComponent
-                  onClick={() => {
-                    prev();
-                    scrollLeftHandler();
-                  }}
+                  onClick={handleClear}
                   type={"submit"}
-                  icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
                 >
-                  Previous
+                  { type === "update" ? "Reset" : "Clear" }
                 </ButtonComponent>
-              )}
-              {current < steps.length - 1 && (
-                <ButtonComponent
-                  onClick={handleButtonNext}
-                  type={"submit"}
-                  disabled={steps[current].disabled}
-                >
-                  <div className="flex gap-x-2 items-center">
-                    <span>Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </div>
-                </ButtonComponent>
-              )}
-              {current === steps.length - 1 && (
-                <>
+                {current > 0 && current !== (steps.length-1) && (
                   <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
                     type={"submit"}
+                    icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
                   >
-                    Save as Draft
+                    Previous
                   </ButtonComponent>
+                )}
+                {current < steps.length - 1 && (
                   <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                    onClick={handleButtonNext}
                     type={"submit"}
+                    disabled={steps[current].disabled}
                   >
-                    Save & Submit
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
                   </ButtonComponent>
-                </>
-              )}
+                )}
+                {current === steps.length - 1 && (
+                  <>
+                    <ButtonComponent
+                      onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                      type={"submit"}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                    <ButtonComponent
+                      onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                      type={"submit"}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-          <ConfirmationModal
-            form={"invoiceRelationForm"}
-            isOpen={showConfirmationModal}
-            handleCancel={() => handleSetShowConfirmationModal(false)}
-            selectedAppHierId={selectedAppHierId}
-            selectedApprovalName={selectedApprovalName}
-            hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
-              ...detail,
-              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-                ...employeeDetail,
-                key: `employee-detail-${index}`
-              })),
-              key: `detail-detail-${index}`,
-            }))}
-            hieararchyOptionData={data_irApprovalHierarchy}
-            type={confirmationType}
-            dataAttachment={dataAttachment}
-            data={formCreate.getFieldsValue()}
-            service={accountManagementService}
-            configApplication={configApp.ACCOUNT_SERVICE}
-          />
-        </Form>
+            <ConfirmationModal
+              form={"invoiceRelationForm"}
+              isOpen={showConfirmationModal}
+              handleCancel={() => handleSetShowConfirmationModal(false)}
+              selectedAppHierId={selectedAppHierId}
+              selectedApprovalName={selectedApprovalName}
+              hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
+                ...detail,
+                employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                  ...employeeDetail,
+                  key: `employee-detail-${index}`
+                })),
+                key: `detail-detail-${index}`,
+              }))}
+              hieararchyOptionData={data_irApprovalHierarchy}
+              type={confirmationType}
+              dataAttachment={dataAttachment}
+              data={formCreate.getFieldsValue()}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+            />
+          </Form>
+        </Spin>
       </div>
     </LayoutMenu>
   );

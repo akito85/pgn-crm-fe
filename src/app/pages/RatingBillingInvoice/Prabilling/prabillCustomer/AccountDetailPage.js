@@ -308,7 +308,7 @@ const AccountDetailPage = () => {
       {
         key: "action",
         title: "ACTION",
-        width: 50,
+        width: 80,
         align: "center",
         fixed: "right",
         render: (text, record) => (
