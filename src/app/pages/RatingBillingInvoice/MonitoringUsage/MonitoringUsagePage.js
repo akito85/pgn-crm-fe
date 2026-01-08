@@ -131,11 +131,10 @@ const MonitoringUsagePage = () => {
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
+      centered: true,
       onOk: async () => {
         try {
           await dispatch(deleteBatch(record?.batchId)).unwrap();
-          // No need to refresh, Redux will automatically update the state
-          // The reducer already handles removing the deleted batch from the list
         } catch (error) {
           console.error("Error deleting batch:", error);
         }

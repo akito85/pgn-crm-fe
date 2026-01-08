@@ -9,6 +9,7 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import PrabillingDetailInformation from "./PrabillingDetailInformation";
 import PrabillingDetailLog from "./PrabillingDetailLog";
+import PrabillingAccountLog from "./PrabillingAccountLog";
 import { getDetailPrabillingInit } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 
 const PrabillingDetail = () => {
@@ -72,7 +73,7 @@ const PrabillingDetail = () => {
       key: "logAccount",
       label: "Prabilling Account Log",
       children: (
-        <PrabillingDetailLog
+        <PrabillingAccountLog
           data={detail_prabilling_init}
           tabHeader="Prabilling Account Log"
         />
@@ -85,37 +86,37 @@ const PrabillingDetail = () => {
   };
 
   return (
-      <LayoutMenu>
-        <BreadCrumb routes={routes} />
+    <LayoutMenu>
+      <BreadCrumb routes={routes} />
 
-        <div className="w-full">
-          <Tabs
-            activeKey={activeTab}
-            items={tabItems}
-            onChange={handleTabChange}
-            style={{ marginBottom: '-24px' }}
-          />
-        </div>
+      <div className="w-full">
+        <Tabs
+          activeKey={activeTab}
+          items={tabItems}
+          onChange={handleTabChange}
+          style={{ marginBottom: "-24px" }}
+        />
+      </div>
 
-        <div className="w-full flex justify-start mt-4">
-          <ButtonComponent
-            type="submit"
-            border={false}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 16,
-                  justifyItems: "left",
-                }}
-              />
-            }
-            onClick={() => navigate(-1)}
-          >
-            Back
-          </ButtonComponent>
-        </div>
-      </LayoutMenu>
+      <div className="w-full flex justify-start mt-4">
+        <ButtonComponent
+          type="submit"
+          border={false}
+          icon={
+            <LeftOutlined
+              style={{
+                color: "#fff",
+                fontSize: 16,
+                justifyItems: "left",
+              }}
+            />
+          }
+          onClick={() => navigate(-1)}
+        >
+          Back
+        </ButtonComponent>
+      </div>
+    </LayoutMenu>
   );
 };
 
