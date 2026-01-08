@@ -510,11 +510,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                       detail.accountGroupType ||
                       ""}
                   </DetailText>
-                  <DetailText label={"Account Numbers"} className="">
-                    {detail.accountNumber || ""}
-                  </DetailText>
-                  <DetailText label={"Account Names"} className="">
-                    {detail.accoutnName || ""}
+                  <DetailText label={"Specific Customer Account"} className="">
+                    {detail.accounts || ""}
                   </DetailText>
                 </React.Fragment>
               ))}

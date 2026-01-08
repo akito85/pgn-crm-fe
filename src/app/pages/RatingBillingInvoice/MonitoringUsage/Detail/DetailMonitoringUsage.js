@@ -58,6 +58,8 @@ const DetailMonitoringUsage = () => {
   const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showBackWarning, setShowBackWarning] = useState(false);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -105,6 +107,21 @@ const DetailMonitoringUsage = () => {
       setPage(1);
     }
   }, [location, dispatch]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     if (
@@ -207,7 +224,6 @@ const DetailMonitoringUsage = () => {
         accountNumber: formValue?.accountNumber || null,
         accountName: formValue?.accountName || null,
         costCenter: formValue?.costCenter || null,
-        billingPeriod: formValue?.billingPeriod || null,
         assetSerialNum: formValue?.assetSerialNum || null,
         assetType: formValue?.assetType || null,
         fdate:
@@ -231,7 +247,8 @@ const DetailMonitoringUsage = () => {
         ghv: formValue?.ghv || null,
         volMscf: formValue?.volMscf || null,
         uncorrectedValue: formValue?.uncorrectedValue || null,
-        taxationRowId: formValue?.taxationRowId || null,
+        sourceRowId: formValue?.sourceRowId || null,
+        sourceName: formValue?.sourceName || null,
         source: formValue?.source || null,
         description: formValue?.description || null,
       };
@@ -255,7 +272,6 @@ const DetailMonitoringUsage = () => {
           const updatedRow = {
             ...item,
             ...formValue,
-            billingPeriod: requestBody.billingPeriod,
             fdate: requestBody.fdate,
             fhour: requestBody.fhour,
             measDate: requestBody.measDate,
@@ -289,6 +305,16 @@ const DetailMonitoringUsage = () => {
 
   // handle back page
   const handleBack = () => {
+    if (hasUnsavedChanges) {
+      setShowBackWarning(true);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleConfirmLeave = () => {
+    setShowBackWarning(false);
+    setHasUnsavedChanges(false);
     navigate(-1);
   };
 
@@ -311,6 +337,7 @@ const DetailMonitoringUsage = () => {
     setDataTable(newData);
     dispatch(addDeletedData(deletedRecord));
     setModalDelete(false);
+    setHasUnsavedChanges(true);
   };
 
   const handleDownloadFailed = () => {
@@ -381,12 +408,14 @@ const DetailMonitoringUsage = () => {
                   }}
                 />
               ) : (
-                <SVGIcon
-                  name="IconDelete"
-                  width={20}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
+                <div className="cursor-not-allowed inline-block">
+                  <SVGIcon
+                    name="IconDelete"
+                    width={20}
+                    color={"#C0BEC6"}
+                    style={{ pointerEvents: "none" }}
+                  />
+                </div>
               )}
             </Tooltip>
           </div>
@@ -613,11 +642,11 @@ const DetailMonitoringUsage = () => {
           <div className="flex justify-center gap-[20px] mt-6">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
             <p className="text-[18px] font-bold">
-              Are you sure want to delete it?
+              Are you sure you want to delete this record?
             </p>
           </div>
           <Alert
-            message="Warning! if you delete this data, it will be permanently."
+            message="Remember to save your changes! This deletion will only take effect after you click 'Save & Submit' or 'Save as Draft'."
             type={"error"}
           />
         </ModalConfirm>
@@ -631,7 +660,26 @@ const DetailMonitoringUsage = () => {
           listDataAppHierDetail={appHierDataDetail}
           data_detail={body}
           columns={filteredColumns}
+          onSaveSuccess={() => setHasUnsavedChanges(false)}
         />
+
+        <ModalConfirm
+          isOpen={showBackWarning}
+          handleCancel={() => setShowBackWarning(false)}
+          handleOk={handleConfirmLeave}
+          width={500}
+          useOk={true}
+        >
+          <div className="flex justify-center gap-[20px] mt-6">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">You have unsaved changes!</p>
+          </div>
+          <Alert
+            message="This change has not been saved yet. If you leave or continue without saving, all activities in this draft will be lost."
+            type="error"
+          />
+        </ModalConfirm>
+
       </Spin>
     </LayoutMenu>
   );
