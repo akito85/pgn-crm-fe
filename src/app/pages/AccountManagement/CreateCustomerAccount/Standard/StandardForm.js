@@ -129,6 +129,19 @@ const StandardForm = () => {
   ])
   
   const [valuePageSectionCAI, setValuePageSectionCAI] = useState(tabPagesSectionCAI[0].value);
+  const [isCAIAttachmentError, setIsCAIAttachmentError] = useState(false);
+
+  useEffect(() => {
+    if (valuePageSectionCAI === "Attachment" && isCAIAttachmentError) {
+      if (window) {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        })
+      }
+      setIsCAIAttachmentError(false);
+    }
+  }, [valuePageSectionCAI, isCAIAttachmentError])
 
   useEffect(() => {
     form.setFieldsValue({
@@ -1176,6 +1189,13 @@ const StandardForm = () => {
     form.validateFields()
     .then((values) => {
       handleMandatory(setTabPagesSectionCAI, listDataAttachment);
+
+      if (!listDataAttachment.length) {
+        setValuePageSectionCAI("Attachment");
+        setIsCAIAttachmentError(true);
+        return;
+      }
+
       const body = {
         registrationNumber: caiObj?.accountRegistrationNumber || "",
       };
@@ -1183,7 +1203,9 @@ const StandardForm = () => {
         checkRegistrationNumber(body))
         .unwrap()
         .then((res) => {
+          console.log("Masuk then");
           if(listDataAttachment.length > 0 && data?.registered === false){
+            console.log("Masuk if");
             if (tiObj.taxIdentifierType === 922 || tiObj.taxIdentifierType === 921) {
               setTiObj((prevState) => ({
                 ...prevState,
@@ -1196,6 +1218,7 @@ const StandardForm = () => {
             next();
             scrollRightHandler();
           }else if(data?.registered === true){
+            console.log("Masuk else if");
             if (tiObj.taxIdentifierType === 922 || tiObj.taxIdentifierType === 921) {
               setTiObj((prevState) => ({
                 ...prevState,
@@ -1211,6 +1234,7 @@ const StandardForm = () => {
         })
     })
     .catch((error) => {
+      console.log("Masuk error")
       console.error("Validation failed:", error);
       handleMandatory(setTabPagesSectionCAI, listDataAttachment, error.errorFields);
 
