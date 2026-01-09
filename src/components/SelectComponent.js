@@ -21,15 +21,15 @@ const SelectComponent = ({
   onDeselect = () => { },
   onClear = () => { },
   onPopupScroll = () => { },
-  className, // Tambahkan ini
-  style: customStyle, // Tambahkan ini
+  className, 
+  style: customStyle,
 }) => {
   const wrapper = "flex flex-col";
   const style = {
     width: width || "auto",
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-    ...customStyle, // Merge dengan custom style
+    ...customStyle,
   };
 
   const filterOption = (input, option) => {
@@ -54,7 +54,7 @@ const SelectComponent = ({
         labelInValue={labelInValue}
         value={value ? value : undefined}
         style={style}
-        className={className} // Tambahkan ini
+        className={className} 
         placeholder={placeholder}
         onChange={onChange}
         mode={mode}

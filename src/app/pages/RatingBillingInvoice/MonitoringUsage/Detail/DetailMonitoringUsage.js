@@ -547,10 +547,10 @@ const DetailMonitoringUsage = () => {
                       {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                     <DetailText label="Updated Date">
-                      {detail_batch?.batchInformation?.uploadDate}
+                      {detail_batch?.batchInformation?.updatedDate}
                     </DetailText>
                     <DetailText label="Updated By">
-                      {detail_batch?.batchInformation?.uploadBy}
+                      {detail_batch?.batchInformation?.updatedBy}
                     </DetailText>
                   </div>
                 </BaseContainer>

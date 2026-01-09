@@ -16,21 +16,23 @@ const ButtonComponent = ({
   className,
   fullButton = false,
   isPrimary = false,
-  loading = false,
+  loading = false, // Backward compatibility
 }) => {
+  // Gabungkan isLoading dan loading untuk backward compatibility
+  const isButtonLoading = isLoading || loading;
+  
   return (
     <div>
       <Button
         form={form || undefined}
         onClick={onClick}
-        loading={isLoading}
+        loading={isButtonLoading} // ← FIX: Gunakan satu variable saja
         icon={icon ? icon : null}
         className={`flex w-full justify-center ${className}`}
         type={type}
-        disabled={disabled}
+        disabled={disabled || isButtonLoading} // ← FIX: Auto disable saat loading
         htmlType={htmlType}
         size={size || "small"}
-        loading={loading}
         style={{
           borderColor: `${border === false ? "#0075bf00" : "var(--primary)"}`,
           ...(fullButton ? { width: "100%" } : {}),
@@ -38,7 +40,7 @@ const ButtonComponent = ({
           color: isPrimary && "#fff",
           height: "32px",
           fontSize: "12px",
-          cursor: disabled ? "not-allowed" : "pointer",
+          cursor: disabled || isButtonLoading ? "not-allowed" : "pointer", // ← FIX: Cursor saat loading
         }}
       >
         <div
