@@ -1769,6 +1769,15 @@ const prabillingSlice = createSlice({
         saTos: false,
       };
     },
+    resetSummaryData: (state) => {
+      state.list_prabilling_summary = [];
+      state.summary_pagination = {
+        totalPages: 0,
+        totalElements: 0,
+        currentPage: 0,
+        pageSize: 10,
+      };
+    },
   },
   extraReducers: {
     // Get List Billing Period for Prabilling
@@ -2468,6 +2477,6 @@ const prabillingSlice = createSlice({
   },
 });
 
-export const { resetCustomerDetail } = prabillingSlice.actions;
+export const { resetCustomerDetail,resetSummaryData } = prabillingSlice.actions;
 const { reducer } = prabillingSlice;
 export default reducer;
