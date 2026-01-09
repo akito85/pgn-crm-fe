@@ -27,7 +27,7 @@ export const getAllTabColumns = (
     dataIndex: "initCode",
     sorter: true,
     isClassification: true,
-    width: 80,
+    width: 65,
     filteredValue: [search?.initCode] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -55,7 +55,7 @@ export const getAllTabColumns = (
     dataIndex: "billingCycle",
     isClassification: true,
     sorter: true,
-    width: 85,
+    width: 65,
     filteredValue: [search?.billingCycle] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -83,7 +83,7 @@ export const getAllTabColumns = (
     dataIndex: "billPeriod",
     isClassification: true,
     sorter: true,
-    width: 85,
+    width: 70,
     filteredValue: [search?.billPeriod] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -111,7 +111,7 @@ export const getAllTabColumns = (
     dataIndex: "sor",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 80,
     filteredValue: [search?.sor] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -140,7 +140,7 @@ export const getAllTabColumns = (
     dataIndex: "costCenter",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 65,
     filteredValue: [search?.costCenter] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -169,7 +169,7 @@ export const getAllTabColumns = (
     dataIndex: "meterReadingCode",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 90,
     filteredValue: [search?.meterReadingCode] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -198,7 +198,7 @@ export const getAllTabColumns = (
     dataIndex: "customerSegment",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 80,
     filteredValue: [search?.customerSegment] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -227,7 +227,7 @@ export const getAllTabColumns = (
     dataIndex: "accountGroupType",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 80,
     filteredValue: [search?.accountGroupType] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -256,7 +256,7 @@ export const getAllTabColumns = (
     dataIndex: "specificAccount",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 90,
     filteredValue: [search?.specificAccount] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -628,6 +628,7 @@ export const getSummaryTabColumns = (
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
     sorter: true,
+    isClassification:true,
     width: 70,
     filteredValue: [search?.billingCycle] || null,
     ...getColumnSearchPropsUseFilteredValue(
@@ -654,6 +655,7 @@ export const getSummaryTabColumns = (
     key: "billPeriod",
     title: "BILLING PERIOD",
     dataIndex: "billPeriod",
+    isClassification:true,
     sorter: true,
     width: 60,
     filteredValue: [search?.billPeriod] || null,
@@ -681,6 +683,7 @@ export const getSummaryTabColumns = (
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
+    isClassification:true,
     sorter: true,
     width: 70,
     filteredValue: [search?.sor] || null,
@@ -709,6 +712,7 @@ export const getSummaryTabColumns = (
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
+    isClassification:true,
     sorter: true,
     width: 70,
     filteredValue: [search?.costCenter] || null,
@@ -737,8 +741,9 @@ export const getSummaryTabColumns = (
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
+    isClassification:true,
     sorter: true,
-    width: 60,
+    width: 70,
     filteredValue: [search?.accountSegment] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -764,6 +769,7 @@ export const getSummaryTabColumns = (
     key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
+    isClassification:true,
     sorter: true,
     width: 70,
     filteredValue: [search?.accountGroupType] || null,

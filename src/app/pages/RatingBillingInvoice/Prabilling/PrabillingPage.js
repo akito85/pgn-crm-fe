@@ -11,6 +11,7 @@ import {
   getListPrabillingInitPopulate,
   getListPrabillingSummary,
   getListBillingPeriodForPrabilling,
+  resetSummaryData,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
@@ -239,10 +240,9 @@ const PrabillingPage = () => {
     valueTab === "All" ? prabilling_pagination : summary_pagination;
   const hasMore = currentData.length < (currentPagination?.totalElements || 0);
 
-  // Add keys to data - FIX: dependency harus include valueTab
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
-    
+
     return currentData.map((item) => ({
       ...item,
       key: valueTab === "All" ? item.initCode : item.customerNumber,
@@ -292,7 +292,7 @@ const PrabillingPage = () => {
     setSearch({});
     setSearchText("");
     setSearchedColumn("");
-    setSort("");  // FIX: Reset sort juga
+    setSort(""); // FIX: Reset sort juga
     setPage(1);
     // Close detail when changing tabs
     setPageDetail(false);
@@ -301,9 +301,13 @@ const PrabillingPage = () => {
   };
 
   const handleBillingPeriodChange = (value) => {
+    dispatch(resetSummaryData());
     setSelectedBillingPeriod(value);
     setPage(1);
-    // Close detail when changing period
+    setSort(""); 
+    setSearch({});
+    setSearchText("");
+    setSearchedColumn("");
     setPageDetail(false);
     setActiveRowKey(null);
     setSelectedRecord(null);
@@ -393,12 +397,12 @@ const PrabillingPage = () => {
 
         <div className="my-0">
           <TableRBI
-            key={valueTab} // FIX: Tambahkan key untuk force re-render table
+            key={`${valueTab}-${selectedBillingPeriod}`}
             idTable="prabilling-table"
             dataSource={dataSourceWithKeys}
             columns={processedColumns}
             totalData={currentPagination?.totalElements || 0}
-            tableScrolled={{ x: valueTab === "All" ? 2500 : 2500, y: 525 }}
+            tableScrolled={{ x: valueTab === "All" ? 3000 : 2000, y: 525 }}
             onSort={onSort}
             showExport={false}
             columnDefinitions={columnDefinitions}
