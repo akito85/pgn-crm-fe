@@ -714,8 +714,7 @@ export const getDetailPrabillingInit = createAsyncThunk(
         accountSegmentName: detail.accountSegmentName,
         accountGroupType: detail.accountGroupType,
         accountGroupTypeName: detail.accountGroupTypeName,
-        accountNumber: detail.accountNumber,
-        accoutnName: detail.accoutnName, // Typo dari backend
+        accounts: detail.accounts
       }));
 
       // Kembalikan struktur yang lengkap
@@ -1590,12 +1589,62 @@ export const getPrabillSaPriceRule = createAsyncThunk(
   }
 );
 
+// Get SA Price Rule
+export const getPrabillSummarySaPriceRule = createAsyncThunk(
+  "GET_PRABILL_SA_PRICE_RULE",
+  async (
+    { prabillSaId, page = 0, size = 10, search = "", sort = "" },
+    thunkAPI
+  ) => {
+    try {
+      const searchParams = search
+        ? `&searchs=${encodeURIComponent(search)}`
+        : "";
+      const sortParams = sort ? `&sort=${sort}` : "";
+
+      const url = `/v1/dbs/api/prabill/summary/sa-prcrule/${prabillSaId}?page=${page}&size=${size}${searchParams}${sortParams}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 // Get SA Price Detail
 export const getPrabillSaPriceDet = createAsyncThunk(
   "GET_PRABILL_SA_PRICE_DET",
   async (prabillSaId, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/prabill/sa-pricedet/${prabillSaId}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data?.data || response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get SA Price Detail summary prabill
+export const getPrabillSummarySaPriceDet = createAsyncThunk(
+  "GET_PRABILL_SA_PRICE_DET",
+  async (prabillSaId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/prabill/summary/sa-price-det/${prabillSaId}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return response.data?.data || response.data;
     } catch (error) {
@@ -1824,6 +1873,19 @@ const prabillingSlice = createSlice({
       state.prabill_sa_detail.saPriceRule = { result: [], page: {} };
     },
 
+    // prabill summary SA Price Rule
+    [getPrabillSummarySaPriceRule.pending]: (state) => {
+      state.loading_prabill_sa.saPriceRule = true;
+    },
+    [getPrabillSummarySaPriceRule.fulfilled]: (state, action) => {
+      state.loading_prabill_sa.saPriceRule = false;
+      state.prabill_sa_detail.saPriceRule = action.payload;
+    },
+    [getPrabillSummarySaPriceRule.rejected]: (state) => {
+      state.loading_prabill_sa.saPriceRule = false;
+      state.prabill_sa_detail.saPriceRule = { result: [], page: {} };
+    },
+
     // SA Price Det
     [getPrabillSaPriceDet.pending]: (state) => {
       state.loading_prabill_sa.saPriceDet = true;
@@ -1833,6 +1895,19 @@ const prabillingSlice = createSlice({
       state.prabill_sa_detail.saPriceDet = action.payload;
     },
     [getPrabillSaPriceDet.rejected]: (state) => {
+      state.loading_prabill_sa.saPriceDet = false;
+      state.prabill_sa_detail.saPriceDet = null;
+    },
+
+     // SA Price Det prabill summary
+    [getPrabillSummarySaPriceDet.pending]: (state) => {
+      state.loading_prabill_sa.saPriceDet = true;
+    },
+    [getPrabillSummarySaPriceDet.fulfilled]: (state, action) => {
+      state.loading_prabill_sa.saPriceDet = false;
+      state.prabill_sa_detail.saPriceDet = action.payload;
+    },
+    [getPrabillSummarySaPriceDet.rejected]: (state) => {
       state.loading_prabill_sa.saPriceDet = false;
       state.prabill_sa_detail.saPriceDet = null;
     },

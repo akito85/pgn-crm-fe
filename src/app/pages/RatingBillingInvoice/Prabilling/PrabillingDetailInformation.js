@@ -17,7 +17,6 @@ import {
   downloadPrabillingResult,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
-import { EyeOutlined } from "@ant-design/icons";
 
 const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const { detail_prabilling_result, loading } = useSelector(
@@ -511,7 +510,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                       ""}
                   </DetailText>
                   <DetailText label={"Specific Customer Account"} className="">
-                    {detail.accounts || ""}
+                    {detail.accounts}
                   </DetailText>
                 </React.Fragment>
               ))}

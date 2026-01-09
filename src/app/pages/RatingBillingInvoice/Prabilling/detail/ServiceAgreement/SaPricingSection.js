@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import DetailText from "../../../../../../components/DetailText";
 import TableRBI from "../../../../../../components/TableRBI";
 import {
-  getPrabillSaPriceRule,
-  getPrabillSaPriceDet,
+  getPrabillSummarySaPriceRule,
+  getPrabillSummarySaPriceDet,
 } from "../../../../../../redux/slices/rating_billing_invoice/praBilling";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../../../utils";
@@ -255,7 +255,7 @@ const SaPricingSection = ({ prabillSaId, saNumber }) => {
   useEffect(() => {
     if (prabillSaId) {
       dispatch(
-        getPrabillSaPriceRule({
+        getPrabillSummarySaPriceRule({
           prabillSaId,
           search: JSON.stringify(search),
           page: page - 1,
@@ -263,7 +263,7 @@ const SaPricingSection = ({ prabillSaId, saNumber }) => {
           sort,
         })
       );
-      dispatch(getPrabillSaPriceDet(prabillSaId));
+      dispatch(getPrabillSummarySaPriceDet(prabillSaId));
     }
   }, [prabillSaId, search, page, pageSize, sort, dispatch]);
 

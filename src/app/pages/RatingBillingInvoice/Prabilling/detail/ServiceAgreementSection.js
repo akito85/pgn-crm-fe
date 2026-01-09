@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs } from "antd";
 import TableRBI from "../../../../../components/TableRBI";
+import SVGIcon from "../../../../../assets/Icon/index";
+import { Tooltip } from "antd";
 import { getPrabillSummaryServiceAgreement } from "../../../../../redux/slices/rating_billing_invoice/praBilling";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
@@ -233,14 +235,17 @@ const columnsServiceAgreement = (
     key: "action",
     align: "center",
     width: 100,
-    render: (text, record) => (
-      <button
-        onClick={() => handleDetail(record)}
-        className="text-blue-600 hover:text-blue-800 font-medium"
-      >
-        Detail
-      </button>
-    ),
+    render: (text, record) => {
+      return (
+        <div className="flex w-full justify-center gap-6">
+          <Tooltip title="Detail">
+            <div className="pt-1 cursor-pointer">
+              <SVGIcon name="IconDetail" width={20}  onClick={() => handleDetail(record)} />
+            </div>
+          </Tooltip>
+        </div>
+      );
+    },
   },
 ];
 
