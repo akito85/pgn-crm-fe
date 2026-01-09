@@ -1229,6 +1229,7 @@ const ContactForm = ({
             form={formContact}
             onFinish={handleAdd}
             id={"formContact"}
+            scrollToFirstError={{ behavior: "smooth", block: "center" }}
           >
             <span className="text-primary uppercase font-bold">
               CONTACT INFORMATION
@@ -1245,16 +1246,16 @@ const ContactForm = ({
                   },
                 ]}
               >
-                <InputComponent onInput={onInputUpperCase} />
+                <InputComponent onInput={onInputUpperCase} isPassingId />
               </Form.Item>
               <Form.Item label="Middle Name" name="middleName">
-                <InputComponent onInput={onInputUpperCase} />
+                <InputComponent onInput={onInputUpperCase} isPassingId />
               </Form.Item>
               <Form.Item label="Last Name" name="lastName">
-                <InputComponent onInput={onInputUpperCase} />
+                <InputComponent onInput={onInputUpperCase} isPassingId />
               </Form.Item>
               <Form.Item label="Job" name="jobId">
-                <SelectComponent>
+                <SelectComponent isPassingId>
                   {data_job &&
                     data_job?.map((data) => (
                       <Select.Option key={data.id} value={data.id}>
@@ -1264,7 +1265,7 @@ const ContactForm = ({
                 </SelectComponent>
               </Form.Item>
               <Form.Item label="Position" name="positionId">
-                <SelectComponent>
+                <SelectComponent isPassingId>
                   {data_position &&
                     data_position?.map((data) => (
                       <Select.Option key={data.id} value={data.id}>
