@@ -129,19 +129,29 @@ const StandardForm = () => {
   ])
   
   const [valuePageSectionCAI, setValuePageSectionCAI] = useState(tabPagesSectionCAI[0].value);
-  const [isCAIAttachmentError, setIsCAIAttachmentError] = useState(false);
+  const [caiErrorType, setCaiErrorType] = useState(null);
+  const [caiErrorField, setCaiErrorField] = useState(null);
 
   useEffect(() => {
-    if (valuePageSectionCAI === "Attachment" && isCAIAttachmentError) {
+    if (valuePageSectionCAI === "Attachment" && caiErrorType === "attachment") {
       if (window) {
         window.scrollTo({
           top: 0,
           behavior: "smooth",
         })
       }
-      setIsCAIAttachmentError(false);
+      setCaiErrorType(null);
     }
-  }, [valuePageSectionCAI, isCAIAttachmentError])
+    else if (valuePageSectionCAI === "Customer/Account Information" && caiErrorType === "info" && caiErrorField) {
+      form.scrollToField(caiErrorField, {
+        block: "center",
+        behavior: "smooth",
+      });
+      setCaiErrorField(null)
+      setCaiErrorType(null);
+    }
+    
+  }, [valuePageSectionCAI, caiErrorType, caiErrorField])
 
   useEffect(() => {
     form.setFieldsValue({
@@ -1186,7 +1196,7 @@ const StandardForm = () => {
 
       if (!listDataAttachment.length) {
         setValuePageSectionCAI("Attachment");
-        setIsCAIAttachmentError(true);
+        setCaiErrorType("attachment");
         return;
       }
 
@@ -1231,11 +1241,17 @@ const StandardForm = () => {
       // Handle scroll to the first field that failed
       if (error.errorFields && error.errorFields.length > 0) {
         const firstErrorFieldName = error.errorFields[0].name;
-        
-        form.scrollToField(firstErrorFieldName, {
-          behavior: 'smooth',
-          block: 'center',
-        });
+
+        if (valuePageSectionCAI === "Customer/Account Information")
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        else if (valuePageSectionCAI === "Attachment") {
+          setValuePageSectionCAI("Customer/Account Information")
+          setCaiErrorType("info");
+          setCaiErrorField(firstErrorFieldName);
+        }
       }
     });
   }
