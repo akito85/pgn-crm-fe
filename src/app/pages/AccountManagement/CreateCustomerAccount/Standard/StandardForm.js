@@ -1213,6 +1213,16 @@ const StandardForm = () => {
     .catch((error) => {
       console.error("Validation failed:", error);
       handleMandatory(setTabPagesSectionCAI, listDataAttachment, error.errorFields);
+
+      // Handle scroll to the first field that failed
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstErrorFieldName = error.errorFields[0].name;
+        
+        form.scrollToField(firstErrorFieldName, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
     });
   }
 
