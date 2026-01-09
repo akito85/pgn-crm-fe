@@ -1806,21 +1806,22 @@ const UpdateServiceAgreement = ({ saType }) => {
 									</ButtonComponent>
 								)}
 								{current < filteredItems.length - 1 && (
-									<Button
-										onClick={handleButtonNext}
-										type="primary"
-										className="ant-btn ant-btn-submit flex w-full justify-center"
-										disabled={filteredItems[current].disabled}
-									>
-										<span className="p-1 text-[18px] text-center">Next</span>
-										<RightOutlined
-											style={{
-												justifyItems: "center",
-												fontSize: "18px",
-												color: "#fff",
-											}}
-										/>
-									</Button>
+									<ButtonComponent
+                    onClick={handleButtonNext}
+                    type={"submit"}
+                    disabled={steps[current].disabled}
+                  >
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
+                  </ButtonComponent>
 								)}
 								{current === filteredItems.length - 1 && (
 									<>

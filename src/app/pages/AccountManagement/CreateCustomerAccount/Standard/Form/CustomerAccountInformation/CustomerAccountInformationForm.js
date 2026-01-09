@@ -505,7 +505,11 @@ const CustomerAccountInformation = ({
         >
           <SelectComponent>
             {data_accountSegment &&
-              data_accountSegment?.map((ta, index) => (
+              data_accountSegment?.filter((ta) =>
+                CIObj?.customerType === 59 && (ta.id === 602 || ta.id === 601) || // If customer type is "Person"
+                CIObj?.customerType === 58 && ta.id === 603 // If customer type is "Organization"
+              )
+              .map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
                   {ta.name}
                 </Select.Option>

@@ -17,7 +17,6 @@ const ConfirmationModalRemark = () => {
       <Form.Item
         key="remark"
         name={"remark"}
-        label={"Remark"}
         rules={[{ message: requiredMessage("Remark"), required: true }]}
         labelCol={{ span: 24 }}
       >
