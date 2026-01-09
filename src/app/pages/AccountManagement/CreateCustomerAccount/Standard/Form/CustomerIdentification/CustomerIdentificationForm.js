@@ -54,6 +54,7 @@ const CustomerIdentificationForm = ({
             onInput={(e) =>
               (e.target.value = e.target.value.replace(/\D/g, ""))
             }
+            isPassingId
           />
         );
       case 60:
@@ -64,6 +65,7 @@ const CustomerIdentificationForm = ({
             onInput={(e) =>
               (e.target.value = e.target.value.replace(/\D/g, ""))
             }
+            isPassingId
           />
         );
       default:
@@ -74,6 +76,7 @@ const CustomerIdentificationForm = ({
             onInput={(e) =>
               (e.target.value = e.target.value.replace(/\D/g, ""))
             }
+            isPassingId
           />
         );
     }
@@ -97,7 +100,7 @@ const CustomerIdentificationForm = ({
             },
           ]}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_customerType &&
               data_customerType?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -123,7 +126,7 @@ const CustomerIdentificationForm = ({
             },
           ]}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_identificationType &&
               data_identificationType?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>

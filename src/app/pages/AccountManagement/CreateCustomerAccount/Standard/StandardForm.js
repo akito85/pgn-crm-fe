@@ -129,6 +129,19 @@ const StandardForm = () => {
   ])
   
   const [valuePageSectionCAI, setValuePageSectionCAI] = useState(tabPagesSectionCAI[0].value);
+  const [isCAIAttachmentError, setIsCAIAttachmentError] = useState(false);
+
+  useEffect(() => {
+    if (valuePageSectionCAI === "Attachment" && isCAIAttachmentError) {
+      if (window) {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        })
+      }
+      setIsCAIAttachmentError(false);
+    }
+  }, [valuePageSectionCAI, isCAIAttachmentError])
 
   useEffect(() => {
     form.setFieldsValue({
@@ -265,12 +278,6 @@ const StandardForm = () => {
   const handleAddressObj = (e, type) => {
     let result;
     switch (type) {
-      case "address1":
-      case "address2":
-      case "address3":
-      case "address4":
-        result = e.target.value;
-        break;
       case "premiseAddress1":
       case "premiseAddress2":
       case "premiseAddress3":
@@ -1176,6 +1183,13 @@ const StandardForm = () => {
     form.validateFields()
     .then((values) => {
       handleMandatory(setTabPagesSectionCAI, listDataAttachment);
+
+      if (!listDataAttachment.length) {
+        setValuePageSectionCAI("Attachment");
+        setIsCAIAttachmentError(true);
+        return;
+      }
+
       const body = {
         registrationNumber: caiObj?.accountRegistrationNumber || "",
       };
@@ -1213,16 +1227,30 @@ const StandardForm = () => {
     .catch((error) => {
       console.error("Validation failed:", error);
       handleMandatory(setTabPagesSectionCAI, listDataAttachment, error.errorFields);
+
+      // Handle scroll to the first field that failed
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstErrorFieldName = error.errorFields[0].name;
+        
+        form.scrollToField(firstErrorFieldName, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
     });
   }
 
   const FunctionCheckValidateAddress = () => {
     form
       .validateFields([
-        `businessPurpose1`,
-        `businessPurpose2`,
-        `businessPurpose3`,
-        `businessPurpose4`,
+        "address1",
+        "businessPurpose1",
+        "address2",
+        "businessPurpose2",
+        "businessPurpose3",
+        "address3",
+        "businessPurpose4",
+        "address4",
       ])
       .then((values) => {
         next();
@@ -1230,6 +1258,16 @@ const StandardForm = () => {
       })
       .catch((error) => {
         console.error("Validation failed:", error);
+
+        // Handle scroll to the first field that failed
+        if (error.errorFields && error.errorFields.length > 0) {
+          const firstErrorFieldName = error.errorFields[0].name;
+          
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       });
   }
 
@@ -1638,7 +1676,16 @@ const StandardForm = () => {
       })
       .catch((error) => {
         console.error("Validation failed:", error);
-        // Handle the rejected result here
+
+        // Handle scroll to the first field that failed
+        if (error.errorFields && error.errorFields.length > 0) {
+          const firstErrorFieldName = error.errorFields[0].name;
+          
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       });
   };
 
