@@ -436,9 +436,8 @@ export default function InfoInvoiceRelation({
                 required: true,
               },
             ]}
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format("DD-MM-YYYY") : null}
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, "DD-MM-YYYY") : null
+              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
             })}
             className="no-margin-form"
           >
@@ -450,9 +449,8 @@ export default function InfoInvoiceRelation({
             name={"endDate"}
             label={"End Date"}
             className="no-margin-form"
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format("DD-MM-YYYY") : null}
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, "DD-MM-YYYY") : null
+              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
             })}
           >
             <DateComponent />

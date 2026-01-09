@@ -77,18 +77,6 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
     setPage(1);
   };
 
-  const handleFirstQuery = () => {
-    const queries = formQuery.getFieldValue("query");
-    if (queries && queries.length > 0) {
-      formQuery.setFieldsValue({
-        query: queries.map((item, index) => ({
-          ...item,
-          condition: index === 0 ? 1311 : item.condition,
-        })),
-      });
-    }
-  };
-
   /**
    * Handle entering or exiting approval mode
    * When entering: set listType = "approval"
@@ -136,120 +124,31 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
           <NotFound type={"unauthorized"} />
          : 
         <BaseContainer header={"RELATIONSHIP LIST"}>
-            <>
-              {!approvalMode ? (
-                <div className="w-full flex justify-between mb-[30px]">
-                  <ButtonComponent
-                    icon={
-                      <FilterOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 20,
-                        }}
-                      />
-                    }
-                    type="submit"
-                    onClick={handleOpenFilter}
-                  >
-                    Filters
-                  </ButtonComponent>
-
-                  <div className="flex gap-3">
-                    <ButtonComponent
-                      type={"submit"}
-                      onClick={handleDownload}
-                      icon={
-                        <DownloadOutlined
-                          style={{
-                            color: "#fff",
-                            fontSize: 20,
-                          }}
-                        />
-                      }
-                      style={{
-                        backgroundColor: "#0075bf",
-                        color: "#fff",
-                        borderColor: "#0075bf",
-                        border: "1px solid #0075bf",
-                        borderRadius: "5px",
-                        height: "48px"
-                      }}
-                    >
-                      Download List
-                    </ButtonComponent>
-                    <ButtonComponent
-                      type={"submit"}
-                      onClick={() => handleIsApproval(true)}
-                      icon={
-                        <CheckOutlined
-                          style={{
-                            color: "#fff",
-                            fontSize: 20,
-                          }}
-                        />
-                      }
-                      style={{
-                        backgroundColor: "#0075bf",
-                        color: "#fff",
-                        borderColor: "#0075bf",
-                        border: "1px solid #0075bf",
-                        borderRadius: "5px",
-                        height: "48px"
-                      }}
-                    >
-                      Approval
-                    </ButtonComponent>
-
-                    <NavLink
-                      to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP}
-                      state={{ idAccount: id, idCustomer: idCustomer, type: type }}
-                    >
-                      <ButtonComponent
-                        type={"submit"}
-                        icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                      >
-                        Create
-                      </ButtonComponent>
-                    </NavLink>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full flex justify-end mb-[30px]">
-                  <ButtonComponent
-                    type="default"
-                    onClick={() => handleIsApproval(false)}
-                  >
-                    Cancel Approval
-                  </ButtonComponent>
-                </div>
-              )}
-
-              <div className={"w-full mt-5"}>
-                <RelationshipTable
-                  idAccount={id}
-                  page={page}
-                  setPage={setPage}
-                  pageSize={pageSize}
-                  setPageSize={setPageSize}
-                  searchedColumn={searchedColumn}
-                  setSearchedColumn={setSearchedColumn}
-                  searchText={searchText}
-                  setSearchText={setSearchText}
-                  sort={sort}
-                  setSort={setSort}
-                  search={search}
-                  setSearch={setSearch}
-                  approvalMode={approvalMode}
-                  handleIsApproval={handleIsApproval}
-                  type={type}
-                  idCustomer={idCustomer}
-                  inputFields={inputFields}
-                  tempInputFields={tempInputFields}
-                  listType={listType}
-                  isAccessGranted={isAccessGranted}
-                />
-              </div>
-            </>
+          <RelationshipTable
+            idAccount={id}
+            page={page}
+            setPage={setPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            searchedColumn={searchedColumn}
+            setSearchedColumn={setSearchedColumn}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            sort={sort}
+            setSort={setSort}
+            search={search}
+            setSearch={setSearch}
+            approvalMode={approvalMode}
+            handleIsApproval={handleIsApproval}
+            type={type}
+            idCustomer={idCustomer}
+            inputFields={inputFields}
+            tempInputFields={tempInputFields}
+            listType={listType}
+            isAccessGranted={isAccessGranted}
+            handleDownload={handleDownload}
+            handleOpenFilter={handleOpenFilter}
+          />
         </BaseContainer>
       }
 
@@ -273,6 +172,7 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
             maxFilters={5}
             loading={loading}
             formId="relationshipFilterForm"
+            accountId={id}
           />
         </Form>
       </ModalCustom>
