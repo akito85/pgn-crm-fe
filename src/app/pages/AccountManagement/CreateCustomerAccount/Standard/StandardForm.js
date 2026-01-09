@@ -1274,10 +1274,14 @@ const StandardForm = () => {
   const FunctionCheckValidateContact = () => {
     form
       .validateFields([
-        `contactAddress1`,
-        `contactAddress2`,
-        `contactAddress3`,
-        `contactAddress4`,
+        "contact1",
+        "contactAddress1",
+        "contact2",
+        "contactAddress2",
+        "contact3",
+        "contactAddress3",
+        "contact4",
+        "contactAddress4",
       ])
       .then((values) => {
         next();
@@ -1285,6 +1289,16 @@ const StandardForm = () => {
       })
       .catch((error) => {
         console.error("Validation failed:", error);
+
+        // Handle scroll to the first field that failed
+        if (error.errorFields && error.errorFields.length > 0) {
+          const firstErrorFieldName = error.errorFields[0].name;
+          
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       });
   }
 
