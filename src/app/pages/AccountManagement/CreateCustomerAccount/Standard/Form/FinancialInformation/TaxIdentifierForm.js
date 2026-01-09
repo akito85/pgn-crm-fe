@@ -137,6 +137,10 @@ const TaxIdentifierForm = ({
     }
   }, [tiObj]);
 
+  useEffect(() => {
+    form.setFieldValue("relatedAccountId", accountNumber)
+  }, [accountNumber])
+
   // Search Column Table
   const getColumnSearchProps = (dataIndex, type) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -364,7 +368,7 @@ const TaxIdentifierForm = ({
             )
           }
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_taxIdentifierType &&
               data_taxIdentifierType?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -391,6 +395,7 @@ const TaxIdentifierForm = ({
               (e.target.value = e.target.value.replace(/\D/g, ""))
             }
             disabled={!tiObj?.taxIdentifierType ? true : false}
+            isPassingId
           />
         </Form.Item>
         <Form.Item
@@ -407,6 +412,7 @@ const TaxIdentifierForm = ({
           <InputComponent
             disabled={!tiObj?.taxIdentifierNumber ? true : false}
             onInput={onInputUpperCase}
+            isPassingId
           />
         </Form.Item>
 
@@ -424,6 +430,7 @@ const TaxIdentifierForm = ({
           >
             <SelectComponent
               disabled={!tiObj?.taxIdentifierName ? true : false}
+              isPassingId
             >
               {dataAddress &&
                 dataAddress?.map((data) => (
@@ -446,46 +453,46 @@ const TaxIdentifierForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item label={"Account Number"} name={"relatedAccountId"}>
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Account Number"}>  
+          <Input.Group compact>
+            <Form.Item name={"relatedAccountId"} noStyle>
               <InputComponent
-                value={accountNumber}
                 onChange={(e) => {
-                  handleChangesReset(e.target.value);
+                  handleChangesReset(e.target.value)
                 }}
+                isPassingId
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setModalChoose(true);
-                }}
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setModalChoose(true);
+              }}
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
         <Form.Item label={"Customer Name"} name={"customerNameTI"}>
-          <InputComponent disabled />
+          <InputComponent disabled isPassingId />
         </Form.Item>
         <Form.Item label={"Account Name"} name={"accountNameTI"}>
-          <InputComponent disabled />
+          <InputComponent disabled isPassingId />
         </Form.Item>
         <Form.Item label={"Related Account Tax Identifier Type"} name={"ratit"}>
-          <InputComponent disabled />
+          <InputComponent disabled isPassingId />
         </Form.Item>
         <Form.Item
           label={"Related Account Tax Identifier Number"}
           name={"ratin"}
         >
-          <InputComponent disabled />
+          <InputComponent disabled isPassingId />
         </Form.Item>
         <Form.Item
           label={"Related Account Tax Identifier Name"}
           name={"ratin2"}
         >
-          <InputComponent disabled />
+          <InputComponent disabled isPassingId />
         </Form.Item>
 
         <div className="col-span-3">
@@ -493,7 +500,7 @@ const TaxIdentifierForm = ({
             label={"Related Account Tax Identifier Address"}
             name={"ratia"}
           >
-            <InputComponent disabled />
+            <InputComponent disabled isPassingId />
           </Form.Item>
         </div>
         <div className="col-span-3">
@@ -507,7 +514,7 @@ const TaxIdentifierForm = ({
               },
             ]}
           >
-            <DateComponent />
+            <DateComponent isPassingId />
           </Form.Item>
         </div>
         <div className="col-span-3">
@@ -520,6 +527,7 @@ const TaxIdentifierForm = ({
               type="textarea"
               value={descriptionTI}
               onChange={(e) => setDescriptionTI(e.target.value)}
+              isPassingId
             />
           </Form.Item>
         </div>

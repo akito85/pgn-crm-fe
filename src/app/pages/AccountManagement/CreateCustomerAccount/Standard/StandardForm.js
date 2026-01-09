@@ -78,6 +78,8 @@ const StandardForm = () => {
   const [keyModal, setKeyModal] = useState();
   // Financial Information
   const [fiObj, setFiObj] = useState({});
+  const [fiCurrent, setFiCurrent] = useState(0);
+  const [fiErrorFieldName, setFiErrorFieldName] = useState(null);
   // Tax Identifier Information
   const [tiObj, setTiObj] = useState({});
   // Withholding Tax Information
@@ -1096,6 +1098,10 @@ const StandardForm = () => {
           dataAddress={addressTable}
           form={form}
           setTiObj={setTiObj}
+          current={fiCurrent}
+          setCurrent={setFiCurrent}
+          errorFieldName={fiErrorFieldName}
+          setErrorFieldName={setFiErrorFieldName}
         />
       ),
     },
@@ -1677,11 +1683,52 @@ const StandardForm = () => {
         setModalConfirm(true);
       }
     })
-    .catch((errorInfo) => {
+    .catch((error) => {
       // Handle validation errors if needed
-      console.log(errorInfo);
+      console.log(error);
     });
   };
+
+  const handleSaveFailed = (error) => {
+    if (error.errorFields && error.errorFields.length > 0) {
+      
+      const firstErrorFieldName = error.errorFields[0].name[0];
+
+      switch (firstErrorFieldName) {
+        case "paymentChannelType":
+        case "generateVA":
+          setFiCurrent(0);
+          break;
+        
+        case "taxIdentifierType":
+        case "taxIdentifierNumber":
+        case "taxIdentifierName":
+        case "taxAddress":
+        case "relatedAccountId":
+        case "customerNameTI":
+        case "accountNameTI":
+        case "ratit":
+        case "ratin":
+        case "ratin2":
+        case "ratia":
+        case "startDateTI":
+        case "descriptionTI":
+          setFiCurrent(1);
+          break;
+
+        case "wapuFlag":
+        case "startDateWT":
+        case "descriptionWT":
+          setFiCurrent(2);
+          break;
+        
+        case "receivableAccount":
+        case "revenueAccount":
+          setFiCurrent(3)
+      }
+      setFiErrorFieldName(firstErrorFieldName);
+    }
+  }
 
   const FunctionCheckCustomer = () => {
     form.validateFields()
@@ -1924,7 +1971,7 @@ const StandardForm = () => {
           </BaseContainer>
         ) : null}
 
-        <Form layout="vertical" form={form} onFinish={handleSave}>
+        <Form layout="vertical" form={form} onFinish={handleSave} onFinishFailed={handleSaveFailed} >
           <BaseContainer header={"Account - Standard Information"}>
             <div className="flex flex-row gap-x-6 justify-center">
               <span className="mt-[10px]">
