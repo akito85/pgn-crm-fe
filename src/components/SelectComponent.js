@@ -21,6 +21,8 @@ const SelectComponent = ({
   onDeselect = () => { },
   onClear = () => { },
   onPopupScroll = () => { },
+  isPassingId = false,
+  id,
   className, // Tambahkan ini
   style: customStyle, // Tambahkan ini
 }) => {
@@ -44,7 +46,7 @@ const SelectComponent = ({
   };
 
   return (
-    <div className={wrapper}>
+    <div className={wrapper} id={isPassingId ? id : undefined}>
       <InputLabel text={label} mandatory={mandatory}></InputLabel>
       <Select
         onPopupScroll={onPopupScroll}

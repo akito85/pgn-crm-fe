@@ -12,6 +12,8 @@ const UtilsTreeSelect = (props) => {
     treeCheckable = false,
     treeCheckStrictly = false,
     filterTreeNode = () => {},
+    isPassingId = false,
+    id,
   } = props;
   const wrapper = "flex flex-col";
   const style = {
@@ -21,7 +23,7 @@ const UtilsTreeSelect = (props) => {
   };
 
   return (
-    <div className={wrapper}>
+    <div className={wrapper} id={isPassingId ? id : undefined}>
       <TreeSelect
         showSearch
         treeData={treeData}

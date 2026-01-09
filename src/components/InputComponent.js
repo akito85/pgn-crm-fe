@@ -27,6 +27,8 @@ const InputComponent = ({
   numericFormatType,
   ref,
   onPressEnter = () => {},
+  isPassingId = false, // Declaratively pass the ID prop to the component's root element
+  id,
 }) => {
   const style = {
     borderRadius: "6px",
@@ -61,7 +63,7 @@ const InputComponent = ({
   const wrapper = "flex flex-col w-auto";
 
   return (
-    <div className={wrapper}>
+    <div className={wrapper} id={isPassingId ? id : false}>
       {!group && <InputLabel text={label} mandatory={mandatory}></InputLabel>}
       {type === "textarea" ? (
         <>
