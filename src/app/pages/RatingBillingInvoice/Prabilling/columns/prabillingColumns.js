@@ -27,7 +27,7 @@ export const getAllTabColumns = (
     dataIndex: "initCode",
     sorter: true,
     isClassification: true,
-    width: 80,
+    width: 65,
     filteredValue: [search?.initCode] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -55,7 +55,7 @@ export const getAllTabColumns = (
     dataIndex: "billingCycle",
     isClassification: true,
     sorter: true,
-    width: 85,
+    width: 65,
     filteredValue: [search?.billingCycle] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -83,7 +83,7 @@ export const getAllTabColumns = (
     dataIndex: "billPeriod",
     isClassification: true,
     sorter: true,
-    width: 85,
+    width: 70,
     filteredValue: [search?.billPeriod] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -111,7 +111,7 @@ export const getAllTabColumns = (
     dataIndex: "sor",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 80,
     filteredValue: [search?.sor] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -140,7 +140,7 @@ export const getAllTabColumns = (
     dataIndex: "costCenter",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 65,
     filteredValue: [search?.costCenter] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -169,7 +169,7 @@ export const getAllTabColumns = (
     dataIndex: "meterReadingCode",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 90,
     filteredValue: [search?.meterReadingCode] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -198,7 +198,7 @@ export const getAllTabColumns = (
     dataIndex: "customerSegment",
     isClassification: true,
     sorter: true,
-    width: 60,
+    width: 80,
     filteredValue: [search?.customerSegment] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(

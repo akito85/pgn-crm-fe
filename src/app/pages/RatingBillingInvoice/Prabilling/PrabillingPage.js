@@ -398,7 +398,7 @@ const PrabillingPage = () => {
             dataSource={dataSourceWithKeys}
             columns={processedColumns}
             totalData={currentPagination?.totalElements || 0}
-            tableScrolled={{ x: valueTab === "All" ? 2500 : 2500, y: 525 }}
+            tableScrolled={{ x: valueTab === "All" ? 3000 : 2500, y: 525 }}
             onSort={onSort}
             showExport={false}
             columnDefinitions={columnDefinitions}
