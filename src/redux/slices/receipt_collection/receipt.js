@@ -763,6 +763,32 @@ export const deleteReceipt = createAsyncThunk(
   }
 );
 
+export const holdReleaseReceiptBulk = createAsyncThunk(
+  "HOLD_RELEASE_RECEIPT_BULK",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/hold-release";
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: response?.message || "Action processed successfully",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "HOLD_RELEASE_RECEIPT_BULK",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 const receiptSlice = createSlice({
   name: "receipt",
   initialState,
@@ -1158,6 +1184,18 @@ const receiptSlice = createSlice({
     [getReceiptCustomerList.rejected]: (state, action) => {
       state.data_customer_list = action.payload;
       state.loading = false;
+    },
+    // Hold/Release Bulk
+    [holdReleaseReceiptBulk.pending]: (state) => {
+      state.loading = true;
+    },
+    [holdReleaseReceiptBulk.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [holdReleaseReceiptBulk.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
     },
   },
 });
