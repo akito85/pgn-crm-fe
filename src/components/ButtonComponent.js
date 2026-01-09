@@ -16,9 +16,8 @@ const ButtonComponent = ({
   className,
   fullButton = false,
   isPrimary = false,
-  loading = false, // Backward compatibility
+  loading = false,
 }) => {
-  // Gabungkan isLoading dan loading untuk backward compatibility
   const isButtonLoading = isLoading || loading;
   
   return (
@@ -26,11 +25,11 @@ const ButtonComponent = ({
       <Button
         form={form || undefined}
         onClick={onClick}
-        loading={isButtonLoading} // ← FIX: Gunakan satu variable saja
+        loading={isButtonLoading}
         icon={icon ? icon : null}
         className={`flex w-full justify-center ${className}`}
         type={type}
-        disabled={disabled || isButtonLoading} // ← FIX: Auto disable saat loading
+        disabled={disabled || isButtonLoading}
         htmlType={htmlType}
         size={size || "small"}
         style={{

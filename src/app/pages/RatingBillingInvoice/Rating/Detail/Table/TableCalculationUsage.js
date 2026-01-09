@@ -216,7 +216,12 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
-    render: (text) => (text !== null && text !== undefined ? text : ""),
+    render: (text) => {
+      if (text === 0 || text === "0" || text === null || text === undefined || text === "") {
+        return "Unlimited";
+      }
+      return text;
+    },
   },
   {
     key: "priceCode",

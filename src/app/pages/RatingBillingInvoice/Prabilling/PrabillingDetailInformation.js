@@ -512,6 +512,13 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                   <DetailText label={"Specific Customer Account"} className="">
                     {detail.accounts}
                   </DetailText>
+                  <DetailText label={"Completion Date"}>
+                    {prabillData?.updateDtm
+                      ? moment(prabillData.updateDtm).format(
+                          "DD MMM YYYY HH:mm:ss"
+                        )
+                      : ""}
+                  </DetailText>
                 </React.Fragment>
               ))}
             <DetailText label={"Remark"} className="col-span-5">
@@ -584,9 +591,9 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
               {prabillData?.createdBy || ""}
             </DetailText>
             <DetailText label={"Updated Date"}>
-              {prabillData?.updateDtm
+              {/* {prabillData?.updateDtm
                 ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
-                : ""}
+                : ""} */}
             </DetailText>
             <DetailText label={"Updated By"}>
               {prabillData?.updateBy || ""}

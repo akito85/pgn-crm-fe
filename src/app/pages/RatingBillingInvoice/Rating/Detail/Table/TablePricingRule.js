@@ -62,6 +62,7 @@ export const columnsPricingRule = (
       handleSearch
     ),
     render: (text, row, index) => {
+      const displayValue = (text === 0 || text === "0" || text === null || text === undefined) ? "Unlimited" : text;
       return searchedColumn === "max" ? (
         <Highlighter
           highlightStyle={{
@@ -73,7 +74,7 @@ export const columnsPricingRule = (
           textToHighlight={text ? text.toString() : ""}
         />
       ) : (
-        text || ""
+        displayValue || ""
       );
     },
   },
