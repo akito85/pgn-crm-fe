@@ -17,19 +17,12 @@ const ModalUpdateUsage = ({
     uploadType = false,
     handleSave = () => { },
     handleBack = () => { },
-    
-    // form
 }) => {
     const { data_asset_type, data_account_number, data_source, loading } = useSelector((state) => state.monitoring_usage);
     const dispatch = useDispatch();
     const [selectedAccount, setSelectedAccount] = useState(null);
-    const [period, setPeriod] = useState("");
-    const [hour, setHour] = useState("");
-    const [date, setDate] = useState("");
-    const [measDate, setMeasDate] = useState("");
     const [form] = Form.useForm();
 
-    // use effect
     useEffect(() => {
         if (isOpen === true) {
             dispatch(getAssetType())
@@ -40,29 +33,62 @@ const ModalUpdateUsage = ({
 
     useEffect(() => {
         if (record) {
+            // Parse date dengan format yang sesuai
+            const parseDate = (dateValue) => {
+                if (!dateValue || !hasValue(dateValue)) return null;
+                if (moment.isMoment(dateValue)) return dateValue;
+                const parsed = moment(dateValue, [
+                    dateFormatting.dateFormal,
+                    dateFormatting.date,
+                    dateFormatting.dateTime,
+                    moment.ISO_8601
+                ], true);
+                return parsed.isValid() ? parsed : null;
+            };
+
+            const parseTime = (timeValue) => {
+                if (!timeValue || !hasValue(timeValue)) return null;
+                if (moment.isMoment(timeValue)) return timeValue;
+                const parsed = moment(timeValue, ['HH:mm', 'HH:mm:ss'], true);
+                return parsed.isValid() ? parsed : null;
+            };
+
+            // Parse numeric value - handle both number and formatted string
+            const parseNumeric = (value) => {
+                if (value === null || value === undefined) return null;
+                if (typeof value === 'number') return value;
+                if (typeof value === 'string') {
+                    // Remove thousand separator
+                    const cleaned = value.replace(/,/g, '');
+                    const parsed = parseFloat(cleaned);
+                    return isNaN(parsed) ? null : parsed;
+                }
+                return null;
+            };
+
             form.setFieldsValue({
                 accountNumber: record?.accountNumber,
                 accountName: record?.accountName,
                 costCenter: record?.costCenter,
-                assetSerialNum: record?.assetSerialNumber,
+                assetSerialNum: record?.assetSerialNumber || record?.assetSerialNum,
                 assetType: record?.assetType,
-                fdate: hasValue(record?.fdate) && moment(record?.fdate),
-                fhour: hasValue(record?.fhour) && moment(record?.fhour, 'HH:mm'),
-                measDate: hasValue(record?.measDate) && moment(record?.measDate),
-                streamId: record?.streamId,
-                temperature: record?.temperature,
-                pressure: record?.pressure,
-                correctionFactor: record?.correctionFactor,
-                calorie: record?.calorie,
-                beginStand: record?.beginStand,
-                endStand: record?.endStand,
-                volMeasured27: record?.volMeasured27,
-                volMeasured60: record?.volMeasured60,
-                engMeasured: record?.engMeasured,
-                ghv: record?.ghv,
-                volMscf: record?.volMscf,
-                uncorrectedValue: record?.uncorrectedValue,
-                sourceRowId: record?.sourceRowId,
+                fdate: parseDate(record?.fdate),
+                fhour: parseTime(record?.fhour),
+                measDate: parseDate(record?.measDate),
+                streamId: parseNumeric(record?.streamId),
+                temperature: parseNumeric(record?.temperature),
+                pressure: parseNumeric(record?.pressure),
+                correctionFactor: parseNumeric(record?.correctionFactor),
+                calorie: parseNumeric(record?.calorie),
+                beginStand: parseNumeric(record?.beginStand),
+                endStand: parseNumeric(record?.endStand),
+                volMeasured27: parseNumeric(record?.volMeasured27),
+                volMeasured60: parseNumeric(record?.volMeasured60),
+                engMeasured: parseNumeric(record?.engMeasured),
+                ghv: parseNumeric(record?.ghv),
+                volMscf: parseNumeric(record?.volMscf),
+                uncorrectedValue: parseNumeric(record?.uncorrectedValue),
+                sourceRowId: parseNumeric(record?.sourceRowId),
                 sourceName: record?.sourceName,
                 source: record?.source,
                 description: record?.description
@@ -166,7 +192,6 @@ const ModalUpdateUsage = ({
                 <DatePicker
                   className="w-full"
                   format={dateFormatting.date}
-                  onChange={(date, dateString) => setDate(dateString)}
                 />
               </Form.Item>
               <Form.Item label={"Hour"} name={"fhour"}>
@@ -174,7 +199,6 @@ const ModalUpdateUsage = ({
                   showNow={false}
                   className="w-full"
                   format={"HH:mm"}
-                  onChange={(time, timeString) => setHour(timeString)}
                 />
               </Form.Item>
               <Form.Item
@@ -190,7 +214,6 @@ const ModalUpdateUsage = ({
                 <DatePicker
                   className="w-full"
                   format={dateFormatting.dateTime}
-                  onChange={(date, dateString) => setMeasDate(dateString)}
                   showTime
                 />
               </Form.Item>
