@@ -33,7 +33,6 @@ const ModalUpdateUsage = ({
 
     useEffect(() => {
         if (record) {
-            // Parse date dengan format yang sesuai
             const parseDate = (dateValue) => {
                 if (!dateValue || !hasValue(dateValue)) return null;
                 if (moment.isMoment(dateValue)) return dateValue;

@@ -268,8 +268,6 @@ const DetailMonitoringUsage = () => {
       description: formValue?.description || null,
     };
 
-    console.log('Request Body:', requestBody); // Debug log
-
     const resultAction = await dispatch(
       updateSingleUsage({
         recordId: recordId,
