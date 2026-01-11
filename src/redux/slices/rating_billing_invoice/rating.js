@@ -367,12 +367,13 @@ export const getListRatingNonGasPaginate = createAsyncThunk(
 // download feat
 export const downloadRatingGas = createAsyncThunk(
   "DOWNLOAD_LIST",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, billPeriodId }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rating/download-filter-gas?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/rating/download-filter-gas?billPeriodId=${billPeriodId}&searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      
       const response = await ratingBillingHttpService.downloadData(url);
       return response?.data;
     } catch (error) {

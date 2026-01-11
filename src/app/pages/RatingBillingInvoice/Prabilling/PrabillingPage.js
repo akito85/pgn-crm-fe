@@ -12,6 +12,7 @@ import {
   getListPrabillingSummary,
   getListBillingPeriodForPrabilling,
   resetSummaryData,
+  resetAllTabData,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
@@ -81,11 +82,11 @@ const PrabillingPage = () => {
       );
 
       if (currentPeriod) {
-        setSelectedBillingPeriod(currentPeriod.name);
+        setSelectedBillingPeriod(currentPeriod.id);
       } else {
         const latestPeriod =
           list_period_summary[list_period_summary.length - 1];
-        setSelectedBillingPeriod(latestPeriod.name);
+        setSelectedBillingPeriod(latestPeriod.id);
       }
     }
   }, [list_period_summary, selectedBillingPeriod]);
@@ -112,30 +113,45 @@ const PrabillingPage = () => {
 
   // Fetch data based on active tab
   useEffect(() => {
-    if (valueTab === "All") {
+    if (valueTab === "All" && selectedBillingPeriod) {
       dispatch(
         getListPrabillingInitPopulate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
           pageSize: 100,
           sort,
+          billPeriodId: selectedBillingPeriod,
           isLoadMore: false,
         })
       );
+      setPage(1);
     } else if (valueTab === "Summary" && selectedBillingPeriod) {
-      dispatch(
-        getListPrabillingSummary({
-          billPeriod: selectedBillingPeriod,
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: 100,
-          sort,
-          isLoadMore: false,
-        })
+      // Untuk Summary tab, convert id ke name
+      const selectedPeriod = list_period_summary.find(
+        (item) => item.id === selectedBillingPeriod
       );
+      if (selectedPeriod) {
+        dispatch(
+          getListPrabillingSummary({
+            billPeriod: selectedPeriod.name,
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: 100,
+            sort,
+            isLoadMore: false,
+          })
+        );
+      }
+      setPage(1);
     }
-    setPage(1);
-  }, [dispatch, search, sort, valueTab, selectedBillingPeriod]);
+  }, [
+    dispatch,
+    search,
+    sort,
+    valueTab,
+    selectedBillingPeriod,
+    list_period_summary,
+  ]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -158,7 +174,7 @@ const PrabillingPage = () => {
       valueTab === "All" ? prabilling_pagination : summary_pagination;
     const totalPages = currentPagination?.totalPages || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPages && selectedBillingPeriod) {
       if (valueTab === "All") {
         await dispatch(
           getListPrabillingInitPopulate({
@@ -166,49 +182,63 @@ const PrabillingPage = () => {
             page: nextPage,
             pageSize: loadMoreSize,
             sort,
+            billPeriodId: selectedBillingPeriod,
             isLoadMore: true,
           })
         );
-      } else if (selectedBillingPeriod) {
-        await dispatch(
-          getListPrabillingSummary({
-            billPeriod: selectedBillingPeriod,
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: nextPage,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: true,
-          })
+      } else {
+        const selectedPeriod = list_period_summary.find(
+          (item) => item.id === selectedBillingPeriod
         );
+        if (selectedPeriod) {
+          await dispatch(
+            getListPrabillingSummary({
+              billPeriod: selectedPeriod.name,
+              search: encodeURIComponent(JSON.stringify(search)),
+              page: nextPage,
+              pageSize: loadMoreSize,
+              sort,
+              isLoadMore: true,
+            })
+          );
+        }
       }
       setPage(nextPage);
     }
   };
 
   const handleRefresh = () => {
-    if (valueTab === "All") {
-      dispatch(
-        getListPrabillingInitPopulate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: page * loadMoreSize || 100,
-          sort,
-          isLoadMore: false,
-        })
-      );
-    } else if (selectedBillingPeriod) {
-      dispatch(
-        getListPrabillingSummary({
-          billPeriod: selectedBillingPeriod,
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: page * loadMoreSize || 100,
-          sort,
-          isLoadMore: false,
-        })
-      );
+    if (selectedBillingPeriod) {
+      if (valueTab === "All") {
+        dispatch(
+          getListPrabillingInitPopulate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: page * loadMoreSize || 100,
+            sort,
+            billPeriodId: selectedBillingPeriod,
+            isLoadMore: false,
+          })
+        );
+      } else {
+        const selectedPeriod = list_period_summary.find(
+          (item) => item.id === selectedBillingPeriod
+        );
+        if (selectedPeriod) {
+          dispatch(
+            getListPrabillingSummary({
+              billPeriod: selectedPeriod.name,
+              search: encodeURIComponent(JSON.stringify(search)),
+              page: 1,
+              pageSize: page * loadMoreSize || 100,
+              sort,
+              isLoadMore: false,
+            })
+          );
+        }
+      }
+      setPage(1);
     }
-    setPage(1);
   };
 
   const handleDetail = (record, rowKey) => {
@@ -287,24 +317,56 @@ const PrabillingPage = () => {
     setSort(dataSort);
   };
 
+  const resetToCurrentPeriod = () => {
+    if (list_period_summary && list_period_summary.length > 0) {
+      const now = new Date();
+      const currentMonth = now.toLocaleString("en-US", { month: "short" });
+      const currentYear = now.getFullYear();
+      const currentPeriodName = `${currentMonth} ${currentYear}`;
+
+      const currentPeriod = list_period_summary.find(
+        (item) => item.name === currentPeriodName
+      );
+
+      if (currentPeriod) {
+        setSelectedBillingPeriod(currentPeriod.id);
+      } else {
+        const latestPeriod =
+          list_period_summary[list_period_summary.length - 1];
+        setSelectedBillingPeriod(latestPeriod.id);
+      }
+    }
+  };
+
   const onChangeTab = (key) => {
+    if (valueTab === "All") {
+      dispatch(resetAllTabData());
+    } else if (valueTab === "Summary") {
+      dispatch(resetSummaryData());
+    }
+
     setValueTab(key);
     setSearch({});
     setSearchText("");
     setSearchedColumn("");
-    setSort(""); // FIX: Reset sort juga
+    setSort("");
     setPage(1);
-    // Close detail when changing tabs
     setPageDetail(false);
     setActiveRowKey(null);
     setSelectedRecord(null);
+    resetToCurrentPeriod();
   };
 
   const handleBillingPeriodChange = (value) => {
-    dispatch(resetSummaryData());
+    if (valueTab === "Summary") {
+      dispatch(resetSummaryData());
+    } else if (valueTab === "All") {
+      dispatch(resetAllTabData());
+    }
+
     setSelectedBillingPeriod(value);
     setPage(1);
-    setSort(""); 
+    setSort("");
     setSearch({});
     setSearchText("");
     setSearchedColumn("");
@@ -339,7 +401,6 @@ const PrabillingPage = () => {
     })
   );
 
-  // FIX: baseColumns harus re-compute ketika valueTab berubah
   const baseColumns = useMemo(() => {
     return valueTab === "All" ? allTabColumns : summaryTabColumns;
   }, [valueTab, allTabColumns, summaryTabColumns]);
@@ -396,31 +457,29 @@ const PrabillingPage = () => {
         />
 
         <div className="my-0">
-          <TableRBI
-            key={`${valueTab}-${selectedBillingPeriod}`}
-            idTable="prabilling-table"
-            dataSource={dataSourceWithKeys}
-            columns={processedColumns}
-            totalData={currentPagination?.totalElements || 0}
-            tableScrolled={{ x: valueTab === "All" ? 3000 : 2000, y: 525 }}
-            onSort={onSort}
-            showExport={false}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
-            usePagination={false}
-            useInfiniteScroll={true}
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            showRefresh={true}
-            onRefresh={handleRefresh}
-            loadMoreThreshold={20}
-            enableRowClick={valueTab === "Summary"}
-            selectedRowKey={activeRowKey}
-            onRowClick={handleDetail}
-            customHeaderLeft={
-              valueTab === "Summary" ? (
+          {valueTab === "All" && (
+            <TableRBI
+              key={`all-${selectedBillingPeriod}`}
+              idTable="prabilling-table-all"
+              dataSource={dataSourceWithKeys}
+              columns={processedColumns}
+              totalData={currentPagination?.totalElements || 0}
+              tableScrolled={{ x: 3000, y: 525 }}
+              onSort={onSort}
+              showExport={false}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              loadMoreThreshold={20}
+              enableRowClick={false}
+              customHeaderLeft={
                 <div className="flex items-center gap-1">
                   <SelectComponent
                     value={selectedBillingPeriod}
@@ -429,13 +488,54 @@ const PrabillingPage = () => {
                     style={{ width: "120px" }}
                     options={(list_period_summary || []).map((item) => ({
                       label: item?.name,
-                      value: item?.name,
+                      value: item?.id,
                     }))}
                   />
                 </div>
-              ) : null
-            }
-          />
+              }
+            />
+          )}
+
+          {valueTab === "Summary" && (
+            <TableRBI
+              key={`summary-${selectedBillingPeriod}`}
+              idTable="prabilling-table-summary"
+              dataSource={dataSourceWithKeys}
+              columns={processedColumns}
+              totalData={currentPagination?.totalElements || 0}
+              tableScrolled={{ x: 2000, y: 525 }}
+              onSort={onSort}
+              showExport={false}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              loadMoreThreshold={20}
+              enableRowClick={true}
+              selectedRowKey={activeRowKey}
+              onRowClick={handleDetail}
+              customHeaderLeft={
+                <div className="flex items-center gap-1">
+                  <SelectComponent
+                    value={selectedBillingPeriod}
+                    onChange={handleBillingPeriodChange}
+                    placeholder="Select Period"
+                    style={{ width: "120px" }}
+                    options={(list_period_summary || []).map((item) => ({
+                      label: item?.name,
+                      value: item?.id,
+                    }))}
+                  />
+                </div>
+              }
+            />
+          )}
         </div>
       </CardContainer>
 
@@ -447,7 +547,10 @@ const PrabillingPage = () => {
           <PrabillingSummaryDetail
             prabillAccId={selectedRecord.prabillAccId}
             customerNumber={selectedRecord.customerNumber}
-            billPeriod={selectedBillingPeriod}
+            billPeriod={
+              list_period_summary.find((p) => p.id === selectedBillingPeriod)
+                ?.name
+            }
             customerName={selectedRecord.customerName}
             accountNumber={selectedRecord.accountNumber}
             onClose={() => {
