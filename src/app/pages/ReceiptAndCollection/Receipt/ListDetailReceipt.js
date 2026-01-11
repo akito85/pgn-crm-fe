@@ -6,7 +6,9 @@ import BaseContainer from "../../../../components/BaseContainer";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import DetailReceipt from "./DetailReceipt";
 import {
+  approveOrRejectHoldReceipt,
   approveOrRejectReceipt,
+  approveOrRejectReleaseReceipt,
   createAllocation,
   getReceiptDetail,
 } from "../../../../redux/slices/receipt_collection/receipt";
@@ -105,8 +107,18 @@ const ListDetailReceipt = () => {
       approvalId: data_detail?.approvalDto?.tAppId,
       action: approveOrReject.toUpperCase(),
     };
+
+    const category = data_detail?.approvalDto?.category;
+
+    if (category === "RECEIPT_HOLD") {
+      dispatch(approveOrRejectHoldReceipt({ body: data }));
+    } else if (category === "RECEIPT_RELEASE") {
+      dispatch(approveOrRejectReleaseReceipt({ body: data }));
+    } else {
+      dispatch(approveOrRejectReceipt({ body: data }));
+    }
+
     setModalConfirm(false);
-    dispatch(approveOrRejectReceipt({ body: data }));
     handleClear();
   };
   const showButtonApproval = data_detail?.approvalDto?.isApprover;
@@ -276,16 +288,16 @@ const ListDetailReceipt = () => {
             {dataAllocation?.filter(
               (item) => hasValue(item?.allocationNumber) === false
             )?.length > 0 && (
-              <div className="flex align-middle gap-5">
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={createAllocationDetail}
-                  disabled={isInsert || balance < 0}
-                >
-                  Submit
-                </ButtonComponent>
-              </div>
-            )}
+                <div className="flex align-middle gap-5">
+                  <ButtonComponent
+                    type={"submit"}
+                    onClick={createAllocationDetail}
+                    disabled={isInsert || balance < 0}
+                  >
+                    Submit
+                  </ButtonComponent>
+                </div>
+              )}
           </div>
         )}
       </div>
@@ -300,11 +312,11 @@ const ListDetailReceipt = () => {
         approveOrReject={approveOrReject}
         menu={"Receipt"}
         named={data_detail?.receiptNumber}
-        // named={
-        //   data_detail_draft?.calendarDetailDto?.id === id
-        //     ? data_detail_draft?.calendarDetailDto?.beginCycle
-        //     : data_detail?.calendarDetailDto?.beginCycle
-        // }
+      // named={
+      //   data_detail_draft?.calendarDetailDto?.id === id
+      //     ? data_detail_draft?.calendarDetailDto?.beginCycle
+      //     : data_detail?.calendarDetailDto?.beginCycle
+      // }
       />
       {/* <ModalApproveOrReject
         key={modalConfirm ? true : false}
