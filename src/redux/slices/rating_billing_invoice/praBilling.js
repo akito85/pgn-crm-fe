@@ -8,7 +8,7 @@ const initialState = {
   loadingCreate: false,
   loading: false,
   loadingModal: false,
-  list_period_summary:[],
+  list_period_summary: [],
   list_sor: [],
   list_account_group: [],
   list_customer_segment: [],
@@ -120,8 +120,10 @@ export const getPrabillSummaryServiceAgreement = createAsyncThunk(
   "GET_PRABILL_SUMMARY_SERVICE_AGREEMENT",
   async ({ id, search, page, pageSize, sort }, thunkAPI) => {
     try {
-      let url = `/v1/dbs/api/prabill/summary/service-agreement/${id}?page=${page - 1}&size=${pageSize}`;
-      
+      let url = `/v1/dbs/api/prabill/summary/service-agreement/${id}?page=${
+        page - 1
+      }&size=${pageSize}`;
+
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
 
@@ -151,14 +153,17 @@ export const getPrabillSummaryServiceAgreement = createAsyncThunk(
 // Get Prabill Summary Usage
 export const getPrabillSummaryUsage = createAsyncThunk(
   "GET_PRABILL_SUMMARY_USAGE",
-  async ({ billPeriod, customerNumber, search, page, pageSize, sort }, thunkAPI) => {
+  async (
+    { billPeriod, customerNumber, search, page, pageSize, sort },
+    thunkAPI
+  ) => {
     try {
       let url = `/v1/dbs/api/prabill/summary/usage?billPeriod=${encodeURIComponent(
         billPeriod
-      )}&customerNumber=${encodeURIComponent(
-        customerNumber
-      )}&page=${page - 1}&size=${pageSize}`;
-      
+      )}&customerNumber=${encodeURIComponent(customerNumber)}&page=${
+        page - 1
+      }&size=${pageSize}`;
+
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
 
@@ -229,15 +234,17 @@ export const getListBillingPeriodForPrabilling = createAsyncThunk(
   }
 );
 
-
 // 3. Tambahkan thunk untuk get summary prabilling
 export const getListPrabillingSummary = createAsyncThunk(
   "GET_LIST_PRABILLING_SUMMARY",
-  async ({ billPeriod, search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
+  async (
+    { billPeriod, search, page, pageSize, sort, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "prabillCustId~asc";
-      
+
       const url = `/v1/dbs/api/prabill/summary?billPeriod=${encodeURIComponent(
         billPeriod
       )}&sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
@@ -643,20 +650,25 @@ export const createPrabilling = createAsyncThunk(
   }
 );
 
-// get prabill list
+//Get list bill period
 export const getListPrabillingInitPopulate = createAsyncThunk(
   "GET_LIST_PRABILLING_INIT_POPULATE",
-  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
+  async (
+    { search, page, pageSize, sort, billPeriodId, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "createdDtm~desc";
-      const url = `/v1/dbs/api/prabill-init-populate/list?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+
+      // UPDATED: Tambahkan billPeriodId ke URL
+      const url = `/v1/dbs/api/prabill-init-populate/list?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
 
       return {
         ...response.data,
-        isLoadMore, // Pass the flag to reducer
+        isLoadMore,
       };
     } catch (error) {
       const message =
@@ -674,11 +686,10 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      return error;
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
-
 // Update untuk getDetailPrabillingInit thunk
 export const getDetailPrabillingInit = createAsyncThunk(
   "GET_DETAIL_PRABILLING_INIT",
@@ -714,7 +725,7 @@ export const getDetailPrabillingInit = createAsyncThunk(
         accountSegmentName: detail.accountSegmentName,
         accountGroupType: detail.accountGroupType,
         accountGroupTypeName: detail.accountGroupTypeName,
-        accounts: detail.accounts
+        accounts: detail.accounts,
       }));
 
       // Kembalikan struktur yang lengkap
@@ -1778,6 +1789,15 @@ const prabillingSlice = createSlice({
         pageSize: 10,
       };
     },
+    resetAllTabData: (state) => {
+      state.list_prabilling_init = [];
+      state.prabilling_pagination = {
+        totalPages: 0,
+        totalElements: 0,
+        currentPage: 0,
+        pageSize: 10,
+      };
+    },
   },
   extraReducers: {
     // Get List Billing Period for Prabilling
@@ -1908,7 +1928,7 @@ const prabillingSlice = createSlice({
       state.prabill_sa_detail.saPriceDet = null;
     },
 
-     // SA Price Det prabill summary
+    // SA Price Det prabill summary
     [getPrabillSummarySaPriceDet.pending]: (state) => {
       state.loading_prabill_sa.saPriceDet = true;
     },
@@ -2427,56 +2447,57 @@ const prabillingSlice = createSlice({
     [createPrabilling.rejected]: (state) => {
       state.loadingCreate = false;
     },
-     // Get Prabill Summary Service Agreement
-  [getPrabillSummaryServiceAgreement.pending]: (state) => {
-    state.loading_sa = true;
-  },
-  [getPrabillSummaryServiceAgreement.fulfilled]: (state, action) => {
-    state.loading_sa = false;
-    state.data_prabilling_sa = {
-      result: action.payload?.result || [],
-      page: action.payload?.page || {
-        size: 10,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-      },
-    };
-  },
-  [getPrabillSummaryServiceAgreement.rejected]: (state) => {
-    state.loading_sa = false;
-    state.data_prabilling_sa = {
-      result: [],
-      page: {},
-    };
-  },
+    // Get Prabill Summary Service Agreement
+    [getPrabillSummaryServiceAgreement.pending]: (state) => {
+      state.loading_sa = true;
+    },
+    [getPrabillSummaryServiceAgreement.fulfilled]: (state, action) => {
+      state.loading_sa = false;
+      state.data_prabilling_sa = {
+        result: action.payload?.result || [],
+        page: action.payload?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    },
+    [getPrabillSummaryServiceAgreement.rejected]: (state) => {
+      state.loading_sa = false;
+      state.data_prabilling_sa = {
+        result: [],
+        page: {},
+      };
+    },
 
-  // Get Prabill Summary Usage
-  [getPrabillSummaryUsage.pending]: (state) => {
-    state.loading_usage = true;
-  },
-  [getPrabillSummaryUsage.fulfilled]: (state, action) => {
-    state.loading_usage = false;
-    state.data_prabilling_usage = {
-      result: action.payload?.result || [],
-      page: action.payload?.page || {
-        size: 10,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-      },
-    };
-  },
-  [getPrabillSummaryUsage.rejected]: (state) => {
-    state.loading_usage = false;
-    state.data_prabilling_usage = {
-      result: [],
-      page: {},
-    };
-  },
+    // Get Prabill Summary Usage
+    [getPrabillSummaryUsage.pending]: (state) => {
+      state.loading_usage = true;
+    },
+    [getPrabillSummaryUsage.fulfilled]: (state, action) => {
+      state.loading_usage = false;
+      state.data_prabilling_usage = {
+        result: action.payload?.result || [],
+        page: action.payload?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    },
+    [getPrabillSummaryUsage.rejected]: (state) => {
+      state.loading_usage = false;
+      state.data_prabilling_usage = {
+        result: [],
+        page: {},
+      };
+    },
   },
 });
 
-export const { resetCustomerDetail,resetSummaryData } = prabillingSlice.actions;
+export const { resetCustomerDetail, resetSummaryData, resetAllTabData } =
+  prabillingSlice.actions;
 const { reducer } = prabillingSlice;
 export default reducer;
