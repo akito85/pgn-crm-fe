@@ -760,6 +760,42 @@ export const approveOrRejectReleaseReceipt = createAsyncThunk(
   }
 );
 
+export const approveOrRejectReverseReceipt = createAsyncThunk(
+  "APPROVE_OR_REJECT_REVERSE_RECEIPT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/reverse/approve-reject";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const successMessage = {
+        title: "Successfull",
+        description: `Your data has been ${body.action === "APPROVED" ? "Approved" : "Rejected"
+          }`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVED" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 // get converted currency
 export const getConvertedCurrency = createAsyncThunk(
   "GET_CONVERTED_CURRENCY",
@@ -1171,6 +1207,18 @@ const receiptSlice = createSlice({
       state.loading = false;
     },
     [approveOrRejectReleaseReceipt.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+    [approveOrRejectReverseReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectReverseReceipt.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectReverseReceipt.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;
