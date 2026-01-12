@@ -57,4 +57,10 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   VIEW_OFFSET: "/debt-and-collection/offset",
   CREATE_OFFSET: "/debt-and-collection/offset/create",
   DETAIL_OFFSET: "/debt-and-collection/offset/view",
+
+  // Write Off
+  VIEW_WRITE_OFF: "/debt-and-collection/write-off",
+  CREATE_WRITE_OFF: "/debt-and-collection/write-off/create",
+  DETAIL_WRITE_OFF: "/debt-and-collection/write-off/view",
+  UPDATE_WRITE_OFF: "/debt-and-collection/write-off/update",
 };
