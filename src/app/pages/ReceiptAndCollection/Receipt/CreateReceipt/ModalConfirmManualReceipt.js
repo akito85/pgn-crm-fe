@@ -34,7 +34,6 @@ const ModalConfirmManualReceipt = ({
   rateTypeDDL,
   dataReceiptChannelDDL,
   dataAccNumber,
-  isMisc,
   rateString,
 }) => {
   const [valuePage, setValuePage] = useState(tabData[0].value);
@@ -127,9 +126,6 @@ const ModalConfirmManualReceipt = ({
               <DetailText label={"Payment Type"}>{payType}</DetailText>
               <DetailText label={"Bank"}>{bank}</DetailText>
               <DetailText label={"Reference"}>{data?.refrence}</DetailText>
-              <DetailText label={"Is Misc"}>
-                {isMisc === true ? "True" : ""}
-              </DetailText>
             </div>
             <div className="text-primary text-xs font-bold uppercase py-3">
               {"AMOUNT DETAIL INFORMATION"}
@@ -178,7 +174,7 @@ const ModalConfirmManualReceipt = ({
             <div className="w-full grid grid-cols-1 gap-5">
               <DetailText label={"Description"}>{data?.description}</DetailText>
             </div>
-          </div>
+          </div >
         );
       case tabData[1].value:
         return (

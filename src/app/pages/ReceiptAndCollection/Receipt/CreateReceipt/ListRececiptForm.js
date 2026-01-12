@@ -94,7 +94,6 @@ const ListRececiptForm = ({ type }) => {
   const [loadingForm, setLoadingForm] = useState(false);
   const [requestBodyConvertedRate, setRequestBodyConvertedRate] = useState({});
   const [allValues, setAllValues] = useState(null);
-  const [isMisc, setIsMisc] = useState(false);
 
   const isLoading = loading || loadingForm;
 
@@ -515,7 +514,6 @@ const ListRececiptForm = ({ type }) => {
         })),
         description: formValue?.description,
         receiptCode: formValue?.receiptCode,
-        isMisc: isMisc,
       };
 
       setBodyData(dataValue);
@@ -600,7 +598,6 @@ const ListRececiptForm = ({ type }) => {
     setRequestBodyConvertedRate({});
     setListDataAttachment([]);
     setAppHierDataDetail([]);
-    setIsMisc();
     setTabData(
       tabData?.map((item) => {
         const { errorBadge, ...keys } = item;
@@ -678,8 +675,6 @@ const ListRececiptForm = ({ type }) => {
               setRequestBodyConverted={setRequestBodyConvertedRate}
               rateAmountValues={data_converted_currency?.convertedRate}
               formValues={allValues}
-              isMisc={isMisc}
-              setIsMisc={setIsMisc}
             />
           </div>
           <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
@@ -801,7 +796,6 @@ const ListRececiptForm = ({ type }) => {
           payMethodDDL={payMethodDDL}
           dataReceiptChannelDDL={dataReceiptChannelDDL}
           dataAccNumber={dataAccNumber}
-          isMisc={isMisc}
           rateString={formValue?.rateAmount}
         />
       </ModalCustom>

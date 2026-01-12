@@ -44,17 +44,11 @@ const CreateReceiptForm = ({
   setRequestBodyConverted = () => { },
   rateAmountValues,
   formValues,
-  isMisc,
-  setIsMisc,
 }) => {
   const dispatch = useDispatch();
   const formValue = form?.getFieldsValue();
   const [filteredConvertedDDL, setFilteredConvertedDDL] = useState([]);
   const [value, setValue] = useState(null);
-
-  const handlePageBox = (e) => {
-    setIsMisc(e.target.checked);
-  };
 
   const handleCodeBank = (value) => {
     setCusNumb(value);
@@ -279,18 +273,6 @@ const CreateReceiptForm = ({
             <InputComponent />
           </Form.Item>
         </div>
-        <div className="w-full grid grid-cols-3 gap-3">
-          <Form.Item>
-            <div className="flex flex-col pt-[12px]">
-              <Checkbox name="isMisc" checked={isMisc} onChange={handlePageBox}>
-                Is Miscellaneous
-              </Checkbox>
-              <span className="text-[10px]">
-                Click or tap this checkbox if data can be VA.
-              </span>
-            </div>
-          </Form.Item>
-        </div>
       </BaseContainer>
       {/* Base Container ke 3  */}
       <BaseContainer header={"AMOUNT DETAIL INFORMATION"}>
@@ -408,10 +390,10 @@ const CreateReceiptForm = ({
             <InputComponent rows={5} type="textarea" />
           </Form.Item>
         </div>
-      </BaseContainer>
+      </BaseContainer >
 
       {/* base container ke empat */}
-      <BaseContainer header={"Allocation Information"}>
+      < BaseContainer header={"Allocation Information"} >
         <AllocationSection
           setIsInsert={setStoredData}
           isInsert={storedData}
@@ -426,8 +408,8 @@ const CreateReceiptForm = ({
           currencyId={formValue?.currency}
           form={form}
         />
-      </BaseContainer>
-    </div>
+      </BaseContainer >
+    </div >
   );
 };
 
