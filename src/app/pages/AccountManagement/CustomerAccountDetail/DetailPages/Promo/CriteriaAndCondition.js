@@ -46,32 +46,89 @@ const selectedRender = ({
 }) => {
   switch (selectedTab) {
     case "criteria":
+      // Dynamically build extra columns based on keys present in criteriaDataSource
+      const baseColumns = promoCriteriaRepository.getColumns(handleClickCriteriaDetail) || [];
+      const availableKeys = new Set();
+      
+      const excludedMetaKeys = new Set([
+        "createdBy",
+        "createdDate",
+        "updatedBy",
+        "updatedDate",
+      ]);
+
+      (criteriaDataSource || []).forEach((item) => {
+        if (!item || typeof item !== "object") return;
+
+        Object.keys(item).forEach((k) => {
+          if (excludedMetaKeys.has(k)) return;
+          const v = item[k];
+          if (v !== null && v !== undefined) availableKeys.add(k);
+        });
+      });
+
+      const excludeKeys = ["key", "id", "no"];
+      const baseKeys = new Set(
+        baseColumns.map((c) => c.dataIndex || c.key || c.title).filter(Boolean)
+      );
+
+      const additionalKeys = [...availableKeys].filter(
+        (k) => !excludeKeys.includes(k) && !baseKeys.has(k)
+      );
+
+      const formatTitle = (str) =>
+        String(str)
+          .replace(/([A-Z])/g, " $1")
+          .replace(/[_-]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+
+      const additionalColumns = additionalKeys.map((k) => ({
+        title: formatTitle(k),
+        dataIndex: k,
+        key: k,
+        render: (val) => (val === null || val === undefined ? "" : String(val)),
+      }));
+
+      const allColumns = [
+        {
+          title: "No",
+          dataIndex: "no",
+          key: "no",
+          width: 60,
+          disableFilter: true,
+        },
+        ...additionalColumns,
+        ...baseColumns
+      ];
+
       return (
         <Space direction="vertical" size={"small"} style={{ width: "100%" }}>
           <Row align={"middle"}>
-            <Col span={3}>
-              <HeaderText text="Criteria List" />
-            </Col>
+        <Col span={3}>
+          <HeaderText text="Criteria List" />
+        </Col>
           </Row>
           <div className="flex justify-between">
-            <Badge count={criteriaActiveFilters.length}>
-              <FilterButton onApplyFilter={handleFilterCriteria} columnType="criteria" activeFilters={criteriaActiveFilters} />
-            </Badge>
-            <ExportButton onClick={handleDownloadCriteria} />
+        <Badge count={criteriaActiveFilters.length}>
+          <FilterButton onApplyFilter={handleFilterCriteria} columnType="criteria" activeFilters={criteriaActiveFilters} />
+        </Badge>
+        <ExportButton onClick={handleDownloadCriteria} />
           </div>
           <div style={{ width: "100%", overflowX: "auto" }}>
-            <TablePaginationNew
-              enableDragColumn={true}
-              enableColumnSorter={criteriaDataSource.length > 0}
-              enableColumnFilter={criteriaDataSource.length > 0}
-              tableScrolled={{ x: 800 }}
-              columns={promoCriteriaRepository.getColumns(handleClickCriteriaDetail)}
-              dataSource={criteriaDataSource}
-              loading={promoCriteriaList?.loading}
-              pagination={criteriaPagination}
-              onChange={handleCriteriaTableChange}
-              totalData={criteriaPagination.total}
-            />
+          <TablePaginationNew
+            enableDragColumn={true}
+            enableColumnSorter={criteriaDataSource.length > 0}
+            enableColumnFilter={criteriaDataSource.length > 0}
+            tableScrolled={{ x: 800 }}
+            columns={allColumns}
+            dataSource={criteriaDataSource}
+            loading={promoCriteriaList?.loading}
+            pagination={criteriaPagination}
+            onChange={handleCriteriaTableChange}
+            totalData={criteriaPagination.total}
+          />
           </div>
         </Space>
       );

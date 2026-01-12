@@ -148,10 +148,18 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               // handleChangeInteraction={handleSetType}
             />
             <div className="my-5 flex justify-between">
-              {isApproval ? (
+              <Link
+                to={
+                  type === "standard"
+                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
+                }
+              >
                 <ButtonComponent
                   type={"submit"}
-                  onClick={() => setIsApproval(false)}
+                  // onClick={() => {
+                  //   navigate(-1)
+                  // }}
                   icon={
                     <LeftOutlined
                       style={{
@@ -164,33 +172,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 >
                   Back
                 </ButtonComponent>
-              ) : (
-                <Link
-                  to={
-                    type === "standard"
-                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                  }
-                >
-                  <ButtonComponent
-                    type={"submit"}
-                    // onClick={() => {
-                    //   navigate(-1)
-                    // }}
-                    icon={
-                      <LeftOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 24,
-                          justifyItems: "center",
-                        }}
-                      />
-                    }
-                  >
-                    Back
-                  </ButtonComponent>
-                </Link>
-              )}
+              </Link>
 
               {showApprovalButton && (
               <div className={"w-full flex justify-end gap-5"}>

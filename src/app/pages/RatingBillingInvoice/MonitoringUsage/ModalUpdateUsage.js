@@ -17,20 +17,12 @@ const ModalUpdateUsage = ({
     uploadType = false,
     handleSave = () => { },
     handleBack = () => { },
-    
-    // form
 }) => {
-    // console.log(uploadType, ' upload type');
     const { data_asset_type, data_account_number, data_source, loading } = useSelector((state) => state.monitoring_usage);
     const dispatch = useDispatch();
     const [selectedAccount, setSelectedAccount] = useState(null);
-    const [period, setPeriod] = useState("");
-    const [hour, setHour] = useState("");
-    const [date, setDate] = useState("");
-    const [measDate, setMeasDate] = useState("");
     const [form] = Form.useForm();
-    // console.log(record, ' record');
-    // use effect
+
     useEffect(() => {
         if (isOpen === true) {
             dispatch(getAssetType())
@@ -38,32 +30,65 @@ const ModalUpdateUsage = ({
             dispatch(getSource())
         }
     }, [dispatch, isOpen]);
+
     useEffect(() => {
         if (record) {
+            const parseDate = (dateValue) => {
+                if (!dateValue || !hasValue(dateValue)) return null;
+                if (moment.isMoment(dateValue)) return dateValue;
+                const parsed = moment(dateValue, [
+                    dateFormatting.dateFormal,
+                    dateFormatting.date,
+                    dateFormatting.dateTime,
+                    moment.ISO_8601
+                ], true);
+                return parsed.isValid() ? parsed : null;
+            };
+
+            const parseTime = (timeValue) => {
+                if (!timeValue || !hasValue(timeValue)) return null;
+                if (moment.isMoment(timeValue)) return timeValue;
+                const parsed = moment(timeValue, ['HH:mm', 'HH:mm:ss'], true);
+                return parsed.isValid() ? parsed : null;
+            };
+
+            // Parse numeric value - handle both number and formatted string
+            const parseNumeric = (value) => {
+                if (value === null || value === undefined) return null;
+                if (typeof value === 'number') return value;
+                if (typeof value === 'string') {
+                    // Remove thousand separator
+                    const cleaned = value.replace(/,/g, '');
+                    const parsed = parseFloat(cleaned);
+                    return isNaN(parsed) ? null : parsed;
+                }
+                return null;
+            };
+
             form.setFieldsValue({
                 accountNumber: record?.accountNumber,
                 accountName: record?.accountName,
                 costCenter: record?.costCenter,
-                billingPeriod: hasValue(record?.billingPeriod) && moment(record?.billingPeriod),
-              assetSerialNum: record?.assetSerialNumber,
+                assetSerialNum: record?.assetSerialNumber || record?.assetSerialNum,
                 assetType: record?.assetType,
-                fdate: hasValue(record?.fdate) && moment(record?.fdate),
-                fhour: hasValue(record?.fhour) && moment(record?.fhour, 'HH:mm'),
-                measDate: hasValue(record?.measDate) && moment(record?.measDate),
-                streamId: record?.streamId,
-                temperature: record?.temperature,
-                pressure: record?.pressure,
-                correctionFactor: record?.correctionFactor,
-                calorie: record?.calorie,
-                beginStand: record?.beginStand,
-                endStand: record?.endStand,
-                volMeasured27: record?.volMeasured27,
-                volMeasured60: record?.volMeasured60,
-                engMeasured: record?.engMeasured,
-                ghv: record?.ghv,
-                volMscf: record?.volMscf,
-                uncorrectedValue: record?.uncorrectedValue,
-                taxationRowId: record?.taxationRowId,
+                fdate: parseDate(record?.fdate),
+                fhour: parseTime(record?.fhour),
+                measDate: parseDate(record?.measDate),
+                streamId: parseNumeric(record?.streamId),
+                temperature: parseNumeric(record?.temperature),
+                pressure: parseNumeric(record?.pressure),
+                correctionFactor: parseNumeric(record?.correctionFactor),
+                calorie: parseNumeric(record?.calorie),
+                beginStand: parseNumeric(record?.beginStand),
+                endStand: parseNumeric(record?.endStand),
+                volMeasured27: parseNumeric(record?.volMeasured27),
+                volMeasured60: parseNumeric(record?.volMeasured60),
+                engMeasured: parseNumeric(record?.engMeasured),
+                ghv: parseNumeric(record?.ghv),
+                volMscf: parseNumeric(record?.volMscf),
+                uncorrectedValue: parseNumeric(record?.uncorrectedValue),
+                sourceRowId: parseNumeric(record?.sourceRowId),
+                sourceName: record?.sourceName,
                 source: record?.source,
                 description: record?.description
             })
@@ -82,10 +107,6 @@ const ModalUpdateUsage = ({
         }
     };
 
-
-    const save = (formValue) => {
-        // console.log(formValue, ' dorm value');
-    }
     return (
       <ModalCustom
         isOpen={isOpen}
@@ -137,24 +158,6 @@ const ModalUpdateUsage = ({
                 <InputComponent disabled />
               </Form.Item>
               <Form.Item
-                label={"Billing Period"}
-                name={"billingPeriod"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Billing Period!",
-                  },
-                ]}
-              >
-                {/* <Input/> */}
-                <DatePicker
-                  format={"MMM YYYY"}
-                  picker="month"
-                  onChange={(date, dateString) => setPeriod(dateString)}
-                  className="w-full"
-                />
-              </Form.Item>
-              <Form.Item
                 label={"Asset Serial No"}
                 name={"assetSerialNum"}
                 rules={[
@@ -188,7 +191,6 @@ const ModalUpdateUsage = ({
                 <DatePicker
                   className="w-full"
                   format={dateFormatting.date}
-                  onChange={(date, dateString) => setDate(dateString)}
                 />
               </Form.Item>
               <Form.Item label={"Hour"} name={"fhour"}>
@@ -196,7 +198,6 @@ const ModalUpdateUsage = ({
                   showNow={false}
                   className="w-full"
                   format={"HH:mm"}
-                  onChange={(time, timeString) => setHour(timeString)}
                 />
               </Form.Item>
               <Form.Item
@@ -212,7 +213,6 @@ const ModalUpdateUsage = ({
                 <DatePicker
                   className="w-full"
                   format={dateFormatting.dateTime}
-                  onChange={(date, dateString) => setMeasDate(dateString)}
                   showTime
                 />
               </Form.Item>
@@ -252,13 +252,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -277,13 +270,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -300,13 +286,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -325,13 +304,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -350,13 +322,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={4}
                   thousandSeparator={","}
@@ -375,13 +340,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={12}
                   thousandSeparator={","}
@@ -397,13 +355,6 @@ const ModalUpdateUsage = ({
                   return e.floatValue;
                 }}
               >
-                {/* <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
-                /> */}
                 <InputComponent
                   decimalScale={7}
                   thousandSeparator={","}
@@ -430,7 +381,7 @@ const ModalUpdateUsage = ({
                   }
                 />
               </Form.Item>
-              <Form.Item label={"Taxation"} name={"taxationRowId"}>
+              <Form.Item label={"Source Row ID"} name={"sourceRowId"}>
                 <InputComponent
                   onInput={(e) =>
                     (e.target.value = e.target.value
@@ -439,10 +390,13 @@ const ModalUpdateUsage = ({
                   }
                 />
               </Form.Item>
+              <Form.Item label={"Source Name"} name={"sourceName"}>
+                <InputComponent />
+              </Form.Item>
               <Form.Item
                 label={"Source"}
                 name={"source"}
-                rules={[{ required: true, message: "Please input end stand!" }]}
+                rules={[{ required: true, message: "Please input source!" }]}
               >
                 <Select>
                   {data_source?.map((val) => (
@@ -453,7 +407,7 @@ const ModalUpdateUsage = ({
                 </Select>
               </Form.Item>
             </div>
-            <div w-full grid grid-cols-1>
+            <div className="w-full grid grid-cols-1">
               <Form.Item label={"Description"} name={"description"}>
                 <InputComponent type={"textarea"} />
               </Form.Item>

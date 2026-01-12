@@ -148,7 +148,6 @@ const RatingPage = () => {
     });
   };
 
-  // Load more handler dengan billPeriodId
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = data?.page?.totalPages || 0;
@@ -165,6 +164,22 @@ const RatingPage = () => {
         })
       );
       setPage(nextPage);
+    }
+  };
+
+  const handleRefresh = () => {
+    if (selectedBillingPeriod) {
+      dispatch(
+        getListRatingGasPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: page * loadMoreSize || 100,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
     }
   };
 
@@ -220,7 +235,6 @@ const RatingPage = () => {
     }
   };
 
-  // Handle billing period change
   const handleBillingPeriodChange = (value) => {
     setSelectedBillingPeriod(value);
     setPage(1);
@@ -306,24 +320,6 @@ const RatingPage = () => {
           className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
         />
 
-        {/* Filter Section */}
-        <div className="flex gap-4 mb-1 items-end">
-          <div className="w-1/4">
-            <label className="block text-sm font-medium mb-2">
-              Billing Period <span className="text-red-500">*</span>
-            </label>
-            <SelectComponent
-              value={selectedBillingPeriod}
-              onChange={handleBillingPeriodChange}
-              placeholder="Select Billing Period"
-              options={(list_billing_period || []).map((item) => ({
-                label: item?.name,
-                value: item?.id,
-              }))}
-            />
-          </div>
-        </div>
-
         <div className="my-0">
           <TableRBI
             idTable="rating-table"
@@ -345,7 +341,23 @@ const RatingPage = () => {
             useInfiniteScroll={true}
             onLoadMore={handleLoadMore}
             hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
             loadMoreThreshold={20}
+            customHeaderLeft={
+              <div className="flex items-center gap-1">
+                <SelectComponent
+                  value={selectedBillingPeriod}
+                  onChange={handleBillingPeriodChange}
+                  placeholder="Select Period"
+                  style={{ width: '120px' }}
+                  options={(list_billing_period || []).map((item) => ({
+                    label: item?.name,
+                    value: item?.id,
+                  }))}
+                />
+              </div>
+            }
           />
         </div>
       </CardContainer>

@@ -40,7 +40,7 @@ export const columnsCalculationUsage = (
     key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     width: 80,
     ...getColumnSearchPropsPaging(
@@ -83,7 +83,7 @@ export const columnsCalculationUsage = (
     key: "billPeriod",
     title: "BILL PERIOD",
     dataIndex: "billPeriod",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     width: 60,
     ...getColumnSearchPropsPaging(
@@ -140,22 +140,6 @@ export const columnsCalculationUsage = (
     render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
-    key: "usage",
-    title: "USAGE",
-    dataIndex: "usage",
-    sorter: true,
-    isNumber: true,
-    width: 50,
-    ...getColumnSearchPropsPaging(
-      "usage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) => (text !== null && text !== undefined ? text : ""),
-  },
-  {
     key: "uom",
     title: "UOM",
     dataIndex: "uom",
@@ -204,7 +188,7 @@ export const columnsCalculationUsage = (
   },
   {
     key: "minContract",
-    title: "MIN CONTRACT",
+    title: "MINIMUM",
     dataIndex: "minContract",
     sorter: true,
     isNumber: true,
@@ -216,10 +200,11 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "maxContract",
-    title: "MAX CONTRACT",
+    title: "MAXIMUM",
     dataIndex: "maxContract",
     sorter: true,
     isNumber: true,
@@ -231,31 +216,22 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
+    render: (text) => {
+      if (text === 0 || text === "0" || text === null || text === undefined || text === "") {
+        return "Unlimited";
+      }
+      return text;
+    },
   },
   {
-    key: "priceMin",
-    title: "PRICE MIN",
-    dataIndex: "priceMin",
+    key: "priceCode",
+    title: "PRICE CODE",
+    dataIndex: "priceCode",
     sorter: true,
-    isNumber: true,
-    width: 50,
-    ...getColumnSearchPropsPaging(
-      "priceMin",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    key: "priceNormal",
-    title: "PRICE NORMAL",
-    dataIndex: "priceNormal",
-    sorter: true,
-    isNumber: true,
+    isClassification: true,
     width: 80,
     ...getColumnSearchPropsPaging(
-      "priceNormal",
+      "priceCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -263,19 +239,20 @@ export const columnsCalculationUsage = (
     ),
   },
   {
-    key: "priceOup",
-    title: "PRICE OUP",
-    dataIndex: "priceOup",
+    key: "price",
+    title: "PRICE",
+    dataIndex: "price",
     sorter: true,
     isNumber: true,
-    width: 60,
+    width: 70,
     ...getColumnSearchPropsPaging(
-      "priceOup",
+      "price",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
     ),
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "amount",
@@ -291,6 +268,7 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "totalAmount",
@@ -306,6 +284,7 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch
     ),
+    render: (text) => (text !== null && text !== undefined ? text : ""),
   },
   {
     key: "currency",
@@ -385,7 +364,7 @@ export const columnsCalculationUsage = (
       return (
         <Tooltip title="Detail">
           <div className="pt-1 cursor-pointer">
-            <SVGIcon name="IconDetail" width={20}  onClick={() => handleDetail(record)} />
+            <SVGIcon name="IconDetail" width={20} onClick={() => handleDetail(record)} />
           </div>
         </Tooltip>
       );

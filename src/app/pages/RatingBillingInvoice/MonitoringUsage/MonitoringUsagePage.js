@@ -16,6 +16,8 @@ import {
   getListUsagePaginate,
   getListBatchPaginate,
   deleteBatch,
+  getSingleBatch,
+  clearUpdatedBatchIds,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -32,7 +34,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const MonitoringUsagePage = () => {
   // Selector
-  const { data_approval_history } = useSelector(
+  const { data_approval_history, updatedBatchIds } = useSelector(
     (state) => state.monitoring_usage
   );
 
@@ -98,6 +100,20 @@ const MonitoringUsagePage = () => {
     }
   }, [data_approval_history]);
 
+  // Fetch updated batches ketika kembali ke list
+  useEffect(() => {
+    if (
+      updatedBatchIds &&
+      updatedBatchIds.length > 0 &&
+      tabHeader === "Batch List"
+    ) {
+      // Fetch setiap batch yang di-update
+      updatedBatchIds.forEach((batchId) => {
+        dispatch(getSingleBatch(batchId));
+      });
+    }
+  }, [dispatch, updatedBatchIds, tabHeader]);
+
   const handleApprovalHistory = async (record) => {
     try {
       setModalApprovalHistory(true);
@@ -115,11 +131,10 @@ const MonitoringUsagePage = () => {
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
+      centered: true,
       onOk: async () => {
         try {
           await dispatch(deleteBatch(record?.batchId)).unwrap();
-          // No need to refresh, Redux will automatically update the state
-          // The reducer already handles removing the deleted batch from the list
         } catch (error) {
           console.error("Error deleting batch:", error);
         }
@@ -269,9 +284,9 @@ const MonitoringUsagePage = () => {
             </Link>
 
             <Tooltip
-              // title={
-              //   isDraft ? "Delete Batch" : "Cannot delete (Status not Draft)"
-              // }
+            // title={
+            //   isDraft ? "Delete Batch" : "Cannot delete (Status not Draft)"
+            // }
             >
               <div
                 style={{
@@ -379,7 +394,7 @@ const MonitoringUsagePage = () => {
   };
 
   return (
-    <Spin spinning={loading}>
+    <>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
@@ -416,6 +431,8 @@ const MonitoringUsagePage = () => {
                   onLoadMore={handleLoadMore}
                   hasMore={hasMoreUsage}
                   loadMoreThreshold={20}
+                  showRefresh={true}
+                  onRefresh={handleListRefresh}
                 />
               </div>
             </Tabs.TabPane>
@@ -438,6 +455,8 @@ const MonitoringUsagePage = () => {
                   onLoadMore={handleLoadMore}
                   hasMore={hasMoreBatch}
                   loadMoreThreshold={20}
+                  showRefresh={true}
+                  onRefresh={handleBatchListRefresh}
                 />
               </div>
             </Tabs.TabPane>
@@ -462,7 +481,7 @@ const MonitoringUsagePage = () => {
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
       />
-    </Spin>
+    </>
   );
 };
 

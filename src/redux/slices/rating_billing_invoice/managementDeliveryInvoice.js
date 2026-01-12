@@ -15,7 +15,7 @@ const initialState = {
 
 export const getDeliveryList = createAsyncThunk(
   "DELIVERY/GET_LIST",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search ?? "";
       const sortParams =
@@ -24,7 +24,7 @@ export const getDeliveryList = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/delivery/list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -102,7 +102,18 @@ const managementDeliveryInvoiceSlice = createSlice({
     },
     [getDeliveryList.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_list = action.payload;
+      const { isLoadMore, ...data } = action.payload;
+
+      if (isLoadMore) {
+        // Append new data to existing list
+        state.data_list = {
+          ...data,
+          result: [...(state.data_list?.result || []), ...(data.result || [])],
+        };
+      } else {
+        // Replace with new data
+        state.data_list = data;
+      }
     },
     [getDeliveryList.rejected]: (state) => {
       state.loading = false;
