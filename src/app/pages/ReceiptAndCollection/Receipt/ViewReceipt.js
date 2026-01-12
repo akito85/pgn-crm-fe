@@ -12,6 +12,7 @@ import {
   getDownloadReceipt,
   getPaginateReceipt,
   deleteReceipt,
+  holdReleaseReceiptBulk,
 } from "../../../../redux/slices/receipt_collection/receipt";
 import { columnsReceipt } from "./ColumnReceiptView";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
@@ -67,10 +68,25 @@ const ViewReceipt = () => {
   };
 
   const handleSubmitHold = (data) => {
-    setOpenModalHold(false);
-    setSelectedRowKeys([]);
-    setSelectedData([]);
-    handleFetch(); // Refresh list
+    const body = {
+      receipts: data.receipts?.map((item) => ({
+        id: item.id,
+        amount: item.holdAmount,
+      })),
+      action: "HOLD",
+      appHierId: data.receipts[0]?.appHierId || 1, // Fallback to 1 if not present
+      reason: data.reason,
+      attachmentIds: data.attachments?.map((a) => a.id),
+    };
+
+    dispatch(holdReleaseReceiptBulk(body)).then((res) => {
+      if (!res.error) {
+        setOpenModalHold(false);
+        setSelectedRowKeys([]);
+        setSelectedData([]);
+        handleFetch(); // Refresh list
+      }
+    });
   };
 
   const handleRefund = () => {
@@ -86,7 +102,25 @@ const ViewReceipt = () => {
   };
 
   const handleSubmitRelease = (data) => {
-    setOpenModalRelease(false);
+    const body = {
+      receipts: data.receipts?.map((item) => ({
+        id: item.id,
+        amount: item.releaseAmount,
+      })),
+      action: "RELEASE",
+      appHierId: data.receipts[0]?.appHierId || 1, // Fallback to 1 if not present
+      reason: data.reason,
+      attachmentIds: data.attachments?.map((a) => a.id),
+    };
+
+    dispatch(holdReleaseReceiptBulk(body)).then((res) => {
+      if (!res.error) {
+        setOpenModalRelease(false);
+        setSelectedRowKeys([]);
+        setSelectedData([]);
+        handleFetch(); // Refresh list
+      }
+    });
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {

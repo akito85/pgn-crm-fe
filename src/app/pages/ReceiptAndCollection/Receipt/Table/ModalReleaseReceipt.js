@@ -11,6 +11,7 @@ import { columnsReceipt } from "../ColumnReceiptView";
 import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
+import BaseContainer from "../../../../../components/BaseContainer";
 
 const { TextArea } = Input;
 
@@ -46,6 +47,10 @@ const ModalReleaseReceipt = ({
             setReleaseReason("");
             setListDataAttachment([]);
             setConfirmationTab("Receipt");
+            setReleaseAmountData({});
+            setPage(1);
+            setPageSize(10);
+
             // Fetch receipt list (filtered/unfiltered?)
             // Usage seems to imply selecting FROM list.
             // If selectedData is passed (from single row action), pre-select it?
@@ -147,10 +152,37 @@ const ModalReleaseReceipt = ({
                     }
                     parser={(value) => value?.replace(/\./g, "")}
                     onChange={(value) => handleReleaseAmountChange(value, record.key || record.id)}
+                    onKeyDown={(e) => {
+                        // Allow: backspace, delete, tab, escape, enter
+                        if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
+                            (e.ctrlKey === true || e.metaKey === true) ||
+                            // Allow: home, end, left, right
+                            (e.keyCode >= 35 && e.keyCode <= 39)) {
+                            return;
+                        }
+                        // Ensure that it is a number and stop the keypress
+                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            e.preventDefault();
+                        }
+                    }}
                     placeholder="Input Amount"
                     controls={false}
                 />
             )
+        }
+    ];
+
+    const columnsStep4 = [
+        ...columnsSimplified,
+        {
+            title: "Release Amount",
+            dataIndex: "releaseAmount",
+            key: "releaseAmount",
+            render: (text, record) => {
+                const amount = releaseAmountData[record.key || record.id];
+                return amount ? `${amount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
+            }
         }
     ];
 
@@ -221,7 +253,10 @@ const ModalReleaseReceipt = ({
                         type="submit"
                         className="h-[40px]"
                         onClick={() => onSubmit({
-                            receipts: localSelectedData,
+                            receipts: localSelectedData.map(item => ({
+                                ...item,
+                                releaseAmount: releaseAmountData[item.key || item.id]
+                            })),
                             reason: releaseReason,
                             attachments: listDataAttachment
                         })}
@@ -233,11 +268,16 @@ const ModalReleaseReceipt = ({
         );
     };
 
+    const filteredDataSource = dataSource?.filter(item =>
+        item.statusApproval !== "Waiting Approval" &&
+        item.status?.toUpperCase() === "HOLD"
+    );
+
     return (
         <ModalCustom
             isOpen={isOpen}
             handleCancel={handleCancel}
-            header="RECEIPT HOLD"
+            header="RECEIPT RELEASE"
             width={1200}
             footer={renderFooter()}
         >
@@ -252,21 +292,19 @@ const ModalReleaseReceipt = ({
             <div className="mt-4">
                 {/* Step 1: Receipt Information */}
                 {currentStep === 0 && (
-                    <div className="w-full">
-                        <p className="text-primary text-xl font-bold uppercase py-4">RECEIPT INFORMATION</p>
+                    <BaseContainer header={"RECEIPT INFORMATION"}>
                         <TablePagination
-                            dataSource={dataSource}
+                            dataSource={filteredDataSource}
                             columns={columns}
                             rowSelection={rowSelection}
                             current={page}
                             pageSize={pageSize}
                             onChange={handleChangePage}
-                            onShowSizeChange={handleChangePage}
-                            totalData={dataSource?.length}
-                            showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} records`}
-                            tableScrolled={{ x: "max-content", y: 400 }}
+                            onSizeChanger={handleChangePage}
+                            totalData={filteredDataSource?.length}
+                            tableScrolled={{ x: 10000, y: 400 }}
                         />
-                    </div>
+                    </BaseContainer>
                 )}
 
                 {/* Step 2: Release Information */}
@@ -334,14 +372,9 @@ const ModalReleaseReceipt = ({
                                     <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
                                     <TablePagination
                                         dataSource={localSelectedData}
-                                        columns={columns}
-                                        current={page}
-                                        pageSize={pageSize}
-                                        onChange={handleChangePage}
-                                        onShowSizeChange={handleChangePage}
-                                        totalData={localSelectedData?.length}
-                                        showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} records`}
-                                        tableScrolled={{ x: "max-content", y: 400 }}
+                                        columns={columnsStep4}
+                                        pagination={false}
+                                        usePagination={false}
                                     />
                                     <div className="mt-4">
                                         <p className="font-bold">Remark</p>

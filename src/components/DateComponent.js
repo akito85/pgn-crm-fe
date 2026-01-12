@@ -5,14 +5,16 @@ import moment from "moment/moment";
 const DateComponent = ({
   picker,
   label,
-  onChange = () => {},
+  onChange = () => { },
   mandatory,
   value,
   dateDisable,
   disabled = false,
   placeholder,
   defaultPickerValue,
-  key
+  key,
+  format = "DD MMM YYYY",
+  showTime = false,
 }) => {
   const wrapper = "flex flex-col";
   const style = {
@@ -43,7 +45,8 @@ const DateComponent = ({
         style={style}
         placeholder={placeholder}
         allowClear
-        format={"DD MMM YYYY"}
+        format={format}
+        showTime={showTime}
         defaultPickerValue={defaultPickerValue}
       />
     </div>

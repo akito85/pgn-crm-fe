@@ -1,0 +1,58 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Detail Write Off",
+    "data": {
+        "writeOff": {
+            "id": 1,
+            "writeOffNo": "DD00001",
+            "writeOffDate": "21 Jan 2023",
+            "writeOffPeriod": "Jan 2023",
+            "type": "Cash",
+            "appHierId": 502,
+            "createdDate": "2023-01-21T10:00:00.000+07:00",
+            "createdBy": "Admin",
+            "updatedDate": "2023-01-21T11:00:00.000+07:00",
+            "updatedBy": "Admin"
+        },
+        "customerList": [
+            {
+                "id": 1,
+                "costCenter": "011 - Jakarta Pusat",
+                "customerNumber": "130252597",
+                "customerName": "PLN (PERSERO) PT",
+                "customerSegment": "RT",
+                "customerGroup": "BUMN",
+                "ppjTp": 1000000,
+                "ppjTlh": 500000,
+                "contractId": "C001",
+                "period": "Jan 2023",
+                "billItem": "Gas",
+                "currency": "IDR",
+                "outstanding": 1500000
+            }
+        ],
+        "attachmentDtoList": [
+            {
+                "id": 1,
+                "fileName": "writeOff_doc.pdf",
+                "fileSize": 1024,
+                "fileType": "pdf",
+                "fileCategoryId": 1,
+                "fileCategoryName": "Invoice",
+                "urlFile1": "https://example.com/file1",
+                "urlFile2": "https://example.com/file2",
+                "createdBy": "Admin",
+                "createdDate": "2023-01-21T10:05:00.000+07:00"
+            }
+        ],
+        "tApprovalDto": {
+            "isApprover": true,
+            "tAppId": 1,
+            "approvalType": "WRITEOFF_APPROVAL",
+            "requestedDate": "2023-01-21T10:00:00.000+07:00",
+            "requestedBy": "Admin",
+            "remarks": "Please approve"
+        }
+    }
+}

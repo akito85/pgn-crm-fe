@@ -55,6 +55,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   //late charge
   VIEW_LATE_CHARGE: "/receipt-and-collection/late-charge-management",
   DETAIL_LATE_CHARGE: "/receipt-and-collection/late-charge-management/view",
+  CREATE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/create",
+  RECALCULATE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/recalculate",
+  REPLACE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/replace",
+  REVERSE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/reverse",
 
   //bridge
   VIEW_BRIDGE: "/receipt-and-collection/bridge",
