@@ -23,7 +23,7 @@ import AttachmentComponent from "../../../../../../components/Attachment/Attachm
 // Column Configuration
 import { columnsCustomerInfo } from "./Table/TableCustomerInfo";
 import { columnsWarrantyInfo } from "./Table/TableWarrantyInfo";
-import { columnsHoldInfo } from "./Table/TableHoldInfo";
+import { columnsReleaseInfo } from "./Table/TableReleaseInfo";
 import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 
 // Redux / Service
@@ -31,13 +31,13 @@ import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   getAllWarrantyInfoPaginate,
-  getAllHoldInfoPaginate,
+  getAllReleaseInfoPaginate,
   getAllAttachmentInfoPaginate,
   getListCategory,
-  requestedHold,
+  requestedRelease,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
-const ModalHold = ({
+const ModalRelease = ({
   isOpen,
   handleBack = () => {},
   handleRefresh = () => {},
@@ -47,7 +47,7 @@ const ModalHold = ({
   const {
     data_customer_info,
     data_warranty_info,
-    data_hold_info,
+    data_release_info,
     data_attachment_info,
     loading,
   } = useSelector((state) => state.warranty);
@@ -59,7 +59,7 @@ const ModalHold = ({
   const dispatch = useDispatch();
   const dataSourceCustomerInfo = data_customer_info?.result || [];
   const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceHoldInfo = data_hold_info?.result || [];
+  const dataSourceReleaseInfo = data_release_info?.result || [];
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -127,7 +127,7 @@ const ModalHold = ({
       disabled: false
     },
     {
-      title: "Hold Information",
+      title: "Release Information",
       disabled: false
     },
     {
@@ -196,7 +196,7 @@ const ModalHold = ({
     setDataWarrantyInfoSelect([]);
     setDataTable([]);
     setBoolean(false);
-    setRemarkHoldInformation("");
+    setRemarkReleaseInformation("");
     setCurrent(0);
     setSearch({});
     setPage(1);
@@ -207,7 +207,7 @@ const ModalHold = ({
   };
 
   const [tabData, setTabData] = useState([
-    { value: "Hold"},
+    { value: "Release"},
     { value: "Attachment" },
   ]);
   
@@ -235,7 +235,7 @@ const ModalHold = ({
     const body = {
     };
     
-    dispatch(requestedHold({ body: body }))
+    dispatch(requestedRelease({ body: body }))
       .unwrap()
       .then(() => {
         handleRefresh();
@@ -245,7 +245,7 @@ const ModalHold = ({
         setDataWarrantyInfoSelect([]);
         setDataTable([]);
         setBoolean(false);
-        setRemarkHoldInformation("");
+        setRemarkReleaseInformation("");
         setCurrent(0);
         setSearch({});
         setPage(1);
@@ -330,28 +330,28 @@ const ModalHold = ({
     onChange: onSelectChangeWarrantyInfo,
   };
 
-  // Hold Information Step
-  const [holdAmountData, setHoldAmountData] = useState({});
-  const handleHoldAmountChange = (value, recordKey) => {
-    setHoldAmountData(prev => ({ ...prev, [recordKey]: value }));
+  // Release Information Step
+  const [releaseAmountData, setReleaseAmountData] = useState({});
+  const handleReleaseAmountChange = (value, recordKey) => {
+    setReleaseAmountData(prev => ({ ...prev, [recordKey]: value }));
   };
 
-  const [holdDateData, setHoldDateData] = useState({});
-  const handleHoldDateChange = (value, recordKey) => {
-    setHoldDateData(prev => ({ ...prev, [recordKey]: value }));
+  const [releaseDateData, setReleaseDateData] = useState({});
+  const handleReleaseDateChange = (value, recordKey) => {
+    setReleaseDateData(prev => ({ ...prev, [recordKey]: value }));
   }; 
 
-  const [remarkHoldInformation, setRemarkHoldInformation] = useState("");
+  const [remarkReleaseInformation, setRemarkReleaseInformation] = useState("");
 
-  const [fixedHoldColumns, setFixedHoldColumns] = useState({
+  const [fixedReleaseColumns, setFixedReleaseColumns] = useState({
     left: ["no"],
-    right: ["date", "holdAmount"] 
+    right: ["date", "releaseAmount"] 
   });
 
   useEffect(() => {
     if (isOpen) {
       dispatch(
-        getAllHoldInfoPaginate({
+        getAllReleaseInfoPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page,
           pageSize,
@@ -361,48 +361,48 @@ const ModalHold = ({
     }
   }, [dispatch, isOpen, search, page, pageSize, sort]);
 
-  const dataSourceHoldInfoWithKeys = useMemo(() => {
-    return dataSourceHoldInfo?.map((item, index) => ({
+  const dataSourceReleaseInfoWithKeys = useMemo(() => {
+    return dataSourceReleaseInfo?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSourceHoldInfo]);
+  }, [dataSourceReleaseInfo]);
   
-  const baseColumnsHoldInfo = useMemo(
+  const baseColumnsReleaseInfo = useMemo(
     () =>
-      columnsHoldInfo(
+      columnsReleaseInfo(
         page,
         pageSize,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        holdAmountData,
-        handleHoldAmountChange,
-        holdDateData,
-        handleHoldDateChange
+        releaseAmountData,
+        handleReleaseAmountChange,
+        releaseDateData,
+        handleReleaseDateChange
       ),
     [page, pageSize, searchedColumn, searchText]
   );
 
-  const allColumnsHoldInfo = useMemo(() => {
-    const columnsWithKeys = baseColumnsHoldInfo.map((col) => ({
+  const allColumnsReleaseInfo = useMemo(() => {
+    const columnsWithKeys = baseColumnsReleaseInfo.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
     return columnsWithKeys;
-  }, [baseColumnsHoldInfo]);
+  }, [baseColumnsReleaseInfo]);
 
-  const processedColumnsHoldInfo = useMemo(() => {
-    return applyFixedColumns(allColumnsHoldInfo, fixedHoldColumns);
-  }, [allColumnsHoldInfo, fixedHoldColumns]);
+  const processedColumnsReleaseInfo = useMemo(() => {
+    return applyFixedColumns(allColumnsReleaseInfo, fixedReleaseColumns);
+  }, [allColumnsReleaseInfo, fixedReleaseColumns]);
 
-  const columnDefinitionsHoldInfo = useMemo(() => {
-    return allColumnsHoldInfo.map((col) => ({
+  const columnDefinitionsReleaseInfo = useMemo(() => {
+    return allColumnsReleaseInfo.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [allColumnsHoldInfo]);
+  }, [allColumnsReleaseInfo]);
 
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -496,7 +496,7 @@ const ModalHold = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Hold"
+        header="Warranty Release"
         handleBack={handleBackForm}
         width={1000}
         footer={
@@ -598,26 +598,26 @@ const ModalHold = ({
               />
             </div>
           </div>
-          {/* STEP : HOLD INFORMATION */}
+          {/* STEP : RELEASE INFORMATION */}
           <div className={`steps-content my-[30px] ${ current !== 1 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
               <p className="text-primary uppercase font-bold mb-4">
-                HOLD INFORMATION
+                RELEASE INFORMATION
               </p>
 
               <TableRBI
-                dataSource={dataSourceHoldInfoWithKeys}
-                columns={processedColumnsHoldInfo}
+                dataSource={dataSourceReleaseInfoWithKeys}
+                columns={processedColumnsReleaseInfo}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_hold_info?.page?.totalElements || 0}
+                totalData={data_release_info?.page?.totalElements || 0}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
-                columnDefinitions={columnDefinitionsHoldInfo}
-                fixedColumns={fixedHoldColumns}
-                setFixedColumns={setFixedHoldColumns}
+                columnDefinitions={columnDefinitionsReleaseInfo}
+                fixedColumns={fixedReleaseColumns}
+                setFixedColumns={setFixedReleaseColumns}
                 loading={loading}
               />
               
@@ -632,8 +632,8 @@ const ModalHold = ({
                   <InputComponent
                     rows={6}
                     type="textarea"
-                    value={remarkHoldInformation}
-                    onChange={(e) => setRemarkHoldInformation(e.target.value)}
+                    value={remarkReleaseInformation}
+                    onChange={(e) => setRemarkReleaseInformation(e.target.value)}
                     placeholder={"Type your remark"}
                   />
                 </Form.Item>
@@ -667,19 +667,19 @@ const ModalHold = ({
               <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
-                    HOLD INFORMATION
+                    RELEASE INFORMATION
                   </p>
                   <TableRBI
-                    dataSource={dataSourceHoldInfoWithKeys}
-                    columns={processedColumnsHoldInfo}
+                    dataSource={dataSourceReleaseInfoWithKeys}
+                    columns={processedColumnsReleaseInfo}
                     current={page}
                     pageSize={pageSize}
                     onChange={handleChange}
                     onSizeChanger={handleChange}
-                    totalData={dataSourceHoldInfoWithKeys.length || 0}
+                    totalData={dataSourceReleaseInfoWithKeys.length || 0}
                     tableScrolled={{ y: 525, x: 1000 }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitionsHoldInfo}
+                    columnDefinitions={columnDefinitionsReleaseInfo}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
                     loading={false}
@@ -737,4 +737,4 @@ const ModalHold = ({
   );
 };
 
-export default ModalHold;
+export default ModalRelease;

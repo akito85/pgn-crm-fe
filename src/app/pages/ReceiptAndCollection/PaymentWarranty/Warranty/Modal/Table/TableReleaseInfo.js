@@ -7,17 +7,17 @@ import { Form } from "antd";
 import DateComponent from "../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../components/InputComponent";
 
-export const columnsHoldInfo = (
+export const columnsReleaseInfo = (
   page = 1,
   pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  holdAmountData = {},
-  handleHoldAmountChange = () => {},
+  releaseAmountData = {},
+  handleReleaseAmountChange = () => {},
   refundDateData = {},
-  handleHoldDateChange = () => {}
+  handleReleaseDateChange = () => {}
 ) => [
   {
     key: "no",
@@ -103,20 +103,20 @@ export const columnsHoldInfo = (
         .includes(value.toLowerCase()),
   },
   {
-    key: "holdAmount",
+    key: "releaseAmount",
     title: "HOLD AMOUNT",
-    dataIndex: "holdAmount",
+    dataIndex: "releaseAmount",
     width: 120,
     sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
     ...getColumnSearchPropsPaging(
-      "holdAmount",
+      "releaseAmount",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
     ),
     onFilter: (value, record) =>
-      record["holdAmount"]
+      record["releaseAmount"]
         ?.toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
@@ -125,8 +125,8 @@ export const columnsHoldInfo = (
         style={{ width: '100%' }}
         formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
         parser={value => value.replace(/\$\s?|(\.*)/g, '')}
-        value={holdAmountData[record.key]}
-        onChange={(val) => handleHoldAmountChange(val, record.key)}
+        value={releaseAmountData[record.key]}
+        onChange={(val) => handleReleaseAmountChange(val, record.key)}
         controls={false}
       />
     )
