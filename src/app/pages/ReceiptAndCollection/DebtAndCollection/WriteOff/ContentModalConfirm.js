@@ -1,9 +1,9 @@
 import React, { Fragment, useState } from "react";
-import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
-import DetailText from "../../../../components/DetailText";
-import RadioTabs from "../../../../components/RadioTabs";
-import TableRBI from "../../../../components/TableRBI";
-import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import DetailText from "../../../../../components/DetailText";
+import RadioTabs from "../../../../../components/RadioTabs";
+import TableRBI from "../../../../../components/TableRBI";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import moment from "moment";
 
 const ContentModalConfirm = ({

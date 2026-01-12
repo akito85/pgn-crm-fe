@@ -35,9 +35,9 @@ import ViewOffset from "../../app/pages/ReceiptAndCollection/DebtAndCollection/O
 import ListFormOffset from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Offset/ListFormOffset";
 import ListDetailOffset from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Offset/ListDetailOffset";
 
-import ViewWriteOff from "../../app/pages/DebtAndCollection/WriteOff/ViewWriteOff";
-import ListDetailWriteOff from "../../app/pages/DebtAndCollection/WriteOff/ListDetailWriteOff";
-import ListFormWriteOff from "../../app/pages/DebtAndCollection/WriteOff/ListFormWriteOff";
+import ViewWriteOff from "../../app/pages/ReceiptAndCollection/DebtAndCollection/WriteOff/ViewWriteOff";
+import ListDetailWriteOff from "../../app/pages/ReceiptAndCollection/DebtAndCollection/WriteOff/ListDetailWriteOff";
+import ListFormWriteOff from "../../app/pages/ReceiptAndCollection/DebtAndCollection/WriteOff/ListFormWriteOff";
 
 export const DEBT_AND_COLLECTION_ELEMENTS = {
   // Grace Period
@@ -90,12 +90,12 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   CREATE_RESTRUCTURE_PAGE: <ListFormRestructure type="create" />,
   UPDATE_RESTRUCTURE_PAGE: <ListFormRestructure type="update" />,
   DETAIL_RESTRUCTURE_PAGE: <ListDetailRestructure />,
-  
+
   // Offset
   VIEW_OFFSET_PAGE: <ViewOffset />,
   CREATE_OFFSET_PAGE: <ListFormOffset type="create" />,
   DETAIL_OFFSET_PAGE: <ListDetailOffset />,
-  
+
   // Write Off
   VIEW_WRITE_OFF: <ViewWriteOff />,
   DETAIL_WRITE_OFF: <ListDetailWriteOff />,

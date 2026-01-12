@@ -1,8 +1,8 @@
 import Highlighter from "react-highlight-words";
 import moment from "moment";
-import { dateFormatting } from "../../../../utils";
-import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../components/StatusComponent";
+import { dateFormatting } from "../../../../../utils";
+import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 export const getWriteOffColumns = ({
     page = 1,

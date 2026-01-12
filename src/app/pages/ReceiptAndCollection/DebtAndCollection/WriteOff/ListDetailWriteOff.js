@@ -4,29 +4,29 @@ import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Form } from "antd";
-import BreadCrumb from "../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
-import RadioTabs from "../../../../components/RadioTabs";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+import RadioTabs from "../../../../../components/RadioTabs";
+import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getDetailWriteOff,
   approveOrRejectWriteOff,
   getListCategory,
   getAllApprovalList,
   getListApprovalById
-} from "../../../../redux/slices/debt_and_collection/writeOff";
-import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes";
+} from "../../../../../redux/slices/receipt_collection/writeOff";
+import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import DetailWriteOff from "./DetailWriteOff";
-import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../components/BaseContainer";
-import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
-import { configApp } from "../../../../constants/configApp";
-import TableRBI from "../../../../components/TableRBI";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import BaseContainer from "../../../../../components/BaseContainer";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import { configApp } from "../../../../../constants/configApp";
+import TableRBI from "../../../../../components/TableRBI";
 import { getCustomerListColumns } from "./CustomerColumns";
-import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
-import GridLayout from "../../../../components/GridLayout";
-import DetailText from "../../../../components/DetailText";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import GridLayout from "../../../../../components/GridLayout";
+import DetailText from "../../../../../components/DetailText";
 
 const ListDetailWriteOff = () => {
   const dispatch = useDispatch();

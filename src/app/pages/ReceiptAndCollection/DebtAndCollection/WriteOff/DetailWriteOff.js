@@ -1,6 +1,6 @@
 import moment from "moment";
-import BaseContainer from "../../../../components/BaseContainer";
-import DetailText from "../../../../components/DetailText";
+import BaseContainer from "../../../../../components/BaseContainer";
+import DetailText from "../../../../../components/DetailText";
 
 const DetailWriteOff = ({ data_detail }) => {
   return (

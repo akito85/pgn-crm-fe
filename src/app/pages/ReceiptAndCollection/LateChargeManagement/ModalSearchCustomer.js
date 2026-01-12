@@ -3,14 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { searchCustomerWriteOff } from "../../../../redux/slices/debt_and_collection/writeOff";
+import { searchCustomerLateCharge } from "../../../../redux/slices/receipt_collection/lateCharge";
 import { getCustomerListColumns } from "./CustomerColumns";
 
 const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
     const dispatch = useDispatch();
-    const { customerData, loading } = useSelector((state) => state.writeOff);
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [selectedRows, setSelectedRows] = useState([]);
+    const { data, loading } = useSelector((state) => state.late);
     const [dataSource, setDataSource] = useState([]);
 
     const [page, setPage] = useState(1);
@@ -18,45 +16,32 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
 
     useEffect(() => {
         if (isOpen) {
-            dispatch(searchCustomerWriteOff({ page, pageSize }));
+            dispatch(searchCustomerLateCharge({ page, pageSize }));
         }
     }, [dispatch, isOpen, page, pageSize]);
 
     useEffect(() => {
-        if (customerData && customerData.result) {
-            setDataSource(customerData.result);
+        if (data && data.result) {
+            setDataSource(data.result);
         } else {
             setDataSource([]);
         }
-    }, [customerData]);
+    }, [data]);
+
+    const handleConfirm = (record) => {
+        onConfirm(record);
+        onClose();
+    };
 
     const columns = getCustomerListColumns({
         page,
         pageSize,
-        actionType: "none",
+        actionType: "select",
+        onSelect: handleConfirm,
     });
-
-    const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
-        setSelectedRowKeys(newSelectedRowKeys);
-        setSelectedRows(newSelectedRows);
-    };
-
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: onSelectChange,
-    };
-
-    const handleConfirm = () => {
-        onConfirm(selectedRows);
-        onClose();
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
-    };
 
     const handleCancel = () => {
         onClose();
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
         setPage(1);
     }
 
@@ -72,16 +57,13 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
         <ModalCustom
             isOpen={isOpen}
             handleCancel={handleCancel}
-            header="Search Customer"
+            header="CUSTOMER LIST"
             width={1200}
             type="confirmation"
             footer={
                 <div className="flex justify-end gap-3 pt-4">
                     <ButtonComponent type="default" onClick={handleCancel}>
                         Cancel
-                    </ButtonComponent>
-                    <ButtonComponent type="primary" onClick={handleConfirm} disabled={selectedRows.length === 0}>
-                        Confirm
                     </ButtonComponent>
                 </div>
             }
@@ -90,14 +72,13 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
                 <TableRBI
                     columns={columns}
                     dataSource={dataSource}
-                    rowSelection={rowSelection}
                     loading={loading}
                     pagination={true}
                     current={page}
                     pageSize={pageSize}
-                    totalData={customerData?.page?.totalElements || 0}
+                    totalData={data?.page?.totalElements || 0}
                     onChange={onPageChange}
-                    tableScrolled={{ x: 1800, y: 400 }}
+                    tableScrolled={{ x: 1200, y: 400 }}
                     rowKey="id"
                 />
             </div>

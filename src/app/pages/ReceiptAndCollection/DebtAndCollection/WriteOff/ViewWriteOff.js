@@ -5,23 +5,23 @@ import { NavLink, Link } from "react-router-dom";
 import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
 
 // Routes
-import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes";
+import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 
 // Global Custom Components
-import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import TableRBI from "../../../../components/TableRBI";
-import CardContainer from "../../../../components/CardContainer";
-import Toolbar from "../../../../components/Toolbar";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import SVGIcon from "../../../../assets/Icon/index";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import TableRBI from "../../../../../components/TableRBI";
+import CardContainer from "../../../../../components/CardContainer";
+import Toolbar from "../../../../../components/Toolbar";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
+import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 
 // Column Configuration
 import { getWriteOffColumns } from "./WriteOffColumns";
 
 // Redux
-import { getWriteOffList, downloadWriteOffList } from "../../../../redux/slices/debt_and_collection/writeOff";
+import { getWriteOffList, downloadWriteOffList } from "../../../../../redux/slices/receipt_collection/writeOff";
 
 const ViewWriteOff = () => {
   const dispatch = useDispatch();

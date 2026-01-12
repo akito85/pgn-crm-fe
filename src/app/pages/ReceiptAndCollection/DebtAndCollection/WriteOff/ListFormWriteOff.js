@@ -6,35 +6,35 @@ import { Form, Spin, Input } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import BreadCrumb from "../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import RadioTabs from "../../../../components/RadioTabs";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import RadioTabs from "../../../../../components/RadioTabs";
+import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
   getAllApprovalList,
   getDetailWriteOff,
   getListApprovalById,
   getListCategory,
-} from "../../../../redux/slices/debt_and_collection/writeOff";
-import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes";
+} from "../../../../../redux/slices/receipt_collection/writeOff";
+import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import WriteOffForm from "./WriteOffForm";
-import SVGIcon from "../../../../assets/Icon/index";
-import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
-import BaseContainer from "../../../../components/BaseContainer";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
+import SVGIcon from "../../../../../assets/Icon/index";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
+import BaseContainer from "../../../../../components/BaseContainer";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ContentModalConfirm from "./ContentModalConfirm";
-import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import {
   showModalError,
   showModalSuccess,
-} from "../../../../redux/slices/general_slice";
-import { bytesConverter } from "../../../../utils/bytesConverter";
-import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
-import { configApp } from "../../../../constants/configApp";
-import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
+} from "../../../../../redux/slices/general_slice";
+import { bytesConverter } from "../../../../../utils/bytesConverter";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import { configApp } from "../../../../../constants/configApp";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ModalSearchCustomer from "./ModalSearchCustomer";
-import TableRBI from "../../../../components/TableRBI";
+import TableRBI from "../../../../../components/TableRBI";
 
 const ListFormWriteOff = (props) => {
   const { type } = props;
