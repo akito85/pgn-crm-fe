@@ -144,6 +144,7 @@ const CustomerAccountInformation = ({
                     ?.filter((a) => a.id === CIObj?.customerType)
                     ?.find((b) => b.name)?.name
                 }
+                isPassingId
               />
             </Form.Item>
             <Form.Item
@@ -162,13 +163,14 @@ const CustomerAccountInformation = ({
                     ?.filter((a) => a.id === CIObj?.identificationType)
                     ?.find((b) => b.name)?.name
                 }
+                isPassingId
               />
             </Form.Item>
             <Form.Item
               label={"Customer Identification Number"}
               name={"customerIdentificationNumberNpwp"}
             >
-              <InputComponent disabled={true} />
+              <InputComponent disabled={true} isPassingId />
             </Form.Item>
           </div>
 
@@ -190,21 +192,21 @@ const CustomerAccountInformation = ({
                     },
                   ]}
                 >
-                  <InputComponent onInput={onInputUpperCase} />
+                  <InputComponent onInput={onInputUpperCase} isPassingId />
                 </Form.Item>
                 <Form.Item
                   label={"Middle Name"}
                   name={"middleName"}
                   getValueFromEvent={(e) => handleCAIObj(e, "middleName")}
                 >
-                  <InputComponent onInput={onInputUpperCase} />
+                  <InputComponent onInput={onInputUpperCase} isPassingId />
                 </Form.Item>
                 <Form.Item
                   label={"Last Name"}
                   name={"lastName"}
                   getValueFromEvent={(e) => handleCAIObj(e, "lastName")}
                 >
-                  <InputComponent onInput={onInputUpperCase} />
+                  <InputComponent onInput={onInputUpperCase} isPassingId />
                 </Form.Item>
               </>
             )}
@@ -221,7 +223,7 @@ const CustomerAccountInformation = ({
                   },
                 ]}
               >
-                <InputComponent onInput={onInputUpperCase} />
+                <InputComponent onInput={onInputUpperCase} isPassingId />
               </Form.Item>
             ) : (
               <Form.Item
@@ -261,6 +263,7 @@ const CustomerAccountInformation = ({
                         }`
                       : ""
                   }
+                  isPassingId
                 />
               </Form.Item>
             )}
@@ -269,7 +272,7 @@ const CustomerAccountInformation = ({
               name={"birthDate"}
               getValueFromEvent={(e) => handleCAIObj(e, "birthDate")}
             >
-              <DateComponent dateDisable={handleDisableEndDate} />
+              <DateComponent dateDisable={handleDisableEndDate} isPassingId />
               {/* <DatePicker
                 allowClear
                 format={"DD MMM YYYY"}
@@ -281,7 +284,7 @@ const CustomerAccountInformation = ({
               name={"birthPlace"}
               getValueFromEvent={(e) => handleCAIObj(e, "birthPlace")}
             >
-              <InputComponent />
+              <InputComponent isPassingId />
             </Form.Item>
 
             {CIObj?.customerType !== 58 ? (
@@ -291,7 +294,7 @@ const CustomerAccountInformation = ({
                   name={"sex"}
                   getValueFromEvent={(e) => handleCAIObj(e, "sex")}
                 >
-                  <SelectComponent>
+                  <SelectComponent isPassingId>
                     {data_sex &&
                       data_sex?.map((ta, index) => (
                         <Select.Option value={ta.id} key={index}>
@@ -305,7 +308,7 @@ const CustomerAccountInformation = ({
                   name={"maritalStatus"}
                   getValueFromEvent={(e) => handleCAIObj(e, "maritalStatus")}
                 >
-                  <SelectComponent>
+                  <SelectComponent isPassingId>
                     {data_maritalStatus &&
                       data_maritalStatus?.map((ta, index) => (
                         <Select.Option value={ta.id} key={index}>
@@ -321,7 +324,7 @@ const CustomerAccountInformation = ({
               name={"search_Key"}
               getValueFromEvent={(e) => handleCAIObj(e, "search_Key")}
             >
-              <InputComponent />
+              <InputComponent isPassingId />
             </Form.Item>
 
             <div className="col-span-3">
@@ -335,6 +338,7 @@ const CustomerAccountInformation = ({
                   type="textarea"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  isPassingId
                 />
               </Form.Item>
             </div>
@@ -355,6 +359,7 @@ const CustomerAccountInformation = ({
           <InputComponent
             disabled={true}
             value={dataCustomer?.accountGroup?.name}
+            isPassingId
           />
         </Form.Item>
         <Form.Item
@@ -365,6 +370,7 @@ const CustomerAccountInformation = ({
           <InputComponent
             disabled={true}
             value={dataCustomer?.customerManagement?.name}
+            isPassingId
           />
         </Form.Item>
       </div>
@@ -379,14 +385,14 @@ const CustomerAccountInformation = ({
           name={"sor"}
           valuePropName={dataCustomer?.sor?.name}
         >
-          <InputComponent disabled={true} value={dataCustomer?.sor?.name} />
+          <InputComponent disabled={true} value={dataCustomer?.sor?.name} isPassingId />
         </Form.Item>
         <Form.Item
           label={"Cost Center"}
           name={"costCenter"}
           valuePropName={dataCustomer?.cc?.name}
         >
-          <InputComponent disabled={true} value={dataCustomer?.cc?.name} />
+          <InputComponent disabled={true} value={dataCustomer?.cc?.name} isPassingId />
         </Form.Item>
         <Form.Item
           label={"Meter Reading Code"}
@@ -399,7 +405,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "meterReadingCode")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_MRC &&
               data_MRC?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -426,7 +432,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "accountName")}
         >
-          <InputComponent onInput={onInputUpperCase} />
+          <InputComponent onInput={onInputUpperCase} isPassingId />
         </Form.Item>
         <Form.Item
           label={"Account Registration Number"}
@@ -448,6 +454,7 @@ const CustomerAccountInformation = ({
             onInput={(e) =>
               (e.target.value = e.target.value.replace(/\D/g, ""))
             }
+            isPassingId
           />
         </Form.Item>
         <Form.Item
@@ -461,7 +468,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "category")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_accountCategory &&
               data_accountCategory?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -482,6 +489,7 @@ const CustomerAccountInformation = ({
               type="textarea"
               value={descriptionAI}
               onChange={(e) => setDescriptionAI(e.target.value)}
+              isPassingId
             />
           </Form.Item>
         </div>
@@ -503,7 +511,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "accountSegment")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_accountSegment &&
               data_accountSegment?.filter((ta) =>
                 CIObj?.customerType === 59 && (ta.id === 602 || ta.id === 601) || // If customer type is "Person"
@@ -527,7 +535,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "accountGroupType")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_accountGroupType &&
               data_accountGroupType?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -547,7 +555,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "accountType")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_accountType &&
               data_accountType?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -567,7 +575,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "classificationType")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_classificationType &&
               data_classificationType?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -581,7 +589,7 @@ const CustomerAccountInformation = ({
           name={"priority"}
           getValueFromEvent={(e) => handleCAIObj(e, "priority")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_priority &&
               data_priority?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -624,7 +632,7 @@ const CustomerAccountInformation = ({
                 </Select.Option>
               ))}
           </SelectComponent> */}
-          <UtilsTreeSelect treeData={filterData(data_industrialSector)} filterTreeNode={filterTreeNode}/>
+          <UtilsTreeSelect treeData={filterData(data_industrialSector)} filterTreeNode={filterTreeNode} isPassingId/>
         </Form.Item>
       </div>
 
@@ -638,7 +646,7 @@ const CustomerAccountInformation = ({
           name={"budgetYear"}
           getValueFromEvent={(e) => handleCAIObj(e, "budgetYear")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_budgetYear &&
               data_budgetYear?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -652,7 +660,7 @@ const CustomerAccountInformation = ({
           name={"budget"}
           getValueFromEvent={(e) => handleCAIObj(e, "budget")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_budget &&
               data_budget?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -666,7 +674,7 @@ const CustomerAccountInformation = ({
           name={"teritory"}
           getValueFromEvent={(e) => handleCAIObj(e, "teritory")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {data_teritory &&
               data_teritory?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
