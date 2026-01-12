@@ -232,6 +232,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               startDate,
               endDate,
               appHierId,
+              id: idIr,
+              type: type.toUpperCase(),
             }
           };
 
@@ -393,6 +395,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             startDate,
             endDate,
             appHierId,
+            id: idIr,
+            type: type.toUpperCase(),
           }
         };
 
@@ -444,6 +448,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               startDate,
               endDate,
               appHierId,
+              id: idIr,
+              type: type.toUpperCase(),
             }
           };
 
