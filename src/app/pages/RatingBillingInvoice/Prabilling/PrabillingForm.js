@@ -53,9 +53,9 @@ const PrabillingForm = ({ type }) => {
     list_component_prabilling,
     data_user_calculation,
     user_profile,
+    loadingCreate,
   } = useSelector((state) => state.rbi_prabilling);
 
-  console.log(loading,"loading")
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -433,7 +433,6 @@ const PrabillingForm = ({ type }) => {
       .then((data) => {
         if (data) {
           setModalSuccess(true);
-          console.log(loading,"kesini")
         }
       })
       .catch((error) => {
@@ -1192,13 +1191,13 @@ const PrabillingForm = ({ type }) => {
         header={"CONFIRMATION"}
         width={900}
         type={"confirmation"}
-        loading={loading}
+        loading={loadingCreate}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loading}  > 
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loadingCreate}  > 
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loading} disabled={loading}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loadingCreate} disabled={loadingCreate}>
               Confirm
             </ButtonComponent>
           </div>

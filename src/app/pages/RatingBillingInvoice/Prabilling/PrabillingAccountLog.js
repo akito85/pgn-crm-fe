@@ -369,14 +369,6 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
             loadMoreThreshold={20}
             rowKey={(record) => record.id}
           />
-          
-          {/* Footer text like in Figma */}
-          {logData.length > 0 && (
-            <div className="text-center text-gray-500 text-sm mt-3">
-              Showing {logData.length} of {totalElements} entries
-              {!hasMore && " | All data loaded"}
-            </div>
-          )}
         </div>
       </CardContainer>
     </div>

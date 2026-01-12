@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import DetailText from "../../../../components/DetailText";
 import { useState } from "react";
-import { Alert, Form, Progress, Select, Spin, Tooltip, Typography } from "antd";
+import { Alert, Form, Progress, Select, Spin, Tooltip, Typography, message } from "antd";
 import SelectComponent from "../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import { bytesConverter } from "../../../../utils/bytesConverter";
@@ -17,7 +17,6 @@ import {
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
 import {
-  // deleteSingleUsage, // ❌ Hapus import ini
   getFormatUsageType,
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
@@ -44,22 +43,23 @@ const UploadLayout = ({
   const [fileList, setFileList] = useState([]);
   const [fileName, setFileName] = useState("");
   const [fileProgress, setFileProgress] = useState(0);
-  const [dataSource, setDataSource] = useState(null);
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [deletedRecord, setDeletedRecord] = useState(null);
   const [recordId, setRecordId] = useState("");
   const [isFileUploadEnabled, setFileUploadEnabled] = useState(false);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [modalDelete, setModalDelete] = useState(false);
+  const [isLinkModalVisible, setLinkModalVisible] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [modalDelete, setModalDelete] = useState(false);
   const MAX_FILE_SIZE = 5000000;
+  const [form] = Form.useForm();
   const { loading } = useSelector((state) => state.monitoring_usage);
   const { columns, page, setPage, pageSize, setPageSize, onSort } =
     useMonitoringList(tabHeader, id);
-  const [tableDataSource, setTableDataSource] = useState([]);
   const dispatch = useDispatch();
-  const [isLinkModalVisible, setLinkModalVisible] = useState(false);
   const { list_usage_type } = useSelector((state) => state.monitoring_usage);
+  
+  // Ref untuk scroll ke file preview
+  const filePreviewRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -69,36 +69,15 @@ const UploadLayout = ({
     }
   }, [dispatch]);
 
-  // onChange Size
-  const onChangeSize = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
-
   const handleUpdate = (record, values) => {
-    const updatedData = { record };
-    setDataSource((prevDataSource) => {
-      return prevDataSource.map((data) =>
-        data.key === record.key ? { ...data, ...updatedData } : data
-      );
-    });
-    setSelectedRecord(null);
+    // Fungsi ini hanya untuk navigasi ke halaman update
+    // Data handling dilakukan di halaman update
   };
 
-  // ✅ Handle delete - hanya update state lokal (seperti versi sebelumnya)
   const handleDeleteOk = () => {
-    // Filter data berdasarkan recordId
     const newData = dataTable.filter((item) => item.recordId !== recordId);
-    
-    // Update state lokal
     setDataTable(newData);
-    
-    // Tutup modal
     setModalDelete(false);
-    
-    // Optional: Jika ada callback untuk tracking deleted data
-    // Anda bisa menambahkan dispatch(addDeletedData(deletedRecord)) di sini
-    // jika ingin menyimpan history data yang dihapus
   };
 
   // column action dengan recordId
@@ -132,7 +111,6 @@ const UploadLayout = ({
                   width={24}
                   onClick={() => {
                     setModalDelete(true);
-                    setDeletedRecord(record);
                     setRecordId(record?.recordId);
                   }}
                 />
@@ -155,13 +133,6 @@ const UploadLayout = ({
     setFileUploadEnabled(!!value);
   };
 
-  // data format
-  const dataFormat = [
-    { id: 1, text: "docs" },
-    { id: 2, text: "xlxs" },
-    { id: 3, text: "csv" },
-  ];
-
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
   };
@@ -175,12 +146,31 @@ const UploadLayout = ({
     accept: ".xlsx, .xls",
     maxCount: 1,
     beforeUpload: (file) => {
+      // Validasi: cek format usage type terlebih dahulu
+      if (!format) {
+        // Trigger validasi untuk menampilkan error di field
+        form.validateFields(['format_usage_type']).catch(() => {
+          // Error akan ditampilkan di field
+        });
+        return false;
+      }
+
       // Check file size
       if (file.size > MAX_FILE_SIZE) {
+        message.error('File size exceeds 5 MB limit');
         return false;
       }
 
       setFileName(file);
+      
+      // Scroll ke preview setelah file dipilih
+      setTimeout(() => {
+        filePreviewRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest' 
+        });
+      }, 100);
+      
       return false;
     },
     onChange: handleFileChange,
@@ -188,12 +178,11 @@ const UploadLayout = ({
 
   const handleUploadButtonClick = () => {
     if (!format) {
-      setModalVisible(true);
+      // Trigger validasi untuk menampilkan error di field
+      form.validateFields(['format_usage_type']).catch(() => {
+        // Error akan ditampilkan di field
+      });
     }
-  };
-
-  const handleModalClose = () => {
-    setModalVisible(false);
   };
 
   const handleUpload = async () => {
@@ -207,10 +196,20 @@ const UploadLayout = ({
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
 
-      // ✅ Refresh data setelah upload berhasil
+      // Set nama file yang berhasil diupload
+      setUploadedFileName(fileName.name);
+      
+      // Tampilkan success modal
+      setShowSuccessModal(true);
+
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
+      
+      // Clear file setelah berhasil upload
+      setFileList([]);
+      setFileName("");
+      
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
@@ -220,6 +219,7 @@ const UploadLayout = ({
           return file;
         })
       );
+      message.error('Upload failed. Please try again.');
     }
     setLoadingUpload(false);
   };
@@ -227,6 +227,14 @@ const UploadLayout = ({
   // handle upload by link
   const handleUploadLink = async (e) => {
     e.stopPropagation();
+
+    // Validasi: cek format usage type terlebih dahulu
+    if (!format) {
+      form.validateFields(['format_usage_type']).catch(() => {
+        // Error akan ditampilkan di field
+      });
+      return;
+    }
 
     // Validasi: cek apakah urlLink sudah diisi
     if (!urlLink || urlLink.trim() === "") {
@@ -241,17 +249,29 @@ const UploadLayout = ({
         calculationType: format.value,
         onProgress: (progress) => setFileProgress(progress),
       };
+      
+      setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
 
-      // ✅ Refresh data setelah upload berhasil
+      // Set nama file dari link
+      const linkFileName = urlLink.split('/').pop() || 'File from link';
+      setUploadedFileName(linkFileName);
+      
+      // Tampilkan success modal
+      setShowSuccessModal(true);
+
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
 
       // Reset urlLink setelah berhasil upload
       setUrlLink("");
+      
     } catch (error) {
       console.error("Upload error:", error);
+      message.error('Upload failed. Please try again.');
+    } finally {
+      setLoadingUpload(false);
     }
   };
 
@@ -286,6 +306,16 @@ const UploadLayout = ({
       return updatedFileList;
     });
     setFileName("");
+  };
+
+  // Handle click pada dragger area - trigger validasi format
+  const handleDraggerClick = (e) => {
+    if (!format) {
+      // Trigger validasi field format_usage_type untuk menampilkan error merah
+      form.validateFields(['format_usage_type']).catch(() => {
+        // Error akan ditampilkan di field
+      });
+    }
   };
 
   const renderLayout = (type) => {
@@ -348,14 +378,24 @@ const UploadLayout = ({
       );
     } else {
       return (
-        <Form>
+        <Form layout={"vertical"} form={form}>
           <div className={"w-full flex flex-col"}>
             <div className={"w-full flex no-margin-form"}>
-              <Form.Item className="w-1/4">
+              <Form.Item 
+                className="w-1/4"
+                name={"format_usage_type"}
+                label={"Format Usage Type"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select Format Usage Type first",
+                  },
+                ]}
+                validateTrigger={['onChange', 'onBlur']}
+              >
                 <SelectComponent
                   allowClear={false}
                   mandatory
-                  label={"Format Usage Type"}
                   placeholder={"Choose Usage Type"}
                   onChange={handleFormat}
                   labelInValue
@@ -368,122 +408,145 @@ const UploadLayout = ({
                 </SelectComponent>
               </Form.Item>
             </div>
-            <Form.Item name={"file"}>
+            
+            <Form.Item 
+              name={"file"}
+              rules={[
+                {
+                  validator: async (_, value) => {
+                    // Validator ini akan di-trigger saat user interact dengan dragger
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              validateTrigger={['onChange', 'onBlur']}
+              help={
+                form.getFieldError('format_usage_type').length > 0 
+                  ? undefined 
+                  : undefined
+              }
+            >
               <div className="w-full">
                 <Spin spinning={loadingUpload}>
-                  <Dragger {...property} disabled={!isFileUploadEnabled}>
-                    <p className="ant-upload-drag-icon">
-                      <SVGIcon
-                        name={"IconUploadAttachment"}
-                        onClick={handleUploadButtonClick}
-                      />
-                    </p>
-                    <p className="ant-upload-text text-bold">
-                      Drag and drop your file here or{" "}
-                      <span className="underline"> click for upload</span>
-                    </p>
-                    <p className="ant-upload-hint">
-                      The maximum file size is limited to 5 MB
-                    </p>
-                    <div className="flex items-center justify-center my-3 gap-x-3">
-                      <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
-                      <span>or</span>
-                      <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
-                    </div>
-                    <p className="ant-upload-text">
-                      Put Google Drive link or local file
-                    </p>
-                    <div
-                      className="flex my-5 justify-center items-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex gap-3 justify-center items-center">
-                        <InputComponent
-                          onChange={updateLink}
-                          disabled={!isFileUploadEnabled}
-                          onClick={(e) => e.stopPropagation()}
-                          value={urlLink}
-                          placeholder="Paste your link here"
+                  <div onClick={handleDraggerClick}>
+                    <Dragger {...property} disabled={!isFileUploadEnabled}>
+                      <p className="ant-upload-drag-icon">
+                        <SVGIcon
+                          name={"IconUploadAttachment"}
+                          onClick={handleUploadButtonClick}
                         />
-                        <ButtonComponent
-                          icon={<UploadOutlined />}
-                          type={"submit"}
-                          border={false}
-                          onClick={handleUploadLink}
-                          disabled={!isFileUploadEnabled}
-                        />
+                      </p>
+                      <p className="ant-upload-text text-bold">
+                        Drag and drop your file here or{" "}
+                        <span className="underline"> click for upload</span>
+                      </p>
+                      <p className="ant-upload-hint">
+                        The maximum file size is limited to 5 MB
+                      </p>
+                      <div className="flex items-center justify-center my-3 gap-x-3">
+                        <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
+                        <span>or</span>
+                        <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
                       </div>
-                    </div>
-                  </Dragger>
+                      <p className="ant-upload-text">
+                        Put Google Drive link or local file
+                      </p>
+                      <div
+                        className="flex my-5 justify-center items-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex gap-3 justify-center items-center">
+                          <InputComponent
+                            onChange={updateLink}
+                            disabled={!isFileUploadEnabled}
+                            onClick={(e) => e.stopPropagation()}
+                            value={urlLink}
+                            placeholder="Paste your link here"
+                          />
+                          <ButtonComponent
+                            icon={<UploadOutlined />}
+                            type={"submit"}
+                            border={false}
+                            onClick={handleUploadLink}
+                            disabled={!isFileUploadEnabled}
+                          />
+                        </div>
+                      </div>
+                    </Dragger>
+                  </div>
                 </Spin>
               </div>
             </Form.Item>
-            {fileList.map((file, index) => (
-              <div
-                className="border-solid border-[0.12rem] border-black rounded-[0.5rem] my-4 py-2 px-3 flex gap-4 items-center"
-                key={index}
-              >
-                <div>
-                  <FileOutlined style={{ fontSize: "20px" }} />
-                </div>
-                <div className="flex flex-col w-full">
-                  <div className="flex w-full justify-between">
-                    <Typography className={"text-red-500"}>
-                      {file.fileName}
-                    </Typography>
-                    <ButtonComponent
-                      icon={<CloseOutlined style={{ color: "#58804D" }} />}
-                      border={false}
-                      onClick={() => handleRemove(index)}
-                    />
+            
+            {/* File Preview dengan ref untuk scroll */}
+            <div ref={filePreviewRef}>
+              {fileList.map((file, index) => (
+                <div
+                  className="border-solid border-[0.12rem] border-black rounded-[0.5rem] my-4 py-2 px-3 flex gap-4 items-center"
+                  key={index}
+                >
+                  <div>
+                    <FileOutlined style={{ fontSize: "20px" }} />
                   </div>
-                  <Typography>{bytesConverter(file.size)}</Typography>
-                  {file.fileStatus === "error" ? (
+                  <div className="flex flex-col w-full">
                     <div className="flex w-full justify-between">
-                      <span className={"text-red-700"}>Failed to Upload</span>
+                      <Typography className={"text-red-500"}>
+                        {file.name || file.fileName}
+                      </Typography>
+                      <ButtonComponent
+                        icon={<CloseOutlined style={{ color: "#58804D" }} />}
+                        border={false}
+                        onClick={() => handleRemove(index)}
+                      />
+                    </div>
+                    <Typography>{bytesConverter(file.size)}</Typography>
+                    {file.fileStatus === "error" ? (
+                      <div className="flex w-full justify-between">
+                        <span className={"text-red-700"}>Failed to Upload</span>
+                        <ButtonComponent border={false}>
+                          <span className={"text-green-800 mr-2"}>Re-upload</span>
+                          <UndoOutlined style={{ color: "#58804D" }} />
+                        </ButtonComponent>
+                      </div>
+                    ) : file.size <= MAX_FILE_SIZE ? (
+                      loadingUpload ? (
+                        <Progress
+                          percent={fileProgress}
+                          format={(percent) => `${percent}%`}
+                        />
+                      ) : (
+                        <div className="flex gap-2 mt-2">
+                          <ButtonComponent
+                            type="primary"
+                            size={"middle"}
+                            onClick={handleUpload}
+                          >
+                            Upload
+                          </ButtonComponent>
+                        </div>
+                      )
+                    ) : (
+                      <span className={"text-red-700"}>
+                        File is bigger than 5MB
+                      </span>
+                    )}
+                  </div>
+                  {file.status === "error" && (
+                    <div className={"flex flex-col justify-end items-end"}>
                       <ButtonComponent border={false}>
-                        <span className={"text-green-800 mr-2"}>Re-upload</span>
+                        <span
+                          className={"text-green-800 mr-2"}
+                          onClick={reUploadImage}
+                        >
+                          Re-upload
+                        </span>
                         <UndoOutlined style={{ color: "#58804D" }} />
                       </ButtonComponent>
                     </div>
-                  ) : file.size <= MAX_FILE_SIZE ? (
-                    loadingUpload ? (
-                      <Progress
-                        percent={fileProgress}
-                        format={(percent) => `${percent}%`}
-                      />
-                    ) : (
-                      <div className="flex gap-2 mt-2">
-                        <ButtonComponent
-                          type="primary"
-                          size={"middle"}
-                          onClick={handleUpload}
-                        >
-                          Upload
-                        </ButtonComponent>
-                      </div>
-                    )
-                  ) : (
-                    <span className={"text-red-700"}>
-                      File is bigger than 5MB
-                    </span>
                   )}
                 </div>
-                {file.status === "error" && (
-                  <div className={"flex flex-col justify-end items-end"}>
-                    <ButtonComponent border={false}>
-                      <span
-                        className={"text-green-800 mr-2"}
-                        onClick={reUploadImage}
-                      >
-                        Re-upload
-                      </span>
-                      <UndoOutlined style={{ color: "#58804D" }} />
-                    </ButtonComponent>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </Form>
       );
@@ -493,22 +556,17 @@ const UploadLayout = ({
   return (
     <>
       {renderLayout(type)}
-      <ModalAttention
-        isOpen={isModalVisible}
-        handleCancel={handleModalClose}
-        handleOk={handleModalClose}
-        textList={"format usage type before uploading a file"}
-        header="Failed"
-      />
-
+      
+      {/* Modal: Link kosong */}
       <ModalAttention
         isOpen={isLinkModalVisible}
         handleCancel={() => setLinkModalVisible(false)}
         handleOk={() => setLinkModalVisible(false)}
-        textList={" a valid link before uploading"}
+        textList={"Please enter a valid link before uploading"}
         header="Link Required"
       />
 
+      {/* Modal: Konfirmasi Delete */}
       <ModalConfirm
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}

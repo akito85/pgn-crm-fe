@@ -42,6 +42,7 @@ const CalculationForm = ({ type }) => {
   // Selector
   const {
     loading,
+    loadingCreate,
     list_sor,
     list_service_type,
     list_account_group,
@@ -1210,13 +1211,14 @@ const handleReset = () => {
         handleCancel={() => setOpenModal(false)}
         header={"CONFIRMATION"}
         width={900}
+        loading={loadingCreate}
         type={"confirmation"}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loadingCreate} >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loadingCreate} disabled={loadingCreate}>
               Confirm
             </ButtonComponent>
           </div>

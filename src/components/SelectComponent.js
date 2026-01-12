@@ -31,7 +31,7 @@ const SelectComponent = ({
     width: width || "auto",
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-    ...customStyle, // Merge dengan custom style
+    ...customStyle,
   };
 
   const filterOption = (input, option) => {
@@ -56,7 +56,7 @@ const SelectComponent = ({
         labelInValue={labelInValue}
         value={value ? value : undefined}
         style={style}
-        className={className} // Tambahkan ini
+        className={className} 
         placeholder={placeholder}
         onChange={onChange}
         mode={mode}

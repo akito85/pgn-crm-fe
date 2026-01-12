@@ -10,6 +10,7 @@ import {
 const initialState = {
   data: [],
   loading: false,
+  loadingCreate: false,
   loadingModal: false,
   list_sor: [],
   list_service_type: [],
@@ -1072,14 +1073,14 @@ const calculationSlice = createSlice({
 
     // create calculation
     [createCalculation.pending]: (state) => {
-      state.loading = true;
+      state.loadingCreate = true;
     },
     [createCalculation.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingCreate = false;
       state.data = action.payload;
     },
     [createCalculation.rejected]: (state) => {
-      state.loading = false;
+      state.loadingCreate = false;
     },
     // get detail calculation job
     [getDetailCalculationJob.pending]: (state) => {
