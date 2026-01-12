@@ -32,6 +32,7 @@ const initialState = {
   dataListAppHierDetail: [],
   data_converted_currency: null,
   data_customer_list: null,
+  accountTypeDDL: [],
 };
 
 export const getPaginateReceipt = createAsyncThunk(
@@ -150,6 +151,38 @@ export const getCollectionAgentDDL = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getAccountTypeDDL = createAsyncThunk(
+  "GET_ACCOUNT_TYPE_DDL",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/account-type/combo-box`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_ACCOUNT_TYPE_DDL" })
+      );
+      return error;
+    }
+  }
+);
+
+export const getAccountNumberByTypeDDL = createAsyncThunk(
+  "GET_ACCOUNT_NUMBER_BY_TYPE_DDL",
+  async (type, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/list-account-number-by-type/${type}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_ACCOUNT_NUMBER_BY_TYPE_DDL" })
+      );
+      return error;
     }
   }
 );
@@ -1329,6 +1362,28 @@ const receiptSlice = createSlice({
     },
     [getReceiptCustomerList.rejected]: (state, action) => {
       state.data_customer_list = action.payload;
+      state.loading = false;
+    },
+    // Account Type DDL
+    [getAccountTypeDDL.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAccountTypeDDL.fulfilled]: (state, action) => {
+      state.accountTypeDDL = action.payload;
+      state.loading = false;
+    },
+    [getAccountTypeDDL.rejected]: (state) => {
+      state.loading = false;
+    },
+    // Account Number By Type
+    [getAccountNumberByTypeDDL.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAccountNumberByTypeDDL.fulfilled]: (state, action) => {
+      state.dataAccNumber = action.payload;
+      state.loading = false;
+    },
+    [getAccountNumberByTypeDDL.rejected]: (state) => {
       state.loading = false;
     },
     // Hold/Release Bulk

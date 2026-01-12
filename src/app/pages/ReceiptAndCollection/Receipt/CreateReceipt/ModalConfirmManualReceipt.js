@@ -94,30 +94,26 @@ const ModalConfirmManualReceipt = ({
               {"CUSTOMER INFORMATION"}
             </div>
             <div className="grid grid-cols-3 w-full gap-5">
-              <DetailText label={"Customer Number"}>{cusNumb}</DetailText>
+              <DetailText label={"Account Type"}>{data?.accountType}</DetailText>
               <DetailText label={"Account Number"}>{accNumb}</DetailText>
-              <DetailText label={"Customer Name"}>
-                {data?.customerName}
-              </DetailText>
-              <DetailText label={"Cost Center"}>{data?.areaId}</DetailText>
-              <DetailText label={"Account Segment"}>
-                {data?.segmentId}
-              </DetailText>
+              <DetailText label={"Account Name"}>{data?.accountName}</DetailText>
+              <DetailText label={"Customer Name"}>{data?.customerName}</DetailText>
+              <DetailText label={"Customer Number"}>{data?.customerNumber}</DetailText>
+              <DetailText label={"SOR"}>{data?.sor}</DetailText>
+              <DetailText label={"Cost Center"}>{data?.area}</DetailText>
+              <DetailText label={"Account Segment"}>{data?.segment}</DetailText>
             </div>
             <div className="text-primary text-xs font-bold uppercase py-3">
               {"RECEIPT DETAIL INFORMATION"}
             </div>
             <div className="w-full grid grid-cols-3 gap-5">
-              <DetailText label={"Receipt Code"}>
-                {data?.receiptCode}
-              </DetailText>
               <DetailText label={"Receipt Channel"}>{resepChannel}</DetailText>
-              <DetailText label={"Payment Partner"}>
+              <DetailText label={"Payment Gateway"}>
                 {paymentGateway}
               </DetailText>
               <DetailText label={"Collecting Agent"}>{colGen}</DetailText>
               <DetailText label={"Delivery Channel"}>{devChen}</DetailText>
-              <DetailText label={"Receipt Method"}>{method}</DetailText>
+              <DetailText label={"Method"}>{method}</DetailText>
               <DetailText label={"Receipt Date"}>
                 {data?.receiptDate
                   ? moment(data?.receiptDate).format(dateFormatting.dateTime)
