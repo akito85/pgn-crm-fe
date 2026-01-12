@@ -416,10 +416,6 @@ const RelationshipCreateAndUpdate = ({
       breadcrumbName: "Customer/Account",
     },
     {
-      path: "",
-      breadcrumbName: "Detail Customer",
-    },
-    {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Detail Account",
     },
