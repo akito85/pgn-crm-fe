@@ -1475,7 +1475,7 @@ const CalculationPage = () => {
                 dataSource={data_calculation.result}
                 columns={processedColumns}
                 totalData={data_calculation?.page?.totalElements || 0}
-                tableScrolled={{ x: 2000, y: 525 }}
+                tableScrolled={{ x: 3000, y: 525 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 handleDownload={handleDownload}
