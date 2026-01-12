@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Space, Collapse, Badge } from "antd";
 import PaymentChannelForm from "./PaymentChannelForm";
 import TaxIdentifierForm from "./TaxIdentifierForm";
@@ -19,11 +19,12 @@ const FinancialInformationForm = ({
   dataFinancialInfo = [],
   dataAddress,
   form,
-  setTiObj
+  setTiObj,
+  current = 0,
+  setCurrent = () => {},
+  errorFieldName = null,
+  setErrorFieldName = () => {},
 }) => {
-  // State
-  const [current, setCurrent] = useState(0);
-
   const financialList = [
     {
       header: "Payment Channel",
@@ -96,6 +97,24 @@ const FinancialInformationForm = ({
       setCurrent(undefined);
     }
   };
+
+  useEffect(() => {
+    if (
+      current === 0 && ["paymentChannelType", "generateVA"].includes(errorFieldName) ||
+      current === 1 && ["taxIdentifierType", "taxIdentifierNumber", "taxIdentifierName", "taxAddress", "relatedAccountId", "customerNameTI", "accountNameTI", "ratit", "ratin", "ratin2", "ratia", "startDateTI", "descriptionTI"].includes(errorFieldName) ||
+      current === 2 && ["wapuFlag", "startDateWT", "descriptionWT"].includes(errorFieldName) ||
+      current === 3 && ["receivableAccount", "revenueAccount"].includes(errorFieldName)
+    ) {
+      setTimeout(() => {
+        form.scrollToField(errorFieldName, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+        setErrorFieldName(null);
+      }, 200);
+    }
+  }, [current, errorFieldName])
+
   return (
     <div>
       <span className="text-primary uppercase font-bold">

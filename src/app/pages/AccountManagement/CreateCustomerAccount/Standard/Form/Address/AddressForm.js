@@ -1333,6 +1333,7 @@ const AddressForm = ({
           onValuesChange={(changedValues, allValues) => {
             formAddress.setFieldsValue(changedValues);
           }}
+          scrollToFirstError={{ behavior: "smooth", block: "center" }}
         >
           <span className="text-primary uppercase font-bold">
             ADDRESS INFORMATION
@@ -1350,7 +1351,7 @@ const AddressForm = ({
               ]}
               getValueFromEvent={handleOnChangeCountry}
             >
-              <SelectComponent>
+              <SelectComponent isPassingId>
                 {data_country?.data &&
                   data_country?.data?.map((data) => (
                     <Select.Option key={data.id} value={data.id}>
@@ -1372,6 +1373,7 @@ const AddressForm = ({
             >
               <SelectComponent
                 disabled={!inputAddress?.countryId ? true : false}
+                isPassingId
               >
                 {data_province?.data &&
                   data_province?.data?.map((data) => (
@@ -1396,6 +1398,7 @@ const AddressForm = ({
                 disabled={
                   !inputAddress?.provinceId ? true : false
                 }
+                isPassingId
               >
                 {data_city?.data &&
                   data_city?.data?.map((data) => (
@@ -1418,6 +1421,7 @@ const AddressForm = ({
             >
               <SelectComponent
                 disabled={!inputAddress?.cityId ? true : false}
+                isPassingId
               >
                 {data_district?.data &&
                   data_district?.data?.map((data) => (
@@ -1442,6 +1446,7 @@ const AddressForm = ({
                 disabled={
                   !inputAddress?.districtId ? true : false
                 }
+                isPassingId
               >
                 {data_subDistrict?.data &&
                   data_subDistrict?.data?.map((data) => (
@@ -1465,6 +1470,7 @@ const AddressForm = ({
                 disabled={
                   !inputAddress?.subDistrictId ? true : false
                 }
+                isPassingId
               >
                 {data_postalCode?.data &&
                   data_postalCode?.data?.map((data) => (
@@ -1478,6 +1484,7 @@ const AddressForm = ({
               <InputComponent
                 onChange={(e) => handleInputChange(e.target.value, "building")}
                 onInput={onInputUpperCase}
+                isPassingId
               />
             </Form.Item>
             <Form.Item label="Floor" name="floor">
@@ -1486,6 +1493,7 @@ const AddressForm = ({
                 onInput={(e) =>
                   (e.target.value = e.target.value.replace(/\D/g, ""))
                 }
+                isPassingId
               />
             </Form.Item>
             <Form.Item label="House Name" name="houseName">
@@ -1494,6 +1502,7 @@ const AddressForm = ({
                   handleInputChange(e.target.value, "houseNumber")
                 }
                 onInput={onInputUpperCase}
+                isPassingId
               />
             </Form.Item>
             <Form.Item
@@ -1511,11 +1520,13 @@ const AddressForm = ({
                   handleInputChange(e.target.value, "streetName")
                 }
                 onInput={onInputUpperCase}
+                isPassingId
               />
             </Form.Item>
             <Form.Item label="Block" name="block">
               <InputComponent
                 onChange={(e) => handleInputChange(e.target.value, "block")}
+                isPassingId
               />
             </Form.Item>
             <Form.Item label="House Number" name="houseNumber">
@@ -1524,6 +1535,7 @@ const AddressForm = ({
                   handleInputChange(e.target.value, "houseNumber")
                 }
                 onInput={onInputUpperCase}
+                isPassingId
               />
             </Form.Item>
             <Form.Item label="RT" name="rt">
@@ -1533,6 +1545,7 @@ const AddressForm = ({
                 onInput={(e) =>
                   (e.target.value = e.target.value.replace(/\D/g, ""))
                 }
+                isPassingId
               />
             </Form.Item>
             <Form.Item label="RW" name="rw">
@@ -1542,6 +1555,7 @@ const AddressForm = ({
                 onInput={(e) =>
                   (e.target.value = e.target.value.replace(/\D/g, ""))
                 }
+                isPassingId
               />
             </Form.Item>
             <Form.Item
@@ -1554,7 +1568,7 @@ const AddressForm = ({
                 },
               ]}
             >
-              <SelectComponent>
+              <SelectComponent isPassingId>
                 {data_type &&
                   data_type?.map((data) => (
                     <Select.Option key={data.id} value={data.id}>
@@ -1569,6 +1583,7 @@ const AddressForm = ({
                   handleInputChange(e.target.value, "additionalNote")
                 }
                 onInput={onInputUpperCase}
+                isPassingId
               />
             </Form.Item>
 
@@ -1582,6 +1597,7 @@ const AddressForm = ({
                   type="textarea"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  isPassingId
                 />
               </Form.Item>
             </div>
@@ -1609,7 +1625,7 @@ const AddressForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={e => setSelectedMaps(e)}>
+              <SelectComponent onChange={e => setSelectedMaps(e)} isPassingId>
                 {/* {data_productName &&
                   data_productName?.map((data) => (
                     <Select.Option key={data.id} value={data.id}>
@@ -1631,7 +1647,7 @@ const AddressForm = ({
                 },
               ]}
             >
-              <InputComponent disabled />
+              <InputComponent disabled isPassingId />
             </Form.Item>
             <Form.Item
               label="Latitude"
@@ -1643,10 +1659,10 @@ const AddressForm = ({
                 },
               ]}
             >
-              <InputComponent disabled />
+              <InputComponent disabled isPassingId />
             </Form.Item>
             <Form.Item label="Altitude" name="altitude">
-              <InputComponent disabled />
+              <InputComponent disabled isPassingId />
             </Form.Item>
           </div>
 

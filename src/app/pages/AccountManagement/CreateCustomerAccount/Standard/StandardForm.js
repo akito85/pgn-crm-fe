@@ -78,6 +78,8 @@ const StandardForm = () => {
   const [keyModal, setKeyModal] = useState();
   // Financial Information
   const [fiObj, setFiObj] = useState({});
+  const [fiCurrent, setFiCurrent] = useState(0);
+  const [fiErrorFieldName, setFiErrorFieldName] = useState(null);
   // Tax Identifier Information
   const [tiObj, setTiObj] = useState({});
   // Withholding Tax Information
@@ -129,19 +131,29 @@ const StandardForm = () => {
   ])
   
   const [valuePageSectionCAI, setValuePageSectionCAI] = useState(tabPagesSectionCAI[0].value);
-  const [isCAIAttachmentError, setIsCAIAttachmentError] = useState(false);
+  const [caiErrorType, setCaiErrorType] = useState(null);
+  const [caiErrorField, setCaiErrorField] = useState(null);
 
   useEffect(() => {
-    if (valuePageSectionCAI === "Attachment" && isCAIAttachmentError) {
+    if (valuePageSectionCAI === "Attachment" && caiErrorType === "attachment") {
       if (window) {
         window.scrollTo({
           top: 0,
           behavior: "smooth",
         })
       }
-      setIsCAIAttachmentError(false);
+      setCaiErrorType(null);
     }
-  }, [valuePageSectionCAI, isCAIAttachmentError])
+    else if (valuePageSectionCAI === "Customer/Account Information" && caiErrorType === "info" && caiErrorField) {
+      form.scrollToField(caiErrorField, {
+        block: "center",
+        behavior: "smooth",
+      });
+      setCaiErrorField(null)
+      setCaiErrorType(null);
+    }
+    
+  }, [valuePageSectionCAI, caiErrorType, caiErrorField])
 
   useEffect(() => {
     form.setFieldsValue({
@@ -1086,6 +1098,10 @@ const StandardForm = () => {
           dataAddress={addressTable}
           form={form}
           setTiObj={setTiObj}
+          current={fiCurrent}
+          setCurrent={setFiCurrent}
+          errorFieldName={fiErrorFieldName}
+          setErrorFieldName={setFiErrorFieldName}
         />
       ),
     },
@@ -1186,7 +1202,7 @@ const StandardForm = () => {
 
       if (!listDataAttachment.length) {
         setValuePageSectionCAI("Attachment");
-        setIsCAIAttachmentError(true);
+        setCaiErrorType("attachment");
         return;
       }
 
@@ -1231,11 +1247,17 @@ const StandardForm = () => {
       // Handle scroll to the first field that failed
       if (error.errorFields && error.errorFields.length > 0) {
         const firstErrorFieldName = error.errorFields[0].name;
-        
-        form.scrollToField(firstErrorFieldName, {
-          behavior: 'smooth',
-          block: 'center',
-        });
+
+        if (valuePageSectionCAI === "Customer/Account Information")
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        else if (valuePageSectionCAI === "Attachment") {
+          setValuePageSectionCAI("Customer/Account Information")
+          setCaiErrorType("info");
+          setCaiErrorField(firstErrorFieldName);
+        }
       }
     });
   }
@@ -1274,10 +1296,14 @@ const StandardForm = () => {
   const FunctionCheckValidateContact = () => {
     form
       .validateFields([
-        `contactAddress1`,
-        `contactAddress2`,
-        `contactAddress3`,
-        `contactAddress4`,
+        "contact1",
+        "contactAddress1",
+        "contact2",
+        "contactAddress2",
+        "contact3",
+        "contactAddress3",
+        "contact4",
+        "contactAddress4",
       ])
       .then((values) => {
         next();
@@ -1285,6 +1311,16 @@ const StandardForm = () => {
       })
       .catch((error) => {
         console.error("Validation failed:", error);
+
+        // Handle scroll to the first field that failed
+        if (error.errorFields && error.errorFields.length > 0) {
+          const firstErrorFieldName = error.errorFields[0].name;
+          
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       });
   }
 
@@ -1647,11 +1683,52 @@ const StandardForm = () => {
         setModalConfirm(true);
       }
     })
-    .catch((errorInfo) => {
+    .catch((error) => {
       // Handle validation errors if needed
-      console.log(errorInfo);
+      console.log(error);
     });
   };
+
+  const handleSaveFailed = (error) => {
+    if (error.errorFields && error.errorFields.length > 0) {
+      
+      const firstErrorFieldName = error.errorFields[0].name[0];
+
+      switch (firstErrorFieldName) {
+        case "paymentChannelType":
+        case "generateVA":
+          setFiCurrent(0);
+          break;
+        
+        case "taxIdentifierType":
+        case "taxIdentifierNumber":
+        case "taxIdentifierName":
+        case "taxAddress":
+        case "relatedAccountId":
+        case "customerNameTI":
+        case "accountNameTI":
+        case "ratit":
+        case "ratin":
+        case "ratin2":
+        case "ratia":
+        case "startDateTI":
+        case "descriptionTI":
+          setFiCurrent(1);
+          break;
+
+        case "wapuFlag":
+        case "startDateWT":
+        case "descriptionWT":
+          setFiCurrent(2);
+          break;
+        
+        case "receivableAccount":
+        case "revenueAccount":
+          setFiCurrent(3)
+      }
+      setFiErrorFieldName(firstErrorFieldName);
+    }
+  }
 
   const FunctionCheckCustomer = () => {
     form.validateFields()
@@ -1894,7 +1971,7 @@ const StandardForm = () => {
           </BaseContainer>
         ) : null}
 
-        <Form layout="vertical" form={form} onFinish={handleSave}>
+        <Form layout="vertical" form={form} onFinish={handleSave} onFinishFailed={handleSaveFailed} >
           <BaseContainer header={"Account - Standard Information"}>
             <div className="flex flex-row gap-x-6 justify-center">
               <span className="mt-[10px]">
