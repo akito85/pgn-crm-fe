@@ -20,10 +20,14 @@ import AccountInformation from "../../app/pages/ReceiptAndCollection/MasterData/
 import ViewLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/ViewLateCharge";
 import ListRececiptForm from "../../app/pages/ReceiptAndCollection/Receipt/CreateReceipt/ListRececiptForm";
 import ListDetailLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/DetailLateCharge/ListDetailLateCharge";
+import ListFormLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/ListFormLateCharge";
 import ViewBridge from "../../app/pages/ReceiptAndCollection/MasterData/Bridge/ViewBridge";
 import ViewInvoice from "../../app/pages/ReceiptAndCollection/MasterData/Invoice/ViewInvoice";
 import ViewPayment from "../../app/pages/ReceiptAndCollection/MasterData/Payment/ViewPayment";
 import ViewTransactionLog from "../../app/pages/ReceiptAndCollection/MasterData/TransactionLog/ViewTransactionLog";
+import ListFormRecalculate from "../../app/pages/ReceiptAndCollection/LateChargeManagement/Recalculate/ListFormRecalculate";
+import ListFormReplace from "../../app/pages/ReceiptAndCollection/LateChargeManagement/Replace/ListFormReplace";
+import ListFormReverse from "../../app/pages/ReceiptAndCollection/LateChargeManagement/Reverse/ListFormReverse";
 
 
 import ViewPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ViewPartner";
@@ -74,6 +78,7 @@ import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/Pay
 
 import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
 import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
+
 
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
@@ -128,6 +133,11 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   //late Charge
   VIEW_LATE_CHARGE: <ViewLateCharge />,
   DETAIL_LATE_CHARGE: <ListDetailLateCharge />,
+  CREATE_LATE_CHARGE: <ListFormLateCharge type="create" />,
+  UPDATE_LATE_CHARGE: <ListFormLateCharge type="update" />,
+  RECALCULATE_LATE_CHARGE: <ListFormRecalculate />,
+  REPLACE_LATE_CHARGE: <ListFormReplace />,
+  REVERSE_LATE_CHARGE: <ListFormReverse />,
 
   // bridge
   VIEW_BRIDGE: <ViewBridge />,
