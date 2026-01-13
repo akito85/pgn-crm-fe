@@ -130,7 +130,7 @@ const FinancialInformationForm = ({
               onChange={(e) => handleCollapse(e, index)}
               style={{ borderRadius: "8px", backgroundColor: "#E6F1F9" }}
             >
-              <Collapse.Panel header={item.header} extra={item.isError ? <Badge count={'!'} overflowCount={10} /> : null}>
+              <Collapse.Panel forceRender header={item.header} extra={item.isError ? <Badge count={'!'} overflowCount={10} /> : null}>
                 {item.children}
               </Collapse.Panel>
             </Collapse>
