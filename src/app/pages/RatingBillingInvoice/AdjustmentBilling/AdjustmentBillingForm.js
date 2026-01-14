@@ -49,6 +49,7 @@ const AdjustmentBillingForm = ({ type }) => {
   const [form] = Form.useForm();
   const location = useLocation();
   const { id, adjustmentNumber } = location?.state || {};
+  console.log("id: ", type);
 
   // State
   const [appHierOptions, setAppHierOptions] = useState([]);

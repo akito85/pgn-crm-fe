@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin, Form } from "antd";
@@ -18,19 +18,42 @@ import { configApp } from "../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AdjustmentInvoiceSectionForm from "./Form/AdjustmentInvoiceSectionForm";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import { getListCategory } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
+import { getListCategoryInvoiceAdjustment } from "../../../../../redux/slices/rating_billing_invoice/adjustmentInvoice";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
+import {
+  getApprovalHierarchiesInvoiceAdjustment,
+  getApprovalHierarchyDetailsInvoiceAdjustment,
+  getDetailInvoiceAdjustment,
+  getAccountDetailInvoiceAdjustment,
+  getBillingPeriodInvoiceAdjustment,
+  getInvoiceListInvoiceAdjustment,
+  getInvoiceDetailInvoiceAdjustment,
+  createInvoiceAdjustment,
+  updateInvoiceAdjustment,
+  uploadAttachmentInvoiceAdjustment,
+  clearInvoiceAdjustmentDetail,
+  clearAccountDetail,
+  clearBillingPeriod,
+  clearInvoiceList,
+  clearInvoiceDetail,
+} from "../../../../../redux/slices/rating_billing_invoice/adjustmentInvoice";
 
 const AdjustmentInvoiceForm = ({ type }) => {
-  // Selector - Placeholder for Redux state
-  const loading = false;
+  // Selector
+  const {
+    loading,
+    dataDetail,
+    dataListApprovalHierarchy,
+    dataListApprovalHierarchyDetail,
+    dataListBillingCycle,
+  } = useSelector((state) => state.adjustmentInvoice);
 
   // Declaration
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const location = useLocation();
-  const { id, invoiceNumber } = location?.state || {};
+  const { id } = location?.state || {};
 
   // State
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -39,20 +62,26 @@ const AdjustmentInvoiceForm = ({ type }) => {
   const [bodyData, setBodyData] = useState({});
   const [flag, setFlag] = useState(1);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
-  const [valuePage, setValuePage] = useState("Create Adjustment Invoice");
+  const [valuePage, setValuePage] = useState(
+    type === "create"
+      ? "Create Adjustment Invoice"
+      : "Update Adjustment Invoice"
+  );
   const [tabPages, setTabPages] = useState([
     {
-      value: "Create Adjustment Invoice",
+      value:
+        type === "create"
+          ? "Create Adjustment Invoice"
+          : "Update Adjustment Invoice",
       paramValue: [
         "accountNumber",
-        "billingCycle",
+        "billingCycleId",
         "billingPeriod",
         "invoiceNumber",
         "transactionDate",
         "documentDate",
-        "termOfPayment",
+        "typeDueDate",
         "adjustmentReason",
-        "remark",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -65,23 +94,149 @@ const AdjustmentInvoiceForm = ({ type }) => {
 
   const isLoading = loading || loadingForm;
 
-  // Use Effect - Placeholder for API calls
+  // Use Effect - Fetch initial data and reset form for create mode
   useEffect(() => {
-    // TODO: dispatch(getSelectTOP())
-    // TODO: dispatch(getListApprovalHierarchy())
-  }, [dispatch]);
+    dispatch(getApprovalHierarchiesInvoiceAdjustment());
 
-  useEffect(() => {
-    if (id && type === "update") {
-      // TODO: dispatch(getDetailAdjustmentInvoice(id))
+    // Reset form if type is create
+    if (type === "create") {
+      form.resetFields();
+      setSelectedHierarchy(undefined);
+      setListDataAttachment([]);
+      // Clear all Redux state data
+      dispatch(clearAccountDetail());
+      dispatch(clearBillingPeriod());
+      dispatch(clearInvoiceList());
+      dispatch(clearInvoiceDetail());
     }
-  }, [dispatch, id, type]);
 
+    return () => {
+      dispatch(clearInvoiceAdjustmentDetail());
+    };
+  }, [dispatch, type, form]);
+
+  // Load data for update
+  useEffect(() => {
+    const loadUpdateData = async () => {
+      if (id && type === "update") {
+        setLoadingForm(true);
+        try {
+          const result = await dispatch(getDetailInvoiceAdjustment(id));
+
+          if (result.payload) {
+            const detail = result.payload;
+
+            // Wait for all dependent data to load
+            const promises = [];
+
+            // Load account detail
+            if (detail.accountNumber) {
+              promises.push(
+                dispatch(getAccountDetailInvoiceAdjustment(detail.accountNumber))
+              );
+            }
+
+            // Load billing period
+            if (detail.billingCycleId) {
+              promises.push(
+                dispatch(getBillingPeriodInvoiceAdjustment(detail.billingCycleId))
+              );
+            }
+
+            // Load invoice list
+            if (
+              detail.accountNumber &&
+              detail.billingCycleId &&
+              detail.billingPeriode
+            ) {
+              // Find billing cycle period from id
+              const billingCyclePeriod =
+                dataListBillingCycle?.find(
+                  (cycle) => cycle.id === detail.billingCycleId
+                )?.period || detail.billingCycleId;
+
+              promises.push(
+                dispatch(
+                  getInvoiceListInvoiceAdjustment({
+                    accountNumber: detail.accountNumber,
+                    billingCycle: billingCyclePeriod,
+                    billingPeriod: detail.billingPeriode,
+                  })
+                )
+              );
+            }
+
+            // Load invoice detail
+            if (detail.invoiceNumber) {
+              promises.push(
+                dispatch(getInvoiceDetailInvoiceAdjustment(detail.invoiceNumber))
+              );
+            }
+
+            // Wait for all data to be loaded
+            await Promise.all(promises);
+
+            // Convert typeDueDate from "Fixed" to "Date" for display
+            const displayTypeDueDate =
+              detail.typeDueDate === "Fixed" ? "Date" : detail.typeDueDate;
+
+            // Set form values after all data is loaded
+            form.setFieldsValue({
+              accountNumber: detail.accountNumber,
+              billingCycleId: detail.billingCycleId,
+              billingPeriod: detail.billingPeriode,
+              invoiceNumber: detail.invoiceNumber,
+              transactionDate: detail.transactionDtm
+                ? moment(detail.transactionDtm)
+                : null,
+              documentDate: detail.documentDate
+                ? moment(detail.documentDate)
+                : null,
+              typeDueDate: displayTypeDueDate,
+              dueDate: detail.dueDate ? moment(detail.dueDate) : null,
+              termsOfPayment: detail.termsOfPayment,
+              adjustmentReason: detail.adjustmentReason,
+              remark: detail.remark,
+              apphierId: detail.apphierId,
+            });
+
+            setSelectedHierarchy(detail.apphierId);
+          }
+        } catch (error) {
+          console.error("Error loading update data:", error);
+        } finally {
+          setLoadingForm(false);
+        }
+      }
+    };
+
+    loadUpdateData();
+  }, [dispatch, id, type, form, dataListBillingCycle]);
+
+  // Load approval hierarchy details
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      // TODO: dispatch(getListApprovalHierarchyDetail({ id: selectedHierarchy }))
+      dispatch(getApprovalHierarchyDetailsInvoiceAdjustment(selectedHierarchy));
     }
   }, [dispatch, selectedHierarchy]);
+
+  // Update appHierOptions when dataListApprovalHierarchy changes
+  useEffect(() => {
+    if (dataListApprovalHierarchy) {
+      const options = dataListApprovalHierarchy.map((item) => ({
+        value: item.appHierId,
+        label: item.approvalName,
+      }));
+      setAppHierOptions(options);
+    }
+  }, [dataListApprovalHierarchy]);
+
+  // Update appHierDataDetail when dataListApprovalHierarchyDetail changes
+  useEffect(() => {
+    if (dataListApprovalHierarchyDetail) {
+      setAppHierDataDetail(dataListApprovalHierarchyDetail);
+    }
+  }, [dataListApprovalHierarchyDetail]);
 
   // Breadcrumbs
   const routes = [
@@ -97,7 +252,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
       path:
         type === "create"
           ? INVOICE_ROUTES.ADJUSTMENT_INVOICE_CREATE
-          : INVOICE_ROUTES.ADJUSTMENT_INVOICE_CREATE,
+          : INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE,
       breadcrumbName:
         type === "create"
           ? "Generate Adjustment Invoice"
@@ -115,10 +270,41 @@ const AdjustmentInvoiceForm = ({ type }) => {
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
-      setAppHierOptions([]);
-      setSelectedHierarchy("");
+      setSelectedHierarchy(undefined);
       setListDataAttachment([]);
       setBodyData({});
+      // Clear all Redux state data
+      dispatch(clearAccountDetail());
+      dispatch(clearBillingPeriod());
+      dispatch(clearInvoiceList());
+      dispatch(clearInvoiceDetail());
+    } else {
+      // Reset to original values for update
+      if (dataDetail) {
+        // Convert typeDueDate from "Fixed" to "Date" for display
+        const displayTypeDueDate =
+          dataDetail.typeDueDate === "Fixed" ? "Date" : dataDetail.typeDueDate;
+
+        form.setFieldsValue({
+          accountNumber: dataDetail.accountNumber,
+          billingCycleId: dataDetail.billingCycleId,
+          billingPeriod: dataDetail.billingPeriode,
+          invoiceNumber: dataDetail.invoiceNumber,
+          transactionDate: dataDetail.transactionDtm
+            ? moment(dataDetail.transactionDtm)
+            : null,
+          documentDate: dataDetail.documentDate
+            ? moment(dataDetail.documentDate)
+            : null,
+          typeDueDate: displayTypeDueDate,
+          dueDate: dataDetail.dueDate ? moment(dataDetail.dueDate) : null,
+          termsOfPayment: dataDetail.termsOfPayment,
+          adjustmentReason: dataDetail.adjustmentReason,
+          remark: dataDetail.remark,
+          apphierId: dataDetail.apphierId,
+        });
+        setSelectedHierarchy(dataDetail.apphierId);
+      }
     }
   };
 
@@ -134,19 +320,121 @@ const AdjustmentInvoiceForm = ({ type }) => {
   };
 
   // Handle Save Form
-  const handleSave = (formValue) => {
-    let errorBody = {};
+  const handleSave = async (formValue) => {
+    console.log("Form values received:", formValue);
+    console.log("All form fields:", form.getFieldsValue());
+
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabPages, listDataAttachment);
-    } else {
-      handleMandatory(setTabPages, listDataAttachment);
-      setBodyData({
-        ...formValue,
-      });
+      return;
+    }
 
-      // TODO: Implement save logic
-      console.log("Form values:", formValue);
-      console.log("Attachments:", listDataAttachment);
+    handleMandatory(setTabPages, listDataAttachment);
+
+    // Get all form values directly from form instance (like EFakturCode pattern)
+    // This ensures we capture all fields even if not passed in formValue param
+    const allFormValues = form.getFieldsValue();
+    console.log("All form values from form.getFieldsValue():", allFormValues);
+
+    // Use allFormValues as primary source, formValue as fallback
+    const finalValues = { ...allFormValues, ...formValue };
+    console.log("Final merged values:", finalValues);
+
+    // Build body based on payload structure
+    const body = {
+      accountNumber: finalValues.accountNumber,
+      billingCycleId: finalValues.billingCycleId?.toString(),
+      billingPeriod: finalValues.billingPeriod,
+      invoiceNumber: finalValues.invoiceNumber,
+      transactionDate: finalValues.transactionDate
+        ? moment(finalValues.transactionDate).format("YYYY-MM-DD")
+        : null,
+      documentDate: finalValues.documentDate
+        ? moment(finalValues.documentDate).format("YYYY-MM-DD")
+        : null,
+      typeDueDate:
+        finalValues.typeDueDate === "Date" ? "Fixed" : finalValues.typeDueDate,
+      adjustmentReason: finalValues.adjustmentReason,
+      remarks: finalValues.remark,
+      apphierId: finalValues.apphierId?.toString(),
+      isSubmit: flag === 2 ? "Y" : "N",
+    };
+
+    // Add dueDate and termsOfPayment based on typeDueDate
+    if (finalValues.typeDueDate === "Date") {
+      // When type is Date, only send dueDate
+      body.dueDate = finalValues.dueDate
+        ? moment(finalValues.dueDate).format("YYYY-MM-DD")
+        : null;
+    } else {
+      // When type is Terms of Payment, send both termsOfPayment and calculated dueDate
+      body.termsOfPayment = finalValues.termsOfPayment;
+      // dueDate should already be calculated in the form
+      body.dueDate = finalValues.dueDate
+        ? moment(finalValues.dueDate).format("YYYY-MM-DD")
+        : null;
+    }
+
+    console.log("Payload being sent:", JSON.stringify(body, null, 2));
+    setBodyData(body);
+
+    try {
+      setLoadingForm(true);
+      let result;
+      let invAdjustmentId;
+
+      if (type === "update" && id) {
+        result = await dispatch(updateInvoiceAdjustment({ id, body })).unwrap();
+        invAdjustmentId = id;
+      } else {
+        result = await dispatch(createInvoiceAdjustment({ body })).unwrap();
+        invAdjustmentId = result?.invAdjustmentId || result?.id;
+      }
+
+      // Upload attachments if any
+      if (listDataAttachment.length > 0 && invAdjustmentId) {
+        await uploadAttachments(invAdjustmentId);
+      }
+
+      // Success - modal success will be shown by Redux action
+      // User can navigate back manually via modal or back button
+    } catch (error) {
+      setModalError(true);
+      setBodyError({
+        message: error?.message || "An error occurred",
+      });
+    } finally {
+      setLoadingForm(false);
+    }
+  };
+
+  // Upload attachments function
+  const uploadAttachments = async (refId) => {
+    try {
+      // Filter only new attachments that need to be uploaded
+      const newAttachments = listDataAttachment.filter(
+        (att) => att.dataType === "new"
+      );
+
+      // Upload each attachment
+      for (const attachment of newAttachments) {
+        const formData = new FormData();
+        formData.append("category", attachment.fileCategoryId);
+        formData.append("files", attachment.file);
+        formData.append("refId", refId);
+
+        await dispatch(
+          uploadAttachmentInvoiceAdjustment({
+            formData,
+            onProgress: (percent) => {
+              console.log(`Upload progress: ${percent}%`);
+            },
+          })
+        ).unwrap();
+      }
+    } catch (error) {
+      console.error("Attachment upload error:", error);
+      throw error;
     }
   };
 
@@ -202,7 +490,12 @@ const AdjustmentInvoiceForm = ({ type }) => {
         >
           <div
             className={`${
-              valuePage !== "Create Adjustment Invoice" ? "hidden" : ""
+              valuePage !==
+              (type === "create"
+                ? "Create Adjustment Invoice"
+                : "Update Adjustment Invoice")
+                ? "hidden"
+                : ""
             }`}
           >
             <AdjustmentInvoiceSectionForm type={type} form={form} />
@@ -216,6 +509,8 @@ const AdjustmentInvoiceForm = ({ type }) => {
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
+                form={form}
+                fieldName="apphierId"
               />
             </BaseContainer>
           </div>
@@ -227,19 +522,31 @@ const AdjustmentInvoiceForm = ({ type }) => {
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 dispatch={dispatch}
-                getAPICategory={getListCategory}
-                typeSelector="adjustmentBilling"
+                getAPICategory={getListCategoryInvoiceAdjustment}
+                typeSelector="adjustmentInvoice"
                 service={ratingBillingHttpService}
                 configApplication={configApp.RATING_BILLING_SERVICE}
                 getAPIGuard={getConfigFileRBIData}
                 typeRBI={"data"}
                 mandatory={true}
+                refId={id}
               />
             </BaseContainer>
           </div>
 
           <div className="mt-[10px] flex">
-            <ButtonComponent type={"submit"} onClick={() => setModalBack(true)}>
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setModalBack(true)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+            >
               Back
             </ButtonComponent>
 
@@ -279,7 +586,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
                   htmlType={"submit"}
                   onClick={() => setFlag(2)}
                 >
-                  Next
+                  Submit
                 </ButtonComponent>
               </Form.Item>
             </div>
@@ -290,7 +597,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
         <ModalBack
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
+          handleOk={() => navigate(INVOICE_ROUTES.ADJUSTMENT_INVOICE_VIEW)}
         />
 
         {/* Modal Retry */}
@@ -306,7 +613,13 @@ const AdjustmentInvoiceForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              type === "update"
+                ? flag === 1
+                  ? "updated"
+                  : "submitted"
+                : flag === 1
+                ? "created"
+                : "submitted"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
