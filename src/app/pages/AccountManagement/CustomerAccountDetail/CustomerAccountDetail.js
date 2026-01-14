@@ -15,11 +15,11 @@ const data = [
   // { value: "Customer Information" },
   { value: "Account Information" }, //
   { value: "Last Activity" },
-  { value: "Billing" },
-  { value: "Receipt" },
-  { value: "Service Request" },
-  { value: "Account Statement" },
-  { value: "Pre Requisite" },
+  { value: "Billing", disabled: true, },
+  { value: "Receipt", disabled: true, },
+  { value: "Service Request", disabled: true, },
+  { value: "Account Statement", disabled: true, },
+  { value: "Pre Requisite", disabled: true, },
   { value: "Account Address" }, //
   { value: "Account Contact" }, //
   { value: "Distribution Media" }, //
@@ -28,8 +28,8 @@ const data = [
   { value: "Service Agreement" },
   { value: "Relationship" },
   { value: "Gas Source" },
-  { value: "Gas Deposit" },
-  { value: "Compensation" },
+  { value: "Gas Deposit", disabled: true, },
+  { value: "Compensation", disabled: true, },
   { value: "Promo" },
   { value: "Multi Destination" },
   { value: "Additional Information" },
@@ -37,7 +37,7 @@ const data = [
   { value: "Equipment" },
   { value: "Raw Material Source" },
   { value: "Product Distribution" },
-  { value: "User Access" },
+  { value: "User Access", disabled: true, },
 ];
 
 const CustomerAccountDetail = ({ type = "standard" }) => {
