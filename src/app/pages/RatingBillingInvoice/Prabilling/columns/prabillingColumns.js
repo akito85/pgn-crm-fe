@@ -6,7 +6,6 @@ import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 
-
 export const getAllTabColumns = (
   search,
   searchInput,
@@ -17,7 +16,7 @@ export const getAllTabColumns = (
   {
     key: "no",
     title: "NO",
-    width: 20,
+    width:30,
     isClassification: true,
     render: (text, object, index) => index + 1,
   },
@@ -27,7 +26,7 @@ export const getAllTabColumns = (
     dataIndex: "initCode",
     sorter: true,
     isClassification: true,
-    width: 65,
+    width: 110,
     filteredValue: [search?.initCode] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -55,7 +54,7 @@ export const getAllTabColumns = (
     dataIndex: "billingCycle",
     isClassification: true,
     sorter: true,
-    width: 65,
+    width: 108,
     filteredValue: [search?.billingCycle] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -83,7 +82,7 @@ export const getAllTabColumns = (
     dataIndex: "billPeriod",
     isClassification: true,
     sorter: true,
-    width: 70,
+    width: 105,
     filteredValue: [search?.billPeriod] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -111,7 +110,7 @@ export const getAllTabColumns = (
     dataIndex: "sor",
     isClassification: true,
     sorter: true,
-    width: 80,
+    width: 140,
     filteredValue: [search?.sor] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -140,7 +139,7 @@ export const getAllTabColumns = (
     dataIndex: "costCenter",
     isClassification: true,
     sorter: true,
-    width: 65,
+    width: 130,
     filteredValue: [search?.costCenter] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -169,7 +168,7 @@ export const getAllTabColumns = (
     dataIndex: "meterReadingCode",
     isClassification: true,
     sorter: true,
-    width: 90,
+    width: 105,
     filteredValue: [search?.meterReadingCode] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -198,7 +197,7 @@ export const getAllTabColumns = (
     dataIndex: "customerSegment",
     isClassification: true,
     sorter: true,
-    width: 80,
+    width: 90,
     filteredValue: [search?.customerSegment] || null,
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
@@ -280,16 +279,17 @@ export const getAllTabColumns = (
       ),
   },
   {
-    key: "processName",
-    title: "PROCESS NAME",
-    dataIndex: "processName",
+    key: "message",
+    title: "MESSAGE",
+    dataIndex: "message",
     align: "left",
-    width: 70,
     sorter: true,
-    filteredValue: [search?.processName] || null,
+    width: 100,
+    filteredValue: [search?.message] || null,
+    ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "processName",
+      "message",
       searchInput,
       searchedColumn,
       searchText,
@@ -298,26 +298,57 @@ export const getAllTabColumns = (
     ),
     render: (text) =>
       renderColumn(
-        "processName",
-        hasValue(search["processName"]),
+        "message",
+        hasValue(search["message"]),
         searchText,
         text,
-        false,
+        true,
         "input",
         search
       ),
   },
   {
-    key: "createdBy",
-    title: "CREATED BY",
-    dataIndex: "createdBy",
-    isClassification: true,
-    width: 60,
+    key: "totalCustomer",
+    title: "TOTAL CUSTOMER",
+    dataIndex: "totalCustomer",
+    isNumber: true,
     sorter: true,
-    filteredValue: [search?.createdBy] || null,
+    width: 90,
+    filteredValue: [search?.totalCustomer] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "createdBy",
+      "totalCustomer",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      const displayText = text?.toLocaleString() || "";
+      return renderColumn(
+        "totalCustomer",
+        hasValue(search["totalCustomer"]),
+        searchText,
+        displayText,
+        false,
+        "input",
+        search
+      );
+    },
+  },
+  {
+    key: "remark",
+    title: "REMARK",
+    dataIndex: "remark",
+    align: "left",
+    sorter: true,
+    width: 90,
+    filteredValue: [search?.remark] || null,
+    ellipsis: { showTitle: false },
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "remark",
       searchInput,
       searchedColumn,
       searchText,
@@ -326,11 +357,11 @@ export const getAllTabColumns = (
     ),
     render: (text) =>
       renderColumn(
-        "createdBy",
-        hasValue(search["createdBy"]),
+        "remark",
+        hasValue(search["remark"]),
         searchText,
         text,
-        false,
+        true,
         "input",
         search
       ),
@@ -368,76 +399,48 @@ export const getAllTabColumns = (
     },
   },
   {
-    key: "message",
-    title: "MESSAGE",
-    dataIndex: "message",
-    align: "left",
+    key: "updatedDtm",
+    title: "Completion Date",
+    dataIndex: "updatedDtm",
+    isClassification: true,
     sorter: true,
-    width: 60,
-    filteredValue: [search?.message] || null,
-    ellipsis: { showTitle: false },
+    width: 90,
+    filteredValue: [search?.updatedDtm] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "message",
+      "updatedDtm",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "message",
-        hasValue(search["message"]),
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalCustomer",
-    title: "TOTAL CUSTOMER",
-    dataIndex: "totalCustomer",
-    isNumber: true,
-    sorter: true,
-    width: 80,
-    filteredValue: [search?.totalCustomer] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalCustomer",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
+      true,
+      "date"
     ),
     render: (text) => {
-      const displayText = text?.toLocaleString() || "";
-      return renderColumn(
-        "totalCustomer",
-        hasValue(search["totalCustomer"]),
+      const formattedDate = text
+        ? moment(text).format("DD MMM YYYY HH:mm:ss")
+        : "";
+      return renderDateColumn(
+        "updatedDtm",
+        hasValue(search["updatedDtm"]),
         searchText,
-        displayText,
-        false,
-        "input",
+        formattedDate,
+        "datetime",
         search
       );
     },
   },
   {
-    key: "remark",
-    title: "REMARK",
-    dataIndex: "remark",
-    align: "left",
+    key: "createdBy",
+    title: "CREATED BY",
+    dataIndex: "createdBy",
+    isClassification: true,
+    width: 80,
     sorter: true,
-    width: 70,
-    filteredValue: [search?.remark] || null,
-    ellipsis: { showTitle: false },
+    filteredValue: [search?.createdBy] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "remark",
+      "createdBy",
       searchInput,
       searchedColumn,
       searchText,
@@ -446,11 +449,11 @@ export const getAllTabColumns = (
     ),
     render: (text) =>
       renderColumn(
-        "remark",
-        hasValue(search["remark"]),
+        "createdBy",
+        hasValue(search["createdBy"]),
         searchText,
         text,
-        true,
+        false,
         "input",
         search
       ),
@@ -461,7 +464,7 @@ export const getAllTabColumns = (
     dataIndex: "status",
     align: "center",
     sorter: true,
-    width: 40,
+    width: 60,
     filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -497,7 +500,6 @@ export const getAllTabColumns = (
     },
   },
 ];
-
 
 export const getSummaryTabColumns = (
   search,
@@ -628,7 +630,7 @@ export const getSummaryTabColumns = (
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     width: 70,
     filteredValue: [search?.billingCycle] || null,
     ...getColumnSearchPropsUseFilteredValue(
@@ -655,7 +657,7 @@ export const getSummaryTabColumns = (
     key: "billPeriod",
     title: "BILLING PERIOD",
     dataIndex: "billPeriod",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     width: 60,
     filteredValue: [search?.billPeriod] || null,
@@ -683,7 +685,7 @@ export const getSummaryTabColumns = (
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     width: 70,
     filteredValue: [search?.sor] || null,
@@ -712,7 +714,7 @@ export const getSummaryTabColumns = (
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     width: 70,
     filteredValue: [search?.costCenter] || null,
@@ -741,7 +743,7 @@ export const getSummaryTabColumns = (
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     width: 70,
     filteredValue: [search?.accountSegment] || null,
@@ -769,7 +771,7 @@ export const getSummaryTabColumns = (
     key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     width: 70,
     filteredValue: [search?.accountGroupType] || null,
@@ -803,7 +805,7 @@ export const getActionColumns = (valueTab) => {
   if (valueTab === "Summary") {
     return [];
   }
-  
+
   // Untuk tab lain (All), tampilkan action View
   return [
     {

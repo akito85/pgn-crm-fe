@@ -113,6 +113,24 @@ const initialState = {
   },
   loading_sa: false,
   loading_usage: false,
+  filters: {
+    all_tab: {
+      search: {},
+      sort: "",
+      searchText: "",
+      searchedColumn: "",
+      page: 1,
+      selectedBillingPeriod: null,
+    },
+    summary_tab: {
+      search: {},
+      sort: "",
+      searchText: "",
+      searchedColumn: "",
+      page: 1,
+      selectedBillingPeriod: null,
+    },
+  },
 };
 
 // Get Prabill Summary Service Agreement
@@ -1798,6 +1816,21 @@ const prabillingSlice = createSlice({
         pageSize: 10,
       };
     },
+    setFilters: (state, action) => {
+      const { tab, filters } = action.payload;
+      state.filters[tab] = { ...state.filters[tab], ...filters };
+    },
+    clearFilters: (state, action) => {
+      const { tab } = action.payload;
+      state.filters[tab] = {
+        search: {},
+        sort: "",
+        searchText: "",
+        searchedColumn: "",
+        page: 1,
+        selectedBillingPeriod: null,
+      };
+    },
   },
   extraReducers: {
     // Get List Billing Period for Prabilling
@@ -2497,7 +2530,12 @@ const prabillingSlice = createSlice({
   },
 });
 
-export const { resetCustomerDetail, resetSummaryData, resetAllTabData } =
-  prabillingSlice.actions;
+export const {
+  resetCustomerDetail,
+  resetSummaryData,
+  resetAllTabData,
+  setFilters,
+  clearFilters,
+} = prabillingSlice.actions;
 const { reducer } = prabillingSlice;
 export default reducer;
