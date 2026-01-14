@@ -40,7 +40,7 @@ import {
 
 const ModalRefund = ({
   isOpen,
-  handleCancel = () => {},
+  handleBack = () => {},
   handleRefresh = () => {},
   handleOpenModal = () => {},
 }) => {
@@ -193,9 +193,9 @@ const ModalRefund = ({
     setBoolean(true);
   };
 
-  // Handle Cancel Form
-  const handleCancelForm = () => {
-    handleCancel();
+  // Handle Back Form
+  const handleBackForm = () => {
+    handleBack();
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
     setDataWarrantyInfoSelect([]);
@@ -236,7 +236,7 @@ const ModalRefund = ({
 
   // Handle Save for Modal Confirmation
   const handleSave = (formValue) => {
-    handleCancel();
+    handleBack();
 
     const body = {
     };
@@ -245,7 +245,7 @@ const ModalRefund = ({
       .unwrap()
       .then(() => {
         handleRefresh();
-        handleCancel();
+        handleBack();
         setSelectedCustomerInfoRowKeys([]);
         setDataCustomerInfoSelect([]);
         setDataWarrantyInfoSelect([]);
@@ -336,7 +336,7 @@ const ModalRefund = ({
     onChange: onSelectChangeCustomerInfo,
   };
 
-  // Warranti Information Step
+  // Warranty Information Step
   useEffect(() => {
     if (isOpen) {
       dispatch(
@@ -413,6 +413,11 @@ const ModalRefund = ({
 
   const [remarkRefundInformation, setRemarkRefundInformation] = useState("");
 
+  const [fixedRefundColumns, setFixedRefundColumns] = useState({
+    left: ["no"],
+    right: ["date", "refundAmount"] 
+  });
+
   useEffect(() => {
     if (isOpen) {
       dispatch(
@@ -459,8 +464,8 @@ const ModalRefund = ({
   }, [baseColumnsRefundInfo]);
 
   const processedColumnsRefundInfo = useMemo(() => {
-    return applyFixedColumns(allColumnsRefundInfo, fixedColumns);
-  }, [allColumnsRefundInfo, fixedColumns]);
+    return applyFixedColumns(allColumnsRefundInfo, fixedRefundColumns);
+  }, [allColumnsRefundInfo, fixedRefundColumns]);
 
   const columnDefinitionsRefundInfo = useMemo(() => {
     return allColumnsRefundInfo.map((col) => ({
@@ -561,14 +566,14 @@ const ModalRefund = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Refund"
-        handleCancel={handleCancelForm}
+        header="Warranty Refund"
+        handleBack={handleBackForm}
         width={1000}
         footer={
           <div className="flex w-full justify-end gap-x-5">
-            {current < steps.length - 1 && (
-              <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                <span className="p-1 text-[18px] text-center">Cancel</span>
+            {current < steps.length - 0 && (
+              <ButtonComponent type={"default"} onClick={handleBackForm}>
+                <span className="p-1 text-[18px] text-center">Back</span>
               </ButtonComponent>
             )}
             {current > 0 && (
@@ -758,62 +763,73 @@ const ModalRefund = ({
               <RadioTabs data={tabData} onChange={onChange} currentPosition={valuePage}/>
               
               <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
-                <p className="text-primary uppercase font-bold my-4">
-                  CUSTOMER INFORMATION
-                </p>
-                <TableRBI
-                  dataSource={dataCustomerInfoSelect}
-                  columns={processedColumnsCustomerInfo}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChange}
-                  onSizeChanger={handleChange}
-                  totalData={dataCustomerInfoSelect.length || 0}
-                  tableScrolled={{ y: 525, x: 1000 }}
-                  onSort={onSort}
-                  columnDefinitions={columnDefinitionsCustomerInfo}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
-                  loading={false}
-                />
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    CUSTOMER INFORMATION
+                  </p>
+                  <TableRBI
+                    dataSource={dataCustomerInfoSelect}
+                    columns={processedColumnsCustomerInfo}
+                    current={page}
+                    pageSize={pageSize}
+                    onChange={handleChange}
+                    onSizeChanger={handleChange}
+                    totalData={dataCustomerInfoSelect.length || 0}
+                    tableScrolled={{ y: 525, x: 1000 }}
+                    onSort={onSort}
+                    columnDefinitions={columnDefinitionsCustomerInfo}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={false}
+                  />
+                </div>
               </div>
 
               <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
-                <p className="text-primary uppercase font-bold my-4">
-                  REFUND INFORMATION
-                </p>
-                <TableRBI
-                  dataSource={dataSourceRefundInfoWithKeys}
-                  columns={processedColumnsRefundInfo}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChange}
-                  onSizeChanger={handleChange}
-                  totalData={dataSourceRefundInfoWithKeys.length || 0}
-                  tableScrolled={{ y: 525, x: 1000 }}
-                  onSort={onSort}
-                  columnDefinitions={columnDefinitionsRefundInfo}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
-                  loading={false}
-                />
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    REFUND INFORMATION
+                  </p>
+                  <TableRBI
+                    dataSource={dataSourceRefundInfoWithKeys}
+                    columns={processedColumnsRefundInfo}
+                    current={page}
+                    pageSize={pageSize}
+                    onChange={handleChange}
+                    onSizeChanger={handleChange}
+                    totalData={dataSourceRefundInfoWithKeys.length || 0}
+                    tableScrolled={{ y: 525, x: 1000 }}
+                    onSort={onSort}
+                    columnDefinitions={columnDefinitionsRefundInfo}
+                    fixedColumns={fixedRefundColumns}
+                    setFixedColumns={setFixedRefundColumns}
+                    loading={false}
+                  />
+                  <div>
+                    <DetailText label={"Remark"}>
+                      {form.getFieldValue("remark")}
+                    </DetailText>
+                  </div>
+                </div>
               </div>
 
               <div style={{ display: valuePage !== tabData[2].value ? "none" : undefined }}>
-                <p className="text-primary uppercase font-bold my-4">
-                  ATTACHMENT INFORMATION
-                </p>
-                <AttachmentComponent
-                  type={"preview"}
-                  data={listDataAttachment}
-                  updateData={setListDataAttachment}
-                  typeSelector="partner"
-                  dispatch={dispatch}
-                  getAPICategory={getListCategory}
-                  service={receiptCollectionHttpService}
-                  configApplication={configApp.PAYMENT_SERVICE}
-                  typeRBI={"data"}
-                />
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    ATTACHMENT INFORMATION
+                  </p>
+                  <AttachmentComponent
+                    type={"preview"}
+                    data={listDataAttachment}
+                    updateData={setListDataAttachment}
+                    typeSelector="partner"
+                    dispatch={dispatch}
+                    getAPICategory={getListCategory}
+                    service={receiptCollectionHttpService}
+                    configApplication={configApp.PAYMENT_SERVICE}
+                    typeRBI={"data"}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -824,7 +840,7 @@ const ModalRefund = ({
       <ModalError
         isOpen={modalError}
         handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
+        handleBack={handleCloseModalError}
         customText={"Try Again"}
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">

@@ -1,0 +1,89 @@
+{
+    "lateCharge": {
+        "id": "LC-2023-001",
+        "areaCode": "BEK001",
+        "areaName": "Bekasi",
+        "customerNumber": "CUS001",
+        "customerName": "PT Pertamina Gas Negara Tbk",
+        "periodTagihan": "2023-01-01",
+        "paymentAmount": 12000000,
+        "type": "Illegal Action",
+        "invoiceNo": "INV009123123012023",
+        "totalDaysLate": 1,
+        "totalLateCharge": 15000.0,
+        "dueDate": "2023-01-15",
+        "lateChargeRate": 15000.0,
+        "paymentDate": "2023-01-16",
+        "lateChargeTimeUnit": "15.000,00",
+        "remark": "Ini adalah remark detail.",
+        "createdDate": "2023-01-23 10:00:00",
+        "createdBy": "Jason Sutedja",
+        "updatedDate": "2023-01-23 10:00:00",
+        "updatedBy": "Jason Sutedja",
+        "appHierId": 502
+    },
+    "invoiceInfo": {
+        "invoiceNo": "INV009123123012023",
+        "totalAmount": 25000000.0,
+        "dueDate": "2023-01-31"
+    },
+    "adjustmentList": [
+        {
+            "id": "1",
+            "periodTagihan": "JAN 2023",
+            "invoiceNo": "INV009123123012023",
+            "type": "Illegal Usage",
+            "typeQuantity": "Hari Minggu",
+            "quantity": 1,
+            "value": 20,
+            "totalAmount": 20000000.0,
+            "remark": "ADJ0000000001",
+            "createdBy": "pgn@gmail.com"
+        },
+        {
+            "id": "2",
+            "periodTagihan": "DES 2022",
+            "invoiceNo": "INV009123123012022",
+            "type": "Illegal Usage",
+            "typeQuantity": "Hari Minggu",
+            "quantity": 1,
+            "value": 20,
+            "totalAmount": 25000000.0,
+            "remark": "ADJ0000000002",
+            "createdBy": "gas@gmail.com"
+        },
+        {
+            "id": "3",
+            "periodTagihan": "NOV 2022",
+            "invoiceNo": "INV009123123012022",
+            "type": "Illegal Usage",
+            "typeQuantity": "Hari Minggu",
+            "quantity": 1,
+            "value": 20,
+            "totalAmount": 14000000.0,
+            "remark": "ADJ0000000003",
+            "createdBy": "pgas@gmail.com"
+        }
+    ],
+    "historyList": [
+        {
+            "id": "1",
+            "date": "2023-01-23 10:00:00",
+            "amount": 20000000.0,
+            "type": "Illegal Usage",
+            "createdBy": "Jason Sutedja"
+        },
+        {
+            "id": "2",
+            "date": "2022-12-23 10:00:00",
+            "amount": 20000000.0,
+            "type": "Illegal Usage",
+            "createdBy": "Asep Saepullah"
+        }
+    ],
+    "tApprovalDto": {
+        "isApprover": true,
+        "tAppId": 123
+    },
+    "attachmentDtoList": []
+}

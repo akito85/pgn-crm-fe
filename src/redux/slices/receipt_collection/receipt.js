@@ -688,6 +688,78 @@ export const approveOrRejectReceipt = createAsyncThunk(
   }
 );
 
+export const approveOrRejectHoldReceipt = createAsyncThunk(
+  "APPROVE_OR_REJECT_HOLD_RECEIPT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/hold/approve-reject";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const successMessage = {
+        title: "Successfull",
+        description: `Your data has been ${body.action === "APPROVED" ? "Approved" : "Rejected"
+          }`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVED" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const approveOrRejectReleaseReceipt = createAsyncThunk(
+  "APPROVE_OR_REJECT_RELEASE_RECEIPT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/release/approve-reject";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const successMessage = {
+        title: "Successfull",
+        description: `Your data has been ${body.action === "APPROVED" ? "Approved" : "Rejected"
+          }`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVED" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 // get converted currency
 export const getConvertedCurrency = createAsyncThunk(
   "GET_CONVERTED_CURRENCY",
@@ -759,6 +831,32 @@ export const deleteReceipt = createAsyncThunk(
         validateError({ error: error, action: "DELETE_RECEIPT", back: false })
       );
       return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const holdReleaseReceiptBulk = createAsyncThunk(
+  "HOLD_RELEASE_RECEIPT_BULK",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/hold-release";
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: response?.message || "Action processed successfully",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "HOLD_RELEASE_RECEIPT_BULK",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -1052,6 +1150,32 @@ const receiptSlice = createSlice({
       state.message = action.payload;
     },
 
+    [approveOrRejectHoldReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectHoldReceipt.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectHoldReceipt.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    [approveOrRejectReleaseReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectReleaseReceipt.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectReleaseReceipt.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
     // Get Approve Hierarchy List
     [getAllApprovalListReceipt.pending]: (state, action) => {
       state.loading = true;
@@ -1158,6 +1282,18 @@ const receiptSlice = createSlice({
     [getReceiptCustomerList.rejected]: (state, action) => {
       state.data_customer_list = action.payload;
       state.loading = false;
+    },
+    // Hold/Release Bulk
+    [holdReleaseReceiptBulk.pending]: (state) => {
+      state.loading = true;
+    },
+    [holdReleaseReceiptBulk.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [holdReleaseReceiptBulk.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
     },
   },
 });

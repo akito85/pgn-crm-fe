@@ -130,6 +130,7 @@ import deductionReducer from "../slices/receipt_collection/deduction";
 import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
 import offsetReducer from "../slices/receipt_collection/offset";
+import writeOffReducer from "../slices/receipt_collection/writeOff";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -284,6 +285,7 @@ const reducer = combineReducers({
   activityAction: activityActionReducer,
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
+  writeOff: writeOffReducer,
 
   // notifications
   notifications: notificationsReducer,
