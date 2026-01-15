@@ -5,7 +5,7 @@ import moment from "moment/moment";
 const DateComponent = ({
   picker,
   label,
-  onChange = () => { },
+  onChange = () => {},
   mandatory,
   value,
   dateDisable,
@@ -15,6 +15,8 @@ const DateComponent = ({
   key,
   format = "DD MMM YYYY",
   showTime = false,
+  isPassingId = false,
+  id,
 }) => {
   const wrapper = "flex flex-col";
   const style = {
@@ -33,7 +35,7 @@ const DateComponent = ({
   };
 
   return (
-    <div className={wrapper}>
+    <div className={wrapper} id={isPassingId ? id : undefined}>
       <InputLabel text={label} mandatory={mandatory}></InputLabel>
       <DatePicker
         key={key}
