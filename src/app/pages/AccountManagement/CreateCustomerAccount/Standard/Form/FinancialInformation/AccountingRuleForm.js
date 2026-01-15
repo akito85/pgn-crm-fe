@@ -21,6 +21,7 @@ const AccountingRuleForm = ({ dataFinancialInfo = [] }) => {
             <InputComponent
               disabled={true}
               value={dataFinancialInfo?.accountingRule?.receivableAccount}
+              isPassingId
             />
           </Form.Item>
           <Form.Item
@@ -31,6 +32,7 @@ const AccountingRuleForm = ({ dataFinancialInfo = [] }) => {
             <InputComponent
               disabled={true}
               value={dataFinancialInfo?.accountingRule?.revenueAccount}
+              isPassingId
             />
           </Form.Item>
         </div>

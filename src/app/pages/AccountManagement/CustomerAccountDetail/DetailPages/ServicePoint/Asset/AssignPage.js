@@ -107,8 +107,8 @@ const AssignPage = ({
             onChange={(e) => setAssetName(e)}
           >
             {optionsAssetName?.map((item) => (
-              <Select.Option key={item.glbTypeValId} value={item.glbTypeValId}>
-                {item.name}
+              <Select.Option key={item.id} value={item.id}>
+                {item.text}
               </Select.Option>
             ))}
           </SelectComponent>
@@ -122,8 +122,8 @@ const AssignPage = ({
         >
           <SelectComponent disabled={type}>
             {optionsAssetType?.map((item) => (
-              <Select.Option key={item.glbTypeValId} value={item.glbTypeValId}>
-                {item.name}
+              <Select.Option key={item.id} value={item.id}>
+                {item.text}
               </Select.Option>
             ))}
           </SelectComponent>
@@ -151,8 +151,8 @@ const AssignPage = ({
         >
           <SelectComponent mandatory disabled={type}>
             {optionsBrand?.map((item) => (
-              <Select.Option key={item.glbTypeValId} value={item.glbTypeValId}>
-                {item.name}
+              <Select.Option key={item.id} value={item.id}>
+                {item.text}
               </Select.Option>
             ))}
           </SelectComponent>
@@ -444,7 +444,7 @@ const AssignPage = ({
           <SelectComponent disabled={type}>
             {optionsAnsi?.map((item) => (
               <Select.Option key={item.id} value={item.id}>
-                {item.name}
+                {item.text}
               </Select.Option>
             ))}
           </SelectComponent>

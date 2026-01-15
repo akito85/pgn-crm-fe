@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
@@ -59,8 +59,8 @@ const AdjustmentBillingPage = () => {
     right: ["statusApproval", "action"],
   }));
 
-  // Use Effect - Initial fetch dengan 100 data
-  useEffect(() => {
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
     dispatch(
       getAdjustmentBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
@@ -72,6 +72,11 @@ const AdjustmentBillingPage = () => {
     );
     setPage(1);
   }, [dispatch, search, sort]);
+
+  // Use Effect - Initial fetch dengan 100 data
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -429,94 +434,94 @@ const AdjustmentBillingPage = () => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] text-primary">
-                Adjustment Billing List
-              </p>
-
-              <Toolbar items={itemGrantAccess} />
-            </div>
-          }
-        >
-          <div className="w-full">
-            <TableRBI
-              idTable="adjustment-billing-table"
-              showExport={false}
-              dataSource={dataSourceWithKeys}
-              columns={processedColumns}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSort}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-              tableScrolled={{ y: 525, x: 3000 }}
-            />
-          </div>
-        </CardContainer>
-
-        {/* Modal Delete */}
-        <ModalConfirm
-          isOpen={modalDelete}
-          handleCancel={() => setModalDelete(false)}
-          handleOk={handleDeleteOk}
-          width={500}
-          useOk={true}
-        >
-          <div className="flex justify-center gap-[20px] mt-6">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              Adjustment Billing List
             </p>
+
+            <Toolbar items={itemGrantAccess} />
           </div>
-          <Alert
-            message="Warning! if you delete this data, it will be permanently."
-            type={"error"}
+        }
+      >
+        <div className="w-full">
+          <TableRBI
+            idTable="adjustment-billing-table"
+            showExport={false}
+            dataSource={dataSourceWithKeys}
+            columns={processedColumns}
+            totalData={data?.page?.totalElements || 0}
+            onSort={onSort}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+            tableScrolled={{ y: 525, x: 3000 }}
+            onRefresh={handleRefresh}
+            showRefresh={true}
           />
-        </ModalConfirm>
+        </div>
+      </CardContainer>
 
-        {/* Modal Error Delete */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={() => {
-            handleDeleteOk(bodyError.body, bodyError.handleClear);
-            setModalError(false);
-            setBodyError({});
-          }}
-          handleCancel={() => setModalError(false)}
-        >
-          <div className="px-8 py-8 justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconDelete" width={48} />
-              <p className="text-[18px] font-bold">Failed</p>
-            </div>
-            <p className="pl-[70px]">
-              {`Your data was not deleted, ${message?.data?.message}. Please try again.`}
-            </p>
-          </div>
-        </ModalError>
-
-        {/* Modal Approval History */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          width={1000}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
+      {/* Modal Delete */}
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleDeleteOk}
+        width={500}
+        useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className={"text-[18px] font-bold"}>
+            {`Are you sure want to delete it?`}
+          </p>
+        </div>
+        <Alert
+          message="Warning! if you delete this data, it will be permanently."
+          type={"error"}
         />
-      </Spin>
+      </ModalConfirm>
+
+      {/* Modal Error Delete */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={() => {
+          handleDeleteOk(bodyError.body, bodyError.handleClear);
+          setModalError(false);
+          setBodyError({});
+        }}
+        handleCancel={() => setModalError(false)}
+      >
+        <div className="px-8 py-8 justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconDelete" width={48} />
+            <p className="text-[18px] font-bold">Failed</p>
+          </div>
+          <p className="pl-[70px]">
+            {`Your data was not deleted, ${message?.data?.message}. Please try again.`}
+          </p>
+        </div>
+      </ModalError>
+
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
     </LayoutMenu>
   );
 };

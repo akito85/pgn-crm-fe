@@ -49,6 +49,7 @@ const AdjustmentBillingForm = ({ type }) => {
   const [form] = Form.useForm();
   const location = useLocation();
   const { id, adjustmentNumber } = location?.state || {};
+  console.log("id: ", type);
 
   // State
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -78,6 +79,8 @@ const AdjustmentBillingForm = ({ type }) => {
         "transactionDate",
         "adjustmentReason",
         "accountingDate",
+        "rateType",
+        "rateDate",
         "remark",
       ],
     },
@@ -166,6 +169,8 @@ const AdjustmentBillingForm = ({ type }) => {
         accountingDate: moment(dataDetail?.accountingDate),
         termsOfPayment: dataDetail?.termsOfPayment,
         adjustmentReason: dataDetail?.adjustmentReason,
+        rateType: dataDetail?.rateType,
+        rateDate: dataDetail?.rateDate ? moment(dataDetail?.rateDate) : null,
         remark: dataDetail?.remark,
         apphierId: apphierId,
       };
@@ -300,6 +305,8 @@ const AdjustmentBillingForm = ({ type }) => {
               "transactionDate",
               "accountingDate",
               "adjustmentReason",
+              "rateType",
+              "rateDate",
               "remark",
             ],
           },
@@ -353,9 +360,11 @@ const AdjustmentBillingForm = ({ type }) => {
       transactionDate: moment(bodyData?.transactionDate).format(
         dateFormatting.dateFormal
       ),
-      rateType: dataInvoice?.rateType,
+      rateType: bodyData?.rateType || dataInvoice?.rateType,
       rate: dataInvoice?.rate,
-      rateDate: dataInvoice?.rateDate,
+      rateDate: bodyData?.rateDate
+        ? moment(bodyData?.rateDate).format(dateFormatting.dateFormal)
+        : dataInvoice?.rateDate,
       accountId: idAccount,
       totalAdjustmentAmountIdr: sumIDR || null,
       totalAdjustmentAmountUsd: sumUSD || null,
