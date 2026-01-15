@@ -21,7 +21,10 @@ const SelectComponent = ({
   onDeselect = () => { },
   onClear = () => { },
   onPopupScroll = () => { },
-  className, 
+  onSearch = () => { },
+  filterOption,
+  showSearch = true,
+  className,
   style: customStyle,
 }) => {
   const wrapper = "flex flex-col";
@@ -32,7 +35,7 @@ const SelectComponent = ({
     ...customStyle,
   };
 
-  const filterOption = (input, option) => {
+  const defaultFilterOption = (input, option) => {
     if (options) {
       return option?.label?.toLowerCase()?.includes(input?.toLowerCase());
     } else if (Array?.isArray(option?.children)) {
@@ -48,15 +51,16 @@ const SelectComponent = ({
       <InputLabel text={label} mandatory={mandatory}></InputLabel>
       <Select
         onPopupScroll={onPopupScroll}
-        showSearch
+        showSearch={showSearch}
         optionFilterProp="children"
-        filterOption={filterOption}
+        filterOption={filterOption !== undefined ? filterOption : defaultFilterOption}
         labelInValue={labelInValue}
         value={value ? value : undefined}
         style={style}
-        className={className} 
+        className={className}
         placeholder={placeholder}
         onChange={onChange}
+        onSearch={onSearch}
         mode={mode}
         tagRender={tagRender}
         disabled={disabled}
