@@ -28,6 +28,7 @@ const initialState = {
   dataApprovalHistory: null,
   dataListCategory: [],
   dataListAttachment: [],
+  dataListAdjustmentReason: [],
   loading: false,
   loadingDetail: false,
   message: "",
@@ -151,6 +152,34 @@ export const getTermOfPaymentInvoiceAdjustment = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/invoice-adjustment/term-of-payment`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// Get Adjustment Reason List
+export const getAdjustmentReasonInvoiceAdjustment = createAsyncThunk(
+  "GET_ADJUSTMENT_REASON_INVOICE_ADJUSTMENT",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice-adjustment/get-adjustment-reason-list`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -682,7 +711,7 @@ export const downloadInvoiceAdjustment = createAsyncThunk(
         search.length > 0
           ? `&search=${encodeURIComponent(search.join(","))}`
           : "";
-      const url = `/v1/dbs/api/rbi/invoice-adjustment/download?page=${page}&size=${size}&sort=${sortParams}${searchParams}`;
+      const url = `/v1/dbs/api/rbi/invoice-adjustment/download-filter?page=${page}&size=${size}&sort=${sortParams}${searchParams}`;
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
@@ -703,33 +732,30 @@ export const deleteInvoiceAdjustment = createAsyncThunk(
   "DELETE_INVOICE_ADJUSTMENT",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/invoice-adjustment/${id}`;
+      const url = `/v1/dbs/api/rbi/invoice-adjustment/delete/${id}`;
       const response = await ratingBillingHttpService.deleteData(url);
-      const successBody = {
-        title: `Successful`,
-        description: `Invoice Adjustment has been deleted successfully.`,
+      const successMessage = {
+        title: "Successful",
+        description: "Your data has been deleted.",
+        return: false,
       };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
-    } catch (error) {
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return { id, data: response.data };
+    } catch (response) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
-        if (error.response?.data?.code === 419) {
-          thunkAPI.dispatch(setBodyError(error));
-        } else {
-          const errorBody = {
-            title: "Failed",
-            description: `Invoice Adjustment was not deleted. ${message}.`,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
-        return thunkAPI.rejectWithValue(error);
-      }
+        (response.response &&
+          response.response.data &&
+          response.response.data.message) ||
+        response.message ||
+        response.toString();
+      const errorBody = {
+        title: "Failed",
+        data: response.response?.data?.data,
+        description: `Your data was not deleted. ${message}. Please try again.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(response.response?.data);
     }
   }
 );
@@ -812,6 +838,18 @@ const adjustmentInvoiceSlice = createSlice({
       state.dataListTermOfPayment = action.payload;
     },
     [getTermOfPaymentInvoiceAdjustment.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // Get Adjustment Reason
+    [getAdjustmentReasonInvoiceAdjustment.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAdjustmentReasonInvoiceAdjustment.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListAdjustmentReason = action.payload;
+    },
+    [getAdjustmentReasonInvoiceAdjustment.rejected]: (state) => {
       state.loading = false;
     },
 

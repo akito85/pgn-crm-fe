@@ -13,6 +13,7 @@ import {
   getInvoiceListInvoiceAdjustment,
   getInvoiceDetailInvoiceAdjustment,
   getTermOfPaymentInvoiceAdjustment,
+  getAdjustmentReasonInvoiceAdjustment,
   clearAccountDetail,
   clearBillingPeriod,
   clearInvoiceList,
@@ -32,6 +33,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     dataListTermOfPayment,
     dataListInvoice,
     dataInvoiceDetail,
+    dataListAdjustmentReason,
   } = useSelector((state) => state.adjustmentInvoice);
 
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -41,6 +43,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const [selectedTypeDueDate, setSelectedTypeDueDate] = useState("Date");
   const [searchAccount, setSearchAccount] = useState("");
   const [documentDate, setDocumentDate] = useState(null);
+  const [selectedTermsOfPayment, setSelectedTermsOfPayment] = useState(null);
   const searchTimeoutRef = useRef(null);
 
   // Get initial values from form for update mode
@@ -53,6 +56,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       const invoiceNumber = form.getFieldValue("invoiceNumber");
       const typeDueDate = form.getFieldValue("typeDueDate");
       const docDate = form.getFieldValue("documentDate");
+      const termsOfPayment = form.getFieldValue("termsOfPayment");
 
       if (accountNumber) setSelectedAccount(accountNumber);
       if (billingCycleId) setSelectedBillingCycle(billingCycleId);
@@ -60,16 +64,25 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       if (invoiceNumber) setSelectedInvoice(invoiceNumber);
       if (typeDueDate) setSelectedTypeDueDate(typeDueDate);
       if (docDate) setDocumentDate(docDate);
+
+      // Set selected terms of payment object if exists
+      if (termsOfPayment && dataListTermOfPayment) {
+        const termsObj = dataListTermOfPayment.find(
+          (term) => term.description === termsOfPayment
+        );
+        if (termsObj) setSelectedTermsOfPayment(termsObj);
+      }
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [form]);
+  }, [form, dataListTermOfPayment]);
 
   // Fetch initial data
   useEffect(() => {
     dispatch(getListAccountInvoiceAdjustment({ search: "" }));
     dispatch(getBillingCycleInvoiceAdjustment());
     dispatch(getTermOfPaymentInvoiceAdjustment());
+    dispatch(getAdjustmentReasonInvoiceAdjustment());
   }, [dispatch]);
 
   // Reset selected states when type is create
@@ -80,6 +93,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       setSelectedBillingPeriod(null);
       setSelectedInvoice(null);
       setSelectedTypeDueDate("Date");
+      setSelectedTermsOfPayment(null);
     }
   }, [type]);
 
@@ -143,7 +157,6 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
 
   // Handle account search with debounce (2 seconds)
   const handleAccountSearch = (value) => {
-    console.log("onSearch triggered with value:", value);
     setSearchAccount(value);
 
     // Clear previous timeout
@@ -153,7 +166,6 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
 
     // Set new timeout for 2 seconds
     searchTimeoutRef.current = setTimeout(() => {
-      console.log("Debounce completed. Searching account with keyword:", value);
       // Fetch account list with search parameter
       dispatch(getListAccountInvoiceAdjustment({ search: value || "" }));
     }, 2000);
@@ -168,15 +180,6 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     };
   }, []);
 
-  // Monitor documentDate changes
-  useEffect(() => {
-    console.log("=== Document Date State Changed ===");
-    console.log("New documentDate:", documentDate);
-    console.log(
-      "Formatted:",
-      documentDate ? moment(documentDate).format("YYYY-MM-DD") : "null"
-    );
-  }, [documentDate]);
 
   // Handle account change
   const handleAccountChange = (value) => {
@@ -272,21 +275,18 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
 
   // Handle document date change
   const handleDocumentDateChange = (date) => {
-    console.log("Document date changed:", date);
-    console.log(
-      "Document date formatted:",
-      date ? moment(date).format("YYYY-MM-DD") : "null"
-    );
-
     setDocumentDate(date);
     form.setFieldsValue({
       documentDate: date,
     });
 
     // If terms of payment is selected, recalculate due date
-    const selectedTerms = form.getFieldValue("termsOfPayment");
-    if (selectedTerms && selectedTypeDueDate === "Terms of Payment" && date) {
-      const calculatedDueDate = calculateDueDate(date, selectedTerms);
+    if (
+      selectedTermsOfPayment &&
+      selectedTypeDueDate === "Terms of Payment" &&
+      date
+    ) {
+      const calculatedDueDate = calculateDueDate(date, selectedTermsOfPayment);
       form.setFieldsValue({
         dueDate: calculatedDueDate,
       });
@@ -294,36 +294,41 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   };
 
   // Calculate due date from document date + terms of payment
-  const calculateDueDate = (docDate, terms) => {
-    if (!docDate || !terms) return null;
+  const calculateDueDate = (docDate, termsOfPaymentObj) => {
+    if (!docDate || !termsOfPaymentObj) {
+      return null;
+    }
 
-    // Extract days from terms description (e.g., "H + 7" -> 7)
-    const daysMatch = terms.match(/\d+/);
-    if (!daysMatch) return null;
+    // Try to get additionalDays from terms of payment object
+    let additionalDays = termsOfPaymentObj.additionalDays;
 
-    const days = parseInt(daysMatch[0], 10);
-    return moment(docDate).add(days, "days");
+    // Fallback: Extract days from description or name if additionalDays not available
+    if (!additionalDays || isNaN(additionalDays)) {
+      const textToSearch =
+        termsOfPaymentObj.description || termsOfPaymentObj.name || "";
+      const daysMatch = textToSearch.match(/\d+/);
+      if (daysMatch) {
+        additionalDays = parseInt(daysMatch[0], 10);
+      } else {
+        return null;
+      }
+    }
+
+    const days = parseInt(additionalDays, 10);
+    const result = moment(docDate).add(days, "days");
+    return result;
   };
 
   // Format terms of payment display with calculated date
   const formatTermsOfPaymentOption = (term) => {
-    console.log("Formatting option for term:", term.name);
-
     // Get document date from form field directly instead of state
     const currentDocDate = form.getFieldValue("documentDate");
-    console.log("Current documentDate from form:", currentDocDate);
-    console.log("Current documentDate state:", documentDate);
 
     if (!currentDocDate) {
-      console.log("No document date, returning term name only");
       return term.name;
     }
 
-    const calculatedDate = calculateDueDate(currentDocDate, term.description);
-    console.log(
-      "Calculated date:",
-      calculatedDate ? calculatedDate.format("YYYY-MM-DD") : "null"
-    );
+    const calculatedDate = calculateDueDate(currentDocDate, term);
 
     if (!calculatedDate) {
       return term.name;
@@ -332,7 +337,6 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     const formattedOption = `${term.name} (${calculatedDate.format(
       "DD MMMM YYYY"
     )})`;
-    console.log("Formatted option:", formattedOption);
     return formattedOption;
   };
 
@@ -340,20 +344,38 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const handleTypeDueDateChange = (value) => {
     setSelectedTypeDueDate(value);
     if (value === "Date") {
+      // Clear terms of payment when switching to Date
+      form.setFieldsValue({
+        termsOfPayment: undefined,
+        dueDate: undefined,
+      });
+      setSelectedTermsOfPayment(null);
+    } else {
+      // Clear only the termsOfPayment dropdown when switching to Terms of Payment
+      // dueDate will be auto-calculated when user selects a term
       form.setFieldsValue({
         termsOfPayment: undefined,
       });
-    } else {
-      form.setFieldsValue({
-        dueDate: undefined,
-      });
+      setSelectedTermsOfPayment(null);
     }
   };
 
   // Handle terms of payment change
   const handleTermsOfPaymentChange = (value) => {
-    if (documentDate) {
-      const calculatedDueDate = calculateDueDate(documentDate, value);
+    // Find the selected terms of payment object
+    const termsObj = dataListTermOfPayment?.find(
+      (term) => term.description === value
+    );
+
+    setSelectedTermsOfPayment(termsObj);
+
+    // Get document date from form directly instead of state
+    const currentDocDate = form.getFieldValue("documentDate");
+
+    if (currentDocDate && termsObj) {
+      const calculatedDueDate = calculateDueDate(currentDocDate, termsObj);
+
+      // Set the moment object to form
       form.setFieldsValue({
         dueDate: calculatedDueDate,
       });
@@ -434,7 +456,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
 
       {/* Adjustment Invoice Information Section */}
       <CardContainer subHeader={"ADJUSTMENT INVOICE INFORMATION"}>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-x-3 gap-y-0">
           <Form.Item
             label="Billing Cycle"
             name="billingCycleId"
@@ -555,45 +577,52 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
             </SelectComponent>
           </Form.Item>
 
-          {selectedTypeDueDate === "Date" ? (
-            <Form.Item
-              label=""
-              name="dueDate"
-              rules={[
-                {
-                  required: true,
-                  message: "Please select Due Date!",
-                },
-              ]}
-            >
-              <DateComponent placeholder="Select Due Date" />
-            </Form.Item>
-          ) : (
-            <Form.Item
-              label=""
-              name="termsOfPayment"
-              rules={[
-                {
-                  required: true,
-                  message: "Please select Terms of Payment!",
-                },
-              ]}
-            >
-              <SelectComponent
-                key={
-                  documentDate ? documentDate.format("YYYY-MM-DD") : "no-date"
-                }
-                placeholder="Select Terms of Payment"
-                onChange={handleTermsOfPaymentChange}
+          <div className="pt-[30px]">
+            {selectedTypeDueDate === "Date" ? (
+              <Form.Item
+                label=""
+                name="dueDate"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select Due Date!",
+                  },
+                ]}
               >
-                {dataListTermOfPayment?.map((term) => (
-                  <Select.Option key={term.id} value={term.description}>
-                    {formatTermsOfPaymentOption(term)}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
-          )}
+                <DateComponent placeholder="Select Due Date" />
+              </Form.Item>
+            ) : (
+              <>
+                <Form.Item
+                  label=""
+                  name="termsOfPayment"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select Terms of Payment!",
+                    },
+                  ]}
+                >
+                  <SelectComponent
+                    placeholder="Select Terms of Payment"
+                    onChange={handleTermsOfPaymentChange}
+                  >
+                    {dataListTermOfPayment?.map((term) => (
+                      <Select.Option key={term.id} value={term.description}>
+                        {formatTermsOfPaymentOption(term)}
+                      </Select.Option>
+                    ))}
+                  </SelectComponent>
+                </Form.Item>
+                {/* Hidden DateComponent field to store calculated dueDate as moment object */}
+                <div style={{ display: "none" }}>
+                  <Form.Item name="dueDate">
+                    <DateComponent />
+                  </Form.Item>
+                </div>
+              </>
+            )}
+          </div>
 
           <Form.Item
             label="Adjustment Reason"
@@ -601,14 +630,23 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
             rules={[
               {
                 required: true,
-                message: "Please input Adjustment Reason!",
+                message: "Please select Adjustment Reason!",
               },
             ]}
           >
-            <InputComponent
-              placeholder="Enter Adjustment Reason"
-              maxLength={200}
-            />
+            <SelectComponent
+              placeholder="Select Adjustment Reason"
+              showSearch
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {dataListAdjustmentReason?.map((reason) => (
+                <Select.Option key={reason.code} value={reason.code}>
+                  {reason.text}
+                </Select.Option>
+              ))}
+            </SelectComponent>
           </Form.Item>
         </div>
 

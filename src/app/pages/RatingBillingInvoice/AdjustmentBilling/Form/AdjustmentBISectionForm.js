@@ -11,6 +11,8 @@ import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import {
   getListDetailType,
   getListItem,
+  getInvoiceInformation,
+  getInvoiceBillingItemList,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import CardComponent from "../../../../../components/Card/CardComponent";
@@ -32,7 +34,7 @@ const AdjustmentBISectionForm = ({
   onCreateClick,
 }) => {
   // Selector
-  const { dataListItem, dataDetailType } = useSelector(
+  const { dataListItem, dataDetailType, dataInvoiceInfo, dataBillingItemList } = useSelector(
     (state) => state.adjustmentBilling
   );
 
@@ -68,6 +70,20 @@ const AdjustmentBISectionForm = ({
       dispatch(getListItem(dataInvoice?.billingCode));
     }
   }, [dispatch, dataInvoice?.billingCode]);
+
+  // Fetch invoice information when invoiceNumber changes
+  useEffect(() => {
+    if (invoiceNumber && type !== "detail" && type !== "show") {
+      dispatch(getInvoiceInformation(invoiceNumber));
+    }
+  }, [dispatch, invoiceNumber, type]);
+
+  // Fetch billing item list when billingNumber is available
+  useEffect(() => {
+    if (dataInvoiceInfo?.billingNumber && type !== "detail" && type !== "show") {
+      dispatch(getInvoiceBillingItemList(dataInvoiceInfo?.billingNumber));
+    }
+  }, [dispatch, dataInvoiceInfo?.billingNumber, type]);
 
   useEffect(() => {
     if (dataItem) {
@@ -376,13 +392,45 @@ const AdjustmentBISectionForm = ({
   };
 
   const handleCreateClick = useCallback(() => {
-    invoiceNumber === undefined
-      ? setModalValidation(true)
-      : setOpenModal(true);
-    setTypeModal("create");
-    setDataUpdate([]);
-    setAdjustmentAmount(0);
-  }, [invoiceNumber]);
+    if (invoiceNumber === undefined) {
+      setModalValidation(true);
+      return;
+    }
+
+    // Check if billing item list is available
+    if (!dataBillingItemList || dataBillingItemList.length === 0) {
+      setModalValidation(true);
+      return;
+    }
+
+    // Get the first billing item from the API response
+    const firstBillingItem = dataBillingItemList[0];
+
+    // Create new row with data from first billing item
+    const newRow = {
+      key: listDataABI.length + 1,
+      adjustmentId: type === "update" ? adjustmentId : null,
+      itemCode: firstBillingItem?.billingItemCode || firstBillingItem?.itemCode,
+      item: firstBillingItem?.billingItem || firstBillingItem?.item,
+      quantity: firstBillingItem?.quantity || 0,
+      price: firstBillingItem?.price || 0,
+      uom: firstBillingItem?.uom || "",
+      currency: firstBillingItem?.currency || "",
+      priceCode: firstBillingItem?.priceCode || "Value",
+      amount: firstBillingItem?.amount || 0,
+      adjustmentAmount: 0,
+      totalAmount: firstBillingItem?.amount || 0,
+      totalAmountEqvIdr: firstBillingItem?.totalAmountEqvIdr || 0,
+      totalAmountEqvUsd: firstBillingItem?.totalAmountEqvUsd || 0,
+      type: null,
+      remark: "",
+      typeBasis: firstBillingItem?.typeBasis || "Debit",
+      discountAmount: firstBillingItem?.discountAmount || 0,
+    };
+
+    // Add the new row to the table
+    setListDataABI((prevData) => [...prevData, newRow]);
+  }, [invoiceNumber, dataBillingItemList, listDataABI, type, adjustmentId, setListDataABI]);
 
   // Expose handleCreateClick to parent via onCreateClick callback
   useEffect(() => {

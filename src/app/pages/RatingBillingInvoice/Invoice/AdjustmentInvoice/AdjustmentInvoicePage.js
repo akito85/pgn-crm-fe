@@ -20,10 +20,7 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 import TableRBI from "../../../../../components/TableRBI";
 import { columnsAdjustmentInvoice } from "./Table/TableAdjustmentInvoice";
-import {
-  ModalConfirm,
-  ModalError,
-} from "../../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import {
@@ -52,8 +49,6 @@ const AdjustmentInvoicePage = () => {
   const [search, setSearch] = useState({});
   const [modalDelete, setModalDelete] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
-  const [modalError, setModalError] = useState(false);
-  const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [idDelete, setIdDelete] = useState();
 
@@ -188,21 +183,16 @@ const AdjustmentInvoicePage = () => {
   };
 
   // Handle Delete OK
-  const handleDeleteOk = async (res, handleClear) => {
+  const handleDeleteOk = async () => {
     try {
       await dispatch(deleteInvoiceAdjustment(idDelete)).unwrap();
       setModalDelete(false);
       handleCancel();
-      handleClear();
       // Refresh the list after successful deletion
       handleRefresh();
     } catch (error) {
+      // Error is already handled by Redux slice (showModalError)
       setModalDelete(false);
-      setBodyError({
-        body: res,
-        handleClear: handleClear,
-      });
-      setModalError(true);
     }
   };
 
@@ -274,7 +264,7 @@ const AdjustmentInvoicePage = () => {
               state={{ id: record.id }}
             >
               <Tooltip title="Detail">
-                <div className="pt-1">
+                <div className="">
                   <SVGIcon name="IconDetail" width={20} />
                 </div>
               </Tooltip>
@@ -303,7 +293,7 @@ const AdjustmentInvoicePage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon
                   name="IconEdit"
                   width={24}
@@ -339,7 +329,7 @@ const AdjustmentInvoicePage = () => {
 
         return (
           <Tooltip title="Delete">
-            <div className="pt-1">
+            <div className="">
               <SVGIcon
                 name="IconDelete"
                 width={20}
@@ -369,7 +359,7 @@ const AdjustmentInvoicePage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
@@ -497,27 +487,6 @@ const AdjustmentInvoicePage = () => {
           type={"error"}
         />
       </ModalConfirm>
-
-      {/* Modal Error Delete */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={() => {
-          handleDeleteOk(bodyError.body, bodyError.handleClear);
-          setModalError(false);
-          setBodyError({});
-        }}
-        handleCancel={() => setModalError(false)}
-      >
-        <div className="px-8 py-8 justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconDelete" width={48} />
-            <p className="text-[18px] font-bold">Failed</p>
-          </div>
-          <p className="pl-[70px]">
-            {`Your data was not deleted. Please try again.`}
-          </p>
-        </div>
-      </ModalError>
 
       {/* Modal Approval History */}
       <ModalHistory

@@ -46,6 +46,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
     dataListApprovalHierarchy,
     dataListApprovalHierarchyDetail,
     dataListBillingCycle,
+    dataListTermOfPayment,
   } = useSelector((state) => state.adjustmentInvoice);
 
   // Declaration
@@ -132,14 +133,18 @@ const AdjustmentInvoiceForm = ({ type }) => {
             // Load account detail
             if (detail.accountNumber) {
               promises.push(
-                dispatch(getAccountDetailInvoiceAdjustment(detail.accountNumber))
+                dispatch(
+                  getAccountDetailInvoiceAdjustment(detail.accountNumber)
+                )
               );
             }
 
             // Load billing period
             if (detail.billingCycleId) {
               promises.push(
-                dispatch(getBillingPeriodInvoiceAdjustment(detail.billingCycleId))
+                dispatch(
+                  getBillingPeriodInvoiceAdjustment(detail.billingCycleId)
+                )
               );
             }
 
@@ -169,7 +174,9 @@ const AdjustmentInvoiceForm = ({ type }) => {
             // Load invoice detail
             if (detail.invoiceNumber) {
               promises.push(
-                dispatch(getInvoiceDetailInvoiceAdjustment(detail.invoiceNumber))
+                dispatch(
+                  getInvoiceDetailInvoiceAdjustment(detail.invoiceNumber)
+                )
               );
             }
 
@@ -225,7 +232,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
     if (dataListApprovalHierarchy) {
       const options = dataListApprovalHierarchy.map((item) => ({
         value: item.appHierId,
-        label: item.approvalName,
+        name: item.approvalName,
       }));
       setAppHierOptions(options);
     }
@@ -321,9 +328,6 @@ const AdjustmentInvoiceForm = ({ type }) => {
 
   // Handle Save Form
   const handleSave = async (formValue) => {
-    console.log("Form values received:", formValue);
-    console.log("All form fields:", form.getFieldsValue());
-
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabPages, listDataAttachment);
       return;
@@ -334,11 +338,9 @@ const AdjustmentInvoiceForm = ({ type }) => {
     // Get all form values directly from form instance (like EFakturCode pattern)
     // This ensures we capture all fields even if not passed in formValue param
     const allFormValues = form.getFieldsValue();
-    console.log("All form values from form.getFieldsValue():", allFormValues);
 
     // Use allFormValues as primary source, formValue as fallback
     const finalValues = { ...allFormValues, ...formValue };
-    console.log("Final merged values:", finalValues);
 
     // Build body based on payload structure
     const body = {
@@ -369,13 +371,45 @@ const AdjustmentInvoiceForm = ({ type }) => {
     } else {
       // When type is Terms of Payment, send both termsOfPayment and calculated dueDate
       body.termsOfPayment = finalValues.termsOfPayment;
-      // dueDate should already be calculated in the form
-      body.dueDate = finalValues.dueDate
-        ? moment(finalValues.dueDate).format("YYYY-MM-DD")
-        : null;
+
+      // Priority 1: Use dueDate from form if already calculated (from handleTermsOfPaymentChange)
+      if (finalValues.dueDate) {
+        body.dueDate = moment(finalValues.dueDate).format("YYYY-MM-DD");
+      }
+      // Priority 2: Calculate manually if dueDate not in form
+      else if (finalValues.documentDate && finalValues.termsOfPayment) {
+        // Find the selected terms of payment object to get additionalDays
+        const selectedTerms = dataListTermOfPayment?.find(
+          (term) => term.description === finalValues.termsOfPayment
+        );
+
+        if (selectedTerms && selectedTerms.additionalDays) {
+          // Calculate: documentDate + additionalDays
+          const days = parseInt(selectedTerms.additionalDays, 10);
+          const calculatedDueDate = moment(finalValues.documentDate).add(
+            days,
+            "days"
+          );
+          body.dueDate = calculatedDueDate.format("YYYY-MM-DD");
+        } else {
+          // Fallback: Extract days from termsOfPayment string
+          const daysMatch = finalValues.termsOfPayment.match(/\d+/);
+          if (daysMatch) {
+            const days = parseInt(daysMatch[0], 10);
+            const calculatedDueDate = moment(finalValues.documentDate).add(
+              days,
+              "days"
+            );
+            body.dueDate = calculatedDueDate.format("YYYY-MM-DD");
+          } else {
+            body.dueDate = null;
+          }
+        }
+      } else {
+        body.dueDate = null;
+      }
     }
 
-    console.log("Payload being sent:", JSON.stringify(body, null, 2));
     setBodyData(body);
 
     try {
@@ -424,12 +458,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
         formData.append("refId", refId);
 
         await dispatch(
-          uploadAttachmentInvoiceAdjustment({
-            formData,
-            onProgress: (percent) => {
-              console.log(`Upload progress: ${percent}%`);
-            },
-          })
+          uploadAttachmentInvoiceAdjustment({ formData })
         ).unwrap();
       }
     } catch (error) {
@@ -468,7 +497,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
   };
 
   // Handle Error Tab Form
-  const handleError = ({ values, errorFields, outOfDate }) => {
+  const handleError = ({ errorFields }) => {
     handleMandatory(setTabPages, listDataAttachment, errorFields);
   };
 
@@ -535,18 +564,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
           </div>
 
           <div className="mt-[10px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-            >
+            <ButtonComponent type={"submit"} onClick={() => setModalBack(true)}>
               Back
             </ButtonComponent>
 

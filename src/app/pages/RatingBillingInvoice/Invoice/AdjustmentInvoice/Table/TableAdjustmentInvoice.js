@@ -1,8 +1,11 @@
 import React from "react";
 import { Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import { currencyFormatting } from "../../../../../../utils/formatCurrency";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
 export const columnsAdjustmentInvoice = (
@@ -75,14 +78,14 @@ export const columnsAdjustmentInvoice = (
       ),
   },
   {
-    key: "billingCycleId",
+    key: "billingPeriode",
     title: "BILLING CYCLE",
-    dataIndex: "billingCycleId",
+    dataIndex: "billingPeriode",
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "billingCycleId",
+      "billingPeriode",
       searchInput,
       searchedColumn,
       searchText,
@@ -91,8 +94,8 @@ export const columnsAdjustmentInvoice = (
     ),
     render: (text) =>
       renderColumn(
-        "billingCycleId",
-        hasValue(search["billingCycleId"]),
+        "billingPeriode",
+        hasValue(search["billingPeriode"]),
         searchText,
         text,
         false,
@@ -360,90 +363,90 @@ export const columnsAdjustmentInvoice = (
         search
       ),
   },
-  {
-    key: "currency",
-    title: "CURRENCY",
-    dataIndex: "currency",
-    width: 100,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "currency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "currency",
-        hasValue(search["currency"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAdjustmentAmountIdr",
-    title: "TOTAL ADJUSTMENT AMOUNT IDR",
-    dataIndex: "totalAdjustmentAmountIdr",
-    width: 190,
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAdjustmentAmountIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      const formatted = currencyFormatting(text);
-      return renderColumn(
-        "totalAdjustmentAmountIdr",
-        hasValue(search["totalAdjustmentAmountIdr"]),
-        searchText,
-        formatted,
-        false,
-        "input",
-        search
-      );
-    },
-  },
-  {
-    key: "totalAdjustmentAmountUsd",
-    title: "TOTAL ADJUSTMENT AMOUNT USD",
-    dataIndex: "totalAdjustmentAmountUsd",
-    width: 190,
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAdjustmentAmountUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      const formatted = currencyFormatting(text);
-      return renderColumn(
-        "totalAdjustmentAmountUsd",
-        hasValue(search["totalAdjustmentAmountUsd"]),
-        searchText,
-        formatted,
-        false,
-        "input",
-        search
-      );
-    },
-  },
+  // {
+  //   key: "currency",
+  //   title: "CURRENCY",
+  //   dataIndex: "currency",
+  //   width: 100,
+  //   sorter: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "currency",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "currency",
+  //       hasValue(search["currency"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
+  // {
+  //   key: "totalAdjustmentAmountIdr",
+  //   title: "TOTAL ADJUSTMENT AMOUNT IDR",
+  //   dataIndex: "totalAdjustmentAmountIdr",
+  //   width: 190,
+  //   sorter: true,
+  //   align: "right",
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAdjustmentAmountIdr",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true
+  //   ),
+  //   render: (text) => {
+  //     const formatted = currencyFormatting(text);
+  //     return renderColumn(
+  //       "totalAdjustmentAmountIdr",
+  //       hasValue(search["totalAdjustmentAmountIdr"]),
+  //       searchText,
+  //       formatted,
+  //       false,
+  //       "input",
+  //       search
+  //     );
+  //   },
+  // },
+  // {
+  //   key: "totalAdjustmentAmountUsd",
+  //   title: "TOTAL ADJUSTMENT AMOUNT USD",
+  //   dataIndex: "totalAdjustmentAmountUsd",
+  //   width: 190,
+  //   sorter: true,
+  //   align: "right",
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "totalAdjustmentAmountUsd",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true
+  //   ),
+  //   render: (text) => {
+  //     const formatted = currencyFormatting(text);
+  //     return renderColumn(
+  //       "totalAdjustmentAmountUsd",
+  //       hasValue(search["totalAdjustmentAmountUsd"]),
+  //       searchText,
+  //       formatted,
+  //       false,
+  //       "input",
+  //       search
+  //     );
+  //   },
+  // },
   {
     key: "termsOfPayment",
     title: "TERMS OF PAYMENT",
@@ -600,87 +603,87 @@ export const columnsAdjustmentInvoice = (
         search
       ),
   },
-  {
-    key: "rateType",
-    title: "RATE TYPE",
-    dataIndex: "rateType",
-    width: 100,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "rateType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "rateType",
-        hasValue(search["rateType"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "rate",
-    title: "RATE",
-    dataIndex: "rate",
-    width: 80,
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "rate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      const formatted = currencyFormatting(text);
-      return renderColumn(
-        "rate",
-        hasValue(search["rate"]),
-        searchText,
-        formatted,
-        false,
-        "input",
-        search
-      );
-    },
-  },
-  {
-    key: "rateDate",
-    title: "RATE DATE",
-    dataIndex: "rateDate",
-    width: 100,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "rateDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "rateDate",
-        hasValue(search["rateDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
+  // {
+  //   key: "rateType",
+  //   title: "RATE TYPE",
+  //   dataIndex: "rateType",
+  //   width: 100,
+  //   sorter: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "rateType",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "rateType",
+  //       hasValue(search["rateType"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
+  // {
+  //   key: "rate",
+  //   title: "RATE",
+  //   dataIndex: "rate",
+  //   width: 80,
+  //   sorter: true,
+  //   align: "right",
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "rate",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true
+  //   ),
+  //   render: (text) => {
+  //     const formatted = currencyFormatting(text);
+  //     return renderColumn(
+  //       "rate",
+  //       hasValue(search["rate"]),
+  //       searchText,
+  //       formatted,
+  //       false,
+  //       "input",
+  //       search
+  //     );
+  //   },
+  // },
+  // {
+  //   key: "rateDate",
+  //   title: "RATE DATE",
+  //   dataIndex: "rateDate",
+  //   width: 100,
+  //   sorter: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "rateDate",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true,
+  //     "date"
+  //   ),
+  //   render: (text) =>
+  //     renderDateColumn(
+  //       "rateDate",
+  //       hasValue(search["rateDate"]),
+  //       searchText,
+  //       text,
+  //       "date",
+  //       search
+  //     ),
+  // },
   {
     key: "remark",
     title: "REMARK",
@@ -731,7 +734,11 @@ export const columnsAdjustmentInvoice = (
       handleSearch,
       true
     ),
-    render: (text) => <StatusComponent colour={text}>{text}</StatusComponent>,
+    render: (text) => (
+      <StatusComponent colour={text} type="status" size="small">
+        {text}
+      </StatusComponent>
+    ),
   },
   {
     key: "statusApproval",
@@ -748,7 +755,11 @@ export const columnsAdjustmentInvoice = (
       handleSearch,
       true
     ),
-    render: (text) => <StatusComponent colour={text}>{text}</StatusComponent>,
+    render: (text) => (
+      <StatusComponent colour={text} type="status" size="small">
+        {text}
+      </StatusComponent>
+    ),
   },
   {
     key: "createdBy",
