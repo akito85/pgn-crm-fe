@@ -39,7 +39,7 @@ import {
 
 const ModalHold = ({
   isOpen,
-  handleCancel = () => {},
+  handleBack = () => {},
   handleRefresh = () => {},
   handleOpenModal = () => {},
 }) => {
@@ -188,9 +188,9 @@ const ModalHold = ({
     setBoolean(true);
   };
 
-  // Handle Cancel Form
-  const handleCancelForm = () => {
-    handleCancel();
+  // Handle Back Form
+  const handleBackForm = () => {
+    handleBack();
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
     setDataWarrantyInfoSelect([]);
@@ -230,7 +230,7 @@ const ModalHold = ({
 
   // Handle Save for Modal Confirmation
   const handleSave = (formValue) => {
-    handleCancel();
+    handleBack();
 
     const body = {
     };
@@ -239,7 +239,7 @@ const ModalHold = ({
       .unwrap()
       .then(() => {
         handleRefresh();
-        handleCancel();
+        handleBack();
         setSelectedCustomerInfoRowKeys([]);
         setDataCustomerInfoSelect([]);
         setDataWarrantyInfoSelect([]);
@@ -339,9 +339,14 @@ const ModalHold = ({
   const [holdDateData, setHoldDateData] = useState({});
   const handleHoldDateChange = (value, recordKey) => {
     setHoldDateData(prev => ({ ...prev, [recordKey]: value }));
-  };
+  }; 
 
   const [remarkHoldInformation, setRemarkHoldInformation] = useState("");
+
+  const [fixedHoldColumns, setFixedHoldColumns] = useState({
+    left: ["no"],
+    right: ["date", "holdAmount"] 
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -389,8 +394,8 @@ const ModalHold = ({
   }, [baseColumnsHoldInfo]);
 
   const processedColumnsHoldInfo = useMemo(() => {
-    return applyFixedColumns(allColumnsHoldInfo, fixedColumns);
-  }, [allColumnsHoldInfo, fixedColumns]);
+    return applyFixedColumns(allColumnsHoldInfo, fixedHoldColumns);
+  }, [allColumnsHoldInfo, fixedHoldColumns]);
 
   const columnDefinitionsHoldInfo = useMemo(() => {
     return allColumnsHoldInfo.map((col) => ({
@@ -491,14 +496,14 @@ const ModalHold = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Hold"
-        handleCancel={handleCancelForm}
+        header="Warranty Hold"
+        handleBack={handleBackForm}
         width={1000}
         footer={
           <div className="flex w-full justify-end gap-x-5">
-            {current < steps.length - 1 && (
-              <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                <span className="p-1 text-[18px] text-center">Cancel</span>
+            {current < steps.length - 0 && (
+              <ButtonComponent type={"default"} onClick={handleBackForm}>
+                <span className="p-1 text-[18px] text-center">Back</span>
               </ButtonComponent>
             )}
             {current > 0 && (
@@ -611,8 +616,8 @@ const ModalHold = ({
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsHoldInfo}
-                fixedColumns={fixedColumns}
-                setFixedColumns={setFixedColumns}
+                fixedColumns={fixedHoldColumns}
+                setFixedColumns={setFixedHoldColumns}
                 loading={loading}
               />
               
@@ -660,41 +665,50 @@ const ModalHold = ({
             <div className="w-full grid grid-cols-1 gap-x-4">
               <RadioTabs data={tabData} onChange={onChange} currentPosition={valuePage}/>
               <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
-                <p className="text-primary uppercase font-bold my-4">
-                  HOLD INFORMATION
-                </p>
-                <TableRBI
-                  dataSource={dataSourceHoldInfoWithKeys}
-                  columns={processedColumnsHoldInfo}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChange}
-                  onSizeChanger={handleChange}
-                  totalData={dataSourceHoldInfoWithKeys.length || 0}
-                  tableScrolled={{ y: 525, x: 1000 }}
-                  onSort={onSort}
-                  columnDefinitions={columnDefinitionsHoldInfo}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
-                  loading={false}
-                />
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    HOLD INFORMATION
+                  </p>
+                  <TableRBI
+                    dataSource={dataSourceHoldInfoWithKeys}
+                    columns={processedColumnsHoldInfo}
+                    current={page}
+                    pageSize={pageSize}
+                    onChange={handleChange}
+                    onSizeChanger={handleChange}
+                    totalData={dataSourceHoldInfoWithKeys.length || 0}
+                    tableScrolled={{ y: 525, x: 1000 }}
+                    onSort={onSort}
+                    columnDefinitions={columnDefinitionsHoldInfo}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={false}
+                  />
+                  <div>
+                    <DetailText label={"Remark"}>
+                      {form.getFieldValue("remark")}
+                    </DetailText>
+                  </div>
+                </div>
               </div>
 
               <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
-                <p className="text-primary uppercase font-bold my-4">
-                  ATTACHMENT INFORMATION
-                </p>
-                <AttachmentComponent
-                  type={"preview"}
-                  data={listDataAttachment}
-                  updateData={setListDataAttachment}
-                  typeSelector="partner"
-                  dispatch={dispatch}
-                  getAPICategory={getListCategory}
-                  service={receiptCollectionHttpService}
-                  configApplication={configApp.PAYMENT_SERVICE}
-                  typeRBI={"data"}
-                />
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    ATTACHMENT INFORMATION
+                  </p>
+                  <AttachmentComponent
+                    type={"preview"}
+                    data={listDataAttachment}
+                    updateData={setListDataAttachment}
+                    typeSelector="partner"
+                    dispatch={dispatch}
+                    getAPICategory={getListCategory}
+                    service={receiptCollectionHttpService}
+                    configApplication={configApp.PAYMENT_SERVICE}
+                    typeRBI={"data"}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -705,7 +719,7 @@ const ModalHold = ({
       <ModalError
         isOpen={modalError}
         handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
+        handleBack={handleCloseModalError}
         customText={"Try Again"}
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">

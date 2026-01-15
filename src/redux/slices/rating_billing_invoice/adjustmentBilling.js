@@ -28,6 +28,9 @@ const initialState = {
   dataListSelectTOP: [],
   dataListItem: [],
   dataDetailType: [],
+  dataListRateType: [],
+  dataInvoiceInfo: null,
+  dataBillingItemList: [],
   loading: false,
   message: "",
 };
@@ -565,11 +568,89 @@ export const getListCurrency = createAsyncThunk(
   }
 );
 
+export const getListRateType = createAsyncThunk(
+  "GET_LIST_RATE_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/daily-rate/list-rate-type";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
 export const getListTermsOfPayment = createAsyncThunk(
   "GET_LIST_TERMS_OF_PAYMENT",
   async (thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/adjustment/term-of-payment-data";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getInvoiceInformation = createAsyncThunk(
+  "GET_INVOICE_INFORMATION",
+  async (invoiceNumber, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/adjustment/get-invoice-information/${invoiceNumber}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getInvoiceBillingItemList = createAsyncThunk(
+  "GET_INVOICE_BILLING_ITEM_LIST",
+  async (billingNumber, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/adjustment/get-invoice-billing-item-list/${billingNumber}`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -970,6 +1051,20 @@ const adjustmentBillingSlice = createSlice({
       state.loading = false;
     },
 
+    /* Get List Rate Type */
+    [getListRateType.pending]: (state, action) => {
+      state.loading = true;
+      state.dataListRateType = action.payload;
+    },
+    [getListRateType.fulfilled]: (state, action) => {
+      state.dataListRateType = action.payload;
+      state.loading = false;
+    },
+    [getListRateType.rejected]: (state, action) => {
+      state.dataListRateType = action.payload;
+      state.loading = false;
+    },
+
     /* Get List Terms Of Payment */
     [getListTermsOfPayment.pending]: (state, action) => {
       state.loading = true;
@@ -1036,6 +1131,34 @@ const adjustmentBillingSlice = createSlice({
     [approveOrRejectAdjustmentBilling.rejected]: (state, action) => {
       state.loading = false;
       state.message = action.payload;
+    },
+
+    // Get Invoice Information
+    [getInvoiceInformation.pending]: (state) => {
+      state.loading = true;
+      state.dataInvoiceInfo = null;
+    },
+    [getInvoiceInformation.fulfilled]: (state, action) => {
+      state.dataInvoiceInfo = action.payload;
+      state.loading = false;
+    },
+    [getInvoiceInformation.rejected]: (state) => {
+      state.dataInvoiceInfo = null;
+      state.loading = false;
+    },
+
+    // Get Invoice Billing Item List
+    [getInvoiceBillingItemList.pending]: (state) => {
+      state.loading = true;
+      state.dataBillingItemList = [];
+    },
+    [getInvoiceBillingItemList.fulfilled]: (state, action) => {
+      state.dataBillingItemList = action.payload;
+      state.loading = false;
+    },
+    [getInvoiceBillingItemList.rejected]: (state) => {
+      state.dataBillingItemList = [];
+      state.loading = false;
     },
   },
 });

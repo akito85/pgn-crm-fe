@@ -11,6 +11,7 @@ import { columnsReceipt } from "../ColumnReceiptView";
 import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
+import BaseContainer from "../../../../../components/BaseContainer";
 
 const { TextArea } = Input;
 
@@ -37,13 +38,22 @@ const ModalHoldReceipt = ({
 
     // Initialize selection when modal opens
     useEffect(() => {
-        if (isOpen && selectedData && selectedData.length > 0) {
-            setLocalSelectedData(selectedData);
-            setSelectedRowKeys(selectedData.map(item => item.key || item.id));
-        } else if (isOpen && (!selectedData || selectedData.length === 0)) {
-            // Clear if nothing passed? Or keep empty.
-            setLocalSelectedData([]);
-            setSelectedRowKeys([]);
+        if (isOpen) {
+            // Reset state on open
+            setCurrentStep(0);
+            setHoldReason("");
+            setListDataAttachment([]);
+            setConfirmationTab("Receipt");
+            setPage(1);
+            setPageSize(10);
+
+            if (selectedData && selectedData.length > 0) {
+                setLocalSelectedData(selectedData);
+                setSelectedRowKeys(selectedData.map(item => item.key || item.id));
+            } else {
+                setLocalSelectedData([]);
+                setSelectedRowKeys([]);
+            }
         }
     }, [isOpen, selectedData]);
 
@@ -136,12 +146,39 @@ const ModalHoldReceipt = ({
                     }
                     parser={(value) => value?.replace(/\./g, "")}
                     onChange={(value) => handleHoldAmountChange(value, record.key || record.id)}
+                    onKeyDown={(e) => {
+                        // Allow: backspace, delete, tab, escape, enter
+                        if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
+                            (e.ctrlKey === true || e.metaKey === true) ||
+                            // Allow: home, end, left, right
+                            (e.keyCode >= 35 && e.keyCode <= 39)) {
+                            return;
+                        }
+                        // Ensure that it is a number and stop the keypress
+                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            e.preventDefault();
+                        }
+                    }}
                     placeholder="Input Amount"
                     controls={false}
                 />
             )
         }
     ];
+    const columnsStep4 = [
+        ...columnsSimplified,
+        {
+            title: "Hold Amount",
+            dataIndex: "holdAmount",
+            key: "holdAmount",
+            render: (text, record) => {
+                const amount = record.holdAmount;
+                return amount ? `${amount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
+            }
+        }
+    ];
+
     const nextParams = [
         { label: "Receipt Information" },
         { label: "Hold Information" },
@@ -202,6 +239,11 @@ const ModalHoldReceipt = ({
         );
     };
 
+    const filteredDataSource = dataSource?.filter(item =>
+        item.statusApproval !== "Waiting Approval" &&
+        item.status?.toUpperCase() !== "HOLD"
+    );
+
     return (
         <ModalCustom
             isOpen={isOpen}
@@ -221,21 +263,19 @@ const ModalHoldReceipt = ({
             <div className="mt-4">
                 {/* Step 1: Receipt Information */}
                 {currentStep === 0 && (
-                    <div className="w-full">
-                        <p className="text-primary text-xl font-bold uppercase py-4">RECEIPT INFORMATION</p>
+                    <BaseContainer header={"RECEIPT INFORMATION"}>
                         <TablePagination
-                            dataSource={dataSource}
+                            dataSource={filteredDataSource}
                             columns={columns}
                             rowSelection={rowSelection}
                             current={page}
                             pageSize={pageSize}
                             onChange={handleChangePage}
-                            onShowSizeChange={handleChangePage}
-                            totalData={dataSource?.length}
-                            showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} records`}
-                            tableScrolled={{ x: "max-content", y: 400 }}
+                            onSizeChanger={handleChangePage}
+                            totalData={filteredDataSource?.length}
+                            tableScrolled={{ x: 10000, y: 400 }}
                         />
-                    </div>
+                    </BaseContainer>
                 )}
 
                 {/* Step 2: Hold Information */}
@@ -308,7 +348,7 @@ const ModalHoldReceipt = ({
                             {confirmationTab === "Receipt" && (
                                 <TablePagination
                                     dataSource={localSelectedData}
-                                    columns={columnsSimplified}
+                                    columns={columnsStep4}
                                     pagination={false}
                                     usePagination={false}
                                 />

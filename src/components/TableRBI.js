@@ -1,6 +1,10 @@
 // TableRBI.js (with resizable columns + customHeaderLeft + showExport control + Fixed Horizontal Scrollbar)
 import React, { useMemo, useState, useCallback } from "react";
-import { DownloadOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
 import ColumnSettings from "./ColumnSettings/ColumnSettings";
 import SearchBar from "./SearchBar";
@@ -148,11 +152,12 @@ const TableRBI = ({
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [clickedRowKey, setClickedRowKey] = useState(null);
-
   // Default refresh handler jika tidak disediakan
-  const handleRefresh = onRefresh || (() => {
-    window.location.reload();
-  });
+  const handleRefresh =
+    onRefresh ||
+    (() => {
+      window.location.reload();
+    });
 
   // State untuk menyimpan width setiap column
   const [columnWidths, setColumnWidths] = useState({});
@@ -225,8 +230,8 @@ const TableRBI = ({
       // Only handle arrow keys when not typing in input/textarea
       const activeElement = document.activeElement;
       const isTyping =
-        activeElement.tagName === 'INPUT' ||
-        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.tagName === "INPUT" ||
+        activeElement.tagName === "TEXTAREA" ||
         activeElement.isContentEditable;
 
       if (isTyping) return;
@@ -240,26 +245,26 @@ const TableRBI = ({
 
       const scrollAmount = 100; // pixels to scroll per key press
 
-      if (e.key === 'ArrowLeft') {
+      if (e.key === "ArrowLeft") {
         e.preventDefault();
         tableBody.scrollTo({
           left: tableBody.scrollLeft - scrollAmount,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === "ArrowRight") {
         e.preventDefault();
         tableBody.scrollTo({
           left: tableBody.scrollLeft + scrollAmount,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }
     };
 
     // Add event listener to document
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [idTable]);
 
@@ -469,7 +474,8 @@ const TableRBI = ({
   };
 
   // Check if any right side controls should be shown
-  const hasRightControls = showExport || showAdvanceSearch || showSearchBar || showRefresh;
+  const hasRightControls =
+    showExport || showAdvanceSearch || showSearchBar || showRefresh;
 
   // Sync internal state with external selectedRowKey
   React.useEffect(() => {

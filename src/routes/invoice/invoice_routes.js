@@ -22,5 +22,6 @@ export const INVOICE_ROUTES = {
   // Adjustment Invoice
   ADJUSTMENT_INVOICE_VIEW: "/invoice/adjustment-invoice",
   ADJUSTMENT_INVOICE_CREATE: "/invoice/adjustment-invoice/create",
-  ADJUSTMENT_INVOICE_DETAIL: "/invoice/adjustment-invoice/detail",
+  ADJUSTMENT_INVOICE_UPDATE: "/invoice/adjustment-invoice/update",
+  ADJUSTMENT_INVOICE_DETAIL: "/invoice/adjustment-invoice/view",
 };

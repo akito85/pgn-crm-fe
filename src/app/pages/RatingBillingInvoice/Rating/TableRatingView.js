@@ -70,16 +70,42 @@ export const columnsRating = (
         search
       ),
   },
+  // {
+  //   key: "currency",
+  //   title: "CURRENCY",
+  //   dataIndex: "currency",
+  //   width: 150,
+  //   sorter: true,
+  //   isClassification: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "currency",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "currency",
+  //       hasValue(search["currency"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
   {
-    key: "rateTyoe",
-    title: "RATE TYPE",
-    dataIndex: "rateType",
-    isClassification: true,
-    width: 130,
+    key: "timeUnitContract",
+    title: "CONTRACT TIME UNIT",
+    dataIndex: "timeUnitContract",
+    width: 190,
     sorter: true,
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "rateType",
+      "timeUnitContract",
       searchInput,
       searchedColumn,
       searchText,
@@ -87,12 +113,92 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "rateType",
-        hasValue(search["rateType"]),
+        "timeUnitContract",
+        hasValue(search["timeUnitContract"]),
         searchText,
         text,
         false,
         "input",
+        search
+      ),
+  },
+  {
+    key: "billingCycle",
+    title: "BILLING CYCLE",
+    dataIndex: "billingCycle",
+    width: 170,
+    isClassification: true,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "billingCycle",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "billingCycle",
+        hasValue(search["billingCycle"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "billingPeriod",
+    title: "BILLING PERIOD",
+    width: 160,
+    sorter: true,
+    isClassification: true,
+    dataIndex: "billingPeriod",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "billingPeriod",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "datePeriod"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "billingPeriod",
+        hasValue(search["billingPeriod"]),
+        searchText,
+        text,
+        "datePeriod",
+        search
+      ),
+  },
+  {
+    key: "transactionDate",
+    title: "TRANSACTION DATE",
+    width: 190,
+    sorter: true,
+    isClassification: true,
+    dataIndex: "transactionDate",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "transactionDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "transactionDate",
+        hasValue(search["transactionDate"]),
+        searchText,
+        text,
+        "date",
         search
       ),
   },
@@ -197,6 +303,32 @@ export const columnsRating = (
       ),
   },
   {
+    key: "accGroupType",
+    title: "ACCOUNT GROUP TYPE",
+    dataIndex: "accGroupType",
+    width: 210,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accGroupType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "accGroupType",
+        hasValue(search["accGroupType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
     key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
@@ -275,32 +407,6 @@ export const columnsRating = (
       ),
   },
   {
-    key: "mreadingCode",
-    title: "METER READING CODE",
-    dataIndex: "mreadingCode",
-    width: 200,
-    isClassification: true,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "mreadingCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "mreadingCode",
-        hasValue(search["mreadingCode"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
     key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
@@ -327,15 +433,15 @@ export const columnsRating = (
       ),
   },
   {
-    key: "accGroupType",
-    title: "ACCOUNT GROUP TYPE",
-    dataIndex: "accGroupType",
-    width: 210,
-    sorter: true,
+    key: "mreadingCode",
+    title: "METER READING CODE",
+    dataIndex: "mreadingCode",
+    width: 200,
     isClassification: true,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "accGroupType",
+      "mreadingCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -343,8 +449,33 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "accGroupType",
-        hasValue(search["accGroupType"]),
+        "mreadingCode",
+        hasValue(search["mreadingCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+   {
+    key: "product",
+    title: "PRODUCT",
+    dataIndex: "product",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "product",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "product",
+        hasValue(search["product"]),
         searchText,
         text,
         false,
@@ -353,15 +484,74 @@ export const columnsRating = (
       ),
   },
   {
-    key: "billingCycle",
-    title: "BILLING CYCLE",
-    dataIndex: "billingCycle",
-    width: 170,
+    title: "PRICE DETAIL",
+    children: [
+      {
+        key: "currency",
+        title: "CURRENCY",
+        dataIndex: "currency",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "currency",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch
+        ),
+        render: (text) =>
+          renderColumn(
+            "currency",
+            hasValue(search["currency"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "uom",
+        title: "UOM",
+        dataIndex: "uom",
+        width: 100,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "uom",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch
+        ),
+        render: (text) =>
+          renderColumn(
+            "uom",
+            hasValue(search["uom"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+    ],
+  },
+  {
+    key: "rateTyoe",
+    title: "RATE TYPE",
+    dataIndex: "rateType",
     isClassification: true,
+    width: 130,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "billingCycle",
+      "rateType",
       searchInput,
       searchedColumn,
       searchText,
@@ -369,39 +559,12 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "billingCycle",
-        hasValue(search["billingCycle"]),
+        "rateType",
+        hasValue(search["rateType"]),
         searchText,
         text,
         false,
         "input",
-        search
-      ),
-  },
-  {
-    key: "billingPeriod",
-    title: "BILLING PERIOD",
-    width: 160,
-    sorter: true,
-    isClassification: true,
-    dataIndex: "billingPeriod",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "billingPeriod",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "datePeriod"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "billingPeriod",
-        hasValue(search["billingPeriod"]),
-        searchText,
-        text,
-        "datePeriod",
         search
       ),
   },
@@ -422,31 +585,6 @@ export const columnsRating = (
       renderColumn(
         "saNumber",
         hasValue(search["saNumber"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "product",
-    title: "PRODUCT",
-    dataIndex: "product",
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "product",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "product",
-        hasValue(search["product"]),
         searchText,
         text,
         false,
@@ -506,58 +644,32 @@ export const columnsRating = (
         search
       ),
   },
-  {
-    key: "uom",
-    title: "UOM",
-    dataIndex: "uom",
-    width: 100,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "uom",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "uom",
-        hasValue(search["uom"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "timeUnitContract",
-    title: "CONTRACT TIME UNIT",
-    dataIndex: "timeUnitContract",
-    width: 190,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "timeUnitContract",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "timeUnitContract",
-        hasValue(search["timeUnitContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
+  // {
+  //   key: "uom",
+  //   title: "UOM",
+  //   dataIndex: "uom",
+  //   width: 100,
+  //   sorter: true,
+  //   isClassification: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "uom",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "uom",
+  //       hasValue(search["uom"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search
+  //     ),
+  // },
   {
     key: "usage",
     title: "USAGE",
@@ -1052,32 +1164,7 @@ export const columnsRating = (
         search
       ),
   },
-  {
-    key: "currency",
-    title: "CURRENCY",
-    dataIndex: "currency",
-    width:150,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "currency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "currency",
-        hasValue(search["currency"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
+
   {
     key: "rate",
     title: "RATE",
@@ -1675,33 +1762,6 @@ export const columnsRating = (
   //       search
   //     ),
   // },
-  {
-    key: "transactionDate",
-    title: "TRANSACTION DATE",
-    width: 190,
-    sorter: true,
-    isClassification: true,
-    dataIndex: "transactionDate",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "transactionDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "transactionDate",
-        hasValue(search["transactionDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
   // {
   //   key: "accountingDate",
   //   title: "ACCOUNTING DATE",
