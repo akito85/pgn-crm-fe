@@ -21,6 +21,7 @@ const initialState = {
   isSuccess: false,
   message: "",
   data_budget: [],
+  data_country: [],
   data_province: [],
   data_city: [],
   data_industrial_sector: [],
@@ -619,6 +620,37 @@ export const getProvinceList = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/province`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.map((item) => {
+        return {
+          value: item.id,
+          label: item.text,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getCountryList = createAsyncThunk(
+  "GET_COUNTRY_PROMO",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/country`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
@@ -1321,6 +1353,19 @@ const promoSlice = createSlice({
     [getProvinceList.rejected]: (state, action) => {
       state.loading = false;
       state.data_province = action.payload;
+    },
+
+    [getCountryList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_country = action.payload;
+    },
+    [getCountryList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
+    },
+    [getCountryList.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
     },
 
     [getCostCenterList.pending]: (state, action) => {
