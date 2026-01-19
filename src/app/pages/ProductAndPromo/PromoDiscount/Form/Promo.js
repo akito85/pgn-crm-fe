@@ -29,6 +29,7 @@ import {
   getTieringList,
   getUomList,
   getProductList,
+  getCountryList,
 } from "../../../../../redux/slices/product_promo/promoSlice";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { formMessageRequired, requiredMessage } from "../../../../../utils";
@@ -216,6 +217,7 @@ const Promo = ({
             selector="promo"
             getApi={{
               getBudgetList,
+              getCountryList,
               getProvinceList,
               getIndustrialSectorList,
               getAccountCategoryList,

@@ -617,9 +617,9 @@ export const getCityList = createAsyncThunk(
 
 export const getProvinceList = createAsyncThunk(
   "GET_PROVINCE_PROMO",
-  async (thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/product-promo/province`;
+      const url = `/v1/dbs/api/product-promo/province/${id}`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
