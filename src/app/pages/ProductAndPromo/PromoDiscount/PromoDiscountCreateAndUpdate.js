@@ -318,6 +318,9 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     if (res.includes(139)) {
       res.push(28); //15
     }
+    if (res.includes(28)) {
+      res.push(3118);
+    }
     if (res.includes(33)) {
       //20
       res.push(32); //19
@@ -332,6 +335,9 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   const handleDeselectCriteria = (value) => {
     let res = criteriaValues.filter((item) => item !== value);
+    if (!res.includes(3118)) {
+      res = res.filter((item) => item !== 28);
+    }
     if (!res.includes(28)) {
       //15
       res = res.filter((item) => item !== 139); //39
