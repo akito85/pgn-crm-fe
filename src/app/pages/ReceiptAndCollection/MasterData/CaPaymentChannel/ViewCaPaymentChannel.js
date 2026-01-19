@@ -9,7 +9,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
-  EyeOutlined,
+    EyeOutlined,
 } from "@ant-design/icons";
 import {
     renderColumn,
@@ -359,7 +359,7 @@ const ViewCaPaymentChannel = () => {
 
     const itemActions = [
         // toolbar items
-        
+
         {
             action: "Create",
             render: (
@@ -385,7 +385,7 @@ const ViewCaPaymentChannel = () => {
                             to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_CA_PAYMENT_CHANNEL}
                             state={{ id: record?.id }}
                         >
-                            <EyeOutlined />
+                            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
                         </Link>
                     </Tooltip>
                 );
@@ -494,8 +494,14 @@ const ViewCaPaymentChannel = () => {
         <LayoutMenu>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
-                <Toolbar items={itemActions} />
-                <CardContainer header={"CA PAYMENT CHANNEL LIST"}>
+                <CardContainer header={
+                    <div className="flex -my-4 justify-between items-center">
+                        <p className="mt-[15px] font-bold">CA PAYMENT CHANNEL LIST</p>
+                        <div className="flex gap-2">
+                            <Toolbar items={itemActions} />
+                        </div>
+                    </div>
+                }>
                     <TableRBI
                         dataSource={data?.result}
                         pageSize={pageSize}

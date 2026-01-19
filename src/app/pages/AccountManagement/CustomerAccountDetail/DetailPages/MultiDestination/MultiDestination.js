@@ -10,7 +10,7 @@ import { dateFormatting } from "../../../../../../utils";
 import MultiDestinationTable from "./MultiDestinationTable";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import NxFilter from "../../../../../../components/Nx/NxFilter";
-import ModalConfirmationApprovalPaymentRelation from "../FinancialInformation/PaymentRelation/ModalConfirmationApprovalPaymentRelation";
+import ModalConfirmationApprovalMultiDestination from "./ModalConfirmationApprovalMultiDestination";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import { getMultiDestination, approveOrRejectAllMultiDestination, downloadMultiDestination, getMdApprovalHistory, getMdColumnApi, getMdConditionApi, getMdOperatorApi, inactivateMultiDestination, } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
@@ -19,7 +19,6 @@ import { useLocation } from "react-router-dom";
 const MultiDestination = ({
   id = 0,
   idCustomer = 0,
-  isActive = false,
   isApproval = false,
   setIsApproval = () => {},
   setShowApprovalButton = () => {},
@@ -397,20 +396,13 @@ const MultiDestination = ({
 
   // Listen to approve or reject button on the parent component
   useEffect(() => {
-    if (isActive) {
-      if (submitApprovalCondition === "approve") {
-        setShowApprovalModal(true);
-      } else if (submitApprovalCondition === "reject") {
-        setShowApprovalModal(true);
-      }
+    console.log("submitApprovalCondition", submitApprovalCondition);
+    if (submitApprovalCondition === "approve") {
+      setShowApprovalModal(true);
+    } else if (submitApprovalCondition === "reject") {
+      setShowApprovalModal(true);
     }
   }, [submitApprovalCondition]);
-
-  // Reset accordian when it's not the current one that's opened
-  useEffect(() => {
-    if (!isActive)
-      handleIsApproval(false);
-  }, [isActive]);
 
   useEffect(() => {
     if (!isApproval) {
@@ -488,7 +480,7 @@ const MultiDestination = ({
           </Form>
         </ModalCustom>
 
-        <ModalConfirmationApprovalPaymentRelation
+        <ModalConfirmationApprovalMultiDestination
           dataSource={selectedRows}
           isOpen={showApprovalModal}
           setIsOpen={setShowApprovalModal}

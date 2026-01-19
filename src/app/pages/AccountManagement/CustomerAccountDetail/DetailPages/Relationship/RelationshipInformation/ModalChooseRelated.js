@@ -88,7 +88,7 @@ const ModalChooseRelated = ({
   if (dataSource.length > 0) {
     dataSource = dataSource.map(item => ({
       ...item,
-      key: item.id || item.objectId
+      key: item.id || item.relatedObjectId
     }));
   }
 
@@ -402,22 +402,6 @@ const ModalChooseRelated = ({
       width: 141,
       sorter: true,
       ...getColumnSearchProps("latitude"),
-      render: (text) => text || "-",
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 171,
-      sorter: true,
-      ...getColumnSearchProps("startDate"),
-      render: (text) => moment(text).format("DD MMM YYYY") || "-",
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 171,
-      sorter: true,
-      ...getColumnSearchProps("endDate"),
       render: (text) => text || "-",
     },
     {

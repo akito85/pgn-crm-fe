@@ -278,7 +278,7 @@ const ViewFaktur = () => {
     [page, pageSize, search, searchText, searchedColumn]
   );
 
-  // Action Dropdown Menu - Updated Design
+  // Action Dropdown Menu
   const actionMenu = (
     <Menu
       items={[
@@ -348,7 +348,7 @@ const ViewFaktur = () => {
       ) {
         return {
           ...col,
-          width: 80, // Sesuaikan ukuran yang diinginkan: 60, 70, 80, atau 100
+          width: 80,
           align: "center",
         };
       }

@@ -28,7 +28,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Spin, Steps } from "antd";
 import { RightOutlined } from "@ant-design/icons";
-import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import { showModalError, validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 
 const obj = {
@@ -95,6 +95,8 @@ const RelationshipCreateAndUpdate = ({
   const [dataDetailApproval, setDataDetailApproval] = useState([]);
   const [relatedDetailData, setRelatedDetailData] = useState([]);
 
+  const [activeTab, setActiveTab] = useState(0);
+
   // Step State
   const [scrollLeft, setScrollLeft] = useState(0);
 
@@ -146,7 +148,8 @@ const RelationshipCreateAndUpdate = ({
 
       // Set relationshipObj for submit
       setRelationshipObj({
-        objectId: detail.objectId,
+        relatedObjectId: detail.relatedObjectId,
+        relatedObjectNumber: detail.relatedObjectNumber,
         objectName: detail.objectName,
         objectValue: detail.objectNumber,
         relationshipType: detail.relationshipType,
@@ -211,6 +214,11 @@ const RelationshipCreateAndUpdate = ({
     }
   }, [data_approvalHierarchyDetail]);
 
+  useEffect(() => {
+    if (!modalConfirm)
+      setActiveTab(0);
+  }, [modalConfirm]);
+
   // Handle Relationship Object
   const handleRelationshipObj = (e, field) => {
     let result;
@@ -265,6 +273,7 @@ const RelationshipCreateAndUpdate = ({
         relationshipCategory: value?.relationshipCategory?.toString(),
         relationshipType: value?.relationshipType?.toString(),
         action: isDraft ? "DRAFT" : "SUBMIT",
+        remark: form.getFieldValue("remark"),
       };
 
       // Filter only new attachments (not existing ones)
@@ -309,84 +318,79 @@ const RelationshipCreateAndUpdate = ({
   // Reusable validation and confirmation handler
   const handleValidateAndConfirm = (action) => {
     if (listDataAttachment.length === 0) {
-      alert("Please upload at least one attachment");
+      const errorBody = {
+        title: "Failed",
+        description: `Please upload at least one attachment`,
+      };
+      dispatch(showModalError(errorBody));
       return;
     }
 
     const isDraft = action === "DRAFT";
 
-    form
-      .validateFields()
-      .then((values) => {
-        // Get display names for type and category
-        const typeId = values.relationshipType || relationshipObj.relationshipType;
-        const categoryId = values.relationshipCategory || relationshipObj.relationshipCategory;
+    const values = form.getFieldsValue();
 
-        const typeName = data_relationshipType?.find(t => t.id === typeId)?.text || typeId;
-        const categoryName = data_relationshipCategory?.find(c => c.id === categoryId)?.text || categoryId;
+    // Get display names for type and category
+    const typeId = values.relationshipType || relationshipObj.relationshipType;
+    const categoryId = values.relationshipCategory || relationshipObj.relationshipCategory;
 
-        // Convert moment objects to strings
-        const startDateValue = values.startDate || relationshipObj.startDate;
-        const endDateValue = values.endDate || relationshipObj.endDate;
+    const typeName = data_relationshipType?.find(t => t.id === typeId)?.text || typeId;
+    const categoryName = data_relationshipCategory?.find(c => c.id === categoryId)?.text || categoryId;
 
-        const valueForm = {
-          subjectId: idAccount,
-          relationshipType: typeId,
-          relationshipTypeName: typeName,
-          relationshipCategory: categoryId,
-          relationshipCategoryName: categoryName,
-          objectId: relationshipObj.objectId,
-          objectName: relationshipObj.objectName || values.relatedName,
-          objectValue: relationshipObj.objectValue || values.relatedNumber,
-          relatedName: relationshipObj.objectName || values.relatedName,
-          relatedNumber: relationshipObj.objectValue || values.relatedNumber,
-          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
-          startDateDisplay: startDateValue ? moment(startDateValue).format("DD MMM YYYY") : "-",
-          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
-          endDateDisplay: endDateValue ? moment(endDateValue).format("DD MMM YYYY") : "-",
-          description: values.description || relationshipObj.description || "",
-          appHierId: values.appHierId || approvalObj.appHierId,
-          appHierName: values.appHierName || approvalObj.appHierName
-        };
+    // Convert moment objects to strings
+    const startDateValue = values.startDate || relationshipObj.startDate;
+    const endDateValue = values.endDate || relationshipObj.endDate;
 
-        // Validate before showing confirmation modal
-        const validateBody = {
-          id: type === "update" ? id : undefined,
-          subjectId: idAccount,
-          relationshipType: typeId,
-          relationshipCategory: categoryId,
-          objectId: relationshipObj.objectId,
-          objectName: relationshipObj.objectName || values.relatedName,
-          objectValue: relationshipObj.objectValue || values.relatedNumber,
-          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
-          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
-          description: values.description || relationshipObj.description || "",
-          appHierId: values.appHierId || approvalObj.appHierId,
-          action,
-        };
+    const valueForm = {
+      subjectId: idAccount,
+      relationshipType: typeId,
+      relationshipTypeName: typeName,
+      relationshipCategory: categoryId,
+      relationshipCategoryName: categoryName,
+      relatedObjectId: relationshipObj.relatedObjectId,
+      objectId: relationshipObj.relatedObjectId,
+      objectName: relationshipObj.objectName || values.relatedName,
+      objectValue: relationshipObj.objectValue || values.relatedNumber,
+      relatedName: relationshipObj.objectName || values.relatedName,
+      relatedNumber: relationshipObj.objectValue || values.relatedNumber,
+      startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+      startDateDisplay: startDateValue ? moment(startDateValue).format("DD MMM YYYY") : "-",
+      endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+      endDateDisplay: endDateValue ? moment(endDateValue).format("DD MMM YYYY") : "-",
+      description: values.description || relationshipObj.description || "",
+      appHierId: values.appHierId || approvalObj.appHierId,
+      appHierName: values.appHierName || approvalObj.appHierName,
+    };
 
-        dispatch(validateCreateUpdate({
-          body: validateBody,
-          services: accountManagementService,
-          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
-          type,
-        }))
-          .unwrap()
-          .then(() => {
-            setDataConfirm(valueForm);
-            setIsDraftSubmission(isDraft);
-            setModalConfirm(true);
-          })
-          .catch(() => { });
+    // Validate before showing confirmation modal
+    const validateBody = {
+      id: type === "update" ? id : undefined,
+      subjectId: idAccount,
+      relationshipType: typeId,
+      relationshipCategory: categoryId,
+      objectId: relationshipObj.relatedObjectId,
+      objectName: relationshipObj.objectName || values.relatedName,
+      objectValue: relationshipObj.objectValue || values.relatedNumber,
+      startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+      endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+      description: values.description || relationshipObj.description || "",
+      appHierId: values.appHierId || approvalObj.appHierId,
+      action,
+    };
+
+    dispatch(validateCreateUpdate({
+      body: validateBody,
+      services: accountManagementService,
+      endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
+      type,
+    }))
+      .unwrap()
+      .then(() => {
+        setDataConfirm(valueForm);
+        setIsDraftSubmission(isDraft);
+        setModalConfirm(true);
       })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-        console.error("Error fields:", error.errorFields);
-        alert(
-          "Please fill all required fields: " +
-          JSON.stringify(error.errorFields?.map((f) => f.name[0]).join(", "))
-        );
-      });
+      .catch(() => { });
   };
 
   const handleSaveAsDraft = () => {
@@ -405,10 +409,6 @@ const RelationshipCreateAndUpdate = ({
     {
       path: "",
       breadcrumbName: "Customer/Account",
-    },
-    {
-      path: "",
-      breadcrumbName: "Detail Customer",
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
@@ -438,10 +438,43 @@ const RelationshipCreateAndUpdate = ({
     []
   ];
 
+  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
+
   // Navigation handlers
   const next = async () => {
     try {
       await form.validateFields(formFields[current]);
+
+      // Get display names for type and category
+      const typeId = relationshipObj.relationshipType;
+      const categoryId = relationshipObj.relationshipCategory;
+
+      // Convert moment objects to strings
+      const startDateValue = relationshipObj.startDate;
+      const endDateValue = relationshipObj.endDate;
+
+      const validateBody = {
+        id: type === "update" ? id : undefined,
+        subjectId: idAccount,
+        relationshipType: typeId,
+        relationshipCategory: categoryId,
+        objectId: relationshipObj.relatedObjectId,
+        objectName: relationshipObj.objectName,
+        objectValue: relationshipObj.objectValue,
+        startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+        endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+        description: relationshipObj.description || "",
+        appHierId: approvalObj.appHierId,
+        validationType: validationTypes[current],
+      };
+
+      await dispatch(validateCreateUpdate({
+        body: validateBody,
+        services: accountManagementService,
+        endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
+        type,
+      })).unwrap();
+
     } catch (err) {
       return;
     }
@@ -463,6 +496,36 @@ const RelationshipCreateAndUpdate = ({
     for (let i = current; i < newCurrent; i++) {
       try {
         await form.validateFields(formFields[i]);
+
+          // Get display names for type and category
+        const typeId = relationshipObj.relationshipType;
+        const categoryId = relationshipObj.relationshipCategory;
+
+        // Convert moment objects to strings
+        const startDateValue = relationshipObj.startDate;
+        const endDateValue = relationshipObj.endDate;
+
+        const validateBody = {
+          id: type === "update" ? id : undefined,
+          subjectId: idAccount,
+          relationshipType: typeId,
+          relationshipCategory: categoryId,
+          objectId: relationshipObj.relatedObjectId,
+          objectName: relationshipObj.objectName,
+          objectValue: relationshipObj.objectValue,
+          startDate: startDateValue ? moment(startDateValue).format("YYYY-MM-DD") : "",
+          endDate: endDateValue ? moment(endDateValue).format("YYYY-MM-DD") : "",
+          description: relationshipObj.description || "",
+          appHierId: approvalObj.appHierId,
+          validationType: validationTypes[i],
+        };
+
+        await dispatch(validateCreateUpdate({
+          body: validateBody,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
+          type,
+        })).unwrap();
       } catch (err) {
         setCurrent(i);
         return;
@@ -512,7 +575,7 @@ const RelationshipCreateAndUpdate = ({
 
         // Restore relationshipObj
         setRelationshipObj({
-          objectId: detail.objectId,
+          relatedObjectId: detail.relatedObjectId,
           objectName: detail.objectName,
           objectValue: detail.objectNumber,
           relationshipType: detail.relationshipType,
@@ -683,18 +746,20 @@ const RelationshipCreateAndUpdate = ({
               <ButtonComponent
                 type="submit"
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                onClick={() => navigate(
-                  type === "standard"
-                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
-                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
-                  {
-                    state: {
-                      section: "Relationship",
-                      idAccount,
-                      idCustomer,
-                    }
-                  }
-                )}
+                onClick={() => navigate(-1)}
+                
+                // onClick={() => navigate(
+                //   type === "standard"
+                //     ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+                //     : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
+                //   {
+                //     state: {
+                //       section: "Relationship",
+                //       idAccount,
+                //       idCustomer,
+                //     }
+                //   }
+                // )}
               >
                 Back
               </ButtonComponent>
@@ -762,6 +827,56 @@ const RelationshipCreateAndUpdate = ({
                 )}
               </div>
             </div>
+            {/* Modal Confirmation */}
+            <ModalCustom
+              isOpen={modalConfirm}
+              type="confirmation"
+              header={isDraftSubmission ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
+              width={1000}
+              centered={false}
+              style={{ top: 20 }}
+              handleCancel={() => setModalConfirm(false)}
+              footer={[
+                <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
+                  {activeTab > 0 ? (
+                    <ButtonComponent type={"default"} onClick={() => setActiveTab(prev => prev - 1)}>
+                      Previous
+                    </ButtonComponent>
+                  ) : (
+                    <ButtonComponent type={"default"} onClick={() => setModalConfirm(false)}>
+                      Cancel
+                    </ButtonComponent>
+                  )}
+                  {(activeTab < (isDraftSubmission ? 2 : 3))  && (
+                    <ButtonComponent type={"submit"} onClick={() => setActiveTab(prev => prev + 1)}>
+                      Next
+                    </ButtonComponent>
+                  )}
+                  {(activeTab === (isDraftSubmission ? 2 : 3)) && (
+                    <ButtonComponent
+                      type={"submit"}
+                      onClick={() => {
+                        sendData(dataConfirm, isDraftSubmission);
+                        setModalConfirm(false);
+                      }}
+                    >
+                      {isDraftSubmission ? "Save as Draft" : "Submit"}
+                    </ButtonComponent>
+                  )}
+                </div>,
+              ]}
+            >
+              <RelationshipConfirm
+                data={dataConfirm || {}}
+                approvalData={dataDetailApproval}
+                attachmentData={listDataAttachment}
+                idAccount={idAccount}
+                dispatch={dispatch}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                isDraftSubmission={isDraftSubmission}
+              />
+            </ModalCustom>
           </Form>
         </Spin>
 
@@ -799,48 +914,6 @@ const RelationshipCreateAndUpdate = ({
         </ModalCustom>
         */}
       </LayoutMenu>
-
-      {/* Modal Confirmation */}
-      <ModalCustom
-        isOpen={modalConfirm}
-        type="confirmation"
-        header={isDraftSubmission ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
-        width={1000}
-        centered={false}
-        style={{ top: 20 }}
-        handleCancel={() => {
-          setModalConfirm(false);
-        }}
-        footer={
-          <div className="w-full flex justify-end gap-3">
-            <ButtonComponent
-              onClick={() => {
-                setModalConfirm(false);
-              }}
-              type="default"
-            >
-              Cancel
-            </ButtonComponent>
-            <ButtonComponent
-              type="submit"
-              onClick={() => {
-                sendData(dataConfirm, isDraftSubmission);
-                setModalConfirm(false);
-              }}
-            >
-              {isDraftSubmission ? "Save as Draft" : "Submit"}
-            </ButtonComponent>
-          </div>
-        }
-      >
-        <RelationshipConfirm
-          data={dataConfirm || {}}
-          approvalData={dataDetailApproval}
-          attachmentData={listDataAttachment}
-          idAccount={idAccount}
-          dispatch={dispatch}
-        />
-      </ModalCustom>
 
       {/* Modal Upload Attachment */}
       <ModalAttachment

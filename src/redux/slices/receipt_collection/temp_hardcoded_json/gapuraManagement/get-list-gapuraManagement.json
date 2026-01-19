@@ -1,0 +1,75 @@
+{
+    "code": 200,
+    "status": "SUCCESS",
+    "message": "Success Get Data",
+    "data": {
+        "result": [
+            {
+                "id": 1,
+                "paymentGateway": "GAPURA 1",
+                "totalBank": 1,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 2,
+                "paymentGateway": "GAPURA 2",
+                "totalBank": 3,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 3,
+                "paymentGateway": "GAPURA 3",
+                "totalBank": 2,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 4,
+                "paymentGateway": "GAPURA 4",
+                "totalBank": 1,
+                "status": "INACTIVE"
+            },
+            {
+                "id": 5,
+                "paymentGateway": "GAPURA 5",
+                "totalBank": 1,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 6,
+                "paymentGateway": "GAPURA 6",
+                "totalBank": 2,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 7,
+                "paymentGateway": "GAPURA 7",
+                "totalBank": 1,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 8,
+                "paymentGateway": "GAPURA 8",
+                "totalBank": 3,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 9,
+                "paymentGateway": "GAPURA 9",
+                "totalBank": 1,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 10,
+                "paymentGateway": "GAPURA 10",
+                "totalBank": 1,
+                "status": "ACTIVE"
+            }
+        ],
+        "page": {
+            "totalElements": 50,
+            "totalPages": 5,
+            "size": 10,
+            "number": 0
+        }
+    }
+}

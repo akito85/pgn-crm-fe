@@ -248,7 +248,7 @@ const ListRececiptForm = ({ type }) => {
   };
 
   const convertToInteger = (amount) => {
-    return parseInt(amount.replace(/\./g, "").replace(",", "."));
+    return parseInt(amount?.toString().replace(/\./g, "").replace(",", "."));
   };
 
 

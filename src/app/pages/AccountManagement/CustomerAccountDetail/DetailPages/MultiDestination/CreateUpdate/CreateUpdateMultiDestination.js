@@ -2,7 +2,7 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Form } from "antd";
+import { Steps, Form, Spin } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
@@ -36,7 +36,7 @@ import {
   getMdAttachmentCategory,
   updateMultiDestination,
 } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
-import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
+import { showModalError, validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../constants/configApp";
 
@@ -55,11 +55,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
   } = useSelector((state) => state.accountManagement);
 
   const {
+    loading,
     data_mdApprovalHierarchy,
     detail_mdApprovalHierarchy,
     detail_multiDestination,
     data_multiDestinationAttachment,
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.multiDestination);
 
   //declare
   const location = useLocation();
@@ -77,6 +78,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
+  const attachmentIsRequired = true;
+
   const formFields = [
     [
       "account",
@@ -87,7 +90,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       "accountGroupType",
       "accountType",
       "premiseAddress",
-      "subdistrict",
+      "subDistrict",
       "district",
       "city",
       "country",
@@ -102,6 +105,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
     ],
     []
   ];
+
+  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
  
   const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
@@ -125,21 +130,22 @@ const CreateUpdateMultiDestination = ({ type }) => {
   useEffect(() => {
     if (
       type === "update" &&
-      detail_multiDestination?.result &&
+      detail_multiDestination &&
       data_mdApprovalHierarchy?.length
     ) {
       const {
         subjectId,
         objectId,
-        account,
-        accountSor,
-        accountCostCenter,
-        meterReadingCode,
-        accountSegment,
+        accountName,
+        accountNumber,
+        sor: accountSor,
+        costCenter: accountCostCenter,
+        meterReadingCodes: meterReadingCode,
+        segment: accountSegment,
         accountGroupType,
         accountType,
         premiseAddress,
-        subdistrict,
+        subDistrict,
         district,
         city,
         country,
@@ -149,12 +155,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_multiDestination.result;
+      } = detail_multiDestination;
 
       formCreate.setFieldsValue({
         subjectId,
         objectId,
-        account,
+        account: `${accountNumber}-${accountName}`,
         accountSor,
         accountCostCenter,
         meterReadingCode,
@@ -162,7 +168,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         accountGroupType,
         accountType,
         premiseAddress,
-        subdistrict,
+        subDistrict,
         district,
         city,
         country,
@@ -235,6 +241,81 @@ const CreateUpdateMultiDestination = ({ type }) => {
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
+      try {
+        if (current === 2) {
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+
+            dispatch(showModalError(errorBody));
+
+            throw new Error("There was no file attached");
+          }
+        }
+        else {
+          await formCreate.validateFields(formFields[current]);
+
+          const {
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idMd : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId,
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[current],
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
+            type,
+          }))
+          .unwrap();
+        }
+      } catch (err) {
+        return;
+      }
+
       const {
         objectId,
         account,
@@ -279,7 +360,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         startDate,
         endDate,
         appHierId,
-        action: submitType
+        action: submitType,
       };
 
       dispatch(validateCreateUpdate({
@@ -314,7 +395,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const setAccount = (
     {
       objectId,
-      account,
+      accountNumber,
+      accountName,
       accountSor,
       accountCostCenter,
       meterReadingCode,
@@ -322,7 +404,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       accountGroupType,
       accountType,
       premiseAddress,
-      subdistrict,
+      subDistrict,
       district,
       city,
       country,
@@ -332,7 +414,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   ) => {
     formCreate.setFieldsValue({
       objectId,
-      account,
+      account: `${accountNumber}-${accountName}`,
       accountSor,
       accountCostCenter,
       meterReadingCode,
@@ -340,7 +422,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       accountGroupType,
       accountType,
       premiseAddress,
-      subdistrict,
+      subDistrict,
       district,
       city,
       country,
@@ -402,6 +484,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
           getAPICategory={getMdAttachmentCategory}
           service={accountManagementService}
           configApplication={configApp.ACCOUNT_SERVICE}
+          mandatory={attachmentIsRequired}
         />
       ),
       disabled: false
@@ -412,10 +495,79 @@ const CreateUpdateMultiDestination = ({ type }) => {
   
   const next = async () => {
     try {
-      await formCreate.validateFields(formFields[current]);
+      if (current === 2) {
+        if (attachmentIsRequired && !dataAttachment.length) {
+          const errorBody = {
+            title: "Failed",
+            description: `Please upload at least one attachment`,
+          };
+
+          dispatch(showModalError(errorBody));
+
+          throw new Error("There was no file attached");
+        }
+      } else {
+        await formCreate.validateFields(formFields[current]);
+
+        const {
+          objectId,
+          account,
+          accountSor,
+          accountCostCenter,
+          meterReadingCode,
+          accountSegment,
+          accountGroupType,
+          accountType,
+          premiseAddress,
+          subdistrict,
+          district,
+          city,
+          country,
+          longitude,
+          latitude,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+        } = formCreate.getFieldsValue();
+
+        const body = {
+          id: type === "update" ? idMd : undefined,
+          subjectId: data_accountDetail?.accountInformation?.accountId,
+          objectId,
+          account,
+          accountSor,
+          accountCostCenter,
+          meterReadingCode,
+          accountSegment,
+          accountGroupType,
+          accountType,
+          premiseAddress,
+          subdistrict,
+          district,
+          city,
+          country,
+          longitude,
+          latitude,
+          description, 
+          startDate,
+          endDate,
+          appHierId,
+          validationType: validationTypes[current],
+        };
+
+        await dispatch(validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
+          type,
+        }))
+        .unwrap();
+      }
     } catch (err) {
       return;
     }
+    
     
     setCurrent(current + 1);
   };
@@ -426,7 +578,75 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const handleSetCurrent = async (newCurrent) => {
     for (let i = current; i < newCurrent; i++) {
       try {
-        await formCreate.validateFields(formFields[i]);
+        if (i === 2) {
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+
+            dispatch(showModalError(errorBody));
+
+            throw new Error("There was no file attached");
+          }
+        } else {
+          await formCreate.validateFields(formFields[i]);
+
+          const {
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          } = formCreate.getFieldsValue();
+
+          const body = {
+            id: type === "update" ? idMd : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId,
+            objectId,
+            account,
+            accountSor,
+            accountCostCenter,
+            meterReadingCode,
+            accountSegment,
+            accountGroupType,
+            accountType,
+            premiseAddress,
+            subdistrict,
+            district,
+            city,
+            country,
+            longitude,
+            latitude,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+            validationType: validationTypes[i],
+          };
+
+          await dispatch(validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
+            type,
+          }))
+          .unwrap();
+        }
       } catch (err) {
         setCurrent(i);
         return;
@@ -471,6 +691,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       startDate,
       endDate,
       appHierId,
+      remark,
     } = formCreate.getFieldsValue();
 
     const body = {
@@ -482,7 +703,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
       startDate,
       endDate,
       appHierId,
-      action: confirmationType
+      action: confirmationType,
+      remarks: remark,
     };
 
     if (type === "create")
@@ -530,20 +752,22 @@ const CreateUpdateMultiDestination = ({ type }) => {
       setCurrent(0);
     } else if (type === "update") {
       if (
-        detail_multiDestination?.result &&
+        detail_multiDestination &&
         data_mdApprovalHierarchy?.length
       ) {
         const {
           subjectId,
           objectId,
-          accountSor,
-          accountCostCenter,
-          meterReadingCode,
-          accountSegment,
+          accountName,
+          accountNumber,
+          sor: accountSor,
+          costCenter: accountCostCenter,
+          meterReadingCodes: meterReadingCode,
+          segment: accountSegment,
           accountGroupType,
           accountType,
           premiseAddress,
-          subdistrict,
+          subDistrict,
           district,
           city,
           country,
@@ -553,11 +777,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
           endDate,
           description,
           appHierId,
-        } = detail_multiDestination.result;
+        } = detail_multiDestination;
 
         formCreate.setFieldsValue({
           subjectId,
           objectId,
+          account: `${accountNumber}-${accountName}`,
           accountSor,
           accountCostCenter,
           meterReadingCode,
@@ -565,7 +790,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
           accountGroupType,
           accountType,
           premiseAddress,
-          subdistrict,
+          subDistrict,
           district,
           city,
           country,
@@ -649,7 +874,6 @@ const CreateUpdateMultiDestination = ({ type }) => {
             </div>
           </div>
         </BaseContainer>
-
         <Form
           id="multiDestinationForm"
           form={formCreate}
@@ -658,106 +882,109 @@ const CreateUpdateMultiDestination = ({ type }) => {
           // onFinishFailed={handleErrorSubmit}
           scrollToFirstError={true}
         >
-          {/* Step Contents */}
-          <div className="flex flex-row gap-x-6 justify-center">
-            <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+          <Spin
+            spinning={loading}
+          >
+            {/* Step Contents */}
+            <div className="flex flex-row gap-x-6 justify-center">
+              <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+              </div>
             </div>
-          </div>
-          <div className="steps-content my-6">
-          {
-            steps.map((step) => step.content)
-          }
-          </div>
+            <div className="steps-content my-6">
+            {
+              steps.map((step) => step.content)
+            }
+            </div>
 
-          {/* Section Action Steps */}
-          <div className="steps-action my-8 flex w-full justify-between gap-x-2">
-            <ButtonComponent
-              type={"submit"}
-              icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{navigate(-1)}}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex w-full justify-end gap-x-4">
+            {/* Section Action Steps */}
+            <div className="steps-action my-8 flex w-full justify-between gap-x-2">
               <ButtonComponent
-                onClick={handleClear}
                 type={"submit"}
-                icon={<SVGIcon name="IconButtonClear" width={24} />}
+                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                onClick={()=>{navigate(-1)}}
               >
-                { type === "update" ? "Reset" : "Clear" }
+                Back
               </ButtonComponent>
-              {current > 0 && current !== (steps.length-1) && (
+              <div className="flex w-full justify-end gap-x-4">
                 <ButtonComponent
-                  onClick={() => {
-                    prev();
-                    scrollLeftHandler();
-                  }}
+                  onClick={handleClear}
                   type={"submit"}
-                  icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
                 >
-                  Previous
+                  { type === "update" ? "Reset" : "Clear" }
                 </ButtonComponent>
-              )}
-              {current < steps.length - 1 && (
-                <ButtonComponent
-                  onClick={handleButtonNext}
-                  type={"submit"}
-                  disabled={steps[current].disabled}
-                >
-                  <div className="flex gap-x-2 items-center">
-                    <span>Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </div>
-                </ButtonComponent>
-              )}
-              {current === steps.length - 1 && (
-                <>
+                {current > 0 && current !== (steps.length-1) && (
                   <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
                     type={"submit"}
+                    icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
                   >
-                    Save as Draft
+                    Previous
                   </ButtonComponent>
+                )}
+                {current < steps.length - 1 && (
                   <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                    onClick={handleButtonNext}
                     type={"submit"}
+                    disabled={steps[current].disabled}
                   >
-                    Save & Submit
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
                   </ButtonComponent>
-                </>
-              )}
+                )}
+                {current === steps.length - 1 && (
+                  <>
+                    <ButtonComponent
+                      onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                      type={"submit"}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                    <ButtonComponent
+                      onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                      type={"submit"}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          </Spin>
+          <ConfirmationModal
+            form={"multiDestinationForm"}
+            isOpen={showConfirmationModal}
+            handleCancel={() => handleSetShowConfirmationModal(false)}
+            selectedAppHierId={selectedAppHierId}
+            selectedApprovalName={selectedApprovalName}
+            hierarchyTableData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
+              ...detail,
+              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                ...employeeDetail,
+                key: `employee-detail-${index}`
+              })),
+              key: `detail-detail-${index}`,
+            }))}
+            hieararchyOptionData={data_mdApprovalHierarchy}
+            type={confirmationType}
+            dataAttachment={dataAttachment}
+            data={formCreate.getFieldsValue()}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
+          />
         </Form>
-
-        <ConfirmationModal
-          form={"multiDestinationForm"}
-          isOpen={showConfirmationModal}
-          handleCancel={() => handleSetShowConfirmationModal(false)}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-          hierarchyTableData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          hieararchyOptionData={data_mdApprovalHierarchy}
-          type={confirmationType}
-          dataAttachment={dataAttachment}
-          data={formCreate.getFieldsValue()}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-        />
       </div>
     </LayoutMenu>
   );

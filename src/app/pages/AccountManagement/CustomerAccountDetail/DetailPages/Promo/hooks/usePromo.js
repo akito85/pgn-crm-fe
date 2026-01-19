@@ -14,6 +14,7 @@ import {
   fetchPromoConditionDetail,
   fetchPromoHistoryList,
   fetchPromoHistoryDetail,
+  fetchPromoHistoryDetailDetail,
   downloadValidPromoList,
   downloadPromoCriteriaList,
   downloadPromoConditionList,
@@ -23,6 +24,7 @@ import {
   clearPromoCriteriaDetail,
   clearPromoConditionDetail,
   clearPromoHistoryDetail,
+  clearPromoHistoryDetailDetail,
   selectValidPromoList,
   selectValidPromoDetail,
   selectPromoCriteriaList,
@@ -31,6 +33,7 @@ import {
   selectPromoConditionDetail,
   selectPromoHistoryList,
   selectPromoHistoryDetail,
+  selectPromoHistoryDetailDetail,
   selectAdvancedSearchMetadata,
 } from '../store/slices/promoSlice';
 
@@ -46,6 +49,7 @@ export const usePromo = () => {
   const promoConditionDetail = useSelector(selectPromoConditionDetail);
   const promoHistoryList = useSelector(selectPromoHistoryList);
   const promoHistoryDetail = useSelector(selectPromoHistoryDetail);
+  const promoHistoryDetailDetail = useSelector(selectPromoHistoryDetailDetail);
   const advancedSearchMetadata = useSelector(selectAdvancedSearchMetadata);
 
   // ==================== VALID PROMO OPERATIONS ====================
@@ -188,6 +192,16 @@ export const usePromo = () => {
   );
 
   /**
+   * Load promo history detail detail
+   */
+  const loadPromoHistoryDetailDetail = useCallback(
+    (billingCode, detailId, accountId) => {
+      dispatch(fetchPromoHistoryDetailDetail({ billingCode, detailId, accountId }));
+    },
+    [dispatch]
+  );
+
+  /**
    * Download promo history list
    */
   const downloadPromoHistory = useCallback(
@@ -202,6 +216,13 @@ export const usePromo = () => {
    */
   const clearPromoHistory = useCallback(() => {
     dispatch(clearPromoHistoryDetail());
+  }, [dispatch]);
+
+  /**
+   * Clear promo history detail detail
+   */
+  const clearDetailOfPromoHistory = useCallback(() => {
+    dispatch(clearPromoHistoryDetailDetail());
   }, [dispatch]);
 
   // ==================== ADVANCED SEARCH ====================
@@ -223,6 +244,7 @@ export const usePromo = () => {
     promoConditionDetail,
     promoHistoryList,
     promoHistoryDetail,
+    promoHistoryDetailDetail,
     advancedSearchMetadata,
 
     // Valid Promo Actions
@@ -246,8 +268,10 @@ export const usePromo = () => {
     // History Actions
     loadPromoHistoryList,
     loadPromoHistoryDetail,
+    loadPromoHistoryDetailDetail,
     downloadPromoHistory,
     clearPromoHistory,
+    clearDetailOfPromoHistory,
 
     // Advanced Search Actions
     loadAdvancedSearchMetadata,

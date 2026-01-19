@@ -51,7 +51,6 @@ const PricingSection = ({ SAId }) => {
     dispatch(getDetailPricing(SAId));
   }, [dispatch, SAId]);
 
-  // Simplified useEffect - No merge logic, just simple mapping
   useEffect(() => {
     const mappedData = dataSource.map((item, index) => ({
       ...item,

@@ -58,6 +58,8 @@ const DetailMonitoringUsage = () => {
   const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showBackWarning, setShowBackWarning] = useState(false);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -105,6 +107,21 @@ const DetailMonitoringUsage = () => {
       setPage(1);
     }
   }, [location, dispatch]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     if (
@@ -202,84 +219,113 @@ const DetailMonitoringUsage = () => {
   };
 
   const handleSaveUpdateUsage = async (formValue) => {
-    try {
-      const requestBody = {
-        accountNumber: formValue?.accountNumber || null,
-        accountName: formValue?.accountName || null,
-        costCenter: formValue?.costCenter || null,
-        billingPeriod: formValue?.billingPeriod || null,
-        assetSerialNum: formValue?.assetSerialNum || null,
-        assetType: formValue?.assetType || null,
-        fdate:
-          formValue?.fdate === false
-            ? null
-            : moment(formValue?.fdate).format(dateFormatting.dateFormal),
-        fhour: hasValue(formValue?.fhour)
-          ? moment(formValue?.fhour).format(dateFormatting.fhour)
-          : null,
-        measDate: formValue?.measDate || null,
-        streamId: formValue?.streamId || null,
-        temperature: formValue?.temperature || null,
-        pressure: formValue?.pressure || null,
-        correctionFactor: formValue?.correctionFactor || null,
-        calorie: formValue?.calorie || null,
-        beginStand: formValue?.beginStand || null,
-        endStand: formValue?.endStand || null,
-        volMeasured27: formValue?.volMeasured27 || null,
-        volMeasured60: formValue?.volMeasured60 || null,
-        engMeasured: formValue?.engMeasured || null,
-        ghv: formValue?.ghv || null,
-        volMscf: formValue?.volMscf || null,
-        uncorrectedValue: formValue?.uncorrectedValue || null,
-        taxationRowId: formValue?.taxationRowId || null,
-        source: formValue?.source || null,
-        description: formValue?.description || null,
-      };
+  try {
+    // Helper function untuk convert string dengan thousand separator ke number
+    const parseNumericValue = (value) => {
+      if (value === null || value === undefined || value === '') return null;
+      if (typeof value === 'number') return value;
+      // Remove thousand separator dan convert ke number
+      if (typeof value === 'string') {
+        const cleaned = value.replace(/,/g, '');
+        const parsed = parseFloat(cleaned);
+        return isNaN(parsed) ? null : parsed;
+      }
+      return null;
+    };
 
-      const resultAction = await dispatch(
-        updateSingleUsage({
-          recordId: recordId,
-          data: requestBody,
-        })
+    const requestBody = {
+      accountNumber: formValue?.accountNumber || null,
+      accountName: formValue?.accountName || null,
+      costCenter: formValue?.costCenter || null,
+      assetSerialNum: formValue?.assetSerialNum || null,
+      assetType: formValue?.assetType || null,
+      fdate:
+        formValue?.fdate === false
+          ? null
+          : moment(formValue?.fdate).format(dateFormatting.dateFormal),
+      fhour: hasValue(formValue?.fhour)
+        ? moment(formValue?.fhour).format(dateFormatting.fhour)
+        : null,
+      measDate: formValue?.measDate 
+        ? moment(formValue?.measDate).toISOString() 
+        : null,
+      streamId: parseNumericValue(formValue?.streamId),
+      temperature: parseNumericValue(formValue?.temperature),
+      pressure: parseNumericValue(formValue?.pressure),
+      correctionFactor: parseNumericValue(formValue?.correctionFactor),
+      calorie: parseNumericValue(formValue?.calorie),
+      beginStand: parseNumericValue(formValue?.beginStand),
+      endStand: parseNumericValue(formValue?.endStand),
+      volMeasured27: parseNumericValue(formValue?.volMeasured27),
+      volMeasured60: parseNumericValue(formValue?.volMeasured60),
+      engMeasured: parseNumericValue(formValue?.engMeasured),
+      ghv: parseNumericValue(formValue?.ghv),
+      volMscf: parseNumericValue(formValue?.volMscf),
+      uncorrectedValue: parseNumericValue(formValue?.uncorrectedValue),
+      sourceRowId: parseNumericValue(formValue?.sourceRowId),
+      sourceName: formValue?.sourceName || null,
+      source: formValue?.source || null,
+      description: formValue?.description || null,
+    };
+
+    const resultAction = await dispatch(
+      updateSingleUsage({
+        recordId: recordId,
+        data: requestBody,
+        batchId: location?.state?.id,
+      })
+    );
+
+    if (updateSingleUsage.fulfilled.match(resultAction)) {
+      const newDataTable = [...dataTable];
+      const index = newDataTable.findIndex(
+        (item) => recordId === item.recordId
       );
 
-      if (updateSingleUsage.fulfilled.match(resultAction)) {
-        const newDataTable = [...dataTable];
-        const index = newDataTable.findIndex(
-          (item) => recordId === item.recordId
-        );
-
-        if (index !== -1) {
-          const item = newDataTable[index];
-          const updatedRow = {
-            ...item,
-            ...formValue,
-            billingPeriod: requestBody.billingPeriod,
-            fdate: requestBody.fdate,
-            fhour: requestBody.fhour,
-            measDate: requestBody.measDate,
-            status: "SUCCESS",
-            recordId: recordId,
-          };
-          newDataTable.splice(index, 1, updatedRow);
-          setDataTable(newDataTable);
-        }
-
-        setOpenUpdateUsage(false);
-
-        // Refresh data from server
-        dispatch(
-          getDetailBatch({
-            batchId: location?.state?.id,
-            page: 1,
-            pageSize: page * loadMoreSize,
-          })
-        );
+      if (index !== -1) {
+        const item = newDataTable[index];
+        const updatedRow = {
+          ...item,
+          ...formValue,
+          fdate: requestBody.fdate,
+          fhour: requestBody.fhour,
+          measDate: requestBody.measDate,
+          streamId: requestBody.streamId,
+          temperature: requestBody.temperature,
+          pressure: requestBody.pressure,
+          correctionFactor: requestBody.correctionFactor,
+          calorie: requestBody.calorie,
+          beginStand: requestBody.beginStand,
+          endStand: requestBody.endStand,
+          volMeasured27: requestBody.volMeasured27,
+          volMeasured60: requestBody.volMeasured60,
+          engMeasured: requestBody.engMeasured,
+          ghv: requestBody.ghv,
+          volMscf: requestBody.volMscf,
+          uncorrectedValue: requestBody.uncorrectedValue,
+          sourceRowId: requestBody.sourceRowId,
+          status: "SUCCESS",
+          recordId: recordId,
+        };
+        newDataTable.splice(index, 1, updatedRow);
+        setDataTable(newDataTable);
       }
-    } catch (error) {
-      console.error("Error updating usage:", error);
+
+      setOpenUpdateUsage(false);
+
+      // Refresh data from server
+      dispatch(
+        getDetailBatch({
+          batchId: location?.state?.id,
+          page: 1,
+          pageSize: page * loadMoreSize,
+        })
+      );
     }
-  };
+  } catch (error) {
+    console.error("Error updating usage:", error);
+  }
+};
 
   // change tabs
   const changeTab = (key) => {
@@ -288,6 +334,16 @@ const DetailMonitoringUsage = () => {
 
   // handle back page
   const handleBack = () => {
+    if (hasUnsavedChanges) {
+      setShowBackWarning(true);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleConfirmLeave = () => {
+    setShowBackWarning(false);
+    setHasUnsavedChanges(false);
     navigate(-1);
   };
 
@@ -310,6 +366,7 @@ const DetailMonitoringUsage = () => {
     setDataTable(newData);
     dispatch(addDeletedData(deletedRecord));
     setModalDelete(false);
+    setHasUnsavedChanges(true);
   };
 
   const handleDownloadFailed = () => {
@@ -380,12 +437,14 @@ const DetailMonitoringUsage = () => {
                   }}
                 />
               ) : (
-                <SVGIcon
-                  name="IconDelete"
-                  width={20}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
+                <div className="cursor-not-allowed inline-block">
+                  <SVGIcon
+                    name="IconDelete"
+                    width={20}
+                    color={"#C0BEC6"}
+                    style={{ pointerEvents: "none" }}
+                  />
+                </div>
               )}
             </Tooltip>
           </div>
@@ -517,10 +576,10 @@ const DetailMonitoringUsage = () => {
                       {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                     <DetailText label="Updated Date">
-                      {detail_batch?.batchInformation?.uploadDate}
+                      {detail_batch?.batchInformation?.updatedDate}
                     </DetailText>
                     <DetailText label="Updated By">
-                      {detail_batch?.batchInformation?.uploadBy}
+                      {detail_batch?.batchInformation?.updatedBy}
                     </DetailText>
                   </div>
                 </BaseContainer>
@@ -612,11 +671,11 @@ const DetailMonitoringUsage = () => {
           <div className="flex justify-center gap-[20px] mt-6">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
             <p className="text-[18px] font-bold">
-              Are you sure want to delete it?
+              Are you sure you want to delete this record?
             </p>
           </div>
           <Alert
-            message="Warning! if you delete this data, it will be permanently."
+            message="Remember to save your changes! This deletion will only take effect after you click 'Save & Submit' or 'Save as Draft'."
             type={"error"}
           />
         </ModalConfirm>
@@ -630,7 +689,26 @@ const DetailMonitoringUsage = () => {
           listDataAppHierDetail={appHierDataDetail}
           data_detail={body}
           columns={filteredColumns}
+          onSaveSuccess={() => setHasUnsavedChanges(false)}
         />
+
+        <ModalConfirm
+          isOpen={showBackWarning}
+          handleCancel={() => setShowBackWarning(false)}
+          handleOk={handleConfirmLeave}
+          width={500}
+          useOk={true}
+        >
+          <div className="flex justify-center gap-[20px] mt-6">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">You have unsaved changes!</p>
+          </div>
+          <Alert
+            message="This change has not been saved yet. If you leave or continue without saving, all activities in this draft will be lost."
+            type="error"
+          />
+        </ModalConfirm>
+
       </Spin>
     </LayoutMenu>
   );

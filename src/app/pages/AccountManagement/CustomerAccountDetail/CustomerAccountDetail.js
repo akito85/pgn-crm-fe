@@ -14,12 +14,12 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 const data = [
   // { value: "Customer Information" },
   { value: "Account Information" }, //
-  { value: "Last Activity", disabled: true },
-  { value: "Billing", disabled: true },
-  { value: "Receipt", disabled: true },
-  { value: "Service Request", disabled: true },
-  { value: "Account Statement", disabled: true },
-  { value: "Pre Requisite", disabled: true },
+  { value: "Last Activity" },
+  { value: "Billing", disabled: true, },
+  { value: "Receipt", disabled: true, },
+  { value: "Service Request", disabled: true, },
+  { value: "Account Statement", disabled: true, },
+  { value: "Pre Requisite", disabled: true, },
   { value: "Account Address" }, //
   { value: "Account Contact" }, //
   { value: "Distribution Media" }, //
@@ -28,16 +28,16 @@ const data = [
   { value: "Service Agreement" },
   { value: "Relationship" },
   { value: "Gas Source" },
-  { value: "Gas Deposit", disabled: true },
-  { value: "Compensation", disabled: true },
-  { value: "Promo", disabled: false },
+  { value: "Gas Deposit", disabled: true, },
+  { value: "Compensation", disabled: true, },
+  { value: "Promo" },
   { value: "Multi Destination" },
-  { value: "Additional Information", disabled: true  },
-  { value: "Gas Utilization", disabled: true  },
-  { value: "Equipment", disabled: true  },
-  { value: "Raw Material Source", disabled: true  },
-  { value: "Product Distribution", disabled: true  },
-  { value: "User Access", disabled: true },
+  { value: "Additional Information" },
+  { value: "Gas Utilization" },
+  { value: "Equipment" },
+  { value: "Raw Material Source" },
+  { value: "Product Distribution" },
+  { value: "User Access", disabled: true, },
 ];
 
 const CustomerAccountDetail = ({ type = "standard" }) => {
@@ -148,10 +148,18 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               // handleChangeInteraction={handleSetType}
             />
             <div className="my-5 flex justify-between">
-              {isApproval ? (
+              <Link
+                to={
+                  type === "standard"
+                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
+                }
+              >
                 <ButtonComponent
                   type={"submit"}
-                  onClick={() => setIsApproval(false)}
+                  // onClick={() => {
+                  //   navigate(-1)
+                  // }}
                   icon={
                     <LeftOutlined
                       style={{
@@ -164,33 +172,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 >
                   Back
                 </ButtonComponent>
-              ) : (
-                <Link
-                  to={
-                    type === "standard"
-                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                  }
-                >
-                  <ButtonComponent
-                    type={"submit"}
-                    // onClick={() => {
-                    //   navigate(-1)
-                    // }}
-                    icon={
-                      <LeftOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 24,
-                          justifyItems: "center",
-                        }}
-                      />
-                    }
-                  >
-                    Back
-                  </ButtonComponent>
-                </Link>
-              )}
+              </Link>
 
               {showApprovalButton && (
               <div className={"w-full flex justify-end gap-5"}>

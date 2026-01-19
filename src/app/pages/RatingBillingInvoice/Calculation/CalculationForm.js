@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -43,6 +42,7 @@ const CalculationForm = ({ type }) => {
   // Selector
   const {
     loading,
+    loadingCreate,
     list_sor,
     list_service_type,
     list_account_group,
@@ -275,9 +275,8 @@ const handleReset = () => {
   setSelectedScheduleType(null);
   setSearchCustomerValue("");
   setFilteredCustomerList([]);
-  setBillingCycle(null); // Reset billing cycle state agar billing period jadi disabled
+  setBillingCycle(null);
   
-  // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
   setDataSpecificCustomer({
     sorId: defaultData?.sor || null,
     costCenterId: defaultData?.costCenter || [],
@@ -1212,13 +1211,14 @@ const handleReset = () => {
         handleCancel={() => setOpenModal(false)}
         header={"CONFIRMATION"}
         width={900}
+        loading={loadingCreate}
         type={"confirmation"}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loadingCreate} >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loadingCreate} disabled={loadingCreate}>
               Confirm
             </ButtonComponent>
           </div>

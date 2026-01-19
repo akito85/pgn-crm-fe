@@ -1,6 +1,4 @@
 import {
-  Checkbox,
-  Form,
   Spin,
   Tooltip,
 } from "antd";
@@ -26,7 +24,6 @@ import {
   getDownloadPartner,
   getPaginatePartner,
 } from "../../../../../redux/slices/receipt_collection/partner";
-import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
@@ -133,12 +130,12 @@ const ViewPartner = () => {
   const handleApprovalHistory = async (data) => {
     try {
       setBody(data);
-     await dispatch(getApprovalHistory(data))?.unwrap();
+      await dispatch(getApprovalHistory(data))?.unwrap();
       setOpenModalHistory(true);
-      
+
     } catch (error) {
       setOpenModalHistory(false);
-      
+
     }
   };
 
@@ -358,9 +355,9 @@ const ViewPartner = () => {
   ];
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-      left: ["no"],
-      right: ["statusApproval", "action"],
-    }));
+    left: ["no"],
+    right: ["statusApproval", "action"],
+  }));
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -370,9 +367,9 @@ const ViewPartner = () => {
     setSort(dataSort);
   };
 
-  
 
-  
+
+
 
   // handle download
   const handleDownload = () => {
@@ -419,7 +416,7 @@ const ViewPartner = () => {
                   icon={<SVGIcon name="IconDetail" width={24} />}
                   border={false}
                 /> */}
-              <EyeOutlined />
+              <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
             </Link>
           </Tooltip>
         );
@@ -429,9 +426,9 @@ const ViewPartner = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
-        const isEditable = record.statusApproval === "Rejected" 
-          // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
-          // (record.status !== "Active" && record.statusApproval !== "Approved") 
+        const isEditable = record.statusApproval === "Rejected"
+        // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
+        // (record.status !== "Active" && record.statusApproval !== "Approved") 
 
         return (
           data_length > 3 ? (
@@ -442,7 +439,7 @@ const ViewPartner = () => {
               <ButtonComponent
                 className="gap-5 w-full"
                 icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"} />
+                  <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
                 }
                 border={false}
                 disabled={!isEditable}
@@ -471,7 +468,7 @@ const ViewPartner = () => {
                     <SVGIcon name="IconEdit" color="#ACC424" width={24} />
                   </Link>
                 ) : (
-                  <SVGIcon name="IconEdit" color="#8D91A0" width={24}  className={"cursor-not-allowed"}/>
+                  <SVGIcon name="IconEdit" color="#8D91A0" width={24} className={"cursor-not-allowed"} />
                 )}
               </div>
             </Tooltip>
@@ -531,8 +528,15 @@ const ViewPartner = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <CardContainer header={"PARTNER LIST"}>
+        {/* <Toolbar items={itemActions} /> */}
+        <CardContainer header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">PARTNER LIST</p>
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
+          </div>
+        }>
           <TableRBI
             showExport={true}
             handleDownload={handleDownload}
@@ -560,7 +564,7 @@ const ViewPartner = () => {
           />
         </CardContainer>
 
-        
+
 
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}

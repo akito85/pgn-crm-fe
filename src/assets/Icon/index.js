@@ -62,6 +62,7 @@ import IconActiveSuccess from "./IconActiveSuccess";
 import IconReGenerate from "./IconReGenerate";
 import IconRatingRecalculate from "./IconRatingRecalculate";
 import IconMonitoring from './IconMonitoring';
+import IconPlusCircle from "./IconPlusCircle";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
@@ -192,6 +193,8 @@ const Icon = (props) => {
       return <IconRatingRecalculate {...props} />;
     case "IconMonitoringSession":
       return <IconMonitoring {...props} />;
+    case "IconPlusCircle":
+      return <IconPlusCircle {...props} />;
     case "IconReporting":
       return <FileOutlined style={{ color: "#4B465C" }} />;
     default:

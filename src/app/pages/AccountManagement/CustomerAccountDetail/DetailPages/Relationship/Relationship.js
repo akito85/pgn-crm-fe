@@ -1,6 +1,6 @@
-import { Fragment } from "react";
-import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { Fragment, useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { Spin } from "antd";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import RelationshipTable from "./RelationshipTable";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
@@ -12,12 +12,32 @@ import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import NxFilter from "../../../../../../components/Nx/NxFilter";
 import { getRelationshipColumnApi, getRelationshipConditionApi, getRelationshipOperatorApi, downloadRelationship } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { CheckOutlined, DownloadOutlined, FilterOutlined } from "@ant-design/icons";
+import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
+import NotFound from "../../../../../NotFound";
 
 const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   const dispatch = useDispatch();
   const relationshipState = useSelector((state) => state.relationship);
   const { loading } = relationshipState;
+  const { access_account } = useSelector((state) => state.accountManagement);
   const [formQuery] = Form.useForm();
+  const location = useLocation();
+  const [isAccessChecked, setIsAccessChecked] = useState(false);
+
+  // Check granted access when component mounts - must complete before data fetch
+  useEffect(() => {
+    setIsAccessChecked(false);
+    const path = location?.pathname.includes('account-standard')
+      ? '/account-management/account-standard/relationship'
+      : '/account-management/account-onetime/relationship';
+
+    dispatch(getGrantedAccessAccount(path))
+      .unwrap()
+      .then(() => setIsAccessChecked(true))
+      .catch(() => setIsAccessChecked(true));
+  }, [dispatch, location?.pathname]);
+
+  const isAccessGranted = access_account?.isGranted === true;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -55,18 +75,6 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
     }
     setModalQuery(false);
     setPage(1);
-  };
-
-  const handleFirstQuery = () => {
-    const queries = formQuery.getFieldValue("query");
-    if (queries && queries.length > 0) {
-      formQuery.setFieldsValue({
-        query: queries.map((item, index) => ({
-          ...item,
-          condition: index === 0 ? 1311 : item.condition,
-        })),
-      });
-    }
   };
 
   /**
@@ -107,95 +115,15 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
   return (
     // <Spin spinning={loading} className={"w-full top-20"} tip={"Loading..."}>
     <Fragment>
-      <BaseContainer header={"RELATIONSHIP LIST"}>
-        {!approvalMode ? (
-          <div className="w-full flex justify-between mb-[30px]">
-            <ButtonComponent
-              icon={
-                <FilterOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              type="submit"
-              onClick={handleOpenFilter}
-            >
-              Filters
-            </ButtonComponent>
-
-            <div className="flex gap-3">
-              <ButtonComponent
-                type={"submit"}
-                onClick={handleDownload}
-                icon={
-                  <DownloadOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Download List
-              </ButtonComponent>
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => handleIsApproval(true)}
-                icon={
-                  <CheckOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Approval
-              </ButtonComponent>
-
-              <NavLink
-                to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP}
-                state={{ idAccount: id, idCustomer: idCustomer, type: type }}
-              >
-                <ButtonComponent
-                  type={"submit"}
-                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                >
-                  Create
-                </ButtonComponent>
-              </NavLink>
-            </div>
+      {
+        !isAccessChecked ?
+          <div className="w-full flex justify-center py-10">
+            <Spin tip="Checking access..." />
           </div>
-        ) : (
-          <div className="w-full flex justify-end mb-[30px]">
-            <ButtonComponent
-              type="default"
-              onClick={() => handleIsApproval(false)}
-            >
-              Cancel Approval
-            </ButtonComponent>
-          </div>
-        )}
-
-        <div className={"w-full mt-5"}>
+         : !isAccessGranted ?
+          <NotFound type={"unauthorized"} />
+         : 
+        <BaseContainer header={"RELATIONSHIP LIST"}>
           <RelationshipTable
             idAccount={id}
             page={page}
@@ -217,9 +145,12 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
             inputFields={inputFields}
             tempInputFields={tempInputFields}
             listType={listType}
+            isAccessGranted={isAccessGranted}
+            handleDownload={handleDownload}
+            handleOpenFilter={handleOpenFilter}
           />
-        </div>
-      </BaseContainer>
+        </BaseContainer>
+      }
 
       {/* Modal Filter */}
       <ModalCustom
@@ -241,6 +172,7 @@ const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
             maxFilters={5}
             loading={loading}
             formId="relationshipFilterForm"
+            accountId={id}
           />
         </Form>
       </ModalCustom>

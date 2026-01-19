@@ -467,31 +467,29 @@ export const createPaymentRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Your data has been ${createBody?.action === "draft" ? 'drafted' : 'submitted'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+
+      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${createBody?.action === "draft" ? 'drafted' : 'submitted'}. ${message}.`,
+      };
+      
+      thunkAPI.dispatch(showModalError(errorBody));
+
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -519,31 +517,29 @@ export const updatePaymentRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
+        description: `Your data has been ${updateBody?.action === "draft" ? 'drafted' : 'submitted'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+      
+      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${updateBody?.action === "draft" ? 'drafted' : 'submitted'}. ${message}.`,
+      };
+      
+      thunkAPI.dispatch(showModalError(errorBody));
+
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -681,7 +677,7 @@ export const updateInvoiceRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
+        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))

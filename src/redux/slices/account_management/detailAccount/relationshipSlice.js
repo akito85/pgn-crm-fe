@@ -182,9 +182,9 @@ export const getApprovalHistory = createAsyncThunk(
 // Get Relationship Search Column
 export const getRelationshipColumnApi = createAsyncThunk(
   "GET_RELATIONSHIP_COLUMN_API",
-  async (_, thunkAPI) => {
+  async ({accountId}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/relationships/list-search-column`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/list-search-column`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -196,9 +196,9 @@ export const getRelationshipColumnApi = createAsyncThunk(
 // Get Relationship Search Condition
 export const getRelationshipConditionApi = createAsyncThunk(
   "GET_RELATIONSHIP_CONDITION_API",
-  async (_, thunkAPI) => {
+  async ({accountId}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/relationships/list-search-condition`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/list-search-condition`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -210,9 +210,9 @@ export const getRelationshipConditionApi = createAsyncThunk(
 // Get Relationship Search Operator
 export const getRelationshipOperatorApi = createAsyncThunk(
   "GET_RELATIONSHIP_OPERATOR_API",
-  async (_, thunkAPI) => {
+  async ({accountId}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/relationships/list-search-operator`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/list-search-operator`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -281,6 +281,45 @@ export const toggleRelationshipStatus = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const inactivateRelationship = createAsyncThunk(
+  "INACTIVATE_RELATIONSHIP",
+  async ({ accountId, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/inactive`;
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been submitted`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -562,6 +601,48 @@ export const approveOrRejectRelationship = createAsyncThunk(
   }
 );
 
+// Approve or Reject Inactive Relationship
+export const approveOrRejectInactiveRelationship = createAsyncThunk(
+  "APPROVE_OR_REJECT_INACTIVE_RELATIONSHIP",
+  async ({ idAccount, body, action }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approve-inactive`;
+      const response = await accountManagementService.activationWithRemark(url, body, {
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      let message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occurred";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Download Relationship to Excel
 export const downloadRelationship = createAsyncThunk(
   "DOWNLOAD_RELATIONSHIP",
@@ -723,6 +804,17 @@ const relationshipSlice = createSlice({
       state.loading = false;
     },
 
+    // Inactivate Relationship
+    [inactivateRelationship.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivateRelationship.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [inactivateRelationship.rejected]: (state) => {
+      state.loading = false;
+    },
+
     // Create Relationship
     [createRelationship.pending]: (state) => {
       state.loading = true;
@@ -836,6 +928,17 @@ const relationshipSlice = createSlice({
       state.loading = false;
     },
     [approveOrRejectRelationship.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // Approve or Reject Inactive Relationship
+    [approveOrRejectInactiveRelationship.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactiveRelationship.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectInactiveRelationship.rejected]: (state) => {
       state.loading = false;
     },
   },

@@ -12,7 +12,9 @@ const DateComponent = ({
   disabled = false,
   placeholder,
   defaultPickerValue,
-  key
+  key,
+  isPassingId = false,
+  id,
 }) => {
   const wrapper = "flex flex-col";
   const style = {
@@ -31,7 +33,7 @@ const DateComponent = ({
   };
 
   return (
-    <div className={wrapper}>
+    <div className={wrapper} id={isPassingId ? id : undefined}>
       <InputLabel text={label} mandatory={mandatory}></InputLabel>
       <DatePicker
         key={key}

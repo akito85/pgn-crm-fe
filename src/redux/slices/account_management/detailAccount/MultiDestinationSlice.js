@@ -21,21 +21,11 @@ export const getMultiDestination = createAsyncThunk(
   "GET_MULTI_DESTINATION",
   async ({ id, body }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/list/${id}`;
-      // const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-      //     headers: { "Accept": "application/json, text/plain, */*" }
-      //   });
-      // return response.data;
-      return {
-        result: [
-          {
-            id: 1,
-          }
-        ],
-        page: {
-          totalElements: 1,
-        }
-      };
+      const url = `/v1/dbs/api/multi-destination/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+          headers: { "Accept": "application/json, text/plain, */*" }
+        });
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -46,10 +36,9 @@ export const getMultiDestinationAttachment = createAsyncThunk(
   "GET_MULTI_DESTINATION_ATTACHMENT",
   async ({ id }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/list-attachment/${id}`;
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = `/v1/dbs/api/multi-destination/list-attachment/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -60,20 +49,20 @@ export const createMultiDestination = createAsyncThunk(
   "CREATE_MULTI_DESTINATION",
   async ({ body: createBody, attachments = [] }, thunkAPI) => {
     try {
-      // const createUrl = "/v1/dbs/api/multi-destination/create";
-      // const response = await accountManagementService.createData(createUrl, createBody);
+      const createUrl = "/v1/dbs/api/multi-destination/create";
+      const response = await accountManagementService.createData(createUrl, createBody);
 
-      // const { id } = response.data;
+      const { id } = response.data;
 
-      // const uploadUrl = `/v1/dbs/api/multi-destination/upload-attachment`;
+      const uploadUrl = `/v1/dbs/api/multi-destination/upload-attachment`;
 
-      // const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(uploadUrl, {
-      //   files:  attachment.file,
-      //   category: attachment.fileCategoryId,
-      //   refId: id,
-      // }));
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(uploadUrl, {
+        files:  attachment.file,
+        category: attachment.fileCategoryId,
+        refId: id,
+      }));
 
-      // await Promise.all(uploadPromises);
+      await Promise.all(uploadPromises);
 
       const successBody = {
         title: `Successful`,
@@ -81,8 +70,7 @@ export const createMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -112,21 +100,21 @@ export const updateMultiDestination = createAsyncThunk(
   "UPDATE_MULTI_DESTINATION",
   async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
     try {
-      // const updateUrl = `/v1/dbs/api/multi-destination/${id}`;
-      // const response = await accountManagementService.updateData(updateUrl, updateBody);
+      const updateUrl = `/v1/dbs/api/multi-destination/${id}`;
+      const response = await accountManagementService.updateData(updateUrl, updateBody);
 
-      // const uploadUrl = `/v1/dbs/api/multi-destination/upload-attachment`;
+      const uploadUrl = `/v1/dbs/api/multi-destination/upload-attachment`;
 
-      // const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
-      //   uploadUrl,
-      //   {
-      //     files:  attachment.file,
-      //     category: attachment.fileCategoryId,
-      //     refId: id,
-      //   }
-      // ));
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
+        uploadUrl,
+        {
+          files:  attachment.file,
+          category: attachment.fileCategoryId,
+          refId: id,
+        }
+      ));
 
-      // await Promise.all(uploadPromises);
+      await Promise.all(uploadPromises);
 
       const successBody = {
         title: `Successful`,
@@ -134,8 +122,7 @@ export const updateMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -165,14 +152,9 @@ export const getDetailMultiDestination = createAsyncThunk(
   "GET_DETAIL_MULTI_DESTINATION",
   async (id, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/detail/${id}`;
-      // const response = await accountManagementService.getDetail(url);
-      // return response.data;
-      return {
-        result: {
-          id: 1
-        },
-      };
+      const url = `/v1/dbs/api/multi-destination/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -183,10 +165,9 @@ export const getMdApprovalHierarchy = createAsyncThunk(
   "GET_MD_APPROVAL_HIERARCHY",
   async (thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -197,10 +178,9 @@ export const getDetailMdApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_MD_APPROVAL_HIERARCHY",
   async ({ id }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/approval-hierarchy/${id}`;
-      // const response = await accountManagementService.getDetail(url);
-      // return response.data;
-      return {};
+      const url = `/v1/dbs/api/multi-destination/approval-hierarchy/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -211,10 +191,9 @@ export const getMdAttachmentCategory = createAsyncThunk(
   "GET_MD_ATTACHMENT_CATEGORY",
   async (thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/attachment-category`;
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = `/v1/dbs/api/multi-destination/attachment-category`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -225,14 +204,13 @@ export const getMdAccountStandard = createAsyncThunk(
   "GET_MD_ACCOUNT_STANDARD",
   async ({ page, pageSize, sort, search, id }, thunkAPI) => {
     try {
-      // const searchParams = search === undefined ? "" : search;
+      const searchParams = search === undefined ? "" : search;
 
-      // const sortParams =
-      //   sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // const url = `/v1/dbs/api/multi-destination/list-account/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      // const response = await accountManagementService.getPagination(url);
-      // return response.data;
-      return {};
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/multi-destination/list-account/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await accountManagementService.getPagination(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -243,8 +221,8 @@ export const approveOrRejectMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_MULTI_DESTINATION",
   async ({ body, action }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/approve";
-      // const response = await accountManagementService.activationWithRemark(url, body);
+      const url = "/v1/dbs/api/multi-destination/approve";
+      const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
@@ -252,8 +230,7 @@ export const approveOrRejectMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -283,8 +260,8 @@ export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_MULTI_DESTINATION",
   async ({ body, action }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/approve-inactive";
-      // const response = await accountManagementService.activationWithRemark(url, body);
+      const url = "/v1/dbs/api/multi-destination/approve-inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
@@ -292,8 +269,7 @@ export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -323,21 +299,21 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_MULTI_DESTINATION",
   async ({ body, inactiveBody, action }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/approve";
-      // const inactiveUrl = "/v1/dbs/api/multi-destination/approve-inactive";
+      const url = "/v1/dbs/api/multi-destination/approve";
+      const inactiveUrl = "/v1/dbs/api/multi-destination/approve-inactive";
       
-      // await Promise.all([
-      //   body.length ? accountManagementService.activationWithRemark(url, body, {
-      //     headers: {
-      //       "Accept": "application/json"
-      //     }
-      //   }) : null,
-      //   inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody, {
-      //     headers: {
-      //       "Accept": "application/json"
-      //     }
-      //   }) : null,
-      // ]);
+      await Promise.all([
+        body.length ? accountManagementService.activationWithRemark(url, body, {
+          headers: {
+            "Accept": "application/json"
+          }
+        }) : null,
+        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody, {
+          headers: {
+            "Accept": "application/json"
+          }
+        }) : null,
+      ]);
 
       const successBody = {
         title: `Successful`,
@@ -373,8 +349,8 @@ export const inactivateMultiDestination = createAsyncThunk(
   "INACTIVATE_MULTI_DESTINATION",
   async ({ body }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/inactive";
-      // const response = await accountManagementService.activationWithRemark(url, body);
+      const url = "/v1/dbs/api/multi-destination/inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
@@ -382,8 +358,7 @@ export const inactivateMultiDestination = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
-      // return response.data;
-      return {};
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -413,10 +388,9 @@ export const downloadMultiDestination = createAsyncThunk(
   "DOWNLOAD_MULTI_DESTINATION",
   async ({ body, id, }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/export-excel/${id}`;
-      // const response = await accountManagementService.downloadDataAdvanced(url, body);
-      // return response;
-      return null;
+      const url = `/v1/dbs/api/multi-destination/export-excel/${id}`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
+      return response;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_MULTI_DESTINATION", back: false }));
       return thunkAPI.rejectWithValue(response.response.data);
@@ -428,10 +402,9 @@ export const getMdApprovalHistory = createAsyncThunk(
   "GET_MD_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/multi-destination/approval-history/${id}`;
-      // const response = await accountManagementService.getDetail(url);
-      // return Array.isArray(response.data) ? null : response.data;
-      return {};
+      const url = `/v1/dbs/api/multi-destination/approval-history/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -445,10 +418,9 @@ export const getMdColumnApi = createAsyncThunk(
   "GET_MD_COLUMN_API",
   async (thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/list-search-column";
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const url = "/v1/dbs/api/multi-destination/list-search-column";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -459,9 +431,9 @@ export const getMdConditionApi = createAsyncThunk(
   "GET_MD_CONDITION_API",
   async (thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/multi-destination/list-search-condition";
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
+      const url = "/v1/dbs/api/multi-destination/list-search-condition";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }

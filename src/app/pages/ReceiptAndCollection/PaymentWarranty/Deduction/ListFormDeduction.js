@@ -2,9 +2,8 @@ import {
   LeftOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Form,Spin } from "antd";
-import moment from "moment";
-import  { useEffect,  useState } from "react";
+import { Form, Spin, Input } from "antd";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -13,16 +12,12 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
-  createSetting,
-  createValidasiSetting,
   getAllApprovalList,
-  getDetailSetting,
+  getDetailDeduction,
   getListApprovalById,
   getListCategory,
-  updateSetting,
-} from "../../../../../redux/slices/receipt_collection/setting";
+} from "../../../../../redux/slices/receipt_collection/deduction";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import { dateFormatting } from "../../../../../utils";
 import DeductionForm from "./DeductionForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
@@ -38,8 +33,10 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import ModalSearchCustomer from "./ModalSearchCustomer";
+import TableRBI from "../../../../../components/TableRBI";
 
-const ListFormSettings = (props) => {
+const ListFormDeduction = (props) => {
   const { type } = props;
   const {
     data_detail,
@@ -47,7 +44,7 @@ const ListFormSettings = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
-  } = useSelector((state) => state.receiptSetting);
+  } = useSelector((state) => state.deduction);
 
   // Declaration
   const navigate = useNavigate();
@@ -64,20 +61,15 @@ const ListFormSettings = (props) => {
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
 
-  
-
-  
-
-  
+  // Customer List State
+  const [customerList, setCustomerList] = useState([]);
+  const [modalSearchCustomer, setModalSearchCustomer] = useState(false);
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailSetting(id));
+      dispatch(getDetailDeduction(id));
     }
   }, [dispatch, id, type]);
-
-
- 
 
   useEffect(() => {
     dispatch(getAllApprovalList());
@@ -93,7 +85,7 @@ const ListFormSettings = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-  
+
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -129,49 +121,13 @@ const ListFormSettings = (props) => {
   }, [formValue, appHierOptions, form]);
 
   useEffect(() => {
-    if (id  && data_detail) {
-
-      form.setFieldsValue({
-        id: data_detail?.settings.id,
-        dateStart: data_detail?.settings?.dateStart ?? "",
-        dateEnd: data_detail?.settings?.dateEnd ?? "",
-        hourStart: data_detail?.settings?.hourStart ?? "",
-        hourEnd: data_detail?.settings?.hourEnd ?? "",
-        minuteStart: data_detail?.settings?.minuteStart ?? "",
-        minuteEnd: data_detail?.settings?.minuteEnd ?? "",
-        caCode: data_detail?.settings?.caCode ?? "",
-        partnerCode: data_detail?.settings?.partnerCode ?? "",
-        ciCode: data_detail?.settings?.ciCode ?? "",
-        type: data_detail?.settings?.type,
-        apphierId: data_detail?.settings?.appHierId,
-      });
-
-      setSelectedHierarchy(data_detail?.settings?.appHierId);
-
-      setListDataAttachment(
-        (data_detail?.attachmentDtoList || []).map((attachData) => ({
-          ...attachData,
-          fileSize: bytesConverter(attachData.fileSize || 0),
-          dataType: "exist",
-        }))
-      );
+    if (id && data_detail) {
+      // Map details to form logic here if needed for update
     }
   }, [data_detail, id]);
 
-  // Define tabData before using it in useState
-
   const [tabData, setTabData] = useState([
-    { value: "Deduction", paramValue: ["dateStart",
-                                      "dateEnd",
-                                      "hourStart",
-                                      "hourEnd",
-                                      "minuteStart",
-                                      "minuteEnd",
-                                      "caCode",
-                                      "partnerCode",
-                                      "ciCode",
-                                      "type"
-                                     ] },
+    { value: "Deduction", paramValue: ["deductionPeriod", "type", "deductionDate"] },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
@@ -182,78 +138,24 @@ const ListFormSettings = (props) => {
     setValuePage(e.target.value);
   };
 
-  useEffect(() => {
-    if (
-      formValue.apphierId &&
-      !appHierOptions.map((item) => item.value).includes(formValue.apphierId)
-    ) {
-      form.setFieldsValue({ apphierId: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
-
-  
-
   const handleSubmitForm = (formValue) => {
-      const dataValue = {
-        dateStart: formValue.dateStart,
-        dateEnd: formValue.dateEnd,
-        hourStart: formValue.hourStart,
-        hourEnd: formValue.hourEnd,
-        minuteStart: formValue.minuteStart,
-        minuteEnd: formValue.minuteEnd,
-        caCode: formValue.caCode,
-        partnerCode: formValue.partnerCode,
-        ciCode: formValue.ciCode,
-        type: formValue.type,
-        apphierId: formValue.apphierId,
-      };
+    const dataValue = {
+      ...formValue,
+      customerList: customerList
+    };
 
-      setSendBody(dataValue);
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: data_detail?.settings?.id,
-      };
-      if (type !== "update") {
-        dispatch(createValidasiSetting(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-          });
-      }else{
-        dispatch(createValidasiSetting(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-            setSendBody(bodyValidasiUpdate)
-          });
-      }
-      
+    setSendBody(dataValue);
+    setModalConfirm(true);
+    // Logic for create/update API call would go here
   };
 
-  
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
 
   // Validation Button Back
   const handleBack = () => {
-    if (
-      form.getFieldValue() === null ||
-      Object.keys(form.getFieldValue()).length === 0
-    ) {
-      navigate(-1);
-    } else {
-      setModalBack(true);
-    }
+    setModalBack(true);
   };
 
   const handleClear = () => {
@@ -261,8 +163,9 @@ const ListFormSettings = (props) => {
       form.resetFields();
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setCustomerList([]);
     } else {
-      dispatch(getDetailSetting(id));
+      // Logic for reset update
     }
   };
 
@@ -307,105 +210,91 @@ const ListFormSettings = (props) => {
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      breadcrumbName: `${type === "create" ? "Create Deduction" : "Update Deduction"}`,
     },
   ];
-  
 
-  //kriim bodyy
+
   const handleSave = async () => {
     setModalConfirm(false);
-    const successMessageCreate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
-    };
-
-    const successMessageUpdate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
-    };
-
-    if (type === "update") {
-      dispatch(updateSetting(sendBody))
-        .unwrap()
-        .then(async () => {
-          const id = data_detail?.settings?.id;
-          setLoadingForm(true);
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
-          for (let icon = 0; icon < filterDataAttach.length; icon++) {
-            const element = filterDataAttach[icon];
-            const body = {
-              referensiId: data_detail?.settings?.id,
-              files: element.file,
-              category: "RECEIPT_SETTING",
-              fileCategoryId: element.fileCategoryId,
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          form.resetFields();
-          setSelectedHierarchy("");
-          setListDataAttachment([]);
-          dispatch(showModalSuccess(successMessageUpdate));
-          handleClear();
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
-    } else {
-      dispatch(createSetting(sendBody))
-        .unwrap()
-        .then(async (data) => {
-          let id = data.id;
-          setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
-            const element = listDataAttachment[icon];
-
-            const body = {
-              files: element.file,
-              fileCategoryId: element.fileCategoryId,
-              referensiId: id,
-              category: "RECEIPT_SETTING",
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          handleClear();
-          dispatch(showModalSuccess(successMessageCreate));
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
-    }
+    // Logic to save
+    console.log("Saving data:", sendBody);
+    navigate(-1);
   };
+
+  const handleCustomerAmountChange = (id, value) => {
+    const updatedList = customerList.map(item => {
+      if (item.id === id) {
+        return { ...item, amount: value };
+      }
+      return item;
+    });
+    setCustomerList(updatedList);
+  };
+
+  const handleDeleteCustomer = (id) => {
+    const updatedList = customerList.filter(item => item.id !== id);
+    setCustomerList(updatedList);
+  };
+
+  const customerColumns = [
+    {
+      title: "NO",
+      dataIndex: "no",
+      key: "no",
+      width: 50,
+      render: (text, record, index) => index + 1,
+    },
+    {
+      title: "COST CENTER",
+      dataIndex: "costCenter",
+      key: "costCenter",
+      width: 150,
+    },
+    {
+      title: "CUSTOMER NUMBER",
+      dataIndex: "customerNumber",
+      key: "customerNumber",
+      width: 120,
+    },
+    {
+      title: "CUSTOMER NAME",
+      dataIndex: "customerName",
+      key: "customerName",
+      width: 200,
+    },
+    {
+      title: "CUSTOMER SEGMENT",
+      dataIndex: "customerSegment",
+      key: "customerSegment",
+      width: 120,
+    },
+    {
+      title: "AMOUNT",
+      dataIndex: "amount",
+      key: "amount",
+      width: 150,
+      render: (text, record) => (
+        <Input
+          placeholder="Placeholder"
+          value={text}
+          onChange={(e) => handleCustomerAmountChange(record.id, e.target.value)}
+        />
+      )
+    },
+    {
+      title: "ACTION",
+      key: "action",
+      fixed: "right",
+      width: 80,
+      align: "center",
+      render: (_, record) => (
+        <div onClick={() => handleDeleteCustomer(record.id)} className="cursor-pointer flex justify-center text-red-500">
+          <SVGIcon name="IconDelete" width={24} />
+        </div>
+      ),
+    },
+  ];
 
   return (
     <LayoutMenu>
@@ -431,7 +320,27 @@ const ListFormSettings = (props) => {
               dataType={dataType}
               form={form}
             />
+
+            <BaseContainer header={
+              <div className="flex justify-between items-center w-full">
+                <span className="font-bold">CUSTOMER INFORMATION</span>
+              </div>
+            }>
+              <div className="flex justify-end mb-4">
+                <ButtonComponent type="primary" onClick={() => setModalSearchCustomer(true)}>
+                  Search Customer
+                </ButtonComponent>
+              </div>
+              <TableRBI
+                columns={customerColumns}
+                dataSource={customerList}
+                rowKey="id"
+                usePagination={false}
+              />
+            </BaseContainer>
+
           </div>
+
           <div
             style={{
               display: valuePage !== tabData[1].value ? "none" : undefined,
@@ -456,7 +365,7 @@ const ListFormSettings = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="receiptSetting"
+                typeSelector="deduction"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}
@@ -499,8 +408,6 @@ const ListFormSettings = (props) => {
               <ButtonComponent
                 htmlType="submit"
                 type="submit"
-              // onClick={() => setModalConfirm(true)}
-              // disabled={disableSubmit}
               >
                 Save & Submit
               </ButtonComponent>
@@ -525,14 +432,17 @@ const ListFormSettings = (props) => {
           </div>
         }
       >
-        <ContentModalConfirm
-          data={sendBody}
-          tabData={tabData}
-          listDataAttachment={listDataAttachment}
-          listDataAppHierDetail={appHierDataDetail}
-          dataOption={appHierOptions}
-          selectedHierarchy={selectedHierarchy}
-        />
+        <div className="p-4">
+          <ContentModalConfirm
+            data={sendBody}
+            listDataAttachment={listDataAttachment}
+            listDataAppHierDetail={appHierDataDetail}
+            tabData={tabData}
+            dataOption={appHierOptions}
+            selectedHierarchy={selectedHierarchy}
+            typeSelector="deduction"
+          />
+        </div>
       </ModalCustom>
 
       {/* Modal Back*/}
@@ -549,8 +459,19 @@ const ListFormSettings = (props) => {
           </p>
         </div>
       </ModalConfirm>
+
+      <ModalSearchCustomer
+        isOpen={modalSearchCustomer}
+        onClose={() => setModalSearchCustomer(false)}
+        onConfirm={(selectedRecords) => {
+          // Avoid duplicates
+          const uniqueRecords = selectedRecords.filter(record => !customerList.some(existing => existing.id === record.id));
+          setCustomerList([...customerList, ...uniqueRecords]);
+        }}
+      />
+
     </LayoutMenu>
   );
 };
 
-export default ListFormSettings;
+export default ListFormDeduction;

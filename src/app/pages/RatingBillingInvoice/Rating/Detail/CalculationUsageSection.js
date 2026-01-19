@@ -180,7 +180,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
       >
         <CardComponent header={"CALCULATION USAGE INFORMATION"} cols={1}>
           <div className="w-full grid grid-cols-4">
-            <DetailText label={"Type"}>{detailCalculationItem?.type}</DetailText>
+            <DetailText label={"Type"}>{detailCalculationItem?.ratingType}</DetailText>
             <DetailText label={"UOM"}>{detailCalculationItem?.uom}</DetailText>
             <DetailText label={"Usage"}>{detailCalculationItem?.usage}</DetailText>
             <DetailText label={"Converted Usage M3"}>
@@ -245,7 +245,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         </CardComponent>
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
           <DetailText label="Record ID">
-            {detailCalculationItem?.idCalcUsage}
+            {detailCalculationItem?.recordId}
           </DetailText>
           <DetailText label="Created Date">
             {hasValue(detailCalculationItem?.createdDate) &&

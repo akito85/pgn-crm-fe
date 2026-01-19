@@ -14,6 +14,7 @@ import PaymentRelation from "./PaymentRelation/PaymentRelation";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import InvoiceRelation from "./InvoiceRelation/InvoiceRelation";
+import { usePrevLocContext } from "../../../../../../utils/usePrevLoc";
 
 const FinancialInformation = ({
   id = 0,
@@ -34,14 +35,65 @@ const FinancialInformation = ({
     (state) => state.accountManagement
   );
 
-    // Use Effect
-    useEffect(() => {
-      if(location?.pathname.includes('account-standard')) {
-        dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information'))
-      }else{
-        dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information'))
-      }
-    }, [dispatch])
+  const { path } = usePrevLocContext();
+
+  // Use Effect
+  useEffect(() => {
+    let collapse = "";
+
+    switch (current) {
+      case 0:
+        collapse = "/payment-channel"
+        break;
+      case 1:
+        collapse = "/tax-identifier"
+        break;
+      case 2:
+        collapse = "/witholding-tax"
+        break;
+      case 3:
+        collapse = "/accounting-rule"
+        break;
+      case 4:
+        collapse = "/billing-bucket"
+        break;
+      case 5:
+        collapse = "/tax-implication"
+        break;
+      case 6:
+        collapse = "/payment-relation"
+        break;
+      case 7:
+        collapse = "/invoice-relation"
+        break;
+    }
+
+    if(location?.pathname.includes('account-standard')) {
+      dispatch(getGrantedAccessAccount(`/account-management/account-standard/financial-information${collapse}`))
+    }else{
+      dispatch(getGrantedAccessAccount(`/account-management/account-onetime/financial-information${collapse}`))
+    }
+  }, [current]);
+
+  useEffect(() => {
+    if (
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/financial-information/payment-relation"
+      ))
+    ) {
+      setCurrent(6);
+    } else if (
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/financial-information/invoice-relation"
+      ))
+    ) {
+      setCurrent(7);
+    } else {
+      setCurrent(0);
+    }
+  }, [path]);
 
   const financialList = [
     // {

@@ -62,6 +62,19 @@ import ViewTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentW
 import ListDetailTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListDetailTransferToReceipt";
 import ListFormTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListFormTransferToReceipt";
 
+import ViewTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ViewTransferToCustomer";
+import ListDetailTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ListDetailTransferToCustomer";
+import ListFormTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ListFormTransferToCustomer";
+
+import ViewWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+
+import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/History/ListHistoryPaymentWarranty";
+
+import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
+import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -130,7 +143,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PARTNER: <ListDetailPartner />,
   CREATE_PARTNER: <ListFormPartner type={"create"} />,
   UPDATE_PARTNER: <ListFormPartner type={"update"} />,
-  
+
   // payment
   VIEW_PAYMENT: <ViewPayment />,
 
@@ -163,7 +176,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PAYMENT_CHANNEL: <ListDetailPaymentChannel />,
   CREATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"create"} />,
   UPDATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"update"} />,
-  
+
   // Accounting
   VIEW_ACCOUNTING: <ViewAccounting />,
 
@@ -172,10 +185,27 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_DEDUCTION: <ListDetailDeduction />,
   CREATE_DEDUCTION: <ListFormDeduction type={"create"} />,
   UPDATE_DEDUCTION: <ListFormDeduction type={"update"} />,
-  
+
   // Transfer to Receipt
   VIEW_TRANSFER_TO_RECEIPT: <ViewTransferToReceipt />,
   DETAIL_TRANSFER_TO_RECEIPT: <ListDetailTransferToReceipt />,
   CREATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"create"} />,
-  UPDATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"update"} />,
+
+  // Transfer to Customer
+  VIEW_TRANSFER_TO_CUSTOMER: <ViewTransferToCustomer />,
+  DETAIL_TRANSFER_TO_CUSTOMER: <ListDetailTransferToCustomer />,
+  CREATE_TRANSFER_TO_CUSTOMER: <ListFormTransferToCustomer type={"create"} />,
+
+  // Transfer to Receipt
+  VIEW_WARRANTY: <ViewWarranty />,
+  DETAIL_WARRANTY: <ListDetailWarranty />,
+  CREATE_WARRANTY: <ListFormWarranty type={"create"} />,
+  UPDATE_WARRANTY: <ListFormWarranty type={"update"} />,
+
+  // History Payment Warranty
+  VIEW_HISTORY_PAYMENT_WARRANTY: <ListHistoryPaymentWarranty />,
+
+  // Gapura Management
+  VIEW_GAPURA_MANAGEMENT_PAGE: <ViewGapuraManagement />,
+  DETAIL_GAPURA_MANAGEMENT_PAGE: <ListDetailGapuraManagement />,
 };

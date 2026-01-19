@@ -22,14 +22,13 @@ import {
   getListAccountGroup,
   getListBillingCycle,
   getListBillingPeriod,
-  getListCalculationType,
   getListCostCenter,
   getListCustomerSegment,
   getListMeterReadingCode,
   getListSchedulerType,
-  getListServiceType,
   getListSor,
   getListSpecificCustomer,
+  getListComponentPrabilling,
   createPrabilling,
   getUserDetailCalculation,
   getUserProfile,
@@ -51,10 +50,12 @@ const PrabillingForm = ({ type }) => {
     specific_customer_message,
     list_billing_cycle,
     list_billing_period,
+    list_component_prabilling,
     data_user_calculation,
     user_profile,
-    loading_user_profile,
+    loadingCreate,
   } = useSelector((state) => state.rbi_prabilling);
+
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -87,7 +88,7 @@ const PrabillingForm = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
   const [defaultData, setDefaultData] = useState({});
 
-  const [searchCustomerValue, setSearchCustomerValue] = useState("");
+  const [searchCustomerValue, setSearchCustomerValue] = useState(""); 
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const searchTimeoutRef = useRef(null);
   const [selectedCustomersMap, setSelectedCustomersMap] = useState({});
@@ -97,12 +98,11 @@ const PrabillingForm = ({ type }) => {
 
   useEffect(() => {
     dispatch(getListSor());
-    dispatch(getListServiceType());
     dispatch(getListCustomerSegment());
-    dispatch(getListCalculationType());
     dispatch(getListSchedulerType());
     dispatch(getListCostCenter());
     dispatch(getListBillingCycle());
+    dispatch(getListComponentPrabilling());
     dispatch(getUserDetailCalculation());
     dispatch(getUserProfile());
   }, [dispatch]);
@@ -248,6 +248,7 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
@@ -268,9 +269,8 @@ const PrabillingForm = ({ type }) => {
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setBillingCycle(null); // Reset billing cycle state
+    setBillingCycle(null); 
 
-    // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
     setDataSpecificCustomer({
       sorId: defaultData?.sor || null,
       costCenterId: defaultData?.costCenter || [],
@@ -280,8 +280,6 @@ const PrabillingForm = ({ type }) => {
       search: "",
       limit: DEFAULT_SEARCH_LIMIT,
     });
-
-    // Reset selected customers map
     setSelectedCustomersMap({});
   };
 
@@ -297,6 +295,7 @@ const PrabillingForm = ({ type }) => {
         : null,
       calculationType: formValue?.calculation_type,
       remark: formValue?.remark,
+      specificComponentPrabilling: formValue?.specificComponentPrabilling || [],
       rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
         return {
           id: null,
@@ -425,6 +424,7 @@ const PrabillingForm = ({ type }) => {
       sorId: dataFinal?.sor,
       calculationTypeId: dataFinal?.calculationType,
       remark: dataFinal?.remark,
+      runDtl: dataFinal?.specificComponentPrabilling || [],
       createdBy: user_profile.username || "",
     };
 
@@ -577,6 +577,7 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
@@ -892,6 +893,24 @@ const PrabillingForm = ({ type }) => {
                   </Select>
                 </Form.Item>
               </div>
+
+              {/* Specific Component Prabilling - Left column */}
+              <Form.Item
+                label={"Specific Component Prabilling"}
+                name={"specificComponentPrabilling"}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  mode={"multiple"}
+                  options={(list_component_prabilling || []).map((item) => {
+                    return {
+                      label: item?.componentName,
+                      value: item?.componenetCode,
+                    };
+                  })}
+                  placeholder={"Choose Multiple..."}
+                />
+              </Form.Item>
             </div>
           </CardContainer>
           <CardContainer
@@ -1172,12 +1191,13 @@ const PrabillingForm = ({ type }) => {
         header={"CONFIRMATION"}
         width={900}
         type={"confirmation"}
+        loading={loadingCreate}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loadingCreate}  > 
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loadingCreate} disabled={loadingCreate}>
               Confirm
             </ButtonComponent>
           </div>

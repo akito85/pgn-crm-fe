@@ -336,20 +336,6 @@ export default function InfoPaymentRelation({
       ...getColumnSearchProps("latitude"),
     },
     {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("startDate"),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("endDate"),
-    },
-    {
       title: "ACTION",
       align: "center",
       width: 120,
@@ -451,9 +437,8 @@ export default function InfoPaymentRelation({
                 required: true,
               },
             ]}
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format("DD-MM-YYYY") : null}
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, "DD-MM-YYYY") : null
+              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
             })}
             className="no-margin-form"
           >
@@ -465,9 +450,8 @@ export default function InfoPaymentRelation({
             name={"endDate"}
             label={"End Date"}
             className="no-margin-form"
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format("DD-MM-YYYY") : null}
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, "DD-MM-YYYY") : null
+              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
             })}
           >
             <DateComponent />
@@ -484,7 +468,6 @@ export default function InfoPaymentRelation({
             <InputComponent
               type={"textarea"}
               rows={4}
-              placeholder="Asset meter baru PGN"
               maxLength={255}
             />
           </Form.Item>

@@ -119,8 +119,16 @@ import contentManagementReducer from "../slices/rating_billing_invoice/MasterDat
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
+import warrantyReducer from "../slices/receipt_collection/warranty";
+import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
+import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
+import restructureReducer from "../slices/receipt_collection/restructure";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
+import deductionReducer from "../slices/receipt_collection/deduction";
+import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
+import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
+import offsetReducer from "../slices/receipt_collection/offset";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -246,6 +254,14 @@ const reducer = combineReducers({
   collectingAgent: collectingAgentReducer,
   paymentChannel: paymentChannelReducer,
   accounting: accountingReducer,
+  warranty: warrantyReducer,
+  transferToReceipt: transferToReceiptReducer,
+  transferToCustomer: transferToCustomerReducer,
+  restructure: restructureReducer,
+  deduction: deductionReducer,
+  gapuraManagement: gapuraManagementReducer,
+  historyWarranty: historyWarrantyReducer,
+  offset: offsetReducer,
 
   // Attachment
   attachment: attachmentReducer,
