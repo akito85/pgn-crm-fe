@@ -40,7 +40,6 @@ const Promo = ({
   criteriaOptionsFix = [],
   promoTypeOptions = [],
   promotionTypeOptions = [],
-  promoCategoryOptions = [],
   handleSelectCriteria,
   handleDeselectCriteria,
   handleClearCriteria,
@@ -126,22 +125,6 @@ const Promo = ({
               dateDisable={handleDisableEndDate}
               onChange={(e) => handleEndDate(e)}
             />
-          </Form.Item>
-          <Form.Item
-            label={"Category"}
-            name={"promoCategory"}
-            className={"w-full"}
-            rules={formMessageRequired("Category")}
-          >
-            <SelectComponent
-              disabled={status === "ACTIVE" && type === "update"}
-            >
-              {(promoCategoryOptions || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
-                  {data.text}
-                </Select.Option>
-              ))}
-            </SelectComponent>
           </Form.Item>
           <Form.Item
             label={"Type"}
