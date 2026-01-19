@@ -322,7 +322,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       res.push(32); //19
     }
     let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(37) ? [37] : outputArray;
+    outputArray = outputArray.includes(37) ? [37] : outputArray.includes(25) ? [25] : outputArray;
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
@@ -348,12 +348,12 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       res = res.filter((item) => item !== 33); //20
     }
     let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(37) ? [37] : outputArray;
+    outputArray = outputArray.includes(37) ? [37] : outputArray.includes(25) ? [25] : outputArray;
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
     });
-    if (outputArray?.length > 0 && outputArray.includes(37)) {
+    if (outputArray?.length > 0 && (outputArray.includes(37) || outputArray.includes(25))) {
       setListDataCriteria([]);
     }
   };
