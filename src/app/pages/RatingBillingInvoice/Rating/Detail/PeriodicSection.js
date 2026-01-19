@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../components/TableRBI";
-import { getAllPromoServiceAgreementPaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
-import { columnsPromo } from "./Table/TablePromo";
+import { getAllPeriodicServiceAgreementPaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
+import { columnsPeriodic } from "./Table/TablePeriodic";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const PromoSection = ({ ratingCodeId, calculationCode }) => {
-  const { data_promoSA, loading } = useSelector((state) => state.rating);
+const PeriodicSection = ({ ratingCodeId, calculationCode }) => {
+  const { data_periodicSA, loading } = useSelector((state) => state.rating);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_promoSA?.result;
+  const dataSource = data_periodicSA?.result;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -27,7 +27,7 @@ const PromoSection = ({ ratingCodeId, calculationCode }) => {
   useEffect(() => {
     // Dispatch dengan ratingCodeId sebagai id
     dispatch(
-      getAllPromoServiceAgreementPaginate({
+      getAllPeriodicServiceAgreementPaginate({
         id: ratingCodeId,
         search: search,
         page,
@@ -67,7 +67,7 @@ const PromoSection = ({ ratingCodeId, calculationCode }) => {
   };
 
   const baseColumns = useMemo(() => {
-    return columnsPromo(
+    return columnsPeriodic(
       search,
       page,
       pageSize,
@@ -100,7 +100,7 @@ const PromoSection = ({ ratingCodeId, calculationCode }) => {
     <>
       <div className="mb-4">
         <p className="text-[15px] font-medium text-[#0075bf] mb-3">
-          PROMO INFORMATION
+          PERIODIC INFORMATION
         </p>
         <div className="flex flex-row gap-8">
           <div className="flex flex-col gap-1">
@@ -128,7 +128,7 @@ const PromoSection = ({ ratingCodeId, calculationCode }) => {
           onChange={handleChangePage}
           onSizeChanger={handleChangePage}
           showExport={false}
-          totalData={data_promoSA?.page?.totalElements || 0}
+          totalData={data_periodicSA?.page?.totalElements || 0}
           tableScrolled={{ x: 1500, y: 525 }}
           onSort={onSort}
           columnDefinitions={columnDefinitions}
@@ -141,4 +141,4 @@ const PromoSection = ({ ratingCodeId, calculationCode }) => {
   );
 };
 
-export default PromoSection;
+export default PeriodicSection;
