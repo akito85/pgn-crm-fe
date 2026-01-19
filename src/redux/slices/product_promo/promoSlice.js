@@ -34,6 +34,7 @@ const initialState = {
   data_cost_center: [],
   data_Gsizes: [],
   data_product: [],
+  data_product_version: [],
   data_customerSegment: [],
   data_customer: [],
   data_adjustment_type: [],
@@ -465,6 +466,37 @@ export const getProductList = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/product`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.data?.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getProductVersionList = createAsyncThunk(
+  "GET_PRODUCT_VERSION_PROMO",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/product-version/${id}`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.data?.map((item) => {
         return {
@@ -1288,6 +1320,19 @@ const promoSlice = createSlice({
     [getProductList.rejected]: (state, action) => {
       state.loading = false;
       state.data_product = action.payload;
+    },
+
+    [getProductVersionList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_product_version = action.payload;
+    },
+    [getProductVersionList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_product_version = action.payload;
+    },
+    [getProductVersionList.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_product_version = action.payload;
     },
 
     [getBudgetList.pending]: (state, action) => {
