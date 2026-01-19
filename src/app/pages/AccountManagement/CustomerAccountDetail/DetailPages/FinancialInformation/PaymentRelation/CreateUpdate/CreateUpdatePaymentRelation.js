@@ -183,7 +183,7 @@ const CreatePaymentRelation = ({ type }) => {
       breadcrumbName: "Detail Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
+      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Payment Relation",
     },
     {

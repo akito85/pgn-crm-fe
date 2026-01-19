@@ -216,7 +216,7 @@ const EditableCell = ({
                 </span>
               </div>
             );
-          } else {
+          } else if (selectDataRecord[`${record.key}inputType`] === 749) {
             return (
               <div className="w-full flex flex-row">
                 <Select
@@ -264,6 +264,8 @@ const EditableCell = ({
                 />
               </div>
             );
+          } else {
+            return null
           }
         }
         if (selectDataRecord[`${record.key}type`] === 743) {
@@ -558,7 +560,7 @@ const EditableCell = ({
         return (
           <Select
             // onChange={form.resetFields([""])}
-            disabled={dataIndex === "inputType" ? true : false}
+            // disabled={dataIndex === "inputType" ? true : false}
             showSearch
             optionFilterProp="children"
             allowClear
@@ -844,16 +846,36 @@ const DynamicTableInlineWithoutBase = ({
       };
     });
     if (index === "type") {
-      setSelectDataRecord((prevState) => {
-        return {
-          ...prevState,
-          // [keyName]: value,
-          [`${key}inputType`]: typeValue(value),
-        };
-      });
-      form.setFieldsValue({
-        inputType: typeValue(value),
-      });
+      if (value !== 741) { // If type is not phone
+        form.setFieldsValue({
+          inputType: typeValue(value),
+        });
+
+        setSelectDataRecord((prevState) => {
+          return {
+            ...prevState,
+            // [keyName]: value,
+            [`${key}inputType`]: typeValue(value),
+          };
+        });
+      }
+
+      else {
+        form.resetFields([
+          "inputType",
+        ]);
+
+        setSelectDataRecord((prevState) => {
+          const temp = { ...prevState }; 
+          delete temp[`${key}inputType`];
+          return temp;
+        });
+      }
+
+      form.resetFields([
+        "value",
+      ]);
+
       setPrefix1((prevState) => {
         return {
           ...prevState,
@@ -878,10 +900,7 @@ const DynamicTableInlineWithoutBase = ({
           [`${keyModal}~${key}`]: "", // Reset the value for changes
         };
       });
-      form.resetFields([
-        // "inputType",
-        "value",
-      ]);
+      
     }
     return value;
   };

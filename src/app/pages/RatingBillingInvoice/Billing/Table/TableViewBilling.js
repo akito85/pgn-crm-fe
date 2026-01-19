@@ -28,7 +28,7 @@ export const columnsBilling = (
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
     isClassification: true,
-    width: 90,
+    width: 71,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "calculationCode",
@@ -62,7 +62,7 @@ export const columnsBilling = (
     title: "RATING CODE",
     dataIndex: "ratingCode",
     isClassification: true,
-    width: 70,
+    width: 57,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "ratingCode",
@@ -96,7 +96,7 @@ export const columnsBilling = (
     title: "BILLING CODE",
     dataIndex: "billingCode",
     isClassification: true,
-    width: 70,
+    width: 57,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "billingCode",
@@ -126,43 +126,10 @@ export const columnsBilling = (
       ),
   },
   {
-    key: "saNumber",
-    title: "SA NUMBER",
-    dataIndex: "saNumber",
-    width: 70,
-    sorter: true,
-    // ...getColumnSearchPropsPaging(
-    //   "saNumber",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "saNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "saNumber",
-        hasValue(search["saNumber"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
-    width: 70,
+    width: 60,
     sorter: true,
     isClassification: true,
     // ...getColumnSearchPropsPaging(
@@ -195,7 +162,7 @@ export const columnsBilling = (
   {
     key: "billingPeriod",
     title: "BILLING PERIOD",
-    width: 70,
+    width: 62,
     sorter: true,
     isClassification: true,
     dataIndex: "billingPeriod",
@@ -249,72 +216,6 @@ export const columnsBilling = (
     //   ) : (
     //     moment(text).format(dateFormatting.datePeriod)
     //   ),
-  },
-  {
-    key: "customerNumber",
-    title: "CUSTOMER NUMBER",
-    dataIndex: "customerNumber",
-    width: 70,
-    sorter: true,
-    // ...getColumnSearchPropsPaging(
-    //   "customerNumber",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "customerNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "customerNumber",
-        hasValue(search["customerNumber"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "customerName",
-    title: "CUSTOMER NAME",
-    dataIndex: "customerName",
-    width: 70,
-    sorter: true,
-    // ...getColumnSearchPropsPaging(
-    //   "customerName",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "customerName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "customerName",
-        hasValue(search["customerName"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
   },
   {
     key: "accountNumber",
@@ -381,6 +282,105 @@ export const columnsBilling = (
     //   searchText,
     //   handleSearch
     // ),
+  },
+  {
+    key: "saNumber",
+    title: "SA NUMBER",
+    dataIndex: "saNumber",
+    width: 70,
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "saNumber",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch
+    // ),
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "saNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "saNumber",
+        hasValue(search["saNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "customerNumber",
+    title: "CUSTOMER NUMBER",
+    dataIndex: "customerNumber",
+    width: 70,
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "customerNumber",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch
+    // ),
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "customerNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "customerNumber",
+        hasValue(search["customerNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "customerName",
+    title: "CUSTOMER NAME",
+    dataIndex: "customerName",
+    width: 70,
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "customerName",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch
+    // ),
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "customerName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "customerName",
+        hasValue(search["customerName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
   },
   {
     key: "serviceType",
@@ -658,7 +658,7 @@ export const columnsBilling = (
     key: "uom",
     title: "UOM",
     dataIndex: "uom",
-    width: 70,
+    width: 50,
     sorter: true,
     isClassification: true,
     // ...getColumnSearchPropsPaging(
@@ -1713,7 +1713,7 @@ export const columnsBilling = (
     dataIndex: "rateType",
     width: 70,
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     // ...getColumnSearchPropsPaging(
     //   "rateType",
     //   searchInput,
