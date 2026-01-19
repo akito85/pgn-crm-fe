@@ -1074,6 +1074,7 @@ export const getFromItemList = createAsyncThunk(
         return {
           value: item.id,
           label: item.text,
+          source: item.source,
         };
       });
     } catch (error) {

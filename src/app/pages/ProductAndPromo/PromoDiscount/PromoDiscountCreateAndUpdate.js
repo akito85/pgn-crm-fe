@@ -60,6 +60,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     data_promoDiscountDetail,
     data_promoDiscountDetailDraft,
     data_listAttachment,
+    data_from_item,
   } = useSelector((state) => state.promo);
 
   // Declaration
@@ -417,13 +418,15 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   const handleBodyConfirm = useCallback(
     (bodyData) => {
-      let dataCriteriaObject = listDataCriteria.map((item, index) =>
-        handleMappingCriteriaGeneral({
-          item: item,
-          index: index,
-          columnsTable: columnsTableCriteriaPromo(),
-          criteriaValues: criteriaValues,
-          dataListCriteria: dataListCriteria,
+      let dataCriteriaObject = listDataCriteria.map((item, index) => ({
+          ...handleMappingCriteriaGeneral({
+            item: item,
+            index: index,
+            columnsTable: columnsTableCriteriaPromo(),
+            criteriaValues: criteriaValues,
+            dataListCriteria: dataListCriteria,
+          }),
+          fromItemSource: data_from_item.find((fromItem) => fromItem.value === item.fromItem?.value)?.source,
         })
       );
 
@@ -483,6 +486,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       id,
       listDataCondition,
       listDataCriteria,
+      data_from_item,
       type,
     ]
   );
@@ -598,13 +602,15 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   const handleConfirm = () => {
     setModalConfirm(false);
 
-    let dataCriteriaObject = listDataCriteria.map((item, index) =>
-      handleMappingCriteriaGeneral({
-        item: item,
-        index: index,
-        columnsTable: columnsTableCriteriaPromo(),
-        criteriaValues: criteriaValues,
-        dataListCriteria: dataListCriteria,
+    let dataCriteriaObject = listDataCriteria.map((item, index) => ({
+        ...handleMappingCriteriaGeneral({
+          item: item,
+          index: index,
+          columnsTable: columnsTableCriteriaPromo(),
+          criteriaValues: criteriaValues,
+          dataListCriteria: dataListCriteria,
+        }),
+        fromItemSource: data_from_item.find((fromItem) => fromItem.value === item.fromItem?.value)?.source,
       })
     );
 
