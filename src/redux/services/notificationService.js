@@ -4,7 +4,7 @@ import { NOTIFICATION_CONFIG } from "../../constants/configApp";
  * Notification Service
  *
  * Handles SSE (Server-Sent Events) connection for real-time notifications
- * Endpoint: /v1/dbs/api/notifications
+ * Endpoint: /v1/api/notification
  */
 
 class NotificationService {
@@ -58,7 +58,7 @@ class NotificationService {
         // If the URL is relative, construct it using the current origin
         sseBaseUrl = `${window.location.protocol}//${window.location.host}${sseBaseUrl}`;
       }
-      let url = `${sseBaseUrl}/v1/dbs/api/notifications`;
+      let url = `${sseBaseUrl}/v1/api/notification`;
 
       // Add userId only if provided (optional in production)
       // Based on server implementation, userId might be derived from session/authorization
