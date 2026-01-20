@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
@@ -56,11 +62,11 @@ const AdjustmentBillingPage = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["statusApproval", "action"],
+    right: ["status", "statusApproval", "action"],
   }));
 
-  // Use Effect - Initial fetch dengan 100 data
-  useEffect(() => {
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
     dispatch(
       getAdjustmentBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
@@ -72,6 +78,11 @@ const AdjustmentBillingPage = () => {
     );
     setPage(1);
   }, [dispatch, search, sort]);
+
+  // Use Effect - Initial fetch dengan 100 data
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -248,34 +259,19 @@ const AdjustmentBillingPage = () => {
     {
       action: "View",
       type: "table",
-      render: (record, data) => {
-        const content =
-          data > 3 ? (
-            <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
-              state={{ id: record.id }}
-            >
-              <ButtonComponent
-                icon={<SVGIcon name="IconDetail" width={20} />}
-                border={false}
-              >
-                <span className={"text-black ml-3"}> Detail</span>
-              </ButtonComponent>
-            </Link>
-          ) : (
-            <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
-              state={{ id: record.id }}
-            >
-              <Tooltip title="Detail">
-                <div className="pt-1">
-                  <SVGIcon name="IconDetail" width={20} />
-                </div>
-              </Tooltip>
-            </Link>
-          );
-
-        return content;
+      render: (record) => {
+        return (
+          <Link
+            to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
+            state={{ id: record.id }}
+          >
+            <Tooltip title="Detail">
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={20} />
+              </div>
+            </Tooltip>
+          </Link>
+        );
       },
     },
     {
@@ -297,7 +293,7 @@ const AdjustmentBillingPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon
                   name="IconEdit"
                   width={20}
@@ -326,24 +322,41 @@ const AdjustmentBillingPage = () => {
     {
       action: "Delete",
       type: "table",
-      render: (record) => {
+      render: (record, data) => {
         const isDelete =
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
-
-        return (
-          <Tooltip title="Delete">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-                color={isDelete ? "#D90000" : "#8D91A0"}
-                className={isDelete ? undefined : "disabled cursor-not-allowed"}
-                onClick={isDelete ? () => handleDelete(record.id) : undefined}
-              />
-            </div>
-          </Tooltip>
-        );
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconDelete"
+                  color={isDelete ? "#D90000" : "#8D91A0"}
+                  width={20}
+                />
+              }
+              border={false}
+              disabled={!isDelete}
+            >
+              <span className={"text-black ml-3"}> Delete</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Delete">
+              <div className="pt-0">
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  color={isDelete ? "#D90000" : "#8D91A0"}
+                  className={
+                    isDelete ? undefined : "disabled cursor-not-allowed"
+                  }
+                  onClick={isDelete ? () => handleDelete(record.id) : undefined}
+                />
+              </div>
+            </Tooltip>
+          );
+        return Content;
       },
     },
     {
@@ -363,7 +376,7 @@ const AdjustmentBillingPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
@@ -381,8 +394,7 @@ const AdjustmentBillingPage = () => {
 
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
-    itemGrantAccess,
-    "Delete"
+    itemGrantAccess
   ).map((col) => ({
     ...col,
     width: 100,
@@ -429,94 +441,94 @@ const AdjustmentBillingPage = () => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] text-primary">
-                Adjustment Billing List
-              </p>
-
-              <Toolbar items={itemGrantAccess} />
-            </div>
-          }
-        >
-          <div className="w-full">
-            <TableRBI
-              idTable="adjustment-billing-table"
-              showExport={false}
-              dataSource={dataSourceWithKeys}
-              columns={processedColumns}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSort}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-              tableScrolled={{ y: 525, x: 3000 }}
-            />
-          </div>
-        </CardContainer>
-
-        {/* Modal Delete */}
-        <ModalConfirm
-          isOpen={modalDelete}
-          handleCancel={() => setModalDelete(false)}
-          handleOk={handleDeleteOk}
-          width={500}
-          useOk={true}
-        >
-          <div className="flex justify-center gap-[20px] mt-6">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              Adjustment Billing List
             </p>
+
+            <Toolbar items={itemGrantAccess} />
           </div>
-          <Alert
-            message="Warning! if you delete this data, it will be permanently."
-            type={"error"}
+        }
+      >
+        <div className="w-full">
+          <TableRBI
+            idTable="adjustment-billing-table"
+            showExport={false}
+            dataSource={dataSourceWithKeys}
+            columns={processedColumns}
+            totalData={data?.page?.totalElements || 0}
+            onSort={onSort}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+            tableScrolled={{ y: 525, x: 3000 }}
+            onRefresh={handleRefresh}
+            showRefresh={true}
           />
-        </ModalConfirm>
+        </div>
+      </CardContainer>
 
-        {/* Modal Error Delete */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={() => {
-            handleDeleteOk(bodyError.body, bodyError.handleClear);
-            setModalError(false);
-            setBodyError({});
-          }}
-          handleCancel={() => setModalError(false)}
-        >
-          <div className="px-8 py-8 justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconDelete" width={48} />
-              <p className="text-[18px] font-bold">Failed</p>
-            </div>
-            <p className="pl-[70px]">
-              {`Your data was not deleted, ${message?.data?.message}. Please try again.`}
-            </p>
-          </div>
-        </ModalError>
-
-        {/* Modal Approval History */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          width={1000}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
+      {/* Modal Delete */}
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleDeleteOk}
+        width={500}
+        useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className={"text-[18px] font-bold"}>
+            {`Are you sure want to delete it?`}
+          </p>
+        </div>
+        <Alert
+          message="Warning! if you delete this data, it will be permanently."
+          type={"error"}
         />
-      </Spin>
+      </ModalConfirm>
+
+      {/* Modal Error Delete */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={() => {
+          handleDeleteOk(bodyError.body, bodyError.handleClear);
+          setModalError(false);
+          setBodyError({});
+        }}
+        handleCancel={() => setModalError(false)}
+      >
+        <div className="px-8 py-8 justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconDelete" width={48} />
+            <p className="text-[18px] font-bold">Failed</p>
+          </div>
+          <p className="pl-[70px]">
+            {`Your data was not deleted, ${message?.data?.message}. Please try again.`}
+          </p>
+        </div>
+      </ModalError>
+
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
     </LayoutMenu>
   );
 };

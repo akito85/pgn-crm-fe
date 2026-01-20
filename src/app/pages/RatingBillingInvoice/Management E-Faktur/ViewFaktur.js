@@ -278,41 +278,6 @@ const ViewFaktur = () => {
     [page, pageSize, search, searchText, searchedColumn]
   );
 
-  // Action Dropdown Menu
-  const actionMenu = (
-    <Menu
-      items={[
-        {
-          key: "approval",
-          label: "Approval",
-          icon: <CheckOutlined style={{ color: "#1890ff" }} />,
-          onClick: handleBulkApproval,
-        },
-        {
-          key: "upload",
-          label: "Upload Attachment",
-          icon: <UploadOutlined style={{ color: "#1890ff" }} />,
-          onClick: handleBulkUploadAttachment,
-        },
-        {
-          key: "generate-xml",
-          label: "Generate XML",
-          icon: <FileTextOutlined style={{ color: "#1890ff" }} />,
-          onClick: handleBulkGenerateXML,
-        },
-        {
-          type: "divider",
-        },
-        {
-          key: "request",
-          label: "Request Approval",
-          icon: <PlusOutlined style={{ color: "#52c41a" }} />,
-          onClick: handleRequest,
-        },
-      ]}
-    />
-  );
-
   // Item Grant Access untuk action columns
   const itemGrantAccess = [
     ...getActionColumn({
@@ -372,23 +337,52 @@ const ViewFaktur = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">E-Faktur Management</p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                {/* Download List Button */}
                 <ButtonComponent
                   type={"submit"}
                   border={false}
                   icon={<SVGIcon name="IconButtonDownload" width={24} />}
-                  onClick={() => {
-                    handleDownload();
-                  }}
+                  onClick={handleDownload}
                 >
                   Download List
                 </ButtonComponent>
-                {/* Action Dropdown - Updated */}
-                <Dropdown overlay={actionMenu} trigger={["click"]}>
-                  <ButtonComponent type="default">
-                    Action <DownOutlined />
-                  </ButtonComponent>
-                </Dropdown>
+
+                {/* Approval Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  icon={<CheckOutlined />}
+                  onClick={handleBulkApproval}
+                >
+                  Approval
+                </ButtonComponent>
+
+                {/* Upload Attachment Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  icon={<UploadOutlined />}
+                  onClick={handleBulkUploadAttachment}
+                >
+                  Upload Attachment
+                </ButtonComponent>
+
+                {/* Generate XML Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  icon={<FileTextOutlined />}
+                  onClick={handleBulkGenerateXML}
+                >
+                  Generate XML
+                </ButtonComponent>
+
+                {/* Request Approval Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  icon={<PlusOutlined />}
+                  onClick={handleRequest}
+                >
+                  Request Approval
+                </ButtonComponent>
 
                 {/* Create E-Faktur Button */}
                 <ButtonComponent
@@ -466,6 +460,7 @@ const ViewFaktur = () => {
             handleRefresh();
           }}
         />
+
         {/* Modal Bulk Request Approval */}
         <ModalRequestApprovalEFaktur
           isOpen={modalRequest}

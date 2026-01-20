@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
@@ -17,11 +17,25 @@ import ratingBillingHttpService from "../../../../../redux/services/ratingBillin
 import { configApp } from "../../../../../constants/configApp";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { dateFormatting } from "../../../../../utils";
+import {
+  getDetailInvoiceAdjustment,
+  approveInvoiceAdjustment,
+  rejectInvoiceAdjustment,
+  getListAttachmentInvoiceAdjustment,
+  getInvoiceDetailInvoiceAdjustment,
+} from "../../../../../redux/slices/rating_billing_invoice/adjustmentInvoice";
+import StatusComponent from "../../../../../components/StatusComponent";
+import CardContainer from "../../../../../components/CardContainer";
 
 const AdjustmentInvoiceDetail = () => {
-  // Selector - Placeholder for Redux state
-  const loading = false;
-  const dataDetail = {};
+  // Selector
+  const {
+    loading,
+    loadingDetail,
+    dataDetail,
+    dataListAttachment,
+    dataInvoiceDetail,
+  } = useSelector((state) => state.adjustmentInvoice);
 
   // Declaration
   const navigate = useNavigate();
@@ -29,7 +43,6 @@ const AdjustmentInvoiceDetail = () => {
   const dispatch = useDispatch();
 
   // State
-  const [listDataAttachment, setListDataAttachment] = useState([]);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [valuePage, setValuePage] = useState("Adjustment Invoice");
   const [approveOrReject, setApproveOrReject] = useState("");
@@ -50,12 +63,52 @@ const AdjustmentInvoiceDetail = () => {
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
 
-  // Use Effect - Placeholder for API calls
+  // Use Effect - Fetch detail data
   useEffect(() => {
     if (id) {
-      // TODO: dispatch(getDetailAdjustmentInvoice(id))
+      dispatch(getDetailInvoiceAdjustment(id));
     }
   }, [dispatch, id]);
+
+  // Fetch invoice detail when adjustment detail has invoice number
+  useEffect(() => {
+    if (dataDetail?.invoiceNumber) {
+      dispatch(getInvoiceDetailInvoiceAdjustment(dataDetail.invoiceNumber));
+    }
+  }, [dispatch, dataDetail?.invoiceNumber]);
+
+  // Set approval body from detail data
+  useEffect(() => {
+    if (dataDetail) {
+      setBodyApproval({
+        isApprover: dataDetail.tappId !== null,
+        tappId: dataDetail.tappId,
+        approvalDetail: null,
+        approvalType: null,
+      });
+    }
+  }, [dataDetail]);
+
+  // Fetch attachment data when dataDetail is available
+  useEffect(() => {
+    if (dataDetail?.invAdjustmentId) {
+      dispatch(getListAttachmentInvoiceAdjustment(dataDetail.invAdjustmentId));
+    }
+  }, [dispatch, dataDetail?.invAdjustmentId]);
+
+  // Format attachment data with urlFile1 for preview
+  const formattedAttachmentData = useMemo(() => {
+    if (!dataListAttachment?.result) return [];
+
+    return dataListAttachment.result.map((attachment) => ({
+      ...attachment,
+      dataType: "exist",
+      urlFile1: `/v1/dbs/api/rbi/invoice-adjustment/download-attachment/${
+        attachment.fileId || attachment.id
+      }`,
+      key: attachment.fileId || attachment.id,
+    }));
+  }, [dataListAttachment]);
 
   // Breadcrumbs
   const routes = [
@@ -73,224 +126,388 @@ const AdjustmentInvoiceDetail = () => {
     },
   ];
 
+  // Format date helper
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return moment(dateString).format("DD MMM YYYY");
+  };
+
+  // Format datetime helper
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "";
+    return moment(dateString).format("DD MMM YYYY HH:mm:ss");
+  };
+
   const layout = (valuePage) => {
     switch (valuePage) {
       case "Adjustment Invoice":
         return (
-          <>
+          <div className="flex flex-col gap-0">
             {/* Customer Information Section */}
-            <BaseContainer header={"CUSTOMER INFORMATION"}>
-              <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+            <CardContainer header={"CUSTOMER INFORMATION"}>
+              <div className="grid grid-cols-5 gap-x-4 gap-y-0">
                 <div>
-                  <p className="text-gray-500 text-sm">Customer Number</p>
-                  <p className="font-medium">CUS002</p>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Customer Number
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.customerNumber || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Customer Name</p>
-                  <p className="font-medium">PT KERAMIK INTI</p>
+                  <p className="text-gray-500 text-xs mb-0.5">Customer Name</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.customerName || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Account Number</p>
-                  <p className="font-medium">0002</p>
+                  <p className="text-gray-500 text-xs mb-0.5">Account Number</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.accountNumber || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Account Name</p>
-                  <p className="font-medium">Keramik Inti Tj Barat</p>
+                  <p className="text-gray-500 text-xs mb-0.5">Account Name</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.accountName || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Account Segment</p>
-                  <p className="font-medium">PK</p>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Account Segment
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.accountSegment || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Account Group Type</p>
-                  <p className="font-medium">PK1</p>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Account Group Type
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.accountGroupType || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">SOR</p>
-                  <p className="font-medium">SOR II</p>
+                  <p className="text-gray-500 text-xs mb-0.5">SOR</p>
+                  <p className="text-sm font-medium">{dataDetail?.sor || ""}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Cost Center Code</p>
-                  <p className="font-medium">122</p>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Cost Center Code
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.costCenterCode || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Cost Center Name</p>
-                  <p className="font-medium">Jakarta Timur</p>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Cost Center Name
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.costCenter || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Meter Reading Code</p>
-                  <p className="font-medium">8k2979</p>
-                </div>
-              </div>
-            </BaseContainer>
-
-            {/* Adjustment Invoice Information Section */}
-            <BaseContainer header={"ADJUSTMENT INVOICE INFORMATION"}>
-              <div className="grid grid-cols-3 gap-x-6 gap-y-4">
-                <div>
-                  <p className="text-gray-500 text-sm">Billing Cycle</p>
-                  <p className="font-medium">5-5</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Billing Period</p>
-                  <p className="font-medium">Feb 2022</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Invoice Number</p>
-                  <p className="font-medium">INV002</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Transaction Date</p>
-                  <p className="font-medium">10 Jan 2022</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Document Date</p>
-                  <p className="font-medium">10 Jan 2022</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Terms Of Payment</p>
-                  <p className="font-medium">Value</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Adjustment Reason</p>
-                  <p className="font-medium">Kebocoran Gas</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-gray-500 text-sm">Remark</p>
-                  <p className="font-medium">Test</p>
-                </div>
-              </div>
-            </BaseContainer>
-
-            {/* Invoice Information Section */}
-            <BaseContainer header={"INVOICE INFORMATION"}>
-              <div className="grid grid-cols-3 gap-x-6 gap-y-4">
-                <div>
-                  <p className="text-gray-500 text-sm">Invoice Number</p>
-                  <p className="font-medium">INV002</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Billing Code</p>
-                  <p className="font-medium">BC8279</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Invoice Date</p>
-                  <p className="font-medium">7 Jan 2022</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Terms of Payment</p>
-                  <p className="font-medium">17 Jan 2023</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Billing Cycle</p>
-                  <p className="font-medium">5-5</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Billing Period</p>
-                  <p className="font-medium">Des 2021</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Total Amount IDR</p>
-                  <p className="font-medium">1.200.000</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Total Amount USD</p>
-                  <p className="font-medium">0.00</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Total Amount EQV IDR</p>
-                  <p className="font-medium">1.200.000</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Total Amount EQV USD</p>
-                  <p className="font-medium">71.08</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Currency</p>
-                  <p className="font-medium">IDR</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Withholding Tax</p>
-                  <p className="font-medium">300.000</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Tax Basis IDR</p>
-                  <p className="font-medium">15.000.000</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Tax Basis USD</p>
-                  <p className="font-medium">15.000.000</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Vat IDR</p>
-                  <p className="font-medium">1.650.000</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">VAT USD</p>
-                  <p className="font-medium">165</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Rate</p>
-                  <p className="font-medium">15.000</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Rate Type</p>
-                  <p className="font-medium">Corporate</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Rate Date</p>
-                  <p className="font-medium">11 Jan 2022</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Status</p>
-                  <p className="font-medium">
-                    <span className="bg-green-500 text-white px-3 py-1 rounded">
-                      Paid
-                    </span>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Meter Reading Code
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.meterReadingCode || ""}
                   </p>
                 </div>
               </div>
-            </BaseContainer>
+            </CardContainer>
 
-            {/* History Log Information */}
-            <BaseContainer header={"HISTORY LOG INFORMATION"}>
-              <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+            {/* Invoice Information Section */}
+            <CardContainer border header={"INVOICE INFORMATION"}>
+              <div className="grid grid-cols-5 gap-x-4 gap-y-0">
                 <div>
-                  <p className="text-gray-500 text-sm">Record ID</p>
-                  <p className="font-medium">1345</p>
+                  <p className="text-gray-500 text-xs mb-0.5">Invoice Number</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.invoiceNumber || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Created Date</p>
-                  <p className="font-medium">05 Dec 2025 01:00:00</p>
+                  <p className="text-gray-500 text-xs mb-0.5">Billing Code</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.billingCode || ""}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Created By</p>
-                  <p className="font-medium">user</p>
+                  <p className="text-gray-500 text-xs mb-0.5">Invoice Date</p>
+                  <p className="text-sm font-medium">
+                    {formatDate(dataInvoiceDetail?.invoiceDate)}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Created By</p>
-                  <p className="font-medium">user</p>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Terms of Payment
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.termOfPayment}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Updated By</p>
-                  <p className="font-medium">user</p>
+                  <p className="text-gray-500 text-xs mb-0.5">Billing Cycle</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.billingCycle || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Billing Period</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.billingPeriod || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Total Amount IDR
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.totalAmountIdr?.toLocaleString() || "0"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Total Amount USD
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.totalAmountUsd?.toLocaleString() ||
+                      "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Total Amount EQV IDR
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.totalAmountEqvIdr?.toLocaleString() ||
+                      "0"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Total Amount EQV USD
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.totalAmountEqvUsd?.toLocaleString() ||
+                      "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Currency</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.currency || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Withholding Tax
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.withholdingTax?.toLocaleString() || "0"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Tax Basis IDR</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.taxBasisIdr?.toLocaleString() || "0"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Tax Basis USD</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.taxBasisUsd?.toLocaleString() || "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Vat IDR</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.vatIdr?.toLocaleString() || "0"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">VAT USD</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.vatUsd?.toLocaleString() || "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Rate</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.rate?.toLocaleString() || "0"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Rate Type</p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.rateType || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Rate Date</p>
+                  <p className="text-sm font-medium">
+                    {formatDate(dataInvoiceDetail?.rateDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Status</p>
+                  <StatusComponent
+                    colour={dataInvoiceDetail?.status}
+                    type="status"
+                    size="small"
+                  >
+                    {dataInvoiceDetail?.status || ""}
+                  </StatusComponent>
                 </div>
               </div>
-            </BaseContainer>
-          </>
+            </CardContainer>
+
+            {/* Adjustment Invoice Information Section */}
+            <CardContainer border header={"ADJUSTMENT INVOICE INFORMATION"}>
+              <div className="grid grid-cols-5 gap-x-4 gap-y-0">
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Billing Cycle</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.billingCycleId || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Billing Period</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.billingPeriode || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Invoice Number</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.invoiceNumber || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Transaction Date
+                  </p>
+                  <p className="text-sm font-medium">
+                    {formatDate(dataDetail?.transactionDtm)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Document Date</p>
+                  <p className="text-sm font-medium">
+                    {formatDate(dataDetail?.documentDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Type Due Date</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.typeDueDate || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Due Date</p>
+                  <p className="text-sm font-medium">
+                    {formatDate(dataDetail?.dueDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Terms Of Payment
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataInvoiceDetail?.termOfPayment || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Adjustment Reason
+                  </p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.adjustmentReason || ""}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Status</p>
+                  <StatusComponent
+                    colour={dataDetail?.status}
+                    type="status"
+                    size="small"
+                  >
+                    {dataDetail?.status || ""}
+                  </StatusComponent>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">
+                    Status Approval
+                  </p>
+                  <StatusComponent
+                    colour={dataDetail?.statusApproval}
+                    type="status"
+                    size="small"
+                  >
+                    {dataDetail?.statusApproval || ""}
+                  </StatusComponent>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-gray-500 text-xs mb-0.5">Remark</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.remark || ""}
+                  </p>
+                </div>
+              </div>
+            </CardContainer>
+
+            {/* History Log Information */}
+            <CardContainer border header={"HISTORY LOG INFORMATION"}>
+              <div className="grid grid-cols-5 gap-x-4 gap-y-0">
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Record ID</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.invAdjustmentId || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Created Date</p>
+                  <p className="text-sm font-medium">
+                    {formatDateTime(dataDetail?.createdDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Created By</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.createdBy || ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Updated Date</p>
+                  <p className="text-sm font-medium">
+                    {formatDateTime(dataDetail?.updatedDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-0.5">Updated By</p>
+                  <p className="text-sm font-medium">
+                    {dataDetail?.updatedBy || ""}
+                  </p>
+                </div>
+              </div>
+            </CardContainer>
+          </div>
         );
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <CardContainer header={"Attachment Information"}>
             <AttachmentComponent
               type={"detail"}
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
-              typeSelector="adjustmentBilling"
+              data={formattedAttachmentData}
+              updateData={() => {}}
+              typeSelector="adjustmentInvoice"
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return null;
@@ -306,7 +523,7 @@ const AdjustmentInvoiceDetail = () => {
   };
 
   // handle Confirm
-  const handleConfirm = (res, handleClear) => {
+  const handleConfirm = async (res, handleClear) => {
     setModalConfirm(false);
     const data = {
       id: id,
@@ -315,12 +532,22 @@ const AdjustmentInvoiceDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    // TODO: dispatch(approveOrRejectAdjustmentInvoice({ body: data }))
-    handleClear();
+    try {
+      if (approveOrReject === "Approve") {
+        await dispatch(approveInvoiceAdjustment({ body: data })).unwrap();
+      } else {
+        await dispatch(rejectInvoiceAdjustment({ body: data })).unwrap();
+      }
+      handleClear();
+      // Refresh data after approval/rejection
+      dispatch(getDetailInvoiceAdjustment(id));
+    } catch (error) {
+      setModalErrorServer(true);
+      setBodyError(error?.response?.data || { message: "An error occurred" });
+    }
   };
 
   const handleRetry = () => {
-    handleConfirm();
     setModalErrorServer(false);
     setBodyError({});
   };
@@ -332,31 +559,19 @@ const AdjustmentInvoiceDetail = () => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
+      <Spin spinning={loading || loadingDetail}>
         <BreadCrumb routes={routes} />
 
         <RadioTabs data={listSectionInfo} onChange={onChange} />
-        {layout(valuePage)}
+        <div className="flex flex-col gap-y-0">{layout(valuePage)}</div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex my-3">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 
           {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
+            <div className={"w-full flex justify-end gap-3"}>
               <ButtonComponent
                 type="reject"
                 onClick={() => {
@@ -404,7 +619,7 @@ const AdjustmentInvoiceDetail = () => {
             </div>
             <p className="pl-[70px]">{`Your data was not ${
               approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            }. ${bodyError.message || "An error occurred"}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

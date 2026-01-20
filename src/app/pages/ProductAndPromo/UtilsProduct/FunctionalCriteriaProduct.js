@@ -260,6 +260,7 @@ const FunctionalCriteriaProduct = ({
   // Selector
   const {
     data_budget,
+    data_country,
     data_province,
     data_city,
     data_industrial_sector,
@@ -312,6 +313,7 @@ const FunctionalCriteriaProduct = ({
   // Declare data list option
   const listOption = {
     data_budget,
+    data_country,
     data_province,
     data_city,
     data_industrial_sector,
@@ -383,6 +385,21 @@ const FunctionalCriteriaProduct = ({
         [keyName]: value,
       };
     });
+    if (index === "country") {
+      if (dataCriteria.includes(3118)) {
+        dispatch(getApi?.getProvinceList(data?.value));
+      }
+      formTableCriteria.resetFields(["province", "city", "district", "subDistrict"]);
+      setEditDataRecord((prevState) => {
+        return {
+          ...prevState,
+          [key + "province"]: undefined,
+          [key + "city"]: undefined,
+          [key + "district"]: undefined,
+          [key + "subDistrict"]: undefined,
+        };
+      });
+    }
     if (index === `province`) {
       if (dataCriteria.includes(39) || (dataCriteria.includes(28))) {
         dispatch(getApi?.getCityList(data?.value));

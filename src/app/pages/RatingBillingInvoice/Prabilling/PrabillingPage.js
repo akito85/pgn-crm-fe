@@ -13,6 +13,8 @@ import {
   getListBillingPeriodForPrabilling,
   resetSummaryData,
   resetAllTabData,
+  setFilters,
+  clearFilters,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
@@ -35,20 +37,31 @@ const PrabillingPage = () => {
     list_prabilling_summary,
     summary_pagination,
     list_period_summary,
+    filters,
   } = useSelector((state) => state.rbi_prabilling);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const detailRef = useRef(null);
 
-  const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20);
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
+  // UBAH state initialization menjadi:
   const [valueTab, setValueTab] = useState("All");
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
+
+  // Gunakan filter dari Redux sebagai initial value
+  const currentTabKey = valueTab === "All" ? "all_tab" : "summary_tab";
+  const [page, setPage] = useState(filters[currentTabKey]?.page || 1);
+  const [loadMoreSize] = useState(20);
+  const [sort, setSort] = useState(filters[currentTabKey]?.sort || "");
+  const [search, setSearch] = useState(filters[currentTabKey]?.search || {});
+  const [searchedColumn, setSearchedColumn] = useState(
+    filters[currentTabKey]?.searchedColumn || ""
+  );
+  const [searchText, setSearchText] = useState(
+    filters[currentTabKey]?.searchText || ""
+  );
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(
+    filters[currentTabKey]?.selectedBillingPeriod || null
+  );
 
   // States for detail view
   const [pageDetail, setPageDetail] = useState(false);
@@ -59,6 +72,48 @@ const PrabillingPage = () => {
     left: ["no"],
     right: valueTab === "All" ? ["action"] : [],
   }));
+
+  // TAMBAHKAN useEffect baru ini setelah state declarations:
+  // Save filters ke Redux setiap kali berubah
+  useEffect(() => {
+    dispatch(
+      setFilters({
+        tab: currentTabKey,
+        filters: {
+          search,
+          sort,
+          searchText,
+          searchedColumn,
+          page,
+          selectedBillingPeriod,
+        },
+      })
+    );
+  }, [
+    search,
+    sort,
+    searchText,
+    searchedColumn,
+    page,
+    selectedBillingPeriod,
+    currentTabKey,
+    dispatch,
+  ]);
+
+  // Restore filters saat tab berubah
+  useEffect(() => {
+    const savedFilters = filters[currentTabKey];
+    if (savedFilters) {
+      setPage(savedFilters.page || 1);
+      setSort(savedFilters.sort || "");
+      setSearch(savedFilters.search || {});
+      setSearchedColumn(savedFilters.searchedColumn || "");
+      setSearchText(savedFilters.searchText || "");
+      if (savedFilters.selectedBillingPeriod !== null) {
+        setSelectedBillingPeriod(savedFilters.selectedBillingPeriod);
+      }
+    }
+  }, [valueTab, filters, currentTabKey]);
 
   // Fetch billing periods on mount
   useEffect(() => {
@@ -241,22 +296,21 @@ const PrabillingPage = () => {
     }
   };
 
-  const handleDetail = (record, rowKey) => {
-    // Only work on Summary tab
-    if (valueTab !== "Summary") return;
+const handleDetail = (record, rowKey) => {
+  if (valueTab !== "Summary") return;
 
-    const recordKey = rowKey || record.customerNumber;
+  const recordKey = rowKey || record.customerNumber;
 
-    if (activeRowKey === recordKey && pageDetail) {
-      setPageDetail(false);
-      setActiveRowKey(null);
-      setSelectedRecord(null);
-    } else {
-      setSelectedRecord(record);
-      setActiveRowKey(recordKey);
-      setPageDetail(true);
-    }
-  };
+  if (activeRowKey === recordKey && pageDetail) {
+    setPageDetail(false);
+    setActiveRowKey(null);
+    setSelectedRecord(null);
+  } else {
+    setSelectedRecord(record);
+    setActiveRowKey(recordKey);
+    setPageDetail(true);
+  }
+};
 
   const currentData = useMemo(() => {
     if (valueTab === "All") {
@@ -338,6 +392,7 @@ const PrabillingPage = () => {
     }
   };
 
+  // UBAH function onChangeTab:
   const onChangeTab = (key) => {
     if (valueTab === "All") {
       dispatch(resetAllTabData());
@@ -346,17 +401,37 @@ const PrabillingPage = () => {
     }
 
     setValueTab(key);
-    setSearch({});
-    setSearchText("");
-    setSearchedColumn("");
-    setSort("");
-    setPage(1);
+
+    // Restore filters untuk tab yang dipilih
+    const newTabKey = key === "All" ? "all_tab" : "summary_tab";
+    const savedFilters = filters[newTabKey];
+
+    if (savedFilters) {
+      setSearch(savedFilters.search || {});
+      setSearchText(savedFilters.searchText || "");
+      setSearchedColumn(savedFilters.searchedColumn || "");
+      setSort(savedFilters.sort || "");
+      setPage(savedFilters.page || 1);
+      if (savedFilters.selectedBillingPeriod !== null) {
+        setSelectedBillingPeriod(savedFilters.selectedBillingPeriod);
+      } else {
+        resetToCurrentPeriod();
+      }
+    } else {
+      setSearch({});
+      setSearchText("");
+      setSearchedColumn("");
+      setSort("");
+      setPage(1);
+      resetToCurrentPeriod();
+    }
+
     setPageDetail(false);
     setActiveRowKey(null);
     setSelectedRecord(null);
-    resetToCurrentPeriod();
   };
 
+  // UBAH function handleBillingPeriodChange:
   const handleBillingPeriodChange = (value) => {
     if (valueTab === "Summary") {
       dispatch(resetSummaryData());
@@ -373,6 +448,21 @@ const PrabillingPage = () => {
     setPageDetail(false);
     setActiveRowKey(null);
     setSelectedRecord(null);
+
+    // TAMBAHKAN: Save ke Redux juga
+    dispatch(
+      setFilters({
+        tab: currentTabKey,
+        filters: {
+          search: {},
+          sort: "",
+          searchText: "",
+          searchedColumn: "",
+          page: 1,
+          selectedBillingPeriod: value,
+        },
+      })
+    );
   };
 
   const itemGrantAccess = [
@@ -396,7 +486,7 @@ const PrabillingPage = () => {
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess).map(
     (col) => ({
       ...col,
-      width: 30,
+      width: 50,
       align: "center",
     })
   );
@@ -464,7 +554,7 @@ const PrabillingPage = () => {
               dataSource={dataSourceWithKeys}
               columns={processedColumns}
               totalData={currentPagination?.totalElements || 0}
-              tableScrolled={{ x: 3000, y: 525 }}
+              tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
               showExport={false}
               columnDefinitions={columnDefinitions}

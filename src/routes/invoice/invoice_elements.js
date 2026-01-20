@@ -32,5 +32,6 @@ export const INVOICE_ELEMENTS = {
   // Adjustment Invoice
   ADJUSTMENT_INVOICE_VIEW_PAGE: <AdjustmentInvoicePage />,
   ADJUSTMENT_INVOICE_FORM_PAGE: <AdjustmentInvoiceForm type="create" />,
+  ADJUSTMENT_INVOICE_FORM_PAGE_UPDATE: <AdjustmentInvoiceForm type="update" />,
   ADJUSTMENT_INVOICE_DETAIL_PAGE: <AdjustmentInvoiceDetail />,
 };

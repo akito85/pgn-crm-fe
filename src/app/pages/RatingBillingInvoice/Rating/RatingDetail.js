@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Tabs } from "antd";
 import ServiceAgreementSection from "./Detail/ServiceAgreementSection";
 import PromoSection from "./Detail/PromoSection";
+import PeriodicSection from "./Detail/PeriodicSection";
 import CalculationUsageSection from "./Detail/CalculationUsageSection";
 import MuldestSection from "./Detail/MuldestSection";
 import UsageSection from "./Detail/UsageSection";
@@ -25,17 +26,20 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
       label: "Calculation Usage",
     },
     {
-      key: "Service Agreement",
-      label: "Service Agreement",
+      key: "Usage",
+      label: "Usage",
     },
+    // {
+    //   key: "Service Agreement",
+    //   label: "Service Agreement",
+    // },
     {
       key: "Promo",
       label: "Promo",
-      disabled: true,
     },
     {
-      key: "Usage",
-      label: "Usage",
+      key: "Periodic",
+      label: "Periodic",
     },
     {
       key: "Multi Destination",
@@ -49,12 +53,14 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
     switch (tabSection) {
       case "Calculation Usage":
         return "CALCULATION USAGE INFORMATION";
-      case "Service Agreement":
-        return "SERVICE AGREEMENT INFORMATION";
-      case "Promo":
-        return "PROMO INFORMATION";
       case "Usage":
         return "USAGE INFORMATION";
+      // case "Service Agreement":
+      //   return "SERVICE AGREEMENT INFORMATION";
+      case "Promo":
+        return "PROMO INFORMATION";
+      case "Periodic":
+        return "PERIODIC INFORMATION";
       case "Multi Destination":
         return "MULTI DESTINATION INFORMATION";
       default:
@@ -72,15 +78,6 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
             ratingCodeId={ratingCodeId}
           />
         );
-      case "Service Agreement":
-        return (
-          <ServiceAgreementSection
-            calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
-          />
-        );
-      case "Promo":
-        return <PromoSection />;
       case "Usage":
         return (
           <UsageSection
@@ -88,8 +85,34 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
             ratingCodeId={ratingCodeId}
           />
         );
+      // case "Service Agreement":
+      //   return (
+      //     <ServiceAgreementSection
+      //       calculationCode={calculationCode}
+      //       ratingCodeId={ratingCodeId}
+      //     />
+      //   );
+      case "Promo":
+        return (
+          <PromoSection
+            calculationCode={calculationCode}
+            ratingCodeId={ratingCodeId}
+          />
+        );
+      case "Periodic":
+        return (
+          <PeriodicSection
+            calculationCode={calculationCode}
+            ratingCodeId={ratingCodeId}
+          />
+        );
       case "Multi Destination":
-        return <MuldestSection />;
+        return (
+          <MuldestSection
+            calculationCode={calculationCode}
+            ratingCodeId={ratingCodeId}
+          />
+        );
       default:
         return (
           <CalculationUsageSection
@@ -120,14 +143,8 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
         </div>
       }
     >
-      <Tabs
-        items={tabItems}
-        onChange={onChangeTab}
-        activeKey={tabSection}
-      />
-      <div className="mt-4">
-        {renderSection()}
-      </div>
+      <Tabs items={tabItems} onChange={onChangeTab} activeKey={tabSection} />
+      <div className="mt-4">{renderSection()}</div>
     </CardContainer>
   );
 };

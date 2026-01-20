@@ -4,26 +4,9 @@ import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
 import CardContainer from "../../../../../components/CardContainer";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const InvoiceSectionForm = ({ data, type, listDataABI = [] }) => {
-  const renderStatus = (status) => {
-    let text;
-    switch (status) {
-      case "WAITING APPROVAL":
-        text = "Waiting Approval";
-        break;
-      case "INPROGRESS":
-        text = "In Progress";
-        break;
-      default:
-        text = status
-          ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-          : status;
-        break;
-    }
-    return text ? text : text;
-  };
-
   return (
     <div>
       {type === "create" || type === "update" ? (
@@ -105,12 +88,14 @@ const InvoiceSectionForm = ({ data, type, listDataABI = [] }) => {
                 : data?.rateDate}
             </DetailText>
             <DetailText label={"Status"}>
-              {renderStatus(data?.status)}
+              <StatusComponent colour={data?.status} type="status" size="small">
+                {data?.status}
+              </StatusComponent>
             </DetailText>
           </div>
         </CardContainer>
       ) : (
-        <div className="w-full grid grid-cols-4 gap-4">
+        <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label={"Invoice Number"}>
             {data?.invoiceNumber}
           </DetailText>
@@ -184,7 +169,11 @@ const InvoiceSectionForm = ({ data, type, listDataABI = [] }) => {
               ? moment(data?.rateDate).format(dateFormatting.date)
               : data?.rateDate}
           </DetailText>
-          <DetailText label={"Status"}>{renderStatus(data?.status)}</DetailText>
+          <DetailText label={"Status"}>
+            <StatusComponent colour={data?.status} type="status" size="small">
+              {data?.status}
+            </StatusComponent>
+          </DetailText>
         </div>
       )}
     </div>
