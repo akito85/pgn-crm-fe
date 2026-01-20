@@ -39,21 +39,9 @@ const UploadPage = () => {
   const onFinish = (formValue) => {
     // console.log(formValue, ' formValue');
   };
-  // clear form
-  const onClear = () => {
-    form.resetFields();
-  };
-  // change tabs
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
-  };
 
   const handleApprovalChangeFromLayout = (newApphierId) => {
     setApphierId(newApphierId);
-  };
-
-  const handleSave = () => {
-    // console.log("handleSave")
   };
 
   const routes = [

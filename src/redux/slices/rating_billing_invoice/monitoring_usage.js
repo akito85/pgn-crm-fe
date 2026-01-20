@@ -146,7 +146,7 @@ export const getListUsagePaginate = createAsyncThunk(
       const response = await ratingBillingHttpService.getPagination(url);
       return {
         ...response.data,
-        isLoadMore, // Pass the flag to reducer
+        isLoadMore,
       };
     } catch (error) {
       const message =

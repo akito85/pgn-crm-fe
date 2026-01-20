@@ -63,11 +63,31 @@ tr:nth-child(odd) > td.ant-table-cell-fix-left,
 tr:nth-child(odd) > td.ant-table-cell-fix-right,
 .ant-table-tbody .ant-table-row:nth-child(odd) {
   background-color: #e6f0f4 !important;
+  
 }
 tr:nth-child(even) > td.ant-table-cell-fix-left,
 tr:nth-child(even) > td.ant-table-cell-fix-right,
 .ant-table-tbody .ant-table-row:nth-child(even) {
   background-color: #ffffff !important;
+}
+
+tr:nth-child(odd) > td.ant-table-cell-fix-left,
+tr:nth-child(odd) > td.ant-table-cell-fix-right,
+.ant-table-tbody .ant-table-row:nth-child(odd) {
+  background-color: #e6f0f4 !important;
+  
+}
+tr:nth-child(even) > td.ant-table-cell,
+tr:nth-child(even) > td.ant-table-cell,
+.ant-table-tbody .ant-table-row:nth-child(even) {
+  border-color: #C8CDD4;
+}
+
+
+tr:nth-child(odd) > td.ant-table-cell,
+tr:nth-child(odd) > td.ant-table-cell,
+.ant-table-tbody .ant-table-row:nth-child(odd) {
+  border-color: #C8CDD4;
 }
 
 /* Hover effect - kuning pastel soft */

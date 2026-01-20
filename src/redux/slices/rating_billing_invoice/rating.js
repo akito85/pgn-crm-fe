@@ -6,6 +6,9 @@ const initialState = {
   data: [],
   list_billing_period: [],
   data_calculationUsage: [],
+  data_calculationSummary: [],
+  data_calculationDetail: [],
+  data_adjustment: [],
   data_serviceAgreement: [],
   data_detailServiceAgreement: [],
   data_calculationRuleServiceAgreement: [],
@@ -13,6 +16,8 @@ const initialState = {
   data_pricing: [],
   data_pricingRule: [],
   data_usageSA: [],
+  data_promoSA: [],
+  data_periodicSA: [],
   loading: false,
   data_detail: null,
   data_downlaod: null,
@@ -23,7 +28,7 @@ export const getListRatingGasPaginate = createAsyncThunk(
   "GET_LIST_RATING_GAS_PAGINATE",
   async (
     { search, page, pageSize, sort, billPeriodId, isLoadMore = false },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search === undefined ? "" : search;
@@ -56,7 +61,7 @@ export const getListRatingGasPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getListBillingPeriodForRating = createAsyncThunk(
@@ -100,7 +105,7 @@ export const getListBillingPeriodForRating = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getAllCalculationUsagePaginate = createAsyncThunk(
@@ -129,7 +134,7 @@ export const getAllCalculationUsagePaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllDetailServiceAgreementPaginate = createAsyncThunk(
@@ -157,7 +162,7 @@ export const getAllDetailServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllCalculationRuleServiceAgreementPaginate = createAsyncThunk(
@@ -186,7 +191,7 @@ export const getAllCalculationRuleServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllTOSServiceAgreementPaginate = createAsyncThunk(
@@ -215,7 +220,7 @@ export const getAllTOSServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllServiceAgreementPaginate = createAsyncThunk(
@@ -244,7 +249,7 @@ export const getAllServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
@@ -273,7 +278,7 @@ export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailPricing = createAsyncThunk(
@@ -299,7 +304,7 @@ export const getDetailPricing = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllPricingRuleSAPaginate = createAsyncThunk(
@@ -327,7 +332,7 @@ export const getAllPricingRuleSAPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // list non gas
@@ -342,7 +347,7 @@ export const getListRatingNonGasPaginate = createAsyncThunk(
       const params = { sortParams, page, pageSize, searchParams };
       const response = await ratingBillingHttpService.getListPagination(
         url,
-        params
+        params,
       );
       return response.data;
     } catch (error) {
@@ -361,7 +366,7 @@ export const getListRatingNonGasPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // download feat
@@ -373,16 +378,16 @@ export const downloadRatingGas = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rating/download-filter-gas?billPeriodId=${billPeriodId}&searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      
+
       const response = await ratingBillingHttpService.downloadData(url);
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_LIST", back: false })
+        validateError({ error: error, action: "DOWNLOAD_LIST", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // get detail rating gas
@@ -409,8 +414,694 @@ export const getDetailRatingGas = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
+
+// getAllCalculationSummaryPaginate - Updated dummy data
+export const getAllCalculationSummaryPaginate = createAsyncThunk(
+  "GET_ALL_CALCULATION_SUMMARY_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-calculation-summary/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Struktur flat (non-nested)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const dummyData = {
+        result: [
+          {
+            id: `unique-${page}-1`,
+            transactionDate: "2025-12-08",
+            usage: 110.0,
+            saType: "PJBG",
+            amount: 15000.0,
+            totalAmount: 15010.0,
+            // Detail partitions untuk expanded row
+            partitions: [
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-001",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-002",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-003",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+            ],
+          },
+          {
+            id: `unique-${page}-2`,
+            transactionDate: "2025-12-09",
+            usage: 110.0,
+            saType: "PJBG",
+            amount: 15000.0,
+            totalAmount: 15010.0,
+            partitions: [
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-001",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+            ],
+          },
+          {
+            id: `unique-${page}-3`,
+            transactionDate: "2025-12-10",
+            usage: 110.0,
+            saType: "PJBG",
+            amount: 15000.0,
+            totalAmount: 15010.0,
+            partitions: [
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-001",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+            ],
+          },
+          {
+            id: `unique-${page}-4`,
+            transactionDate: "2025-12-31",
+            usage: 110.0,
+            saType: "PJBG",
+            amount: 15000.0,
+            totalAmount: 15010.0,
+            partitions: [
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-001",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+            ],
+          },
+          {
+            id: `unique-${page}-5`,
+            transactionDate: "2025-12-31",
+            usage: 110.0,
+            saType: "PJBG",
+            amount: 15000.0,
+            totalAmount: 15010.0,
+            partitions: [
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-001",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+            ],
+          },
+          {
+            id: `unique-${page}-6`,
+            transactionDate: "2025-12-31",
+            usage: 110.0,
+            saType: "PJBG",
+            amount: 15000.0,
+            totalAmount: 15010.0,
+            partitions: [
+              {
+                uom: "M3",
+                usageMin: 0,
+                usageNormal: 110.0,
+                usageOup: 0,
+                priceCurrency: "IDR",
+                priceCode: "PRICE-001",
+                priceMin: 0,
+                priceNormal: 136363.636,
+                priceOup: 0,
+                amountCurrency: "IDR",
+                amountMin: 0,
+                amountNormal: 15000000.0,
+                amountOup: 0,
+              },
+            ],
+          },
+        ],
+        page: {
+          totalElements: 6,
+          totalPages: 1,
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyData;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// GET CALCULATION DETAIL
+export const getAllCalculationDetailPaginate = createAsyncThunk(
+  "GET_ALL_CALCULATION_DETAIL_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-calculation-detail/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Hapus setelah backend ready
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const dummyData = {
+        result: [
+          {
+            id: 1,
+            timeUnit: "Hour",
+            transactionDate: "2024-01-15T10:30:00",
+            usage: 125.456,
+            rangeMin: 0,
+            rangeMax: 500,
+          },
+          {
+            id: 2,
+            timeUnit: "Hour",
+            transactionDate: "2024-01-15T11:30:00",
+            usage: 235.789,
+            rangeMin: 0,
+            rangeMax: 500,
+          },
+          {
+            id: 3,
+            timeUnit: "Hour",
+            transactionDate: "2024-01-15T12:30:00",
+            usage: 189.234,
+            rangeMin: 0,
+            rangeMax: 500,
+          },
+          {
+            id: 4,
+            timeUnit: "Day",
+            transactionDate: "2024-01-16T00:00:00",
+            usage: 1450.567,
+            rangeMin: 500,
+            rangeMax: 2000,
+          },
+          {
+            id: 5,
+            timeUnit: "Day",
+            transactionDate: "2024-01-17T00:00:00",
+            usage: 1789.123,
+            rangeMin: 500,
+            rangeMax: 2000,
+          },
+          {
+            id: 6,
+            timeUnit: "Week",
+            transactionDate: "2024-01-22T00:00:00",
+            usage: 8950.456,
+            rangeMin: 2000,
+            rangeMax: 10000,
+          },
+        ],
+        page: {
+          totalElements: 6,
+          totalPages: 1,
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyData;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// GET ADJUSTMENT
+export const getAllAdjustmentPaginate = createAsyncThunk(
+  "GET_ALL_ADJUSTMENT_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-adjustment/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Hapus setelah backend ready
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const dummyData = {
+        result: [
+          {
+            id: 1,
+            ratingAdjustmentType: "Volume Adjustment",
+            adjustmentItem: "Gas Shrinkage",
+            crDr: "CR",
+            uom: "MMBTU",
+            usage: 125.456,
+          },
+          {
+            id: 2,
+            ratingAdjustmentType: "Price Adjustment",
+            adjustmentItem: "Seasonal Discount",
+            crDr: "DR",
+            uom: "USD",
+            usage: 500.25,
+          },
+          {
+            id: 3,
+            ratingAdjustmentType: "Volume Adjustment",
+            adjustmentItem: "Meter Correction",
+            crDr: "CR",
+            uom: "M3",
+            usage: 75.789,
+          },
+          {
+            id: 4,
+            ratingAdjustmentType: "Tax Adjustment",
+            adjustmentItem: "VAT Correction",
+            crDr: "DR",
+            uom: "USD",
+            usage: 250.5,
+          },
+        ],
+        page: {
+          totalElements: 4,
+          totalPages: 1,
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyData;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// GET PROMO
+export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
+  "GET_ALL_PROMO_SERVICE_AGREEMENT_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-promo/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Sesuai dengan gambar yang diberikan
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const allDummyData = [
+        {
+          id: 1,
+          name: "Promo Gas Industri Q1",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "Volume Discount",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "5",
+        },
+        {
+          id: 2,
+          name: "Program Loyalty 2025",
+          type: "Billing",
+          promotionType: "Program",
+          promoCategory: "Customer Retention",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "10",
+        },
+        {
+          id: 3,
+          name: "Early Payment Discount",
+          type: "Rating & Billing",
+          promotionType: "Promo",
+          promoCategory: "Payment Incentive",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "3",
+        },
+        {
+          id: 4,
+          name: "Seasonal Gas Promo",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "Seasonal",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "15",
+        },
+        {
+          id: 5,
+          name: "New Customer Bonus",
+          type: "Billing",
+          promotionType: "Program",
+          promoCategory: "Acquisition",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "7.5",
+        },
+        {
+          id: 6,
+          name: "Bundle Package Discount",
+          type: "Rating & Billing",
+          promotionType: "Promo",
+          promoCategory: "Bundle Offer",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "12",
+        },
+        {
+          id: 7,
+          name: "Corporate Partnership",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "B2B Special",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "8",
+        },
+        {
+          id: 8,
+          name: "Year End Clearance",
+          type: "Billing",
+          promotionType: "Program",
+          promoCategory: "Clearance",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "20",
+        },
+        {
+          id: 9,
+          name: "Referral Reward Program",
+          type: "Rating & Billing",
+          promotionType: "Promo",
+          promoCategory: "Referral",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "4",
+        },
+        {
+          id: 10,
+          name: "High Volume Incentive",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "Volume Incentive",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "18",
+        },
+      ];
+
+      // Terapkan pencarian jika ada
+      let filteredData = [...allDummyData];
+
+      if (search && Object.keys(search).length > 0) {
+        filteredData = filteredData.filter((item) => {
+          return Object.keys(search).every((key) => {
+            if (!search[key]) return true;
+            const itemValue = String(item[key] || "").toLowerCase();
+            const searchValue = String(search[key]).toLowerCase();
+            return itemValue.includes(searchValue);
+          });
+        });
+      }
+
+      // Terapkan sorting jika ada
+      if (sort) {
+        const [field, order] = sort.split("~");
+        filteredData.sort((a, b) => {
+          const aVal = a[field] || "";
+          const bVal = b[field] || "";
+
+          if (order === "asc") {
+            return aVal > bVal ? 1 : -1;
+          } else {
+            return aVal < bVal ? 1 : -1;
+          }
+        });
+      }
+
+      // Terapkan pagination
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedData = filteredData.slice(startIndex, endIndex);
+
+      const dummyResponse = {
+        result: paginatedData,
+        page: {
+          totalElements: filteredData.length,
+          totalPages: Math.ceil(filteredData.length / pageSize),
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyResponse;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// get periodic
+export const getAllPeriodicServiceAgreementPaginate = createAsyncThunk(
+  "GET_ALL_PERIODIC_SERVICE_AGREEMENT_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-periodic/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Sesuai dengan gambar yang diberikan
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const allDummyData = [
+        {
+          id: 1,
+          uom: "M3",
+          totalEstUsage: 100.0,
+          totalEstAmount: 150000.0,
+          accMinContract: 300.0,
+          accMaxContract: 360.0,
+          adjustmentUsage: 70.0,
+        },
+        {
+          id: 2,
+          uom: "M3",
+          totalEstUsage: 200.0,
+          totalEstAmount: 250000.0,
+          accMinContract: 400.0,
+          accMaxContract: 500.0,
+          adjustmentUsage: 80.0,
+        },
+        {
+          id: 3,
+          uom: "M3",
+          totalEstUsage: 150.0,
+          totalEstAmount: 180000.0,
+          accMinContract: 350.0,
+          accMaxContract: 420.0,
+          adjustmentUsage: 65.0,
+        },
+      ];
+
+      // Terapkan pencarian jika ada
+      let filteredData = [...allDummyData];
+
+      if (search && Object.keys(search).length > 0) {
+        filteredData = filteredData.filter((item) => {
+          return Object.keys(search).every((key) => {
+            if (!search[key]) return true;
+            const itemValue = String(item[key] || "").toLowerCase();
+            const searchValue = String(search[key]).toLowerCase();
+            return itemValue.includes(searchValue);
+          });
+        });
+      }
+
+      // Terapkan sorting jika ada
+      if (sort) {
+        const [field, order] = sort.split("~");
+        filteredData.sort((a, b) => {
+          const aVal = a[field] || "";
+          const bVal = b[field] || "";
+
+          if (order === "asc") {
+            return aVal > bVal ? 1 : -1;
+          } else {
+            return aVal < bVal ? 1 : -1;
+          }
+        });
+      }
+
+      // Terapkan pagination
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedData = filteredData.slice(startIndex, endIndex);
+
+      const dummyResponse = {
+        result: paginatedData,
+        page: {
+          totalElements: filteredData.length,
+          totalPages: Math.ceil(filteredData.length / pageSize),
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyResponse;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 const ratingSlice = createSlice({
   name: "rating",
   initialState,
@@ -539,7 +1230,7 @@ const ratingSlice = createSlice({
     },
     [getAllCalculationRuleServiceAgreementPaginate.fulfilled]: (
       state,
-      action
+      action,
     ) => {
       state.loading = false;
       state.data_calculationRuleServiceAgreement = action.payload;
@@ -594,6 +1285,68 @@ const ratingSlice = createSlice({
     },
     [getDetailRatingGas.rejected]: (state) => {
       state.loading = false;
+    },
+    // Get All Calculation Summary Pagination
+    [getAllCalculationSummaryPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllCalculationSummaryPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_calculationSummary = action.payload;
+    },
+    [getAllCalculationSummaryPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_calculationSummary = [];
+    },
+
+    // Get All Calculation Detail Pagination
+    [getAllCalculationDetailPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllCalculationDetailPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_calculationDetail = action.payload;
+    },
+    [getAllCalculationDetailPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_calculationDetail = [];
+    },
+
+    // Get All Adjustment Pagination
+    [getAllAdjustmentPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllAdjustmentPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_adjustment = action.payload;
+    },
+    [getAllAdjustmentPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_adjustment = [];
+    },
+    // Get All Promo Service Agreement Pagination
+    [getAllPromoServiceAgreementPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllPromoServiceAgreementPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_promoSA = action.payload;
+    },
+    [getAllPromoServiceAgreementPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_promoSA = [];
+    },
+    // Get All Periodic Service Agreement Pagination
+    [getAllPeriodicServiceAgreementPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllPeriodicServiceAgreementPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_periodicSA = action.payload;
+    },
+    [getAllPeriodicServiceAgreementPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_periodicSA = [];
     },
   },
 });

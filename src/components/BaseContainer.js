@@ -14,7 +14,7 @@ const BaseContainer = ({
     : "drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]";
 
   // Use inline style for border to ensure visibility
-  const containerStyle = border ? { border: "1px solid #BDBDBD" } : {};
+  const containerStyle = border ? { border: "1px solid #C8CDD4" } : {};
 
   return (
     <div className={containerClass} style={containerStyle}>

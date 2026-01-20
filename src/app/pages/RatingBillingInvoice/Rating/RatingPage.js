@@ -327,7 +327,7 @@ const RatingPage = () => {
             dataSource={dataSourceWithKeys}
             columns={processedColumns}
             totalData={data?.page?.totalElements || 0}
-            tableScrolled={{ y: 525, x: 3000 }}
+            tableScrolled={{ y: 525, x: 2000 }}
             onSort={onSortApi}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
