@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin, Form } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../../routes/invoice/invoice_routes";

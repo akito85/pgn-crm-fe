@@ -138,7 +138,6 @@ const AdjustmentInvoiceDetail = () => {
     return moment(dateString).format("DD MMM YYYY HH:mm:ss");
   };
 
-  console.log("dataInvoiceDetail", dataInvoiceDetail);
   const layout = (valuePage) => {
     switch (valuePage) {
       case "Adjustment Invoice":

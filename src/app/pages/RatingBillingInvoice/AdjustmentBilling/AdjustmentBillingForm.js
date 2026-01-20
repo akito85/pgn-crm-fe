@@ -49,7 +49,6 @@ const AdjustmentBillingForm = ({ type }) => {
   const [form] = Form.useForm();
   const location = useLocation();
   const { id, adjustmentNumber } = location?.state || {};
-  console.log("id: ", type);
 
   // State
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -404,7 +403,6 @@ const AdjustmentBillingForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
-          console.log(error, "error");
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
