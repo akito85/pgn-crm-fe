@@ -27,7 +27,7 @@ import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
   const dispatch = useDispatch();
@@ -82,7 +82,7 @@ const BillingPage = () => {
         pageSize: 100, // Initial load 100 data
         sort,
         isLoadMore: false, // Flag untuk initial load
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -112,12 +112,12 @@ const BillingPage = () => {
 
   const tabBilling = [
     {
-      key: "Billing Gas",
-      label: "Billing Gas",
-    },
-    {
       key: "All",
       label: "All",
+    },
+    {
+      key: "Billing Gas",
+      label: "Billing Gas",
     },
     {
       key: "Billing Non Gas",
@@ -156,7 +156,7 @@ const BillingPage = () => {
           pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true, // Flag untuk load more
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -180,7 +180,7 @@ const BillingPage = () => {
         page,
         pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -230,7 +230,7 @@ const BillingPage = () => {
           pageSize: pageSize,
           sort,
           isLoadMore: false,
-        })
+        }),
       );
     } else if (valueTab === "All") {
       dispatch(
@@ -240,7 +240,7 @@ const BillingPage = () => {
           pageSize: pageSize,
           sort,
           isLoadMore: false,
-        })
+        }),
       );
     }
 
@@ -314,7 +314,7 @@ const BillingPage = () => {
 
   const actionCols = useColumnActionPermission(
     ["view", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: valueTab === "All" ? 70 : 25,
@@ -330,7 +330,7 @@ const BillingPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        search
+        search,
       );
     }
     return columnsBilling(
@@ -340,7 +340,7 @@ const BillingPage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [valueTab, searchInput, searchedColumn, searchText, search]);
 
