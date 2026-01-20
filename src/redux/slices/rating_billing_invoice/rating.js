@@ -842,7 +842,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Diskon",
           promoCategory: "Volume Discount",
           adjustmentType: "Mark Up",
-          adjustmentValue: "5%",
+          adjustmentValue: "5",
         },
         {
           id: 2,
@@ -851,7 +851,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Program",
           promoCategory: "Customer Retention",
           adjustmentType: "Mark Down",
-          adjustmentValue: "10%",
+          adjustmentValue: "10",
         },
         {
           id: 3,
@@ -860,7 +860,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Promo",
           promoCategory: "Payment Incentive",
           adjustmentType: "Mark Up",
-          adjustmentValue: "3%",
+          adjustmentValue: "3",
         },
         {
           id: 4,
@@ -869,7 +869,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Diskon",
           promoCategory: "Seasonal",
           adjustmentType: "Mark Down",
-          adjustmentValue: "15%",
+          adjustmentValue: "15",
         },
         {
           id: 5,
@@ -878,7 +878,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Program",
           promoCategory: "Acquisition",
           adjustmentType: "Mark Up",
-          adjustmentValue: "7.5%",
+          adjustmentValue: "7.5",
         },
         {
           id: 6,
@@ -887,7 +887,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Promo",
           promoCategory: "Bundle Offer",
           adjustmentType: "Mark Down",
-          adjustmentValue: "12%",
+          adjustmentValue: "12",
         },
         {
           id: 7,
@@ -896,7 +896,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Diskon",
           promoCategory: "B2B Special",
           adjustmentType: "Mark Up",
-          adjustmentValue: "8%",
+          adjustmentValue: "8",
         },
         {
           id: 8,
@@ -905,7 +905,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Program",
           promoCategory: "Clearance",
           adjustmentType: "Mark Down",
-          adjustmentValue: "20%",
+          adjustmentValue: "20",
         },
         {
           id: 9,
@@ -914,7 +914,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Promo",
           promoCategory: "Referral",
           adjustmentType: "Mark Up",
-          adjustmentValue: "4%",
+          adjustmentValue: "4",
         },
         {
           id: 10,
@@ -923,7 +923,7 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
           promotionType: "Diskon",
           promoCategory: "Volume Incentive",
           adjustmentType: "Mark Down",
-          adjustmentValue: "18%",
+          adjustmentValue: "18",
         },
       ];
 
