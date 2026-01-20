@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Select, Form } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
@@ -20,6 +20,7 @@ import {
   clearInvoiceDetail,
 } from "../../../../../../redux/slices/rating_billing_invoice/adjustmentInvoice";
 import { currencyFormatting } from "../../../../../../utils/formatCurrency";
+import { hasValue } from "../../../../../../utils";
 import moment from "moment";
 
 const AdjustmentInvoiceSectionForm = ({ type, form }) => {
@@ -45,6 +46,9 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const [documentDate, setDocumentDate] = useState(null);
   const [selectedTermsOfPayment, setSelectedTermsOfPayment] = useState(null);
   const [isTypeDueDateDisabled, setIsTypeDueDateDisabled] = useState(false);
+  const [rangeDisableDate, setRangeDisableDate] = useState({});
+  const [defaultPicker, setDefaultPicker] = useState("");
+  const [keyPicker, setKeyPicker] = useState(0);
   const searchTimeoutRef = useRef(null);
 
   // Get initial values from form for update mode
@@ -182,6 +186,30 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     };
   }, []);
 
+  // Set range disable date based on billing period
+  useEffect(() => {
+    if (hasValue(selectedBillingPeriod)) {
+      const findPeriod = dataListBillingPeriod?.find(
+        (item) => item?.period === selectedBillingPeriod
+      );
+      setRangeDisableDate({
+        startDate: findPeriod?.startDate,
+        endDate: findPeriod?.endDate,
+      });
+    } else {
+      setRangeDisableDate({});
+      setDefaultPicker("");
+    }
+  }, [selectedBillingPeriod, dataListBillingPeriod]);
+
+  // Set default picker value when range is available
+  useEffect(() => {
+    if (hasValue(rangeDisableDate?.startDate)) {
+      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone());
+      setKeyPicker((prev) => prev + 1);
+    }
+  }, [rangeDisableDate?.startDate]);
+
   // Handle account change
   const handleAccountChange = (value) => {
     setSelectedAccount(value);
@@ -269,6 +297,8 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       typeDueDate: "Date",
       dueDate: undefined,
       termsOfPayment: undefined,
+      transactionDate: undefined,
+      documentDate: undefined,
     });
     dispatch(clearInvoiceDetail());
   };
@@ -462,6 +492,17 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     }
   };
 
+  // Disable dates outside of billing period range
+  const disabledRangeDate = useCallback(
+    (current) => {
+      return (
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days")
+      );
+    },
+    [rangeDisableDate]
+  );
+
   return (
     <>
       {/* Customer Information Section */}
@@ -617,7 +658,12 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
               },
             ]}
           >
-            <DateComponent placeholder="Select Transaction Date" />
+            <DateComponent
+              placeholder="Select Transaction Date"
+              dateDisable={disabledRangeDate}
+              defaultPickerValue={defaultPicker}
+              key={`transaction-${keyPicker}`}
+            />
           </Form.Item>
 
           <Form.Item
@@ -633,6 +679,9 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
             <DateComponent
               placeholder="Select Document Date"
               onChange={handleDocumentDateChange}
+              dateDisable={disabledRangeDate}
+              defaultPickerValue={defaultPicker}
+              key={`document-${keyPicker}`}
             />
           </Form.Item>
 
@@ -673,6 +722,9 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
                 <DateComponent
                   placeholder="Select Due Date"
                   disabled={isTypeDueDateDisabled}
+                  dateDisable={disabledRangeDate}
+                  defaultPickerValue={defaultPicker}
+                  key={`duedate-${keyPicker}`}
                 />
               </Form.Item>
             ) : (
