@@ -243,7 +243,6 @@ export const createGasSourceQuality = createAsyncThunk(
 export const updateEnDateGasSourceQuality = createAsyncThunk(
   "UPDATE_END_DATE_GAS_SOURCE_QUALITY",
   async (body, thunkAPI) => {
-    // console.log("🚀 ~ body:", body)
     try {
       const url = "/v1/dbs/api/gas-source/update-quality";
       const response = await accountManagementService.updateData(url, body);

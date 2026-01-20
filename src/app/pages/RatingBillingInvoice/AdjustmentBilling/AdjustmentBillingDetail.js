@@ -10,7 +10,6 @@ import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
-import BaseContainer from "../../../../components/BaseContainer";
 import SVGIcon from "../../../../assets/Icon/index";
 import ABDInfoSection from "./Utils/ABDInfoSection";
 import {
@@ -23,6 +22,7 @@ import AttachmentComponent from "../../../../components/Attachment/AttachmentCom
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../constants/configApp";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
+import CardContainer from "../../../../components/CardContainer";
 
 const AdjustmentBillingDetail = () => {
   // Selector
@@ -159,7 +159,7 @@ const AdjustmentBillingDetail = () => {
         return <ABDInfoSection data={dataDetail} listDataABI={listDataABI} />;
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <CardContainer header={"Attachment Information"}>
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
@@ -168,7 +168,7 @@ const AdjustmentBillingDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return (
@@ -239,20 +239,8 @@ const AdjustmentBillingDetail = () => {
         <RadioTabs data={listSectionInfo} onChange={onChange} />
         {layout(valuePage)}
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex my-[10px]">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 

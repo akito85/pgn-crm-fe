@@ -24,6 +24,7 @@ import {
 import ModalHoldReceipt from "./Table/ModalHoldReceipt";
 import ModalRefundReceipt from "./Table/ModalRefundReceipt";
 import ModalReleaseReceipt from "./Table/ModalReleaseReceipt";
+import ModalReverseReceipt from "./Table/ModalReverseReceipt";
 import { DownloadOutlined, WarningOutlined, DownOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../components/Toolbar";
@@ -57,6 +58,7 @@ const ViewReceipt = () => {
   const [openModalHold, setOpenModalHold] = useState(false);
   const [openModalRefund, setOpenModalRefund] = useState(false);
   const [openModalRelease, setOpenModalRelease] = useState(false);
+  const [openModalReverse, setOpenModalReverse] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
 
@@ -116,6 +118,35 @@ const ViewReceipt = () => {
     dispatch(holdReleaseReceiptBulk(body)).then((res) => {
       if (!res.error) {
         setOpenModalRelease(false);
+        setSelectedRowKeys([]);
+        setSelectedData([]);
+        handleFetch(); // Refresh list
+      }
+    });
+  };
+
+  const handleReverse = (record) => {
+    if (record) {
+      setSelectedData([record]);
+    }
+    setOpenModalReverse(true);
+  };
+
+  const handleSubmitReverse = (data) => {
+    const body = {
+      receipts: data.receipts?.map((item) => ({
+        id: item.id,
+        amount: item.receiptAmount || item.amount,
+      })),
+      action: "REVERSE",
+      appHierId: data.receipts[0]?.appHierId || 1, // Fallback to 1 if not present
+      reason: data.reason,
+      attachmentIds: data.attachments?.map((a) => a.id),
+    };
+
+    dispatch(holdReleaseReceiptBulk(body)).then((res) => {
+      if (!res.error) {
+        setOpenModalReverse(false);
         setSelectedRowKeys([]);
         setSelectedData([]);
         handleFetch(); // Refresh list
@@ -300,6 +331,12 @@ const ViewReceipt = () => {
           <span>Refund</span>
         </div>
       </Menu.Item>
+      <Menu.Item key="Reverse" onClick={() => handleReverse(null)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconRevers" color={"#000000"} width={16} />
+          <span>Reverse</span>
+        </div>
+      </Menu.Item>
     </Menu>
   );
 
@@ -373,7 +410,8 @@ const ViewReceipt = () => {
               className="gap-5"
               icon={<SVGIcon name="IconRevers" color={"#808080"} width={24} />}
               border={false}
-              disabled={true}
+              disabled={false}
+              onClick={() => handleReverse(r)}
             >
             </ButtonComponent>
           </Tooltip>
@@ -567,6 +605,13 @@ const ViewReceipt = () => {
           selectedData={selectedData}
           dataSource={dataSource}
           onSubmit={handleSubmitRelease}
+        />
+        <ModalReverseReceipt
+          isOpen={openModalReverse}
+          handleCancel={() => setOpenModalReverse(false)}
+          selectedData={selectedData}
+          dataSource={dataSource}
+          onSubmit={handleSubmitReverse}
         />
 
         {/* approval modal */}
