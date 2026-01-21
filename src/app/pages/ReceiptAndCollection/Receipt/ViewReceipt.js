@@ -311,6 +311,55 @@ const ViewReceipt = () => {
     );
   };
 
+  const moreActionsMenu = (record) => (
+    <Menu>
+      <Menu.Item key="Release" onClick={() => {
+        setSelectedData([record]);
+        handleRelease();
+      }}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconSend" color={"#000000"} width={16} />
+          <span>Release</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="Hold" onClick={() => handleHold(record)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconHold" color={"#000000"} width={16} />
+          <span>Hold</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="Refund" onClick={() => {
+        setSelectedData([record]);
+        handleRefund();
+      }}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconRefund" color={"#000000"} width={16} />
+          <span>Refund</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="Reverse" onClick={() => handleReverse(record)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconRevers" color={"#000000"} width={16} />
+          <span>Reverse</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item key="History" onClick={() => handleModalApprovalHistory(record?.id)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconLogHistory" color={"#000000"} width={16} />
+          <span>History</span>
+        </div>
+      </Menu.Item>
+      {record?.status === "Draft" && record?.statusApproval === "Rejected" && (
+        <Menu.Item key="Delete" onClick={() => handleDeleteReceipt(record)}>
+          <div className="flex items-center gap-2">
+            <SVGIcon name="IconDelete" color={"#BE3036"} width={16} />
+            <span className="text-[#BE3036]">Delete</span>
+          </div>
+        </Menu.Item>
+      )}
+    </Menu>
+  );
+
   const moreMenu = (
     <Menu>
       <Menu.Item key="Release" onClick={handleRelease}>
@@ -516,23 +565,46 @@ const ViewReceipt = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold uppercase">receipt list</p>
+              <p className="mt-[15px] font-bold uppercase text-[#0075BF]">receipt list</p>
               <div className="flex gap-2">
+                <ButtonComponent
+                  icon={<SVGIcon name="IconButtonDownload" width={18} />}
+                  onClick={handleDownload}
+                >
+                  Download List
+                </ButtonComponent>
+                <ButtonComponent
+                  icon={<SVGIcon name="IconHold" width={18} />}
+                  onClick={() => handleHold(null)}
+                >
+                  Hold
+                </ButtonComponent>
+                <ButtonComponent
+                  icon={<SVGIcon name="IconSend" width={18} />}
+                  onClick={handleRelease}
+                >
+                  Release
+                </ButtonComponent>
+                <ButtonComponent
+                  icon={<SVGIcon name="IconRefund" width={18} />}
+                  onClick={handleRefund}
+                >
+                  Refund
+                </ButtonComponent>
+                <ButtonComponent
+                  icon={<SVGIcon name="IconRevers" width={18} />}
+                  onClick={() => handleReverse(null)}
+                >
+                  Reverse
+                </ButtonComponent>
                 <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_RECEIPT}>
                   <ButtonComponent
-                    icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                    icon={<SVGIcon name="IconButtonCreate" width={18} />}
                     type="submit"
                   >
-                    Create
+                    + Create
                   </ButtonComponent>
                 </NavLink>
-                <Dropdown overlay={moreMenu} trigger={['click']}>
-                  <ButtonComponent
-                    type="default"
-                  >
-                    More Actions <DownOutlined />
-                  </ButtonComponent>
-                </Dropdown>
               </div>
             </div>
           }
@@ -552,19 +624,31 @@ const ViewReceipt = () => {
                   handleModalApprovalHistory,
                   handleDeleteReceipt
                 ),
-                ...useColumnActionPermission(
-                  [
-                    "view",
-                    "history",
-                    "update",
-                    "transfer",
-                    "hold",
-                    "release",
-                    "refund",
-                    "reverse",
-                  ],
-                  itemActions
-                ),
+                {
+                  title: "ACTION",
+                  fixed: "right",
+                  width: 100,
+                  align: "center",
+                  render: (record) => (
+                    <div className="flex justify-center items-center gap-2">
+                      <Dropdown overlay={moreActionsMenu(record)} trigger={['click']}>
+                        <div className="cursor-pointer">
+                          <SVGIcon name="IconActionDropdown" width={20} />
+                        </div>
+                      </Dropdown>
+                      <Tooltip title="Detail">
+                        <Link
+                          to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT}
+                          state={{ id: record?.id }}
+                        >
+                          <div className="cursor-pointer">
+                            <SVGIcon name="IconDetail" width={20} />
+                          </div>
+                        </Link>
+                      </Tooltip>
+                    </div>
+                  )
+                }
               ]}
               current={page}
               pageSize={pageSize}

@@ -256,8 +256,9 @@ const ListRececiptForm = ({ type }) => {
     return Math.round(value * 10) / 10;
   };
 
-  const convertToInteger = (amount) => {
-    return parseInt(amount?.toString().replace(/\./g, "").replace(",", "."));
+  const convertToFloat = (amount) => {
+    if (!amount) return 0;
+    return parseFloat(amount?.toString().replace(/\./g, "").replace(",", "."));
   };
 
 
@@ -278,50 +279,40 @@ const ListRececiptForm = ({ type }) => {
         ? formValue?.amount
         : 0;
 
+      const rateAmountValue = data_converted_currency?.convertedRate?.toLocaleString(
+        "en-US",
+        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+      );
+
       if (
         hasValue(formValue?.convertedCurrency) &&
-        hasValue(formValue?.currency) &&
-        hasValue(formValue?.rateAmount)
+        hasValue(formValue?.currency)
       ) {
         if (formValue?.currency === 243) {
-          const eqAmountValue = data_converted_currency?.convertedRate * convertToInteger(convertedAmount);
+          const eqAmountValue = data_converted_currency?.convertedRate * convertToFloat(convertedAmount);
 
           form.setFieldsValue({
-            rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-              "en-US",
-              { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-            ),
+            rateAmount: rateAmountValue,
             eqAmount: eqAmountValue.toLocaleString("id-ID", {
-              minimumFractionDigits: 2, // Tambahkan dua angka desimal
+              minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }) || "0"
           });
         } else if (formValue?.currency === 244) {
-          const convertValue = convertToInteger(convertedAmount)
+          const convertValue = convertToFloat(convertedAmount)
           const eqAmountValue = roundToOneDecimal(convertValue / data_converted_currency?.convertedRate)
 
           form.setFieldsValue({
-            rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-              "en-US",
-              {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }
-            ),
+            rateAmount: rateAmountValue,
             eqAmount: eqAmountValue
-
           });
         }
       } else {
         form.setFieldsValue({
-          rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-            "en-US",
-            { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-          ),
+          rateAmount: rateAmountValue,
           eqAmount: 0,
         });
       }
-
     }
   }, [data_converted_currency, form, amount]);
 
