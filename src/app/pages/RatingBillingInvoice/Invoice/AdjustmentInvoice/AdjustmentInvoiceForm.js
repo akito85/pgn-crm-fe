@@ -27,6 +27,7 @@ import {
   getBillingPeriodInvoiceAdjustment,
   getInvoiceListInvoiceAdjustment,
   getInvoiceDetailInvoiceAdjustment,
+  getListAttachmentInvoiceAdjustment,
   createInvoiceAdjustment,
   updateInvoiceAdjustment,
   uploadAttachmentInvoiceAdjustment,
@@ -46,6 +47,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
     dataListApprovalHierarchyDetail,
     dataListBillingCycle,
     dataListTermOfPayment,
+    dataListAttachment,
   } = useSelector((state) => state.adjustmentInvoice);
 
   // Declaration
@@ -243,6 +245,28 @@ const AdjustmentInvoiceForm = ({ type }) => {
       setAppHierDataDetail(dataListApprovalHierarchyDetail);
     }
   }, [dataListApprovalHierarchyDetail]);
+
+  // Fetch attachment data when dataDetail is available (for update mode)
+  useEffect(() => {
+    if (type === "update" && dataDetail?.invAdjustmentId) {
+      dispatch(getListAttachmentInvoiceAdjustment(dataDetail.invAdjustmentId));
+    }
+  }, [dispatch, type, dataDetail?.invAdjustmentId]);
+
+  // Set listDataAttachment from Redux when dataListAttachment changes (for update mode)
+  useEffect(() => {
+    if (type === "update" && dataListAttachment?.result) {
+      const formattedAttachments = dataListAttachment.result.map((attachment) => ({
+        ...attachment,
+        dataType: "exist",
+        urlFile1: `/v1/dbs/api/rbi/invoice-adjustment/download-attachment/${
+          attachment.fileId || attachment.id
+        }`,
+        key: attachment.fileId || attachment.id,
+      }));
+      setListDataAttachment(formattedAttachments);
+    }
+  }, [type, dataListAttachment]);
 
   // Breadcrumbs
   const routes = [
