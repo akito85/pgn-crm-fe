@@ -270,7 +270,6 @@ const CreateReceiptForm = ({
           <Form.Item
             label={"Receipt Method"}
             name={"method"}
-            rules={formMessageRequired("Receipt Method")}
           >
             <SelectComponent onChange={handleReceiptMethodChange} placeholder="Select Receipt Method">
               {payMethodDDL?.data?.map((data) => (
@@ -314,27 +313,17 @@ const CreateReceiptForm = ({
             />
           </Form.Item>
           <div></div>
-
-          <div className="col-span-5 grid grid-cols-1 gap-3">
-            <Form.Item
-              label={"Remark"}
-              name={"description"}
-              rules={formMessageRequired("Remark")}
-            >
-              <InputComponent rows={5} type="textarea" placeholder="Input Remark" />
-            </Form.Item>
-          </div>
         </div>
       </BaseContainer>
       {/* Base Container ke 3  */}
-      <BaseContainer header={"AMOUNT DETAIL INFORMATION"}>
-        <div className="w-full grid grid-cols-2 gap-5">
+      <BaseContainer header={"AMOUNT INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-3">
           <Form.Item
             label={"Currency"}
             name={"currency"}
             rules={formMessageRequired("Currency")}
           >
-            <SelectComponent onChange={onChangeCurrency}>
+            <SelectComponent onChange={onChangeCurrency} placeholder="Select Currency">
               {currencyDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -356,21 +345,19 @@ const CreateReceiptForm = ({
               decimalSeparator=","
               precision={2}
               onChange={handleChangeAmount}
-              placeholder="0,00"
+              placeholder="Input Amount"
               controls={false}
             />
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-3 gap-5">
           <Form.Item
             label={"Rate Type"}
             name={"rateType"}
-            rules={formMessageRequired("rate Type")}
+            rules={formMessageRequired("Rate Type")}
           >
-            <SelectComponent onChange={onChangeRateType}>
+            <SelectComponent onChange={onChangeRateType} placeholder="Select Rate Type">
               {rateTypeDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {`${data.name} - ${data.description}`}
                 </Select.Option>
               ))}
             </SelectComponent>
@@ -387,8 +374,23 @@ const CreateReceiptForm = ({
               className={"w-full"}
               format={dateFormatting?.date}
               onChange={onChangeRateDate}
+              placeholder="Select Rate Date"
             />
           </Form.Item>
+          <Form.Item
+            label={"Converted Currency"}
+            name={"convertedCurrency"}
+            rules={formMessageRequired("Converted Currency")}
+          >
+            <SelectComponent onChange={onChangeConvertedCurrency} placeholder="Select Converted Currency">
+              {filteredConvertedDDL?.map((data) => (
+                <Select.Option key={data.id} value={data.id}>
+                  {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
           <Form.Item
             label={"Rate"}
             name={"rateAmount"}
@@ -398,27 +400,7 @@ const CreateReceiptForm = ({
               allowClear
               maxLength={5}
               disabled
-            // onChange={(e) => console.log(e, 'lalalal')}
-            // onInput={(e) =>
-            //   (e.target.value = e.target.value.replace(/\D/g, ""))
-            // }
             />
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-2 gap-5">
-          <Form.Item
-            label={"Converted Currency"}
-            name={"convertedCurrency"}
-            rules={formMessageRequired("Converted Currency")}
-          >
-            {/* <InputComponent /> */}
-            <SelectComponent onChange={onChangeConvertedCurrency}>
-              {filteredConvertedDDL?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
           </Form.Item>
           <Form.Item
             label={"Equivalent Amount"}
@@ -430,10 +412,22 @@ const CreateReceiptForm = ({
               maxLength={5}
               disabled
             />
-            {/* <InputComponent disabled={true} /> */}
           </Form.Item>
+          <div></div>
+          <div></div>
+          <div></div>
+
+          <div className="col-span-5 grid grid-cols-1 gap-3">
+            <Form.Item
+              label={"Remark"}
+              name={"description"}
+              rules={formMessageRequired("Remark")}
+            >
+              <InputComponent rows={5} type="textarea" placeholder="Input Remark" />
+            </Form.Item>
+          </div>
         </div>
-      </BaseContainer >
+      </BaseContainer>
 
       {/* base container ke empat */}
       < BaseContainer header={"Allocation Information"} >
