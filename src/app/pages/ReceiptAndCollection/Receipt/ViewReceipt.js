@@ -313,6 +313,25 @@ const ViewReceipt = () => {
 
   const moreActionsMenu = (record) => (
     <Menu>
+      <Menu.Item
+        key="Update"
+        disabled={!(record?.status === "Draft" && record?.statusApproval === "Rejected")}
+      >
+        <Link
+          to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_RECEIPT}
+          state={{ id: record?.id }}
+          className={`flex items-center gap-2 ${!(record?.status === "Draft" && record?.statusApproval === "Rejected") ? 'pointer-events-none opacity-50' : ''}`}
+        >
+          <SVGIcon name="IconEdit" color={"#000000"} width={16} />
+          <span>Update</span>
+        </Link>
+      </Menu.Item>
+      <Menu.Item key="Hold" onClick={() => handleHold(record)}>
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconHold" color={"#000000"} width={16} />
+          <span>Hold</span>
+        </div>
+      </Menu.Item>
       <Menu.Item key="Release" onClick={() => {
         setSelectedData([record]);
         handleRelease();
@@ -322,10 +341,10 @@ const ViewReceipt = () => {
           <span>Release</span>
         </div>
       </Menu.Item>
-      <Menu.Item key="Hold" onClick={() => handleHold(record)}>
+      <Menu.Item key="Reverse" onClick={() => handleReverse(record)}>
         <div className="flex items-center gap-2">
-          <SVGIcon name="IconHold" color={"#000000"} width={16} />
-          <span>Hold</span>
+          <SVGIcon name="IconRevers" color={"#000000"} width={16} />
+          <span>Reverse</span>
         </div>
       </Menu.Item>
       <Menu.Item key="Refund" onClick={() => {
@@ -337,16 +356,26 @@ const ViewReceipt = () => {
           <span>Refund</span>
         </div>
       </Menu.Item>
-      <Menu.Item key="Reverse" onClick={() => handleReverse(record)}>
+      <Menu.Item key="CreateAccounting">
         <div className="flex items-center gap-2">
-          <SVGIcon name="IconRevers" color={"#000000"} width={16} />
-          <span>Reverse</span>
+          <SVGIcon name="IconActionCreate" color={"#000000"} width={16} />
+          <span>Create Accounting</span>
         </div>
+      </Menu.Item>
+      <Menu.Item key="ViewAccounting">
+        <Link
+          to={RECEIPT_AND_COLLECTION_ROUTES.VIEW_ACCOUNTING}
+          state={{ id: record?.id }}
+          className="flex items-center gap-2"
+        >
+          <SVGIcon name="IconReport" color={"#000000"} width={16} />
+          <span>View Accounting</span>
+        </Link>
       </Menu.Item>
       <Menu.Item key="History" onClick={() => handleModalApprovalHistory(record?.id)}>
         <div className="flex items-center gap-2">
           <SVGIcon name="IconLogHistory" color={"#000000"} width={16} />
-          <span>History</span>
+          <span>Approval History</span>
         </div>
       </Menu.Item>
       {record?.status === "Draft" && record?.statusApproval === "Rejected" && (
