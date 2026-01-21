@@ -182,9 +182,9 @@ export const getApprovalHistory = createAsyncThunk(
 // Get Relationship Search Column
 export const getRelationshipColumnApi = createAsyncThunk(
   "GET_RELATIONSHIP_COLUMN_API",
-  async (_, thunkAPI) => {
+  async ({accountId}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/relationships/list-search-column`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/list-search-column`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -196,9 +196,9 @@ export const getRelationshipColumnApi = createAsyncThunk(
 // Get Relationship Search Condition
 export const getRelationshipConditionApi = createAsyncThunk(
   "GET_RELATIONSHIP_CONDITION_API",
-  async (_, thunkAPI) => {
+  async ({accountId}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/relationships/list-search-condition`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/list-search-condition`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -210,9 +210,9 @@ export const getRelationshipConditionApi = createAsyncThunk(
 // Get Relationship Search Operator
 export const getRelationshipOperatorApi = createAsyncThunk(
   "GET_RELATIONSHIP_OPERATOR_API",
-  async (_, thunkAPI) => {
+  async ({accountId}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/relationships/list-search-operator`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/list-search-operator`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {

@@ -3,7 +3,7 @@ import React from "react";
 
 const ModalCustom = (props) => {
   const {
-    loading,
+    loading = false, // ← FIX: Default value
     isOpen,
     handleCancel = () => {},
     handleOk = () => {},
@@ -13,11 +13,10 @@ const ModalCustom = (props) => {
     type,
     footer = [],
     centered = true,
-    closable,
+    closable = true, // ← FIX: Default true
     title,
     maxHeight,
   } = props;
-
 
   const typeModal = (type) => {
     switch (type) {
@@ -30,8 +29,6 @@ const ModalCustom = (props) => {
               className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}
             >
               <div className={"flex gap-x-1.5 items-center"}>
-                {/* <div className="p-2.5 modal-header-box rounded-sm"></div> */}
-                {/* <span className="text-primary">{header}</span> */}
                 <span
                   style={{
                     color: "#0075bf",
@@ -81,19 +78,21 @@ const ModalCustom = (props) => {
         );
     }
   };
+
   return (
     <Modal
       open={isOpen}
       onOk={handleOk}
-      onCancel={handleCancel}
+      onCancel={loading ? undefined : handleCancel} // ← FIX: Prevent close saat loading
       footer={footer}
       className={type === 'confirmation' ? "modal-approve-reject" : "modal-custom"}
       centered={centered}
       width={width}
-      maskClosable={false}
-      closable={closable}
+      maskClosable={!loading} // ← FIX: Prevent click outside saat loading
+      closable={!loading && closable} // ← FIX: Hide X button saat loading
       title={title}
       maxHeight={maxHeight}
+      confirmLoading={loading} // ← FIX: Show loading di OK button (jika ada)
     >
       {typeModal(type)}
     </Modal>

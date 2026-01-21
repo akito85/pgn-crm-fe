@@ -27,11 +27,19 @@ const InputComponent = ({
   numericFormatType,
   ref,
   onPressEnter = () => {},
+  isPassingId = false, // Declaratively pass the ID prop to the component's root element
+  id,
 }) => {
   const style = {
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
     padding: "4px 12px",
+  };
+
+  const styleTextarea = {
+    borderRadius: "6px",
+    boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    padding: "0px",
   };
 
   const styleNumeric = {
@@ -55,13 +63,13 @@ const InputComponent = ({
   const wrapper = "flex flex-col w-auto";
 
   return (
-    <div className={wrapper}>
+    <div className={wrapper} id={isPassingId ? id : false}>
       {!group && <InputLabel text={label} mandatory={mandatory}></InputLabel>}
       {type === "textarea" ? (
         <>
           <Input.TextArea
             rows={rows || 3}
-            style={style}
+            style={styleTextarea}
             onChange={onChange}
             value={value}
             maxLength={255}

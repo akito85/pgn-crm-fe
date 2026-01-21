@@ -36,7 +36,7 @@ import {
   getPrAttachmentCategory,
   updatePaymentRelation,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
-import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
+import { showModalError, validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
 
@@ -183,7 +183,7 @@ const CreatePaymentRelation = ({ type }) => {
       breadcrumbName: "Detail Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
+      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Payment Relation",
     },
     {
@@ -208,8 +208,15 @@ const CreatePaymentRelation = ({ type }) => {
     if (show) {
       try {
         if (current === 2) {
-          if (attachmentIsRequired && !dataAttachment.length)
-            throw new Error("At least provide one attachment");
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+            dispatch(showModalError(errorBody));
+            
+            throw new Error("There was no file attached");
+          }
         }
         else {
           await formCreate.validateFields(formFields[current]);
@@ -368,8 +375,15 @@ const CreatePaymentRelation = ({ type }) => {
   const next = async () => {
     try {
       if (current === 2) {
-        if (attachmentIsRequired && !dataAttachment.length)
-          throw new Error("At least provide one attachment");
+        if (attachmentIsRequired && !dataAttachment.length) {
+          const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+            dispatch(showModalError(errorBody));
+            
+            throw new Error("There was no file attached");
+        }
       }
       else {
         await formCreate.validateFields(formFields[current]);
@@ -417,8 +431,15 @@ const CreatePaymentRelation = ({ type }) => {
     for (let i = current; i < newCurrent; i++) {
       try {
         if (i === 2) {
-          if (attachmentIsRequired && !dataAttachment.length)
-            throw new Error("At least provide one attachment");
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+            dispatch(showModalError(errorBody));
+            
+            throw new Error("There was no file attached");
+          }
         }
         else {
           await formCreate.validateFields(formFields[i]);

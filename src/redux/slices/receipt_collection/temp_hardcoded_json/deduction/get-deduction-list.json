@@ -1,0 +1,90 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Data Deduction",
+    "data": {
+        "result": [
+            {
+                "id": 1,
+                "deductionNo": "DD00001",
+                "deductionDate": "21 Jan 2023",
+                "deductionPeriod": "Jan 2023",
+                "totalDeduction": 100,
+                "totalAccount": 1,
+                "totalAmount": 11000000,
+                "totalSuccess": 10,
+                "totalFailed": 80,
+                "totalCancel": 10,
+                "type": "Cash",
+                "approvalStatus": "Approved",
+                "status": "In Progress"
+            },
+            {
+                "id": 2,
+                "deductionNo": "PAW002",
+                "deductionDate": "12 Jan 2023",
+                "deductionPeriod": "Jan 2023",
+                "totalDeduction": 85,
+                "totalAccount": 4,
+                "totalAmount": 32000000,
+                "totalSuccess": 0,
+                "totalFailed": 40,
+                "totalCancel": 40,
+                "type": "Non Cash",
+                "approvalStatus": "Approved",
+                "status": "In Progress"
+            },
+            {
+                "id": 3,
+                "deductionNo": "PAW003",
+                "deductionDate": "11 Jan 2023",
+                "deductionPeriod": "Jan 2023",
+                "totalDeduction": 100,
+                "totalAccount": 10,
+                "totalAmount": 28000000,
+                "totalSuccess": 100,
+                "totalFailed": 0,
+                "totalCancel": 0,
+                "type": "Non Cash",
+                "approvalStatus": "Rejected",
+                "status": ""
+            },
+            {
+                "id": 4,
+                "deductionNo": "PAW004",
+                "deductionDate": "20 Jan 2023",
+                "deductionPeriod": "Jan 2023",
+                "totalDeduction": 100,
+                "totalAccount": 5,
+                "totalAmount": 41000000,
+                "totalSuccess": 100,
+                "totalFailed": 0,
+                "totalCancel": 0,
+                "type": "Cash",
+                "approvalStatus": "In Progress",
+                "status": "In Progress"
+            },
+            {
+                "id": 5,
+                "deductionNo": "PAW005",
+                "deductionDate": "22 Feb 2023",
+                "deductionPeriod": "Feb 2023",
+                "totalDeduction": 100,
+                "totalAccount": 5,
+                "totalAmount": 25000000,
+                "totalSuccess": 90,
+                "totalFailed": 5,
+                "totalCancel": 5,
+                "type": "Non Cash",
+                "approvalStatus": "Rejected",
+                "status": ""
+            }
+        ],
+        "page": {
+            "size": 10,
+            "totalElements": 5,
+            "totalPages": 1,
+            "number": 0
+        }
+    }
+}

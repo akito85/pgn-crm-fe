@@ -16,17 +16,20 @@ const ButtonComponent = ({
   className,
   fullButton = false,
   isPrimary = false,
+  loading = false,
 }) => {
+  const isButtonLoading = isLoading || loading;
+  
   return (
     <div>
       <Button
         form={form || undefined}
         onClick={onClick}
-        loading={isLoading}
+        loading={isButtonLoading}
         icon={icon ? icon : null}
         className={`flex w-full justify-center ${className}`}
         type={type}
-        disabled={disabled}
+        disabled={disabled || isButtonLoading}
         htmlType={htmlType}
         size={size || "small"}
         style={{
@@ -36,7 +39,7 @@ const ButtonComponent = ({
           color: isPrimary && "#fff",
           height: "32px",
           fontSize: "12px",
-          cursor: disabled ? "not-allowed" : "pointer",
+          cursor: disabled || isButtonLoading ? "not-allowed" : "pointer", // ← FIX: Cursor saat loading
         }}
       >
         <div

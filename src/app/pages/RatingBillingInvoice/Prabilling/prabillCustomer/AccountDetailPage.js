@@ -130,7 +130,8 @@ const AccountDetailPage = () => {
 
   const routes = [
     { path: "", breadcrumbName: "Rating Billing" },
-    { path: RBI_ROUTES.PRABILLING_DETAIL, breadcrumbName: "Prabilling" },
+    { path: RBI_ROUTES.PRABILLING_VIEW, breadcrumbName: "Prabilling" },
+    { path: RBI_ROUTES.PRABILLING_DETAIL, breadcrumbName: "Detail Prabilling" },
     { path: "", breadcrumbName: "Customer Detail" },
   ];
 
@@ -308,7 +309,7 @@ const AccountDetailPage = () => {
       {
         key: "action",
         title: "ACTION",
-        width: 50,
+        width: 80,
         align: "center",
         fixed: "right",
         render: (text, record) => (

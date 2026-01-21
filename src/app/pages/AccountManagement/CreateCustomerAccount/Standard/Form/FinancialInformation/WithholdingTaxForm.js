@@ -34,7 +34,7 @@ const WithholdingTaxForm = ({
             },
           ]}
         >
-          <DateComponent disabled={wtObj?.wapuFlag ? false : true} />
+          <DateComponent disabled={wtObj?.wapuFlag ? false : true} isPassingId />
         </Form.Item>
 
         <Form.Item
@@ -47,7 +47,7 @@ const WithholdingTaxForm = ({
           //   },
           // ]}
         >
-          <InputComponent />
+          <InputComponent isPassingId />
         </Form.Item>
       </div>
     </div>

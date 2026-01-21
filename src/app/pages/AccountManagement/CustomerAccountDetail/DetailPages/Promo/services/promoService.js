@@ -239,6 +239,19 @@ export const promoService = {
   },
 
   /**
+   * Get detail of promo history detail by billing code and detail ID
+   */
+  async getDetailDetailPromoHistoryById(billingCode, detailId, accountId) {
+    try {
+      const response = await promoRepository.getDetailDetailPromoHistoryById(billingCode, detailId, accountId);
+      return response;
+    } catch (error) {
+      console.error('Error fetching promo history detail:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Download list of promo history
    */
   async downloadListPromoHistory(params, advancedSearch = null) {

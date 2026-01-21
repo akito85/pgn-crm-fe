@@ -1,0 +1,19 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get List From Customer",
+    "data": {
+        "result": [
+            {
+                "fromCustomerId": "CUS001",
+                "fromCustomerName": "PLN (PERSERO), PT",
+                "areaCode": "BEK001"
+            },
+            {
+                "fromCustomerId": "CUS002",
+                "fromCustomerName": "PT JAYA ABADI",
+                "areaCode": "BEK002"
+            }
+        ]
+    }
+}

@@ -78,8 +78,12 @@ const SaInformation = ({
       return value;
     }
   };
+  const handlePjbgTypeValidate = (value) => { 
+    form.resetFields(["pjbgType"])
+  }
   const handleSaTypeValidate = (value) => { 
     form.resetFields(["serviceAgreementType"])
+    handlePjbgTypeValidate(value);
   }
   const handleMandatory = (e) => {
     setIsGas(e)
@@ -273,7 +277,12 @@ const SaInformation = ({
               },
             ]}
           >
-            <SelectComponent disabled={saRecordData?.typeSa !== "main" || !hasValue(saInfoObj?.serviceType) ? true : false}>
+            <SelectComponent
+              disabled={saRecordData?.typeSa !== "main" || !hasValue(saInfoObj?.serviceType) ? true : false}
+              onChange={(e) => {
+                handlePjbgTypeValidate(e)
+              }}
+            >
             {dataSaType &&
                 dataSaType?.map((item, index) => (
                   <Select.Option value={item.id} key={index}>
@@ -289,11 +298,11 @@ const SaInformation = ({
             rules={[
               {
                 message: "Please input your PJBG Type",
-                required: saInfoObj?.serviceType === 608 ? true : false,
+                required: saInfoObj?.serviceAgreementType === 1170 ? true : false,
               },
             ]}
           >
-            <SelectComponent disabled={(saInfoObj?.serviceType !== 608 || saRecordData?.typeSa !== "main") ? true : false}>
+            <SelectComponent disabled={(saInfoObj?.serviceAgreementType === 1170 || saRecordData?.typeSa !== "main") ? false : true}>
               {dataPjbg &&
                 dataPjbg?.map((item, index) => (
                   <Select.Option value={item.id} key={index}>

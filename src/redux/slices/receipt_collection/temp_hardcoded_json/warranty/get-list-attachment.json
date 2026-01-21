@@ -1,0 +1,46 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Data Efaktur",
+    "data": {
+        "result": [
+            {
+                "category": "PJBG",
+                "fileName": "PJBG_gas_PLN.pdf",
+                "fileSize": "3 MB"
+            },
+            {
+                "category": "PJBG",
+                "fileName": "PJBG_gas_PLN_2.png",
+                "fileSize": "3 MB"
+            },
+            {
+                "category": "SK",
+                "fileName": "SK_pricing_1.pdf",
+                "fileSize": "3 MB"
+            },
+            {
+                "category": "SK",
+                "fileName": "SK_pricing_2.pdf",
+                "fileSize": "1 MB"
+            },
+            {
+                "category": "PJBG",
+                "fileName": "PJBG_gas_PLN_3.pdf",
+                "fileSize": "2 MB"
+            }
+        ],
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://localhost:3000/v1/dbs/api/rbi/get-warranty?page=0&size=10&sort=invoiceDate,desc"
+            }
+        ],
+        "page": {
+            "size": 10,
+            "totalElements": 3,
+            "totalPages": 1,
+            "number": 0
+        }
+    }
+}

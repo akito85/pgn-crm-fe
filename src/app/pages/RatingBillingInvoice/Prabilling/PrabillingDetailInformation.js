@@ -17,7 +17,6 @@ import {
   downloadPrabillingResult,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
-import { EyeOutlined } from "@ant-design/icons";
 
 const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const { detail_prabilling_result, loading } = useSelector(
@@ -384,69 +383,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         render: (text) => text || "",
       },
       {
-        key: "minUsage",
-        title: "MIN USAGE",
-        dataIndex: "minUsage",
-        width: 120,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : ""),
-      },
-      {
-        key: "maxUsage",
-        title: "MAX USAGE",
-        dataIndex: "maxUsage",
-        width: 120,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : ""),
-      },
-      {
-        key: "timeUnit",
-        title: "TIME UNIT",
-        dataIndex: "timeUnit",
-        width: 100,
-        isClassification: true,
-        sorter: true,
-        render: (text) => text || "",
-      },
-      {
-        key: "unitMeasure",
-        title: "UNIT MEASURE",
-        dataIndex: "unitMeasure",
-        width: 120,
-        isClassification: true,
-        sorter: true,
-        render: (text) => text || "",
-      },
-      {
-        key: "currency",
-        title: "CURRENCY",
-        dataIndex: "currency",
-        width: 100,
-        isClassification: true,
-        sorter: true,
-        render: (text) => text || "",
-      },
-      {
-        key: "paymentType",
-        title: "PAYMENT TYPE",
-        dataIndex: "paymentType",
-        width: 120,
-        isClassification: true,
-        sorter: true,
-        render: (text) => text || "",
-      },
-      {
-        key: "chargingMethod",
-        title: "CHARGING METHOD",
-        dataIndex: "chargingMethod",
-        width: 150,
-        isClassification: true,
-        sorter: true,
-        render: (text) => text || "",
-      },
-      {
         key: "action",
         title: "ACTION",
         width: 60,
@@ -573,11 +509,15 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                       detail.accountGroupType ||
                       ""}
                   </DetailText>
-                  <DetailText label={"Account Numbers"} className="">
-                    {detail.accountNumber || ""}
+                  <DetailText label={"Specific Customer Account"} className="">
+                    {detail.accounts}
                   </DetailText>
-                  <DetailText label={"Account Names"} className="">
-                    {detail.accoutnName || ""}
+                  <DetailText label={"Completion Date"}>
+                    {prabillData?.updateDtm
+                      ? moment(prabillData.updateDtm).format(
+                          "DD MMM YYYY HH:mm:ss"
+                        )
+                      : ""}
                   </DetailText>
                 </React.Fragment>
               ))}
@@ -651,12 +591,12 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
               {prabillData?.createdBy || ""}
             </DetailText>
             <DetailText label={"Updated Date"}>
-              {prabillData?.updateDtm
+              {/* {prabillData?.updateDtm
                 ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
-                : ""}
+                : ""} */}
             </DetailText>
             <DetailText label={"Updated By"}>
-              {prabillData?.updatedBy || ""}
+              {prabillData?.updateBy || ""}
             </DetailText>
           </div>
         </CardContainer>
