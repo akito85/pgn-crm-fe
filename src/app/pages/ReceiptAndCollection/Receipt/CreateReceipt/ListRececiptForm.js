@@ -43,6 +43,7 @@ import {
   resetDataAccountNumber,
   getAccountTypeDDL,
   getAccountNumberByTypeDDL,
+  getUnifiedCreateReceiptDdl,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
@@ -105,14 +106,15 @@ const ListRececiptForm = ({ type }) => {
     dispatch(resetDataAccountNumber());
     dispatch(getAllApprovalListReceipt());
     dispatch(getRateTypeDDL());
-    dispatch(getPayDeliverDDL());
-    dispatch(getPayGetwayDDL());
+    // dispatch(getPayDeliverDDL());
+    // dispatch(getPayGetwayDDL());
     dispatch(getBankDDL());
-    dispatch(getCollectionAgentDDL());
+    // dispatch(getCollectionAgentDDL());
     dispatch(getCusNumberDDL());
     dispatch(getCurrencyDDL());
-    dispatch(getPayTypeDDL());
-    dispatch(getPayMethodDDL());
+    // dispatch(getPayTypeDDL());
+    dispatch(getUnifiedCreateReceiptDdl());
+    // dispatch(getPayMethodDDL());
     dispatch(getReceiptChanelDDL());
     dispatch(getAccountTypeDDL());
   }, [dispatch]);
@@ -402,14 +404,15 @@ const ListRececiptForm = ({ type }) => {
         "cusName",
         "area",
         "segment",
+        "receiptCode",
         "receiptChannel",
+        "paymentType",
         "paymentGateway",
         "collectingAgent",
         "deliveryChannel",
         "method",
-        "receiptDate",
-        "paymentType",
         "bank",
+        "receiptDate",
         "currency",
         "amount",
         "rateType",
@@ -417,6 +420,7 @@ const ListRececiptForm = ({ type }) => {
         "rateAmount",
         "convertedCurrency",
         "eqAmount",
+        "description",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },

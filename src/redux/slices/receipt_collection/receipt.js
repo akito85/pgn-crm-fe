@@ -930,6 +930,28 @@ export const holdReleaseReceiptBulk = createAsyncThunk(
   }
 );
 
+export const getUnifiedCreateReceiptDdl = createAsyncThunk(
+  "GET_UNIFIED_CREATE_RECEIPT_DDL",
+  async ({ paymentTypeId, partnerId, deliveryChannelId, methodId } = {}, thunkAPI) => {
+    try {
+      const params = new URLSearchParams();
+      if (paymentTypeId) params.append("paymentTypeId", paymentTypeId);
+      if (partnerId) params.append("partnerId", partnerId);
+      if (deliveryChannelId) params.append("deliveryChannelId", deliveryChannelId);
+      if (methodId) params.append("methodId", methodId);
+
+      const url = `/v1/dbs/api/receipt/unified-ddl${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_UNIFIED_CREATE_RECEIPT_DDL" })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const receiptSlice = createSlice({
   name: "receipt",
   initialState,
@@ -1397,6 +1419,22 @@ const receiptSlice = createSlice({
     [holdReleaseReceiptBulk.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
+    },
+    // Unified DDL
+    [getUnifiedCreateReceiptDdl.pending]: (state) => {
+      state.loading = true;
+    },
+    [getUnifiedCreateReceiptDdl.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.payTypeDDL = { data: action.payload.paymentTypes };
+      state.payGatewayDDL = { data: action.payload.paymentPartners };
+      state.colAgentDDL = { data: action.payload.collectingAgents };
+      state.payDeliveryDDL = { data: action.payload.deliveryChannels };
+      state.payMethodDDL = { data: action.payload.receiptMethods };
+      state.bankDDL = { data: action.payload.banks };
+    },
+    [getUnifiedCreateReceiptDdl.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });
