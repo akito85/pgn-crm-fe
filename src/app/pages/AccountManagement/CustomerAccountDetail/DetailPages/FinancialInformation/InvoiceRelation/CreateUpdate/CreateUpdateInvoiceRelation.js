@@ -84,7 +84,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     [
       "accountNumber",
       "accountName",
-      "priority",
       "startDate",
       "endDate",
       "description",
@@ -123,7 +122,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       const {
         subjectId,
         objectId,
-        priority,
         startDate,
         endDate,
         description,
@@ -137,7 +135,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         objectId,
         accountName: relatedAccountName,
         accountNumber: relatedAccountNumber,
-        priority,
         startDate,
         endDate,
         description,
@@ -215,7 +212,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
           const {
             objectId,
-            priority,
             description, 
             startDate,
             endDate,
@@ -227,7 +223,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
-              priority,
               description, 
               startDate,
               endDate,
@@ -251,7 +246,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
       const {
         objectId,
-        priority,
         description, 
         startDate,
         endDate,
@@ -262,7 +256,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         id: type === "update" ? idIr : undefined,
         subjectId: data_accountDetail?.accountInformation?.accountId, 
         objectId,
-        priority,
         description, 
         startDate,
         endDate,
@@ -378,7 +371,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
         const {
           objectId,
-          priority,
           description, 
           startDate,
           endDate,
@@ -390,7 +382,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           data : {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
-            priority,
             description, 
             startDate,
             endDate,
@@ -431,7 +422,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           
           const {
             objectId,
-            priority,
             description, 
             startDate,
             endDate,
@@ -443,7 +433,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
-              priority,
               description, 
               startDate,
               endDate,
@@ -500,7 +489,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const handleSubmitForm = () => {
     const {
       objectId,
-      priority,
       description, 
       startDate,
       endDate,
@@ -512,7 +500,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       id: idIr,
       subjectId: data_accountDetail?.accountInformation?.accountId, 
       objectId,
-      priority,
       description, 
       startDate,
       endDate,
@@ -572,7 +559,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         const {
           subjectId,
           objectId,
-          priority,
           startDate,
           endDate,
           description,
@@ -586,7 +572,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           objectId,
           accountName: relatedAccountName,
           accountNumber: relatedAccountNumber,
-          priority,
           startDate,
           endDate,
           description,
