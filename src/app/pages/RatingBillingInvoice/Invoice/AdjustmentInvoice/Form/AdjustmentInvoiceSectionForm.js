@@ -73,7 +73,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       // Set selected terms of payment object if exists
       if (termsOfPayment && dataListTermOfPayment) {
         const termsObj = dataListTermOfPayment.find(
-          (term) => term.description === termsOfPayment
+          (term) => term.description === termsOfPayment,
         );
         if (termsObj) setSelectedTermsOfPayment(termsObj);
       }
@@ -177,6 +177,21 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     }, 500);
   };
 
+  // Handle account dropdown close - reset to initial list
+  const handleAccountDropdownVisibleChange = (open) => {
+    if (!open && searchAccount) {
+      // When dropdown closes and there was a search, reset the list
+      setSearchAccount("");
+      dispatch(getListAccountInvoiceAdjustment({ search: "" }));
+    }
+  };
+
+  // Handle account clear - reset to initial list
+  const handleAccountClear = () => {
+    setSearchAccount("");
+    dispatch(getListAccountInvoiceAdjustment({ search: "" }));
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -190,7 +205,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   useEffect(() => {
     if (hasValue(selectedBillingPeriod)) {
       const findPeriod = dataListBillingPeriod?.find(
-        (item) => item?.period === selectedBillingPeriod
+        (item) => item?.period === selectedBillingPeriod,
       );
       setRangeDisableDate({
         startDate: findPeriod?.startDate,
@@ -256,7 +271,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const handleBillingCycleChange = (value) => {
     // value here is the id, we need to find the period
     const selectedCycle = dataListBillingCycle?.find(
-      (cycle) => cycle.id === value
+      (cycle) => cycle.id === value,
     );
     const billingCyclePeriod = selectedCycle?.period;
 
@@ -284,7 +299,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
           accountNumber: selectedAccount,
           billingCycle: selectedBillingCycle,
           billingPeriod: value,
-        })
+        }),
       );
     }
 
@@ -326,7 +341,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
         const termsObj = dataListTermOfPayment?.find(
           (term) =>
             term.description === invoiceTermOfPayment ||
-            term.name === invoiceTermOfPayment
+            term.name === invoiceTermOfPayment,
         );
 
         if (termsObj) {
@@ -341,7 +356,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
           if (currentDocDate) {
             const calculatedDueDate = calculateDueDate(
               currentDocDate,
-              termsObj
+              termsObj,
             );
             form.setFieldsValue({
               dueDate: calculatedDueDate,
@@ -445,7 +460,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     }
 
     const formattedOption = `${term.name} (${calculatedDate.format(
-      "DD MMMM YYYY"
+      "DD MMMM YYYY",
     )})`;
     return formattedOption;
   };
@@ -474,7 +489,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const handleTermsOfPaymentChange = (value) => {
     // Find the selected terms of payment object
     const termsObj = dataListTermOfPayment?.find(
-      (term) => term.description === value
+      (term) => term.description === value,
     );
 
     setSelectedTermsOfPayment(termsObj);
@@ -500,7 +515,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
         current > moment(rangeDisableDate?.endDate).add(1, "days")
       );
     },
-    [rangeDisableDate]
+    [rangeDisableDate],
   );
 
   return (
@@ -521,8 +536,11 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
             <SelectComponent
               placeholder="Select Account Number"
               showSearch
+              allowClear
               onChange={handleAccountChange}
               onSearch={handleAccountSearch}
+              onClear={handleAccountClear}
+              onDropdownVisibleChange={handleAccountDropdownVisibleChange}
               disabled={type === "update"}
               filterOption={false}
             >
@@ -787,7 +805,16 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
           </Form.Item>
         </div>
 
-        <Form.Item label="Remark" name="remark">
+        <Form.Item
+          label="Remark"
+          name="remark"
+          rules={[
+            {
+              required: true,
+              message: "Please enter Remark!",
+            },
+          ]}
+        >
           <InputComponent
             type="textarea"
             rows={3}
@@ -800,7 +827,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       {/* Invoice Information Section */}
       {dataInvoiceDetail && (
         <CardContainer subHeader={"INVOICE INFORMATION"}>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-5 gap-2">
             <div>
               <p className="text-gray-500 text-xs">Invoice Number</p>
               <p className="font-medium text-sm">
