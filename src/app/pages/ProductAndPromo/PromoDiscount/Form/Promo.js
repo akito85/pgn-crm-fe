@@ -30,6 +30,7 @@ import {
   getUomList,
   getProductList,
   getCountryList,
+  getProductVersionList,
 } from "../../../../../redux/slices/product_promo/promoSlice";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { formMessageRequired, requiredMessage } from "../../../../../utils";
@@ -236,6 +237,7 @@ const Promo = ({
               getFromItemList,
               getTieringList,
               getProductList,
+              getProductVersionList,
             }}
             columnsTable={columnsTableCriteriaPromo}
             fixedColumn={[

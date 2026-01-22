@@ -95,6 +95,42 @@ export const columnsTableCriteriaPromo = (
   },
   {
     required: true,
+    title: "PRODUCT VERSION",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("accountCategory", value, record),
+    sorter: (a, b) => sorter("productVersion", a, b),
+    dataIndex: "productVersion",
+    dataIndexForm: "data_version",
+    indexValue: 38,
+    inputType: "select",
+    filteredValue: search?.["productVersion"] ? [search?.["productVersion"]] : null,
+    option: listOption["data_product_version"],
+    url: "getProductVersionList",
+    dependDataIndex: "product",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "version",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "version",
+        hasValue(search["version"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
     title: "ACCOUNT CATEGORY",
     width: 240,
     //onFilter: (value, record) => //onFilter("accountCategory", value, record),
