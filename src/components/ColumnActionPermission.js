@@ -26,14 +26,14 @@ export const RenderContentActions = (
                 ?.map((item) => {
                   if (permissions?.includes(item?.action)) {
                     return item?.render(record, totalLength);
-                  }else {
+                  } else {
                     return null;
                   }
                 })}
             </Space>
           }
         >
-          <div className="pt-1">
+          <div className="pt-0">
             <MoreOutlined
               style={{
                 fontSize: "24px",
@@ -52,7 +52,7 @@ export const RenderContentActions = (
                 item?.action === sliceColumn?.toLowerCase()
               ) {
                 return item?.render(record, totalLength);
-              }else {
+              } else {
                 return null;
               }
             })}
@@ -65,7 +65,7 @@ export const RenderContentActions = (
         {itemRender?.map((item) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength);
-          }else {
+          } else {
             return null;
           }
         })}
@@ -79,9 +79,9 @@ export const useColumnActionPermission = (
   permissionList = [],
   itemsRender = [],
   sliceColumn = "View",
-  type = 'page'
+  type = "page"
 ) => {
-  const access = useGrantAccessHooks(type)
+  const access = useGrantAccessHooks(type);
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),

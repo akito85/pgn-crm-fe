@@ -85,11 +85,11 @@ const sorter = (fieldSort, a, b) => {
       case "total":
       case "totalEqvIdr":
       case "totalEqvUsd":
-        return Math.sign(parseInt(a) - parseInt(b))
+        return Math.sign(parseInt(a) - parseInt(b));
       default:
         return a.localeCompare(b);
     }
-  }
+  };
 
   return handleCompare(fa, fb);
 };
@@ -144,14 +144,14 @@ const PointOfSalesPageDetailPOS = ({
   useEffect(() => {
     setDataTemp(data);
   }, [data]);
-  
+
   //useEffect for product
   useEffect(() => {
     if (type === 2144 && hasValue(item)) {
       const requestData = {
         account: dataPriority[0]?.data,
         itemId: item,
-        qty: hasValue(quantity) || quantity > 0 ?  parseInt(quantity) : null,
+        qty: hasValue(quantity) || quantity > 0 ? parseInt(quantity) : null,
         transactionDate: moment(dataPriority[2]?.data).format(
           dateFormatting.dateFormal
         ),
@@ -239,7 +239,8 @@ const PointOfSalesPageDetailPOS = ({
               ? data_calculate?.priceInformation?.eqvIdr
               : null,
           discount:
-            hasValue(quantity) && data_calculate?.priceInformation?.discount >= 0
+            hasValue(quantity) &&
+            data_calculate?.priceInformation?.discount >= 0
               ? data_calculate?.priceInformation?.discount
               : null,
           total:
@@ -261,16 +262,16 @@ const PointOfSalesPageDetailPOS = ({
           reference: data_calculate?.priceInformation?.referenceName || null,
           uom: data_calculate?.priceInformation?.uom || null,
           currency: data_calculate?.priceInformation?.currency || null,
-          amountEqvUsd: data_calculate?.priceInformation?.amountEqvUsd ? Number(
-            data_calculate?.priceInformation?.amountEqvUsd.toFixed(2)
-          ) : null,
+          amountEqvUsd: data_calculate?.priceInformation?.amountEqvUsd
+            ? Number(data_calculate?.priceInformation?.amountEqvUsd.toFixed(2))
+            : null,
           amountEqvIdr: data_calculate?.priceInformation?.amountEqvIdr || null,
           eqvIdrTaxPurpose: data_calculate?.priceInformation?.eqvIdr || null,
           discount: data_calculate?.priceInformation?.discount || null,
           total: data_calculate?.priceInformation?.total || null,
-          totalEqvUsd: data_calculate?.priceInformation?.totalEqvUsd ? (
-            data_calculate?.priceInformation?.totalEqvUsd.toFixed(2)
-          ) : null,
+          totalEqvUsd: data_calculate?.priceInformation?.totalEqvUsd
+            ? data_calculate?.priceInformation?.totalEqvUsd.toFixed(2)
+            : null,
           totalEqvIdr: data_calculate?.priceInformation?.totalEqvIdr || null,
         });
       }

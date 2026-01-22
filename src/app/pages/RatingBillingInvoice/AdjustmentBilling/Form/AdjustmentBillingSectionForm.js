@@ -7,8 +7,6 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import DateComponent from "../../../../../components/DateComponent";
 import InvoiceSectionForm from "./InvoiceSectionForm";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
 import {
   getListAccount,
   getListAdjustmentReason,
@@ -20,8 +18,6 @@ import {
   getListType,
   getListRateType,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
-import { currencyFormatting } from "../../../../../utils/formatCurrency";
-import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import moment from "moment";
 
@@ -84,10 +80,10 @@ const AdjustmentBillingSectionForm = ({
 
   // Set reference invoice number from dataInvoice when available
   useEffect(() => {
-    if (dataInvoice?.invoiceNumber) {
+    if (dataInvoice?.invoiceNumber && !referenceInvoiceNumber) {
       setReferenceInvoiceNumber(dataInvoice.invoiceNumber);
     }
-  }, [dataInvoice?.invoiceNumber]);
+  }, [dataInvoice?.invoiceNumber, referenceInvoiceNumber]);
 
   useEffect(() => {
     if (cycleId && cycleId !== 0) {
@@ -244,14 +240,17 @@ const AdjustmentBillingSectionForm = ({
     }
   }, [rangeDisableDate?.startDate]);
 
+
   const onChangeAccountNumber = (e) => {
     setIdAccount(e || undefined);
     return e;
   };
 
   const handleChangeInvoice = (e) => {
+    console.log("handleChangeInvoice - value:", e);
     setIdInvoice(e || undefined);
     setReferenceInvoiceNumber(e || undefined);
+    console.log("referenceInvoiceNumber set to:", e);
     return e;
   };
 
@@ -321,6 +320,11 @@ const AdjustmentBillingSectionForm = ({
     <div>
       {/* Customer Information */}
       <CardContainer subHeader={"Customer Information"}>
+        {/* Hidden field untuk accountNumber agar masuk ke payload (tidak ada visible input untuk field ini) */}
+        <Form.Item name="accountNumber" hidden>
+          <input type="hidden" />
+        </Form.Item>
+
         <div className="w-full grid grid-cols-4 gap-3">
           <Form.Item
             label={"Account Number"}
@@ -674,21 +678,23 @@ const AdjustmentBillingSectionForm = ({
       </CardContainer>
 
       {/* Adjustment Billing Item Information */}
-      <AdjustmentBISectionForm
-        type={type}
-        listDataABI={listDataABI}
-        setListDataABI={setListDataABI}
-        invoiceNumber={referenceInvoiceNumber}
-        dataInvoice={dataInvoice}
-        adjustmentId={adjustmentId}
-        showCreateButtonInHeader={false}
-        onCreateClick={(handler) => {
-          const btn = document.getElementById("create-abi-button");
-          if (btn) {
-            btn.onclick = handler;
-          }
-        }}
-      />
+      <CardContainer header={"BILLING ADJUSTMENT ITEM INFORMATION"}>
+        <AdjustmentBISectionForm
+          type={type}
+          listDataABI={listDataABI}
+          setListDataABI={setListDataABI}
+          invoiceNumber={referenceInvoiceNumber}
+          dataInvoice={dataInvoice}
+          adjustmentId={adjustmentId}
+          showCreateButtonInHeader={false}
+          onCreateClick={(handler) => {
+            const btn = document.getElementById("create-abi-button");
+            if (btn) {
+              btn.onclick = handler;
+            }
+          }}
+        />
+      </CardContainer>
 
       {/* Invoice Information */}
       <InvoiceSectionForm
