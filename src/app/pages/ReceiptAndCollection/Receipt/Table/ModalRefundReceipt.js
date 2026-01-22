@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Steps, Button, message, Input, InputNumber, Segmented } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { columnsReceipt } from "../ColumnReceiptView"; // Might use parts of this or define custom
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -394,7 +394,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={dataSourceStep1}
                             columns={columnsStep1}
                             rowSelection={rowSelection}
@@ -420,7 +420,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Receipt Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={receiptDataSource}
                             columns={columnsStep2}
                             rowSelection={receiptRowSelection}
@@ -441,7 +441,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={localSelectedData}
                             columns={columnsStep3}
                             // No custom pagination logic needed for selected items list for now
@@ -470,7 +470,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Refund Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={selectedReceipts}
                             columns={columnsStep4}
                             pagination={false}
@@ -530,7 +530,7 @@ const ModalRefundReceipt = ({
                                         <div className="flex justify-between items-center mb-2">
                                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                                         </div>
-                                        <TablePagination
+                                        <TableRBI
                                             dataSource={localSelectedData}
                                             columns={columnsStep3Confirmation}
                                             pagination={false}
@@ -548,7 +548,7 @@ const ModalRefundReceipt = ({
                                         <div className="flex justify-between items-center mb-2">
                                             <h3 className="text-blue-500 font-bold uppercase">Refund Information</h3>
                                         </div>
-                                        <TablePagination
+                                        <TableRBI
                                             dataSource={selectedReceipts}
                                             columns={columnsStep4Confirmation}
                                             pagination={false}

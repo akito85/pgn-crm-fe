@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Steps, Input, Form, Alert, Spin, InputNumber } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import { LeftOutlined } from "@ant-design/icons";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { useDispatch } from "react-redux";
@@ -173,12 +173,27 @@ const ModalHoldReceipt = ({
             dataIndex: "receiptDate",
             key: "receiptDate",
         },
+        {
+            title: "Amount",
+            dataIndex: "amount",
+            key: "amount",
+            render: (value) => value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0"
+        },
+        {
+            title: "Balance",
+            dataIndex: "balance",
+            key: "balance",
+            render: (value) => value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0"
+        },
     ];
 
     const handleHoldAmountChange = (value, key) => {
         const newData = localSelectedData.map(item => {
             if ((item.key || item.id) === key) {
-                return { ...item, holdAmount: value };
+                // Validate: Hold Amount cannot exceed Balance
+                const balance = item.balance || 0;
+                const validatedValue = value > balance ? balance : (value < 0 ? 0 : value);
+                return { ...item, holdAmount: validatedValue };
             }
             return item;
         });
@@ -195,6 +210,8 @@ const ModalHoldReceipt = ({
                 <InputNumber
                     style={{ width: "100%" }}
                     value={record.holdAmount}
+                    max={record.balance || 0}
+                    min={0}
                     formatter={(value) =>
                         value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
                     }
@@ -325,7 +342,7 @@ const ModalHoldReceipt = ({
                     {/* Step 1: Receipt Information */}
                     {currentStep === 0 && (
                         <BaseContainer header={"RECEIPT INFORMATION"}>
-                            <TablePagination
+                            <TableRBI
                                 dataSource={filteredDataSource}
                                 columns={columns}
                                 rowSelection={rowSelection}
@@ -345,11 +362,12 @@ const ModalHoldReceipt = ({
                             <p className="text-primary text-xl font-bold uppercase py-4">HOLD INFORMATION</p>
 
                             <div className="mb-4">
-                                <TablePagination
+                                <TableRBI
                                     dataSource={localSelectedData}
                                     columns={columnsStep2}
                                     pagination={false}
                                     usePagination={false}
+                                    tableScrolled={{ x: 2000 }}
                                 />
                             </div>
 
@@ -408,6 +426,29 @@ const ModalHoldReceipt = ({
                                 showIcon
                                 className="mb-4"
                             />
+
+                            {/* Summary Cards */}
+                            <div className="grid grid-cols-3 gap-4 mb-4">
+                                <div className="p-4 bg-blue-50 border border-blue-200 rounded">
+                                    <div className="text-sm text-gray-600">Total Receipts</div>
+                                    <div className="text-2xl font-bold text-blue-600">
+                                        {localSelectedData.length}
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-green-50 border border-green-200 rounded">
+                                    <div className="text-sm text-gray-600">Total Hold Amount</div>
+                                    <div className="text-2xl font-bold text-green-600">
+                                        {localSelectedData.reduce((sum, item) => sum + (item.holdAmount || 0), 0)
+                                            .toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-orange-50 border border-orange-200 rounded">
+                                    <div className="text-sm text-gray-600">Approval</div>
+                                    <div className="text-lg font-bold text-orange-600">
+                                        {appHierOptions.find((opt) => opt.value === selectedAppHierId)?.name || "-"}
+                                    </div>
+                                </div>
+                            </div>
                             <RadioTabs
                                 data={[
                                     { value: "Receipt", label: "Receipt" },
@@ -421,11 +462,12 @@ const ModalHoldReceipt = ({
 
                             <div className="mt-4">
                                 {confirmationTab === "Receipt" && (
-                                    <TablePagination
+                                    <TableRBI
                                         dataSource={localSelectedData}
                                         columns={columnsStep4}
                                         pagination={false}
                                         usePagination={false}
+                                        tableScrolled={{ x: 2000 }}
                                     />
                                 )}
                                 {confirmationTab === "Hold" && (

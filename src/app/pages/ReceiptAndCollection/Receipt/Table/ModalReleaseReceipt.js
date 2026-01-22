@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Steps, Input, Form, Alert, Spin, InputNumber } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import { LeftOutlined } from "@ant-design/icons";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { useDispatch, useSelector } from "react-redux";
@@ -346,7 +346,7 @@ const ModalReleaseReceipt = ({
                     {/* Step 1: Receipt Information */}
                     {currentStep === 0 && (
                         <BaseContainer header={"RECEIPT INFORMATION"}>
-                            <TablePagination
+                            <TableRBI
                                 dataSource={filteredDataSource}
                                 columns={columns}
                                 rowSelection={rowSelection}
@@ -366,7 +366,7 @@ const ModalReleaseReceipt = ({
                             <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
 
                             <div className="mb-4">
-                                <TablePagination
+                                <TableRBI
                                     dataSource={localSelectedData}
                                     columns={columnsStep2}
                                     pagination={false}
@@ -437,7 +437,7 @@ const ModalReleaseReceipt = ({
                                 {confirmationTab === "Release" && (
                                     <>
                                         <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
-                                        <TablePagination
+                                        <TableRBI
                                             dataSource={localSelectedData}
                                             columns={columnsStep4}
                                             pagination={false}

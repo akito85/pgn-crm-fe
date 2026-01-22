@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Steps, Input, Form, Alert, Spin, InputNumber } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import { LeftOutlined } from "@ant-design/icons";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { useDispatch } from "react-redux";
@@ -263,7 +263,7 @@ const ModalReverseReceipt = ({
                 <div className="mt-4">
                     {currentStep === 0 && (
                         <BaseContainer header={"RECEIPT INFORMATION"}>
-                            <TablePagination
+                            <TableRBI
                                 dataSource={filteredDataSource}
                                 columns={columns}
                                 rowSelection={rowSelection}
@@ -282,7 +282,7 @@ const ModalReverseReceipt = ({
                             <p className="text-primary text-xl font-bold uppercase py-4">REVERSE INFORMATION</p>
 
                             <div className="mb-4">
-                                <TablePagination
+                                <TableRBI
                                     dataSource={localSelectedData}
                                     columns={columnsSimplified}
                                     pagination={false}
@@ -352,7 +352,7 @@ const ModalReverseReceipt = ({
 
                             <div className="mt-4">
                                 {confirmationTab === "Receipt" && (
-                                    <TablePagination
+                                    <TableRBI
                                         dataSource={localSelectedData}
                                         columns={columnsSimplified}
                                         pagination={false}
