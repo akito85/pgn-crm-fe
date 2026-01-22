@@ -1,5 +1,5 @@
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import { Form, Spin } from "antd";
+import { Form, Spin, Steps } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -207,9 +207,12 @@ const ListRececiptForm = ({ type }) => {
           area: dataAccountNumber?.data?.area,
           segment: dataAccountNumber?.data?.segment,
           accountType: dataAccountNumber?.data?.accountType,
+          accountGroupType: dataAccountNumber?.data?.accountType, // Same as Account Type
           accountName: dataAccountNumber?.data?.accountName,
           sor: dataAccountNumber?.data?.sor,
           cusNumber: dataAccountNumber?.data?.customerNumber,
+          costCenterCode: dataAccountNumber?.data?.area, // TODO: Backend needs to split
+          costCenterName: dataAccountNumber?.data?.area, // TODO: Backend needs to split
         });
       }
     }
@@ -390,11 +393,16 @@ const ListRececiptForm = ({ type }) => {
     {
       value: "Receipt",
       paramValue: [
-        "cusNumber",
+        "miscellaneous",
         "accNumber",
+        "cusNumber",
         "cusName",
-        "area",
+        "accountName",
         "segment",
+        "accountGroupType",
+        "sor",
+        "costCenterCode",
+        "costCenterName",
         "receiptCode",
         "receiptChannel",
         "paymentType",
@@ -639,6 +647,17 @@ const ListRececiptForm = ({ type }) => {
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
+      {/* Step Indicator */}
+      <div className="mb-3">
+        <Steps
+          current={tabData.findIndex(tab => tab.value === valuePage)}
+          items={[
+            { title: 'CREATE RECEIPT' },
+            { title: 'APPROVAL' },
+            { title: 'ATTACHMENT' }
+          ]}
+        />
+      </div>
       {/* <Spin spinning={loadingForm}> */}
       <RadioTabs
         data={tabData}

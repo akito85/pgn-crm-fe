@@ -338,11 +338,15 @@ const ViewReceipt = () => {
           <span>Hold</span>
         </div>
       </Menu.Item>
-      <Menu.Item key="Release" onClick={() => {
-        setSelectedData([record]);
-        handleRelease();
-      }}>
-        <div className="flex items-center gap-2">
+      <Menu.Item
+        key="Release"
+        disabled={!(record?.status === "Hold" && record?.statusApproval === "Approved")}
+        onClick={() => {
+          setSelectedData([record]);
+          handleRelease();
+        }}
+      >
+        <div className={`flex items-center gap-2 ${!(record?.status === "Hold" && record?.statusApproval === "Approved") ? 'opacity-50' : ''}`}>
           <SVGIcon name="IconSend" color={"#000000"} width={16} />
           <span>Release</span>
         </div>
@@ -397,7 +401,11 @@ const ViewReceipt = () => {
 
   const moreMenu = (
     <Menu>
-      <Menu.Item key="Release" onClick={handleRelease}>
+      <Menu.Item
+        key="Release"
+        disabled={selectedData.length === 0}
+        onClick={handleRelease}
+      >
         <div className="flex items-center gap-2">
           <SVGIcon name="IconSend" color={"#000000"} width={16} />
           <span>Release</span>

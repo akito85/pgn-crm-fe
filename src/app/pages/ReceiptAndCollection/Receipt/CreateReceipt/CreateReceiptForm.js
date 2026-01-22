@@ -53,10 +53,6 @@ const CreateReceiptForm = ({
   const [filteredConvertedDDL, setFilteredConvertedDDL] = useState([]);
   const [value, setValue] = useState(null);
 
-  const handleAccountType = (value) => {
-    dispatch(getAccountNumberByTypeDDL(value));
-    form.resetFields(["accNumber", "accountName", "cusName", "cusNumber", "sor", "area", "segment"]);
-  };
 
   const handleAccNumb = (value, option) => {
     setAccNumb({ id: value, name: option?.label });
@@ -119,28 +115,28 @@ const CreateReceiptForm = ({
   return (
     <div className="w-full">
       <BaseContainer header={"CUSTOMER INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-5">
+        <div className="w-full grid grid-cols-5 gap-5">
+          {/* Row 1 */}
           <Form.Item
-            label={"Account Type"}
-            name={"accountType"}
+            label={"Miscellaneous"}
+            name={"miscellaneous"}
+            rules={formMessageRequired("Miscellaneous")}
+            initialValue={"No"}
           >
-            <SelectComponent
-              onChange={handleAccountType}
-              options={accountTypeDDL?.data?.map((item) => {
-                return {
-                  label: item?.name,
-                  value: item?.name,
-                };
-              })}
-            />
+            <SelectComponent placeholder="Select Miscellaneous">
+              <Select.Option value="Yes">Yes</Select.Option>
+              <Select.Option value="No">No</Select.Option>
+            </SelectComponent>
           </Form.Item>
+
           <Form.Item
             label={"Account Number"}
             name={"accNumber"}
+            rules={formMessageRequired("Account Number")}
           >
             <SelectComponent
-              disabled={!dataAccNumber?.data || dataAccNumber?.data?.length === 0}
               onChange={handleAccNumb}
+              placeholder="Select Account Number"
               options={
                 dataAccNumber
                   ? dataAccNumber?.data?.map((item) => {
@@ -153,41 +149,70 @@ const CreateReceiptForm = ({
               }
             />
           </Form.Item>
-          <Form.Item
-            label={"Account Name"}
-            name={"accountName"}
-          >
-            <InputComponent disabled={true} />
-          </Form.Item>
-          <Form.Item
-            label={"Customer Name"}
-            name={"cusName"}
-          >
-            <InputComponent disabled={true} />
-          </Form.Item>
+
           <Form.Item
             label={"Customer Number"}
             name={"cusNumber"}
+            rules={formMessageRequired("Customer Number")}
           >
-            <InputComponent disabled={true} />
+            <InputComponent disabled placeholder="Auto-filled" />
           </Form.Item>
+
           <Form.Item
-            label={"SOR"}
-            name={"sor"}
+            label={"Customer Name"}
+            name={"cusName"}
+            rules={formMessageRequired("Customer Name")}
           >
-            <InputComponent disabled={true} />
+            <InputComponent disabled placeholder="Auto-filled" />
           </Form.Item>
+
           <Form.Item
-            label={"Cost Center"}
-            name={"area"}
+            label={"Account Name"}
+            name={"accountName"}
+            rules={formMessageRequired("Account Name")}
           >
-            <InputComponent disabled={true} />
+            <InputComponent disabled placeholder="Auto-filled" />
           </Form.Item>
+
+          {/* Row 2 */}
           <Form.Item
             label={"Account Segment"}
             name={"segment"}
+            rules={formMessageRequired("Account Segment")}
           >
-            <InputComponent disabled={true} />
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"Account Group Type"}
+            name={"accountGroupType"}
+            rules={formMessageRequired("Account Group Type")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"SOR"}
+            name={"sor"}
+            rules={formMessageRequired("SOR")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"Cost Center Code"}
+            name={"costCenterCode"}
+            rules={formMessageRequired("Cost Center Code")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"Cost Center Name"}
+            name={"costCenterName"}
+            rules={formMessageRequired("Cost Center Name")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
           </Form.Item>
         </div>
       </BaseContainer>
@@ -272,11 +297,20 @@ const CreateReceiptForm = ({
             name={"method"}
           >
             <SelectComponent onChange={handleReceiptMethodChange} placeholder="Select Receipt Method">
-              {payMethodDDL?.data?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))}
+              {payMethodDDL?.data
+                ?.filter((data) => {
+                  const miscellaneous = form.getFieldValue("miscellaneous");
+                  // If Miscellaneous is "Yes", exclude "From Customer"
+                  if (miscellaneous === "Yes" && data.name === "From Customer") {
+                    return false;
+                  }
+                  return true;
+                })
+                ?.map((data) => (
+                  <Select.Option key={data.id} value={data.id}>
+                    {data.name}
+                  </Select.Option>
+                ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item

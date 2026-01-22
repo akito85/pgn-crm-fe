@@ -321,8 +321,8 @@ const ModalReleaseReceipt = ({
     };
 
     const filteredDataSource = dataSource?.filter(item =>
-        item.statusApproval !== "Waiting Approval" &&
-        item.status?.toUpperCase() === "HOLD"
+        item.status?.toUpperCase() === "HOLD" &&
+        item.statusApproval === "Approved"
     );
 
     return (
