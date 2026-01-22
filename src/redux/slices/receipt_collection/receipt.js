@@ -793,6 +793,31 @@ export const approveOrRejectReleaseReceipt = createAsyncThunk(
   }
 );
 
+export const reverseAllocation = createAsyncThunk(
+  "REVERSE_ALLOCATION",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/allocation/reverse";
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: response?.message || "Allocation reversal requested successfully",
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "REVERSE_ALLOCATION",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const approveOrRejectReverseReceipt = createAsyncThunk(
   "APPROVE_OR_REJECT_REVERSE_RECEIPT",
   async ({ body }, thunkAPI) => {
@@ -1304,6 +1329,18 @@ const receiptSlice = createSlice({
     [createReceipt.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+    },
+    // Reverse Allocation
+    [reverseAllocation.pending]: (state) => {
+      state.loading = true;
+    },
+    [reverseAllocation.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [reverseAllocation.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
     },
     // Create Allocation Detail
     [createAllocation.pending]: (state, action) => {

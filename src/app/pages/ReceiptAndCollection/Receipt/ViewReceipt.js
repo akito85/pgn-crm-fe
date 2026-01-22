@@ -76,7 +76,7 @@ const ViewReceipt = () => {
         amount: item.holdAmount,
       })),
       action: "HOLD",
-      appHierId: data.receipts[0]?.appHierId || 1, // Fallback to 1 if not present
+      appHierId: data.appHierId,
       reason: data.reason,
       attachmentIds: data.attachments?.map((a) => a.id),
     };
@@ -110,7 +110,7 @@ const ViewReceipt = () => {
         amount: item.releaseAmount,
       })),
       action: "RELEASE",
-      appHierId: data.receipts[0]?.appHierId || 1, // Fallback to 1 if not present
+      appHierId: data.appHierId,
       reason: data.reason,
       attachmentIds: data.attachments?.map((a) => a.id),
     };
@@ -139,7 +139,7 @@ const ViewReceipt = () => {
         amount: item.receiptAmount || item.amount,
       })),
       action: "REVERSE",
-      appHierId: data.receipts[0]?.appHierId || 1, // Fallback to 1 if not present
+      appHierId: data.appHierId,
       reason: data.reason,
       attachmentIds: data.attachments?.map((a) => a.id),
     };
@@ -162,6 +162,8 @@ const ViewReceipt = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
+    fixed: "left",
+    columnWidth: 50,
   };
 
   // Breadcrumbs
@@ -326,8 +328,12 @@ const ViewReceipt = () => {
           <span>Update</span>
         </Link>
       </Menu.Item>
-      <Menu.Item key="Hold" onClick={() => handleHold(record)}>
-        <div className="flex items-center gap-2">
+      <Menu.Item
+        key="Hold"
+        onClick={() => handleHold(record)}
+        disabled={!(record?.statusApproval === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED")}
+      >
+        <div className={`flex items-center gap-2 ${!(record?.statusApproval === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED") ? 'opacity-50' : ''}`}>
           <SVGIcon name="IconHold" color={"#000000"} width={16} />
           <span>Hold</span>
         </div>

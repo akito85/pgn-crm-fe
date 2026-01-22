@@ -8,10 +8,15 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
 import { columnsReceipt } from "../ColumnReceiptView";
-import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import BaseContainer from "../../../../../components/BaseContainer";
+import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import {
+    getListCategoryReceipt,
+    getAllApprovalListReceipt,
+    getListApprovalByIdReceipt
+} from "../../../../../redux/slices/receipt_collection/receipt";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import BaseContainer from "../../../../../components/BaseContainer";
 
 const { TextArea } = Input;
 
@@ -33,9 +38,16 @@ const ModalReleaseReceipt = ({
     const [listDataAttachment, setListDataAttachment] = useState([]);
     const [confirmationTab, setConfirmationTab] = useState("Release");
 
+    // Approval State
+    const { loading: loadingReceipt, dataListAppHierId, dataListAppHierDetail } = useSelector((state) => state.receipt);
+    const [appHierOptions, setAppHierOptions] = useState([]);
+    const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+    const [selectedAppHierId, setSelectedAppHierId] = useState(null);
+
     const nextParams = [
         { label: "Receipt Information" },
         { label: "Release Information" },
+        { label: "Approval Information" },
         { label: "Attachment Information" },
         { label: "Confirmation" }
     ];
@@ -50,6 +62,10 @@ const ModalReleaseReceipt = ({
             setReleaseAmountData({});
             setPage(1);
             setPageSize(10);
+            setSelectedAppHierId(null);
+            setAppHierDataDetail([]);
+
+            dispatch(getAllApprovalListReceipt());
 
             // Fetch receipt list (filtered/unfiltered?)
             // Usage seems to imply selecting FROM list.
@@ -63,7 +79,39 @@ const ModalReleaseReceipt = ({
                 setLocalSelectedData([]);
             }
         }
-    }, [isOpen, selectedData]);
+    }, [isOpen, selectedData, dispatch]);
+
+    useEffect(() => {
+        if (dataListAppHierId && dataListAppHierId.length > 0) {
+            const tempAppHier = dataListAppHierId.map((appHier) => ({
+                name: appHier.approvalName,
+                value: appHier.appHierId,
+            }));
+            setAppHierOptions(tempAppHier);
+        }
+    }, [dataListAppHierId]);
+
+    useEffect(() => {
+        if (selectedAppHierId) {
+            dispatch(getListApprovalByIdReceipt({ id: selectedAppHierId }));
+        }
+    }, [selectedAppHierId, dispatch]);
+
+    useEffect(() => {
+        if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+            const data = dataListAppHierDetail.map((a, index) => ({
+                ...a,
+                key: index + 1,
+                employeeDetail: a.employeeDetail?.map((b, idx) => ({
+                    ...b,
+                    key: idx + 1,
+                })) || [],
+            }));
+            setAppHierDataDetail(data);
+        } else {
+            setAppHierDataDetail([]);
+        }
+    }, [dataListAppHierDetail]);
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
         setSelectedRowKeys(newSelectedRowKeys);
@@ -73,6 +121,8 @@ const ModalReleaseReceipt = ({
     const rowSelection = {
         selectedRowKeys,
         onChange: onSelectChange,
+        fixed: "left",
+        columnWidth: 50,
     };
 
     const handleChangePage = (p, ps) => {
@@ -203,6 +253,7 @@ const ModalReleaseReceipt = ({
     const isNextDisabled = () => {
         if (currentStep === 0) return localSelectedData.length === 0;
         if (currentStep === 1) return !isStep2Valid();
+        if (currentStep === 2) return !selectedAppHierId;
         return false;
     };
 
@@ -239,7 +290,7 @@ const ModalReleaseReceipt = ({
                         Previous
                     </ButtonComponent>
                 )}
-                {currentStep < 3 ? (
+                {currentStep < 4 ? (
                     <ButtonComponent
                         type="submit"
                         onClick={handleNext}
@@ -258,6 +309,7 @@ const ModalReleaseReceipt = ({
                                 releaseAmount: releaseAmountData[item.key || item.id]
                             })),
                             reason: releaseReason,
+                            appHierId: selectedAppHierId,
                             attachments: listDataAttachment
                         })}
                     >
@@ -289,113 +341,140 @@ const ModalReleaseReceipt = ({
                 />
             </div>
 
-            <div className="mt-4">
-                {/* Step 1: Receipt Information */}
-                {currentStep === 0 && (
-                    <BaseContainer header={"RECEIPT INFORMATION"}>
-                        <TablePagination
-                            dataSource={filteredDataSource}
-                            columns={columns}
-                            rowSelection={rowSelection}
-                            current={page}
-                            pageSize={pageSize}
-                            onChange={handleChangePage}
-                            onSizeChanger={handleChangePage}
-                            totalData={filteredDataSource?.length}
-                            tableScrolled={{ x: 10000, y: 400 }}
-                        />
-                    </BaseContainer>
-                )}
-
-                {/* Step 2: Release Information */}
-                {currentStep === 1 && (
-                    <div className="w-full">
-                        <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
-
-                        <div className="mb-4">
+            <Spin spinning={loadingReceipt}>
+                <div className="mt-4">
+                    {/* Step 1: Receipt Information */}
+                    {currentStep === 0 && (
+                        <BaseContainer header={"RECEIPT INFORMATION"}>
                             <TablePagination
-                                dataSource={localSelectedData}
-                                columns={columnsStep2}
-                                pagination={false}
-                                usePagination={false}
+                                dataSource={filteredDataSource}
+                                columns={columns}
+                                rowSelection={rowSelection}
+                                current={page}
+                                pageSize={pageSize}
+                                onChange={handleChangePage}
+                                onSizeChanger={handleChangePage}
+                                totalData={filteredDataSource?.length}
+                                tableScrolled={{ x: 10000, y: 400 }}
+                            />
+                        </BaseContainer>
+                    )}
+
+                    {/* Step 2: Release Information */}
+                    {currentStep === 1 && (
+                        <div className="w-full">
+                            <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
+
+                            <div className="mb-4">
+                                <TablePagination
+                                    dataSource={localSelectedData}
+                                    columns={columnsStep2}
+                                    pagination={false}
+                                    usePagination={false}
+                                />
+                            </div>
+
+                            <Form layout="vertical">
+                                <Form.Item label="Remark" required>
+                                    <TextArea
+                                        rows={4}
+                                        value={releaseReason}
+                                        onChange={(e) => setReleaseReason(e.target.value)}
+                                        placeholder="Input release remark..."
+                                    />
+                                </Form.Item>
+                            </Form>
+                            <div className="text-gray-400 text-xs mt-1">
+                                You have {255 - (releaseReason?.length || 0)} characters remaining
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 3: Approval Information */}
+                    {currentStep === 2 && (
+                        <div className="w-full">
+                            <p className="text-primary text-xl font-bold uppercase py-4">APPROVAL INFORMATION</p>
+                            <ApprovalSectionForm
+                                dataTable={appHierDataDetail}
+                                dataOption={appHierOptions}
+                                selectedHierarchy={selectedAppHierId}
+                                updateSelectedHierarchy={setSelectedAppHierId}
                             />
                         </div>
+                    )}
 
-                        <Form layout="vertical">
-                            <Form.Item label="Remark" required>
-                                <TextArea
-                                    rows={4}
-                                    value={releaseReason}
-                                    onChange={(e) => setReleaseReason(e.target.value)}
-                                    placeholder="Input release remark..."
-                                />
-                            </Form.Item>
-                        </Form>
-                        <div className="text-gray-400 text-xs mt-1">
-                            You have {255 - (releaseReason?.length || 0)} characters remaining
+                    {/* Step 4: Attachment Information */}
+                    {currentStep === 3 && (
+                        <div className="w-full">
+                            <p className="text-primary text-xl font-bold uppercase py-4">ATTACHMENT INFORMATION</p>
+                            <AttachmentComponent
+                                data={listDataAttachment}
+                                updateData={setListDataAttachment}
+                                dispatch={dispatch}
+                                getAPICategory={getListCategoryReceipt}
+                                typeSelector="receipt"
+                                service={receiptCollectionHttpService}
+                                configApplication={configApp.PAYMENT_SERVICE}
+                                typeRBI={"data"}
+                            />
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Step 3: Attachment Information */}
-                {currentStep === 2 && (
-                    <div className="w-full">
-                        <p className="text-primary text-xl font-bold uppercase py-4">ATTACHMENT INFORMATION</p>
-                        <AttachmentComponent
-                            data={listDataAttachment}
-                            updateData={setListDataAttachment}
-                            dispatch={dispatch}
-                            getAPICategory={getListCategoryReceipt}
-                            typeSelector="receipt"
-                            service={receiptCollectionHttpService}
-                            configApplication={configApp.PAYMENT_SERVICE}
-                            typeRBI={"data"}
-                        />
-                    </div>
-                )}
+                    {/* Step 5: Confirmation */}
+                    {currentStep === 4 && (
+                        <div className="w-full">
+                            <RadioTabs
+                                data={[
+                                    { value: "Release", label: "Release" },
+                                    { value: "Approval", label: "Approval" },
+                                    { value: "Attachment", label: "Attachment" },
+                                ]}
+                                currentPosition={confirmationTab}
+                                onChange={handleTabChange}
+                            />
 
-                {/* Step 4: Confirmation */}
-                {currentStep === 3 && (
-                    <div className="w-full">
-                        <RadioTabs
-                            data={[
-                                { value: "Release", label: "Release" },
-                                { value: "Attachment", label: "Attachment" },
-                            ]}
-                            currentPosition={confirmationTab}
-                            onChange={handleTabChange}
-                        />
-
-                        <div className="mt-4">
-                            {confirmationTab === "Release" && (
-                                <>
-                                    <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
-                                    <TablePagination
-                                        dataSource={localSelectedData}
-                                        columns={columnsStep4}
-                                        pagination={false}
-                                        usePagination={false}
+                            <div className="mt-4">
+                                {confirmationTab === "Release" && (
+                                    <>
+                                        <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
+                                        <TablePagination
+                                            dataSource={localSelectedData}
+                                            columns={columnsStep4}
+                                            pagination={false}
+                                            usePagination={false}
+                                        />
+                                        <div className="mt-4">
+                                            <p className="font-bold">Remark</p>
+                                            <div className="text-gray-700">{releaseReason || "-"}</div>
+                                        </div>
+                                    </>
+                                )}
+                                {confirmationTab === "Approval" && (
+                                    <ApprovalSectionForm
+                                        showSelect={false}
+                                        disableSelect={true}
+                                        approvalName={
+                                            appHierOptions.find((opt) => opt.value === selectedAppHierId)?.name
+                                        }
+                                        dataTable={appHierDataDetail}
+                                        selectedHierarchy={selectedAppHierId}
                                     />
-                                    <div className="mt-4">
-                                        <p className="font-bold">Remark</p>
-                                        <div className="text-gray-700">{releaseReason || "-"}</div>
-                                    </div>
-                                </>
-                            )}
-                            {confirmationTab === "Attachment" && (
-                                <AttachmentComponent
-                                    data={listDataAttachment}
-                                    type="preview"
-                                    dispatch={dispatch}
-                                    typeSelector="receipt"
-                                    service={receiptCollectionHttpService}
-                                    configApplication={configApp.PAYMENT_SERVICE}
-                                />
-                            )}
+                                )}
+                                {confirmationTab === "Attachment" && (
+                                    <AttachmentComponent
+                                        data={listDataAttachment}
+                                        type="preview"
+                                        dispatch={dispatch}
+                                        typeSelector="receipt"
+                                        service={receiptCollectionHttpService}
+                                        configApplication={configApp.PAYMENT_SERVICE}
+                                    />
+                                )}
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            </Spin>
         </ModalCustom>
     );
 };
