@@ -13,6 +13,9 @@ import AllocationSection from "../Table/AllocationSection";
 import {
   getAccountDDL,
   getAccountNumberDDL,
+  getAllAccountNumberDDL,
+  resetDataAccountNumber,
+  getCusNumberDDL,
   getAccountNumberByTypeDDL,
   getUnifiedCreateReceiptDdl,
 } from "../../../../../redux/slices/receipt_collection/receipt";
@@ -57,6 +60,24 @@ const CreateReceiptForm = ({
   const handleAccNumb = (value, option) => {
     setAccNumb({ id: value, name: option?.label });
     hasValue(value) && dispatch(getAccountNumberDDL(value));
+
+    if (!hasValue(form.getFieldValue("accNumber"))) {
+      dispatch(getAllAccountNumberDDL()); 
+      dispatch(resetDataAccountNumber());
+    }
+  };
+
+  const handleCusNumb = (value, option) => {
+    setCusNumb({ id: value, name: option?.label });
+    hasValue(value) && dispatch(getAccountDDL(value));
+    
+    if (!hasValue(form.getFieldValue("cusNumber"))) {
+      form.setFieldsValue({
+        accNumber: null
+      })
+      dispatch(getAllAccountNumberDDL()); 
+      dispatch(resetDataAccountNumber());
+    }
   };
 
   // handle change amount
@@ -155,7 +176,21 @@ const CreateReceiptForm = ({
             name={"cusNumber"}
             rules={formMessageRequired("Customer Number")}
           >
-            <InputComponent disabled placeholder="Auto-filled" />
+            {/* <InputComponent disabled placeholder="Auto-filled" /> */}
+            <SelectComponent
+              onChange={handleCusNumb}
+              placeholder="Select Customer Number"
+              options={
+                cusNumberDDL
+                  ? cusNumberDDL?.data?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })
+                  : []
+              }
+            />
           </Form.Item>
 
           <Form.Item
