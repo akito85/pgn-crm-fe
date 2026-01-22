@@ -510,6 +510,29 @@ export const getDownloadList = createAsyncThunk(
   }
 );
 
+export const getDownloadBatchList = createAsyncThunk(
+  "DOWNLOAD_MONITORING_BATCH_LIST",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/usage/download-list-batch?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_MONITORING_BATCH_LIST",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(response.response.data);
+    }
+  }
+);
+
 export const getDownloadTemplate = createAsyncThunk(
   "DOWNLOAD_MONITORING_USAGE_TEMPLATE",
   async (_, thunkAPI) => {
@@ -768,6 +791,20 @@ const monitoringUsageSlice = createSlice({
       .addCase(getDownloadList.rejected, (state, action) => {
         state.isFailed = true;
         state.data_download = action.payload;
+        state.loading = false;
+      });
+
+      builder
+      .addCase(getDownloadBatchList.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getDownloadBatchList.fulfilled, (state, action) => {
+        state.data_download_batch = action.payload;
+        state.loading = false;
+      })
+      .addCase(getDownloadBatchList.rejected, (state, action) => {
+        state.isFailed = true;
+        state.data_download_batch = action.payload;
         state.loading = false;
       });
 
