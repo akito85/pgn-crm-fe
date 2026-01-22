@@ -214,6 +214,22 @@ export const getAccountNumberDDL = createAsyncThunk(
   }
 );
 
+export const getAllAccountNumberDDL = createAsyncThunk(
+  "GET_ALL_ACCOUNT_NUMBER_DDL",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/list-account-number`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_ALL_ACCOUNT_NUMBER_DDL" })
+      );
+      return error;
+    }
+  }
+);
+
 export const getAccountDDL = createAsyncThunk(
   "GET_LIST_ACCOUNT_RECEIPTS_DDL_CREATE _RECEIPT",
   async (id, thunkAPI) => {
@@ -1044,6 +1060,20 @@ const receiptSlice = createSlice({
       state.loading = false;
     },
     [getAccountDDL.rejected]: (state, action) => {
+      state.dataAccNumber = action.payload;
+      state.loading = false;
+    },
+
+    // Get All Account Number List
+    [getAllAccountNumberDDL.pending]: (state, action) => {
+      state.loading = true;
+      state.dataAccNumber = action.payload;
+    },
+    [getAllAccountNumberDDL.fulfilled]: (state, action) => {
+      state.dataAccNumber = action.payload;
+      state.loading = false;
+    },
+    [getAllAccountNumberDDL.rejected]: (state, action) => {
       state.dataAccNumber = action.payload;
       state.loading = false;
     },

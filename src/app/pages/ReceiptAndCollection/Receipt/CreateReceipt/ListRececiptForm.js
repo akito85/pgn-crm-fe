@@ -44,6 +44,7 @@ import {
   getAccountTypeDDL,
   getAccountNumberByTypeDDL,
   getUnifiedCreateReceiptDdl,
+  getAllAccountNumberDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
@@ -117,6 +118,7 @@ const ListRececiptForm = ({ type }) => {
     // dispatch(getPayMethodDDL());
     dispatch(getReceiptChanelDDL());
     dispatch(getAccountTypeDDL());
+    dispatch(getAllAccountNumberDDL());
   }, [dispatch]);
 
   // APPROVAL HIERARCHY
@@ -531,6 +533,7 @@ const ListRececiptForm = ({ type }) => {
         })),
         description: formValue?.description,
         receiptCode: formValue?.receiptCode,
+        isMisc: formValue?.miscellaneous === "Yes", // Map "Yes"/"No" to true/false
       };
 
       setBodyData(dataValue);
