@@ -10,7 +10,7 @@ import {
 } from "./columns/ColumnsCalculationSummary";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const CalculationSummary = ({ ratingCodeId }) => {
+const CalculationSummary = ({ ratingCodeId, calculationCode, accountNumber }) => {
   const { data_calculationSummary, loading } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -32,21 +32,25 @@ const CalculationSummary = ({ ratingCodeId }) => {
   const dataSource = useMemo(() => {
     return (data_calculationSummary?.result || []).map((item, index) => ({
       ...item,
-      key: item.id || item.recordId || `row-${index}`,
+      key: item.id || `row-${index}`,
     }));
   }, [data_calculationSummary]);
 
   useEffect(() => {
-    dispatch(
-      getAllCalculationSummaryPaginate({
-        id: ratingCodeId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
+    // Pastikan calculationCode dan accountNumber tersedia
+    if (calculationCode && accountNumber) {
+      dispatch(
+        getAllCalculationSummaryPaginate({
+          calculationCode,
+          accountNumber,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [calculationCode, accountNumber, search, page, pageSize, sort, dispatch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();

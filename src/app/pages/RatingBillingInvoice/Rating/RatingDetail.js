@@ -8,16 +8,21 @@ import MuldestSection from "./Detail/MuldestSection";
 import UsageSection from "./Detail/UsageSection";
 import CardContainer from "../../../../components/CardContainer";
 
-const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
+const RatingDetail = ({ 
+  ratingCode,
+  calculationCode, 
+  accountNumber,
+  onClose 
+}) => {
   // State
   const [tabSection, setTabSection] = useState("Calculation Usage");
 
   // Use Effect
   useEffect(() => {
-    if (ratingCodeId) {
+    if (calculationCode) {
       setTabSection("Calculation Usage");
     }
-  }, [ratingCodeId]);
+  }, [calculationCode]);
 
   // Value Tab
   const tabItems = [
@@ -29,10 +34,6 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
       key: "Usage",
       label: "Usage",
     },
-    // {
-    //   key: "Service Agreement",
-    //   label: "Service Agreement",
-    // },
     {
       key: "Promo",
       label: "Promo",
@@ -55,8 +56,6 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
         return "CALCULATION USAGE INFORMATION";
       case "Usage":
         return "USAGE INFORMATION";
-      // case "Service Agreement":
-      //   return "SERVICE AGREEMENT INFORMATION";
       case "Promo":
         return "PROMO INFORMATION";
       case "Periodic":
@@ -75,49 +74,40 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
         return (
           <CalculationUsageSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
+            ratingCode={ratingCode}
+            accountNumber={accountNumber}
           />
         );
       case "Usage":
         return (
           <UsageSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
           />
         );
-      // case "Service Agreement":
-      //   return (
-      //     <ServiceAgreementSection
-      //       calculationCode={calculationCode}
-      //       ratingCodeId={ratingCodeId}
-      //     />
-      //   );
       case "Promo":
         return (
           <PromoSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
           />
         );
       case "Periodic":
         return (
           <PeriodicSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
           />
         );
       case "Multi Destination":
         return (
           <MuldestSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
           />
         );
       default:
         return (
           <CalculationUsageSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
+            ratingCode={ratingCode}
+            accountNumber={accountNumber}
           />
         );
     }

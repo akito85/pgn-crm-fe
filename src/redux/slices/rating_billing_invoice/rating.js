@@ -36,7 +36,7 @@ export const getListRatingGasPaginate = createAsyncThunk(
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
 
       // Tambahkan billPeriodId ke URL
-      const url = `/v1/dbs/api/rating/list-rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
+      const url = `/v1/dbs/api/rating/rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
 
@@ -417,214 +417,57 @@ export const getDetailRatingGas = createAsyncThunk(
   },
 );
 
-// getAllCalculationSummaryPaginate - Updated dummy data
+// Calculation Summary
 export const getAllCalculationSummaryPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_PAGINATE",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ calculationCode, accountNumber, page, pageSize, search, sort }, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API real setelah backend ready
-      // const searchParams = search === undefined ? "" : search;
-      // const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
-      // const url = `/v1/dbs/api/rating/list-calculation-summary/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await ratingBillingHttpService.getPagination(url);
-      // return response.data;
-
-      // DUMMY DATA - Struktur flat (non-nested)
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const dummyData = {
-        result: [
-          {
-            id: `unique-${page}-1`,
-            transactionDate: "2025-12-08",
-            usage: 110.0,
-            saType: "PJBG",
-            amount: 15000.0,
-            totalAmount: 15010.0,
-            // Detail partitions untuk expanded row
-            partitions: [
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-001",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-002",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-003",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-            ],
-          },
-          {
-            id: `unique-${page}-2`,
-            transactionDate: "2025-12-09",
-            usage: 110.0,
-            saType: "PJBG",
-            amount: 15000.0,
-            totalAmount: 15010.0,
-            partitions: [
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-001",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-            ],
-          },
-          {
-            id: `unique-${page}-3`,
-            transactionDate: "2025-12-10",
-            usage: 110.0,
-            saType: "PJBG",
-            amount: 15000.0,
-            totalAmount: 15010.0,
-            partitions: [
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-001",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-            ],
-          },
-          {
-            id: `unique-${page}-4`,
-            transactionDate: "2025-12-31",
-            usage: 110.0,
-            saType: "PJBG",
-            amount: 15000.0,
-            totalAmount: 15010.0,
-            partitions: [
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-001",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-            ],
-          },
-          {
-            id: `unique-${page}-5`,
-            transactionDate: "2025-12-31",
-            usage: 110.0,
-            saType: "PJBG",
-            amount: 15000.0,
-            totalAmount: 15010.0,
-            partitions: [
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-001",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-            ],
-          },
-          {
-            id: `unique-${page}-6`,
-            transactionDate: "2025-12-31",
-            usage: 110.0,
-            saType: "PJBG",
-            amount: 15000.0,
-            totalAmount: 15010.0,
-            partitions: [
-              {
-                uom: "M3",
-                usageMin: 0,
-                usageNormal: 110.0,
-                usageOup: 0,
-                priceCurrency: "IDR",
-                priceCode: "PRICE-001",
-                priceMin: 0,
-                priceNormal: 136363.636,
-                priceOup: 0,
-                amountCurrency: "IDR",
-                amountMin: 0,
-                amountNormal: 15000000.0,
-                amountOup: 0,
-              },
-            ],
-          },
-        ],
-        page: {
-          totalElements: 6,
-          totalPages: 1,
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+      const url = `/v1/dbs/api/rating/summary-rating?calculationCode=${calculationCode}&accountNumber=${accountNumber}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      const rawData = response?.data?.result || [];
+      const groupedMap = new Map();
+      
+      rawData.forEach((item) => {
+        const key = `${item.transactionDate}-${item.saType}`; 
+        if (!groupedMap.has(key)) {
+          groupedMap.set(key, {
+            id: key,
+            transactionDate: item.transactionDate,
+            usage: item.usage,
+            saType: item.saType,
+            amount: item.amount,
+            totalAmount: item.amountPartitionTotal,
+            partitions: []
+          });
+        }
+        groupedMap.get(key).partitions.push({
+          uom: item.calculatedUsageUom,
+          usageMin: item.calculatedUsageMin,
+          usageNormal: item.calculatedUsageNormal,
+          usageOup: item.calculatedUsageUop,
+          priceCurrency: item.currency,
+          priceCode: item.priceCode,
+          priceMin: item.priceMin,
+          priceNormal: item.priceNormal,
+          priceOup: item.priceOup,
+          amountCurrency: item.amountPartitionCurrency,
+          amountMin: item.amountPartitionMin,
+          amountNormal: item.amountPartitionNormal,
+          amountOup: item.amountPartitionOup,
+        });
+      });
+      const transformedResult = Array.from(groupedMap.values());   
+      return {
+        result: transformedResult,
+        page: response?.data?.page || {
+          totalElements: transformedResult.length,
+          totalPages: Math.ceil(transformedResult.length / pageSize),
           size: pageSize,
           number: page - 1,
-        },
+        }
       };
-
-      return dummyData;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -648,78 +491,15 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
 // GET CALCULATION DETAIL
 export const getAllCalculationDetailPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_DETAIL_PAGINATE",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ calculationCode, page, pageSize, search, sort }, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API real setelah backend ready
-      // const searchParams = search === undefined ? "" : search;
-      // const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
-      // const url = `/v1/dbs/api/rating/list-calculation-detail/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await ratingBillingHttpService.getPagination(url);
-      // return response.data;
-
-      // DUMMY DATA - Hapus setelah backend ready
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const dummyData = {
-        result: [
-          {
-            id: 1,
-            timeUnit: "Hour",
-            transactionDate: "2024-01-15T10:30:00",
-            usage: 125.456,
-            rangeMin: 0,
-            rangeMax: 500,
-          },
-          {
-            id: 2,
-            timeUnit: "Hour",
-            transactionDate: "2024-01-15T11:30:00",
-            usage: 235.789,
-            rangeMin: 0,
-            rangeMax: 500,
-          },
-          {
-            id: 3,
-            timeUnit: "Hour",
-            transactionDate: "2024-01-15T12:30:00",
-            usage: 189.234,
-            rangeMin: 0,
-            rangeMax: 500,
-          },
-          {
-            id: 4,
-            timeUnit: "Day",
-            transactionDate: "2024-01-16T00:00:00",
-            usage: 1450.567,
-            rangeMin: 500,
-            rangeMax: 2000,
-          },
-          {
-            id: 5,
-            timeUnit: "Day",
-            transactionDate: "2024-01-17T00:00:00",
-            usage: 1789.123,
-            rangeMin: 500,
-            rangeMax: 2000,
-          },
-          {
-            id: 6,
-            timeUnit: "Week",
-            transactionDate: "2024-01-22T00:00:00",
-            usage: 8950.456,
-            rangeMin: 2000,
-            rangeMax: 10000,
-          },
-        ],
-        page: {
-          totalElements: 6,
-          totalPages: 1,
-          size: pageSize,
-          number: page - 1,
-        },
-      };
-
-      return dummyData;
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+      
+      // API endpoint menggunakan calculationCode, bukan id
+      const url = `/v1/dbs/api/rating/detail-rating?calculationCode=${calculationCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);    
+      return response.data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();

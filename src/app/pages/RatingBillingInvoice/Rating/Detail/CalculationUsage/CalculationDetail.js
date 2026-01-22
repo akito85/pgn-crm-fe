@@ -5,11 +5,13 @@ import { getAllCalculationDetailPaginate } from "../../../../../../redux/slices/
 import { columnsCalculationDetail } from "./columns/ColumnsCalculationDetail";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const CalculationDetail = ({ ratingCodeId }) => {
+const CalculationDetail = ({ calculationCode }) => {
   const { data_calculationDetail, loading } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_calculationDetail?.result;
+  
+  // Pastikan dataSource mengambil dari result
+  const dataSource = data_calculationDetail?.result || [];
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -24,16 +26,18 @@ const CalculationDetail = ({ ratingCodeId }) => {
   }));
 
   useEffect(() => {
-    dispatch(
-      getAllCalculationDetailPaginate({
-        id: ratingCodeId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
+    if (calculationCode) {
+      dispatch(
+        getAllCalculationDetailPaginate({
+          calculationCode,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [calculationCode, search, page, pageSize, sort, dispatch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -71,9 +75,10 @@ const CalculationDetail = ({ ratingCodeId }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        search
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, pageSize, searchedColumn, searchText, search]
   );
 
   const allColumns = useMemo(() => {
