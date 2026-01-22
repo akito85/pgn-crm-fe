@@ -48,6 +48,9 @@ const ModalHoldReceipt = ({
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
+    // Fetched Receipt Data (all eligible receipts)
+    const [allReceiptsData, setAllReceiptsData] = useState([]);
+
     // Initialize selection when modal opens
     useEffect(() => {
         if (isOpen) {
@@ -62,6 +65,46 @@ const ModalHoldReceipt = ({
             setAppHierDataDetail([]);
 
             dispatch(getAllApprovalListReceipt());
+
+            // Fetch all eligible receipts directly via API (not Redux to avoid state conflict)
+            const fetchAllReceipts = async () => {
+                try {
+                    const url = `/v1/dbs/api/receipt/get-list?searchs=&page=0&size=9999&sort=createdDate~desc`;
+                    const response = await receiptCollectionHttpService.getAll(url);
+
+                    // Try different possible structures
+                    let content = null;
+                    if (response?.data?.result) {
+                        content = response.data.result;
+                    } else if (response?.data?.data?.content) {
+                        content = response.data.data.content;
+                    } else if (response?.data?.content) {
+                        content = response.data.content;
+                    } else if (response?.content) {
+                        content = response.content;
+                    } else if (Array.isArray(response?.data?.data)) {
+                        content = response.data.data;
+                    } else if (Array.isArray(response?.data)) {
+                        content = response.data;
+                    }
+
+                    if (content && Array.isArray(content)) {
+                        // Filter only Unapplied & Approved
+                        const eligible = content.filter(item =>
+                            item.statusApproval === "Approved" &&
+                            item.status?.toUpperCase() === "UNAPPLIED"
+                        );
+
+                        setAllReceiptsData(eligible);
+                    } else {
+                        setAllReceiptsData([]);
+                    }
+                } catch (error) {
+                    setAllReceiptsData([]);
+                }
+            };
+
+            fetchAllReceipts();
 
             if (selectedData && selectedData.length > 0) {
                 const validSelection = selectedData.filter(item =>
@@ -316,10 +359,8 @@ const ModalHoldReceipt = ({
         );
     };
 
-    const filteredDataSource = dataSource?.filter(item =>
-        item.statusApproval === "Approved" &&
-        item.status?.toUpperCase() === "UNAPPLIED"
-    );
+    // Use fetched data instead of passed dataSource
+    const filteredDataSource = allReceiptsData;
 
     return (
         <ModalCustom
