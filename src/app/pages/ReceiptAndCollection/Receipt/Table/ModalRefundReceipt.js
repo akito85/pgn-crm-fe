@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from "react";
-import { Modal, Steps, Button, message, Input, InputNumber, Segmented } from "antd";
+import { Modal, Steps, Button, message, Input, InputNumber, Segmented, DatePicker } from "antd";
+import moment from "moment";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../components/TableRBI";
@@ -39,10 +40,14 @@ const ModalRefundReceipt = ({
     const [searchedColumn, setSearchedColumn] = useState("");
 
     // Step 2 Selection State (Receipts)
+    const [eligibleReceipts, setEligibleReceipts] = useState([]); // Filtered receipts
     const [selectedReceipts, setSelectedReceipts] = useState([]);
     const [selectedReceiptRowKeys, setSelectedReceiptRowKeys] = useState([]);
     const [pageReceipt, setPageReceipt] = useState(1);
     const [pageSizeReceipt, setPageSizeReceipt] = useState(10);
+
+    // Refund Date State
+    const [refundDate, setRefundDate] = useState(moment()); // Default: today
 
     const onReceiptSelectChange = (newSelectedRowKeys, newSelectedRows) => {
         setSelectedReceiptRowKeys(newSelectedRowKeys);
@@ -100,12 +105,30 @@ const ModalRefundReceipt = ({
         }
     }, [isOpen, dispatch]);
 
-    // Fetch receipt list when entering Step 2
+    // Fetch eligible receipts when entering Step 2 (Approved & Balance > 0)
     useEffect(() => {
-        if (currentStep === 1) {
-            dispatch(getPaginateReceipt({ page: pageReceipt, pageSize: pageSizeReceipt, sort: "createdDate~desc" }));
+        if (currentStep === 1 && isOpen) {
+            const fetchEligibleReceipts = async () => {
+                try {
+                    const url = `/v1/dbs/api/receipt/get-list?searchs=&page=0&size=9999&sort=createdDate~desc`;
+                    const response = await receiptCollectionHttpService.getAll(url);
+
+                    const content = response?.data?.result || [];
+                    const eligible = content.filter(item =>
+                        item.statusApproval === "Approved" &&
+                        (item.balance > 0 || item.unAppliedAmount > 0)
+                    );
+
+                    setEligibleReceipts(eligible);
+                } catch (error) {
+                    console.error('Error fetching eligible receipts:', error);
+                    setEligibleReceipts([]);
+                }
+            };
+
+            fetchEligibleReceipts();
         }
-    }, [currentStep, pageReceipt, pageSizeReceipt, dispatch]);
+    }, [currentStep, isOpen]);
 
     const steps = [
         {
@@ -410,7 +433,7 @@ const ModalRefundReceipt = ({
                     </div>
                 );
             case 1:
-                const receiptDataSource = data?.result?.map(item => ({
+                const receiptDataSource = eligibleReceipts?.map(item => ({
                     ...item,
                     key: item.id
                 })) || [];
@@ -428,7 +451,7 @@ const ModalRefundReceipt = ({
                             pageSize={pageSizeReceipt}
                             onChange={handleReceiptChangePage}
                             onShowSizeChange={handleReceiptChangePage}
-                            totalData={data?.page?.totalElements || 0}
+                            totalData={eligibleReceipts?.length || 0}
                             showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} Records`}
                             tableScrolled={{ x: "max-content", y: 400 }}
                             loading={loading}
@@ -451,6 +474,16 @@ const ModalRefundReceipt = ({
                             usePagination={false} // Disable external pagination if just showing list
                             useSelect={false}
                         />
+                        <div className="mt-4">
+                            <p className="mb-2 font-bold">Refund Date <span className="text-red-500">*</span></p>
+                            <DatePicker
+                                style={{ width: '300px' }}
+                                value={refundDate}
+                                onChange={(date) => setRefundDate(date)}
+                                format="DD MMM YYYY"
+                                placeholder="Select Refund Date"
+                            />
+                        </div>
                         <div className="mt-4">
                             <p className="mb-2 font-bold">Remark</p>
                             <Input.TextArea
@@ -537,6 +570,10 @@ const ModalRefundReceipt = ({
                                             usePagination={false}
                                             tableScrolled={{ x: "max-content", y: 400 }}
                                         />
+                                        <div className="mt-4">
+                                            <p className="mb-2 font-bold">Refund Date</p>
+                                            <div className="text-gray-700">{refundDate?.format('DD MMM YYYY') || "-"}</div>
+                                        </div>
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
                                             <div className="text-gray-700">{remarkStep3 || "-"}</div>
