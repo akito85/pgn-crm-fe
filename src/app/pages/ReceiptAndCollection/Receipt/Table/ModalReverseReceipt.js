@@ -238,10 +238,14 @@ const ModalReverseReceipt = ({
         );
     };
 
+    // Add unique key to prevent selection issues
     const filteredDataSource = dataSource?.filter(item =>
         item.statusApproval !== "Waiting Approval" &&
         item.status?.toUpperCase() !== "REVERSE"
-    );
+    ).map(item => ({
+        ...item,
+        key: item.id
+    })) || [];
 
     return (
         <ModalCustom
