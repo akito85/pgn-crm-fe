@@ -1718,7 +1718,7 @@ const ViewReceiptHistories = () => {
           usePagination={false}
           dataSource={updatePaginationActivationLog("data")}
           columns={column}
-          tableScrolled={{ x: 4000, y: 525 }}
+          tableScrolled={{ x: "max-content", y: 525 }}
         />
       </div>
     );

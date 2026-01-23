@@ -548,7 +548,7 @@ const ViewReconcileReceiptHistories = () => {
               onSort={onSort}
               handleDownload={handleDownload}
               tableScrolled={{
-                x: 3200,
+                x: "max-content",
                 y: 300,
               }}
             />

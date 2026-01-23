@@ -252,7 +252,7 @@ const ViewSynchronizeReceipt = () => {
             // totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 1300,
+              x: "max-content",
               y: 300,
             }}
             fixedColumns={fixedColumns}
