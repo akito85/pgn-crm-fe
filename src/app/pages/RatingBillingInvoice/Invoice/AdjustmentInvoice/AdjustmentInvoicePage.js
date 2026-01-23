@@ -33,7 +33,7 @@ import {
 const AdjustmentInvoicePage = () => {
   // Selector
   const { data, pagination, loading } = useSelector(
-    (state) => state.adjustmentInvoice
+    (state) => state.adjustmentInvoice,
   );
 
   // Declaration
@@ -72,7 +72,7 @@ const AdjustmentInvoicePage = () => {
         sort: sortArray,
         search: searchArray,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -118,7 +118,7 @@ const AdjustmentInvoicePage = () => {
           sort: sortArray,
           search: searchArray,
           isLoadMore: true,
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -166,7 +166,7 @@ const AdjustmentInvoicePage = () => {
         size: pagination?.totalElements || 1000,
         sort: sortArray,
         search: searchArray,
-      })
+      }),
     );
   };
 
@@ -282,7 +282,7 @@ const AdjustmentInvoicePage = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
-        const content =
+        const Content =
           data > 3 ? (
             <ButtonComponent
               icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
@@ -304,19 +304,7 @@ const AdjustmentInvoicePage = () => {
             </Tooltip>
           );
 
-        return isEditable ? (
-          <Link
-            to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
-            state={{
-              id: record.invAdjustmentId,
-              invoiceNumber: record.invoiceNumber,
-            }}
-          >
-            {content}
-          </Link>
-        ) : (
-          <div>{content}</div>
-        );
+        return Content;
       },
     },
     {
@@ -378,7 +366,7 @@ const AdjustmentInvoicePage = () => {
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
     itemGrantAccess,
-    "Delete"
+    "Delete",
   ).map((col) => ({
     ...col,
     width: 70,
@@ -393,7 +381,7 @@ const AdjustmentInvoicePage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [searchInput, searchedColumn, searchText, search]);
 
