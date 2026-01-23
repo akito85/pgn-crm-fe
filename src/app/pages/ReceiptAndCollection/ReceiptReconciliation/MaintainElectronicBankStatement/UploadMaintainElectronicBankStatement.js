@@ -20,9 +20,9 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getBankDDLMaintain,
-  getListType,
   uploadBank,
-  getListTypeCi
+  getListTypeCiByPartner,
+  getListPartner
 } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -35,7 +35,7 @@ const { Option } = Select;
 const MAX_FILE_SIZE = 5000000;
 
 const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
-  const { bankDDL, data_type_ci, data, loading } = useSelector(
+  const { bankDDL, data_type_ci, data, loading, data_partner } = useSelector(
     (state) => state.electronic
   );
 
@@ -43,6 +43,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
   const [fileList, setFileList] = useState([]);
   const [bank, setBank] = useState();
   const [type, setType] = useState();
+  const [partner, setPartner] = useState();
   const [submit, setSubmit] = useState(false);
   const [dataLink, setDataLink] = useState({});
   const [urlLink, setUrlLink] = useState("");
@@ -68,13 +69,21 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
 
   useEffect(() => {
     dispatch(getBankDDLMaintain());
-    dispatch(getListTypeCi());
+    // dispatch(getListTypeCiByPartner());
+    dispatch(getListPartner());
   }, [dispatch]);
 
   const handleButton = (value) => {
     setBank(value);
     setType(value);
+    setPartner(value);
   };
+
+  const handleChangePartner = (value) => {
+    setPartner(value);
+    dispatch(getListTypeCiByPartner({ partnerId: value.value }));
+  }
+
   const handleRemove = (index) => {
     setFileList((prevFileList) => {
       const updatedFileList = [...prevFileList];
@@ -132,6 +141,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
     const body = {
       bankId: formValue?.bankName?.value,
       receiptChannel: formValue?.receiptChannel?.value,
+      partnerId: formValue?.partner?.value,
       // onProgress: (progress) => setFileProgress(progress),
     };
     try {
@@ -267,6 +277,25 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
                   </SelectComponent>
                 </Form.Item>
                 <Form.Item
+                  name={"partner"}
+                  className={"w-1/4 no-margin-form"}
+                  rules={formMessageRequired("partner")}
+                >
+                  <SelectComponent
+                    allowClear={false}
+                    mandatory
+                    label={"Partner"}
+                    onChange={handleChangePartner}
+                    labelInValue
+                  >
+                    {data_partner?.data?.map((a, index) => (
+                      <Select.Option key={index.id} value={a.id}>
+                        {a.partnerCode} - {a.partnerName}
+                      </Select.Option>
+                    ))}
+                  </SelectComponent>
+                </Form.Item>
+                <Form.Item
                   name={"receiptChannel"}
                   className={"w-1/4 no-margin-form"}
                   rules={formMessageRequired("receiptChannel")}
@@ -274,13 +303,13 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
                   <SelectComponent
                     allowClear={false}
                     mandatory
-                    label={"Type"}
+                    label={"Delivery Channel"}
                     onChange={handleButton}
                     labelInValue
                   >
                     {data_type_ci?.data?.map((a, index) => (
                       <Select.Option key={index.id} value={a.id}>
-                        {a.ciCode} - {a.name}
+                        {a.ciCode} - {a.name} ({a.category})
                       </Select.Option>
                     ))}
                   </SelectComponent>
