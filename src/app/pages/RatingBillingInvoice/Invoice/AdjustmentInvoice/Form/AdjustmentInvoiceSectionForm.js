@@ -132,6 +132,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     const invoiceNumber = form.getFieldValue("invoiceNumber");
     const typeDueDate = form.getFieldValue("typeDueDate");
     const docDate = form.getFieldValue("documentDate");
+    const txnDate = form.getFieldValue("transactionDate");
 
     if (accountNumber && !selectedAccount) {
       setSelectedAccount(accountNumber);
@@ -151,6 +152,9 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     if (docDate && !documentDate) {
       setDocumentDate(docDate);
     }
+    if (txnDate && !transactionDate) {
+      setTransactionDate(txnDate);
+    }
   }, [
     dataAccountDetail,
     dataListBillingPeriod,
@@ -163,6 +167,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     selectedInvoice,
     selectedTypeDueDate,
     documentDate,
+    transactionDate,
   ]);
 
   // Handle account search with debounce (2 seconds)
