@@ -12,45 +12,47 @@ import PointOfSalesPageDetailPOS from "./PointOfSalesPageDetailPOS";
 import { currencyFormatting } from "../../../../../../utils/formatCurrency";
 import { renderDate } from "../../Utils";
 import moment from "moment";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const PointOfSalesPage = ({
   data_dynamic = {},
   data = [],
-  setData = () => { },
+  setData = () => {},
   data_billingCycle,
-  setDataBillingCycle = () => { },
+  setDataBillingCycle = () => {},
   data_globalType = [],
   data_globalBillingCycle = [],
   data_globalBillingPeriod = [],
   data_globalCurrency = [],
-  setCurrency = () => { },
+  setCurrency = () => {},
   data_accountNumber = [],
   data_termsOfPayment = [],
-  setAccountNumber = () => { },
-  dispatch = () => { },
+  setAccountNumber = () => {},
+  dispatch = () => {},
   valueDdl = null,
-  setValueDdl = () => { },
+  setValueDdl = () => {},
   data_globalProduct = [],
   data_globalBilling = [],
   data_globalTermsOfPaymentValue = [],
-  setTransactionDate = () => { },
+  setTransactionDate = () => {},
   dataMissing = [],
   dataPriority = [],
   accountNumber,
   currency,
   transactionDate,
   idPos,
-  setRangeDisableDate = () => { },
-  rangeDisableDate
+  setRangeDisableDate = () => {},
+  rangeDisableDate,
 }) => {
-
-  const [selectedBilingPeriod, setSelectedBillingPeriod] = useState('');
+  const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
 
   useEffect(() => {
     if (hasValue(selectedBilingPeriod)) {
-      const findRange = data_globalBillingPeriod?.find(item => item?.id === selectedBilingPeriod);
+      const findRange = data_globalBillingPeriod?.find(
+        (item) => item?.id === selectedBilingPeriod,
+      );
 
       setRangeDisableDate(findRange);
     }
@@ -58,8 +60,8 @@ const PointOfSalesPage = ({
 
   useEffect(() => {
     if (hasValue(rangeDisableDate?.startDate)) {
-      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone())
-      setKeyPicker(prev => prev + 1)
+      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone());
+      setKeyPicker((prev) => prev + 1);
     }
   }, [rangeDisableDate?.startDate]);
 
@@ -154,53 +156,83 @@ const PointOfSalesPage = ({
     }
   };
 
+  const handleRangeDisable = useCallback(
+    (current) => {
+      return (
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days")
+      );
+    },
+    [rangeDisableDate],
+  );
 
-  const handleRangeDisable = useCallback((current) => {
-    return current < moment(rangeDisableDate?.startDate) || current > moment(rangeDisableDate?.endDate).add(1, 'days')
-  }, [rangeDisableDate])
+  const handleRangeDisableInvoiceDate = useCallback(
+    (current) => {
+      return current < moment(rangeDisableDate?.startDate);
+    },
+    [rangeDisableDate],
+  );
 
-  const handleRangeDisableInvoiceDate = useCallback((current) => {
-    return current < moment(rangeDisableDate?.startDate);
-  }, [rangeDisableDate]);
-
-  
   return (
     <Fragment>
-      <BaseContainer header={"CUSTOMER INFORMATION"}>
-        <Form.Item
-          name={"accountNumber"}
-          label={"Account Number"}
-          rules={[
-            { message: requiredMessage("Account Number"), required: true },
-          ]}
-        >
-          <SelectComponent onChange={(e) => setAccountNumber(e)}>
-            {(data_accountNumber || [])?.map((item) => (
-              <Select.Option
-                key={item.accountNumber}
-                value={item.accountNumber}
-              >
-                {item.accountNumberWithName}
-              </Select.Option>
-            ))}
-          </SelectComponent>
-        </Form.Item>
-        <div className="w-full grid grid-cols-4 gap-3">
-          <Form.Item name={"customerNumber"} label={"Customer Number"}>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              CUSTOMER INFORMATION
+            </p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-5 gap-1">
+          <Form.Item
+            name={"accountNumber"}
+            label={"Account Number"}
+            rules={[
+              { message: requiredMessage("Account Number"), required: true },
+            ]}
+            style={{ marginBottom: 0 }}
+          >
+            <SelectComponent onChange={(e) => setAccountNumber(e)}>
+              {(data_accountNumber || [])?.map((item) => (
+                <Select.Option
+                  key={item.accountNumber}
+                  value={item.accountNumber}
+                >
+                  {item.accountNumberWithName}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+          <Form.Item
+            name={"customerNumber"}
+            label={"Customer Number"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled />
           </Form.Item>
-          <Form.Item name={"customerName"} label={"Customer Name"}>
+          <Form.Item
+            name={"customerName"}
+            label={"Customer Name"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled />
           </Form.Item>
-          <Form.Item name={"accountNumber"} label={"Account Number"}>
+          {/* <Form.Item name={"accountNumber"} label={"Account Number"}>
+            <InputComponent disabled />
+          </Form.Item> */}
+          <Form.Item
+            name={"accountName"}
+            label={"Account Name"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled />
           </Form.Item>
-          <Form.Item name={"accountName"} label={"Account Name"}>
-            <InputComponent disabled />
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-4 gap-3">
-          <Form.Item name={"accountSegment"} label={"Account Segment"}>
+          <Form.Item
+            name={"accountSegment"}
+            label={"Account Segment"}
+            style={{ marginBottom: 0 }}
+          >
             <InputComponent disabled />
           </Form.Item>
           <Form.Item
@@ -213,8 +245,7 @@ const PointOfSalesPage = ({
           <Form.Item name={"sor"} label={"SOR"}>
             <InputComponent disabled />
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-4 gap-3">
+
           <Form.Item name={"costCenterCode"} label={"Cost Center Code"}>
             <InputComponent disabled />
           </Form.Item>
@@ -225,18 +256,25 @@ const PointOfSalesPage = ({
             <InputComponent disabled />
           </Form.Item>
         </div>
+      </CardContainer>
 
-        <div className="text-primary text-xs font-bold uppercase pt-3 pb-5">
-          BILLING DATE INFORMATION
-        </div>
-
-        <div className="w-full grid grid-cols-3 gap-3">
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              BILLING DATE INFORMATION
+            </p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-5 gap-2">
           <Form.Item
             name={"billingCycle"}
             label={"Billing Cycle"}
             rules={[
               { message: requiredMessage("Billing Cycle"), required: true },
             ]}
+            style={{ marginBottom: 0 }}
           >
             <SelectComponent onChange={(e) => setDataBillingCycle(e)}>
               {(data_globalBillingCycle || [])?.map((item) => (
@@ -252,8 +290,12 @@ const PointOfSalesPage = ({
             rules={[
               { message: requiredMessage("Billing Period"), required: true },
             ]}
+            style={{ marginBottom: 0 }}
           >
-            <SelectComponent disabled={data_billingCycle ? false : true} onChange={e => setSelectedBillingPeriod(e)}>
+            <SelectComponent
+              disabled={data_billingCycle ? false : true}
+              onChange={(e) => setSelectedBillingPeriod(e)}
+            >
               {(data_globalBillingPeriod || [])?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.name}
@@ -265,6 +307,7 @@ const PointOfSalesPage = ({
             name={"currency"}
             label={"Currency"}
             rules={[{ message: requiredMessage("Currency"), required: true }]}
+            style={{ marginBottom: 0 }}
           >
             <SelectComponent
               onChange={(e) => setCurrency(e)}
@@ -283,8 +326,13 @@ const PointOfSalesPage = ({
             rules={[
               { message: requiredMessage("Transaction Date"), required: true },
             ]}
+            style={{ marginBottom: 0 }}
           >
-            <DateComponent dateDisable={handleRangeDisable} defaultPickerValue={defaultPicker} key={keyPicker} />
+            <DateComponent
+              dateDisable={handleRangeDisable}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
           <Form.Item
             name={"invoiceDate"}
@@ -292,13 +340,18 @@ const PointOfSalesPage = ({
             rules={[
               { message: requiredMessage("Invoice Date"), required: true },
             ]}
+            style={{ marginBottom: 0 }}
           >
             <DateComponent
               disabled={data.length > 0}
               onChange={setTransactionDate}
-              dateDisable={handleRangeDisableInvoiceDate} defaultPickerValue={defaultPicker} key={keyPicker} />
+              dateDisable={handleRangeDisableInvoiceDate}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
           <Form.Item
+            style={{ marginBottom: 0 }}
             label={
               <>
                 Terms Of Payment{" "}
@@ -347,7 +400,7 @@ const PointOfSalesPage = ({
               </Input.Group>
             </div>
           </Form.Item>
-          <div className="col-span-3">
+          <div className="col-span-5">
             <Form.Item
               name={"remark"}
               label={"Remark"}
@@ -358,84 +411,24 @@ const PointOfSalesPage = ({
                 },
               ]}
             >
-              <InputComponent type="textarea" rows={1} />
+              <InputComponent type="textarea" rows={3} />
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"POINT OF SALES INFORMATION"}>
-        <div className="w-full grid grid-cols-4 gap-3">
-          <DetailText label="Total Amount IDR">
-            {currencyFormatting(data_dynamic?.totalAmountIdr || 0, "idr")}
-          </DetailText>
-          <DetailText label="Total Amount USD">
-            {currencyFormatting(data_dynamic?.totalAmountUsd || 0, "usd")}
-          </DetailText>
-          <DetailText label="Amount IDR">
-            {currencyFormatting(data_dynamic?.amountIdr || 0, "idr")}
-          </DetailText>
-          <DetailText label="Amount USD">
-            {currencyFormatting(data_dynamic?.amountUsd || 0, "usd")}
-          </DetailText>
-          <DetailText label="Discount IDR">
-            {currencyFormatting(data_dynamic?.discountAmountIdr || 0, "idr")}
-          </DetailText>
-          <DetailText label="Discount USD">
-            {currencyFormatting(data_dynamic?.discountAmountUsd || 0, "usd")}
-          </DetailText>
-
-          {/* new */}
-          <DetailText label="Tax Basis IDR">
-            {currencyFormatting(data_dynamic?.taxBasisIdr || 0, "idr")}
-          </DetailText>
-          <DetailText label="Tax Basis USD">
-            {currencyFormatting(data_dynamic?.taxBasisUsd || 0, "idr")}
-          </DetailText>
-
-          {/* <DetailText label="Tax Basis">
-            {currencyFormatting(data_dynamic?.taxBasis || 0, "idr")}
-          </DetailText> */}
-
-          <DetailText label="Tax Basis Eqv IDR">
-            {currencyFormatting(data_dynamic?.taxBasisEqvIdr || 0, "idr")}
-          </DetailText>
-          <DetailText label="VAT IDR">
-            {currencyFormatting(data_dynamic?.vatIdr || 0, "idr")}
-          </DetailText>
-          <DetailText label="VAT USD">
-            {currencyFormatting(data_dynamic?.vatUsd || 0, "idr")}
-          </DetailText>
-          <DetailText label="VAT Eqv IDR">
-            {currencyFormatting(data_dynamic?.vatEqvIdr || 0, "idr")}
-          </DetailText>
-          <DetailText label="Witholding Tax">
-            {currencyFormatting(data_dynamic?.withholdingTax || 0, "idr")}
-          </DetailText>
-          <DetailText label="Rate Type">{data_dynamic?.rateType}</DetailText>
-          <DetailText label="Rate Date">
-            {renderDate(data_dynamic?.rateDate)}
-          </DetailText>
-          <DetailText label="Rate">{data_dynamic?.rate}</DetailText>
-          <DetailText label="Tax Rate Type">
-            {data_dynamic?.taxRateType}
-          </DetailText>
-          <DetailText label="Tax Rate Date">
-            {renderDate(data_dynamic?.taxRateDate)}
-          </DetailText>
-          <DetailText label="Tax Rate">{data_dynamic?.taxRate}</DetailText>
-        </div>
-      </BaseContainer>
-
-      <BaseContainer
-        header={"POINT OF SALES DETAIL INFORMATION"}
-        type="tabs"
-        element={
-          <RadioTabs data={listDetailPage} onChange={handleDetailPage} />
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              POINT OF SALES DETAIL INFORMATION
+            </p>
+          </div>
         }
       >
+        <RadioTabs data={listDetailPage} onChange={handleDetailPage} />
         <div className={"w-full"}>{renderSection()}</div>
-      </BaseContainer>
+      </CardContainer>
     </Fragment>
   );
 };

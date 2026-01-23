@@ -3,19 +3,16 @@ import React, {
   useRef,
   useState,
   useMemo,
-  useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tooltip, Dropdown, message, Menu } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Spin, message } from "antd";
 import {
-  MoreOutlined,
-  PlusOutlined,
-  DownOutlined,
   CheckOutlined,
   UploadOutlined,
   FileTextOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
-import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -24,13 +21,11 @@ import SVGIcon from "../../../../assets/Icon/index";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
-import ModalGenerateEFaktur from "./ModalEfaktur/ModalGenerateEFaktur";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
 import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
 import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur";
 import ModalRequestApprovalEFaktur from "./ModalEfaktur/ModalRequestApprovalEFaktur";
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
-import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import { getEFakturColumns, getActionColumn } from "./Tabel/EFakturColumns";
@@ -52,6 +47,7 @@ const ViewFaktur = () => {
 
   // Declaration
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
   const dataSource = list_efaktur || [];
 
@@ -63,7 +59,6 @@ const ViewFaktur = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  const [modalGenerateEFaktur, setModalGenerateEFaktur] = useState(false);
   const [modalGenerateXML, setModalGenerateXML] = useState(false);
   const [modalUploadEFaktur, setModalUploadEFaktur] = useState(false);
   const [modalApproval, setModalApproval] = useState(false);
@@ -159,10 +154,9 @@ const ViewFaktur = () => {
     );
   };
 
-  // Handle Actions
-  const handleGenerateEFaktur = (record) => {
-    setSelectedBilling(record);
-    setModalGenerateEFaktur(true);
+  // Handle Create E-Faktur - Navigate to Create Form
+  const handleCreateEFaktur = () => {
+    navigate(INVOICE_ROUTES.EFAKTUR_CREATE);
   };
 
   const handleApprovalHistory = async (record) => {
@@ -227,11 +221,6 @@ const ViewFaktur = () => {
   };
 
   // Close Modal Functions
-  const closeModalGenerateEFaktur = () => {
-    setModalGenerateEFaktur(false);
-    setSelectedBilling(null);
-  };
-
   const closeModalGenerateXML = () => {
     setModalGenerateXML(false);
     setSelectedBilling(null);
@@ -272,7 +261,6 @@ const ViewFaktur = () => {
         searchText,
         handleSearch,
         handleApprovalHistory,
-        handleGenerateEFaktur,
         handleLogAktivitas,
       }),
     [page, pageSize, search, searchText, searchedColumn]
@@ -282,7 +270,6 @@ const ViewFaktur = () => {
   const itemGrantAccess = [
     ...getActionColumn({
       handleApprovalHistory,
-      handleGenerateEFaktur,
       handleLogAktivitas,
     }),
   ];
@@ -303,9 +290,7 @@ const ViewFaktur = () => {
   const processedColumns = useMemo(() => {
     const columnsWithFixed = applyFixedColumns(allColumns, fixedColumns);
 
-    // Cari dan update width untuk action column
     return columnsWithFixed.map((col) => {
-      // Jika ini adalah action column, set width yang lebih kecil
       if (
         col.key === "action" ||
         col.title === "ACTION" ||
@@ -384,11 +369,11 @@ const ViewFaktur = () => {
                   Request Approval
                 </ButtonComponent>
 
-                {/* Create E-Faktur Button */}
+                {/* Create E-Faktur Button - Navigate to Form */}
                 <ButtonComponent
                   icon={<PlusOutlined />}
                   type="submit"
-                  onClick={() => setModalGenerateEFaktur(true)}
+                  onClick={handleCreateEFaktur}
                 >
                   Create E-Faktur
                 </ButtonComponent>
@@ -416,17 +401,6 @@ const ViewFaktur = () => {
             />
           </div>
         </CardContainer>
-
-        {/* Modal Generate E-Faktur */}
-        <ModalGenerateEFaktur
-          isOpen={modalGenerateEFaktur}
-          handleClose={closeModalGenerateEFaktur}
-          billingData={selectedBilling}
-          onSuccess={() => {
-            closeModalGenerateEFaktur();
-            handleRefresh();
-          }}
-        />
 
         {/* Modal Generate XML */}
         <ModalGenerateXML

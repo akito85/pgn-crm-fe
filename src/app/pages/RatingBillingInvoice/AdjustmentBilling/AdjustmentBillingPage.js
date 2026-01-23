@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
@@ -31,7 +37,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 const AdjustmentBillingPage = () => {
   // Selector
   const { data, loading, data_approval_history, message } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -56,7 +62,7 @@ const AdjustmentBillingPage = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["statusApproval", "action"],
+    right: ["status", "statusApproval", "action"],
   }));
 
   // Handle Refresh
@@ -68,7 +74,7 @@ const AdjustmentBillingPage = () => {
         pageSize: 100, // Initial load 100 data
         sort,
         isLoadMore: false, // Flag untuk initial load
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -122,7 +128,7 @@ const AdjustmentBillingPage = () => {
           pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true, // Flag untuk load more
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -159,7 +165,7 @@ const AdjustmentBillingPage = () => {
         page,
         pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -188,7 +194,7 @@ const AdjustmentBillingPage = () => {
             pageSize: 100,
             sort,
             isLoadMore: false,
-          })
+          }),
         );
         setPage(1);
         handleCancel();
@@ -253,34 +259,19 @@ const AdjustmentBillingPage = () => {
     {
       action: "View",
       type: "table",
-      render: (record, data) => {
-        const content =
-          data > 3 ? (
-            <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
-              state={{ id: record.id }}
-            >
-              <ButtonComponent
-                icon={<SVGIcon name="IconDetail" width={20} />}
-                border={false}
-              >
-                <span className={"text-black ml-3"}> Detail</span>
-              </ButtonComponent>
-            </Link>
-          ) : (
-            <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
-              state={{ id: record.id }}
-            >
-              <Tooltip title="Detail">
-                <div className="pt-1">
-                  <SVGIcon name="IconDetail" width={20} />
-                </div>
-              </Tooltip>
-            </Link>
-          );
-
-        return content;
+      render: (record) => {
+        return (
+          <Link
+            to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
+            state={{ id: record.id }}
+          >
+            <Tooltip title="Detail">
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={20} />
+              </div>
+            </Tooltip>
+          </Link>
+        );
       },
     },
     {
@@ -302,7 +293,7 @@ const AdjustmentBillingPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon
                   name="IconEdit"
                   width={20}
@@ -331,24 +322,41 @@ const AdjustmentBillingPage = () => {
     {
       action: "Delete",
       type: "table",
-      render: (record) => {
+      render: (record, data) => {
         const isDelete =
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
-
-        return (
-          <Tooltip title="Delete">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-                color={isDelete ? "#D90000" : "#8D91A0"}
-                className={isDelete ? undefined : "disabled cursor-not-allowed"}
-                onClick={isDelete ? () => handleDelete(record.id) : undefined}
-              />
-            </div>
-          </Tooltip>
-        );
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconDelete"
+                  color={isDelete ? "#D90000" : "#8D91A0"}
+                  width={20}
+                />
+              }
+              border={false}
+              disabled={!isDelete}
+            >
+              <span className={"text-black ml-3"}> Delete</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Delete">
+              <div className="pt-0">
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  color={isDelete ? "#D90000" : "#8D91A0"}
+                  className={
+                    isDelete ? undefined : "disabled cursor-not-allowed"
+                  }
+                  onClick={isDelete ? () => handleDelete(record.id) : undefined}
+                />
+              </div>
+            </Tooltip>
+          );
+        return Content;
       },
     },
     {
@@ -368,7 +376,7 @@ const AdjustmentBillingPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
@@ -387,7 +395,6 @@ const AdjustmentBillingPage = () => {
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
     itemGrantAccess,
-    "Delete"
   ).map((col) => ({
     ...col,
     width: 100,
@@ -402,7 +409,7 @@ const AdjustmentBillingPage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [searchInput, searchedColumn, searchText, search]);
 
@@ -478,7 +485,7 @@ const AdjustmentBillingPage = () => {
         handleCancel={() => setModalDelete(false)}
         handleOk={handleDeleteOk}
         width={500}
-        useOk={true}
+        // useOk={true}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />

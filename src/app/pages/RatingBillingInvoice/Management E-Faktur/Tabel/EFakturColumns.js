@@ -1,6 +1,10 @@
 import React from "react";
 import { Tooltip, Dropdown } from "antd";
-import { EllipsisOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  EllipsisOutlined,
+  MoreOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
 import StatusComponent from "../../../../../components/StatusComponent";
@@ -48,44 +52,44 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
           "efakturNo",
           hasValue(search["efakturNo"]),
           searchText,
-          text || "-",
+          text || " ",
           false,
           "input",
-          search
+          search,
         ),
     },
     {
-      key: "invoiceNumber",
-      title: "INVOICE NUMBER",
-      dataIndex: "invoiceNumber",
+      key: "type",
+      title: "FAKTUR TYPE",
+      dataIndex: "type",
       width: 180,
       sorter: true,
-      filteredValue: [search?.invoiceNumber] || null,
+      filteredValue: [search?.type] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "invoiceNumber",
+        "type",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
-          "invoiceNumber",
-          hasValue(search["invoiceNumber"]),
+          "type",
+          hasValue(search["type"]),
           searchText,
-          text || "-",
+          text || " ",
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -102,7 +106,7 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -112,144 +116,61 @@ export const getEFakturColumns = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
-      key: "sor",
-      title: "SOR",
-      dataIndex: "sor",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.sor] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "sor",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "sor",
-          hasValue(search["sor"]),
-          searchText,
-          text || "-",
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "costCenter",
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.costCenter] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "costCenter",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "costCenter",
-          hasValue(search["costCenter"]),
-          searchText,
-          text || "-",
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "meterReadingCode",
-      title: "METER READING",
-      dataIndex: "meterReadingCode",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.meterReadingCode] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "meterReadingCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "meterReadingCode",
-          hasValue(search["meterReadingCode"]),
-          searchText,
-          text || "-",
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "accountName",
-      title: "ACCOUNT NAME",
-      dataIndex: "accountName",
-      width: 250,
-      sorter: true,
-      filteredValue: [search?.accountName] || null,
-      ellipsis: { showTitle: false },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "accountName",
-          hasValue(search["accountName"]),
-          searchText,
-          text || "-",
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "typePpn",
-      title: "TYPE PPN",
-      dataIndex: "typePpn",
+      key: "invoiceNumber",
+      title: "INVOICE NUMBER",
+      dataIndex: "invoiceNumber",
       width: 180,
-      isClassification: true,
       sorter: true,
-      filteredValue: [search?.typePpn] || null,
+      filteredValue: [search?.invoiceNumber] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "typePpn",
+        "invoiceNumber",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
-          "typePpn",
-          hasValue(search["typePpn"]),
+          "invoiceNumber",
+          hasValue(search["invoiceNumber"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      key: "accountNumber",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.accountNumber] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
           searchText,
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -267,7 +188,7 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -277,7 +198,144 @@ export const getEFakturColumns = ({
           text,
           true,
           "input",
-          search
+          search,
+        ),
+    },
+    {
+      key: "sor",
+      title: "SOR",
+      dataIndex: "sor",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.sor] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "sor",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "sor",
+          hasValue(search["sor"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      key: "costCenter",
+      title: "COST CENTER",
+      dataIndex: "costCenter",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.costCenter] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "costCenter",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "costCenter",
+          hasValue(search["costCenter"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      key: "meterReadingCode",
+      title: "METER READING",
+      dataIndex: "meterReadingCode",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.meterReadingCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "meterReadingCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "meterReadingCode",
+          hasValue(search["meterReadingCode"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      key: "accountName",
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      width: 250,
+      sorter: true,
+      filteredValue: [search?.accountName] || null,
+      ellipsis: { showTitle: false },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountName",
+          hasValue(search["accountName"]),
+          searchText,
+          text || " ",
+          true,
+          "input",
+          search,
+        ),
+    },
+    {
+      key: "typePpn",
+      title: "TYPE PPN",
+      dataIndex: "typePpn",
+      width: 180,
+      isClassification: true,
+      sorter: true,
+      filteredValue: [search?.typePpn] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "typePpn",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "typePpn",
+          hasValue(search["typePpn"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
         ),
     },
     {
@@ -295,44 +353,17 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
           "accountSegment",
           hasValue(search["accountSegment"]),
           searchText,
-          text || "-",
+          text || " ",
           false,
           "input",
-          search
-        ),
-    },
-    {
-      key: "accountNumber",
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.accountNumber] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "accountNumber",
-          hasValue(search["accountNumber"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
+          search,
         ),
     },
     {
@@ -349,17 +380,17 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
           "npwpCust",
           hasValue(search["npwpCust"]),
           searchText,
-          text || "-",
+          text || " ",
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -377,17 +408,17 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
           "fullAddress",
           hasValue(search["fullAddress"]),
           searchText,
-          text || "-",
+          text || " ",
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -404,17 +435,17 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
           "nikPasport",
           hasValue(search["nikPasport"]),
           searchText,
-          text || "-",
+          text || " ",
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -431,17 +462,17 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
           "tkuCode",
           hasValue(search["tkuCode"]),
           searchText,
-          text || "-",
+          text || " ",
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -460,7 +491,7 @@ export const getEFakturColumns = ({
         searchText,
         handleSearch,
         true,
-        "datePeriod"
+        "datePeriod",
       ),
       render: (text) =>
         renderDateColumn(
@@ -469,7 +500,7 @@ export const getEFakturColumns = ({
           searchText,
           text,
           "datePeriod",
-          search
+          search,
         ),
     },
     {
@@ -488,17 +519,17 @@ export const getEFakturColumns = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) => {
-        const formattedDate = text ? moment(text).format("DD-MM-YYYY") : "-";
+        const formattedDate = text ? moment(text).format("DD-MM-YYYY") : " ";
         return renderDateColumn(
           "invoiceDate",
           hasValue(search["invoiceDate"]),
           searchText,
           formattedDate,
           "date",
-          search
+          search,
         );
       },
     },
@@ -517,7 +548,7 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (value) => {
         const formattedValue = (
@@ -531,7 +562,7 @@ export const getEFakturColumns = ({
           formattedValue,
           false,
           "input",
-          search
+          search,
         );
       },
     },
@@ -550,7 +581,7 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (status) => {
         const displayStatus = status || "DRAFT";
@@ -580,7 +611,7 @@ export const getEFakturColumns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (status) => {
         const displayStatus = status || "DRAFT";
