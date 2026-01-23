@@ -12,7 +12,11 @@ const DateComponent = ({
   disabled = false,
   placeholder,
   defaultPickerValue,
-  key
+  key,
+  format = "DD MMM YYYY",
+  showTime = false,
+  isPassingId = false,
+  id,
 }) => {
   const wrapper = "flex flex-col";
   const style = {
@@ -31,7 +35,7 @@ const DateComponent = ({
   };
 
   return (
-    <div className={wrapper}>
+    <div className={wrapper} id={isPassingId ? id : undefined}>
       <InputLabel text={label} mandatory={mandatory}></InputLabel>
       <DatePicker
         key={key}
@@ -43,7 +47,8 @@ const DateComponent = ({
         style={style}
         placeholder={placeholder}
         allowClear
-        format={"DD MMM YYYY"}
+        format={format}
+        showTime={showTime}
         defaultPickerValue={defaultPickerValue}
       />
     </div>

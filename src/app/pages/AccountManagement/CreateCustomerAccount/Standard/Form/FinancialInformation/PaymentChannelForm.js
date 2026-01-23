@@ -36,7 +36,7 @@ const PaymentChannelForm = ({
           ]}
           getValueFromEvent={(e) => handleFIObj(e, "paymentChannelType")}
         >
-          <SelectComponent>
+          <SelectComponent isPassingId>
             {(
               // data_paymentChannel &&
               data_paymentChannel || []

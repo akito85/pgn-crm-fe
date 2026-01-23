@@ -28,7 +28,10 @@
                 "customerNumber": "CUS1",
                 "approvalStatus": "Approved",
                 "status": "Hold",
-                "description": "Ini adalah description "
+                "description": "Ini adalah description ",
+                "areaCode": "BEK001",
+                "areaName": "BEKASI TIMUR",
+                "customerId": "CUS001"
             },
             {
                 "document": "DOC2",
@@ -54,7 +57,10 @@
                 "customerNumber": "CUS2",
                 "approvalStatus": "Rejected",
                 "status": "Unapplied",
-                "description": "Ini adalah description "
+                "description": "Ini adalah description ",
+                "areaCode": "BEK002",
+                "areaName": "BEKASI SELATAN",
+                "customerId": "CUS002"
             },
             {
                 "document": "DOC3",
@@ -80,7 +86,10 @@
                 "customerNumber": "CUS3",
                 "approvalStatus": "Draft",
                 "status": "Reverse",
-                "description": "Ini adalah description "
+                "description": "Ini adalah description ",
+                "areaCode": "BEK003",
+                "areaName": "BEKASI BARAT",
+                "customerId": "CUS003"
             }
         ],
         "links": [

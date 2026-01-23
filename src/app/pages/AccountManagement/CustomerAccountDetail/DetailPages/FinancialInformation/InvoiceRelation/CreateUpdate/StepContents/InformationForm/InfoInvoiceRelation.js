@@ -412,21 +412,6 @@ export default function InfoInvoiceRelation({
           </Form.Item>
 
           <Form.Item
-            key="priority"
-            name={"priority"}
-            label={"Priority"}
-            rules={[
-              {
-                message: requiredMessage("Priority"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <InputComponent />
-          </Form.Item>
-
-          <Form.Item
             key="startDate"
             name={"startDate"}
             label={"Start Date"}

@@ -220,6 +220,19 @@ const DetailMonitoringUsage = () => {
 
   const handleSaveUpdateUsage = async (formValue) => {
     try {
+      // Helper function untuk convert string dengan thousand separator ke number
+      const parseNumericValue = (value) => {
+        if (value === null || value === undefined || value === "") return null;
+        if (typeof value === "number") return value;
+        // Remove thousand separator dan convert ke number
+        if (typeof value === "string") {
+          const cleaned = value.replace(/,/g, "");
+          const parsed = parseFloat(cleaned);
+          return isNaN(parsed) ? null : parsed;
+        }
+        return null;
+      };
+
       const requestBody = {
         accountNumber: formValue?.accountNumber || null,
         accountName: formValue?.accountName || null,
@@ -233,21 +246,23 @@ const DetailMonitoringUsage = () => {
         fhour: hasValue(formValue?.fhour)
           ? moment(formValue?.fhour).format(dateFormatting.fhour)
           : null,
-        measDate: formValue?.measDate || null,
-        streamId: formValue?.streamId || null,
-        temperature: formValue?.temperature || null,
-        pressure: formValue?.pressure || null,
-        correctionFactor: formValue?.correctionFactor || null,
-        calorie: formValue?.calorie || null,
-        beginStand: formValue?.beginStand || null,
-        endStand: formValue?.endStand || null,
-        volMeasured27: formValue?.volMeasured27 || null,
-        volMeasured60: formValue?.volMeasured60 || null,
-        engMeasured: formValue?.engMeasured || null,
-        ghv: formValue?.ghv || null,
-        volMscf: formValue?.volMscf || null,
-        uncorrectedValue: formValue?.uncorrectedValue || null,
-        sourceRowId: formValue?.sourceRowId || null,
+        measDate: formValue?.measDate
+          ? moment(formValue?.measDate).toISOString()
+          : null,
+        streamId: parseNumericValue(formValue?.streamId),
+        temperature: parseNumericValue(formValue?.temperature),
+        pressure: parseNumericValue(formValue?.pressure),
+        correctionFactor: parseNumericValue(formValue?.correctionFactor),
+        calorie: parseNumericValue(formValue?.calorie),
+        beginStand: parseNumericValue(formValue?.beginStand),
+        endStand: parseNumericValue(formValue?.endStand),
+        volMeasured27: parseNumericValue(formValue?.volMeasured27),
+        volMeasured60: parseNumericValue(formValue?.volMeasured60),
+        engMeasured: parseNumericValue(formValue?.engMeasured),
+        ghv: parseNumericValue(formValue?.ghv),
+        volMscf: parseNumericValue(formValue?.volMscf),
+        uncorrectedValue: parseNumericValue(formValue?.uncorrectedValue),
+        sourceRowId: parseNumericValue(formValue?.sourceRowId),
         sourceName: formValue?.sourceName || null,
         source: formValue?.source || null,
         description: formValue?.description || null,
@@ -275,6 +290,20 @@ const DetailMonitoringUsage = () => {
             fdate: requestBody.fdate,
             fhour: requestBody.fhour,
             measDate: requestBody.measDate,
+            streamId: requestBody.streamId,
+            temperature: requestBody.temperature,
+            pressure: requestBody.pressure,
+            correctionFactor: requestBody.correctionFactor,
+            calorie: requestBody.calorie,
+            beginStand: requestBody.beginStand,
+            endStand: requestBody.endStand,
+            volMeasured27: requestBody.volMeasured27,
+            volMeasured60: requestBody.volMeasured60,
+            engMeasured: requestBody.engMeasured,
+            ghv: requestBody.ghv,
+            volMscf: requestBody.volMscf,
+            uncorrectedValue: requestBody.uncorrectedValue,
+            sourceRowId: requestBody.sourceRowId,
             status: "SUCCESS",
             recordId: recordId,
           };
@@ -547,10 +576,14 @@ const DetailMonitoringUsage = () => {
                       {detail_batch?.batchInformation?.uploadBy}
                     </DetailText>
                     <DetailText label="Updated Date">
-                      {detail_batch?.batchInformation?.uploadDate}
+                      {detail_batch?.batchInformation?.updatedDate
+                        ? moment(detail_batch.batchInformation.updatedDate).format(
+                            "DD MMM YYYY HH:mm:ss"
+                          )
+                        : ""}
                     </DetailText>
                     <DetailText label="Updated By">
-                      {detail_batch?.batchInformation?.uploadBy}
+                      {detail_batch?.batchInformation?.updatedBy}
                     </DetailText>
                   </div>
                 </BaseContainer>
@@ -679,7 +712,6 @@ const DetailMonitoringUsage = () => {
             type="error"
           />
         </ModalConfirm>
-
       </Spin>
     </LayoutMenu>
   );

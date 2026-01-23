@@ -95,6 +95,42 @@ export const columnsTableCriteriaPromo = (
   },
   {
     required: true,
+    title: "PRODUCT VERSION",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("accountCategory", value, record),
+    sorter: (a, b) => sorter("productVersion", a, b),
+    dataIndex: "productVersion",
+    dataIndexForm: "data_version",
+    indexValue: 38,
+    inputType: "select",
+    filteredValue: search?.["productVersion"] ? [search?.["productVersion"]] : null,
+    option: listOption["data_product_version"],
+    url: "getProductVersionList",
+    dependDataIndex: "product",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "version",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "version",
+        hasValue(search["version"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
     title: "ACCOUNT CATEGORY",
     width: 240,
     //onFilter: (value, record) => //onFilter("accountCategory", value, record),
@@ -382,6 +418,41 @@ export const columnsTableCriteriaPromo = (
   },
   {
     required: true,
+    title: "COUNTRY",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("province", value, record),
+    sorter: (a, b) => sorter("country", a, b),
+    dataIndex: "country",
+    dataIndexForm: "data_country",
+    indexValue: 3118,
+    inputType: "select",
+    filteredValue: search?.["country"] ? [search?.["country"]] : null,
+    option: listOption["data_country"],
+    url: "getCountryList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "country",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "country",
+        hasValue(search["country"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
     title: "PROVINCE",
     width: 240,
     //onFilter: (value, record) => //onFilter("province", value, record),
@@ -393,6 +464,7 @@ export const columnsTableCriteriaPromo = (
     filteredValue: search?.["province"] ? [search?.["province"]] : null,
     option: listOption["data_province"],
     url: "getProvinceList",
+    dependDataIndex: "country",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "province",

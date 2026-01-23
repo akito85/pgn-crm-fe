@@ -41,6 +41,8 @@ import {
   getReceiptChanelDDL,
   resetConvertedAmount,
   resetDataAccountNumber,
+  getAccountTypeDDL,
+  getAccountNumberByTypeDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
@@ -66,6 +68,7 @@ const ListRececiptForm = ({ type }) => {
     dataListAppHierDetail,
     loading,
     data_converted_currency,
+    accountTypeDDL,
   } = useSelector((state) => state.receipt);
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -94,7 +97,6 @@ const ListRececiptForm = ({ type }) => {
   const [loadingForm, setLoadingForm] = useState(false);
   const [requestBodyConvertedRate, setRequestBodyConvertedRate] = useState({});
   const [allValues, setAllValues] = useState(null);
-  const [isMisc, setIsMisc] = useState(false);
 
   const isLoading = loading || loadingForm;
 
@@ -112,6 +114,7 @@ const ListRececiptForm = ({ type }) => {
     dispatch(getPayTypeDDL());
     dispatch(getPayMethodDDL());
     dispatch(getReceiptChanelDDL());
+    dispatch(getAccountTypeDDL());
   }, [dispatch]);
 
   // APPROVAL HIERARCHY
@@ -198,9 +201,13 @@ const ListRececiptForm = ({ type }) => {
 
       if (hasValue(accNumb)) {
         form.setFieldsValue({
-          cusName: accountNumbers?.data?.customerName,
-          area: accountNumbers?.data?.area,
-          segment: accountNumbers?.data?.segment,
+          cusName: dataAccountNumber?.data?.customerName,
+          area: dataAccountNumber?.data?.area,
+          segment: dataAccountNumber?.data?.segment,
+          accountType: dataAccountNumber?.data?.accountType,
+          accountName: dataAccountNumber?.data?.accountName,
+          sor: dataAccountNumber?.data?.sor,
+          cusNumber: dataAccountNumber?.data?.customerNumber,
         });
       }
     }
@@ -484,11 +491,17 @@ const ListRececiptForm = ({ type }) => {
       const dataValue = {
         // receiptId: ,
         appHierId: selectedHierarchy,
-        areaId: formValue?.area,
-        customerId: formValue?.cusNumber,
+        areaId: dataAccountNumber?.data?.areaId,
+        customerId: dataAccountNumber?.data?.customerId,
         accountId: formValue?.accNumber,
         customerName: formValue?.cusName,
-        segmentId: formValue?.segment,
+        segmentId: dataAccountNumber?.data?.segmentId,
+        accountType: formValue?.accountType,
+        accountName: formValue?.accountName,
+        customerNumber: formValue?.cusNumber,
+        sor: formValue?.sor,
+        area: formValue?.area,
+        segment: formValue?.segment,
         receiptDate: moment(formValue?.receiptDate).format(
           dateFormatting.dateTime
         ),
@@ -515,7 +528,6 @@ const ListRececiptForm = ({ type }) => {
         })),
         description: formValue?.description,
         receiptCode: formValue?.receiptCode,
-        isMisc: isMisc,
       };
 
       setBodyData(dataValue);
@@ -600,7 +612,6 @@ const ListRececiptForm = ({ type }) => {
     setRequestBodyConvertedRate({});
     setListDataAttachment([]);
     setAppHierDataDetail([]);
-    setIsMisc();
     setTabData(
       tabData?.map((item) => {
         const { errorBadge, ...keys } = item;
@@ -678,8 +689,7 @@ const ListRececiptForm = ({ type }) => {
               setRequestBodyConverted={setRequestBodyConvertedRate}
               rateAmountValues={data_converted_currency?.convertedRate}
               formValues={allValues}
-              isMisc={isMisc}
-              setIsMisc={setIsMisc}
+              accountTypeDDL={accountTypeDDL}
             />
           </div>
           <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
@@ -801,7 +811,6 @@ const ListRececiptForm = ({ type }) => {
           payMethodDDL={payMethodDDL}
           dataReceiptChannelDDL={dataReceiptChannelDDL}
           dataAccNumber={dataAccNumber}
-          isMisc={isMisc}
           rateString={formValue?.rateAmount}
         />
       </ModalCustom>

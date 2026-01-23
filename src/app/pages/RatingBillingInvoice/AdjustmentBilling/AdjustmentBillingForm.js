@@ -78,6 +78,8 @@ const AdjustmentBillingForm = ({ type }) => {
         "transactionDate",
         "adjustmentReason",
         "accountingDate",
+        "rateType",
+        "rateDate",
         "remark",
       ],
     },
@@ -166,6 +168,8 @@ const AdjustmentBillingForm = ({ type }) => {
         accountingDate: moment(dataDetail?.accountingDate),
         termsOfPayment: dataDetail?.termsOfPayment,
         adjustmentReason: dataDetail?.adjustmentReason,
+        rateType: dataDetail?.rateType,
+        rateDate: dataDetail?.rateDate ? moment(dataDetail?.rateDate) : null,
         remark: dataDetail?.remark,
         apphierId: apphierId,
       };
@@ -300,6 +304,8 @@ const AdjustmentBillingForm = ({ type }) => {
               "transactionDate",
               "accountingDate",
               "adjustmentReason",
+              "rateType",
+              "rateDate",
               "remark",
             ],
           },
@@ -353,9 +359,11 @@ const AdjustmentBillingForm = ({ type }) => {
       transactionDate: moment(bodyData?.transactionDate).format(
         dateFormatting.dateFormal
       ),
-      rateType: dataInvoice?.rateType,
+      rateType: bodyData?.rateType || dataInvoice?.rateType,
       rate: dataInvoice?.rate,
-      rateDate: dataInvoice?.rateDate,
+      rateDate: bodyData?.rateDate
+        ? moment(bodyData?.rateDate).format(dateFormatting.dateFormal)
+        : dataInvoice?.rateDate,
       accountId: idAccount,
       totalAdjustmentAmountIdr: sumIDR || null,
       totalAdjustmentAmountUsd: sumUSD || null,
@@ -395,7 +403,6 @@ const AdjustmentBillingForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
-          console.log(error, "error");
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&

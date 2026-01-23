@@ -39,6 +39,44 @@ import moment from "moment";
 const { Text } = Typography;
 
 /**
+ * LocalStorage helpers for tracking read broadcast notifications
+ * Since broadcast notifications are shared records, we track per-user read status locally
+ */
+const BROADCAST_READ_KEY_PREFIX = "broadcast_read_";
+
+const getBroadcastReadKey = (userId) => `${BROADCAST_READ_KEY_PREFIX}${userId}`;
+
+const getReadBroadcastIds = (userId) => {
+  try {
+    const key = getBroadcastReadKey(userId);
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    console.warn("[NotificationDropdown] Error reading broadcast read status:", e);
+    return [];
+  }
+};
+
+const markBroadcastsAsRead = (userId, notificationIds) => {
+  try {
+    const key = getBroadcastReadKey(userId);
+    const existing = getReadBroadcastIds(userId);
+    const updated = [...new Set([...existing, ...notificationIds])];
+    localStorage.setItem(key, JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.warn("[NotificationDropdown] Error saving broadcast read status:", e);
+    return [];
+  }
+};
+
+const isBroadcastNotification = (notification) => {
+  return notification.direction === "broadcast" ||
+         notification.TO_USER_ID === "BROADCAST" ||
+         notification.toUserId === "BROADCAST";
+};
+
+/**
  * NotificationDropdown Component
  *
  * Displays a bell icon with unread count badge and a dropdown/popover
@@ -54,6 +92,7 @@ const NotificationDropdown = () => {
   const [clickedTab, setClickedTab] = useState(null);
   const [animatingNotifications, setAnimatingNotifications] = useState(new Set());
   const [animatingDateGroups, setAnimatingDateGroups] = useState(new Set());
+  const [readBroadcastIds, setReadBroadcastIds] = useState([]);
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
@@ -69,61 +108,72 @@ const NotificationDropdown = () => {
   );
   const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
 
+  // Load read broadcast IDs from localStorage on mount
+  useEffect(() => {
+    if (userId) {
+      const storedReadBroadcasts = getReadBroadcastIds(userId);
+      setReadBroadcastIds(storedReadBroadcasts);
+    }
+  }, [userId]);
+
   // Filter notifications for current user only
   const userNotifications = safeAllNotifications.filter(notification => {
     // Include broadcast notifications (for all users) or notifications directed to this user
     const isForThisUser = notification.direction === "broadcast" ||
            notification.TO_USER_ID === userId ||
            notification.TO_USER_ID === "ALL" ||
+           notification.TO_USER_ID === "BROADCAST" ||
            notification.toUserId === userId ||
-           notification.toUserId === "ALL";
-
-    // Log warning if backend sent notifications for other users (data leakage detection)
-    if (!isForThisUser && process.env.NODE_ENV === 'development') {
-      console.warn('[NotificationDropdown] Backend sent notification for different user:', {
-        notificationId: notification.id,
-        toUserId: notification.toUserId || notification.TO_USER_ID,
-        currentUserId: userId,
-        title: notification.title || notification.TITLE
-      });
-    }
+           notification.toUserId === "ALL" ||
+           notification.toUserId === "BROADCAST";
 
     return isForThisUser;
   });
+
+  // Check if a broadcast notification has been read locally
+  const isBroadcastReadLocally = (notification) => {
+    if (!isBroadcastNotification(notification)) return false;
+    const notificationId = notification.id || notification.ID;
+    return readBroadcastIds.includes(notificationId);
+  };
+
+  // Get effective read status (considers local broadcast read tracking)
+  const isNotificationRead = (notification) => {
+    // Check backend status first
+    const backendRead = (notification.STATUS || notification.status) === "read";
+    if (backendRead) return true;
+
+    // For broadcasts, also check local storage
+    if (isBroadcastNotification(notification)) {
+      return isBroadcastReadLocally(notification);
+    }
+
+    return false;
+  };
 
   // Calculate new notifications count (unread notifications that arrived since last view)
   const newNotificationsCount = lastViewedTime
     ? userNotifications.filter(notification => {
         const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
-        return (notification.STATUS || notification.status) !== "read" &&
+        return !isNotificationRead(notification) &&
                notificationTime &&
                new Date(notificationTime) > new Date(lastViewedTime);
       }).length
     : 0;
 
-  // Filter notifications based on active tab
+  // Filter notifications based on active tab (using effective read status)
   const notifications = activeTab === 'all'
     ? userNotifications
-    : userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read");
+    : userNotifications.filter(notification => !isNotificationRead(notification));
 
-  // Calculate counts for tabs
+  // Calculate counts for tabs (using effective read status)
   const allCount = userNotifications.length;
-  const unreadCountForTab = userNotifications.filter(notification => (notification.STATUS || notification.status) !== "read").length;
+  const unreadCountForTab = userNotifications.filter(notification => !isNotificationRead(notification)).length;
 
   // Client-side validation: Use client-calculated unread count as fallback
   // This protects against backend returning count for all users
   // If Redux unreadCount doesn't match our filtered count, use the filtered count as it's more reliable
   const safeUnreadCount = userUnreadCount !== undefined ? Math.min(userUnreadCount, unreadCountForTab) : unreadCountForTab;
-
-  // Log warning if counts don't match (potential backend issue)
-  if (userUnreadCount !== unreadCountForTab && process.env.NODE_ENV === 'development') {
-    console.warn('[NotificationDropdown] Unread count mismatch detected:', {
-      reduxUnreadCount: userUnreadCount,
-      clientCalculatedCount: unreadCountForTab,
-      usingSafeCount: safeUnreadCount,
-      possibleCause: 'Backend may be returning count for all users or counts are out of sync'
-    });
-  }
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
@@ -161,7 +211,6 @@ const NotificationDropdown = () => {
           // Step 4: Fetch all existing user notifications from API (list endpoint)
           dispatch(fetchAllUserNotifications({ userId }));
         } catch (error) {
-          console.error("[NotificationDropdown] Failed to initialize notifications:", error);
           // Continue anyway - user might still see notifications if backend allows
           dispatch(connectNotifications({ userId }));
           dispatch(fetchUnreadCount());
@@ -170,8 +219,6 @@ const NotificationDropdown = () => {
       };
 
       initializeNotifications();
-    } else {
-      console.warn("[NotificationDropdown] No userId found in token");
     }
 
     // Cleanup: Disconnect from SSE on unmount
@@ -288,37 +335,31 @@ const NotificationDropdown = () => {
    * Handle notification click - State-based navigation with proper NAVIGATION_STATE parsing
    */
   const handleNotificationClick = (notification) => {
-    console.log('=== Notification Click Debug ===');
-    console.log('Full notification object:', notification);
-
     // Mark as read if not already read
     const notificationId = notification.id || notification.ID;
-    const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
-
-    console.log('Notification ID:', notificationId);
-    console.log('Is Read:', isRead);
+    const isRead = isNotificationRead(notification);
 
     if (!isRead && notificationId) {
-      console.log('Marking notification as read:', notificationId);
+      // For broadcast notifications, also persist to localStorage
+      if (isBroadcastNotification(notification) && userId) {
+        const updatedReadBroadcasts = markBroadcastsAsRead(userId, [notificationId]);
+        setReadBroadcastIds(updatedReadBroadcasts);
+      }
       dispatch(markAsRead(notificationId));
     }
 
     // Navigate using state-based routing pattern
     const link = notification.link || notification.LINK;
-    console.log('Navigation link:', link);
 
     if (link) {
       // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
       let parsedNavigationState = {};
       const navState = notification.navigationState || notification.NAVIGATION_STATE;
-      console.log('Raw NAVIGATION_STATE:', navState);
 
       if (navState) {
         try {
           parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
-          console.log('Parsed NAVIGATION_STATE:', parsedNavigationState);
         } catch (e) {
-          console.error('Failed to parse NAVIGATION_STATE:', e);
           parsedNavigationState = {};
         }
       }
@@ -343,35 +384,34 @@ const NotificationDropdown = () => {
         routeState.approvalLevel = approvalLevel;
       }
 
-      console.log('Final route state:', routeState);
-      console.log('Navigating to:', link);
-
       // Navigate based on presence of entity_id
       if (notification.entityId || notification.ENTITY_ID) {
-        console.log('Navigation with entity state');
         navigate(link, { state: routeState });
       } else {
-        console.log('Navigation without entity');
         navigate(link, {
           state: Object.keys(parsedNavigationState).length > 0
             ? parsedNavigationState
             : undefined
         });
       }
-    } else {
-      console.log('No link found - skipping navigation');
     }
-    console.log('=== End Notification Click Debug ===');
   };
 
   /**
    * Handle mark all as read
+   * Also persists broadcast notification IDs to localStorage for local read tracking
    */
   const handleMarkAllAsRead = () => {
+    // Collect broadcast notification IDs to mark as read locally
+    const broadcastIds = userNotifications
+      .filter(notification => isBroadcastNotification(notification) && !isNotificationRead(notification))
+      .map(notification => notification.id || notification.ID)
+      .filter(Boolean);
+
     // Only animate in unread tab
     if (activeTab === 'unread') {
       const unreadNotifications = notifications.filter(
-        notification => (notification.STATUS || notification.status) !== "read"
+        notification => !isNotificationRead(notification)
       );
 
       if (unreadNotifications.length === 0) {
@@ -410,15 +450,7 @@ const NotificationDropdown = () => {
 
         const notificationId = notification.id || notification.ID;
 
-        console.log(`Scheduling animation for notification ${index + 1}/${visualOrderNotifications.length}:`, {
-          id: notificationId,
-          title: notification.title || notification.TITLE,
-          delay: `${delay}ms`,
-          reverseIndex,
-        });
-
         setTimeout(() => {
-          console.log(`Animating notification: ${notification.title || notification.TITLE} (ID: ${notificationId})`);
           setAnimatingNotifications(prev => new Set([...prev, notificationId]));
         }, delay);
       });
@@ -431,14 +463,19 @@ const NotificationDropdown = () => {
         const dateGroupDelay = lastNotificationDelay + dateGroupAnimationDelay;
 
         setTimeout(() => {
-          console.log(`Animating date group: ${date}`);
           setAnimatingDateGroups(prev => new Set([...prev, date]));
         }, dateGroupDelay);
       });
 
-      // After all animations complete, dispatch the API call
+      // After all animations complete, dispatch the API call and persist broadcast read status
       const totalAnimationTime = visualOrderNotifications.length * delayBetweenAnimations + dateGroupAnimationDelay + 400; // +400ms for animation duration
       setTimeout(() => {
+        // Persist broadcast read status to localStorage
+        if (broadcastIds.length > 0 && userId) {
+          const updatedReadBroadcasts = markBroadcastsAsRead(userId, broadcastIds);
+          setReadBroadcastIds(updatedReadBroadcasts);
+        }
+
         dispatch(markAllNotificationsAsReadApi());
 
         // Clear animating notifications and date groups after a delay to allow Redux state to update
@@ -450,6 +487,12 @@ const NotificationDropdown = () => {
       }, totalAnimationTime);
     } else {
       // In 'all' tab, just mark as read without animation
+      // Persist broadcast read status to localStorage
+      if (broadcastIds.length > 0 && userId) {
+        const updatedReadBroadcasts = markBroadcastsAsRead(userId, broadcastIds);
+        setReadBroadcastIds(updatedReadBroadcasts);
+      }
+
       dispatch(markAllNotificationsAsReadApi());
     }
   };
@@ -651,7 +694,7 @@ const NotificationDropdown = () => {
                       style={{
                         padding: "12px 16px",
                         cursor: (notification.LINK || notification.link) ? "pointer" : "default",
-                        backgroundColor: ((notification.STATUS || notification.status) === "read") ? "#ffffff" : "#f0f7ff",
+                        backgroundColor: isNotificationRead(notification) ? "#ffffff" : "#f0f7ff",
                         borderBottom: "1px dashed rgb(29 28 29 / 0.1)",
                         borderTop: "1px dashed rgb(29 28 29 / 0.1)",
                         marginTop: "-1px"
@@ -667,7 +710,7 @@ const NotificationDropdown = () => {
                             <span
                               style={{
                                 fontSize: 14,
-                                fontWeight: !(notification.read || notification.STATUS === "read") ? 600 : 400,
+                                fontWeight: !isNotificationRead(notification) ? 600 : 400,
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap'
@@ -694,6 +737,22 @@ const NotificationDropdown = () => {
                                   {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
                                 </div>
                               )}
+                            {/* Broadcast Badge */}
+                            {notification.direction === "broadcast" && (
+                              <div
+                                style={{
+                                  fontSize: 9,
+                                  fontWeight: 600,
+                                  color: '#722ed1',
+                                  verticalAlign: 'super',
+                                  lineHeight: 1,
+                                  margin: 0,
+                                  padding: 0
+                                }}
+                              >
+                                BROADCAST
+                              </div>
+                            )}
                             {/* New Badge */}
                             {(() => {
                               const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
@@ -732,11 +791,6 @@ const NotificationDropdown = () => {
                                   getNotificationTimestamp(notification)
                                 )}
                               </Text>
-                              {notification.direction === "broadcast" && (
-                                <Tag color="purple" style={{ fontSize: 10 }}>
-                                  BROADCAST
-                                </Tag>
-                              )}
                             </div>
                           </div>
                         }
@@ -784,7 +838,6 @@ const NotificationDropdown = () => {
 
   // Safety check: Don't render if no userId (prevents showing wrong user's data)
   if (!userId) {
-    console.warn('[NotificationDropdown] No userId found - notifications disabled');
     return null;
   }
 
