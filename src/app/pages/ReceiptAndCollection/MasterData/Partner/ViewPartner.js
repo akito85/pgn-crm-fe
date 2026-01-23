@@ -145,6 +145,7 @@ const ViewPartner = () => {
       width: 60,
       key: "no",
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -556,7 +557,7 @@ const ViewPartner = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 2500,
+              x: "max-content",
               y: 525,
             }}
             fixedColumns={fixedColumns}

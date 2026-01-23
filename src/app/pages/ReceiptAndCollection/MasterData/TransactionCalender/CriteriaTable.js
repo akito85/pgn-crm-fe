@@ -110,24 +110,28 @@ const CriteriaTable = (props) => {
 
   const columns = [
     {
+      key: "no",
       title: "NO",
       align: "center",
       width: 60,
       render: (text, object, index) => index + 1,
     },
     {
+      key: "customerSegment",
       title: "CUSTOMER SEGMENT",
       dataIndex: "customerSegment",
       sorter: true,
       ...getColumnSearchProps("beginCycle"),
     },
     {
+      key: "accountGroupType",
       title: "ACCOUNT GROUP TYPE",
       dataIndex: "customerSegment",
       sorter: true,
       ...getColumnSearchProps("beginCycle"),
     },
     {
+      key: "startDate",
       title: "START DATE",
       dataIndex: "startDate",
       sorter: true,
@@ -137,6 +141,7 @@ const CriteriaTable = (props) => {
       render: (v) => (v ? moment(v).format(dateFormatting.date) : "-"),
     },
     {
+      key: "endDate",
       title: "END DATE",
       dataIndex: "endDate",
       sorter: true,

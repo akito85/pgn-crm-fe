@@ -169,7 +169,7 @@ const ViewDeduction = () => {
             onChange={handleChangePage}
             onSizeChanger={handleChangePage}
             totalData={data?.page?.totalElements || 0}
-            tableScrolled={{ x: 2000 }}
+            tableScrolled={{ x: "max-content", y: 500 }}
           />
         </CardContainer>
       </Spin>

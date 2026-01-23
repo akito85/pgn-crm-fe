@@ -10,64 +10,68 @@ export const columnVA = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => { }
 ) => [
-  {
-    title: "NO",
-    width: 60,
-    dataIndex: "no",
-    align: "center",
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  },
-  {
-    title: "CUSTOMER",
-    dataIndex: "customer",
-    sorter: true,
-    align: "left",
-    ...getColumnSearchProps(
-      "customer",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-  },
-  {
-    title: "ACCOUNT",
-    dataIndex: "account",
-    sorter: true,
-    align: "left",
-    ...getColumnSearchProps(
-      "account",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-  },
-  {
-    title: "VA NUMBER",
-    dataIndex: "vaNumber",
-    sorter: true,
-    align: "left",
-    ...getColumnSearchProps(
-      "vaNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-  },
-];
+    {
+      key: "no",
+      title: "NO",
+      width: 60,
+      dataIndex: "no",
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      key: "customer",
+      title: "CUSTOMER",
+      dataIndex: "customer",
+      sorter: true,
+      align: "left",
+      ...getColumnSearchProps(
+        "customer",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+    },
+    {
+      key: "account",
+      title: "ACCOUNT",
+      dataIndex: "account",
+      sorter: true,
+      align: "left",
+      ...getColumnSearchProps(
+        "account",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+    },
+    {
+      key: "vaNumber",
+      title: "VA NUMBER",
+      dataIndex: "vaNumber",
+      sorter: true,
+      align: "left",
+      ...getColumnSearchProps(
+        "vaNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+    },
+  ];
 
 const TableVA = ({
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
+  handleSearch = () => { },
   id,
 }) => {
   const { dataVA } = useSelector((state) => state.bank);
@@ -133,10 +137,10 @@ const TableVA = ({
         onSizeChanger={handleChange}
         totalData={dataVA?.page?.totalElements}
         onSort={onSort}
-        // tableScrolled={{
-        //   x: 1300,
-        //   y: 525,
-        // }}
+      // tableScrolled={{
+      //   x: 1300,
+      //   y: 525,
+      // }}
       />
     </div>
   );

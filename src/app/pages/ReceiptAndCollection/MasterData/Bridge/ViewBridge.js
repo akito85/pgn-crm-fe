@@ -140,7 +140,7 @@ const ViewBridge = () => {
               totalData={totalElements}
               current={page}
               pageSize={pageSize}
-              tableScrolled={{ y: 525, x: 1500 }}
+              tableScrolled={{ y: "max-content", x: 1500 }}
               onChange={handleChangeSize}
               handleDownload={handleDownload}
               onSort={onSort}

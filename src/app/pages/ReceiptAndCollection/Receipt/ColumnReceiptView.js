@@ -15,6 +15,7 @@ export const columnsReceipt = (
 ) => [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -75,6 +76,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT",
       dataIndex: "account",
+      key: "account",
       isNumber: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -164,6 +166,7 @@ export const columnsReceipt = (
     {
       title: "SOR",
       dataIndex: "sor",
+      key: "sor",
       // align: "center",
       sorter: true,
       // width: 150,
@@ -181,6 +184,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT TYPE",
       dataIndex: "accountType",
+      key: "accountType",
       isClassification: true,
       sorter: true,
       width: 180,
@@ -198,6 +202,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT GROUP",
       dataIndex: "accountGroup",
+      key: "accountGroup",
       isClassification: true,
       sorter: true,
       width: 180,
@@ -216,6 +221,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT SEGMENT",
       dataIndex: "accountSegment",
+      key: "accountSegment",
       isClassification: true,
       width: 200,
       sorter: true,
@@ -359,6 +365,7 @@ export const columnsReceipt = (
     {
       title: "MISCELLANEOUS",
       dataIndex: "isMisc",
+      key: "isMisc",
       sorter: true,
       width: 180,
       isClassification: true,

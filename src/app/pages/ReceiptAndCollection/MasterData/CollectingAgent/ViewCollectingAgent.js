@@ -137,6 +137,7 @@ const ViewCollectingAgent = () => {
             title: "NO",
             width: 60,
             align: "center",
+            isClassification: true,
             render: (text, object, index) => (page - 1) * pageSize + index + 1,
         },
         {
@@ -498,7 +499,7 @@ const ViewCollectingAgent = () => {
                         totalData={data?.page?.totalElements}
                         onSort={onSort}
                         tableScrolled={{
-                            x: 2500,
+                            x: "max-content",
                             y: 525,
                         }}
                         fixedColumns={fixedColumns}

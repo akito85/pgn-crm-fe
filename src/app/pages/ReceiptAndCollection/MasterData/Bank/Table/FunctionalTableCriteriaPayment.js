@@ -53,7 +53,7 @@ const EditableCell = ({
   dataEditRecord,
   formTableCriteria,
   endDateHeader,
-  handleEditDataRecord = () => {},
+  handleEditDataRecord = () => { },
   ...restProps
 }) => {
   const dispatch = useDispatch();
@@ -183,13 +183,13 @@ const EditableCell = ({
             inputType !== "endDate"
               ? rules()
               : [
-                  {
-                    validator: (_, value) =>
-                      endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
-                      )(_, value),
-                  },
-                ]
+                {
+                  validator: (_, value) =>
+                    endDateValidator(
+                      formTableCriteria.getFieldValue().startDate
+                    )(_, value),
+                },
+              ]
           }
         >
           {inputNode}
@@ -206,15 +206,15 @@ const FunctionalTableCriteriaPayment = ({
   data = [],
   dataCriteria = [],
   disableDate,
-  updateData = () => {},
+  updateData = () => { },
   storedData = false,
-  setStoredData = () => {},
+  setStoredData = () => { },
   endDateHeader,
   required,
   status,
   statusApproval,
   showAction,
-  setIsEditing = () => {},
+  setIsEditing = () => { },
 }) => {
   const searchInput = useRef(null);
   const [formTableCriteria] = Form.useForm();
@@ -671,6 +671,7 @@ const FunctionalTableCriteriaPayment = ({
   const columns = () => {
     const temp = [
       {
+        key: "no",
         title: "NO",
         width: 60,
         dataIndex: "no",
@@ -686,6 +687,7 @@ const FunctionalTableCriteriaPayment = ({
         handleSearch
       ),
       {
+        key: "startDate",
         title: "START DATE",
         required: true,
         width: 240,
@@ -722,6 +724,7 @@ const FunctionalTableCriteriaPayment = ({
         },
       },
       {
+        key: "endDate",
         title: "END DATE",
         width: 240,
         align: "center",
@@ -758,6 +761,7 @@ const FunctionalTableCriteriaPayment = ({
         },
       },
       {
+        key: "operation",
         title: "ACTION",
         dataIndex: "operation",
         width: 240,
@@ -849,9 +853,9 @@ const FunctionalTableCriteriaPayment = ({
       type !== "detail" ? temp : temp.filter((col) => col.title !== "ACTION");
     return filterCol.filter((col) =>
       col.title !== "NO" &&
-      col.title !== "ACTION" &&
-      col.title !== "START DATE" &&
-      col.title !== "END DATE"
+        col.title !== "ACTION" &&
+        col.title !== "START DATE" &&
+        col.title !== "END DATE"
         ? dataCriteria.includes(col.indexValue)
         : true
     );
