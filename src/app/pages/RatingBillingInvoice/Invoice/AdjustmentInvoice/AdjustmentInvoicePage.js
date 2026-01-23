@@ -33,7 +33,7 @@ import {
 const AdjustmentInvoicePage = () => {
   // Selector
   const { data, pagination, loading } = useSelector(
-    (state) => state.adjustmentInvoice
+    (state) => state.adjustmentInvoice,
   );
 
   // Declaration
@@ -72,7 +72,7 @@ const AdjustmentInvoicePage = () => {
         sort: sortArray,
         search: searchArray,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -118,7 +118,7 @@ const AdjustmentInvoicePage = () => {
           sort: sortArray,
           search: searchArray,
           isLoadMore: true,
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -166,7 +166,7 @@ const AdjustmentInvoicePage = () => {
         size: pagination?.totalElements || 1000,
         sort: sortArray,
         search: searchArray,
-      })
+      }),
     );
   };
 
@@ -288,23 +288,33 @@ const AdjustmentInvoicePage = () => {
               icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isEditable}
+              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+              state={{
+                id: record.invAdjustmentId,
+                invoiceNumber: record.invoiceNumber,
+              }}
             >
               <span className={"text-black ml-3"}> Update</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Update">
-              <div className="">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
-            </Tooltip>
+            <Link
+              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_DETAIL}
+              state={{ id: record.id }}
+            >
+              <Tooltip title="Update">
+                <div className="">
+                  <SVGIcon
+                    name="IconEdit"
+                    width={24}
+                    color={!isEditable ? "#8D91A0" : "#ACC424"}
+                    className={!isEditable ? "cursor-not-allowed" : undefined}
+                  />
+                </div>
+              </Tooltip>
+            </Link>
           );
 
-        return isEditable ? (
+        return (
           <Link
             to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
             state={{
@@ -314,8 +324,6 @@ const AdjustmentInvoicePage = () => {
           >
             {content}
           </Link>
-        ) : (
-          <div>{content}</div>
         );
       },
     },
@@ -378,7 +386,7 @@ const AdjustmentInvoicePage = () => {
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
     itemGrantAccess,
-    "Delete"
+    "Delete",
   ).map((col) => ({
     ...col,
     width: 70,
@@ -393,7 +401,7 @@ const AdjustmentInvoicePage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [searchInput, searchedColumn, searchText, search]);
 
@@ -474,7 +482,7 @@ const AdjustmentInvoicePage = () => {
         handleCancel={() => setModalDelete(false)}
         handleOk={handleDeleteOk}
         width={500}
-        useOk={true}
+        // useOk={true}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
