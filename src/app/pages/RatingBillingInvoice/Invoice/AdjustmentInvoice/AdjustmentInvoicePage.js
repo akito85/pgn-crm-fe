@@ -293,7 +293,7 @@ const AdjustmentInvoicePage = () => {
                 }}
               >
                 <ButtonComponent
-                  icon={<SVGIcon name="IconEdit" color="#0075bf" width={20} />}
+                  icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
                   border={false}
                 >
                   <span className="text-black ml-3"> Update</span>
@@ -301,42 +301,33 @@ const AdjustmentInvoicePage = () => {
               </Link>
             ) : (
               <div className="flex items-center cursor-not-allowed px-3 py-1">
-                <SVGIcon name="IconEdit" color="#8D91A0" width={20} />
-                <span className="text-gray-400 ml-3"> Update</span>
+                <span className="pointer-events-none">
+                  <SVGIcon name="IconEdit" color="#8D91A0" width={24} />
+                </span>
+                <span className="text-gray-400 ml-3 pointer-events-none">
+                  {" "}
+                  Update
+                </span>
               </div>
             )
-          ) : (
+          ) : isEditable ? (
             <Tooltip title="Update">
-              <div
-                className={!isEditable ? "cursor-not-allowed" : "cursor-pointer"}
-                onClick={() => {
-                  if (isEditable) {
-                    window.location.href = INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE;
-                  }
+              <Link
+                to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+                state={{
+                  id: record.invAdjustmentId,
+                  invoiceNumber: record.invoiceNumber,
                 }}
               >
-                {isEditable ? (
-                  <Link
-                    to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
-                    state={{
-                      id: record.invAdjustmentId,
-                      invoiceNumber: record.invoiceNumber,
-                    }}
-                  >
-                    <SVGIcon
-                      name="IconEdit"
-                      width={24}
-                      color="#ACC424"
-                    />
-                  </Link>
-                ) : (
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    color="#8D91A0"
-                    className="cursor-not-allowed"
-                  />
-                )}
+                <SVGIcon name="IconEdit" width={24} color="#ACC424" />
+              </Link>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Update">
+              <div className="cursor-not-allowed">
+                <span className="pointer-events-none">
+                  <SVGIcon name="IconEdit" width={24} color="#8D91A0" />
+                </span>
               </div>
             </Tooltip>
           );
