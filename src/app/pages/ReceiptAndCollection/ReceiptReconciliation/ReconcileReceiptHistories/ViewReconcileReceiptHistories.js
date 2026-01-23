@@ -33,6 +33,7 @@ const columns = (
 ) => [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -40,6 +41,7 @@ const columns = (
     {
       title: "RECEIPT CODE",
       dataIndex: "receiptCode",
+      key: "receiptCode",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -73,6 +75,7 @@ const columns = (
     {
       title: "SOR",
       dataIndex: "sor",
+      key: "sor",
       align: "",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -106,6 +109,7 @@ const columns = (
     {
       title: "COST CENTER",
       dataIndex: "costCenter",
+      key: "costCenter",
       align: "",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -142,6 +146,7 @@ const columns = (
     {
       title: "CUSTOMER",
       dataIndex: "customerName",
+      key: "customerName",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -178,6 +183,7 @@ const columns = (
     {
       title: "ACCOUNT",
       dataIndex: "accountNumber",
+      key: "accountNumber",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -214,6 +220,7 @@ const columns = (
     {
       title: "RECEIPT NUMBER",
       dataIndex: "receiptNumber",
+      key: "receiptNumber",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -250,6 +257,7 @@ const columns = (
     {
       title: "RECEIPT DATE",
       dataIndex: "receiptDate",
+      key: "receiptDate",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -285,6 +293,7 @@ const columns = (
     {
       title: "CURRENCY",
       dataIndex: "currency",
+      key: "currency",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -321,6 +330,7 @@ const columns = (
     {
       title: "RECEIPT AMOUNT",
       dataIndex: "amount",
+      key: "amount",
       align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -357,6 +367,7 @@ const columns = (
     {
       title: "TYPE",
       dataIndex: "type",
+      key: "type",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,

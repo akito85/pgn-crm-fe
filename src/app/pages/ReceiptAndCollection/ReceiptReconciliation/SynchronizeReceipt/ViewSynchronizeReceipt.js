@@ -6,7 +6,7 @@ import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  EyeOutlined, 
+  EyeOutlined,
   FilterOutlined
 } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -132,6 +132,7 @@ const ViewSynchronizeReceipt = () => {
       title: "NO",
       key: "no",
       width: 60,
+      isClassification: true,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -204,9 +205,9 @@ const ViewSynchronizeReceipt = () => {
               >
                 <ButtonComponent
                   icon={
-                  // <SVGIcon name="IconDetail" width={24} />
-                  <EyeOutlined />
-                }
+                    // <SVGIcon name="IconDetail" width={24} />
+                    <EyeOutlined />
+                  }
                   border={false}
                 />
               </Link>
