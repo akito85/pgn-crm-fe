@@ -282,29 +282,49 @@ const AdjustmentInvoicePage = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
-        const Content =
+        const content =
           data > 3 ? (
             <ButtonComponent
               icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isEditable}
+              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+              state={{
+                id: record.invAdjustmentId,
+                invoiceNumber: record.invoiceNumber,
+              }}
             >
               <span className={"text-black ml-3"}> Update</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Update">
-              <div className="">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
-            </Tooltip>
+            <Link
+              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_DETAIL}
+              state={{ id: record.id }}
+            >
+              <Tooltip title="Update">
+                <div className="">
+                  <SVGIcon
+                    name="IconEdit"
+                    width={24}
+                    color={!isEditable ? "#8D91A0" : "#ACC424"}
+                    className={!isEditable ? "cursor-not-allowed" : undefined}
+                  />
+                </div>
+              </Tooltip>
+            </Link>
           );
 
-        return Content;
+        return (
+          <Link
+            to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+            state={{
+              id: record.invAdjustmentId,
+              invoiceNumber: record.invoiceNumber,
+            }}
+          >
+            {content}
+          </Link>
+        );
       },
     },
     {
@@ -462,7 +482,7 @@ const AdjustmentInvoicePage = () => {
         handleCancel={() => setModalDelete(false)}
         handleOk={handleDeleteOk}
         width={500}
-        useOk={true}
+        // useOk={true}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />

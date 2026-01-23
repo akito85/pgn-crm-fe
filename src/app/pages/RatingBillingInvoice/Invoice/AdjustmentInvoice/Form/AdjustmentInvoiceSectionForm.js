@@ -49,6 +49,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const [rangeDisableDate, setRangeDisableDate] = useState({});
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
+  const [transactionDate, setTransactionDate] = useState(null);
   const searchTimeoutRef = useRef(null);
 
   // Get initial values from form for update mode
@@ -62,6 +63,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       const typeDueDate = form.getFieldValue("typeDueDate");
       const docDate = form.getFieldValue("documentDate");
       const termsOfPayment = form.getFieldValue("termsOfPayment");
+      const txnDate = form.getFieldValue("transactionDate");
 
       if (accountNumber) setSelectedAccount(accountNumber);
       if (billingCycleId) setSelectedBillingCycle(billingCycleId);
@@ -69,6 +71,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       if (invoiceNumber) setSelectedInvoice(invoiceNumber);
       if (typeDueDate) setSelectedTypeDueDate(typeDueDate);
       if (docDate) setDocumentDate(docDate);
+      if (txnDate) setTransactionDate(txnDate);
 
       // Set selected terms of payment object if exists
       if (termsOfPayment && dataListTermOfPayment) {
@@ -100,6 +103,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       setSelectedTypeDueDate("Date");
       setSelectedTermsOfPayment(null);
       setIsTypeDueDateDisabled(false);
+      setTransactionDate(null);
     }
   }, [type]);
 
@@ -405,6 +409,9 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       documentDate: date,
     });
 
+    // Validate document date against transaction date
+    form.validateFields(["documentDate"]);
+
     // If terms of payment is selected, recalculate due date
     if (
       selectedTermsOfPayment &&
@@ -507,6 +514,16 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     }
   };
 
+  // Handle transaction date change
+  const handleTransactionDateChange = (date) => {
+    setTransactionDate(date);
+    // Re-validate document date when transaction date changes
+    const currentDocDate = form.getFieldValue("documentDate");
+    if (currentDocDate) {
+      form.validateFields(["documentDate"]);
+    }
+  };
+
   // Disable dates outside of billing period range
   const disabledRangeDate = useCallback(
     (current) => {
@@ -516,6 +533,24 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       );
     },
     [rangeDisableDate],
+  );
+
+  // Disable dates for document date: must be within billing period AND not after transaction date
+  const disabledDocumentDate = useCallback(
+    (current) => {
+      // First check billing period range
+      const outsideBillingPeriod =
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days");
+
+      // Then check if after transaction date
+      const afterTransactionDate = transactionDate
+        ? current > moment(transactionDate).endOf("day")
+        : false;
+
+      return outsideBillingPeriod || afterTransactionDate;
+    },
+    [rangeDisableDate, transactionDate],
   );
 
   return (
@@ -681,25 +716,43 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
               dateDisable={disabledRangeDate}
               defaultPickerValue={defaultPicker}
               key={`transaction-${keyPicker}`}
+              onChange={handleTransactionDateChange}
             />
           </Form.Item>
 
           <Form.Item
             label="Document Date"
             name="documentDate"
+            dependencies={["transactionDate"]}
             rules={[
               {
                 required: true,
                 message: "Please select Document Date!",
               },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const transactionDate = getFieldValue("transactionDate");
+                  if (!value || !transactionDate) {
+                    return Promise.resolve();
+                  }
+                  if (moment(value).isAfter(moment(transactionDate), "day")) {
+                    return Promise.reject(
+                      new Error(
+                        "Document Date cannot be later than Transaction Date!",
+                      ),
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              }),
             ]}
           >
             <DateComponent
               placeholder="Select Document Date"
               onChange={handleDocumentDateChange}
-              dateDisable={disabledRangeDate}
+              dateDisable={disabledDocumentDate}
               defaultPickerValue={defaultPicker}
-              key={`document-${keyPicker}`}
+              key={`document-${keyPicker}-${transactionDate}`}
             />
           </Form.Item>
 

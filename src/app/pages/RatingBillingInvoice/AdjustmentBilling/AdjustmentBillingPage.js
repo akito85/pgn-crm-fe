@@ -37,7 +37,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 const AdjustmentBillingPage = () => {
   // Selector
   const { data, loading, data_approval_history, message } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -74,7 +74,7 @@ const AdjustmentBillingPage = () => {
         pageSize: 100, // Initial load 100 data
         sort,
         isLoadMore: false, // Flag untuk initial load
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -128,7 +128,7 @@ const AdjustmentBillingPage = () => {
           pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true, // Flag untuk load more
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -165,7 +165,7 @@ const AdjustmentBillingPage = () => {
         page,
         pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -194,7 +194,7 @@ const AdjustmentBillingPage = () => {
             pageSize: 100,
             sort,
             isLoadMore: false,
-          })
+          }),
         );
         setPage(1);
         handleCancel();
@@ -394,7 +394,7 @@ const AdjustmentBillingPage = () => {
 
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: 100,
@@ -409,7 +409,7 @@ const AdjustmentBillingPage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [searchInput, searchedColumn, searchText, search]);
 
@@ -485,7 +485,7 @@ const AdjustmentBillingPage = () => {
         handleCancel={() => setModalDelete(false)}
         handleOk={handleDeleteOk}
         width={500}
-        useOk={true}
+        // useOk={true}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
