@@ -300,7 +300,7 @@ const AdjustmentInvoicePage = () => {
                 </ButtonComponent>
               </Link>
             ) : (
-              <div className="flex items-center cursor-not-allowed px-3 py-1">
+              <div className="flex items-center cursor-not-allowed px-2 py-1">
                 <span className="pointer-events-none">
                   <SVGIcon name="IconEdit" color="#8D91A0" width={24} />
                 </span>
@@ -324,11 +324,13 @@ const AdjustmentInvoicePage = () => {
             </Tooltip>
           ) : (
             <Tooltip title="Update">
-              <div className="cursor-not-allowed">
-                <span className="pointer-events-none">
-                  <SVGIcon name="IconEdit" width={24} color="#8D91A0" />
-                </span>
-              </div>
+              <Link>
+                <div className="cursor-not-allowed">
+                  <span className="pointer-events-none">
+                    <SVGIcon name="IconEdit" width={24} color="#8D91A0" />
+                  </span>
+                </div>
+              </Link>
             </Tooltip>
           );
 
