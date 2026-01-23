@@ -3,10 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin, Alert, Steps, message } from "antd";
 import {
   DownloadOutlined,
-  FileTextOutlined,
   CopyOutlined,
   CheckOutlined,
-  ArrowLeftOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -286,7 +285,6 @@ const ModalGenerateXML = ({
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
-    // Reset selection when page changes
     setSelectedRowKeys([]);
     setSelectedRecords([]);
   };
@@ -443,7 +441,6 @@ const ModalGenerateXML = ({
     }));
   }, [allColumns]);
 
-  // Data source with keys
   const dataSource = useMemo(() => {
     return data_available_requested.map((item, idx) => ({
       ...item,
@@ -451,67 +448,106 @@ const ModalGenerateXML = ({
     }));
   }, [data_available_requested]);
 
-  const getFooter = () => {
-    if (currentStep === 0) {
-      return (
-        <div
-          className="flex justify-end gap-3"
-          style={{ alignItems: "stretch" }}
-        >
-          <ButtonComponent
-            type="default"
-            size="large"
-            onClick={handleCancel}
-            style={{ width: 140, height: 40 }}
-          >
-            Cancel
-          </ButtonComponent>
-
-          <ButtonComponent
-            type="default"
-            className={"bg-red-500"}
-            onClick={handleGenerateXML}
-            loading={loading_modal}
-            disabled={selectedRowKeys.length === 0}
-            icon={<FileTextOutlined />}
-            fontSizeClassname="text-[18px] py-1 px-1"
-            style={{ width: 140 }}
-          >
-            Next
-          </ButtonComponent>
+  // Steps configuration
+  const steps = [
+    {
+      title: "SELECT E-FAKTUR",
+      content: (
+        <div>
+          <TableRBI
+            dataSource={dataSource}
+            columns={processedColumns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            onSizeChanger={handleChange}
+            totalData={pagination_available_requested.totalElements}
+            tableScrolled={{ y: 400, x: 1200 }}
+            onSort={onSort}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading_available_requested}
+            rowSelection={rowSelection}
+            showExport={false}
+          />
         </div>
-      );
-    }
+      ),
+      disabled: false,
+    },
+    {
+      title: "XML PREVIEW",
+      content: (
+        <div>
+          {/* Selected E-Faktur Summary */}
+          <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
+            <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
+              E-Faktur yang Diproses ({selectedRecords.length})
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              {selectedRecords.slice(0, 10).map((record, idx) => (
+                <div key={idx} className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    {idx + 1}. {record.billingCode}
+                  </span>
+                  <span className="font-medium">
+                    {record.invoiceNumber || "-"}
+                  </span>
+                </div>
+              ))}
+              {selectedRecords.length > 10 && (
+                <div className="col-span-2 text-center text-sm text-gray-500">
+                  ... dan {selectedRecords.length - 10} lainnya
+                </div>
+              )}
+            </div>
+          </div>
 
-    return (
-      <div className="flex justify-between">
-        <ButtonComponent
-          type="default"
-          onClick={handlePrevious}
-          icon={<ArrowLeftOutlined />}
-        >
-          Previous
-        </ButtonComponent>
-        <div className="flex gap-3">
-          <ButtonComponent
-            type="default"
-            onClick={handleCopyXML}
-            icon={copied ? <CheckOutlined /> : <CopyOutlined />}
-            style={copied ? { borderColor: "#52c41a", color: "#52c41a" } : {}}
-          >
-            {copied ? "Copied!" : "Copy XML"}
-          </ButtonComponent>
-          <ButtonComponent
-            type="primary"
-            onClick={handleDownloadXML}
-            icon={<DownloadOutlined />}
-          >
-            Download XML
-          </ButtonComponent>
+          {/* XML Preview */}
+          {xmlContent && (
+            <div>
+              <h3 className="text-base font-bold text-green-800 mb-3 flex items-center gap-2">
+                <FileTextOutlined /> XML Generated Successfully
+              </h3>
+              <div className="rounded-lg border-2 border-green-300 bg-white shadow-md overflow-hidden">
+                <div className="flex justify-between items-center px-4 py-3 border-b-2 border-green-200 bg-green-50">
+                  <p className="text-sm font-bold text-green-800">
+                    XML Preview ({xmlContent.length.toLocaleString()}{" "}
+                    characters)
+                  </p>
+                  <ButtonComponent
+                    type="default"
+                    size="small"
+                    onClick={handleCopyXML}
+                    icon={copied ? <CheckOutlined /> : <CopyOutlined />}
+                    className={`transition-all duration-200 ${
+                      copied
+                        ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
+                        : "border-gray-300 text-gray-600 bg-white hover:bg-gray-100"
+                    }`}
+                  >
+                    {copied ? "Copied!" : "Copy"}
+                  </ButtonComponent>
+                </div>
+
+                <div className="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-auto max-h-96">
+                  <pre className="whitespace-pre-wrap break-words">
+                    {xmlContent}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    );
-  };
+      ),
+      disabled: false,
+    },
+  ];
+
+  const items = steps.map((item) => ({
+    key: item.title,
+    title: item.title,
+  }));
 
   return (
     <div>
@@ -520,107 +556,65 @@ const ModalGenerateXML = ({
         type="confirmation"
         header="GENERATE XML"
         handleCancel={handleCancel}
-        width={1000}
-        footer={getFooter()}
+        width={1200}
+        footer={null}
       >
         <Spin spinning={loading_available_requested || loading_modal}>
           <div className="my-6">
             {/* Steps */}
-            <div className="mb-6">
-              <Steps current={currentStep} className="px-12">
-                <Step title="E-FAKTUR" icon={<FileTextOutlined />} />
-                <Step title="CONFIRMATION" icon={<CheckOutlined />} />
-              </Steps>
+            <div className="mb-6 flex justify-center">
+              <div className="w-1/2">
+                <Steps
+                  current={currentStep}
+                  items={items}
+                  labelPlacement="vertical"
+                />
+              </div>
             </div>
 
-            {/* Step 1: E-Faktur List */}
-            {currentStep === 0 && (
-              <>
-                {/* Table */}
-                <TableRBI
-                  dataSource={dataSource}
-                  columns={processedColumns}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChange}
-                  onSizeChanger={handleChange}
-                  totalData={pagination_available_requested.totalElements}
-                  tableScrolled={{ y: 400, x: 1200 }}
-                  onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
-                  loading={loading_available_requested}
-                  rowSelection={rowSelection}
-                  showExport={false}
-                />
-              </>
-            )}
+            {/* Step Content */}
+            <div className="steps-content my-[30px]">
+              {steps[currentStep].content}
+            </div>
 
-            {/* Step 2: Confirmation */}
-            {currentStep === 1 && (
+            {/* Footer Buttons */}
+            <div className="mt-[30px] flex justify-between">
               <div>
-                {/* Selected E-Faktur Summary */}
-                <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
-                  <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                    E-Faktur yang Diproses ({selectedRecords.length})
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {selectedRecords.slice(0, 10).map((record, idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
-                        <span className="text-gray-600">
-                          {idx + 1}. {record.billingCode}
-                        </span>
-                        <span className="font-medium">
-                          {record.invoiceNumber || "-"}
-                        </span>
-                      </div>
-                    ))}
-                    {selectedRecords.length > 10 && (
-                      <div className="col-span-2 text-center text-sm text-gray-500">
-                        ... dan {selectedRecords.length - 10} lainnya
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <ButtonComponent type="default" onClick={handleCancel}>
+                  Cancel
+                </ButtonComponent>
+              </div>
 
-                {/* XML Preview */}
-                {xmlContent && (
-                  <div>
-                    <h3 className="text-base font-bold text-green-800 mb-3 flex items-center gap-2">
-                      <FileTextOutlined /> XML Generated Successfully
-                    </h3>
-                    <div className="rounded-lg border-2 border-green-300 bg-white shadow-md overflow-hidden">
-                      <div className="flex justify-between items-center px-4 py-3 border-b-2 border-green-200 bg-green-50">
-                        <p className="text-sm font-bold text-green-800">
-                          XML Preview ({xmlContent.length.toLocaleString()}{" "}
-                          characters)
-                        </p>
-                        <ButtonComponent
-                          type="default"
-                          size="small"
-                          onClick={handleCopyXML}
-                          icon={copied ? <CheckOutlined /> : <CopyOutlined />}
-                          className={`transition-all duration-200 ${
-                            copied
-                              ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
-                              : "border-gray-300 text-gray-600 bg-white hover:bg-gray-100"
-                          }`}
-                        >
-                          {copied ? "Copied!" : "Copy"}
-                        </ButtonComponent>
-                      </div>
+              <div className="flex gap-x-4">
+                {currentStep > 0 && (
+                  <ButtonComponent
+                    type="default"
+                    onClick={handlePrevious}
+                  >
+                    Previous
+                  </ButtonComponent>
+                )}
 
-                      <div className="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-auto max-h-96">
-                        <pre className="whitespace-pre-wrap break-words">
-                          {xmlContent}
-                        </pre>
-                      </div>
-                    </div>
-                  </div>
+                {currentStep === 0 ? (
+                  <ButtonComponent
+                    type="primary"
+                    onClick={handleGenerateXML}
+                    loading={loading_modal}
+                    disabled={selectedRowKeys.length === 0}
+                  >
+                    Next
+                  </ButtonComponent>
+                ) : (
+                  <ButtonComponent
+                    type="primary"
+                    onClick={handleDownloadXML}
+                    icon={<DownloadOutlined />}
+                  >
+                    Download XML
+                  </ButtonComponent>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </Spin>
       </ModalCustom>

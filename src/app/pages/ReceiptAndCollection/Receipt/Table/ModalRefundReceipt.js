@@ -1,9 +1,10 @@
 
 import React, { useEffect, useState } from "react";
-import { Modal, Steps, Button, message, Input, InputNumber, Segmented } from "antd";
+import { Modal, Steps, Button, message, Input, InputNumber, Segmented, DatePicker } from "antd";
+import moment from "moment";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { columnsReceipt } from "../ColumnReceiptView"; // Might use parts of this or define custom
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -39,10 +40,14 @@ const ModalRefundReceipt = ({
     const [searchedColumn, setSearchedColumn] = useState("");
 
     // Step 2 Selection State (Receipts)
+    const [eligibleReceipts, setEligibleReceipts] = useState([]); // Filtered receipts
     const [selectedReceipts, setSelectedReceipts] = useState([]);
     const [selectedReceiptRowKeys, setSelectedReceiptRowKeys] = useState([]);
     const [pageReceipt, setPageReceipt] = useState(1);
     const [pageSizeReceipt, setPageSizeReceipt] = useState(10);
+
+    // Refund Date State
+    const [refundDate, setRefundDate] = useState(moment()); // Default: today
 
     const onReceiptSelectChange = (newSelectedRowKeys, newSelectedRows) => {
         setSelectedReceiptRowKeys(newSelectedRowKeys);
@@ -100,12 +105,30 @@ const ModalRefundReceipt = ({
         }
     }, [isOpen, dispatch]);
 
-    // Fetch receipt list when entering Step 2
+    // Fetch eligible receipts when entering Step 2 (Approved & Balance > 0)
     useEffect(() => {
-        if (currentStep === 1) {
-            dispatch(getPaginateReceipt({ page: pageReceipt, pageSize: pageSizeReceipt, sort: "createdDate~desc" }));
+        if (currentStep === 1 && isOpen) {
+            const fetchEligibleReceipts = async () => {
+                try {
+                    const url = `/v1/dbs/api/receipt/get-list?searchs=&page=0&size=9999&sort=createdDate~desc`;
+                    const response = await receiptCollectionHttpService.getAll(url);
+
+                    const content = response?.data?.result || [];
+                    const eligible = content.filter(item =>
+                        item.statusApproval === "Approved" &&
+                        (item.balance > 0 || item.unAppliedAmount > 0)
+                    );
+
+                    setEligibleReceipts(eligible);
+                } catch (error) {
+                    console.error('Error fetching eligible receipts:', error);
+                    setEligibleReceipts([]);
+                }
+            };
+
+            fetchEligibleReceipts();
         }
-    }, [currentStep, pageReceipt, pageSizeReceipt, dispatch]);
+    }, [currentStep, isOpen]);
 
     const steps = [
         {
@@ -394,7 +417,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={dataSourceStep1}
                             columns={columnsStep1}
                             rowSelection={rowSelection}
@@ -410,7 +433,7 @@ const ModalRefundReceipt = ({
                     </div>
                 );
             case 1:
-                const receiptDataSource = data?.result?.map(item => ({
+                const receiptDataSource = eligibleReceipts?.map(item => ({
                     ...item,
                     key: item.id
                 })) || [];
@@ -420,7 +443,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Receipt Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={receiptDataSource}
                             columns={columnsStep2}
                             rowSelection={receiptRowSelection}
@@ -428,7 +451,7 @@ const ModalRefundReceipt = ({
                             pageSize={pageSizeReceipt}
                             onChange={handleReceiptChangePage}
                             onShowSizeChange={handleReceiptChangePage}
-                            totalData={data?.page?.totalElements || 0}
+                            totalData={eligibleReceipts?.length || 0}
                             showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} Records`}
                             tableScrolled={{ x: "max-content", y: 400 }}
                             loading={loading}
@@ -441,7 +464,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={localSelectedData}
                             columns={columnsStep3}
                             // No custom pagination logic needed for selected items list for now
@@ -451,6 +474,16 @@ const ModalRefundReceipt = ({
                             usePagination={false} // Disable external pagination if just showing list
                             useSelect={false}
                         />
+                        <div className="mt-4">
+                            <p className="mb-2 font-bold">Refund Date <span className="text-red-500">*</span></p>
+                            <DatePicker
+                                style={{ width: '300px' }}
+                                value={refundDate}
+                                onChange={(date) => setRefundDate(date)}
+                                format="DD MMM YYYY"
+                                placeholder="Select Refund Date"
+                            />
+                        </div>
                         <div className="mt-4">
                             <p className="mb-2 font-bold">Remark</p>
                             <Input.TextArea
@@ -470,7 +503,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Refund Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={selectedReceipts}
                             columns={columnsStep4}
                             pagination={false}
@@ -530,13 +563,17 @@ const ModalRefundReceipt = ({
                                         <div className="flex justify-between items-center mb-2">
                                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                                         </div>
-                                        <TablePagination
+                                        <TableRBI
                                             dataSource={localSelectedData}
                                             columns={columnsStep3Confirmation}
                                             pagination={false}
                                             usePagination={false}
                                             tableScrolled={{ x: "max-content", y: 400 }}
                                         />
+                                        <div className="mt-4">
+                                            <p className="mb-2 font-bold">Refund Date</p>
+                                            <div className="text-gray-700">{refundDate?.format('DD MMM YYYY') || "-"}</div>
+                                        </div>
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
                                             <div className="text-gray-700">{remarkStep3 || "-"}</div>
@@ -548,7 +585,7 @@ const ModalRefundReceipt = ({
                                         <div className="flex justify-between items-center mb-2">
                                             <h3 className="text-blue-500 font-bold uppercase">Refund Information</h3>
                                         </div>
-                                        <TablePagination
+                                        <TableRBI
                                             dataSource={selectedReceipts}
                                             columns={columnsStep4Confirmation}
                                             pagination={false}

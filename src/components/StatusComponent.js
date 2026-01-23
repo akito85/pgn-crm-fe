@@ -137,20 +137,25 @@ const StatusComponent = ({
       case "primary":
       case "refund":
       case "unapplied":
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
+        break;
+
       case "hold":
       case "rating":
       case "standby":
-        bgColor = "bg-blue-500";
+        bgColor = "bg-[#F57C00]";
         tColor = "text-white";
         break;
 
       case "applied":
-        bgColor = "bg-[#ACC424]";
+        bgColor = "bg-[#288C44]";
         tColor = "text-white";
         break;
 
       case "reverse":
-        bgColor = "bg-[#910000]";
+      case "reversed":
+        bgColor = "bg-[#BE3036]";
         tColor = "text-white";
         break;
 

@@ -71,6 +71,32 @@ export const columnsRating = (
       ),
   },
   {
+    key: "currency",
+    title: "CURRENCY",
+    dataIndex: "currency",
+    isClassification: true,
+    width: 130,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "currency",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+    render: (text) =>
+      renderColumn(
+        "currency",
+        hasValue(search["currency"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
     key: "timeUnitContract",
     title: "CONTRACT TIME UNIT",
     dataIndex: "timeUnitContract",
@@ -100,7 +126,7 @@ export const columnsRating = (
     key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
-    width: 170,
+    width: 150,
     isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -152,7 +178,7 @@ export const columnsRating = (
   {
     key: "transactionDate",
     title: "TRANSACTION DATE",
-    width: 190,
+    width: 180,
     sorter: true,
     isClassification: true,
     dataIndex: "transactionDate",
@@ -205,7 +231,7 @@ export const columnsRating = (
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
-    width: 180,
+    width: 170,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -230,7 +256,7 @@ export const columnsRating = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
-    width: 180,
+    width: 170,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -269,32 +295,6 @@ export const columnsRating = (
       renderColumn(
         "accountName",
         hasValue(search["accountName"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    key: "accGroupType",
-    title: "ACCOUNT GROUP TYPE",
-    dataIndex: "accGroupType",
-    width: 210,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accGroupType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
-        "accGroupType",
-        hasValue(search["accGroupType"]),
         searchText,
         text,
         false,
@@ -399,6 +399,32 @@ export const columnsRating = (
       renderColumn(
         "accountSegment",
         hasValue(search["accountSegment"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+    {
+    key: "accGroupType",
+    title: "ACCOUNT GROUP TYPE",
+    dataIndex: "accGroupType",
+    width: 210,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accGroupType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+    render: (text) =>
+      renderColumn(
+        "accGroupType",
+        hasValue(search["accGroupType"]),
         searchText,
         text,
         false,
@@ -685,7 +711,7 @@ export const columnsRating = (
         key: "minCalculated",
         title: "MIN",
         dataIndex: "minCalculated",
-        width: 150,
+        width: 120,
         sorter: true,
         isClassification: true,
         align: "center",
@@ -986,32 +1012,6 @@ export const columnsRating = (
     ],
   },
   {
-    key: "currency",
-    title: "CURRENCY",
-    dataIndex: "currency",
-    isClassification: true,
-    width: 130,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "currency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
-        "currency",
-        hasValue(search["currency"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
     title: "AMOUNT PARTITION",
     children: [
       {
@@ -1123,7 +1123,7 @@ export const columnsRating = (
         search,
       ),
   },
-   {
+  {
     key: "totalAdjustment",
     title: "TOTAL ADJUSTMENT",
     width: 160,

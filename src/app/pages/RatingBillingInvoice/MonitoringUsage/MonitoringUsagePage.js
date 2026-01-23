@@ -35,7 +35,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 const MonitoringUsagePage = () => {
   // Selector
   const { data_approval_history, updatedBatchIds } = useSelector(
-    (state) => state.monitoring_usage
+    (state) => state.monitoring_usage,
   );
 
   // Declaration
@@ -55,6 +55,7 @@ const MonitoringUsagePage = () => {
     onClickApproval,
     data_approval,
     handleDownload,
+    handleDownloadBatch,
     search,
     setSearch,
     setSearchText,
@@ -175,57 +176,69 @@ const MonitoringUsagePage = () => {
     }
   };
 
-  const grantAccessButton = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={20} />}
-          onClick={() => {
-            handleDownload();
-          }}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Approval",
-      render: (
-        <ButtonComponent
-          icon={
-            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={20} />
-          }
-          type={"submit"}
-          border={false}
-          onClick={() => {
-            onClickApproval();
-            setModalApproval(true);
-            setDataTableSelect(data_approval);
-          }}
-        >
-          Approval
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Upload",
-      render: (
-        <NavLink to={RBI_ROUTES.MONITORING_USAGE_UPLOAD}>
+  const grantAccessButton = useMemo(() => {
+    const isUsageList = tabHeader === "Usage List";
+
+    return [
+      {
+        action: "Download",
+        render: (
           <ButtonComponent
-            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={17} />}
             type={"submit"}
             border={false}
+            icon={<SVGIcon name="IconButtonDownload" width={20} />}
+            onClick={() => {
+              if (isUsageList) {
+                handleDownload();
+              } else {
+                handleDownloadBatch();
+              }
+            }}
           >
-            Upload Usage
+            Download List
           </ButtonComponent>
-        </NavLink>
-      ),
-    },
-  ];
-
+        ),
+      },
+      {
+        action: "Approval",
+        render: (
+          <ButtonComponent
+            icon={
+              <SVGIcon
+                name="IconRequestApproval"
+                color={"#FFFFFF"}
+                width={20}
+              />
+            }
+            type={"submit"}
+            border={false}
+            onClick={() => {
+              onClickApproval();
+              setModalApproval(true);
+              setDataTableSelect(data_approval);
+            }}
+          >
+            Approval
+          </ButtonComponent>
+        ),
+      },
+      {
+        action: "Upload",
+        render: (
+          <NavLink to={RBI_ROUTES.MONITORING_USAGE_UPLOAD}>
+            <ButtonComponent
+              icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={17} />}
+              type={"submit"}
+              border={false}
+            >
+              Upload Usage
+            </ButtonComponent>
+          </NavLink>
+        ),
+      },
+    ];
+  }, [tabHeader, handleDownload, handleDownloadBatch]);
+  
   const grantAccessUsage = [
     {
       action: "History",
@@ -247,7 +260,7 @@ const MonitoringUsagePage = () => {
 
   const columnActionUsage = useColumnActionPermission(
     ["history"],
-    grantAccessUsage
+    grantAccessUsage,
   ).map((col) => ({
     ...col,
     width: 80,
@@ -375,7 +388,7 @@ const MonitoringUsagePage = () => {
         pageSize: 100,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   };
@@ -388,7 +401,7 @@ const MonitoringUsagePage = () => {
         pageSize: 100,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   };
