@@ -28,6 +28,7 @@ const initialState = {
   loadingApprove: false,
   loadingModalReq: false,
   data_type_ci: [],
+  data_partner: [],
 };
 
 export const getEceletricBankPaging = createAsyncThunk(
@@ -573,6 +574,60 @@ export const getListTypeCi = createAsyncThunk(
   }
 );
 
+export const getListPartner = createAsyncThunk(
+  "GET_LIST_PARTNER",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getListTypeCiByPartner = createAsyncThunk(
+  "GET_LIST_TYPE_CI_BY_PARTNER",
+  async ( {partnerId}, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-channel/list-by-partner/${partnerId}`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 const electronicSlice = createSlice({
   name: "Electronic_Bank_Statment",
   initialState,
@@ -841,6 +896,28 @@ const electronicSlice = createSlice({
       state.loading = false;
     },
     [getListTypeCi.rejected]: (state) => {
+      state.loading = true;
+    },
+
+    [getListTypeCiByPartner.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListTypeCiByPartner.fulfilled]: (state, action) => {
+      state.data_type_ci = action.payload;
+      state.loading = false;
+    },
+    [getListTypeCiByPartner.rejected]: (state) => {
+      state.loading = true;
+    },
+
+    [getListPartner.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListPartner.fulfilled]: (state, action) => {
+      state.data_partner = action.payload;
+      state.loading = false;
+    },
+    [getListPartner.rejected]: (state) => {
       state.loading = true;
     },
   },
