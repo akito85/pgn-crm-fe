@@ -284,47 +284,64 @@ const AdjustmentInvoicePage = () => {
 
         const content =
           data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isEditable}
-              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
-              state={{
-                id: record.invAdjustmentId,
-                invoiceNumber: record.invoiceNumber,
-              }}
-            >
-              <span className={"text-black ml-3"}> Update</span>
-            </ButtonComponent>
+            isEditable ? (
+              <Link
+                to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+                state={{
+                  id: record.invAdjustmentId,
+                  invoiceNumber: record.invoiceNumber,
+                }}
+              >
+                <ButtonComponent
+                  icon={<SVGIcon name="IconEdit" color="#0075bf" width={20} />}
+                  border={false}
+                >
+                  <span className="text-black ml-3"> Update</span>
+                </ButtonComponent>
+              </Link>
+            ) : (
+              <div className="flex items-center cursor-not-allowed px-3 py-1">
+                <SVGIcon name="IconEdit" color="#8D91A0" width={20} />
+                <span className="text-gray-400 ml-3"> Update</span>
+              </div>
+            )
           ) : (
-            <Link
-              to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_DETAIL}
-              state={{ id: record.id }}
-            >
-              <Tooltip title="Update">
-                <div className="">
+            <Tooltip title="Update">
+              <div
+                className={!isEditable ? "cursor-not-allowed" : "cursor-pointer"}
+                onClick={() => {
+                  if (isEditable) {
+                    window.location.href = INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE;
+                  }
+                }}
+              >
+                {isEditable ? (
+                  <Link
+                    to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+                    state={{
+                      id: record.invAdjustmentId,
+                      invoiceNumber: record.invoiceNumber,
+                    }}
+                  >
+                    <SVGIcon
+                      name="IconEdit"
+                      width={24}
+                      color="#ACC424"
+                    />
+                  </Link>
+                ) : (
                   <SVGIcon
                     name="IconEdit"
                     width={24}
-                    color={!isEditable ? "#8D91A0" : "#ACC424"}
-                    className={!isEditable ? "cursor-not-allowed" : undefined}
+                    color="#8D91A0"
+                    className="cursor-not-allowed"
                   />
-                </div>
-              </Tooltip>
-            </Link>
+                )}
+              </div>
+            </Tooltip>
           );
 
-        return (
-          <Link
-            to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
-            state={{
-              id: record.invAdjustmentId,
-              invoiceNumber: record.invoiceNumber,
-            }}
-          >
-            {content}
-          </Link>
-        );
+        return content;
       },
     },
     {

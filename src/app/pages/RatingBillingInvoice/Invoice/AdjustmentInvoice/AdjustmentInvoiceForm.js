@@ -67,7 +67,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
   const [valuePage, setValuePage] = useState(
     type === "create"
       ? "Create Adjustment Invoice"
-      : "Update Adjustment Invoice"
+      : "Update Adjustment Invoice",
   );
   const [tabPages, setTabPages] = useState([
     {
@@ -135,8 +135,8 @@ const AdjustmentInvoiceForm = ({ type }) => {
             if (detail.accountNumber) {
               promises.push(
                 dispatch(
-                  getAccountDetailInvoiceAdjustment(detail.accountNumber)
-                )
+                  getAccountDetailInvoiceAdjustment(detail.accountNumber),
+                ),
               );
             }
 
@@ -144,8 +144,8 @@ const AdjustmentInvoiceForm = ({ type }) => {
             if (detail.billingCycleId) {
               promises.push(
                 dispatch(
-                  getBillingPeriodInvoiceAdjustment(detail.billingCycleId)
-                )
+                  getBillingPeriodInvoiceAdjustment(detail.billingCycleId),
+                ),
               );
             }
 
@@ -158,7 +158,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
               // Find billing cycle period from id
               const billingCyclePeriod =
                 dataListBillingCycle?.find(
-                  (cycle) => cycle.id === detail.billingCycleId
+                  (cycle) => cycle.id === detail.billingCycleId,
                 )?.period || detail.billingCycleId;
 
               promises.push(
@@ -167,8 +167,8 @@ const AdjustmentInvoiceForm = ({ type }) => {
                     accountNumber: detail.accountNumber,
                     billingCycle: billingCyclePeriod,
                     billingPeriod: detail.billingPeriode,
-                  })
-                )
+                  }),
+                ),
               );
             }
 
@@ -176,8 +176,8 @@ const AdjustmentInvoiceForm = ({ type }) => {
             if (detail.invoiceNumber) {
               promises.push(
                 dispatch(
-                  getInvoiceDetailInvoiceAdjustment(detail.invoiceNumber)
-                )
+                  getInvoiceDetailInvoiceAdjustment(detail.invoiceNumber),
+                ),
               );
             }
 
@@ -256,14 +256,16 @@ const AdjustmentInvoiceForm = ({ type }) => {
   // Set listDataAttachment from Redux when dataListAttachment changes (for update mode)
   useEffect(() => {
     if (type === "update" && dataListAttachment?.result) {
-      const formattedAttachments = dataListAttachment.result.map((attachment) => ({
-        ...attachment,
-        dataType: "exist",
-        urlFile1: `/v1/dbs/api/rbi/invoice-adjustment/download-attachment/${
-          attachment.fileId || attachment.id
-        }`,
-        key: attachment.fileId || attachment.id,
-      }));
+      const formattedAttachments = dataListAttachment.result.map(
+        (attachment) => ({
+          ...attachment,
+          dataType: "exist",
+          urlFile1: `/v1/dbs/api/rbi/invoice-adjustment/download-attachment/${
+            attachment.fileId || attachment.id
+          }`,
+          key: attachment.fileId || attachment.id,
+        }),
+      );
       setListDataAttachment(formattedAttachments);
     }
   }, [type, dataListAttachment]);
@@ -272,7 +274,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Rating & Billing",
+      breadcrumbName: "Invoice",
     },
     {
       path: INVOICE_ROUTES.ADJUSTMENT_INVOICE_VIEW,
@@ -403,7 +405,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
       else if (finalValues.documentDate && finalValues.termsOfPayment) {
         // Find the selected terms of payment object to get additionalDays
         const selectedTerms = dataListTermOfPayment?.find(
-          (term) => term.description === finalValues.termsOfPayment
+          (term) => term.description === finalValues.termsOfPayment,
         );
 
         if (selectedTerms && selectedTerms.additionalDays) {
@@ -411,7 +413,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
           const days = parseInt(selectedTerms.additionalDays, 10);
           const calculatedDueDate = moment(finalValues.documentDate).add(
             days,
-            "days"
+            "days",
           );
           body.dueDate = calculatedDueDate.format("YYYY-MM-DD");
         } else {
@@ -421,7 +423,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
             const days = parseInt(daysMatch[0], 10);
             const calculatedDueDate = moment(finalValues.documentDate).add(
               days,
-              "days"
+              "days",
             );
             body.dueDate = calculatedDueDate.format("YYYY-MM-DD");
           } else {
@@ -470,7 +472,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
     try {
       // Filter only new attachments that need to be uploaded
       const newAttachments = listDataAttachment.filter(
-        (att) => att.dataType === "new"
+        (att) => att.dataType === "new",
       );
 
       // Upload each attachment
@@ -481,7 +483,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
         formData.append("refId", refId);
 
         await dispatch(
-          uploadAttachmentInvoiceAdjustment({ formData })
+          uploadAttachmentInvoiceAdjustment({ formData }),
         ).unwrap();
       }
     } catch (error) {
@@ -493,7 +495,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -504,11 +506,11 @@ const AdjustmentInvoiceForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -659,8 +661,8 @@ const AdjustmentInvoiceForm = ({ type }) => {
                   ? "updated"
                   : "submitted"
                 : flag === 1
-                ? "created"
-                : "submitted"
+                  ? "created"
+                  : "submitted"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
