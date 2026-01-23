@@ -214,6 +214,22 @@ export const getAccountNumberDDL = createAsyncThunk(
   }
 );
 
+export const getAllAccountNumberDDL = createAsyncThunk(
+  "GET_ALL_ACCOUNT_NUMBER_DDL",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/list-account-number`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_ALL_ACCOUNT_NUMBER_DDL" })
+      );
+      return error;
+    }
+  }
+);
+
 export const getAccountDDL = createAsyncThunk(
   "GET_LIST_ACCOUNT_RECEIPTS_DDL_CREATE _RECEIPT",
   async (id, thunkAPI) => {
@@ -793,6 +809,31 @@ export const approveOrRejectReleaseReceipt = createAsyncThunk(
   }
 );
 
+export const reverseAllocation = createAsyncThunk(
+  "REVERSE_ALLOCATION",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/allocation/reverse";
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: response?.message || "Allocation reversal requested successfully",
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "REVERSE_ALLOCATION",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const approveOrRejectReverseReceipt = createAsyncThunk(
   "APPROVE_OR_REJECT_REVERSE_RECEIPT",
   async ({ body }, thunkAPI) => {
@@ -930,6 +971,28 @@ export const holdReleaseReceiptBulk = createAsyncThunk(
   }
 );
 
+export const getUnifiedCreateReceiptDdl = createAsyncThunk(
+  "GET_UNIFIED_CREATE_RECEIPT_DDL",
+  async ({ paymentTypeId, partnerId, deliveryChannelId, methodId } = {}, thunkAPI) => {
+    try {
+      const params = new URLSearchParams();
+      if (paymentTypeId) params.append("paymentTypeId", paymentTypeId);
+      if (partnerId) params.append("partnerId", partnerId);
+      if (deliveryChannelId) params.append("deliveryChannelId", deliveryChannelId);
+      if (methodId) params.append("methodId", methodId);
+
+      const url = `/v1/dbs/api/receipt/unified-ddl${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_UNIFIED_CREATE_RECEIPT_DDL" })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const receiptSlice = createSlice({
   name: "receipt",
   initialState,
@@ -997,6 +1060,20 @@ const receiptSlice = createSlice({
       state.loading = false;
     },
     [getAccountDDL.rejected]: (state, action) => {
+      state.dataAccNumber = action.payload;
+      state.loading = false;
+    },
+
+    // Get All Account Number List
+    [getAllAccountNumberDDL.pending]: (state, action) => {
+      state.loading = true;
+      state.dataAccNumber = action.payload;
+    },
+    [getAllAccountNumberDDL.fulfilled]: (state, action) => {
+      state.dataAccNumber = action.payload;
+      state.loading = false;
+    },
+    [getAllAccountNumberDDL.rejected]: (state, action) => {
       state.dataAccNumber = action.payload;
       state.loading = false;
     },
@@ -1283,6 +1360,18 @@ const receiptSlice = createSlice({
       state.data = action.payload;
       state.loading = false;
     },
+    // Reverse Allocation
+    [reverseAllocation.pending]: (state) => {
+      state.loading = true;
+    },
+    [reverseAllocation.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [reverseAllocation.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
+    },
     // Create Allocation Detail
     [createAllocation.pending]: (state, action) => {
       state.loading = true;
@@ -1397,6 +1486,22 @@ const receiptSlice = createSlice({
     [holdReleaseReceiptBulk.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
+    },
+    // Unified DDL
+    [getUnifiedCreateReceiptDdl.pending]: (state) => {
+      state.loading = true;
+    },
+    [getUnifiedCreateReceiptDdl.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.payTypeDDL = { data: action.payload.paymentTypes };
+      state.payGatewayDDL = { data: action.payload.paymentPartners };
+      state.colAgentDDL = { data: action.payload.collectingAgents };
+      state.payDeliveryDDL = { data: action.payload.deliveryChannels };
+      state.payMethodDDL = { data: action.payload.receiptMethods };
+      state.bankDDL = { data: action.payload.banks };
+    },
+    [getUnifiedCreateReceiptDdl.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });

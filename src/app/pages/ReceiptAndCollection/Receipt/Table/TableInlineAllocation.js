@@ -38,7 +38,7 @@ const EditableCell = ({
   required,
   disableDate,
   onCellClicked,
-  onInput = () => {},
+  onInput = () => { },
   maxLength,
   form,
   rules = [],
@@ -210,8 +210,8 @@ const TableInlineAllocation = ({
   action,
   useSelect = false,
   usePagination = false,
-  onChangePage = () => {},
-  onSizeChanger = () => {},
+  onChangePage = () => { },
+  onSizeChanger = () => { },
   pageSize,
   current,
   totalData,
@@ -220,22 +220,23 @@ const TableInlineAllocation = ({
   disableDate,
   setOpenModal,
   actionButton,
-  onSort = () => {},
+  onSort = () => { },
   useContainer = true,
   checkInputBy,
   checkNameColumn,
   handleValidate,
   messageValidate,
   actionFix,
-  setInserted = () => {},
-  setRule = () => {},
-  setMaxLenght = () => {},
-  setUpdateSelectDataTable = () => {},
-  setUpdateSelectRowKeys = () => {},
-  setUpdateTotalAmount = () => {},
+  setInserted = () => { },
+  setRule = () => { },
+  setMaxLenght = () => { },
+  setUpdateSelectDataTable = () => { },
+  setUpdateSelectRowKeys = () => { },
+  setUpdateTotalAmount = () => { },
   rateAmount,
   type = "create",
   currency,
+  onReverse = () => { },
 }) => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
@@ -467,6 +468,16 @@ const TableInlineAllocation = ({
       />
     );
   };
+  const renderReverse = (record) => {
+    return record.allocationNumber ? (
+      <ButtonComponent
+        onClick={() => onReverse(record)}
+        disabled={editingKey !== ""}
+        icon={<SVGIcon name="IconRevers" width={24} />}
+        border={false}
+      />
+    ) : null;
+  };
 
   // render column table inline
   const columns = [
@@ -519,7 +530,7 @@ const TableInlineAllocation = ({
                             />
                           }
                           border={false}
-                          // onClick={() => onDetail(record?.id)}
+                        // onClick={() => onDetail(record?.id)}
                         >
                           <span className={"text-[#C0BEC6]"}> Detail</span>
                         </ButtonComponent>
@@ -608,6 +619,7 @@ const TableInlineAllocation = ({
                     />
                   </ButtonComponent>
                 )}
+                {renderReverse(record)}
                 {renderDelete(record)}
               </>
             )}
