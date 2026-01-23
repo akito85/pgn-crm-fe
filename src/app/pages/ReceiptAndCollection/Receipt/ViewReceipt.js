@@ -611,7 +611,7 @@ const ViewReceipt = () => {
               <p className="mt-[15px] font-bold uppercase text-[#0075BF]">receipt list</p>
               <div className="flex gap-2">
                 <ButtonComponent
-                  icon={<SVGIcon name="IconButtonDownload" width={18} />}
+                  icon={<DownloadOutlined style={{ fontSize: 18 }} />}
                   onClick={handleDownload}
                 >
                   Download List
@@ -645,7 +645,7 @@ const ViewReceipt = () => {
                     icon={<SVGIcon name="IconButtonCreate" width={18} />}
                     type="submit"
                   >
-                    + Create
+                    Create
                   </ButtonComponent>
                 </NavLink>
               </div>

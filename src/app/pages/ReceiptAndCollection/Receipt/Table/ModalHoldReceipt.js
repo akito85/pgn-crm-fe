@@ -360,7 +360,11 @@ const ModalHoldReceipt = ({
     };
 
     // Use fetched data instead of passed dataSource
-    const filteredDataSource = allReceiptsData;
+    // Add unique key to prevent selection issues
+    const filteredDataSource = allReceiptsData?.map(item => ({
+        ...item,
+        key: item.id // Use id as unique key
+    })) || [];
 
     return (
         <ModalCustom
