@@ -111,27 +111,27 @@ const TableRBI = ({
   pageSize,
   current,
   loading,
-  onChange = () => {},
-  onSizeChanger = () => {},
+  onChange = () => { },
+  onSizeChanger = () => { },
   totalData,
   onDelete,
   rowSelection,
-  onRowClicked = () => {},
+  onRowClicked = () => { },
   tableScrolled,
   expandable,
   className,
   useSelect = true,
   usePagination = true,
   useInfiniteScroll = false,
-  onLoadMore = () => {},
+  onLoadMore = () => { },
   hasMore = false,
   loadMoreThreshold = 20,
-  onSort = () => {},
-  handleDownload = () => {},
+  onSort = () => { },
+  handleDownload = () => { },
   columnDefinitions,
   fixedColumns = { left: [], right: [] },
-  setFixedColumns = () => {},
-  onAdvanceSearch = () => {},
+  setFixedColumns = () => { },
+  onAdvanceSearch = () => { },
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -142,7 +142,7 @@ const TableRBI = ({
   onRefresh,
   enableRowClick = false,
   selectedRowKey = null,
-  onRowClick = () => {},
+  onRowClick = () => { },
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -609,11 +609,23 @@ const TableRBI = ({
             #${idTable} .ant-table-thead > tr > th {
               position: relative;
               z-index: 4;
+              background-color: #0075BF !important;
+              color: white !important;
+            }
+
+            #${idTable} .ant-table-thead > tr > th .ant-table-column-sorter {
+              color: white !important;
+            }
+
+            #${idTable} .ant-table-thead > tr > th .ant-table-filter-trigger {
+              color: white !important;
             }
 
             #${idTable} .ant-table-thead .ant-table-cell-fix-left,
             #${idTable} .ant-table-thead .ant-table-cell-fix-right {
               z-index: 5;
+              background-color: #0075BF !important;
+              color: white !important;
             }
 
             #${idTable} .ant-table-filter-trigger,
@@ -713,7 +725,7 @@ const TableRBI = ({
           </div>
 
           {hasRightControls && (
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 items-center">
               {showRefresh && (
                 <Button
                   icon={<ReloadOutlined style={{ fontSize: "14px" }} />}
@@ -731,25 +743,10 @@ const TableRBI = ({
                 </Button>
               )}
 
-              {showExport && (
-                <Button
-                  icon={<DownloadOutlined style={{ fontSize: "14px" }} />}
-                  onClick={handleDownload}
-                  style={{
-                    border: "1px solid #BDBDBD",
-                    color: "black",
-                    borderRadius: "8px",
-                    height: "32px",
-                    fontSize: "12px",
-                  }}
-                >
-                  Export
-                </Button>
-              )}
-
               {showAdvanceSearch && (
                 <Button
                   onClick={() => setIsAdvanceOpen(true)}
+                  className="flex items-center gap-2"
                   style={{
                     border: "1px solid #BDBDBD",
                     color: "black",
@@ -764,8 +761,8 @@ const TableRBI = ({
               )}
 
               {showSearchBar && (
-                <div style={{ width: "200px" }}>
-                  <SearchBar />
+                <div style={{ width: "250px" }}>
+                  <SearchBar placeholder="Search Content" />
                 </div>
               )}
             </div>
@@ -820,9 +817,11 @@ const TableRBI = ({
                 </Option>
               ))}
             </Select>
-            <span style={{ fontSize: "12px" }}>
-              Showing {(current - 1) * pageSize + 1} to{" "}
-              {Math.min(current * pageSize, totalData)} of {totalData} entries
+            <span style={{ fontSize: "12px", color: "#666" }}>
+              Showing {current * pageSize - pageSize + 1} to{" "}
+              {Math.min(current * pageSize, totalData)} entries
+              <span className="mx-2">•</span>
+              <span className="text-[#288C44] font-medium">All data showed</span>
             </span>
           </div>
           <Pagination

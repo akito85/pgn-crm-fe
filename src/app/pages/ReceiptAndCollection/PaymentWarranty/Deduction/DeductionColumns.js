@@ -15,6 +15,8 @@ export const getDeductionColumns = ({
     const columns = [
         {
             title: "NO",
+            isClassification: true,
+            align: "center",
             key: "no",
             width: 60,
             render: (text, object, index) => (page - 1) * pageSize + index + 1,

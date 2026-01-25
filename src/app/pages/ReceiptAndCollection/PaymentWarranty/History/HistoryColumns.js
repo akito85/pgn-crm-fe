@@ -11,6 +11,7 @@ export const getHistoryPaymentWarrantyColumns = ({
             dataIndex: "no",
             key: "no",
             width: 50,
+            isClassification: true,
             render: (text, record, index) => (page - 1) * pageSize + index + 1,
         },
         {
@@ -122,6 +123,7 @@ export const getInvoiceInformationColumns = () => {
             title: "NO",
             dataIndex: "no",
             key: "no",
+            isClassification: true,
             width: 50,
         },
         {

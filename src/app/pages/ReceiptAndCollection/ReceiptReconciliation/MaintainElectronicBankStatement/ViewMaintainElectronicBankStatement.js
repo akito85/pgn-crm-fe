@@ -65,7 +65,7 @@ const ViewMaintainElectronicBankStatement = () => {
       title: "NO",
       key: "no",
       width: 60,
-      align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -263,6 +263,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalTransaction",
       key: "totalTransaction",
       align: "center",
+      isClassification: true,
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -292,6 +293,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalMatch",
       key: "totalMatch",
       align: "center",
+      isClassification: true,
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -321,6 +323,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalForce",
       key: "totalForce",
       align: "center",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -349,6 +352,7 @@ const ViewMaintainElectronicBankStatement = () => {
       title: "TOTAL REVERSE",
       dataIndex: "totalReverse",
       align: "center",
+      isClassification: true,
       key: "totalReverse",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -375,6 +379,7 @@ const ViewMaintainElectronicBankStatement = () => {
       title: "TOTAL SUNDRY",
       dataIndex: "totalSundry",
       key: "totalSundry",
+      isClassification: true,
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -402,6 +407,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "currency",
       key: "currency",
       align: "center",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -431,6 +437,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalAmount",
       key: "totalAmount",
       align: "right",
+      isNumber: true,
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -447,6 +454,96 @@ const ViewMaintainElectronicBankStatement = () => {
       render: (text) =>
         renderColumn(
           "totalAmount",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Partner",
+      dataIndex: "partnerName",
+      key: "partnerName",
+      align: "left",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "partnerName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "partnerName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Delivery Channel",
+      dataIndex: "ciName",
+      key: "ciName",
+      align: "left",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "ciName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "ciName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Source",
+      dataIndex: "source",
+      key: "source",
+      align: "left",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "source",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "source",
           searchedColumn,
           searchText,
           text,
@@ -700,7 +797,7 @@ const ViewMaintainElectronicBankStatement = () => {
             totalData={data?.page?.totalElements || 0}
             onSort={onSort}
             tableScrolled={{
-              x: 3700,
+              x: "max-content",
               y: 525,
             }}
             showExport={true}
