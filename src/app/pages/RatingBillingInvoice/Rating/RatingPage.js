@@ -22,7 +22,7 @@ import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
   const { data, loading, list_billing_period } = useSelector(
-    (state) => state.rating
+    (state) => state.rating,
   );
 
   const dispatch = useDispatch();
@@ -67,18 +67,17 @@ const RatingPage = () => {
       const currentPeriodName = `${currentMonth} ${currentYear}`;
 
       const currentPeriod = list_billing_period.find(
-        (item) => item.name === currentPeriodName
+        (item) => item.name === currentPeriodName,
       );
 
       if (currentPeriod) {
-        setSelectedBillingPeriod(currentPeriod.id);
+        setSelectedBillingPeriod(currentPeriod.name);
       } else {
-        const latestPeriod =
-          list_billing_period[list_billing_period.length - 1];
-        setSelectedBillingPeriod(latestPeriod.id);
+        const latestPeriod = list_billing_period[0];
+        setSelectedBillingPeriod(latestPeriod.name);
       }
     }
-  }, [list_billing_period]);
+  }, [list_billing_period, selectedBillingPeriod]);
 
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
@@ -100,9 +99,9 @@ const RatingPage = () => {
           page: 1,
           pageSize: 100,
           sort,
-          billPeriodId: selectedBillingPeriod,
+          period: selectedBillingPeriod,
           isLoadMore: false,
-        })
+        }),
       );
       setPage(1);
     }
@@ -159,9 +158,9 @@ const RatingPage = () => {
           page: nextPage,
           pageSize: loadMoreSize,
           sort,
-          billPeriodId: selectedBillingPeriod,
+          period: selectedBillingPeriod,
           isLoadMore: true,
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -175,9 +174,9 @@ const RatingPage = () => {
           page: 1,
           pageSize: page * loadMoreSize || 100,
           sort,
-          billPeriodId: selectedBillingPeriod,
+           period: selectedBillingPeriod,
           isLoadMore: false,
-        })
+        }),
       );
       setPage(1);
     }
@@ -229,8 +228,8 @@ const RatingPage = () => {
           page,
           pageSize: loadMoreSize,
           sort,
-          billPeriodId: selectedBillingPeriod,
-        })
+          billPeriodName: selectedBillingPeriod,
+        }),
       );
     }
   };
@@ -273,9 +272,9 @@ const RatingPage = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [search, searchedColumn, searchText]
+    [search, searchedColumn, searchText],
   );
 
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
@@ -350,10 +349,10 @@ const RatingPage = () => {
                   value={selectedBillingPeriod}
                   onChange={handleBillingPeriodChange}
                   placeholder="Select Period"
-                  style={{ width: '120px' }}
+                  style={{ width: "120px" }}
                   options={(list_billing_period || []).map((item) => ({
                     label: item?.name,
-                    value: item?.id,
+                    value: item?.name,
                   }))}
                 />
               </div>
@@ -370,7 +369,7 @@ const RatingPage = () => {
           <RatingDetail
             calculationCode={calculationCode}
             SAId={saNumberId}
-            ratingCodeId={ratingCode}
+            ratingCode={ratingCode}   
             onClose={() => {
               setPageDetail(false);
               setActiveRowKey(null);

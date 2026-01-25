@@ -43,10 +43,30 @@ const PointOfSalesPage = ({
   idPos,
   setRangeDisableDate = () => {},
   rangeDisableDate,
+  customerType = "customer",
+  defaultData = {}, 
+  onSorChange = () => {}, 
+  onCostCenterChange = () => {},
+  onAccountSegmentChange = () => {},
+  data_account_segment = [],
+  data_account_group_type = [],
+  data_meter_reading_code_list = [],
+  data_sor_list = [],
+  data_cost_center_list = [],
 }) => {
   const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
+
+  const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
+
+  useEffect(() => {
+    let dataMrc = data_meter_reading_code_list?.reduce(
+      (result, current) => result?.concat(current?.dtoList),
+      [],
+    );
+    setMergedArrayMrc(dataMrc);
+  }, [data_meter_reading_code_list]);
 
   useEffect(() => {
     if (hasValue(selectedBilingPeriod)) {
@@ -86,6 +106,241 @@ const PointOfSalesPage = ({
 
   const handleDetailPage = (e) => {
     setDetailPage(e.target.value);
+  };
+
+  // Render Customer Information berdasarkan customerType
+  const renderCustomerInformation = () => {
+    if (customerType === "prospective") {
+      return (
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] text-primary">
+                PROSPECTIVE CUSTOMER INFORMATION
+              </p>
+            </div>
+          }
+        >
+          <div className="w-full grid grid-cols-5 gap-1">
+            {/* Row 1 */}
+            <Form.Item
+              name="customerNumber"
+              label="Customer Number"
+              rules={[
+                { message: requiredMessage("Customer Number"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent placeholder="Enter Customer Number" />
+            </Form.Item>
+
+            <Form.Item
+              name="customerName"
+              label="Customer Name"
+              rules={[
+                { message: requiredMessage("Customer Name"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent placeholder="Enter Customer Name" />
+            </Form.Item>
+
+            <Form.Item
+              name="accountNumber"
+              label="Account Number"
+              rules={[
+                { message: requiredMessage("Account Number"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent
+                placeholder="Enter Account Number"
+                onChange={(e) => setAccountNumber(e.target.value)}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="accountName"
+              label="Account Name"
+              rules={[
+                { message: requiredMessage("Account Name"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent placeholder="Enter Account Name" />
+            </Form.Item>
+
+            <Form.Item
+              name="accountSegment"
+              label="Account Segment"
+              rules={[
+                { message: requiredMessage("Account Segment"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                onChange={onAccountSegmentChange}
+                placeholder="Select Account Segment"
+                options={(data_account_segment || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            {/* Row 2 */}
+            <Form.Item
+              name="accountGroupType"
+              label="Account Group Type"
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                placeholder="Select Account Group Type"
+                options={(data_account_group_type || []).map((item) => ({
+                  label: item?.glbValue || item?.name,
+                  value: item?.glbTypeValId,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="sor"
+              label="SOR"
+              rules={[{ message: requiredMessage("SOR"), required: true }]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                onChange={onSorChange}
+                disabled={!!defaultData?.sor}
+                placeholder="SOR from User"
+                options={(data_sor_list || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="costCenter"
+              label="Cost Center"
+              rules={[
+                { message: requiredMessage("Cost Center"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                mode="multiple"
+                onChange={onCostCenterChange}
+                disabled={
+                  defaultData?.costCenter && defaultData.costCenter.length > 0
+                }
+                placeholder="Cost Center from User"
+                options={(data_cost_center_list || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="meterReadingCode"
+              label="Meter Reading Code"
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                mode="multiple"
+                placeholder="Select Meter Reading Code"
+                options={(mergedArrayMrc || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+          </div>
+        </CardContainer>
+      );
+    } else {
+      return (
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] text-primary">
+                CUSTOMER INFORMATION
+              </p>
+            </div>
+          }
+        >
+          <div className="w-full grid grid-cols-5 gap-1">
+            <Form.Item
+              name={"accountNumber"}
+              label={"Account Number"}
+              rules={[
+                { message: requiredMessage("Account Number"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent onChange={(e) => setAccountNumber(e)}>
+                {(data_accountNumber || [])?.map((item) => (
+                  <Select.Option
+                    key={item.accountNumber}
+                    value={item.accountNumber}
+                  >
+                    {item.accountNumberWithName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+            <Form.Item
+              name={"customerNumber"}
+              label={"Customer Number"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item
+              name={"customerName"}
+              label={"Customer Name"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item
+              name={"accountName"}
+              label={"Account Name"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item
+              name={"accountSegment"}
+              label={"Account Segment"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item
+              name={"accountGroupType"}
+              label={"Account Group Type"}
+              className="no-margin-form"
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item name={"sor"} label={"SOR"}>
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item name={"costCenterCode"} label={"Cost Center Code"}>
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item name={"costCenterName"} label={"Cost Center Name"}>
+              <InputComponent disabled />
+            </Form.Item>
+            <Form.Item name={"meterReadingCode"} label={"Meter Reading Code"}>
+              <InputComponent disabled />
+            </Form.Item>
+          </div>
+        </CardContainer>
+      );
+    }
   };
 
   const renderSection = () => {
@@ -175,88 +430,7 @@ const PointOfSalesPage = ({
 
   return (
     <Fragment>
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="w-full mt-[15px] text-primary">
-              CUSTOMER INFORMATION
-            </p>
-          </div>
-        }
-      >
-        <div className="w-full grid grid-cols-5 gap-1">
-          <Form.Item
-            name={"accountNumber"}
-            label={"Account Number"}
-            rules={[
-              { message: requiredMessage("Account Number"), required: true },
-            ]}
-            style={{ marginBottom: 0 }}
-          >
-            <SelectComponent onChange={(e) => setAccountNumber(e)}>
-              {(data_accountNumber || [])?.map((item) => (
-                <Select.Option
-                  key={item.accountNumber}
-                  value={item.accountNumber}
-                >
-                  {item.accountNumberWithName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            name={"customerNumber"}
-            label={"Customer Number"}
-            style={{ marginBottom: 0 }}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-          <Form.Item
-            name={"customerName"}
-            label={"Customer Name"}
-            style={{ marginBottom: 0 }}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-          {/* <Form.Item name={"accountNumber"} label={"Account Number"}>
-            <InputComponent disabled />
-          </Form.Item> */}
-          <Form.Item
-            name={"accountName"}
-            label={"Account Name"}
-            style={{ marginBottom: 0 }}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-          <Form.Item
-            name={"accountSegment"}
-            label={"Account Segment"}
-            style={{ marginBottom: 0 }}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-          <Form.Item
-            name={"accountGroupType"}
-            label={"Account Group Type"}
-            className="no-margin-form"
-          >
-            <InputComponent disabled />
-          </Form.Item>
-          <Form.Item name={"sor"} label={"SOR"}>
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item name={"costCenterCode"} label={"Cost Center Code"}>
-            <InputComponent disabled />
-          </Form.Item>
-          <Form.Item name={"costCenterName"} label={"Cost Center Name"}>
-            <InputComponent disabled />
-          </Form.Item>
-          <Form.Item name={"meterReadingCode"} label={"Meter Reading Code"}>
-            <InputComponent disabled />
-          </Form.Item>
-        </div>
-      </CardContainer>
+      {renderCustomerInformation()}
 
       <CardContainer
         header={

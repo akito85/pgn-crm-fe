@@ -27,7 +27,7 @@ const initialState = {
 export const getListRatingGasPaginate = createAsyncThunk(
   "GET_LIST_RATING_GAS_PAGINATE",
   async (
-    { search, page, pageSize, sort, billPeriodId, isLoadMore = false },
+    { search, page, pageSize, sort, period, isLoadMore = false },
     thunkAPI,
   ) => {
     try {
@@ -35,8 +35,8 @@ export const getListRatingGasPaginate = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
 
-      // Tambahkan billPeriodId ke URL
-      const url = `/v1/dbs/api/rating/rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
+      // URL dengan parameter period
+      const url = `/v1/dbs/api/rating/rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&period=${encodeURIComponent(period)}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
 

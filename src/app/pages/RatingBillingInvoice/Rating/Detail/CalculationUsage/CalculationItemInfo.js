@@ -20,14 +20,6 @@ const CalculationItemInfo = ({ calculationCode, ratingCode, accountNumber }) => 
             {ratingCode || "-"}
           </p>
         </div>
-        <div className="flex flex-col gap-1">
-          <p className="text-[13px] font-normal text-gray-600">
-            Account Number
-          </p>
-          <p className="text-[15px] font-semibold text-gray-900">
-            {accountNumber || "-"}
-          </p>
-        </div>
       </div>
     </div>
   );
