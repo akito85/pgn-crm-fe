@@ -10,7 +10,7 @@ const PaymentRelationDetailInfo = ({
 }) => {
   return (
     <Fragment>
-      <CardContainer  header={"PAYMENT RELATION"}>
+      <CardContainer header={"PAYMENT RELATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Payment Relation Information */}
           <DetailText label="Account Number">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountNumber : dataDetail?.accountNumber}</DetailText>
