@@ -97,15 +97,15 @@ export const columnsRating = (
       ),
   },
   {
-    key: "timeUnitContract",
+    key: "timeUnit",
     title: "CONTRACT TIME UNIT",
-    dataIndex: "timeUnitContract",
+    dataIndex: "timeUnit",
     width: 190,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "timeUnitContract",
+      "timeUnit",
       searchInput,
       searchedColumn,
       searchText,
@@ -113,8 +113,8 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "timeUnitContract",
-        hasValue(search["timeUnitContract"]),
+        "timeUnit",
+        hasValue(search["timeUnit"]),
         searchText,
         text,
         false,
@@ -149,15 +149,15 @@ export const columnsRating = (
       ),
   },
   {
-    key: "billingPeriod",
+    key: "periodName",
     title: "BILLING PERIOD",
     width: 160,
     sorter: true,
     isClassification: true,
-    dataIndex: "billingPeriod",
+    dataIndex: "periodName",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "billingPeriod",
+      "periodName",
       searchInput,
       searchedColumn,
       searchText,
@@ -167,8 +167,8 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderDateColumn(
-        "billingPeriod",
-        hasValue(search["billingPeriod"]),
+        "periodName",
+        hasValue(search["periodName"]),
         searchText,
         text,
         "datePeriod",
@@ -407,15 +407,15 @@ export const columnsRating = (
       ),
   },
     {
-    key: "accGroupType",
+    key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
-    dataIndex: "accGroupType",
+    dataIndex: "accountGroupType",
     width: 210,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "accGroupType",
+      "accountGroupType",
       searchInput,
       searchedColumn,
       searchText,
@@ -423,8 +423,8 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "accGroupType",
-        hasValue(search["accGroupType"]),
+        "accountGroupType",
+        hasValue(search["accountGroupType"]),
         searchText,
         text,
         false,
@@ -433,15 +433,15 @@ export const columnsRating = (
       ),
   },
   {
-    key: "mreadingCode",
+    key: "meterReadingCode",
     title: "METER READING CODE",
-    dataIndex: "mreadingCode",
+    dataIndex: "meterReadingCode",
     width: 200,
     isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "mreadingCode",
+      "meterReadingCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -449,8 +449,8 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "mreadingCode",
-        hasValue(search["mreadingCode"]),
+        "meterReadingCode",
+        hasValue(search["meterReadingCode"]),
         searchText,
         text,
         false,
@@ -541,16 +541,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "sanumber",
+        key: "saNumber",
         title: "SA NUMBER",
-        dataIndex: "sanumber",
+        dataIndex: "saNumber",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "sanumber",
+          "saNumber",
           searchInput,
           searchedColumn,
           searchText,
@@ -558,8 +558,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "sanumber",
-            hasValue(search["sanumber"]),
+            "saNumber",
+            hasValue(search["saNumber"]),
             searchText,
             text,
             false,
@@ -708,16 +708,16 @@ export const columnsRating = (
     title: "CALCULATED USAGE PARTITION",
     children: [
       {
-        key: "minCalculated",
+        key: "calculatedUsageMin",
         title: "MIN",
-        dataIndex: "minCalculated",
+        dataIndex: "calculatedUsageMin",
         width: 120,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "minCalculated",
+          "calculatedUsageMin",
           searchInput,
           searchedColumn,
           searchText,
@@ -725,8 +725,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "minCalculated",
-            hasValue(search["minCalculated"]),
+            "calculatedUsageMin",
+            hasValue(search["calculatedUsageMin"]),
             searchText,
             text,
             false,
@@ -735,16 +735,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "normalCalculated",
+        key: "calculatedUsageNormal",
         title: "NOMRAL",
-        dataIndex: "normalCalculated",
+        dataIndex: "calculatedUsageNormal",
         width: 130,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "normalCalculated",
+          "calculatedUsageNormal",
           searchInput,
           searchedColumn,
           searchText,
@@ -752,8 +752,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "normalCalculated",
-            hasValue(search["normalCalculated"]),
+            "calculatedUsageNormal",
+            hasValue(search["calculatedUsageNormal"]),
             searchText,
             text,
             false,
@@ -762,16 +762,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "oupCalculated",
+        key: "calculatedUsageUop",
         title: "OUP",
-        dataIndex: "oupCalculated",
+        dataIndex: "calculatedUsageUop",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "oupCalculated",
+          "calculatedUsageUop",
           searchInput,
           searchedColumn,
           searchText,
@@ -779,8 +779,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "oupCalculated",
-            hasValue(search["oupCalculated"]),
+            "calculatedUsageUop",
+            hasValue(search["calculatedUsageUop"]),
             searchText,
             text,
             false,
@@ -789,16 +789,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "adjusmentCalculated",
+        key: "calculatedAdjustment",
         title: "ADJUSTMENT",
-        dataIndex: "adjusmentCalculated",
+        dataIndex: "calculatedAdjustment",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "adjusmentCalculated",
+          "calculatedAdjustment",
           searchInput,
           searchedColumn,
           searchText,
@@ -806,8 +806,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "adjusmentCalculated",
-            hasValue(search["adjusmentCalculated"]),
+            "calculatedAdjustment",
+            hasValue(search["calculatedAdjustment"]),
             searchText,
             text,
             false,
@@ -816,16 +816,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "totalCalculated",
+        key: "calculatedTotal",
         title: "TOTAL CALCULATED",
-        dataIndex: "totalCalculated",
+        dataIndex: "calculatedTotal",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "totalCalculated",
+          "calculatedTotal",
           searchInput,
           searchedColumn,
           searchText,
@@ -833,8 +833,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "totalCalculated",
-            hasValue(search["totalCalculated"]),
+            "calculatedTotal",
+            hasValue(search["calculatedTotal"]),
             searchText,
             text,
             false,
@@ -848,16 +848,16 @@ export const columnsRating = (
     title: "CONVERTED CALCULATED USAGE PARTITION",
     children: [
       {
-        key: "uomPartition",
+        key: "convertedCalculatedUom",
         title: "UOM",
-        dataIndex: "uomPartition",
+        dataIndex: "convertedCalculatedUom",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "uomPartition",
+          "convertedCalculatedUom",
           searchInput,
           searchedColumn,
           searchText,
@@ -865,8 +865,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "uomPartition",
-            hasValue(search["uomPartition"]),
+            "convertedCalculatedUom",
+            hasValue(search["convertedCalculatedUom"]),
             searchText,
             text,
             false,
@@ -875,16 +875,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "minPartition",
+        key: "convertedCalculatedMin",
         title: "MIN",
-        dataIndex: "minPartition",
+        dataIndex: "convertedCalculatedMin",
         width: 130,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "minPartition",
+          "convertedCalculatedMin",
           searchInput,
           searchedColumn,
           searchText,
@@ -892,8 +892,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "minPartition",
-            hasValue(search["minPartition"]),
+            "convertedCalculatedMin",
+            hasValue(search["convertedCalculatedMin"]),
             searchText,
             text,
             false,
@@ -902,16 +902,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "normalPartition",
+        key: "convertedCalculatedNormal",
         title: "NORMAL",
-        dataIndex: "normalPartition",
+        dataIndex: "convertedCalculatedNormal",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "normalPartition",
+          "convertedCalculatedNormal",
           searchInput,
           searchedColumn,
           searchText,
@@ -919,8 +919,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "normalPartition",
-            hasValue(search["normalPartition"]),
+            "convertedCalculatedNormal",
+            hasValue(search["convertedCalculatedNormal"]),
             searchText,
             text,
             false,
@@ -929,16 +929,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "oupPartition",
+        key: "convertedCalculatedOup",
         title: "OUP",
-        dataIndex: "oupPartition",
+        dataIndex: "convertedCalculatedOup",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "oupPartition",
+          "convertedCalculatedOup",
           searchInput,
           searchedColumn,
           searchText,
@@ -946,8 +946,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "oupPartition",
-            hasValue(search["oupPartition"]),
+            "convertedCalculatedOup",
+            hasValue(search["convertedCalculatedOup"]),
             searchText,
             text,
             false,
@@ -956,16 +956,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "adjustmentPartition",
+        key: "convertedCalculatedAdjustment",
         title: "ADJUSMENT",
-        dataIndex: "adjustmentPartition",
+        dataIndex: "convertedCalculatedAdjustment",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "adjustmentPartition",
+          "convertedCalculatedAdjustment",
           searchInput,
           searchedColumn,
           searchText,
@@ -973,8 +973,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "adjustmentPartition",
-            hasValue(search["adjustmentPartition"]),
+            "convertedCalculatedAdjustment",
+            hasValue(search["convertedCalculatedAdjustment"]),
             searchText,
             text,
             false,
@@ -983,16 +983,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "totalCalculatedPartition",
+        key: "convertedCalculatedTotal",
         title: "TOTAL CALCULATED",
-        dataIndex: "totalCalculatedPartition",
+        dataIndex: "convertedCalculatedTotal",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "totalCalculatedPartition",
+          "convertedCalculatedTotal",
           searchInput,
           searchedColumn,
           searchText,
@@ -1000,8 +1000,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "totalCalculatedPartition",
-            hasValue(search["totalCalculatedPartition"]),
+            "convertedCalculatedTotal",
+            hasValue(search["convertedCalculatedTotal"]),
             searchText,
             text,
             false,
@@ -1015,16 +1015,16 @@ export const columnsRating = (
     title: "AMOUNT PARTITION",
     children: [
       {
-        key: "minAmount",
+        key: "amountPartitionMin",
         title: "MIN",
-        dataIndex: "minAmount",
+        dataIndex: "amountPartitionMin",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "minAmount",
+          "amountPartitionMin",
           searchInput,
           searchedColumn,
           searchText,
@@ -1032,8 +1032,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "minAmount",
-            hasValue(search["minAmount"]),
+            "amountPartitionMin",
+            hasValue(search["amountPartitionMin"]),
             searchText,
             text,
             false,
@@ -1042,16 +1042,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "normalAmount",
+        key: "amountPartitionNormal",
         title: "NORMAL",
-        dataIndex: "normalAmount",
+        dataIndex: "amountPartitionNormal",
         width: 130,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "normalAmount",
+          "amountPartitionNormal",
           searchInput,
           searchedColumn,
           searchText,
@@ -1059,8 +1059,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "normalAmount",
-            hasValue(search["normalAmount"]),
+            "amountPartitionNormal",
+            hasValue(search["amountPartitionNormal"]),
             searchText,
             text,
             false,
@@ -1069,16 +1069,16 @@ export const columnsRating = (
           ),
       },
       {
-        key: "oupAmount",
+        key: "amountPartitionOup",
         title: "OUP",
-        dataIndex: "oupAmount",
+        dataIndex: "amountPartitionOup",
         width: 150,
         sorter: true,
         isClassification: true,
         align: "center",
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "oupAmount",
+          "amountPartitionOup",
           searchInput,
           searchedColumn,
           searchText,
@@ -1086,8 +1086,8 @@ export const columnsRating = (
         ),
         render: (text) =>
           renderColumn(
-            "oupAmount",
-            hasValue(search["oupAmount"]),
+            "amountPartitionOup",
+            hasValue(search["amountPartitionOup"]),
             searchText,
             text,
             false,
@@ -1098,15 +1098,15 @@ export const columnsRating = (
     ],
   },
   {
-    key: "amount",
+    key: "amountPartition",
     title: "AMOUNT",
     width: 160,
-    dataIndex: "amount",
+    dataIndex: "amountPartition",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "amount",
+      "amountPartition",
       searchInput,
       searchedColumn,
       searchText,
@@ -1114,8 +1114,8 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "amount",
-        hasValue(search["amount"]),
+        "amountPartition",
+        hasValue(search["amountPartition"]),
         searchText,
         text,
         false,
@@ -1124,15 +1124,15 @@ export const columnsRating = (
       ),
   },
   {
-    key: "totalAdjustment",
+    key: "amountPartitionAdjustment",
     title: "TOTAL ADJUSTMENT",
     width: 160,
-    dataIndex: "totalAdjustment",
+    dataIndex: "amountPartitionAdjustment",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "totalAdjustment",
+      "amountPartitionAdjustment",
       searchInput,
       searchedColumn,
       searchText,
@@ -1140,8 +1140,8 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "totalAdjustment",
-        hasValue(search["totalAdjustment"]),
+        "amountPartitionAdjustment",
+        hasValue(search["amountPartitionAdjustment"]),
         searchText,
         text,
         false,
@@ -1150,15 +1150,15 @@ export const columnsRating = (
       ),
   },
   {
-    key: "totalAmount",
+    key: "amountPartitionTotal",
     title: "TOTAL AMOUNT",
     width: 160,
-    dataIndex: "totalAmount",
+    dataIndex: "amountPartitionTotal",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "totalAmount",
+      "amountPartitionTotal",
       searchInput,
       searchedColumn,
       searchText,
@@ -1166,8 +1166,8 @@ export const columnsRating = (
     ),
     render: (text) =>
       renderColumn(
-        "totalAmount",
-        hasValue(search["totalAmount"]),
+        "amountPartitionTotal",
+        hasValue(search["amountPartitionTotal"]),
         searchText,
         text,
         false,

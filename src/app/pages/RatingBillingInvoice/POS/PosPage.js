@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Alert, Spin, Tooltip } from "antd";
+import { useNavigate } from "react-router-dom";
 import { WarningOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -11,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import ApprovalPointOfSales from "./Modal/ApprovalPointOfSales";
 import PosDetail from "./PosDetail";
 import PosTableView from "./Table/PosTableView";
+import ModalCustomerType from "./Modal/ModalCustomerType";
 import {
   deletePOS,
   downloadPOS,
@@ -30,8 +32,12 @@ import TableRBI from "../../../../components/TableRBI";
 const PosPage = () => {
   // Selector
   const { data_view, data_approvalHistory, loading } = useSelector(
-    (state) => state.pointOfSales
+    (state) => state.pointOfSales,
   );
+
+  const navigate = useNavigate();
+  const [modalCustomerType, setModalCustomerType] = useState(false);
+  const [selectedCustomerType, setSelectedCustomerType] = useState(null);
 
   // Declaration
   const searchInput = useRef(null);
@@ -58,6 +64,24 @@ const PosPage = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
+  const handleOpenCustomerTypeModal = () => {
+    setSelectedCustomerType(null);
+    setModalCustomerType(true);
+  };
+
+  const handleConfirmCustomerType = (type) => {
+    setModalCustomerType(false);
+    // Navigate dengan state customer type
+    navigate(RBI_ROUTES.POS_CREATE, {
+      state: { customerType: type },
+    });
+  };
+
+  const handleCancelCustomerType = () => {
+    setModalCustomerType(false);
+    setSelectedCustomerType(null);
+  };
+
   // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
@@ -67,7 +91,7 @@ const PosPage = () => {
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false, // Flag untuk initial load
-      })
+      }),
     );
     setPage(0);
   }, [dispatch, sort, search]);
@@ -79,7 +103,7 @@ const PosPage = () => {
         pageSize: loadMoreSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   };
 
@@ -97,7 +121,7 @@ const PosPage = () => {
           pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true, // Flag untuk load more
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -153,7 +177,7 @@ const PosPage = () => {
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
             isLoadMore: false,
-          })
+          }),
         );
         setPage(0);
       })
@@ -224,7 +248,7 @@ const PosPage = () => {
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false,
-      })
+      }),
     );
     setPage(0);
   };
@@ -276,15 +300,14 @@ const PosPage = () => {
     {
       action: "Create",
       render: (
-        <Link to={RBI_ROUTES.POS_CREATE}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={20} />}
-            type={"submit"}
-            border={false}
-          >
-            Create Point Of Sales
-          </ButtonComponent>
-        </Link>
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonCreate" width={20} />}
+          type={"submit"}
+          border={false}
+          onClick={handleOpenCustomerTypeModal}
+        >
+          Create Point Of Sales
+        </ButtonComponent>
       ),
     },
 
@@ -466,12 +489,12 @@ const PosPage = () => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                 ),
                 ...useColumnActionPermission(
                   ["view", "update", "delete", "preview", "history"],
                   itemGrantAccess,
-                  "Delete"
+                  "Delete",
                 ),
               ]}
               totalData={data_view?.page?.totalElements || 0}
@@ -528,6 +551,15 @@ const PosPage = () => {
             type={"error"}
           />
         </ModalConfirm>
+
+        {/* Modal Customer Type */}
+        <ModalCustomerType
+          isOpen={modalCustomerType}
+          onCancel={handleCancelCustomerType}
+          onConfirm={handleConfirmCustomerType}
+          selectedType={selectedCustomerType}
+          setSelectedType={setSelectedCustomerType}
+        />
 
         {/** Modal Retry */}
         <ModalError
