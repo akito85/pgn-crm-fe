@@ -23,7 +23,6 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import ModalBack from "../../../../components/Modal/ModalBack";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
-import { dateFormatting } from "../../../../utils";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
@@ -70,6 +69,9 @@ const AdjustmentBillingForm = ({ type }) => {
       paramValue: [
         "accountNumber",
         "adjustmentType",
+        "classificationAdjustment",
+        "postInvoice",
+        "onDemand",
         "billingCycle",
         "billingPeriod",
         "referenceInvoiceNumber",
@@ -92,6 +94,8 @@ const AdjustmentBillingForm = ({ type }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [rangeDisableDate, setRangeDisableDate] = useState({});
+  const [selectedClassification, setSelectedClassification] = useState();
+  const [selectedPostInvoice, setSelectedPostInvoice] = useState();
 
   const isLoading = loading || loadingForm;
 
@@ -144,6 +148,20 @@ const AdjustmentBillingForm = ({ type }) => {
   const dataUpdate = useCallback(
     (dataDetail) => {
       const apphierId = dataDetail?.apphierId || 1;
+
+      // Determine classificationAdjustment value from saved data
+      let classificationAdjustmentValue = null;
+      let postInvoiceValue = null;
+      let onDemandValue = null;
+
+      if (dataDetail?.classification === "Internal") {
+        classificationAdjustmentValue = "Internal";
+      } else if (dataDetail?.postInvoice) {
+        classificationAdjustmentValue = "Post Invoice";
+        postInvoiceValue = dataDetail?.postInvoice;
+        onDemandValue = dataDetail?.onDemand;
+      }
+
       const obj = {
         accountNumberWithName:
           dataDetail?.accountNumber + "-" + dataDetail?.accountName,
@@ -172,6 +190,9 @@ const AdjustmentBillingForm = ({ type }) => {
         rateDate: dataDetail?.rateDate ? moment(dataDetail?.rateDate) : null,
         remark: dataDetail?.remark,
         apphierId: apphierId,
+        classificationAdjustment: classificationAdjustmentValue,
+        postInvoice: postInvoiceValue,
+        onDemand: onDemandValue,
       };
 
       form.setFieldsValue(obj);
@@ -182,6 +203,11 @@ const AdjustmentBillingForm = ({ type }) => {
       setIdInvoice(dataDetail.referenceInvoiceNumber);
       setBillingPeriodId(dataDetail.billingPeriod);
       setDataInvoice(dataDetail?.invoiceInformation || null);
+
+      // Set classification states for conditional rendering
+      setSelectedClassification(classificationAdjustmentValue);
+      setSelectedPostInvoice(postInvoiceValue);
+
       setListDataAttachment(
         (dataDetail?.mAttachmentLists || []).map((attachData) => ({
           ...attachData,
@@ -255,6 +281,8 @@ const AdjustmentBillingForm = ({ type }) => {
       setIdInvoice();
       setCycleId();
       setRangeDisableDate({});
+      setSelectedClassification(undefined);
+      setSelectedPostInvoice(undefined);
     } else {
       dataUpdate(dataDetail);
     }
@@ -296,6 +324,9 @@ const AdjustmentBillingForm = ({ type }) => {
             paramValue: [
               "accountNumber",
               "adjustmentType",
+              "classificationAdjustment",
+              "postInvoice",
+              "onDemand",
               "billingCycle",
               "billingPeriod",
               "referenceInvoiceNumber",
@@ -344,6 +375,38 @@ const AdjustmentBillingForm = ({ type }) => {
 
     delete bodyData?.accountNumberWithName;
 
+    // Build classification, postInvoice, onDemand values based on selection
+    let classificationValue = null;
+    let postInvoiceValue = null;
+    let onDemandValue = null;
+
+    const classificationAdjustment = bodyData?.classificationAdjustment;
+
+    if (classificationAdjustment === "Internal") {
+      // Internal selected: classification = "Internal", postInvoice = null, onDemand = null
+      classificationValue = classificationAdjustment;
+      postInvoiceValue = null;
+      onDemandValue = null;
+    } else if (classificationAdjustment === "Post Invoice") {
+      // Post Invoice selected: need to check postInvoice value
+      const postInvoice = bodyData?.postInvoice;
+
+      if (postInvoice === "Carry Forward Adjustment") {
+        // Carry Forward Adjustment: classification = postInvoice value, postInvoice = postInvoice value, onDemand = null
+        classificationValue = postInvoice;
+        postInvoiceValue = postInvoice;
+        onDemandValue = null;
+      } else if (postInvoice === "On Demand") {
+        // On Demand: classification = classificationAdjustment, postInvoice = postInvoice, onDemand = onDemand value
+        classificationValue = classificationAdjustment;
+        postInvoiceValue = postInvoice;
+        onDemandValue = bodyData?.onDemand || null;
+      }
+    }
+
+    // Remove temporary fields
+    delete bodyData?.classificationAdjustment;
+
     const body = {
       ...bodyData,
       id: type === "update" ? id : undefined,
@@ -351,22 +414,25 @@ const AdjustmentBillingForm = ({ type }) => {
       adjustmentBillingDetails: modifiedArray,
       submit: flag === 1 ? false : true,
       documentDate: moment(bodyData?.documentDate).format(
-        dateFormatting.dateFormal
+        "YYYY-MM-DDTHH:mm:ss"
       ),
       accountingDate: moment(bodyData?.accountingDate).format(
-        dateFormatting.dateFormal
+        "YYYY-MM-DDTHH:mm:ss"
       ),
       transactionDate: moment(bodyData?.transactionDate).format(
-        dateFormatting.dateFormal
+        "YYYY-MM-DDTHH:mm:ss"
       ),
       rateType: bodyData?.rateType || dataInvoice?.rateType,
       rate: dataInvoice?.rate,
       rateDate: bodyData?.rateDate
-        ? moment(bodyData?.rateDate).format(dateFormatting.dateFormal)
+        ? moment(bodyData?.rateDate).format("YYYY-MM-DDTHH:mm:ss")
         : dataInvoice?.rateDate,
       accountId: idAccount,
       totalAdjustmentAmountIdr: sumIDR || null,
       totalAdjustmentAmountUsd: sumUSD || null,
+      classification: classificationValue,
+      postInvoice: postInvoiceValue,
+      onDemand: onDemandValue,
     };
 
     // replace if value undefined to be null
@@ -525,6 +591,10 @@ const AdjustmentBillingForm = ({ type }) => {
               setBillingPeriodId={setBillingPeriodId}
               setRangeDisableDate={setRangeDisableDate}
               rangeDisableDate={rangeDisableDate}
+              selectedClassification={selectedClassification}
+              setSelectedClassification={setSelectedClassification}
+              selectedPostInvoice={selectedPostInvoice}
+              setSelectedPostInvoice={setSelectedPostInvoice}
             />
           </div>
 

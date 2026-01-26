@@ -210,7 +210,6 @@ const AdjustmentBillingPage = () => {
 
   // Handle Approval History
   const handleApprovalHistory = (id) => {
-    // console.log(id);
     dispatch(getApprovalHistory(id));
     setModalApprovalHistory(true);
   };
@@ -285,20 +284,37 @@ const AdjustmentBillingPage = () => {
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={20}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={"text-black ml-3"}> Update</span>
+              <span
+                className={
+                  isEditable ? "text-black ml-3" : "text-gray-400 ml-3"
+                }
+              >
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-0">
+              <div
+                className="pt-0"
+                style={{ pointerEvents: !isEditable ? "none" : "auto" }}
+              >
                 <SVGIcon
                   name="IconEdit"
                   width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                  className={
+                    !isEditable ? "cursor-not-allowed" : "cursor-pointer"
+                  }
                 />
               </div>
             </Tooltip>
@@ -315,7 +331,7 @@ const AdjustmentBillingPage = () => {
             {content}
           </Link>
         ) : (
-          <div>{content}</div>
+          <div style={{ opacity: 0.5, cursor: "not-allowed" }}>{content}</div>
         );
       },
     },
@@ -338,19 +354,29 @@ const AdjustmentBillingPage = () => {
               }
               border={false}
               disabled={!isDelete}
+              onClick={isDelete ? () => handleDelete(record.id) : undefined}
             >
-              <span className={"text-black ml-3"}> Delete</span>
+              <span
+                className={isDelete ? "text-black ml-3" : "text-gray-400 ml-3"}
+              >
+                Delete
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Delete">
-              <div className="pt-0">
+              <div
+                className="pt-0"
+                style={{
+                  pointerEvents: !isDelete ? "none" : "auto",
+                  opacity: !isDelete ? 0.5 : 1,
+                  cursor: !isDelete ? "not-allowed" : "pointer",
+                }}
+              >
                 <SVGIcon
                   name="IconDelete"
                   width={20}
                   color={isDelete ? "#D90000" : "#8D91A0"}
-                  className={
-                    isDelete ? undefined : "disabled cursor-not-allowed"
-                  }
+                  className={isDelete ? "cursor-pointer" : "cursor-not-allowed"}
                   onClick={isDelete ? () => handleDelete(record.id) : undefined}
                 />
               </div>

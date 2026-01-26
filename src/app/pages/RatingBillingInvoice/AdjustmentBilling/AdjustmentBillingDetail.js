@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -27,7 +26,7 @@ import CardContainer from "../../../../components/CardContainer";
 const AdjustmentBillingDetail = () => {
   // Selector
   const { loading, dataDetail, dataListType } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -69,7 +68,7 @@ const AdjustmentBillingDetail = () => {
   useEffect(() => {
     if (id && dataDetail?.id) {
       const findDataType = dataListType?.find(
-        (item) => item.id === dataDetail?.adjustmentType
+        (item) => item.id === dataDetail?.adjustmentType,
       )?.name;
 
       // Data Adjustment Billing Detail
@@ -116,7 +115,7 @@ const AdjustmentBillingDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       setListDataABI(dataDetailAdjustmentBilling);
@@ -200,7 +199,7 @@ const AdjustmentBillingDetail = () => {
     dispatch(
       approveOrRejectAdjustmentBilling({
         body: data,
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -245,7 +244,7 @@ const AdjustmentBillingDetail = () => {
           </ButtonComponent>
 
           {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
+            <div className={"w-full flex justify-end gap-3"}>
               <ButtonComponent
                 type="reject"
                 onClick={() => {
