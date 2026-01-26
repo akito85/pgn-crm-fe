@@ -184,6 +184,7 @@ const PaymentRelationDetailAttch = ({
           setFixedColumns={setFixedColumns}
           columnDefinitions={columnDefinitions}
           loading={loading}
+          showAdvanceSearch={false}
         />
       </CardContainer>
     </Spin>
