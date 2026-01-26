@@ -6,7 +6,7 @@ import { useColumnActionPermission } from "../../../../../../../components/Colum
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 
@@ -92,9 +92,7 @@ const PaymentRelationTable = ({
             key={`table-action-${index}`}
           >
             <Tooltip title="Detail">
-              <div className="pt-0">
-                <SVGIcon name="IconDetail" width={20} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         )
@@ -108,73 +106,95 @@ const PaymentRelationTable = ({
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
-        console.log("isEditable", isEditable)
-
-        const content =
-          actionLength > 3 ? (
+        const content = actionLength > 3 ?
+          (
             <ButtonComponent
               icon={<SVGIcon name="IconEdit" color={!isEditable ? "#8D91A0" : "#ACC424"} width={20} />}
               border={false}
               disabled={!isEditable}
+              onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION, {
+                state: {
+                  idPr: record.id,
+                  idAccount,
+                  idCustomer,
+                }
+              })}
             >
-              <span className={"text-black ml-3"}> Update</span>
+              <span className={"text-black ml-3"}>Update</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="">
-                <SVGIcon
-                  name="IconEdit"
-                  width={20}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
+              <SVGIcon
+                name="IconEdit"
+                width={20}
+                color={!isEditable ? "#8D91A0" : "#ACC424"}
+                className={!isEditable ? "cursor-not-allowed" : undefined}
+                onClick={
+                  isEditable ?
+                    () => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION, {
+                      state: {
+                        idPr: record.id,
+                        idAccount,
+                        idCustomer,
+                      }
+                    }) :
+                    () => {}
+                }
+              />
             </Tooltip>
           );
 
-        return isEditable ? (
-          <Link
-            to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION}
-            state={{
-              idPr: record.id,
-              idAccount,
-              idCustomer,
-            }}
-          >
-            {content}
-          </Link>
-        ) : (
-          <div>{content}</div>
-        );
+        return (
+          <Fragment key={`table-action-${index}`}>{content}</Fragment>          
+        )
       }
     },
     {
       action: 'Inactivate',
       type: 'table',
-      render: (r, actionLength, index) => {
-        
+      render: (record, actionLength, index) => {
+        const isActive = record.status === "ACTIVE";
 
-        return (
-          <Tooltip
-            title="Inactivate"
-            key={`table-action-${index}`}
-          >
-            <Checkbox
-              className="inactive-check"
-              disabled={r?.status === "ACTIVE" ? false : true}
-              checked={r?.status === "ACTIVE" ? false : true}
-              onClick={() => handleInactivateModal(true, r?.id, r?.appHierId, r?.relatedAccountNumber)}
-            />
-          </Tooltip>
-        )
+        const content = actionLength > 3 ?
+          (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  disabled={isActive ? false : true}
+                  checked={isActive ? false : true}
+                  style={{ transform: "scale(0.9)" }}
+                />
+              }
+              border={false}
+              disabled={!isActive}
+              onClick={() => handleInactivateModal(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+            >
+              <span className={"text-black ml-3"}>Inactivate</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title="Inactivate"
+            >
+              <Checkbox
+                className="inactive-check"
+                disabled={isActive ? false : true}
+                checked={isActive ? false : true}
+                onClick={() => handleInactivateModal(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+                style={{ transform: "scale(0.9)" }}
+              />
+            </Tooltip>
+          );
+
+        return <Fragment key={`table-action-${index}`}>{content}</Fragment>
       }
     },
     {
       action: 'History',
       type: 'table',
       render: (record, actionLength, index) => {
-        const Content =
-          actionLength > 3 ? (
+        const content = (actionLength > 3) ?
+          (
             <ButtonComponent
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
@@ -186,18 +206,16 @@ const PaymentRelationTable = ({
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="">
-                <SVGIcon
-                  name="IconLogHistory"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => handleApprovalHistoryModal(true, record?.id)}
-                />
-              </div>
+              <SVGIcon
+                name="IconLogHistory"
+                color={"#0075bf"}
+                width={20}
+                onClick={() => handleApprovalHistoryModal(true, record?.id)}
+              />
             </Tooltip>
           );
 
-        return Content;
+        return <Fragment key={`table-action-${index}`}>{content}</Fragment>
       }
     }
   ];
@@ -215,10 +233,6 @@ const PaymentRelationTable = ({
       align: "center",
     })
   );
-
-  useEffect(() => {
-    console.log("actionCols", actionCols);
-  }, [actionCols])
 
   const baseColumns = useMemo(() =>
     getPaymentRelationColumns(
