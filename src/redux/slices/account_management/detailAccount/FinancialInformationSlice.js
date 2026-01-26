@@ -22,6 +22,13 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  list_prDetailAttachment: [],
+  pagination_prDetailAttachment: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data_invoiceRelation: [],
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
@@ -35,7 +42,6 @@ const initialState = {
   data_irAccountStandard: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
-  listlationAttachment: [],
   detail_invoiceRelation: {},
   data_invoiceRelationAttachment: [],
   data_prApprovalHistory: {},
@@ -444,9 +450,26 @@ export const getPaymentRelation = createAsyncThunk(
 
 export const getPaymentRelationAttachment = createAsyncThunk(
   "GET_PAYMENT_RELATION_ATTACHMENT",
-  async ({ id }, thunkAPI) => {
+  async ({ id, page, size, sort, searchs, listType }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/list-attachment/${id}`;
+      const queryParams = new URLSearchParams;
+
+      if (page)
+        queryParams.append("page", page);
+      if (size)
+        queryParams.append("size", size);
+      if (sort)
+        queryParams.append("sort", sort);
+      if (searchs)
+        queryParams.append("searchs", searchs);
+      if (listType)
+        queryParams.append("listType", listType);
+
+      let url = `/v1/dbs/api/payment-relation/list-attachment/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -1713,16 +1736,42 @@ const financialInformationSlice = createSlice({
     },
 
     /** Get Payment Relation Attachment */
-    [getPaymentRelationAttachment.pending]: (state) => {
-      state.loading = true;
+    [getPaymentRelationAttachment.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getPaymentRelationAttachment.fulfilled]: (state, action) => {
-      state.listlationAttachment = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (isLoadMore)
+        state.list_prDetailAttachment = [
+          ...state.list_paymentRelation,
+          ...result,
+        ];
+      else
+        state.list_prDetailAttachment = result;
+
+      state.pagination_prDetailAttachment = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
     },
-    [getPaymentRelationAttachment.rejected]: (state) => {
-      state.listlationAttachment = [];
+    [getPaymentRelationAttachment.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_prDetailAttachment = [];
+        state.pagination_prDetailAttachment = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
     },
 
     /** Approve or Reject Payment Relation */

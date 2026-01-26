@@ -10,11 +10,12 @@ const dataTabs = {
 
 const PaymentRelationDetailTabs = ({
   subjectAccountNumber,
+  id = 0,
   dataDetail = {},
-  dataAttachment = [],
   section = "",
   options = [],
   handleChangeOption = () => {},
+  dispatch = () => {},
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -45,7 +46,7 @@ const PaymentRelationDetailTabs = ({
       case dataTabs.pri:
         return <PaymentRelationDetailInfo subjectAccountNumber={subjectAccountNumber} dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
-        return <PaymentRelationDetailAttch dataAttachment={dataAttachment} />;
+        return <PaymentRelationDetailAttch dispatch={dispatch} id={id} />;
       default:
         return <PaymentRelationDetailInfo />;
     }

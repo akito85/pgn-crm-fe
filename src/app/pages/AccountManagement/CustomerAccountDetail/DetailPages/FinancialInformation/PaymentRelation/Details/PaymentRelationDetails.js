@@ -29,7 +29,7 @@ const PaymentRelationDetails = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { detail_paymentRelation, data_paymentRelationAttachment } = useSelector(
+  const { detail_paymentRelation } = useSelector(
     (state) => state.financialInformation
   )
 
@@ -254,8 +254,9 @@ const PaymentRelationDetails = ({
             options={tabs}
             handleChangeOption={handleDetailSection}
             dataDetail={detail_paymentRelation?.result}
-            dataAttachment={data_paymentRelationAttachment?.result}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
+            dispatch={dispatch}
+            id={idPr}
           />
         </div>
 
