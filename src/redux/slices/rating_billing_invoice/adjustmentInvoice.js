@@ -59,7 +59,7 @@ export const getListAccountInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Account Detail
@@ -87,7 +87,7 @@ export const getAccountDetailInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Billing Cycle List
@@ -115,7 +115,7 @@ export const getBillingCycleInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Billing Period List
@@ -143,7 +143,7 @@ export const getBillingPeriodInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Term of Payment List
@@ -171,7 +171,7 @@ export const getTermOfPaymentInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Adjustment Reason List
@@ -199,7 +199,7 @@ export const getAdjustmentReasonInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Invoice List
@@ -227,7 +227,7 @@ export const getInvoiceListInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Invoice Detail
@@ -255,7 +255,7 @@ export const getInvoiceDetailInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Create Invoice Adjustment
@@ -295,7 +295,7 @@ export const createInvoiceAdjustment = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 // Update Invoice Adjustment
@@ -303,7 +303,7 @@ export const updateInvoiceAdjustment = createAsyncThunk(
   "UPDATE_INVOICE_ADJUSTMENT",
   async ({ id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/invoice-adjustment/update-invoice-adjustment/${id}`;
+      const url = `/v1/dbs/api/rbi/invoice-adjustment/${id}`;
       const response = await ratingBillingHttpService.updateData(url, body);
       const successBody = {
         title: `Successful`,
@@ -335,7 +335,7 @@ export const updateInvoiceAdjustment = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 // Get Invoice Adjustment Detail
@@ -363,7 +363,7 @@ export const getDetailInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get List Invoice Adjustment
@@ -371,7 +371,7 @@ export const getInvoiceAdjustmentPaginate = createAsyncThunk(
   "GET_INVOICE_ADJUSTMENT_PAGINATE",
   async (
     { page = 1, size = 100, sort = [], search = [], isLoadMore = false },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const sortParams = sort.length > 0 ? sort.join(",") : "createdDate~desc";
@@ -404,7 +404,7 @@ export const getInvoiceAdjustmentPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Approve Invoice Adjustment
@@ -440,7 +440,7 @@ export const approveInvoiceAdjustment = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 // Reject Invoice Adjustment
@@ -476,7 +476,7 @@ export const rejectInvoiceAdjustment = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 // Get Approval History
@@ -509,7 +509,7 @@ export const getApprovalHistoryInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Approval Hierarchies
@@ -537,7 +537,7 @@ export const getApprovalHierarchiesInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Approval Hierarchy Details
@@ -565,7 +565,7 @@ export const getApprovalHierarchyDetailsInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get List Category for Attachment
@@ -593,7 +593,7 @@ export const getListCategoryInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get List Attachment by Reference ID
@@ -622,7 +622,7 @@ export const getListAttachmentInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Download Attachment by File ID
@@ -650,7 +650,7 @@ export const downloadAttachmentInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Upload Attachment with multipart/form-data
@@ -662,7 +662,7 @@ export const uploadAttachmentInvoiceAdjustment = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        onProgress || (() => {})
+        onProgress || (() => {}),
       );
       return response;
     } catch (error) {
@@ -682,7 +682,7 @@ export const uploadAttachmentInvoiceAdjustment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Validate Create Invoice Adjustment
@@ -698,7 +698,7 @@ export const validateCreateInvoiceAdjustment = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 // Download Invoice Adjustment
@@ -720,11 +720,11 @@ export const downloadInvoiceAdjustment = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_INVOICE_ADJUSTMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 // Delete Invoice Adjustment
@@ -757,7 +757,7 @@ export const deleteInvoiceAdjustment = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 const adjustmentInvoiceSlice = createSlice({
@@ -1003,7 +1003,7 @@ const adjustmentInvoiceSlice = createSlice({
     },
     [getApprovalHierarchyDetailsInvoiceAdjustment.fulfilled]: (
       state,
-      action
+      action,
     ) => {
       state.loading = false;
       state.dataListApprovalHierarchyDetail = action.payload;

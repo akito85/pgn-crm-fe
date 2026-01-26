@@ -29,7 +29,7 @@ import CardContainer from "../../../../../components/CardContainer";
 import { columnWarranty } from "./ColumnConfig/WarrantyColumns";
 
 // Redux / Service
-import { 
+import {
   getAllWarrantyListPaginate,
   downloadWarrantyList
 } from "../../../../../redux/slices/receipt_collection/warranty";
@@ -230,7 +230,7 @@ const BillingPage = () => {
       </Menu.Item>
     </Menu>
   );
-  
+
   const itemGrantAccess = [
     {
       action: "Create",
@@ -363,16 +363,16 @@ const BillingPage = () => {
         {/* <CardContainer header={"Warranty List"}> */}
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Warranty List</p>
-              <div className="flex gap-2">
-                  <Dropdown overlay={moreMenu} trigger={['click']}>
-                    <ButtonComponent
-                      type="default"
-                    >
-                      More Actions <DownOutlined />
-                    </ButtonComponent>
-                  </Dropdown>
-              </div>
+            <p className="mt-[15px] font-bold">Warranty List</p>
+            <div className="flex gap-2">
+              <Dropdown overlay={moreMenu} trigger={['click']}>
+                <ButtonComponent
+                  type="default"
+                >
+                  More Actions <DownOutlined />
+                </ButtonComponent>
+              </Dropdown>
+            </div>
           </div>
         }>
           <div className="my-5">
@@ -383,8 +383,8 @@ const BillingPage = () => {
               pageSize={pageSize}
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
-              totalData={ data?.page?.totalElements || 0 }
-              tableScrolled={{ x: 5000, y: 525 }}
+              totalData={data?.page?.totalElements || 0}
+              tableScrolled={{ x: "max-content", y: 525 }}
               onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
@@ -397,7 +397,7 @@ const BillingPage = () => {
                   cursor: "pointer",
                   backgroundColor:
                     activeRowKey ===
-                    (record.billingCode || record.invoiceNumber)
+                      (record.billingCode || record.invoiceNumber)
                       ? "#bae7ff"
                       : "transparent",
                   transition: "background-color 0.2s ease",

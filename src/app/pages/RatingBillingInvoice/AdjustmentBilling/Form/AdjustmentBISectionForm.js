@@ -34,7 +34,7 @@ const AdjustmentBISectionForm = ({
 }) => {
   // Selector
   const { dataDetailType, dataInvoiceInfo, dataBillingItemList } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -96,7 +96,7 @@ const AdjustmentBISectionForm = ({
   useEffect(() => {
     if (dataItem) {
       const dataListItemDetail = dataBillingItemList?.find(
-        (a) => (a.item || a.billingItem) === dataItem
+        (a) => (a.item || a.billingItem) === dataItem,
       );
 
       formDetail.setFieldsValue({
@@ -126,7 +126,7 @@ const AdjustmentBISectionForm = ({
     let newTotalAmount = formDetail.getFieldValue().amount;
     let currency = formDetail.getFieldValue().currency;
     const dataListItemDetail = dataBillingItemList?.find(
-      (a) => (a.item || a.billingItem) === dataItem
+      (a) => (a.item || a.billingItem) === dataItem,
     );
 
     if (adjustmentAmount) {
@@ -256,7 +256,7 @@ const AdjustmentBISectionForm = ({
             tempValue.length > 0
               ? tempValue[0].replace(
                   /\B(?=(\d{3})+(?!\d))/g,
-                  thousandSeparator
+                  thousandSeparator,
                 ) + descimal
               : "";
           return format.toLowerCase();
@@ -291,7 +291,7 @@ const AdjustmentBISectionForm = ({
     (r) => {
       setListDataABI((prevState) => prevState.filter((e) => e.key !== r.key));
     },
-    [listDataABI]
+    [listDataABI],
   );
 
   // Handle Cancel Modal
@@ -331,7 +331,7 @@ const AdjustmentBISectionForm = ({
   // Handle Add Value to Array
   const handleAdd = (formValue) => {
     const findDataItem = dataBillingItemList?.find(
-      (item) => (item.item || item.billingItem) === formValue?.item
+      (item) => (item.item || item.billingItem) === formValue?.item,
     )?.billingItemCode;
 
     if (typeModal === "create") {
@@ -467,8 +467,8 @@ const AdjustmentBISectionForm = ({
               onFilter,
               sorter,
               handleDetail,
-              showAction
-            )
+              showAction,
+            ),
           )}
         />
       </div>
@@ -517,7 +517,10 @@ const AdjustmentBISectionForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={onChangeItem}>
+              <SelectComponent
+                placeholder={"Choose Item"}
+                onChange={onChangeItem}
+              >
                 {(() => {
                   const filtered = filterBillingItem();
 
@@ -546,6 +549,7 @@ const AdjustmentBISectionForm = ({
             >
               <InputNumber
                 type="number"
+                placeholder="Input Quantity"
                 controls={false}
                 style={{
                   width: "100%",
@@ -568,6 +572,7 @@ const AdjustmentBISectionForm = ({
             >
               <InputComponent
                 decimalScale={2}
+                placeholder="Input Price"
                 thousandSeparator={","}
                 decimalSeparator={"."}
                 type="numeric"
@@ -576,11 +581,11 @@ const AdjustmentBISectionForm = ({
             </Form.Item>
 
             <Form.Item label="UOM" name="uom">
-              <InputComponent disabled={true} />
+              <InputComponent placeholder={"Auto Filled"} disabled={true} />
             </Form.Item>
 
             <Form.Item label="Currency" name="currency">
-              <InputComponent disabled={true} />
+              <InputComponent placeholder={"Auto Filled"} disabled={true} />
             </Form.Item>
 
             <Form.Item
@@ -593,7 +598,10 @@ const AdjustmentBISectionForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={onChangeType}>
+              <SelectComponent
+                placeholder={"Choose Type"}
+                onChange={onChangeType}
+              >
                 {dataDetailType &&
                   dataDetailType?.map((data, index) => (
                     <Select.Option key={index} value={data.id}>
@@ -616,6 +624,7 @@ const AdjustmentBISectionForm = ({
                 decimalSeparator={"."}
                 type="numeric"
                 disabled={true}
+                placeholder={"0"}
                 fixedDecimalScale={true}
               />
             </Form.Item>
@@ -637,6 +646,7 @@ const AdjustmentBISectionForm = ({
                 decimalSeparator={"."}
                 type="numeric"
                 onChange={onChangeAdjustmentAmount}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -655,6 +665,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -673,6 +684,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -691,6 +703,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -699,6 +712,7 @@ const AdjustmentBISectionForm = ({
             <div className="col-span-4">
               <Form.Item name={"remark"} className="w-full" label={"Remark"}>
                 <InputComponent
+                  placeholder={"Input Remark"}
                   type="textarea"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
