@@ -1,6 +1,6 @@
-const CardContainer = ({ header, subHeader, children, type, element }) => {
+const CardContainer = ({ header, subHeader, children, type, element, className }) => {
   return (
-    <div className="drop-shadow-lg bg-white rounded-lg w-full my-2">
+    <div className={`drop-shadow-lg bg-white rounded-lg w-full my-2 ${className}`}>
       {type === "profile" || type === "tab" ? (
         <>
           <div style={{ padding: "16px" }}>{element}</div>

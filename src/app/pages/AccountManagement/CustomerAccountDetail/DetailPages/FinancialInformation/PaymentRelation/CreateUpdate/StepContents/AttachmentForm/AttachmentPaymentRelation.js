@@ -17,6 +17,7 @@ import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
 // import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 import { TablePaginationNew } from "poc-table-dragandrop";
+import CardContainer from "../../../../../../../../../../components/CardContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -307,95 +308,70 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <div className={`${className} drop-shadow-lg bg-white rounded-lg w-full p-9`}>
+    <CardContainer header={"ATTACHMENT"} className={`${className}`}>
       <Spin spinning={loadingDownload}>
-        <div className="flex flex-col w-full gap-5">
-          <span className="text-primary text-sm font-bold uppercase">
-            ATTACHMENT
-          </span>
-          {type !== "detail" && type !== "preview" ? (
-            <div className="flex flex-col w-full gap-2 items-end">
-              <div className="flex flex-col gap-y-1 justify-start">
-                <p className="text-[13px] mb-0 text-dg-grey-dark">
-                  Attach File:
-                  {mandatory ? (
-                  <span className={"pl-1"} style={{ color: "red" }}>
-                    *
-                  </span>
-                ) : null}
+        {type !== "detail" && type !== "preview" ? (
+          <div className="flex flex-col w-full gap-2 items-end">
+            <div className="flex flex-col gap-y-1 justify-start">
+              <p className="text-[13px] mb-0 text-dg-grey-dark">
+                Attach File:
+                {mandatory ? (
+                <span className={"pl-1"} style={{ color: "red" }}>
+                  *
+                </span>
+              ) : null}
+              </p>
+              <div className="flex flex-row gap-2 items-center">
+                <ButtonComponent
+                  fontSizeClassname="text-[11px]"
+                  size="small"
+                  type="default"
+                  onClick={handleOpenModal}
+                >
+                  Choose File
+                </ButtonComponent>
+                <p className="text-[11px] text-dg-grey-dark mb-0">
+                  No file choosen
                 </p>
-                <div className="flex flex-row gap-2 items-center">
-                  <ButtonComponent
-                    fontSizeClassname="text-[11px]"
-                    size="small"
-                    type="default"
-                    onClick={handleOpenModal}
-                  >
-                    Choose File
-                  </ButtonComponent>
-                  <p className="text-[11px] text-dg-grey-dark mb-0">
-                    No file choosen
-                  </p>
-                </div>
               </div>
             </div>
-          ) : null}
-          {/* <TablePaginationNew
-            type="FE"
-            dataSource={data}
-            totalData={data.length}
-            current={page}
-            pageSize={pageSize}
-            tableScrolled={{ y: 300, x: 1500 }}
-            onChange={handleChangeSize}
-            columns={columnAttachmentData(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDelete,
-              type,
-              handleShow
-            )}
-          /> */}
-          <TablePaginationNew
-            type="FE"
-            dataSource={data.map((item, index) => ({
-              ...item,
-              no: (page - 1) * pageSize + index + 1,
-            }))}
-            tableScrolled={{ y: 300, x: 1500 }}
-            onChange={handleChangeSize}
-            columns={columnAttachmentData(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDelete,
-              type,
-              handleShow
-            )}
-            enableDragColumn={true}
-          />
-          <ModalAttachment
-            openUpload={modalUpload}
-            updateData={updateData}
-            categoryOptions={categoryOptions}
-            handleCancel={() => setModalUpload(false)}
-            valueGuard={
-              configApplication === configApp.MASTER_MANAGEMENT
-                ? dataGlobalPropAttachment
-                : {}
-            }
-            withLink
-          />
-        </div>
+          </div>
+        ) : null}
+        <TablePaginationNew
+          type="FE"
+          dataSource={data.map((item, index) => ({
+            ...item,
+            no: (page - 1) * pageSize + index + 1,
+          }))}
+          tableScrolled={{ y: 300, x: 1500 }}
+          onChange={handleChangeSize}
+          columns={columnAttachmentData(
+            page,
+            pageSize,
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            handleDelete,
+            type,
+            handleShow
+          )}
+          enableDragColumn={true}
+        />
+        <ModalAttachment
+          openUpload={modalUpload}
+          updateData={updateData}
+          categoryOptions={categoryOptions}
+          handleCancel={() => setModalUpload(false)}
+          valueGuard={
+            configApplication === configApp.MASTER_MANAGEMENT
+              ? dataGlobalPropAttachment
+              : {}
+          }
+          withLink
+        />
       </Spin>
-    </div>  
+    </CardContainer>
   );
 };
 

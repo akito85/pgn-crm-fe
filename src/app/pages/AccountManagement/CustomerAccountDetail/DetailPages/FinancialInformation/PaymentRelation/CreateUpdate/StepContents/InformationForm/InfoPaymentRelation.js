@@ -16,6 +16,7 @@ import { getPrAccountStandard } from "../../../../../../../../../../redux/slices
 import { useDispatch, useSelector } from "react-redux";
 // import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 import { TablePaginationNew } from "poc-table-dragandrop";
+import CardContainer from "../../../../../../../../../../components/CardContainer";
 
 export default function InfoPaymentRelation({
   accountId,
@@ -364,7 +365,7 @@ export default function InfoPaymentRelation({
 
   return(
     <div className={className}>
-      <NxPanel title={"PAYMENT RELATION INFORMATION"} removeBottomMargin>
+      <CardContainer header={"PAYMENT RELATION INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           <div className="flex gap-2 items-end">
             <Form.Item name={"objectId"} hidden>
@@ -472,7 +473,7 @@ export default function InfoPaymentRelation({
             />
           </Form.Item>
         </div>
-      </NxPanel>
+      </CardContainer>
 
       <ModalCustom
         isOpen={isOpen}
