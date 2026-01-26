@@ -46,12 +46,12 @@ export const RenderContentActions = (
         <div className="pt-1">
           {itemRender
             ?.filter((item) => item?.action === sliceColumn?.toLowerCase())
-            ?.map((item) => {
+            ?.map((item, index) => {
               if (
                 permissions?.includes(sliceColumn?.toLowerCase()) === true &&
                 item?.action === sliceColumn?.toLowerCase()
               ) {
-                return item?.render(record, totalLength);
+                return item?.render(record, totalLength, index);
               } else {
                 return null;
               }
@@ -61,10 +61,10 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 mt-1 items-start">
-        {itemRender?.map((item) => {
+      <div className="w-full flex justify-center gap-4 py-1 items-center">
+        {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
-            return item?.render(record, totalLength);
+            return item?.render(record, totalLength, index);
           } else {
             return null;
           }
