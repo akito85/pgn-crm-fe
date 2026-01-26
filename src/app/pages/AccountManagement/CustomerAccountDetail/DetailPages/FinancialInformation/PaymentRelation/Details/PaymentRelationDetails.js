@@ -48,7 +48,7 @@ const PaymentRelationDetails = ({
   const location = useLocation();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
-  const idPr = location?.state?.idPr;
+  const idPr = location?.state?.id;
 
   //state
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
