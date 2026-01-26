@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import { applyFixedColumns } from "../../../../../../../../utils/applyFixedColumns";
 
 const PaymentRelationDetailAttch = ({
-  id = 0,
+  idPr = 0,
   dispatch = () => {},
 }) => {
   const financialInformationState = useSelector(
@@ -162,7 +162,8 @@ const PaymentRelationDetailAttch = ({
   };
 
   useEffect(() => {
-    dispatch(getPaymentRelationAttachment({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search) }));
+    if (idPr)
+      dispatch(getPaymentRelationAttachment({ id: idPr, page, size: loadMoreSize, sort, searchs: JSON.stringify(search) }));
   }, [page, loadMoreSize, sort, search, tempFilters]);
 
   return (

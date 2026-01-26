@@ -15,7 +15,7 @@ import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../../../components/DetailText";
-import { getDetailPaymentRelation, getPaymentRelationAttachment, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 
@@ -178,10 +178,8 @@ const PaymentRelationDetails = ({
   }, [idAccount, idCustomer]);
 
   useEffect(() => {
-    if (idPr) {
+    if (idPr)
       dispatch(getDetailPaymentRelation(idPr));
-      dispatch(getPaymentRelationAttachment({ id: idPr }));
-    }
   }, [idPr])
 
   useEffect(() => {
@@ -256,7 +254,7 @@ const PaymentRelationDetails = ({
             dataDetail={detail_paymentRelation?.result}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
             dispatch={dispatch}
-            id={idPr}
+            idPr={idPr}
           />
         </div>
 

@@ -10,7 +10,7 @@ const dataTabs = {
 
 const PaymentRelationDetailTabs = ({
   subjectAccountNumber,
-  id = 0,
+  idPr = 0,
   dataDetail = {},
   section = "",
   options = [],
@@ -46,7 +46,7 @@ const PaymentRelationDetailTabs = ({
       case dataTabs.pri:
         return <PaymentRelationDetailInfo subjectAccountNumber={subjectAccountNumber} dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
-        return <PaymentRelationDetailAttch dispatch={dispatch} id={id} />;
+        return <PaymentRelationDetailAttch dispatch={dispatch} idPr={idPr} />;
       default:
         return <PaymentRelationDetailInfo />;
     }
