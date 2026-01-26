@@ -10,8 +10,8 @@ export const columnAllocation = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleInactive = () => {}
+  handleSearch = () => { },
+  handleInactive = () => { }
 ) => {
   const columns = [
     {
@@ -94,19 +94,7 @@ export const columnAllocation = (
         handleSearch
       ),
     },
-    {
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycle",
-      sorter: (a, b) => sorterFunction("billingCycle", a, b),
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "billingCycle",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
+
     {
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
@@ -207,22 +195,22 @@ export const columnAllocation = (
       ),
       // width: 120,
       render: (index) =>
-        // (
-        //     <div className={" flex justify-center"}>
-        //         <StatusComponent colour={index}>{toTitleCase(index)}</StatusComponent>
-        //     </div>
-        // ),
-        {
-          return index ? (
-            <div className={" flex justify-center"}>
-              <StatusComponent colour={index}>
-                {toTitleCase(index)}
-              </StatusComponent>
-            </div>
-          ) : (
-            index
-          );
-        },
+      // (
+      //     <div className={" flex justify-center"}>
+      //         <StatusComponent colour={index}>{toTitleCase(index)}</StatusComponent>
+      //     </div>
+      // ),
+      {
+        return index ? (
+          <div className={" flex justify-center"}>
+            <StatusComponent colour={index}>
+              {toTitleCase(index)}
+            </StatusComponent>
+          </div>
+        ) : (
+          index
+        );
+      },
     },
     {
       title: "CONVERTED CURRENCY",

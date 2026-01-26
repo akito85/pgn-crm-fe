@@ -10,8 +10,8 @@ export const columnRecommendation = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleInactive = () => {}
+  handleSearch = () => { },
+  handleInactive = () => { }
 ) => {
   const columns = [
     {
@@ -56,20 +56,6 @@ export const columnRecommendation = (
       align: "center",
       ...getColumnSearchPropsPaging(
         "invoiceCurrency",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycle",
-      // sorter:true,
-      sorter: (a, b) => sorterFunction("billingCycle", a, b, "date"),
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "billingCycle",
         searchInput,
         searchedColumn,
         searchText,
