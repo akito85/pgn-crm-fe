@@ -2,7 +2,7 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, Form } from "antd";
+import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
@@ -24,7 +24,6 @@ import {
   getAccountOneTimeDetail,
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import DetailText from "../../../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
