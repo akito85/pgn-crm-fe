@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect, memo } from "react";
 
 
 import { Form, Spin, Switch } from "antd";
@@ -266,4 +266,4 @@ const PaymentChannel = ({access, id = 0 }) => {
   );
 };
 
-export default PaymentChannel;
+export default memo(PaymentChannel);
