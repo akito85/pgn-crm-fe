@@ -10,6 +10,7 @@ import { getBase64 } from "../../../../../../../../utils/getBase64";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import { configApp } from "../../../../../../../../constants/configApp";
 import { TablePaginationNew } from "poc-table-dragandrop";
+import CardContainer from "../../../../../../../../components/CardContainer";
 
 const PaymentRelationDetailAttch = ({
   dataAttachment = [],
@@ -103,7 +104,7 @@ const PaymentRelationDetailAttch = ({
 
   return (
     <Spin spinning={loadingDownload}>
-      <BaseContainer header={"ATTACHMENTS"}>
+      <CardContainer header={"ATTACHMENTS"}>
         {/* <TablePaginationNew
           dataSource={dataAttachment.map((item, idx) => ({
             ...item,
@@ -128,7 +129,7 @@ const PaymentRelationDetailAttch = ({
           enableDragColumn={true}
           type="FE"
         />
-      </BaseContainer>
+      </CardContainer>
     </Spin>
   );
 };
