@@ -1,4 +1,4 @@
-import { Badge, Button, Checkbox, Tooltip } from "antd";
+import { Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { Link, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
@@ -6,7 +6,7 @@ import { useColumnActionPermission } from "../../../../../../../components/Colum
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 
