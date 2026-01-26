@@ -110,6 +110,7 @@ const TableCriteriaInformation = (props) => {
 
   const columns = [
     {
+      key: "no",
       title: "NO",
       dataIndex: "no",
       width: "5%",
@@ -117,6 +118,7 @@ const TableCriteriaInformation = (props) => {
       render: (t, r, i) => i + 1,
     },
     {
+      key: "bankAccount",
       title: "CUSTOMER SEGMENT",
       dataIndex: "bankAccount",
       align: "",
@@ -124,6 +126,7 @@ const TableCriteriaInformation = (props) => {
       ...getColumnSearchProps("bankAccount"),
     },
     {
+      key: "glAccount",
       title: "ACCOUNT GROUP TYPE",
       dataIndex: "glAccount",
       align: "",
@@ -131,17 +134,18 @@ const TableCriteriaInformation = (props) => {
       ...getColumnSearchProps("glAccount"),
     },
     {
+      key: "startDate",
       title: "START DATE",
       dataIndex: "startDate",
       inputType: "date",
       align: "center",
       editable: true,
-      key: "startDate",
       ...getColumnSearchProps("startDate", "date"),
       sorter: (a, b) => a.startDate - b.startDate,
       render: (startDate) => moment(startDate).format("DD MMM YYYY"),
     },
     {
+      key: "endDate",
       title: "END DATE",
       dataIndex: "endDate",
       inputType: "date",

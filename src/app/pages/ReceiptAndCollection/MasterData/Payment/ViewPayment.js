@@ -144,7 +144,7 @@ const ViewPayment = () => {
               pageSize={pageSize}
               totalData={totalElements}
               current={page}
-              tableScrolled={{ y: 525, x: 10000 }}
+              tableScrolled={{ y: 525, x: "max-content" }}
               onChange={handleChangeSize}
               onSizeChanger={handleChangeSize}
               onSort={onSort}
