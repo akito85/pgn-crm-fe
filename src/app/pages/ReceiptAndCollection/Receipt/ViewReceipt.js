@@ -700,7 +700,7 @@ const ViewReceipt = () => {
               totalData={data?.page?.totalElements}
               onSort={onSort}
               tableScrolled={{
-                x: 10000,
+                x: "max-content",
                 y: 500,
               }}
               handleDownload={handleDownload} // For Export button in TableRBI

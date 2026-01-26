@@ -65,59 +65,64 @@ export const columnsApproval = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => { }
 ) => [
-  {
-    title: "NO",
-    align: "center",
-    width: 60,
-    render: (text, object, index) => index + 1,
-  },
-  {
-    title: "HIERARCHY",
-    dataIndex: "approvalLevel",
-    ...getColumnSearchProps(
-      "approvalLevel",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-  {
-    title: "POSITION",
-    dataIndex: "position",
-    ...getColumnSearchProps(
-      "position",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-];
+    {
+      key: "no",
+      title: "NO",
+      align: "center",
+      width: 60,
+      render: (text, object, index) => index + 1,
+    },
+    {
+      key: "approvalLevel",
+      title: "HIERARCHY",
+      dataIndex: "approvalLevel",
+      ...getColumnSearchProps(
+        "approvalLevel",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    },
+    {
+      key: "position",
+      title: "POSITION",
+      dataIndex: "position",
+      ...getColumnSearchProps(
+        "position",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    },
+  ];
 
 export const columnsExpandApproval = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => { }
 ) => [
-  {
-    title: "NO",
-    width: 60,
-    align: "center",
-    render: (text, object, index) => index + 1,
-  },
-  {
-    title: "EMPLOYEE",
-    dataIndex: "employeeName",
-    ...getColumnSearchProps(
-      "employeeName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  },
-];
+    {
+      key: "no",
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => index + 1,
+    },
+    {
+      key: "employeeName",
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+      ...getColumnSearchProps(
+        "employeeName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    },
+  ];

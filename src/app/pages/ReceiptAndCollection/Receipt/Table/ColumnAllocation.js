@@ -16,6 +16,7 @@ export const columnAllocation = (
   const columns = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       dataIndex: "no",
@@ -24,6 +25,7 @@ export const columnAllocation = (
     {
       title: "ALLOCATION CODE",
       dataIndex: "allocationCode",
+      key: "allocationCode",
       sorter: (a, b) => sorterFunction("allocationCode", a, b),
       ...getColumnSearchPropsPaging(
         "allocationCode",
@@ -36,6 +38,7 @@ export const columnAllocation = (
     {
       title: "ALLOCATION NUMBER",
       dataIndex: "allocationNumber",
+      key: "allocationNumber",
       sorter: (a, b) => sorterFunction("allocationNumber", a, b),
       ...getColumnSearchPropsPaging(
         "allocationNumber",
@@ -48,6 +51,7 @@ export const columnAllocation = (
     {
       title: "ITEM",
       dataIndex: "billingItem",
+      key: "billingItem",
       sorter: (a, b) => sorterFunction("billingItem", a, b),
       ...getColumnSearchPropsPaging(
         "billingItem",
@@ -60,6 +64,7 @@ export const columnAllocation = (
     {
       title: "ALLOCATION DATE",
       dataIndex: "allocationDate",
+      key: "allocationDate",
       sorter: (a, b) => sorterFunction("allocationDate", a, b, "date"),
       ...getColumnSearchPropsPaging(
         "allocationDate",
@@ -72,6 +77,7 @@ export const columnAllocation = (
     {
       title: "INVOICE NO",
       dataIndex: "invoiceNumber",
+      key: "invoiceNumber",
       sorter: (a, b) => sorterFunction("invoiceNumber", a, b),
       ...getColumnSearchPropsPaging(
         "invoiceNumber",
@@ -84,6 +90,7 @@ export const columnAllocation = (
     {
       title: "INVOICE CURRENCY",
       dataIndex: "invoiceCurrency",
+      key: "invoiceCurrency",
       sorter: (a, b) => sorterFunction("invoiceCurrency", a, b),
       align: "center",
       ...getColumnSearchPropsPaging(
@@ -98,6 +105,7 @@ export const columnAllocation = (
     {
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
+      key: "billingPeriod",
       // sorter:true,
       sorter: (a, b) => sorterFunction("billingPeriod", a, b, "date"),
       align: "center",
@@ -117,6 +125,7 @@ export const columnAllocation = (
     {
       title: "BILLING ITEM AMOUNT",
       dataIndex: "billingItemAmount",
+      key: "billingItemAmount",
       sorter: (a, b) => sorterFunction("billingItemAmount", a, b, "number"),
       align: "right",
       ...getColumnSearchPropsPaging(
@@ -135,6 +144,7 @@ export const columnAllocation = (
     {
       title: "TYPE",
       dataIndex: "type",
+      key: "type",
       sorter: (a, b) => sorterFunction("type", a, b),
       ...getColumnSearchPropsPaging(
         "type",
@@ -147,6 +157,7 @@ export const columnAllocation = (
     {
       title: "ALLOCATION AMOUNT",
       dataIndex: "allocationAmount",
+      key: "allocationAmount",
       sorter: (a, b) => sorterFunction("allocationAmount", a, b, "number"),
       align: "right",
       inputType: "number",
@@ -167,6 +178,7 @@ export const columnAllocation = (
     {
       title: "BILLING ITEM BALANCE",
       dataIndex: "billingItemBalance",
+      key: "billingItemBalance",
       sorter: (a, b) => sorterFunction("billingItemBalance", a, b, "number"),
       align: "right",
       ...getColumnSearchPropsPaging(
@@ -185,6 +197,7 @@ export const columnAllocation = (
     {
       title: "ALLOCATION STATUS",
       dataIndex: "allocationStatus",
+      key: "allocationStatus",
       sorter: (a, b) => sorterFunction("allocationStatus", a, b),
       ...getColumnSearchPropsPaging(
         "allocationStatus",
@@ -215,6 +228,7 @@ export const columnAllocation = (
     {
       title: "CONVERTED CURRENCY",
       dataIndex: "convertedCurrency",
+      key: "convertedCurrency",
       sorter: true,
       align: "center",
       ...getColumnSearchPropsPaging(
@@ -228,6 +242,7 @@ export const columnAllocation = (
     {
       title: "EQUIVALENT AMOUNT",
       dataIndex: "equivalentAmount",
+      key: "equivalentAmount",
       sorter: true,
       align: "right",
       ...getColumnSearchPropsPaging(

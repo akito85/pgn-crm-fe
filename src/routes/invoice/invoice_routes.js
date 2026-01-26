@@ -18,6 +18,7 @@ export const INVOICE_ROUTES = {
   //E-Faktur
   EFAKTUR_VIEW: "/invoice/e-faktur-management",
   EFAKTUR_VIEW_DETAIL: "/invoice/e-faktur-management/view",
+  EFAKTUR_CREATE: "/invoice/e-faktur-management/create",
 
   // Adjustment Invoice
   ADJUSTMENT_INVOICE_VIEW: "/invoice/adjustment-invoice",

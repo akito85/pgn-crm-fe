@@ -15,7 +15,7 @@ export const columnsAdjustmentInvoice = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
 ) => [
   {
     key: "no",
@@ -38,7 +38,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -48,7 +48,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -64,7 +64,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -74,33 +74,33 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
-    key: "billingPeriode",
+    key: "billingCycle",
     title: "BILLING CYCLE",
-    dataIndex: "billingPeriode",
+    dataIndex: "billingCycle",
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "billingPeriode",
+      "billingCycle",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
-        "billingPeriode",
-        hasValue(search["billingPeriode"]),
+        "billingCycle",
+        hasValue(search["billingCycle"]),
         searchText,
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -116,7 +116,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -126,7 +126,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -142,7 +142,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -152,7 +152,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -168,7 +168,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -178,7 +178,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -194,7 +194,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -204,7 +204,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -220,7 +220,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -230,7 +230,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -246,7 +246,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -256,7 +256,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -272,7 +272,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -282,7 +282,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -298,7 +298,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -308,7 +308,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -324,7 +324,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -334,7 +334,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -350,7 +350,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -360,7 +360,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -460,7 +460,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -470,7 +470,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -487,7 +487,7 @@ export const columnsAdjustmentInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -496,7 +496,7 @@ export const columnsAdjustmentInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -513,7 +513,7 @@ export const columnsAdjustmentInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -522,7 +522,7 @@ export const columnsAdjustmentInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -539,7 +539,7 @@ export const columnsAdjustmentInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -548,7 +548,7 @@ export const columnsAdjustmentInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -564,7 +564,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -574,7 +574,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -590,7 +590,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -600,7 +600,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -700,7 +700,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       text ? (
@@ -712,7 +712,7 @@ export const columnsAdjustmentInvoice = (
             text,
             true,
             "input",
-            search
+            search,
           )}
         </Tooltip>
       ) : (
@@ -732,7 +732,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => (
       <StatusComponent colour={text} type="status" size="small">
@@ -753,7 +753,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => (
       <StatusComponent colour={text} type="status" size="small">
@@ -774,7 +774,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -784,7 +784,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -801,7 +801,7 @@ export const columnsAdjustmentInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -810,7 +810,7 @@ export const columnsAdjustmentInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -826,7 +826,7 @@ export const columnsAdjustmentInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -836,7 +836,7 @@ export const columnsAdjustmentInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -853,7 +853,7 @@ export const columnsAdjustmentInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -862,7 +862,7 @@ export const columnsAdjustmentInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
 ];
