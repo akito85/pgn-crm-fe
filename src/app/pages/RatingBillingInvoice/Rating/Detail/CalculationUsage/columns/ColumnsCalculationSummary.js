@@ -1,4 +1,5 @@
 import React from "react";
+import { Spin } from "antd";
 import TableRBI from "../../../../../../../components/TableRBI";
 import { separatorNumber } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
@@ -19,6 +20,7 @@ const renderDate = (value) => {
   return `${day} ${month} ${year}`;
 };
 
+// Kolom untuk tabel utama (summary) - Data SEDIKIT
 export const columnsCalculationSummary = (
   page,
   pageSize,
@@ -111,8 +113,8 @@ export const columnsCalculationSummary = (
   },
   {
     title: "TOTAL AMOUNT",
-    dataIndex: "totalAmount",
-    key: "totalAmount",
+    dataIndex: "amountPartitionTotal",
+    key: "amountPartitionTotal",
     width: 180,
     align: "right",
     sorter: true,
@@ -120,50 +122,87 @@ export const columnsCalculationSummary = (
   },
 ];
 
-// Kolom untuk expanded table - menyesuaikan dengan design Figma
+// Kolom untuk expanded table - Data BANYAK dengan semua partisi
 export const getExpandedColumns = () => [
+  {
+    title: "NO",
+    dataIndex: "no",
+    key: "expanded_no",
+    width: 50,
+    align: "center",
+    render: (text, record, index) => index + 1,
+  },
   {
     title: "CALCULATED USAGE PARTITION",
     children: [
       {
-        title: "NO",
-        dataIndex: "no",
-        key: "expanded_no",
-        width: 50,
-        align: "center",
-        render: (text, record, index) => index + 1,
-      },
-      {
         title: "UOM",
-        dataIndex: "uom",
-        key: "uom",
+        dataIndex: "calculatedUsageUom",
+        key: "calculatedUsageUom",
         width: 120,
         align: "center",
         render: (text) => text || "-",
       },
       {
         title: "MIN",
-        dataIndex: "usageMin",
-        key: "usage_min",
+        dataIndex: "calculatedUsageMin",
+        key: "calculatedUsageMin",
         width: 150,
         align: "right",
         render: (text) => renderNumber(text, 3),
       },
       {
         title: "NORMAL",
-        dataIndex: "usageNormal",
-        key: "usage_normal",
+        dataIndex: "calculatedUsageNormal",
+        key: "calculatedUsageNormal",
         width: 150,
         align: "right",
         render: (text) => renderNumber(text, 3),
       },
       {
         title: "OUP",
-        dataIndex: "usageOup",
-        key: "usage_oup",
+        dataIndex: "calculatedUsageUop",
+        key: "calculatedUsageUop",
         width: 150,
         align: "right",
         render: (text) => renderNumber(text, 3),
+      },
+    ],
+  },
+  {
+    title: "CONVERTED CALCULATED",
+    children: [
+      {
+        title: "UOM",
+        dataIndex: "convertedCalculatedUom",
+        key: "convertedCalculatedUom",
+        width: 120,
+        align: "center",
+        render: (text) => text || "-",
+      },
+      {
+        title: "MIN",
+        dataIndex: "convertedCalculatedMin",
+        key: "convertedCalculatedMin",
+        width: 150,
+        align: "right",
+        render: (text) => renderNumber(text, 8),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "convertedCalculatedNormal",
+        key: "convertedCalculatedNormal",
+        width: 150,
+        align: "right",
+        render: (text) => renderNumber(text, 8),
+      },
+      {
+        title: "OUP",
+        dataIndex: "convertedCalculatedOup",
+        key: "convertedCalculatedOup",
+        width: 150,
+        align: "right",
+        render: (text) => renderNumber(text, 8),
       },
     ],
   },
@@ -172,8 +211,8 @@ export const getExpandedColumns = () => [
     children: [
       {
         title: "CURRENCY",
-        dataIndex: "priceCurrency",
-        key: "price_currency",
+        dataIndex: "currency",
+        key: "currency",
         width: 120,
         align: "center",
         render: (text) => text || "-",
@@ -181,7 +220,7 @@ export const getExpandedColumns = () => [
       {
         title: "PRICE CODE",
         dataIndex: "priceCode",
-        key: "price_code",
+        key: "priceCode",
         width: 150,
         align: "center",
         render: (text) => text || "-",
@@ -189,7 +228,7 @@ export const getExpandedColumns = () => [
       {
         title: "MIN",
         dataIndex: "priceMin",
-        key: "price_min",
+        key: "priceMin",
         width: 150,
         align: "right",
         render: (text) => renderNumber(text, 3),
@@ -197,7 +236,7 @@ export const getExpandedColumns = () => [
       {
         title: "NORMAL",
         dataIndex: "priceNormal",
-        key: "price_normal",
+        key: "priceNormal",
         width: 150,
         align: "right",
         render: (text) => renderNumber(text, 3),
@@ -205,7 +244,7 @@ export const getExpandedColumns = () => [
       {
         title: "OUP",
         dataIndex: "priceOup",
-        key: "price_oup",
+        key: "priceOup",
         width: 150,
         align: "right",
         render: (text) => renderNumber(text, 3),
@@ -217,32 +256,32 @@ export const getExpandedColumns = () => [
     children: [
       {
         title: "CURRENCY",
-        dataIndex: "amountCurrency",
-        key: "amount_currency",
+        dataIndex: "amountPartitionCurrency",
+        key: "amountPartitionCurrency",
         width: 120,
         align: "center",
         render: (text) => text || "-",
       },
       {
         title: "MIN",
-        dataIndex: "amountMin",
-        key: "amount_min",
+        dataIndex: "amountPartitionMin",
+        key: "amountPartitionMin",
         width: 200,
         align: "right",
         render: (text) => renderNumber(text, 3),
       },
       {
         title: "NORMAL",
-        dataIndex: "amountNormal",
-        key: "amount_normal",
+        dataIndex: "amountPartitionNormal",
+        key: "amountPartitionNormal",
         width: 200,
         align: "right",
         render: (text) => renderNumber(text, 3),
       },
       {
         title: "OUP",
-        dataIndex: "amountOup",
-        key: "amount_oup",
+        dataIndex: "amountPartitionOup",
+        key: "amountPartitionOup",
         width: 200,
         align: "right",
         render: (text) => renderNumber(text, 3),
@@ -251,19 +290,40 @@ export const getExpandedColumns = () => [
   },
 ];
 
-// Render expanded row menggunakan TableRBI component
-export const renderExpandedRow = (record) => {
-  const expandedData = record.partitions || [];
+// Render expanded row - mengambil data dari redux
+export const renderExpandedRow = (record, expandData, loadingExpand) => {
+  const rowKey = `${record.transactionDate}-${record.saType}`;
+  const isLoading = loadingExpand[rowKey];
+  const expandedData = expandData[rowKey]?.result || [];
+  
   const expandedColumns = getExpandedColumns();
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <Spin tip="Loading expanded data..." />
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (!expandedData || expandedData.length === 0) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
+        No data available
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white" style={{ marginLeft: "28px" }}>
       <TableRBI
-        idTable={`expanded-table-${record.id}`}
+        idTable={`expanded-table-${rowKey}`}
         columns={expandedColumns}
         dataSource={expandedData}
         size="small"
-        tableScrolled={{ x: 1000 }}
+        tableScrolled={{ x: 2000 }}
         showExport={false}
         showAdvanceSearch={false}
         showSearchBar={false}

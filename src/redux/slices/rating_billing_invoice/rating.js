@@ -7,6 +7,7 @@ const initialState = {
   list_billing_period: [],
   data_calculationUsage: [],
   data_calculationSummary: [],
+  data_calculationSummaryExpand: {},
   data_calculationDetail: [],
   data_adjustment: [],
   data_serviceAgreement: [],
@@ -21,6 +22,7 @@ const initialState = {
   loading: false,
   data_detail: null,
   data_downlaod: null,
+  loadingExpand: {},
 };
 
 // list gas
@@ -417,77 +419,59 @@ export const getDetailRatingGas = createAsyncThunk(
   },
 );
 
-// Calculation Summary
+// Calculation Summary - Tabel Utama
 export const getAllCalculationSummaryPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_PAGINATE",
-  async ({ calculationCode, saType, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ ratingCode, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
       
-      // Endpoint baru dengan calculationCode dan saType
-      const url = `/v1/dbs/api/rating/summary-rating?calculationCode=${calculationCode}&saType=${saType}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // Endpoint untuk tabel utama (summary)
+      const url = `/v1/dbs/api/rating/summary-rating?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       
       const response = await ratingBillingHttpService.getPagination(url);
-      const rawData = response?.data?.result || [];
       
-      // Group data berdasarkan transactionDate dan saType
-      const groupedMap = new Map();
+      // Langsung return response data tanpa grouping
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// Calculation Summary Expand - Tabel yang di-expand
+export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
+  "GET_ALL_CALCULATION_SUMMARY_EXPAND_PAGINATE",
+  async ({ ratingCode, transactionDate, saType, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
       
-      rawData.forEach((item) => {
-        const key = `${item.transactionDate}-${item.saType}`; 
-        
-        if (!groupedMap.has(key)) {
-          groupedMap.set(key, {
-            id: item.id || key, // Gunakan id dari response atau key sebagai fallback
-            transactionDate: item.transactionDate,
-            usage: item.usage,
-            saType: item.saType,
-            amount: item.amount,
-            totalAmount: item.amountPartitionTotal,
-            partitions: []
-          });
-        }
-        
-        // Tambahkan partition data
-        groupedMap.get(key).partitions.push({
-          // Calculated Usage
-          uom: item.calculatedUsageUom,
-          usageMin: item.calculatedUsageMin,
-          usageNormal: item.calculatedUsageNormal,
-          usageOup: item.calculatedUsageUop,
-          
-          // Converted Calculated (optional, bisa ditambahkan jika diperlukan)
-          convertedUom: item.convertedCalculatedUom,
-          convertedMin: item.convertedCalculatedMin,
-          convertedNormal: item.convertedCalculatedNormal,
-          convertedOup: item.convertedCalculatedOup,
-          
-          // Price
-          priceCurrency: item.currency,
-          priceCode: item.priceCode,
-          priceMin: item.priceMin,
-          priceNormal: item.priceNormal,
-          priceOup: item.priceOup,
-          
-          // Amount Partition
-          amountCurrency: item.amountPartitionCurrency,
-          amountMin: item.amountPartitionMin,
-          amountNormal: item.amountPartitionNormal,
-          amountOup: item.amountPartitionOup,
-        });
-      });
+      // Endpoint untuk detail expanded
+      const url = `/v1/dbs/api/rating/summary-rating-expand?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       
-      const transformedResult = Array.from(groupedMap.values());   
+      const response = await ratingBillingHttpService.getPagination(url);
       
+      // Return dengan identifier untuk row yang di-expand
       return {
-        result: transformedResult,
-        page: response?.data?.page || {
-          totalElements: transformedResult.length,
-          totalPages: Math.ceil(transformedResult.length / pageSize),
-          size: pageSize,
-          number: page - 1,
-        }
+        ...response.data,
+        transactionDate,
+        saType,
       };
     } catch (error) {
       const message =
@@ -1039,6 +1023,7 @@ const ratingSlice = createSlice({
     [getAllCalculationRuleServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
+    
 
     // Get All Rating Non Gas Pagination
     [getListRatingNonGasPaginate.pending]: (state) => {
@@ -1087,7 +1072,7 @@ const ratingSlice = createSlice({
     [getDetailRatingGas.rejected]: (state) => {
       state.loading = false;
     },
-    // Get All Calculation Summary Pagination
+    // Get All Calculation Summary Pagination (Tabel Utama)
     [getAllCalculationSummaryPaginate.pending]: (state) => {
       state.loading = true;
     },
@@ -1098,6 +1083,25 @@ const ratingSlice = createSlice({
     [getAllCalculationSummaryPaginate.rejected]: (state) => {
       state.loading = false;
       state.data_calculationSummary = [];
+    },
+
+    // Get All Calculation Summary Expand (Data di dalam expand)
+    [getAllCalculationSummaryExpandPaginate.pending]: (state, action) => {
+      const { transactionDate, saType } = action.meta.arg;
+      const key = `${transactionDate}-${saType}`;
+      state.loadingExpand[key] = true;
+    },
+    [getAllCalculationSummaryExpandPaginate.fulfilled]: (state, action) => {
+      const { transactionDate, saType } = action.payload;
+      const key = `${transactionDate}-${saType}`;
+      state.loadingExpand[key] = false;
+      state.data_calculationSummaryExpand[key] = action.payload;
+    },
+    [getAllCalculationSummaryExpandPaginate.rejected]: (state, action) => {
+      const { transactionDate, saType } = action.meta.arg;
+      const key = `${transactionDate}-${saType}`;
+      state.loadingExpand[key] = false;
+      state.data_calculationSummaryExpand[key] = null;
     },
 
     // Get All Calculation Detail Pagination
