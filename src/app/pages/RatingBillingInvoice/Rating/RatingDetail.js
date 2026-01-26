@@ -12,6 +12,7 @@ const RatingDetail = ({
   ratingCode,
   calculationCode, 
   accountNumber,
+  saType, // Tambahkan saType sebagai prop
   onClose 
 }) => {
   // State
@@ -76,6 +77,7 @@ const RatingDetail = ({
             calculationCode={calculationCode}
             ratingCode={ratingCode}
             accountNumber={accountNumber}
+            saType={saType}
           />
         );
       case "Usage":
@@ -108,6 +110,7 @@ const RatingDetail = ({
             calculationCode={calculationCode}
             ratingCode={ratingCode}
             accountNumber={accountNumber}
+            saType={saType}
           />
         );
     }

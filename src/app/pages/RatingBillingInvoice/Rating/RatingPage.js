@@ -41,6 +41,8 @@ const RatingPage = () => {
   const [ratingCode, setRatingCode] = useState("");
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
+  const [saType, setSaType] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
@@ -211,10 +213,14 @@ const RatingPage = () => {
       setRatingCode("");
       setCalculationCode("");
       setSANumberId("");
+      setSaType("");
+      setAccountNumber("");
     } else {
       setRatingCode(record.ratingCode);
       setCalculationCode(record.calculationCode);
       setSANumberId(record.saNumber);
+      setSaType(record.saType);
+      setAccountNumber(record.accountNumber);
       setActiveRowKey(recordKey);
       setPageDetail(true);
     }
@@ -369,13 +375,17 @@ const RatingPage = () => {
           <RatingDetail
             calculationCode={calculationCode}
             SAId={saNumberId}
-            ratingCode={ratingCode}   
+            ratingCode={ratingCode}
+            saType={saType}
+            accountNumber={accountNumber}
             onClose={() => {
               setPageDetail(false);
               setActiveRowKey(null);
               setRatingCode("");
               setCalculationCode("");
               setSANumberId("");
+              setSaType("");
+              setAccountNumber("");
             }}
           />
         </div>

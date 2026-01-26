@@ -420,20 +420,26 @@ export const getDetailRatingGas = createAsyncThunk(
 // Calculation Summary
 export const getAllCalculationSummaryPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_PAGINATE",
-  async ({ calculationCode, accountNumber, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ calculationCode, saType, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
-      const url = `/v1/dbs/api/rating/summary-rating?calculationCode=${calculationCode}&accountNumber=${accountNumber}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      
+      // Endpoint baru dengan calculationCode dan saType
+      const url = `/v1/dbs/api/rating/summary-rating?calculationCode=${calculationCode}&saType=${saType}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      
       const response = await ratingBillingHttpService.getPagination(url);
       const rawData = response?.data?.result || [];
+      
+      // Group data berdasarkan transactionDate dan saType
       const groupedMap = new Map();
       
       rawData.forEach((item) => {
         const key = `${item.transactionDate}-${item.saType}`; 
+        
         if (!groupedMap.has(key)) {
           groupedMap.set(key, {
-            id: key,
+            id: item.id || key, // Gunakan id dari response atau key sebagai fallback
             transactionDate: item.transactionDate,
             usage: item.usage,
             saType: item.saType,
@@ -442,23 +448,38 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
             partitions: []
           });
         }
+        
+        // Tambahkan partition data
         groupedMap.get(key).partitions.push({
+          // Calculated Usage
           uom: item.calculatedUsageUom,
           usageMin: item.calculatedUsageMin,
           usageNormal: item.calculatedUsageNormal,
           usageOup: item.calculatedUsageUop,
+          
+          // Converted Calculated (optional, bisa ditambahkan jika diperlukan)
+          convertedUom: item.convertedCalculatedUom,
+          convertedMin: item.convertedCalculatedMin,
+          convertedNormal: item.convertedCalculatedNormal,
+          convertedOup: item.convertedCalculatedOup,
+          
+          // Price
           priceCurrency: item.currency,
           priceCode: item.priceCode,
           priceMin: item.priceMin,
           priceNormal: item.priceNormal,
           priceOup: item.priceOup,
+          
+          // Amount Partition
           amountCurrency: item.amountPartitionCurrency,
           amountMin: item.amountPartitionMin,
           amountNormal: item.amountPartitionNormal,
           amountOup: item.amountPartitionOup,
         });
       });
+      
       const transformedResult = Array.from(groupedMap.values());   
+      
       return {
         result: transformedResult,
         page: response?.data?.page || {

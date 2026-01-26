@@ -118,15 +118,6 @@ export const columnsCalculationSummary = (
     sorter: true,
     render: (text) => renderNumber(text, 3),
   },
-  {
-    title: "TOTAL AMOUNT",
-    dataIndex: "totalAmount",
-    key: "totalAmount",
-    width: 180,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
 ];
 
 // Kolom untuk expanded table - menyesuaikan dengan design Figma

@@ -10,7 +10,7 @@ import {
 } from "./columns/ColumnsCalculationSummary";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const CalculationSummary = ({ ratingCodeId, calculationCode, accountNumber }) => {
+const CalculationSummary = ({ calculationCode, saType }) => {
   const { data_calculationSummary, loading } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -37,12 +37,12 @@ const CalculationSummary = ({ ratingCodeId, calculationCode, accountNumber }) =>
   }, [data_calculationSummary]);
 
   useEffect(() => {
-    // Pastikan calculationCode dan accountNumber tersedia
-    if (calculationCode && accountNumber) {
+    // Pastikan calculationCode dan saType tersedia
+    if (calculationCode && saType) {
       dispatch(
         getAllCalculationSummaryPaginate({
           calculationCode,
-          accountNumber,
+          saType, // Tambahkan saType sebagai parameter
           search: encodeURIComponent(JSON.stringify(search)),
           page,
           pageSize,
@@ -50,7 +50,7 @@ const CalculationSummary = ({ ratingCodeId, calculationCode, accountNumber }) =>
         })
       );
     }
-  }, [calculationCode, accountNumber, search, page, pageSize, sort, dispatch]);
+  }, [calculationCode, saType, search, page, pageSize, sort, dispatch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();

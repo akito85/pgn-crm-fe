@@ -16,6 +16,7 @@ import CardContainer from "../../../../../../components/CardContainer";
 
 const PointOfSalesPage = ({
   data_dynamic = {},
+  form,
   data = [],
   setData = () => {},
   data_billingCycle,
@@ -44,29 +45,20 @@ const PointOfSalesPage = ({
   setRangeDisableDate = () => {},
   rangeDisableDate,
   customerType = "customer",
-  defaultData = {}, 
-  onSorChange = () => {}, 
+  defaultData = {},
+  onSorChange = () => {},
   onCostCenterChange = () => {},
   onAccountSegmentChange = () => {},
+  onMeterReadingCodeChange = () => {},
   data_account_segment = [],
   data_account_group_type = [],
-  data_meter_reading_code_list = [],
   data_sor_list = [],
   data_cost_center_list = [],
+  mergedArrayMrc = [],
 }) => {
   const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
-
-  const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
-
-  useEffect(() => {
-    let dataMrc = data_meter_reading_code_list?.reduce(
-      (result, current) => result?.concat(current?.dtoList),
-      [],
-    );
-    setMergedArrayMrc(dataMrc);
-  }, [data_meter_reading_code_list]);
 
   useEffect(() => {
     if (hasValue(selectedBilingPeriod)) {
@@ -171,6 +163,63 @@ const PointOfSalesPage = ({
             </Form.Item>
 
             <Form.Item
+              name="sor"
+              label="SOR"
+              rules={[{ message: requiredMessage("SOR"), required: true }]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                onChange={onSorChange}
+                disabled={!!defaultData?.sor}
+                placeholder="SOR from User"
+                options={(data_sor_list || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            {/* Row 2 */}
+            <Form.Item
+              name="costCenter"
+              label="Cost Center"
+              rules={[
+                { message: requiredMessage("Cost Center"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                mode="multiple"
+                onChange={onCostCenterChange}
+                disabled={
+                  defaultData?.costCenter && defaultData.costCenter.length > 0
+                }
+                placeholder="Select Cost Center"
+                options={(data_cost_center_list || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="meterReadingCode"
+              label="Meter Reading Code"
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                mode="multiple"
+                onChange={onMeterReadingCodeChange}
+                disabled={!mergedArrayMrc || mergedArrayMrc.length === 0}
+                placeholder="Select Meter Reading Code"
+                options={(mergedArrayMrc || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
               name="accountSegment"
               label="Account Segment"
               rules={[
@@ -188,7 +237,6 @@ const PointOfSalesPage = ({
               />
             </Form.Item>
 
-            {/* Row 2 */}
             <Form.Item
               name="accountGroupType"
               label="Account Group Type"
@@ -196,63 +244,13 @@ const PointOfSalesPage = ({
             >
               <SelectComponent
                 placeholder="Select Account Group Type"
+                disabled={
+                  !data_account_group_type ||
+                  data_account_group_type.length === 0
+                }
                 options={(data_account_group_type || []).map((item) => ({
                   label: item?.glbValue || item?.name,
                   value: item?.glbTypeValId,
-                }))}
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="sor"
-              label="SOR"
-              rules={[{ message: requiredMessage("SOR"), required: true }]}
-              style={{ marginBottom: 0 }}
-            >
-              <SelectComponent
-                onChange={onSorChange}
-                disabled={!!defaultData?.sor}
-                placeholder="SOR from User"
-                options={(data_sor_list || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
-                }))}
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="costCenter"
-              label="Cost Center"
-              rules={[
-                { message: requiredMessage("Cost Center"), required: true },
-              ]}
-              style={{ marginBottom: 0 }}
-            >
-              <SelectComponent
-                mode="multiple"
-                onChange={onCostCenterChange}
-                disabled={
-                  defaultData?.costCenter && defaultData.costCenter.length > 0
-                }
-                placeholder="Cost Center from User"
-                options={(data_cost_center_list || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
-                }))}
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="meterReadingCode"
-              label="Meter Reading Code"
-              style={{ marginBottom: 0 }}
-            >
-              <SelectComponent
-                mode="multiple"
-                placeholder="Select Meter Reading Code"
-                options={(mergedArrayMrc || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
                 }))}
               />
             </Form.Item>

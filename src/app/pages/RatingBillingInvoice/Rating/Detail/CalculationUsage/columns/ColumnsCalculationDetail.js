@@ -1,12 +1,14 @@
 import React from "react";
-import { hasValue, renderColumn, renderDateColumn, separatorNumber } from "../../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-
-// Helper function untuk render number dengan decimal
-const renderNumber = (value, decimal = 3) => {
-  if (value === null || value === undefined || value === "") return "-";
-  return separatorNumber(value, decimal);
-};
+import {
+  currencyFormatting,
+  numberFormatting,
+} from "../../../../../../../utils/formatCurrency";
 
 export const columnsCalculationDetail = (
   page,
@@ -15,7 +17,7 @@ export const columnsCalculationDetail = (
   searchedColumn,
   searchText,
   handleSearch,
-  search = {}
+  search = {},
 ) => [
   {
     title: "No",
@@ -26,63 +28,10 @@ export const columnsCalculationDetail = (
     render: (text, record, index) => (page - 1) * pageSize + index + 1,
   },
   {
-    title: "Rating Code",
-    dataIndex: "ratingCode",
-    key: "ratingCode",
-    width: 150,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "ratingCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      false,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
-        "ratingCode",
-        hasValue(search["ratingCode"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "Account Number",
-    dataIndex: "accountNumber",
-    key: "accountNumber",
-    width: 150,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accountNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      false,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
-        "accountNumber",
-        hasValue(search["accountNumber"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
     title: "Time Unit",
     dataIndex: "timeUnit",
     key: "timeUnit",
+    isClassification: true,
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -93,7 +42,7 @@ export const columnsCalculationDetail = (
       searchText,
       handleSearch,
       false,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -103,7 +52,7 @@ export const columnsCalculationDetail = (
         text || "-",
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -120,7 +69,7 @@ export const columnsCalculationDetail = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -129,7 +78,7 @@ export const columnsCalculationDetail = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -147,7 +96,7 @@ export const columnsCalculationDetail = (
       searchText,
       handleSearch,
       false,
-      "input"
+      "input",
     ),
     render: (text) => {
       if (hasValue(search["usage"])) {
@@ -155,13 +104,13 @@ export const columnsCalculationDetail = (
           "usage",
           true,
           searchText,
-          renderNumber(text, 3),
+          currencyFormatting(text, "idr"),
           false,
           "input",
-          search
+          search,
         );
       }
-      return renderNumber(text, 3);
+      return currencyFormatting(text, "idr");
     },
   },
   {
@@ -179,7 +128,7 @@ export const columnsCalculationDetail = (
       searchText,
       handleSearch,
       false,
-      "input"
+      "input",
     ),
     render: (text) => {
       if (hasValue(search["minUsage"])) {
@@ -187,13 +136,13 @@ export const columnsCalculationDetail = (
           "minUsage",
           true,
           searchText,
-          renderNumber(text, 3),
+          currencyFormatting(text, "idr"),
           false,
           "input",
-          search
+          search,
         );
       }
-      return renderNumber(text, 3);
+      return currencyFormatting(text, "idr");
     },
   },
   {
@@ -211,7 +160,7 @@ export const columnsCalculationDetail = (
       searchText,
       handleSearch,
       false,
-      "input"
+      "input",
     ),
     render: (text) => {
       if (hasValue(search["maxUsage"])) {
@@ -219,19 +168,20 @@ export const columnsCalculationDetail = (
           "maxUsage",
           true,
           searchText,
-          renderNumber(text, 3),
+          currencyFormatting(text, "idr"),
           false,
           "input",
-          search
+          search,
         );
       }
-      return renderNumber(text, 3);
+      return currencyFormatting(text, "idr");
     },
   },
   {
     title: "SA Type",
     dataIndex: "saType",
     key: "saType",
+    isClassification: true,
     width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -242,7 +192,7 @@ export const columnsCalculationDetail = (
       searchText,
       handleSearch,
       false,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -252,184 +202,212 @@ export const columnsCalculationDetail = (
         text || "-",
         false,
         "input",
-        search
+        search,
       ),
   },
+  // GROUP: CALCULATED USAGE PARTITION
   {
-    title: "Calculated Usage UOM",
-    dataIndex: "calculatedUsageUom",
-    key: "calculatedUsageUom",
-    width: 180,
-    sorter: true,
-    render: (text) => text || "-",
+    title: "CALCULATED USAGE PARTITION",
+    children: [
+      {
+        title: "UOM",
+        dataIndex: "calculatedUsageUom",
+        key: "calculatedUsageUom",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "-",
+      },
+      {
+        title: "MIN",
+        dataIndex: "calculatedUsageMin",
+        key: "calculatedUsageMin",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "calculatedUsageNormal",
+        key: "calculatedUsageNormal",
+        width: 150,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+      {
+        title: "OUP",
+        dataIndex: "calculatedUsageOup",
+        key: "calculatedUsageOup",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+    ],
   },
+  // GROUP: CONVERTED CALCULATED USAGE PARTITION
   {
-    title: "Calculated Usage Min",
-    dataIndex: "calculatedUsageMin",
-    key: "calculatedUsageMin",
-    width: 180,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
+    title: "CONVERTED CALCULATED USAGE PARTITION",
+    children: [
+      {
+        title: "UOM",
+        dataIndex: "convertedCalculatedUom",
+        key: "convertedCalculatedUom",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "-",
+      },
+      {
+        title: "MIN",
+        dataIndex: "convertedCalculatedMin",
+        key: "convertedCalculatedMin",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "convertedCalculatedNormal",
+        key: "convertedCalculatedNormal",
+        width: 150,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+      {
+        title: "OUP",
+        dataIndex: "convertedCalculatedOup",
+        key: "convertedCalculatedOup",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+    ],
   },
+  // GROUP: PRICE
   {
-    title: "Calculated Usage Normal",
-    dataIndex: "calculatedUsageNormal",
-    key: "calculatedUsageNormal",
-    width: 200,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
+    title: "PRICE",
+    children: [
+      {
+        title: "PRICE CODE",
+        dataIndex: "priceCode",
+        key: "priceCode",
+        width: 150,
+        align: "center",
+        sorter: true,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "priceCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          false,
+          "input",
+        ),
+        render: (text) =>
+          renderColumn(
+            "priceCode",
+            hasValue(search["priceCode"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "MIN",
+        dataIndex: "priceMin",
+        key: "priceMin",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "priceNormal",
+        key: "priceNormal",
+        width: 150,
+        isNumber: true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+      {
+        title: "OUP",
+        dataIndex: "priceOup",
+        key: "priceOup",
+        width: 130,
+        isNumber:true,
+        sorter: true,
+        render: (text) => numberFormatting(text),
+      },
+    ],
   },
+  // GROUP: AMOUNT PARTITION
   {
-    title: "Calculated Usage OUP",
-    dataIndex: "calculatedUsageOup",
-    key: "calculatedUsageOup",
-    width: 180,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
-  {
-    title: "Converted Calculated UOM",
-    dataIndex: "convertedCalculatedUom",
-    key: "convertedCalculatedUom",
-    width: 200,
-    sorter: true,
-    render: (text) => text || "-",
-  },
-  {
-    title: "Converted Calculated Min",
-    dataIndex: "convertedCalculatedMin",
-    key: "convertedCalculatedMin",
-    width: 200,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
-  {
-    title: "Converted Calculated Normal",
-    dataIndex: "convertedCalculatedNormal",
-    key: "convertedCalculatedNormal",
-    width: 220,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
-  {
-    title: "Converted Calculated OUP",
-    dataIndex: "convertedCalculatedOup",
-    key: "convertedCalculatedOup",
-    width: 200,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
-  {
-    title: "Price Code",
-    dataIndex: "priceCode",
-    key: "priceCode",
-    width: 150,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "priceCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      false,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
-        "priceCode",
-        hasValue(search["priceCode"]),
-        searchText,
-        text || "-",
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "Price Min",
-    dataIndex: "priceMin",
-    key: "priceMin",
-    width: 150,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
-  {
-    title: "Price Normal",
-    dataIndex: "priceNormal",
-    key: "priceNormal",
-    width: 150,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
-  {
-    title: "Price OUP",
-    dataIndex: "priceOup",
-    key: "priceOup",
-    width: 150,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 3),
-  },
-  {
-    title: "Amount Partition Currency",
-    dataIndex: "amountPartitionCurrency",
-    key: "amountPartitionCurrency",
-    width: 200,
-    sorter: true,
-    render: (text) => text || "-",
-  },
-  {
-    title: "Amount Partition Min",
-    dataIndex: "amountPartitionMin",
-    key: "amountPartitionMin",
-    width: 180,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 2),
-  },
-  {
-    title: "Amount Partition Normal",
-    dataIndex: "amountPartitionNormal",
-    key: "amountPartitionNormal",
-    width: 200,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 2),
-  },
-  {
-    title: "Amount Partition OUP",
-    dataIndex: "amountPartitionOup",
-    key: "amountPartitionOup",
-    width: 180,
-    align: "right",
-    sorter: true,
-    render: (text) => renderNumber(text, 2),
+    title: "AMOUNT PARTITION",
+    children: [
+      {
+        title: "CURRENCY",
+        dataIndex: "amountPartitionCurrency",
+        key: "amountPartitionCurrency",
+        width: 120,
+        isClassification:true,
+        sorter: true,
+        render: (text) => text || "-",
+      },
+      {
+        title: "MIN",
+        dataIndex: "amountPartitionMin",
+        key: "amountPartitionMin",
+        width: 150,
+        isNumber:true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "amountPartitionNormal",
+        key: "amountPartitionNormal",
+        width: 170,
+        isNumber:true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+      {
+        title: "OUP",
+        dataIndex: "amountPartitionOup",
+        key: "amountPartitionOup",
+        width: 150,
+        isNumber:true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+    ],
   },
   {
     title: "Amount Partition",
     dataIndex: "amountPartition",
     key: "amountPartition",
     width: 160,
-    align: "right",
+    isNumber:true,
     sorter: true,
-    render: (text) => renderNumber(text, 2),
+    render: (text) => currencyFormatting(text, "idr"),
   },
   {
     title: "Amount Partition Total",
     dataIndex: "amountPartitionTotal",
     key: "amountPartitionTotal",
     width: 180,
-    align: "right",
+    isNumber:true,
     sorter: true,
-    render: (text) => renderNumber(text, 2),
+    render: (text) => currencyFormatting(text, "idr"),
   },
 ];

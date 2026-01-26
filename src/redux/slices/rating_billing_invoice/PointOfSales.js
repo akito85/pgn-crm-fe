@@ -35,7 +35,6 @@ const initialState = {
   data_materai: {},
   data_rate_tax: {},
   data_attachment: [],
-  // State baru untuk Prospective Customer
   data_account_segment: [],
   data_account_group_type: [],
   data_meter_reading_code: [],

@@ -92,6 +92,7 @@ const PosForm = ({ type }) => {
   const customerTypeFromNav = location?.state?.customerType;
   const [customerType, setCustomerType] = useState(customerTypeFromNav || null);
   const [defaultData, setDefaultData] = useState({});
+  const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
 
   //state
   const containerRef = useRef(null);
@@ -125,22 +126,18 @@ const PosForm = ({ type }) => {
   const [dataPriority, setDataPriority] = useState([]);
 
   const handleAccountSegmentChange = (selectedSegmentIds) => {
-    if (selectedSegmentIds && selectedSegmentIds.length > 0) {
-      dispatch(getAccountGroupTypeList([selectedSegmentIds]));
-    } else {
-      form.resetFields(["accountGroupType"]);
+    form.resetFields(["accountGroupType"]);
+
+    if (selectedSegmentIds) {
+      const segmentArray = Array.isArray(selectedSegmentIds)
+        ? selectedSegmentIds
+        : [selectedSegmentIds];
+      dispatch(getAccountGroupTypeList(segmentArray));
     }
   };
 
-  const handleCostCenterChangeProspective = (selectedCostCenterIds) => {
-    if (selectedCostCenterIds && selectedCostCenterIds.length > 0) {
-      const body = {
-        ccIds: selectedCostCenterIds.map((id) => ({ ccId: id })),
-      };
-      dispatch(getMeterReadingCodeList(body));
-    } else {
-      form.resetFields(["meterReadingCode"]);
-    }
+  const handleMeterReadingCodeChange = (selectedMrcIds) => {
+
   };
 
   const steps = [
@@ -238,6 +235,7 @@ const PosForm = ({ type }) => {
         costCenter: tempDefaultData.costCenter,
       });
 
+      // Auto-load meter reading code jika ada default cost center
       if (tempDefaultData.costCenter && tempDefaultData.costCenter.length > 0) {
         const body = {
           ccIds: tempDefaultData.costCenter.map((id) => ({ ccId: id })),
@@ -246,6 +244,14 @@ const PosForm = ({ type }) => {
       }
     }
   }, [type, customerType, data_user_detail, form, dispatch]);
+
+  useEffect(() => {
+    let dataMrc = data_meter_reading_code?.reduce(
+      (result, current) => result?.concat(current?.dtoList),
+      [],
+    );
+    setMergedArrayMrc(dataMrc);
+  }, [data_meter_reading_code]);
 
   //useEffect
   useEffect(() => {
@@ -1184,6 +1190,7 @@ const PosForm = ({ type }) => {
   };
 
   const handleChangeSOR = (selectedSorId) => {
+    // Reset semua field yang depend on SOR
     form.resetFields([
       "costCenter",
       "meterReadingCode",
@@ -1351,14 +1358,16 @@ const PosForm = ({ type }) => {
               rangeDisableDate={rangeDisableDate}
               customerType={customerType}
               defaultData={defaultData}
-              onSorChange={handleChangeSOR} 
-              onCostCenterChange={handleChangeCostCenter} 
+              onSorChange={handleChangeSOR}
+              onCostCenterChange={handleChangeCostCenter}
+              onMeterReadingCodeChange={handleMeterReadingCodeChange}
               onAccountSegmentChange={handleAccountSegmentChange}
               data_account_segment={data_account_segment}
               data_account_group_type={data_account_group_type}
               data_meter_reading_code_list={data_meter_reading_code}
               data_sor_list={data_sor_list}
               data_cost_center_list={data_cost_center_list}
+              mergedArrayMrc={mergedArrayMrc}
             />
           </div>
 
