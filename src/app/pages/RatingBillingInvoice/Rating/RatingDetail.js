@@ -38,10 +38,12 @@ const RatingDetail = ({
     {
       key: "Promo",
       label: "Promo",
+      disabled: true,
     },
     {
       key: "Periodic",
       label: "Periodic",
+      disabled: true,
     },
     {
       key: "Multi Destination",
