@@ -9,7 +9,10 @@ import { dateFormatting } from "../../../../../utils";
 import {
   getListFakturType,
   getListTaxPeriod,
+  getListTaxYears,
+  getListFakturCode,
   getListCountry,
+  clearTaxYears,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
 
 const EFakturSectionForm = ({
@@ -23,6 +26,8 @@ const EFakturSectionForm = ({
   const {
     dataListFakturType,
     dataListTaxPeriod,
+    dataListTaxYears,
+    dataListFakturCode,
     dataListCountry,
   } = useSelector((state) => state.efaktur);
 
@@ -31,13 +36,28 @@ const EFakturSectionForm = ({
 
   // State
   const [description, setDescription] = useState("");
+  const [selectedTaxPeriod, setSelectedTaxPeriod] = useState(null);
 
   // Use Effect
   useEffect(() => {
     dispatch(getListFakturType());
     dispatch(getListTaxPeriod());
+    dispatch(getListFakturCode());
     dispatch(getListCountry());
   }, [dispatch]);
+
+  // Handle Tax Period Change
+  const handleTaxPeriodChange = (value) => {
+    setSelectedTaxPeriod(value);
+    // Clear tax year when period changes
+    form.setFieldsValue({ taxYear: undefined });
+    dispatch(clearTaxYears());
+
+    // Fetch tax years based on selected period
+    if (value) {
+      dispatch(getListTaxYears(value));
+    }
+  };
 
   return (
     <div>
@@ -58,8 +78,8 @@ const EFakturSectionForm = ({
             <SelectComponent placeholder="Select Faktur Type">
               {dataListFakturType &&
                 dataListFakturType?.map((data, index) => (
-                  <Select.Option value={data.id} key={index}>
-                    {data.name}
+                  <Select.Option value={data.value} key={index}>
+                    {data.label}
                   </Select.Option>
                 ))}
             </SelectComponent>
@@ -69,9 +89,7 @@ const EFakturSectionForm = ({
             label={"Faktur Date"}
             name={"fakturDate"}
             style={{ marginBottom: 0 }}
-            rules={[
-              { required: true, message: "Please select Faktur Date!" },
-            ]}
+            rules={[{ required: true, message: "Please select Faktur Date!" }]}
           >
             <DatePicker
               format={dateFormatting?.date}
@@ -88,15 +106,16 @@ const EFakturSectionForm = ({
             label={"Tax Period"}
             name={"taxPeriod"}
             style={{ marginBottom: 0 }}
-            rules={[
-              { required: true, message: "Please select Tax Period!" },
-            ]}
+            rules={[{ required: true, message: "Please select Tax Period!" }]}
           >
-            <SelectComponent placeholder="Select Tax Period">
+            <SelectComponent
+              placeholder="Select Tax Period"
+              onChange={handleTaxPeriodChange}
+            >
               {dataListTaxPeriod &&
                 dataListTaxPeriod?.map((data, index) => (
-                  <Select.Option value={data.id} key={index}>
-                    {data.period}
+                  <Select.Option value={data.value} key={index}>
+                    {data.label}
                   </Select.Option>
                 ))}
             </SelectComponent>
@@ -106,27 +125,34 @@ const EFakturSectionForm = ({
             label={"Faktur Code"}
             name={"fakturCode"}
             style={{ marginBottom: 0 }}
-            rules={[
-              { required: true, message: "Please input Faktur Code!" },
-            ]}
+            rules={[{ required: true, message: "Please select Faktur Code!" }]}
           >
-            <InputComponent placeholder="Select Faktur Code" />
+            <SelectComponent placeholder="Select Faktur Code">
+              {dataListFakturCode &&
+                dataListFakturCode?.map((data, index) => (
+                  <Select.Option value={data.value} key={index}>
+                    {data.label}
+                  </Select.Option>
+                ))}
+            </SelectComponent>
           </Form.Item>
 
           <Form.Item
             label={"Tax Year"}
             name={"taxYear"}
             style={{ marginBottom: 0 }}
-            rules={[
-              { required: true, message: "Please select Tax Year!" },
-            ]}
+            rules={[{ required: true, message: "Please select Tax Year!" }]}
           >
-            <SelectComponent placeholder="Select Tax Year">
-              {[2020, 2021, 2022, 2023, 2024, 2025, 2026].map((year) => (
-                <Select.Option value={year} key={year}>
-                  {year}
-                </Select.Option>
-              ))}
+            <SelectComponent
+              placeholder="Select Tax Year"
+              disabled={!selectedTaxPeriod}
+            >
+              {dataListTaxYears &&
+                dataListTaxYears?.map((data, index) => (
+                  <Select.Option value={data.value} key={index}>
+                    {data.label}
+                  </Select.Option>
+                ))}
             </SelectComponent>
           </Form.Item>
 
@@ -139,8 +165,8 @@ const EFakturSectionForm = ({
             <SelectComponent placeholder="Select Country">
               {dataListCountry &&
                 dataListCountry?.map((data, index) => (
-                  <Select.Option value={data.code} key={index}>
-                    {data.name}
+                  <Select.Option value={data.value} key={index}>
+                    {data.label}
                   </Select.Option>
                 ))}
             </SelectComponent>
@@ -209,13 +235,23 @@ const EFakturSectionForm = ({
                 required: true,
                 message: "Please input Tax Identification Number!",
               },
+              {
+                min: 16,
+                message:
+                  "Tax Identification Number must be at least 16 characters!",
+              },
+              {
+                max: 16,
+                message:
+                  "Tax Identification Number must not exceed 16 characters!",
+              },
             ]}
           >
-            <InputComponent placeholder={"Tax Identification Number"} />
+            <InputComponent placeholder={"Tax Identification Number"}  maxLength={16}/>
           </Form.Item>
 
           <Form.Item
-            label={"NPWP"}
+            label={"NITKU"}
             name={"npwp"}
             style={{ marginBottom: 0 }}
             rules={[
@@ -223,9 +259,17 @@ const EFakturSectionForm = ({
                 required: true,
                 message: "Please input NPWP!",
               },
+              {
+                min: 16,
+                message: "NITKU must be at least 16 characters!",
+              },
+              {
+                max: 16,
+                message: "NITKU must not exceed 16 characters!",
+              },
             ]}
           >
-            <InputComponent placeholder={"NPWP"} />
+            <InputComponent placeholder={"NPWP"}  maxLength={16}/>
           </Form.Item>
 
           <div className="col-span-4">

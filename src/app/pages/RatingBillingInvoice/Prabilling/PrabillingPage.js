@@ -73,8 +73,6 @@ const PrabillingPage = () => {
     right: valueTab === "All" ? ["action"] : [],
   }));
 
-  // TAMBAHKAN useEffect baru ini setelah state declarations:
-  // Save filters ke Redux setiap kali berubah
   useEffect(() => {
     dispatch(
       setFilters({

@@ -1,29 +1,26 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Spin, Form } from "antd";
+import { Spin, Form, Steps } from "antd";
 import moment from "moment";
+import { LeftOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../../routes/invoice/invoice_routes";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import EFakturSectionForm from "./EFakturSectionForm ";
-import ModalBack from "../../../../../components/Modal/ModalBack";
 import ConfirmationLayout from "./ConfirmationLayout";
 import { dateFormatting } from "../../../../../utils";
-import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import { ModalError, ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import CardContainer from "../../../../../components/CardContainer";
 import {
-  createEFaktur,
-  updateEFaktur,
-  getDetailEFaktur,
-  getListApprovalHierarchy,
-  getListApprovalHierarchyDetail,
+  createEFakturManual,
+  getAllApprovalList,
+  getListApprovalById,
   getListCategory,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
@@ -33,9 +30,8 @@ const EFakturForm = ({ type }) => {
   // Selector
   const {
     loading,
-    dataListAppHierDetail,
-    dataListAppHierId,
-    dataDetail,
+    data_approval_list,
+    data_approval,
   } = useSelector((state) => state.efaktur);
 
   // Declaration
@@ -43,17 +39,17 @@ const EFakturForm = ({ type }) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const location = useLocation();
-  const { id, efakturNumber } = location?.state || {};
+  const containerRef = useRef(null);
 
   // State
+  const [currentStep, setCurrentStep] = useState(0);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [listDataDetail, setListDataDetail] = useState([]);
   const [bodyData, setBodyData] = useState({});
-  const [flag, setFlag] = useState(1);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
-  const [valuePage, setValuePage] = useState("Create-Faktur");
+  const [typeSubmit, setTypeSubmit] = useState(false);
   const [tabPages, setTabPages] = useState([
     {
       value: "Create-Faktur",
@@ -84,26 +80,56 @@ const EFakturForm = ({ type }) => {
 
   const isLoading = loading || loadingForm;
 
+  // Steps configuration
+  const steps = [
+    { title: "CREATE E-FAKTUR" },
+    { title: "APPROVAL" },
+    { title: "ATTACHMENT" },
+  ];
+
+  const items = steps.map((item) => ({
+    key: item.title,
+    title: item.title,
+  }));
+
+  // Scroll handlers
+  const scrollLeftHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft -= 250;
+    }
+  };
+
+  const scrollRightHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft += 250;
+    }
+  };
+
+  // Navigation handlers
+  const next = () => {
+    setCurrentStep(currentStep + 1);
+    scrollRightHandler();
+  };
+
+  const prev = () => {
+    setCurrentStep(currentStep - 1);
+    scrollLeftHandler();
+  };
+
   // Use Effect
   useEffect(() => {
-    dispatch(getListApprovalHierarchy());
+    dispatch(getAllApprovalList());
   }, [dispatch]);
 
   useEffect(() => {
-    if (id && type === "update") {
-      dispatch(getDetailEFaktur(id));
-    }
-  }, [dispatch, id, type]);
-
-  useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getListApprovalHierarchyDetail({ id: selectedHierarchy }));
+      dispatch(getListApprovalById(selectedHierarchy));
     }
   }, [dispatch, selectedHierarchy]);
 
   useEffect(() => {
-    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
-      const data = dataListAppHierDetail.map((a, index) => ({
+    if (data_approval_list && data_approval_list.length > 0) {
+      const data = data_approval_list.map((a, index) => ({
         ...a,
         key: index + 1,
         employeeDetail: a.employeeDetail.map((b, index) => ({
@@ -115,62 +141,17 @@ const EFakturForm = ({ type }) => {
     } else {
       setAppHierDataDetail([]);
     }
-  }, [dataListAppHierDetail]);
+  }, [data_approval_list]);
 
   useEffect(() => {
-    if (dataListAppHierId && dataListAppHierId.length > 0) {
-      const tempAppHier = dataListAppHierId.map((appHier) => ({
+    if (data_approval && data_approval.length > 0) {
+      const tempAppHier = data_approval.map((appHier) => ({
         name: appHier.approvalName,
         value: appHier.appHierId,
       }));
       setAppHierOptions(tempAppHier);
     }
-  }, [dataListAppHierId]);
-
-  // Functional Set Data Update
-  const dataUpdate = useCallback(
-    (dataDetail) => {
-      const apphierId = dataDetail?.apphierId || 1;
-      const obj = {
-        fakturType: dataDetail?.fakturType,
-        fakturDate: moment(dataDetail?.fakturDate),
-        taxPeriod: dataDetail?.taxPeriod,
-        fakturCode: dataDetail?.fakturCode,
-        taxYear: dataDetail?.taxYear,
-        country: dataDetail?.country,
-        description: dataDetail?.description,
-        customerName: dataDetail?.customerName,
-        email: dataDetail?.email,
-        taxIdentificationNumber: dataDetail?.taxIdentificationNumber,
-        npwp: dataDetail?.npwp,
-        customerAddress: dataDetail?.customerAddress,
-        downPayment: dataDetail?.downPayment,
-        apphierId: apphierId,
-      };
-
-      form.setFieldsValue(obj);
-      setSelectedHierarchy(apphierId);
-      setListDataAttachment(
-        (dataDetail?.mAttachmentLists || []).map((attachData) => ({
-          ...attachData,
-          dataType: "exist",
-        }))
-      );
-      setListDataDetail(
-        (dataDetail?.detailTransaction || []).map((data, index) => ({
-          ...data,
-          key: index + 1,
-        }))
-      );
-    },
-    [form]
-  );
-
-  useEffect(() => {
-    if (id && type === "update" && dataDetail?.id === id) {
-      dataUpdate(dataDetail);
-    }
-  }, [id, type, dataDetail, dataUpdate]);
+  }, [data_approval]);
 
   // Breadcrumbs
   const routes = [
@@ -183,33 +164,19 @@ const EFakturForm = ({ type }) => {
       breadcrumbName: "Manajemen E-Faktur",
     },
     {
-      path:
-        type === "create"
-          ? INVOICE_ROUTES.EFAKTUR_CREATE
-          : INVOICE_ROUTES.EFAKTUR_UPDATE,
-      breadcrumbName:
-        type === "create" ? "Create E-Faktur" : "Update E-Faktur",
+      path: INVOICE_ROUTES.EFAKTUR_CREATE,
+      breadcrumbName: "Create E-Faktur",
     },
   ];
 
-  // Handle Change Radio Tabs
-  const onChange = (e) => {
-    setValuePage(e.target.value);
-  };
-
   // Handle Clear
   const handleClear = () => {
-    if (type === "create") {
-      form.resetFields();
-      setAppHierDataDetail([]);
-      setAppHierOptions([]);
-      setSelectedHierarchy("");
-      setListDataAttachment([]);
-      setListDataDetail([]);
-      setBodyData({});
-    } else {
-      dataUpdate(dataDetail);
-    }
+    form.resetFields();
+    setAppHierDataDetail([]);
+    setSelectedHierarchy(undefined);
+    setListDataAttachment([]);
+    setListDataDetail([]);
+    setBodyData({});
   };
 
   const handleCloseModalError = () => {
@@ -253,147 +220,181 @@ const EFakturForm = ({ type }) => {
   };
 
   // Handle Save Form
-  const handleSave = (formValue) => {
+  const handleSave = (formValue) => {    
     let errorBody = {};
+    
     if (listDataAttachment.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: "Attachment is mandatory. Please upload at least one file.",
+      };
+      setBodyError(errorBody);
+      setModalError(true);
       handleMandatory(setTabPages, listDataAttachment);
-    } else {
-      handleMandatory(setTabPages, listDataAttachment);
-
-      if (listDataDetail.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: "Detail Transaction is mandatory. Please insert data.",
-        };
-        setBodyError(errorBody);
-        setModalError(true);
-      } else {
-        setBodyData({
-          ...formValue,
-        });
-        setModalConfirm(true);
-        setTabPages([
-          {
-            value: "Create-Faktur",
-            paramValue: [
-              "fakturType",
-              "fakturDate",
-              "taxPeriod",
-              "fakturCode",
-              "taxYear",
-              "country",
-              "description",
-              "customerName",
-              "email",
-              "taxIdentificationNumber",
-              "npwp",
-              "customerAddress",
-              "downPayment",
-            ],
-          },
-          { value: "Approval", paramValue: ["apphierId"] },
-          { value: "Attachment" },
-        ]);
-      }
+      return;
     }
-  };
 
-  // Handle Confirm
-  const handleConfirm = () => {
-    setModalConfirm(false);
-    const modifiedArray = listDataDetail?.map((obj) => {
-      const { key, ...rest } = obj;
-      return rest;
+    //  Validate detail transactions
+    if (listDataDetail.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: "Detail Transaction is mandatory. Please insert data.",
+      };
+      setBodyError(errorBody);
+      setModalError(true);
+      handleMandatory(setTabPages, listDataAttachment);
+      return;
+    }
+
+    // Validate each detail item has required fields
+    const invalidItems = listDataDetail.filter((item) => {
+      const isValid = item.type && item.productCode && item.productName && item.uom;
+      return !isValid;
     });
 
+    if (invalidItems.length > 0) {
+      errorBody = {
+        title: "Failed",
+        description: `${invalidItems.length} detail transaction(s) have missing required fields. Please complete all fields.`,
+      };
+      setBodyError(errorBody);
+      setModalError(true);
+      return;
+    }
+
+    setBodyData({
+      ...formValue,
+    });
+    setModalConfirm(true);
+    
+    // Reset error badges
+    setTabPages([
+      {
+        value: "Create-Faktur",
+        paramValue: [
+          "fakturType",
+          "fakturDate",
+          "taxPeriod",
+          "fakturCode",
+          "taxYear",
+          "country",
+          "description",
+          "customerName",
+          "email",
+          "taxIdentificationNumber",
+          "npwp",
+          "customerAddress",
+          "downPayment",
+        ],
+      },
+      { value: "Approval", paramValue: ["apphierId"] },
+      { value: "Attachment" },
+    ]);
+  };
+
+  //Handle Confirm
+  const handleConfirm = () => {
+    
+    setModalConfirm(false);
+
+    // Validate listDataDetail before transforming
+    if (!listDataDetail || listDataDetail.length === 0) {
+      setBodyError({
+        title: "Failed",
+        description: "Detail Transaction is required",
+      });
+      setModalError(true);
+      return;
+    }
+
+    // Transform detail items 
+    const detailsItems = listDataDetail.map((item) => {
+      const transformed = {
+        type: item.type || "",
+        code: item.productCode || "",
+        name: item.productName || "",
+        uomCode: item.uom || "",
+        unitPrice: String(item.unitPrice || 0),
+        qty: String(item.quantity || 0),
+        ppnRate: String(item.vatRate || 0),
+        ppnbmRate: String(item.ppnbmRate || 0),
+      };
+      return transformed;
+    });
+
+    // Build request body
     const body = {
-      ...bodyData,
-      id: type === "update" ? id : undefined,
-      efakturNumber: type === "update" ? efakturNumber : null,
-      detailTransaction: modifiedArray,
-      submit: flag === 1 ? false : true,
-      fakturDate: moment(bodyData?.fakturDate).format(
-        dateFormatting.dateFormal
-      ),
+      apphierId: String(bodyData.apphierId),
+      fakturType: bodyData.fakturType,
+      fakturDate: moment(bodyData.fakturDate).format("YYYY-MM-DD"),
+      fakturKode: bodyData.fakturCode,
+      taxPeriod: String(bodyData.taxPeriod),
+      taxYear: String(bodyData.taxYear),
+      country: bodyData.country,
+      desc: bodyData.description || "",
+      customerName: bodyData.customerName,
+      customerEmail: bodyData.email,
+      customerTin: bodyData.taxIdentificationNumber,
+      customerNitku: bodyData.npwp,
+      customerAddress: bodyData.customerAddress,
+      downPaymentAmount: String(bodyData.downPayment || 0),
+      detailsItems: detailsItems,
     };
 
-    // Replace undefined to null
-    const bodyValue = {};
-    for (const key in body) {
-      if (body.hasOwnProperty(key)) {
-        if (typeof body[key] === "undefined") {
-          bodyValue[key] = null;
-        } else {
-          bodyValue[key] = body[key];
-        }
-      }
-    }
-
-    if (type === "create") {
-      dispatch(createEFaktur({ body: bodyValue }))
-        .unwrap()
-        .then(async (dataForm) => {
-          const idEFaktur = dataForm.id;
+    dispatch(createEFakturManual({ body }))
+      .unwrap()
+      .then(async (dataForm) => {
+        const efakturId = dataForm.created_id;
+        
+        if (efakturId && listDataAttachment.length > 0) {
           setLoadingForm(true);
+          
+          let uploadSuccess = 0;
+          let uploadFailed = 0;
+          
           for (let i = 0; i < listDataAttachment.length; i++) {
             const element = listDataAttachment[i];
-            const body = {
-              files: element.file,
-              category: element.fileCategoryId,
-            };
-            await ratingBillingHttpService.uploadAttachment(
-              `/v1/dbs/api/invoice/efaktur/uploadAttachment/${idEFaktur}`,
-              body
-            );
+            
+            try {
+              const formData = new FormData();
+              formData.append("files", element.file);
+              formData.append("refId", String(efakturId));
+              formData.append("categoryId", String(element.fileCategoryId));
+
+              const response = await ratingBillingHttpService.uploadAttachment(
+                `/v1/dbs/api/rbi/e-invoice/upload-attachment`,
+                formData
+              );
+              
+              if (response.success) {
+                uploadSuccess++;
+              } else {
+                uploadFailed++;
+              }
+            } catch (uploadError) {
+              console.error(`Error uploading attachment ${i + 1}:`, uploadError);
+              uploadFailed++;
+            }
           }
+          
           setLoadingForm(false);
-          setModalConfirm(false);
-          handleClear();
-          navigate(INVOICE_ROUTES.EFAKTUR_VIEW);
-        })
-        .catch((error) => {
-          console.log(error, "error");
-          if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
-            const message =
-              error.response?.data?.message || error.message || error.toString();
-            setBodyError({ message });
-            setModalError(true);
-          }
+        }
+        
+        setModalConfirm(false);
+        handleClear();
+        navigate(INVOICE_ROUTES.EFAKTUR_VIEW);
+      })
+      .catch((error) => {
+        setLoadingForm(false);
+        
+        const message =
+          error.response?.data?.message || error.message || error.toString();
+        setBodyError({ 
+          title: "Failed",
+          message 
         });
-    } else {
-      dispatch(updateEFaktur({ body: bodyValue }))
-        .unwrap()
-        .then(async (data) => {
-          setLoadingForm(true);
-          const idEFaktur = data.id;
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
-          for (let i = 0; i < filterDataAttach.length; i++) {
-            const element = filterDataAttach[i];
-            const body = {
-              files: element.file,
-              category: element.fileCategoryId,
-            };
-            await ratingBillingHttpService.uploadAttachment(
-              `/v1/dbs/api/invoice/efaktur/uploadAttachment/${idEFaktur}`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          setModalConfirm(false);
-          navigate(INVOICE_ROUTES.EFAKTUR_VIEW);
-        })
-        .catch((error) => {
-          if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
-            const message =
-              error.response?.data?.message || error.message || error.toString();
-            setBodyError({ message });
-            setModalError(true);
-          }
-          setModalConfirm(false);
-        });
-    }
+        setModalError(true);
+      });
   };
 
   // Handle Error Tab Form
@@ -405,11 +406,23 @@ const EFakturForm = ({ type }) => {
     <LayoutMenu>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={tabPages}
-          onChange={onChange}
-          currentPosition={valuePage}
-        />
+        
+        {/* Steps Navigation */}
+        <div className="bg-white rounded-lg p-4 mb-6">
+          <div className="flex flex-row justify-center">
+            <div
+              ref={containerRef}
+              className="overflow-x-scroll scrollStepsCstm"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              <Steps
+                current={currentStep}
+                items={items}
+                labelPlacement="vertical"
+              />
+            </div>
+          </div>
+        </div>
 
         <Form
           layout="vertical"
@@ -417,19 +430,18 @@ const EFakturForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          <div
-            className={`${valuePage !== "Create-Faktur" ? "hidden" : ""}`}
-          >
+          {/* Step 1: Create E-Faktur */}
+          <div className={currentStep !== 0 ? "hidden" : ""}>
             <EFakturSectionForm
               type={type}
               form={form}
               listDataDetail={listDataDetail}
               setListDataDetail={setListDataDetail}
-              efakturId={id}
             />
           </div>
 
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
+          {/* Step 2: Approval */}
+          <div className={currentStep !== 1 ? "hidden" : ""}>
             <CardContainer subHeader={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
@@ -441,7 +453,8 @@ const EFakturForm = ({ type }) => {
             </CardContainer>
           </div>
 
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
+          {/* Step 3: Attachment */}
+          <div className={currentStep !== 2 ? "hidden" : ""}>
             <CardContainer subHeader={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
@@ -459,50 +472,83 @@ const EFakturForm = ({ type }) => {
             </CardContainer>
           </div>
 
-          <div className="mt-[10px] flex">
-            <ButtonComponent type={"submit"} onClick={() => setModalBack(true)}>
-              Back
-            </ButtonComponent>
+          {/* Footer Buttons */}
+          <div className="w-full flex justify-between mt-10">
+            <div className="flex">
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => setModalBack(true)}
+                icon={<LeftOutlined style={{ color: "#fff", fontSize: 24 }} />}
+              >
+                Back
+              </ButtonComponent>
+            </div>
 
-            <div className={"w-full flex justify-end gap-1"}>
-              <Form.Item>
+            <div className="flex gap-5">
+              {/* Previous Button - tampil jika bukan step pertama */}
+              {currentStep > 0 && (
                 <ButtonComponent
+                  onClick={prev}
+                  type={"default"}
                   icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={20}
-                    />
+                    <LeftOutlined style={{ color: "#1890ff", fontSize: 24 }} />
                   }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderColor: "#1890ff",
+                    color: "#1890ff",
                   }}
                 >
-                  {type === "update" ? "Reset" : "Clear"}
+                  Previous
                 </ButtonComponent>
-              </Form.Item>
+              )}
+
               <Form.Item>
                 <ButtonComponent
+                  icon={<SVGIcon name="IconButtonClear" width={24} color={"#FFFFFF"} />}
                   type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(1)}
+                  onClick={handleClear}
                 >
-                  Save as Draft
+                  Clear
                 </ButtonComponent>
               </Form.Item>
-              <Form.Item>
+
+              {/* Next Button - tampil jika bukan step terakhir */}
+              {currentStep < steps.length - 1 && (
                 <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(2)}
+                  onClick={next}
+                  type={"submit"}
+                  icon={
+                    <RightOutlined style={{ color: "#fff", fontSize: 18 }} />
+                  }
                 >
-                  Save & Submit
+                  Next
                 </ButtonComponent>
-              </Form.Item>
+              )}
+
+              {/* Save Buttons - tampil jika step terakhir */}
+              {currentStep === steps.length - 1 && (
+                <>
+                  <Form.Item>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setTypeSubmit(false)}
+                    >
+                      Save As Draft
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setTypeSubmit(true)}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </Form.Item>
+                </>
+              )}
             </div>
           </div>
         </Form>
@@ -511,10 +557,10 @@ const EFakturForm = ({ type }) => {
         <ConfirmationLayout
           isOpen={modalConfirm}
           handleCancel={() => setModalConfirm(false)}
-          handleConfirm={() => handleConfirm()}
+          handleConfirm={handleConfirm}
           data={bodyData}
           listDataAppHierDetail={appHierDataDetail}
-          apiApproval={dataListAppHierId}
+          apiApproval={data_approval}
           listDataAttachment={listDataAttachment}
           listDataDetail={listDataDetail}
           selectedHierarchy={selectedHierarchy}
@@ -522,11 +568,19 @@ const EFakturForm = ({ type }) => {
         />
 
         {/* Modal Back */}
-        <ModalBack
+        <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-        />
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
 
         {/* Modal Retry */}
         <ModalError
@@ -540,9 +594,7 @@ const EFakturForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not created. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

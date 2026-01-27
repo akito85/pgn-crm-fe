@@ -372,22 +372,27 @@ const AdjustmentBillingSectionForm = ({
     [rangeDisableDate, transactionDate],
   );
 
-  // Disable dates for accounting date: must be within billing period AND not after transaction date
+  // Disable dates for accounting date: must be on or after transaction date, no end date limit
   const disabledAccountingDate = useCallback(
     (current) => {
-      // First check billing period range
-      const outsideBillingPeriod =
-        current < moment(rangeDisableDate?.startDate) ||
-        current > moment(rangeDisableDate?.endDate).add(1, "days");
+      // Only check if before transaction date (no end date limit)
+      const beforeTransactionDate = transactionDate
+        ? current < moment(transactionDate).startOf("day")
+        : true; // Disable all dates if no transaction date selected
 
-      // Then check if after transaction date
-      const afterTransactionDate = transactionDate
-        ? current > moment(transactionDate).endOf("day")
-        : false;
-
-      return outsideBillingPeriod || afterTransactionDate;
+      return beforeTransactionDate;
     },
-    [rangeDisableDate, transactionDate],
+    [transactionDate],
+  );
+
+  // Disable dates for rate date: must be on or after billing period start date, no end date limit
+  const disabledRateDate = useCallback(
+    (current) => {
+      // Only check if before billing period start date (no end date limit)
+      if (!rangeDisableDate?.startDate) return false;
+      return current < moment(rangeDisableDate?.startDate);
+    },
+    [rangeDisableDate],
   );
 
   // Handle transaction date change
@@ -841,7 +846,7 @@ const AdjustmentBillingSectionForm = ({
             ]}
           >
             <DateComponent
-              dateDisable={disabledRangeDate}
+              dateDisable={disabledRateDate}
               defaultPickerValue={defaultPicker}
               key={keyPicker}
             />
