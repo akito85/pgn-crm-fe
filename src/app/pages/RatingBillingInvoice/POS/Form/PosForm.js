@@ -91,6 +91,9 @@ const PosForm = ({ type }) => {
   const idPos = type === "create" ? undefined : location?.state?.idPos;
   const customerTypeFromNav = location?.state?.customerType;
   const [customerType, setCustomerType] = useState(customerTypeFromNav || null);
+  const getCustomerTypeNumber = (type) => {
+    return type === "prospective" ? 2 : 1;
+  };
   const [defaultData, setDefaultData] = useState({});
   const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
 
@@ -104,6 +107,8 @@ const PosForm = ({ type }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [dataListDetailApproval, setDataListDetailApproval] = useState([]);
+  const [isCostCenterFilled, setIsCostCenterFilled] = useState(false);
+  const [isAccountSegmentFilled, setIsAccountSegmentFilled] = useState(false);
   const [dataSend, setDataSend] = useState({});
   const [accountNumber, setAccountNumber] = useState("");
   const [dataAccount, setDataAccount] = useState();
@@ -125,20 +130,16 @@ const PosForm = ({ type }) => {
   const [dataMissing, setDataMissing] = useState([]);
   const [dataPriority, setDataPriority] = useState([]);
 
-  const handleAccountSegmentChange = (selectedSegmentIds) => {
+  const handleAccountSegmentChange = (selectedSegmentId) => {
     form.resetFields(["accountGroupType"]);
+    setIsAccountSegmentFilled(!!selectedSegmentId);
 
-    if (selectedSegmentIds) {
-      const segmentArray = Array.isArray(selectedSegmentIds)
-        ? selectedSegmentIds
-        : [selectedSegmentIds];
-      dispatch(getAccountGroupTypeList(segmentArray));
+    if (selectedSegmentId) {
+      dispatch(getAccountGroupTypeList([selectedSegmentId]));
     }
   };
 
-  const handleMeterReadingCodeChange = (selectedMrcIds) => {
-
-  };
+  const handleMeterReadingCodeChange = (selectedMrcIds) => {};
 
   const steps = [
     { title: "POINT OF SALES" },
@@ -235,7 +236,6 @@ const PosForm = ({ type }) => {
         costCenter: tempDefaultData.costCenter,
       });
 
-      // Auto-load meter reading code jika ada default cost center
       if (tempDefaultData.costCenter && tempDefaultData.costCenter.length > 0) {
         const body = {
           ccIds: tempDefaultData.costCenter.map((id) => ({ ccId: id })),
@@ -345,13 +345,18 @@ const PosForm = ({ type }) => {
   }, [dispatch, type]);
 
   useEffect(() => {
-    if (hasValue(accountNumber)) {
+    if (customerType === "customer" && hasValue(accountNumber)) {
       const getAccountId = data_globalAccountNumber?.find(
         (item) => item?.accountNumber === accountNumber,
       )?.accountId;
-      dispatch(getGlobalTermsOfPaymentData(getAccountId));
+
+      if (getAccountId) {
+        dispatch(getGlobalTermsOfPaymentData(getAccountId));
+      }
+    } else if (customerType === "prospective") {
+      dispatch(getGlobalTermsOfPaymentData(null));
     }
-  }, [accountNumber, data_globalAccountNumber, dispatch]);
+  }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
 
   const handleSetFormUpdate = useCallback(
     (data_detailPos, data_globalCurrency) => {
@@ -368,6 +373,7 @@ const PosForm = ({ type }) => {
         apphierId: data_detailPos?.appHierId,
         transactionDate: moment(data_detailPos?.transactionDate),
         invoiceDate: moment(data_detailPos?.invoiceDate),
+        costCenter: data_detailPos?.costCenter,
         // termType: {
         //   termValue: isDateString(data_detailPos?.termsOfPayment)
         //     ? moment(data_detailPos?.termsOfPayment || "")
@@ -985,6 +991,7 @@ const PosForm = ({ type }) => {
   // console.log(dataDynamic, "dataDynamic");
   const handleSendData = (e) => {
     setModalConfirm(false);
+
     // Summary Amount
     const calculateAmount = data.map((a) => a.amount);
     const sumAmount = calculateAmount.reduce(
@@ -1011,81 +1018,209 @@ const PosForm = ({ type }) => {
       true,
     ).isValid();
 
-    //code
-    const body = {
-      ...e,
-      id: type === "create" ? undefined : idUpdate,
-      posNumber: type === "create" ? undefined : idPos,
-      costcenter: `${e?.costCenterCode || ""} - ${e?.costCenterName || ""}`,
-      termsOfPayment:
-        isDateString === true
-          ? moment(e?.termsOfPayment).format(dateFormatting.dateFormal)
-          : e?.termsOfPayment,
-      ...dataDynamic,
-      appHierId: dataApprovalId,
-      rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
-      // rateType: dataDynamic?.rateType || null,
-      rateDate: renderDate(dataDynamic?.rateDate) || null,
-      amount: sumAmount,
-      // taxBasisIdr: 0,
-      // taxBasisUsd: 0,
-      // taxBasisEqvUsd: 0,
-      // vatIdr: 0,
-      // vatUsd: 0,
-      taxRate: parseFloat(dataDynamic?.taxRate.replace(/,/g, "")) || 0,
-      taxRateDate: renderDate(dataDynamic?.taxRateDate) || null,
-      // taxRateType: dataDynamic?.rateType || null,
-      discountAmount: sumDiscount,
-      topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
-      mrbiPosDetails: data?.map((item) => {
-        return {
-          posDetailId: item?.posDetailId,
-          posNumber: item?.posNumber,
-          type: item?.typeId,
-          item: item?.itemId,
-          price: item?.price || 0,
-          reference: item?.reference || null,
-          quantity: item?.quantity,
-          uom: item?.uom || null,
-          currency: item?.currency || null,
-          amount: item?.amount || 0,
-          amountEqvIdr: item?.amountEqvIdr || 0,
-          amountEqvUsd: item?.amountEqvUsd || 0,
-          eqvIdr: item?.eqvIdr || 0,
-          discount: item?.discount || 0,
-          total: item?.total || 0,
-          totalEqvUsd: item?.totalEqvUsd || 0,
-          totalEqvIdr: item?.totalEqvIdr || 0,
-          remark: item?.remark || null,
-          lineNumber: item?.lineNumber || 0,
-        };
-      }),
+    // Get SOR name for prospective customer
+    const getSorName = () => {
+      if (customerType === "prospective" && e?.sor) {
+        const sorItem = data_sor_list?.find((item) => item.id === e.sor);
+        return sorItem ? sorItem.name : "";
+      }
+      return e?.sor || "";
     };
 
-    delete body.costCenterCode;
-    delete body.costCenterName;
+    // Get MRC name for prospective customer
+    const getMrcName = () => {
+      if (customerType === "prospective" && e?.meterReadingCode) {
+        const mrcIds = Array.isArray(e.meterReadingCode)
+          ? e.meterReadingCode
+          : [e.meterReadingCode];
+        const mrcNames = mrcIds
+          .map((mrcId) => {
+            const mrc = mergedArrayMrc?.find((item) => item.id === mrcId);
+            return mrc ? mrc.name : "";
+          })
+          .filter(Boolean);
+        return mrcNames.join(", ");
+      }
+      return e?.meterReadingCode || "";
+    };
+
+    // Get Account Segment name
+    const getAccountSegmentName = () => {
+      if (customerType === "prospective" && e?.accountSegment) {
+        const segment = data_account_segment?.find(
+          (item) => item.id === e.accountSegment,
+        );
+        return segment ? segment.name : "";
+      }
+      return e?.accountSegment || "";
+    };
+
+    // Get Account Group Type name
+    const getAccountGroupTypeName = () => {
+      if (customerType === "prospective" && e?.accountGroupType) {
+        const groupType = data_account_group_type?.find(
+          (item) => item.glbTypeValId === e.accountGroupType,
+        );
+        return groupType ? groupType.glbValue || groupType.name : "";
+      }
+      return e?.accountGroupType || "";
+    };
+
+    // Prepare base body
+    let body = {
+      id: type === "create" ? undefined : idUpdate,
+      posNumber: type === "create" ? undefined : idPos,
+
+      // Customer Type (1 = customer, 2 = prospective)
+      customerType: getCustomerTypeNumber(customerType),
+
+      // Customer Information
+      ...(customerType === "customer" && { customerNumber: e?.customerNumber }),
+      customerName: e?.customerName,
+      accountName: e?.accountName,
+
+      // SOR & Cost Center
+      sor: getSorName(),
+      meterReadingCode: getMrcName(),
+      accountSegment: getAccountSegmentName(),
+      accountGroupType: getAccountGroupTypeName(),
+
+      // Billing Information
+      billingCycle:
+        data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
+          ?.name || e?.billingCycle,
+      billingPeriod:
+        data_globalBillingPeriod?.find((item) => item.id === e?.billingPeriod)
+          ?.name || e?.billingPeriod,
+      currency:
+        data_globalCurrency?.find((item) => item.Id === e?.currency)?.text ||
+        e?.currency,
+      transactionDate: moment(e?.transactionDate).format("DD MMM YYYY"),
+      invoiceDate: moment(e?.invoiceDate).format("DD MMM YYYY"),
+      termsOfPayment: moment.isMoment(e?.termType?.termValue)
+        ? moment(e?.termType?.termValue).format(dateFormatting.date)
+        : data_globalTermsOfPaymentValue?.find(
+            (item) => item.Id === e?.termType?.termValue,
+          )?.text || e?.termType?.termValue,
+      remark: e?.remark,
+
+      // Approval
+      appHierId: dataApprovalId,
+      submit: typeSubmit,
+      topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
+      topId: e.termType.termValueDdl,
+
+      // Rate & Tax Information
+      rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
+      rateDate: dataDynamic?.rateDate
+        ? moment(dataDynamic.rateDate, dateFormatting.date).format(
+            "DD MMM YYYY",
+          )
+        : null,
+      rateType: dataDynamic?.rateType || null,
+      taxRate: parseFloat(dataDynamic?.taxRate.replace(/,/g, "")) || 0,
+      taxRateDate: dataDynamic?.taxRateDate
+        ? moment(dataDynamic.taxRateDate, dateFormatting.date).format(
+            "DD MMM YYYY",
+          )
+        : null,
+      taxRateType: dataDynamic?.taxRateType || null,
+
+      // Amount Calculations
+      amount: sumAmount,
+      discountAmount: sumDiscount,
+      totalAmountIdr: dataDynamic?.totalAmountIdr || 0,
+      totalAmountUsd: dataDynamic?.totalAmountUsd || 0,
+      amountIdr: dataDynamic?.amountIdr || 0,
+      amountUsd: dataDynamic?.amountUsd || 0,
+      discountAmountIdr: dataDynamic?.discountAmountIdr || 0,
+      discountAmountUsd: dataDynamic?.discountAmountUsd || 0,
+      taxBasisIdr: dataDynamic?.taxBasisIdr || 0,
+      taxBasisUsd: dataDynamic?.taxBasisUsd || 0,
+      taxBasisEqvIdr: dataDynamic?.taxBasisEqvIdr || 0,
+      vatIdr: dataDynamic?.vatIdr || 0,
+      vatUsd: dataDynamic?.vatUsd || 0,
+      vatEqvIdr: dataDynamic?.vatEqvIdr || 0,
+      withholdingTax: dataDynamic?.withholdingTax || 0,
+      totalEqvIdr: dataDynamic?.totalEqvIdr || 0,
+      totalEqvUsd: dataDynamic?.totalEqvUsd || 0,
+
+      // POS Details
+      mrbiPosDetails: data?.map((item) => ({
+        posDetailId: item?.posDetailId,
+        posNumber: item?.posNumber,
+        lineNumber: item?.lineNumber || 0,
+        type: item?.typeId,
+        item: item?.itemId,
+        price: item?.price || 0,
+        reference: item?.reference || null,
+        quantity: item?.quantity,
+        uom: item?.uom || null,
+        currency: item?.currency || null,
+        amount: item?.amount || 0,
+        amountEqvIdr: item?.amountEqvIdr || 0,
+        amountEqvUsd: item?.amountEqvUsd || 0,
+        eqvIdr: item?.eqvIdr || 0,
+        discount: item?.discount || 0,
+        total: item?.total || 0,
+        totalEqvUsd: item?.totalEqvUsd || 0,
+        totalEqvIdr: item?.totalEqvIdr || 0,
+        remark: item?.remark || null,
+      })),
+    };
+
+    // Handle field berdasarkan customer type
+    if (customerType === "prospective") {
+      if (Array.isArray(e?.costCenter) && e.costCenter.length > 0) {
+        const costCenterNames = e.costCenter
+          .map((ccId) => {
+            const cc = data_cost_center_list?.find((item) => item.id === ccId);
+            return cc ? cc.name : ""; 
+          })
+          .filter(Boolean)
+          .join(", ");
+
+        body.costcenter = costCenterNames;
+      }
+      body.registrationNumber = e?.accountNumber;
+
+      // Field tambahan untuk prospective
+      body.email = e?.email || "";
+      body.address = e?.address || "";
+    } else {
+      body.accountNumber = e?.accountNumber;
+      body.costcenter = e?.costCenter || "";
+    }
+
+    // Clean up fields yang tidak diperlukan
+    delete body.costCenter;
     delete body.termType;
     delete body.apphierId;
     delete body.taxBasis;
 
+    // Dispatch create or update
     if (type === "create") {
       dispatch(createPOS(body))
         .unwrap()
         .then(async (data) => {
           const id = data?.id;
           setLoadingForm(true);
+
+          // Upload attachments
           for (let icon = 0; icon < dataAttachment.length; icon++) {
             const element = dataAttachment[icon];
-            const body = {
+            const attachBody = {
               files: element.file,
               refId: id,
               category: element.fileCategoryId,
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              body,
+              attachBody,
             );
           }
+
+          // Reset form
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1096,6 +1231,9 @@ const PosForm = ({ type }) => {
           setCurrency();
           setInvoiceDate();
           setDdlFinal("DATE");
+
+          // Navigate back
+          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1110,7 +1248,7 @@ const PosForm = ({ type }) => {
           }
         });
     } else {
-      // console.log(body, "body");
+      // Update logic sama, hanya tambah upload attachment untuk yang baru
       dispatch(updatePOS(body))
         .unwrap()
         .then(async (data) => {
@@ -1119,18 +1257,20 @@ const PosForm = ({ type }) => {
           const filterDataAttach = dataAttachment.filter(
             (item) => item.dataType !== "exist",
           );
+
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
-            const body = {
+            const attachBody = {
               files: element.file,
               refId: id,
               category: element.fileCategoryId,
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              body,
+              attachBody,
             );
           }
+
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1140,8 +1280,9 @@ const PosForm = ({ type }) => {
           setAccountNumber();
           setCurrency();
           setInvoiceDate();
-          setCurrency();
           setDdlFinal("DATE");
+
+          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1199,13 +1340,12 @@ const PosForm = ({ type }) => {
     ]);
   };
 
-  const handleChangeCostCenter = (selectedCostCenterIds) => {
+  const handleChangeCostCenter = (selectedCostCenterId) => {
     form.resetFields(["meterReadingCode"]);
+    setIsCostCenterFilled(!!selectedCostCenterId);
 
-    if (selectedCostCenterIds && selectedCostCenterIds.length > 0) {
-      const body = {
-        ccIds: selectedCostCenterIds.map((id) => ({ ccId: id })),
-      };
+    if (selectedCostCenterId) {
+      const body = { ccIds: [{ ccId: selectedCostCenterId }] };
       dispatch(getMeterReadingCodeList(body));
     }
   };
@@ -1278,6 +1418,8 @@ const PosForm = ({ type }) => {
       form.resetFields();
       setData([]);
       setAccountNumber();
+      setIsCostCenterFilled(false);
+      setIsAccountSegmentFilled(false);
       setCurrency();
       setInvoiceDate();
       form.setFieldsValue({
@@ -1328,6 +1470,9 @@ const PosForm = ({ type }) => {
           {/* Step 1: Point of Sales */}
           <div className={currentStep !== 0 ? "hidden" : ""}>
             <PointOfSalesPage
+              form={form}
+              isCostCenterFilled={isCostCenterFilled}
+              isAccountSegmentFilled={isAccountSegmentFilled}
               data_dynamic={dataDynamic}
               data={data}
               setData={setData}
