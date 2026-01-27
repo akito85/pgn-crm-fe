@@ -8,7 +8,7 @@ import {
 import { Button, Pagination, Select, Table } from "antd";
 import ColumnSettings from "../ColumnSettings/ColumnSettings";
 import SearchBar from "../SearchBar";
-import AdvanceSearch from "../AdvanceSearch";
+import NxAdvanceSearch from "./NxAdvanceSearch";
 
 const { Option } = Select;
 
@@ -838,7 +838,7 @@ const NxTable = ({
         </div>
       ) : null}
 
-      <AdvanceSearch
+      <NxAdvanceSearch
         visible={isAdvanceOpen}
         onClose={() => setIsAdvanceOpen(false)}
         onSearch={handleAdvanceSearch}
