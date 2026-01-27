@@ -34,7 +34,7 @@ import {
   getPrApprovalHierarchy,
   getPrAttachmentCategory,
   updatePaymentRelation,
-} from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { showModalError, validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
@@ -59,7 +59,7 @@ const CreatePaymentRelation = ({ type }) => {
     detail_prApprovalHierarchy,
     detail_paymentRelation,
     data_paymentRelationAttachment,
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.paymentRelation);
 
   //declare
   const location = useLocation();

@@ -9,7 +9,7 @@ import { configApp } from "../../../../../../../../constants/configApp";
 import CardContainer from "../../../../../../../../components/CardContainer";
 import NxTable from "../../../../../../../../components/Nx/NxTable";
 import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
-import { getPaymentRelationAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getPaymentRelationAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useSelector } from "react-redux";
 import { applyFixedColumns } from "../../../../../../../../utils/applyFixedColumns";
 
@@ -18,7 +18,7 @@ const PaymentRelationDetailAttch = ({
   dispatch = () => {},
 }) => {
   const financialInformationState = useSelector(
-    (state) => state.financialInformation
+    (state) => state.paymentRelation
   );
 
   const {

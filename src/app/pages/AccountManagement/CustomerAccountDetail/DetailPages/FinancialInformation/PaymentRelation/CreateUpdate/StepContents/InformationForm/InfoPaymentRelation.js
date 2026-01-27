@@ -5,16 +5,14 @@ import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../../../../../components/Modal/ModalCustom";
-import NxPanel from "../../../../../../../../../../components/Nx/NxPanel";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
 
 import moment from "moment";
 import DateComponent from "../../../../../../../../../../components/DateComponent";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
-// import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 import { TablePaginationNew } from "poc-table-dragandrop";
 import CardContainer from "../../../../../../../../../../components/CardContainer";
 
@@ -44,7 +42,7 @@ export default function InfoPaymentRelation({
   const [isOpen, setIsOpen] = useState(false);
   
   const { data_prAccountStandard } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.paymentRelation
   );
   
   const handleOk = () => {
@@ -488,19 +486,6 @@ export default function InfoPaymentRelation({
           </Button>,
         ]}
       >
-        {/* <TablePaginationNew
-          dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
-            ...item,
-            key: item.id || idx,
-          }))}
-          totalData={sanitizedTotalElement}
-          current={sanitizedPage}
-          pageSize={sanitizedPageSize}
-          onSort={onSort}
-          tableScrolled={{ y: 525, x: 3000 }}
-          columns={columnMain}
-          onChange={handleChangeSize}
-        /> */}
         <TablePaginationNew
           dataSource={data_prAccountStandard?.result?.map((item, index) => ({
             ...item,

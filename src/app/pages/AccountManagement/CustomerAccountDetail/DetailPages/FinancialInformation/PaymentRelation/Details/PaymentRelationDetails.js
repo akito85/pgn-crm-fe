@@ -14,7 +14,7 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/accoun
 import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import DetailText from "../../../../../../../../components/DetailText";
-import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../../../../components/CardContainer";
@@ -30,8 +30,8 @@ const PaymentRelationDetails = ({
   const dispatch = useDispatch();
 
   const { detail_paymentRelation } = useSelector(
-    (state) => state.financialInformation
-  )
+    (state) => state.paymentRelation
+  );
 
   const { data_customerDetail, loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
