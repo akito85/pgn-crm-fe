@@ -134,7 +134,7 @@ const PaymentRelation = ({
         inputFields: tempFilters,
       }
 
-      dispatch(getPaymentRelation({ id, body }))
+      dispatch(getPaymentRelation({ id, body, isLoadMore: false }))
     })
     .catch(() => {});
   }
@@ -183,7 +183,7 @@ const PaymentRelation = ({
         inputFields: tempFilters,
       }
 
-      dispatch(getPaymentRelation({ id, body }));
+      dispatch(getPaymentRelation({ id, body, isLoadMore: false }));
       setShowInactiveModal(false);
       handleClear();
     })
@@ -353,12 +353,19 @@ const PaymentRelation = ({
     const totalPages = pagination_paymentRelation?.totalPages || 0;
 
     if (nextPage <= totalPages) {
+      const body = {
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        inputFields: tempFilters,
+        listType,
+      }
+
       await dispatch(
         getPaymentRelation({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
+          id,
+          body,
           isLoadMore: true,
         })
       );
@@ -376,8 +383,8 @@ const PaymentRelation = ({
       listType,
     }
 
-    dispatch(getPaymentRelation({ id, body }));
-  }, [page, loadMoreSize, sort, search, tempFilters, listType]);
+    dispatch(getPaymentRelation({ id, body, isLoadMore: false }));
+  }, [sort, search, tempFilters, listType]);
 
   // Listen to approve or reject button on the parent component
   useEffect(() => {
