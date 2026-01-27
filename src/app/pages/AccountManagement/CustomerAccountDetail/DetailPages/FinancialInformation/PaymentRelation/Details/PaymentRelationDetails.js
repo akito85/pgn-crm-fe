@@ -20,11 +20,6 @@ import { showModalError } from "../../../../../../../../redux/slices/general_sli
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 
-const tabs = [
-  { value: "Payment Relation Information" },
-  { value: "Attachment" },
-];
-
 const PaymentRelationDetails = ({
   type = "standard"
 }) => {
@@ -51,8 +46,6 @@ const PaymentRelationDetails = ({
   const idCustomer = location?.state?.idCustomer;
   const idPr = location?.state?.id;
 
-  //state
-  const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
   const [isApproval, setIsApproval] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
@@ -86,11 +79,6 @@ const PaymentRelationDetails = ({
       breadcrumbName: "Detail",
     },
   ];
-
-  //handle
-  const handleDetailSection = (key) => {
-    setTypeDetailSection(key);
-  };
 
   const renderDate = (date) => {
     if (date) {
@@ -243,9 +231,6 @@ const PaymentRelationDetails = ({
         </NxCardContainer>
 
         <PaymentRelationDetailTabs
-          section={typeDetailSection}
-          options={tabs}
-          handleChangeOption={handleDetailSection}
           dataDetail={detail_paymentRelation?.result}
           subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
           dispatch={dispatch}
