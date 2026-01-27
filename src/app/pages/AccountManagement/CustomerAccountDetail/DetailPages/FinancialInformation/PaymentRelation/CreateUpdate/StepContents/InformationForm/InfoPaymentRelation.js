@@ -259,7 +259,7 @@ export default function InfoPaymentRelation({
         handleOk={handleOk}
         header={"CHOOSE ACCOUNT"}
         width={1100}
-        type={"custom"}
+        type={"confirmation"}
         footer={[
           <Button key="close" onClick={handleClose}>
             Close
