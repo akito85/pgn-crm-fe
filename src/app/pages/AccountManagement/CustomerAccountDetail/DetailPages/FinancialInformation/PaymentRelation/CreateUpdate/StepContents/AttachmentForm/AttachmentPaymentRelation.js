@@ -15,8 +15,8 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
-// import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
-import { TablePaginationNew } from "poc-table-dragandrop";
+import CardContainer from "../../../../../../../../../../components/CardContainer";
+import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -84,12 +84,14 @@ const columnAttachmentData = (
 ) => {
   const res = [
     {
+      key: "no",
       title: "NO",
       width: 30,
       align: "center",
-      dataIndex: "no",
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "category",
       title: "CATEGORY",
       width: 75,
       dataIndex: "fileCategoryName",
@@ -104,6 +106,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "fileName",
       title: "FILE NAME",
       width: 200,
       dataIndex: "fileName",
@@ -118,6 +121,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "createdBy",
       title: "UPLOADED BY",
       width: 100,
       dataIndex: "createdBy",
@@ -132,6 +136,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "createdDate",
       title: "UPLOADED DATE",
       align: "center",
       width: 100,
@@ -147,6 +152,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "fileSize",
       title: "FILE SIZE",
       align: "center",
       width: 100,
@@ -162,6 +168,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "action",
       title: "ACTION",
       align: "center",
       width: 75,
@@ -262,10 +269,6 @@ const AttachmentSectionForm = ({
     }
     setSearchedColumn(tempSearchColumn);
   };
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
   const handleDelete = (record) => {
     updateData((prevState) => {
       const temp = prevState.filter((detail) => detail.key !== record.key);
@@ -307,12 +310,9 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <div className={`${className} drop-shadow-lg bg-white rounded-lg w-full p-9`}>
+    <CardContainer header={"ATTACHMENT"} className={`${className}`}>
       <Spin spinning={loadingDownload}>
-        <div className="flex flex-col w-full gap-5">
-          <span className="text-primary text-sm font-bold uppercase">
-            ATTACHMENT
-          </span>
+        <div className="flex flex-col gap-y-4">
           {type !== "detail" && type !== "preview" ? (
             <div className="flex flex-col w-full gap-2 items-end">
               <div className="flex flex-col gap-y-1 justify-start">
@@ -340,34 +340,13 @@ const AttachmentSectionForm = ({
               </div>
             </div>
           ) : null}
-          {/* <TablePaginationNew
-            type="FE"
-            dataSource={data}
-            totalData={data.length}
-            current={page}
-            pageSize={pageSize}
-            tableScrolled={{ y: 300, x: 1500 }}
-            onChange={handleChangeSize}
-            columns={columnAttachmentData(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDelete,
-              type,
-              handleShow
-            )}
-          /> */}
-          <TablePaginationNew
-            type="FE"
+          <NxTable
             dataSource={data.map((item, index) => ({
               ...item,
               no: (page - 1) * pageSize + index + 1,
             }))}
+            totalData={data.length}
             tableScrolled={{ y: 300, x: 1500 }}
-            onChange={handleChangeSize}
             columns={columnAttachmentData(
               page,
               pageSize,
@@ -379,23 +358,23 @@ const AttachmentSectionForm = ({
               type,
               handleShow
             )}
-            enableDragColumn={true}
-          />
-          <ModalAttachment
-            openUpload={modalUpload}
-            updateData={updateData}
-            categoryOptions={categoryOptions}
-            handleCancel={() => setModalUpload(false)}
-            valueGuard={
-              configApplication === configApp.MASTER_MANAGEMENT
-                ? dataGlobalPropAttachment
-                : {}
-            }
-            withLink
+            usePagination={false}
           />
         </div>
       </Spin>
-    </div>  
+      <ModalAttachment
+        openUpload={modalUpload}
+        updateData={updateData}
+        categoryOptions={categoryOptions}
+        handleCancel={() => setModalUpload(false)}
+        valueGuard={
+          configApplication === configApp.MASTER_MANAGEMENT
+            ? dataGlobalPropAttachment
+            : {}
+        }
+        withLink
+      />
+    </CardContainer>
   );
 };
 

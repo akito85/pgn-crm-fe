@@ -1,8 +1,8 @@
 import { Fragment } from "react";
 import DetailText from "../../../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../../../components/BaseContainer";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../../utils";
+import CardContainer from "../../../../../../../../components/CardContainer";
 
 const PaymentRelationDetailInfo = ({
   subjectAccountNumber,
@@ -10,7 +10,7 @@ const PaymentRelationDetailInfo = ({
 }) => {
   return (
     <Fragment>
-      <BaseContainer header={"PAYMENT RELATION"}>
+      <CardContainer header={"PAYMENT RELATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Payment Relation Information */}
           <DetailText label="Account Number">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountNumber : dataDetail?.accountNumber}</DetailText>
@@ -23,9 +23,9 @@ const PaymentRelationDetailInfo = ({
         <div className="w-full">
           <DetailText label="Description">{dataDetail?.description}</DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"HISTORY LOG INFORMATION"}>
+      <CardContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-4">
           {/* History Log Information */}
           <DetailText label="Record Id">{dataDetail?.id}</DetailText>
@@ -34,7 +34,7 @@ const PaymentRelationDetailInfo = ({
           <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
           <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </Fragment>
   );
 };

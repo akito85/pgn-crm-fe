@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, memo } from "react";
 import { Collapse, Space } from "antd";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -208,4 +208,4 @@ const FinancialInformation = ({
   );
 };
 
-export default FinancialInformation;
+export default memo(FinancialInformation);

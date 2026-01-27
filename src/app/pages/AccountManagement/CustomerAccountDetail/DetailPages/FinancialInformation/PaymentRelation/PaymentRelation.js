@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation, getPrColumnApi, getPrConditionApi, getPrOperatorApi } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -481,4 +481,4 @@ const PaymentRelation = ({
   );
 };
 
-export default PaymentRelation;
+export default memo(PaymentRelation);

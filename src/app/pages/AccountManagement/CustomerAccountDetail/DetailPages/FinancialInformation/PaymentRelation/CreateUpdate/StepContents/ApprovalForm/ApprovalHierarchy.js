@@ -123,7 +123,7 @@ const ApprovalHierarchy = ({
   approvalName,
 }) => {
   return (
-    <Fragment>
+    <div className="flex flex-col gap-y-4">
       {showSelect ? (
         <Form.Item
           name={"appHierId"}
@@ -165,7 +165,7 @@ const ApprovalHierarchy = ({
           }}
         />
       ) : null}
-    </Fragment>
+    </div>
   );
 };
 
