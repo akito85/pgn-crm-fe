@@ -14,7 +14,13 @@ const initialState = {
   data_prApprovalHierarchy: [],
   detail_prApprovalHierarchy: [],
   data_prAttachmentCategory: [],
-  data_prAccountStandard: [],
+  list_prAccountStandard: [],
+  pagination_prAccountStandard: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   detail_paymentRelation: {},
   data_prApprovalHistory: {},
 };
@@ -202,15 +208,29 @@ export const getPrAttachmentCategory = createAsyncThunk(
 
 export const getPrAccountStandard = createAsyncThunk(
   "GET_PR_ACCOUNT_STANDARD",
-  async ({ page, pageSize, sort, search, id }, thunkAPI) => {
+  async ({ page, size, sort, searchs, id, isLoadMore }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
+      const queryParams = new URLSearchParams;
 
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/payment-relation/list-account/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      if (page)
+        queryParams.append("page", page);
+      if (size)
+        queryParams.append("size", size);
+      if (sort)
+        queryParams.append("sort", sort);
+      if (searchs)
+        queryParams.append("searchs", searchs);
+
+      let url = `/v1/dbs/api/payment-relation/list-account/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getPagination(url);
-      return response?.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -453,16 +473,42 @@ const paymentRelationSlice = createSlice({
     },
 
     /** Get Payment Relation Account Standard */
-    [getPrAccountStandard.pending]: (state) => {
-      state.loading = true;
+    [getPrAccountStandard.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getPrAccountStandard.fulfilled]: (state, action) => {
-      state.data_prAccountStandard = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (isLoadMore)
+        state.list_prAccountStandard = [
+          ...state.list_prAccountStandard,
+          ...result,
+        ];
+      else
+        state.list_prAccountStandard = result;
+
+      state.pagination_prAccountStandard = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
     },
-    [getPrAccountStandard.rejected]: (state) => {
-      state.data_prAccountStandard = [];
+    [getPrAccountStandard.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_prAccountStandard = [];
+        state.pagination_prAccountStandard = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
     },
 
     /** Get Payment Relation Attachment */
