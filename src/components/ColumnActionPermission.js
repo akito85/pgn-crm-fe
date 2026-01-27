@@ -23,9 +23,9 @@ export const RenderContentActions = (
             <Space direction="vertical">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
-                ?.map((item) => {
+                ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
-                    return item?.render(record, totalLength);
+                    return item?.render(record, totalLength, index);
                   } else {
                     return null;
                   }
@@ -36,7 +36,7 @@ export const RenderContentActions = (
           <div className="pt-0">
             <MoreOutlined
               style={{
-                fontSize: "24px",
+                fontSize: "20px",
                 color: "#0075bf",
                 cursor: "pointer",
               }}

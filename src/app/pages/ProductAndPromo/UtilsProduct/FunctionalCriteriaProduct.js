@@ -279,6 +279,7 @@ const FunctionalCriteriaProduct = ({
     data_from_item,
     data_tiering,
     data_product,
+    data_product_version,
   } = useSelector((state) => state[selector]);
 
   // Declaration
@@ -332,6 +333,7 @@ const FunctionalCriteriaProduct = ({
     data_from_item,
     data_tiering,
     data_product,
+    data_product_version,
     ...{ dataListExternal },
   };
 
@@ -385,6 +387,18 @@ const FunctionalCriteriaProduct = ({
         [keyName]: value,
       };
     });
+    if (index === "product") {
+      if (dataCriteria.includes(38)) {
+        dispatch(getApi?.getProductVersionList(data?.value));
+      }
+      formTableCriteria.resetFields(["productVersion"]);
+      setEditDataRecord((prevState) => {
+        return {
+          ...prevState,
+          [key + "productVersion"]: undefined,
+        };
+      });
+    }
     if (index === "country") {
       if (dataCriteria.includes(3118)) {
         dispatch(getApi?.getProvinceList(data?.value));

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Form, Input, Modal, Spin } from "antd";
+import { DatePicker, Form, Input, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
@@ -14,8 +14,6 @@ import { dateFormatting } from "../../../../../../../utils";
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
-import NxFilter from "../../../../../../../components/Nx/NxFilter";
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 
 const PaymentRelation = ({
   id = 0,
@@ -33,16 +31,20 @@ const PaymentRelation = ({
     (state) => state.financialInformation
   );
 
-  const { data_paymentRelation, loading, data_prApprovalHistory } = financialInformationState;
+  const {
+    list_paymentRelation,
+    pagination_paymentRelation,
+    data_prApprovalHistory,
+    loading,
+  } = financialInformationState;
 
   //declare
   const searchInput = useRef(null);
 
   //state
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [listType, setListType] = useState("all");
-  const [totalElement, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -77,19 +79,19 @@ const PaymentRelation = ({
     preserveSelectedRowKeys: true,
   }
 
-  const handleSaveFilter = (values) => {
-    setTempFilters(values.query);
-    setPage(1);
-    setSort("");
-    setSearch({});
-    setSearchText("")
-    setShowFilterModal(false);
-  };
+  const currentData = useMemo(() => list_paymentRelation, [list_paymentRelation]);
 
-  const handleCancelFilter = () => {
-    setShowFilterModal(false);
-    filterForm.setFieldValue({ query: tempFilters });
-  };
+  const currentPagination = pagination_paymentRelation;
+  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!currentData || currentData.length === 0) return [];
+
+    return currentData.map((item, index) => ({
+      ...item,
+      key: `${item.id}-${index}`,
+    }));
+  }, [currentData]);
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
@@ -126,7 +128,7 @@ const PaymentRelation = ({
 
       const body = {
         page,
-        size: pageSize,
+        size: loadMoreSize,
         sort,
         searchs: search,
         inputFields: tempFilters,
@@ -175,7 +177,7 @@ const PaymentRelation = ({
     .then(() => {
       const body = {
         page,
-        size: pageSize,
+        size: loadMoreSize,
         sort,
         searchs: search,
         inputFields: tempFilters,
@@ -325,30 +327,13 @@ const PaymentRelation = ({
   const handleDownload = () => {
     const body = {
       page,
-      size: pageSize,
+      size: loadMoreSize,
       sort,
       inputFields: tempFilters,
       searchs: search
     }
 
     dispatch(downloadPaymentRelation({ body, id, }));
-  };
-
-  /**
-   * @param {number} newPage
-   */
-  const handleChange = (newPage) => {
-    setPage(newPage);
-  };
-
-  /**
-   * @param {number} pageChange 
-   * @param {number} pageSizeChange 
-   */
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
   };
 
   /**
@@ -363,10 +348,28 @@ const PaymentRelation = ({
     setSort(dataSort);
   };
 
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination_paymentRelation?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getPaymentRelation({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+    }
+    setPage(nextPage);
+  };
+
   useEffect(() => {
     const body = {
       page,
-      size: pageSize,
+      size: loadMoreSize,
       sort,
       searchs: search,
       inputFields: tempFilters,
@@ -374,17 +377,7 @@ const PaymentRelation = ({
     }
 
     dispatch(getPaymentRelation({ id, body }));
-  }, [page, pageSize, sort, search, tempFilters, listType]);
-
-  useEffect(() => {
-    if (
-      data_paymentRelation && 
-      data_paymentRelation.result &&
-      data_paymentRelation.result.length > 0
-    ) {
-      setTotalElement(data_paymentRelation?.page?.totalElements);
-    }
-  }, [data_paymentRelation]);
+  }, [page, loadMoreSize, sort, search, tempFilters, listType]);
 
   // Listen to approve or reject button on the parent component
   useEffect(() => {
@@ -429,92 +422,62 @@ const PaymentRelation = ({
   }, [data_prApprovalHistory]);
 
   return (
-    <Spin spinning={loading}>
-      <Fragment>
-        <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-          {"PAYMENT RELATION LIST"}
-        </div>
+    <Fragment>
+      <PaymentRelationTable
+        data={dataSourceWithKeys}
+        idAccount={id}
+        idCustomer={idCustomer}
+        totalElement={pagination_paymentRelation.totalElements}
+        page={page}
+        onSort={onSort}
+        rowSelection={isApproval ? rowSelection : undefined}
+        isApproval={isApproval}
+        handleInactivateModal={handleInactivateModal}
+        handleApprovalHistoryModal={handleApprovalHistoryModal}
+        handleIsApproval={handleIsApproval}
+        handleDownload={handleDownload}
+        tempFilters={tempFilters}
+        setShowFilterModal={setShowFilterModal}
+        setIsApproval={setIsApproval}
+        handleLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        searchText={searchText}
+        search={search}
+        searchedColumn={searchedColumn}
+        searchInput={searchInput}
+        handleSearch={handleSearch}
+        loading={loading}
+      />
 
-        <PaymentRelationTable
-          data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
-            ...paymentRelation,
-            no: index + 1 + ( page - 1) * pageSize,
-            key: `payment-relation-${paymentRelation.id}-${index}`
-          }))}
-          idAccount={id}
-          idCustomer={idCustomer}
-          handleChange={handleChange}
-          handleChangeSize={handleChangeSize}
-          totalElement={totalElement}
-          page={page}
-          pageSize={pageSize}
-          onSort={onSort}
-          getColumnSearchProps={getColumnSearchProps}
-          rowSelection={isApproval ? rowSelection : undefined}
-          isApproval={isApproval}
-          handleInactivateModal={handleInactivateModal}
-          handleApprovalHistoryModal={handleApprovalHistoryModal}
-          handleIsApproval={handleIsApproval}
-          handleDownload={handleDownload}
-          tempFilters={tempFilters}
-          setShowFilterModal={setShowFilterModal}
-          setIsApproval={setIsApproval}
-        />
+      <ModalConfirmationApprovalPaymentRelation
+        dataSource={selectedRows}
+        isOpen={showApprovalModal}
+        setIsOpen={setShowApprovalModal}
+        getColumnSearchProps={getColumnSearchProps}
+        handleCloseModal={handleCancelApprovalModal}
+        onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
+      />
 
-        {/* Advanced Filter Modal */}
-        <ModalCustom
-          isOpen={showFilterModal}
-          type={"confirmation"}
-          header={"QUERY"}
-          width={1200}
-          handleCancel={handleCancelFilter}
-        >
-          <Form form={filterForm} layout="vertical" onFinish={handleSaveFilter} id={"prFilterForm"}>
-            <NxFilter
-              form={filterForm}
-              onCancel={handleCancelFilter}
-              dispatch={dispatch}
-              getColumnApi={getPrColumnApi}
-              getConditionApi={getPrConditionApi}
-              getOperatorApi={getPrOperatorApi}
-              reduxState={financialInformationState}
-              maxFilters={5}
-              loading={loading}
-              formId="prFilterForm"
-            />
-          </Form>
-        </ModalCustom>
+      {/* Inactivate Modal */}
+      <ModalApproveOrReject
+        isOpen={showInactiveModal}
+        header={"INACTIVATE"}
+        handleCloseModal={() => handleInactivateModal(false)}
+        customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrAccountNumber}?`}
+        onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
+      />
 
-        <ModalConfirmationApprovalPaymentRelation
-          dataSource={selectedRows}
-          isOpen={showApprovalModal}
-          setIsOpen={setShowApprovalModal}
-          getColumnSearchProps={getColumnSearchProps}
-          handleCloseModal={handleCancelApprovalModal}
-          onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
-        />
-
-        {/* Inactivate Modal */}
-        <ModalApproveOrReject
-          isOpen={showInactiveModal}
-          header={"INACTIVATE"}
-          handleCloseModal={() => handleInactivateModal(false)}
-          customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrAccountNumber}?`}
-          onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
-        />
-
-        {/* Approval History Modal */}
-        <ModalHistory
-          isOpen={showApprovalHistoryModal}
-          handleClose={() => handleApprovalHistoryModal(false)}
-          header={"Approval History"}
-          width={850}
-          tabOptions={handleApprovalHistoryOptions()}
-          dataApprover={dataApprovalHistoryFix?.dataApprover}
-          dataHistory={dataApprovalHistoryFix?.dataHistory}
-        />
-      </Fragment>  
-    </Spin>
+      {/* Approval History Modal */}
+      <ModalHistory
+        isOpen={showApprovalHistoryModal}
+        handleClose={() => handleApprovalHistoryModal(false)}
+        header={"Approval History"}
+        width={850}
+        tabOptions={handleApprovalHistoryOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
+    </Fragment>
   );
 };
 

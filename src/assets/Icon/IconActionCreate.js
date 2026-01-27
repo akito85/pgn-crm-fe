@@ -6,6 +6,7 @@ const SVG = ({
   className = "",
   onClick = () => {},
   color = "#4B465C",
+  ...otherProps
 }) => (
   <svg
     width={width}
@@ -16,6 +17,7 @@ const SVG = ({
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    {...otherProps}
   >
     <circle
       cx="12"

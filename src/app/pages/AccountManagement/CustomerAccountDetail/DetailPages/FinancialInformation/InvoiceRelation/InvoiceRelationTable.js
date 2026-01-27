@@ -57,14 +57,6 @@ const InvoiceRelationTable = ({
       ...getColumnSearchProps("relatedAccountNumber"),
     },
     {
-      title: "PRIORITY",
-      dataIndex: "priority",
-      width: 150,
-      align: "center",
-      sorter: true,
-      ...getColumnSearchProps("priority"),
-    },
-    {
       title: "START DATE",
       dataIndex: "startDate",
       width: 200,

@@ -196,7 +196,7 @@ const Icon = (props) => {
     case "IconPlusCircle":
       return <IconPlusCircle {...props} />;
     case "IconReporting":
-      return <FileOutlined style={{ color: "#4B465C" }} />;
+      return <FileOutlined {...props} style={{ color: "#4B465C" }} />;
     default:
       return;
   }

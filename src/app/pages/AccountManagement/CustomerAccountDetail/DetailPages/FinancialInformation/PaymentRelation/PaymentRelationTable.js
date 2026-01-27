@@ -1,157 +1,48 @@
-import TablePagination from "../../../../../../../components/TablePagination";
 import { Badge, Button, Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import moment from "moment";
-import { dateFormatting, toTitleCase } from "../../../../../../../utils";
-import StatusComponent from "../../../../../../../components/StatusComponent";
 import { Link, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
-import { CheckOutlined, DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
-import { TablePaginationNew } from "poc-table-dragandrop";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import { useEffect, useMemo, useState } from "react";
+import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns";
+import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 
 const PaymentRelationTable = ({
   data = [],
   idAccount = 0,
   idCustomer = 0,
-  handleChange = {},
-  handleChangeSize = {},
-  totalElement = {},
-  page = {},
-  pageSize = {},
-  onSort = {},
-  getColumnSearchProps = () => {},
+  totalElement = 0,
+  page = 0,
+  onSort = () => {},
   rowSelection,
   isApproval = false,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleIsApproval = () => {},
   handleDownload = () => {},
-  tempFilters = [],
-  setShowFilterModal = () => {},
   setIsApproval = () => {},
+  handleLoadMore = () => {},
+  hasMore = false,
+  searchText="",
+  search="",
+  searchedColumn={},
+  searchInput="",
+  handleSearch=() => {},
+  loading = false 
 }) => {
   const navigate = useNavigate();
 
-  const columns = [
-    {
-      title: "NO",
-      align: "center",
-      dataIndex: "no",
-      width: 100,
-    },
-    {
-      title: "ACCOUNT NAME",
-      dataIndex: "relatedAccountName",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchProps("relatedAccountName"),
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "relatedAccountNumber",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchProps("relatedAccountNumber"),
-    },
-    {
-      title: "PRIORITY",
-      dataIndex: "priority",
-      width: 150,
-      align: "center",
-      sorter: true,
-      ...getColumnSearchProps("priority"),
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 200,
-      align: "center",
-      ...getColumnSearchProps("startDate", "date"),
-      render: (startDate) => startDate ? moment(startDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 200,
-      align: "center",
-      ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      width: 200,
-      sorter: true,
-      align: "center",
-      fixed: "right",
-      ...getColumnSearchProps("statusApproval"),
-      render: (status) => {
-        const displayText = {
-          "approved": "Approved",
-          "waitingApproval": "Waiting Approval",
-          "pending": "Pending",
-          "rejected": "Rejected",
-          "WAITING_APPROVAL": "Waiting Approval"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={status}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      width: 120,
-      sorter: true,
-      fixed: "right",
-      ...getColumnSearchProps("status"),
-      render: (status) => {
-        const displayText = {
-          "active": "Active",
-          "inactive": "Inactive",
-        };
-
-        return (
-          <div className={" flex justify-center"}>
-            <StatusComponent colour={status}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        )
-      },
-    },
-  ];
-
-  const itemActions = [
+  const itemGrantAccess = [
     {
       action: "Download",
       render: (
         <ButtonComponent
-          type={"submit"}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          type="submit"
           onClick={handleDownload}
-          icon={
-            <DownloadOutlined
-              style={{
-                color: "#fff",
-                fontSize: 20,
-              }}
-            />
-          }
-          style={{
-            backgroundColor: "#0075bf",
-            color: "#fff",
-            borderColor: "#0075bf",
-            border: "1px solid #0075bf",
-            borderRadius: "5px",
-            height: "48px"
-          }}
         >
           Download List
         </ButtonComponent>
@@ -161,24 +52,9 @@ const PaymentRelationTable = ({
       action: "Approve",
       render: (
         <ButtonComponent
-          type={"submit"}
+          icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
+          type="submit"
           onClick={() => handleIsApproval(true)}
-          icon={
-            <CheckOutlined
-              style={{
-                color: "#fff",
-                fontSize: 20,
-              }}
-            />
-          }
-          style={{
-            backgroundColor: "#0075bf",
-            color: "#fff",
-            borderColor: "#0075bf",
-            border: "1px solid #0075bf",
-            borderRadius: "5px",
-            height: "48px"
-          }}
         >
           Approval
         </ButtonComponent>
@@ -192,25 +68,11 @@ const PaymentRelationTable = ({
           idCustomer,
         }}>
           <ButtonComponent
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type={"submit"}
-            icon={
-              <PlusOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 20,
-                }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              borderRadius: "5px",
-              height: "48px"
-            }}
+            border={false}
           >
-            Create
+            Create Calculation
           </ButtonComponent>
         </Link>
       )
@@ -218,20 +80,20 @@ const PaymentRelationTable = ({
     {
       action: 'View',
       type: 'table',
-      render: (r, data_length) => {
+      render: (r, actionLength, index) => {
         return (
-          <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION} state={{
-            idPr: r.id,
-            idAccount,
-            idCustomer,
-          }}>
+          <Link
+            to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION}
+            state={{
+              idPr: r.id,
+              idAccount,
+              idCustomer,
+            }}
+            key={`table-action-${index}`}
+          >
             <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconDetail"
-                  color={"#0075bf"}
-                  width={24}
-                />
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -241,38 +103,61 @@ const PaymentRelationTable = ({
     {
       action: 'Update',
       type: 'table',
-      render: (r, data_length) => {
-        return (
-          <Button
-            type="text"
-            style={{ padding: 0, height: 'auto', border: 'none' }}
-            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION, { state: {
-              idPr: r.id,
-              idAccount,
-              idCustomer,
-            }})}
-            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE" || r.status === "ACTIVE"}
-          >
+      render: (record, actionLength, index) => {
+        const isEditable =
+          record.statusApproval === "DRAFT" ||
+          record.statusApproval === "REJECTED";
+
+        console.log("isEditable", isEditable)
+
+        const content =
+          actionLength > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconEdit" color={!isEditable ? "#8D91A0" : "#ACC424"} width={20} />}
+              border={false}
+              disabled={!isEditable}
+            >
+              <span className={"text-black ml-3"}> Update</span>
+            </ButtonComponent>
+          ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon
-                  name="IconUpdateAction"
-                  color={"#0075bf"}
-                  width={24}
+                  name="IconEdit"
+                  width={20}
+                  color={!isEditable ? "#8D91A0" : "#ACC424"}
+                  className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
               </div>
             </Tooltip>
-          </Button>
-        )
+          );
+
+        return isEditable ? (
+          <Link
+            to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION}
+            state={{
+              idPr: record.id,
+              idAccount,
+              idCustomer,
+            }}
+          >
+            {content}
+          </Link>
+        ) : (
+          <div>{content}</div>
+        );
       }
     },
     {
       action: 'Inactivate',
       type: 'table',
-      render: (r, data_length) => {
+      render: (r, actionLength, index) => {
+        
+
         return (
           <Tooltip
             title="Inactivate"
+            key={`table-action-${index}`}
           >
             <Checkbox
               className="inactive-check"
@@ -287,22 +172,82 @@ const PaymentRelationTable = ({
     {
       action: 'History',
       type: 'table',
-      render: (r, data_length) => {
-        return (
-          <Tooltip title="History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistoryModal(true, r?.id)}
-              />
-            </div>
-          </Tooltip>
-        )
+      render: (record, actionLength, index) => {
+        const Content =
+          actionLength > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+              }
+              border={false}
+              onClick={() => handleApprovalHistoryModal(true, record?.id)}
+            >
+              <span className={"text-black ml-3"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <div className="">
+                <SVGIcon
+                  name="IconLogHistory"
+                  color={"#0075bf"}
+                  width={20}
+                  onClick={() => handleApprovalHistoryModal(true, record?.id)}
+                />
+              </div>
+            </Tooltip>
+          );
+
+        return Content;
       }
     }
   ];
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    statusApproval: "right",
+    status: "right",
+    action: "right",
+  }));
+
+  const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History"], itemGrantAccess, "View", "table").map(
+    (col) => ({
+      ...col,
+      width: 70,
+      align: "center",
+    })
+  );
+
+  useEffect(() => {
+    console.log("actionCols", actionCols);
+  }, [actionCols])
+
+  const baseColumns = useMemo(() =>
+    getPaymentRelationColumns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  [search, searchText, searchedColumn]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <div className="flex flex-col gap-y-6">
@@ -316,73 +261,25 @@ const PaymentRelationTable = ({
           </ButtonComponent>
         </div>
       ) : (
-        <div className="flex justify-between items-center gap-5 mb-5">
-          <Badge count={tempFilters.length}>
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setShowFilterModal(true)}
-              icon={
-                <FilterOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                width: "128px",
-                height: "48px",
-                borderRadius: "5px"
-              }}
-            >
-              Filters
-            </ButtonComponent>
-          </Badge>
-          <Toolbar items={itemActions} type="detail" />
-        </div>
+        <Toolbar items={itemGrantAccess} type="detail" />
       )}
-      {/* <TablePagination
+      <NxTable
+        idTable="payment-relation-table"
         dataSource={data}
         totalData={totalElement}
         current={page}
-        pageSize={pageSize}
-        onChange={handleChange}
-        onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 400, x: 2000 }}
-        onSort={onSort}
-        columns={[
-          ...columns,
-          ...useColumnActionPermission(
-            ["Inactivate", "View", "Update", "History"],
-            itemActions,
-            "View",
-            "detail"
-          )
-        ]}
-        rowSelection={rowSelection}
-      /> */}
-      <TablePaginationNew
-        dataSource={data}
-        totalData={totalElement}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChangeSize}
         tableScrolled={{ y: 400, x: "max-content" }}
-        columns={[
-          ...columns,
-          ...useColumnActionPermission(
-            ["Inactivate", "View", "Update", "History"],
-            itemActions,
-            "View",
-            "detail"
-          )
-        ]}
+        onSort={onSort}
+        columns={processedColumns}
         rowSelection={rowSelection}
-        enableDragColumn={!isApproval}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        handleLoadMore={handleLoadMore}
+        loadMoreThreshold={20}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columnDefinitions}
+        loading={loading}
       />
     </div>
   );

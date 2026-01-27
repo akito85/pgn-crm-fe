@@ -4,8 +4,11 @@ const SVG = ({
     className = "",
     onClick = () => { },
     color = "#4B465C",
+    ...otherProps
 }) => (
-    <svg width={width}
+    <svg
+        {...otherProps}
+        width={width}
         style={style}
         height={width}
         className={`cursor-pointer${className}`}

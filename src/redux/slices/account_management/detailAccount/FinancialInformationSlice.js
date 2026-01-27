@@ -15,7 +15,13 @@ const initialState = {
   data_billingBucket: [],
   data_accountingRule: {},
   data_globalTypeTaxIdentifier: [],
-  data_paymentRelation: [],
+  list_paymentRelation: [],
+  pagination_paymentRelation: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data_invoiceRelation: [],
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
@@ -29,7 +35,7 @@ const initialState = {
   data_irAccountStandard: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
-  data_paymentRelationAttachment: [],
+  listlationAttachment: [],
   detail_invoiceRelation: {},
   data_invoiceRelationAttachment: [],
   data_prApprovalHistory: {},
@@ -420,13 +426,16 @@ export const getDetailTaxImplication = createAsyncThunk(
 
 export const getPaymentRelation = createAsyncThunk(
   "GET_PAYMENT_RELATION",
-  async ({ id, body }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
         });
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -1502,16 +1511,42 @@ const financialInformationSlice = createSlice({
     },
 
     /** Get Payment Relation */
-    [getPaymentRelation.pending]: (state) => {
-      state.loading = true;
+    [getPaymentRelation.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getPaymentRelation.fulfilled]: (state, action) => {
-      state.data_paymentRelation = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (isLoadMore)
+        state.list_paymentRelation = [
+          ...state.list_paymentRelation,
+          ...result,
+        ];
+      else
+        state.list_paymentRelation = result;
+
+      state.pagination_paymentRelation = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
     },
-    [getPaymentRelation.rejected]: (state) => {
-      state.data_paymentRelation = [];
+    [getPaymentRelation.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_paymentRelation = [];
+        state.pagination_paymentRelation = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
     },
 
     /** Get Detail Payment Relation */
@@ -1682,11 +1717,11 @@ const financialInformationSlice = createSlice({
       state.loading = true;
     },
     [getPaymentRelationAttachment.fulfilled]: (state, action) => {
-      state.data_paymentRelationAttachment = action.payload;
+      state.listlationAttachment = action.payload;
       state.loading = false;
     },
     [getPaymentRelationAttachment.rejected]: (state) => {
-      state.data_paymentRelationAttachment = [];
+      state.listlationAttachment = [];
       state.loading = false;
     },
 
