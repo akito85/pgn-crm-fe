@@ -15,11 +15,8 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
-// import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
-import { TablePaginationNew } from "poc-table-dragandrop";
 import CardContainer from "../../../../../../../../../../components/CardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
-import { render } from "@testing-library/react";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();

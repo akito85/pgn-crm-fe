@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import ConfirmationModalAttachmentTable from "./ConfirmationModalAttachmentTable";
 import CardContainer from "../../../../../../../../../components/CardContainer";
 
