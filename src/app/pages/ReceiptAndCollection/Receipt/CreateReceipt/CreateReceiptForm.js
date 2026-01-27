@@ -13,7 +13,11 @@ import AllocationSection from "../Table/AllocationSection";
 import {
   getAccountDDL,
   getAccountNumberDDL,
+  getAllAccountNumberDDL,
+  resetDataAccountNumber,
+  getCusNumberDDL,
   getAccountNumberByTypeDDL,
+  getUnifiedCreateReceiptDdl,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import { useDispatch } from "react-redux";
 
@@ -52,14 +56,28 @@ const CreateReceiptForm = ({
   const [filteredConvertedDDL, setFilteredConvertedDDL] = useState([]);
   const [value, setValue] = useState(null);
 
-  const handleAccountType = (value) => {
-    dispatch(getAccountNumberByTypeDDL(value));
-    form.resetFields(["accNumber", "accountName", "cusName", "cusNumber", "sor", "area", "segment"]);
-  };
 
   const handleAccNumb = (value, option) => {
     setAccNumb({ id: value, name: option?.label });
     hasValue(value) && dispatch(getAccountNumberDDL(value));
+
+    if (!hasValue(form.getFieldValue("accNumber"))) {
+      dispatch(getAllAccountNumberDDL()); 
+      dispatch(resetDataAccountNumber());
+    }
+  };
+
+  const handleCusNumb = (value, option) => {
+    setCusNumb({ id: value, name: option?.label });
+    hasValue(value) && dispatch(getAccountDDL(value));
+    
+    if (!hasValue(form.getFieldValue("cusNumber"))) {
+      form.setFieldsValue({
+        accNumber: null
+      })
+      dispatch(getAllAccountNumberDDL()); 
+      dispatch(resetDataAccountNumber());
+    }
   };
 
   // handle change amount
@@ -89,31 +107,57 @@ const CreateReceiptForm = ({
     }));
   };
 
+  const handlePaymentTypeChange = (value) => {
+    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId: value }));
+    form.resetFields(["paymentGateway", "collectingAgent"]);
+  };
+
+  const handlePaymentGatewayChange = (value) => {
+    const paymentTypeId = form.getFieldValue("paymentType");
+    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId: value }));
+    form.resetFields(["collectingAgent"]);
+  };
+
+  const handleDeliveryChannelChange = (value) => {
+    const paymentTypeId = form.getFieldValue("paymentType");
+    const partnerId = form.getFieldValue("paymentGateway");
+    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId, deliveryChannelId: value }));
+    form.resetFields(["method", "bank"]);
+  };
+
+  const handleReceiptMethodChange = (value) => {
+    const paymentTypeId = form.getFieldValue("paymentType");
+    const partnerId = form.getFieldValue("paymentGateway");
+    const deliveryChannelId = form.getFieldValue("deliveryChannel");
+    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId, deliveryChannelId, methodId: value }));
+    form.resetFields(["bank"]);
+  };
+
   return (
     <div className="w-full">
       <BaseContainer header={"CUSTOMER INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-5">
+        <div className="w-full grid grid-cols-5 gap-5">
+          {/* Row 1 */}
           <Form.Item
-            label={"Account Type"}
-            name={"accountType"}
+            label={"Miscellaneous"}
+            name={"miscellaneous"}
+            rules={formMessageRequired("Miscellaneous")}
+            initialValue={"No"}
           >
-            <SelectComponent
-              onChange={handleAccountType}
-              options={accountTypeDDL?.data?.map((item) => {
-                return {
-                  label: item?.name,
-                  value: item?.name,
-                };
-              })}
-            />
+            <SelectComponent placeholder="Select Miscellaneous">
+              <Select.Option value="Yes">Yes</Select.Option>
+              <Select.Option value="No">No</Select.Option>
+            </SelectComponent>
           </Form.Item>
+
           <Form.Item
             label={"Account Number"}
             name={"accNumber"}
+            rules={formMessageRequired("Account Number")}
           >
             <SelectComponent
-              disabled={!dataAccNumber?.data || dataAccNumber?.data?.length === 0}
               onChange={handleAccNumb}
+              placeholder="Select Account Number"
               options={
                 dataAccNumber
                   ? dataAccNumber?.data?.map((item) => {
@@ -126,53 +170,103 @@ const CreateReceiptForm = ({
               }
             />
           </Form.Item>
-          <Form.Item
-            label={"Account Name"}
-            name={"accountName"}
-          >
-            <InputComponent disabled={true} />
-          </Form.Item>
-          <Form.Item
-            label={"Customer Name"}
-            name={"cusName"}
-          >
-            <InputComponent disabled={true} />
-          </Form.Item>
+
           <Form.Item
             label={"Customer Number"}
             name={"cusNumber"}
+            rules={formMessageRequired("Customer Number")}
           >
-            <InputComponent disabled={true} />
+            {/* <InputComponent disabled placeholder="Auto-filled" /> */}
+            <SelectComponent
+              onChange={handleCusNumb}
+              placeholder="Select Customer Number"
+              options={
+                cusNumberDDL
+                  ? cusNumberDDL?.data?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })
+                  : []
+              }
+            />
           </Form.Item>
+
           <Form.Item
-            label={"SOR"}
-            name={"sor"}
+            label={"Customer Name"}
+            name={"cusName"}
+            rules={formMessageRequired("Customer Name")}
           >
-            <InputComponent disabled={true} />
+            <InputComponent disabled placeholder="Auto-filled" />
           </Form.Item>
+
           <Form.Item
-            label={"Cost Center"}
-            name={"area"}
+            label={"Account Name"}
+            name={"accountName"}
+            rules={formMessageRequired("Account Name")}
           >
-            <InputComponent disabled={true} />
+            <InputComponent disabled placeholder="Auto-filled" />
           </Form.Item>
+
+          {/* Row 2 */}
           <Form.Item
             label={"Account Segment"}
             name={"segment"}
+            rules={formMessageRequired("Account Segment")}
           >
-            <InputComponent disabled={true} />
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"Account Group Type"}
+            name={"accountGroupType"}
+            rules={formMessageRequired("Account Group Type")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"SOR"}
+            name={"sor"}
+            rules={formMessageRequired("SOR")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"Cost Center Code"}
+            name={"costCenterCode"}
+            rules={formMessageRequired("Cost Center Code")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
+          </Form.Item>
+
+          <Form.Item
+            label={"Cost Center Name"}
+            name={"costCenterName"}
+            rules={formMessageRequired("Cost Center Name")}
+          >
+            <InputComponent disabled placeholder="Auto-filled" />
           </Form.Item>
         </div>
       </BaseContainer>
 
-      <BaseContainer header={"RECEIPT DETAIL INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-3">
+      <BaseContainer header={"RECEIPT INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-3">
+          <Form.Item
+            label={"Receipt Code"}
+            name={"receiptCode"}
+            rules={formMessageRequired("Receipt Code")}
+          >
+            <InputComponent placeholder="Input Receipt Code" />
+          </Form.Item>
           <Form.Item
             label={"Receipt Channel"}
             name={"receiptChannel"}
             rules={formMessageRequired("Receipt Channel")}
           >
-            <SelectComponent>
+            <SelectComponent placeholder="Select Receipt Channel">
               {dataReceiptChannelDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -181,11 +275,24 @@ const CreateReceiptForm = ({
             </SelectComponent>
           </Form.Item>
           <Form.Item
-            label={"Payment Gateway"}
-            name={"paymentGateway"}
-            rules={formMessageRequired("Payment Gateway")}
+            label={"Payment Type"}
+            name={"paymentType"}
+            rules={formMessageRequired("Payment Type")}
           >
-            <SelectComponent>
+            <SelectComponent onChange={handlePaymentTypeChange} placeholder="Select Payment Type">
+              {payTypeDDL?.data?.map((data) => (
+                <Select.Option key={data.id} value={data.id}>
+                  {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+          <Form.Item
+            label={"Partner"}
+            name={"paymentGateway"}
+            rules={formMessageRequired("Partner")}
+          >
+            <SelectComponent onChange={handlePaymentGatewayChange} placeholder="Select Partner">
               {payGatewayDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -198,7 +305,7 @@ const CreateReceiptForm = ({
             name={"collectingAgent"}
             rules={formMessageRequired("Collecting Agent")}
           >
-            <SelectComponent>
+            <SelectComponent placeholder="Select Collecting Agent">
               {colAgentDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -206,12 +313,13 @@ const CreateReceiptForm = ({
               ))}
             </SelectComponent>
           </Form.Item>
+
           <Form.Item
             label={"Delivery Channel"}
             name={"deliveryChannel"}
             rules={formMessageRequired("Delivery Channel")}
           >
-            <SelectComponent>
+            <SelectComponent onChange={handleDeliveryChannelChange} placeholder="Select Delivery Channel">
               {payDeliveryDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -220,12 +328,33 @@ const CreateReceiptForm = ({
             </SelectComponent>
           </Form.Item>
           <Form.Item
-            label={"Method"}
+            label={"Receipt Method"}
             name={"method"}
-            rules={formMessageRequired("Method")}
           >
-            <SelectComponent>
-              {payMethodDDL?.data?.map((data) => (
+            <SelectComponent onChange={handleReceiptMethodChange} placeholder="Select Receipt Method">
+              {payMethodDDL?.data
+                ?.filter((data) => {
+                  const miscellaneous = form.getFieldValue("miscellaneous");
+                  // If Miscellaneous is "Yes", exclude "From Customer"
+                  if (miscellaneous === "Yes" && data.name === "From Customer") {
+                    return false;
+                  }
+                  return true;
+                })
+                ?.map((data) => (
+                  <Select.Option key={data.id} value={data.id}>
+                    {data.name}
+                  </Select.Option>
+                ))}
+            </SelectComponent>
+          </Form.Item>
+          <Form.Item
+            label={"Bank"}
+            name={"bank"}
+            rules={formMessageRequired("Bank")}
+          >
+            <SelectComponent placeholder="Select Bank">
+              {bankDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
                 </Select.Option>
@@ -249,48 +378,21 @@ const CreateReceiptForm = ({
               className={"w-full"}
               format={dateFormatting?.dateTime}
               showTime={true}
+              placeholder="Select Receipt Date"
             />
           </Form.Item>
-          <Form.Item
-            label={"Payment Type"}
-            name={"paymentType"}
-            rules={formMessageRequired("Payment Type")}
-          >
-            <SelectComponent>
-              {payTypeDDL?.data?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            label={"Bank"}
-            name={"bank"}
-            rules={formMessageRequired("Bank")}
-          >
-            <SelectComponent>
-              {bankDDL?.data?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Reference"} name={"refrence"}>
-            <InputComponent />
-          </Form.Item>
+          <div></div>
         </div>
       </BaseContainer>
       {/* Base Container ke 3  */}
-      <BaseContainer header={"AMOUNT DETAIL INFORMATION"}>
-        <div className="w-full grid grid-cols-2 gap-5">
+      <BaseContainer header={"AMOUNT INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-3">
           <Form.Item
             label={"Currency"}
             name={"currency"}
             rules={formMessageRequired("Currency")}
           >
-            <SelectComponent onChange={onChangeCurrency}>
+            <SelectComponent onChange={onChangeCurrency} placeholder="Select Currency">
               {currencyDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -312,21 +414,19 @@ const CreateReceiptForm = ({
               decimalSeparator=","
               precision={2}
               onChange={handleChangeAmount}
-              placeholder="0,00"
+              placeholder="Input Amount"
               controls={false}
             />
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-3 gap-5">
           <Form.Item
             label={"Rate Type"}
             name={"rateType"}
-            rules={formMessageRequired("rate Type")}
+            rules={formMessageRequired("Rate Type")}
           >
-            <SelectComponent onChange={onChangeRateType}>
+            <SelectComponent onChange={onChangeRateType} placeholder="Select Rate Type">
               {rateTypeDDL?.data?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {`${data.name} - ${data.description}`}
                 </Select.Option>
               ))}
             </SelectComponent>
@@ -343,8 +443,23 @@ const CreateReceiptForm = ({
               className={"w-full"}
               format={dateFormatting?.date}
               onChange={onChangeRateDate}
+              placeholder="Select Rate Date"
             />
           </Form.Item>
+          <Form.Item
+            label={"Converted Currency"}
+            name={"convertedCurrency"}
+            rules={formMessageRequired("Converted Currency")}
+          >
+            <SelectComponent onChange={onChangeConvertedCurrency} placeholder="Select Converted Currency">
+              {filteredConvertedDDL?.map((data) => (
+                <Select.Option key={data.id} value={data.id}>
+                  {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
           <Form.Item
             label={"Rate"}
             name={"rateAmount"}
@@ -354,27 +469,7 @@ const CreateReceiptForm = ({
               allowClear
               maxLength={5}
               disabled
-            // onChange={(e) => console.log(e, 'lalalal')}
-            // onInput={(e) =>
-            //   (e.target.value = e.target.value.replace(/\D/g, ""))
-            // }
             />
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-2 gap-5">
-          <Form.Item
-            label={"Converted Currency"}
-            name={"convertedCurrency"}
-            rules={formMessageRequired("Converted Currency")}
-          >
-            {/* <InputComponent /> */}
-            <SelectComponent onChange={onChangeConvertedCurrency}>
-              {filteredConvertedDDL?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
           </Form.Item>
           <Form.Item
             label={"Equivalent Amount"}
@@ -386,19 +481,22 @@ const CreateReceiptForm = ({
               maxLength={5}
               disabled
             />
-            {/* <InputComponent disabled={true} /> */}
           </Form.Item>
+          <div></div>
+          <div></div>
+          <div></div>
+
+          <div className="col-span-5 grid grid-cols-1 gap-3">
+            <Form.Item
+              label={"Remark"}
+              name={"description"}
+              rules={formMessageRequired("Remark")}
+            >
+              <InputComponent rows={5} type="textarea" placeholder="Input Remark" />
+            </Form.Item>
+          </div>
         </div>
-        <div className="w-full grid grid-cols-1 gap-3">
-          <Form.Item
-            label={"Description"}
-            name={"description"}
-            rules={formMessageRequired("Description")}
-          >
-            <InputComponent rows={5} type="textarea" />
-          </Form.Item>
-        </div>
-      </BaseContainer >
+      </BaseContainer>
 
       {/* base container ke empat */}
       < BaseContainer header={"Allocation Information"} >

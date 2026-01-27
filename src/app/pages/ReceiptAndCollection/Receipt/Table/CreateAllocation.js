@@ -9,18 +9,19 @@ import { Spin } from "antd";
 import TablePagination from "../../../../../components/TablePagination";
 import { columnRecommendation } from "./ColumnRecomendation";
 import { columnsAllocation } from "../DetailReceipt";
-import { getRecommendationDetailAllocation } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getRecommendationDetailAllocation, getAllocation } from "../../../../../redux/slices/receipt_collection/receipt";
 import moment from "moment";
 import { dateFormatting, hasValue } from "../../../../../utils";
+import ModalReverseAllocation from "./ModalReverseAllocation";
 
 const CreateAllocation = ({
   unApliedAmount = 0,
   isInsert = false,
-  setIsInsert = () => {},
+  setIsInsert = () => { },
   dataTable,
-  setDataTable = () => {},
+  setDataTable = () => { },
   totalUnapliedAmount,
-  setTotalUnapliedAmount = () => {},
+  setTotalUnapliedAmount = () => { },
   dataDetail,
 }) => {
   const {
@@ -46,6 +47,8 @@ const CreateAllocation = ({
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [typeColumn, setTypeColumn] = useState("");
+  const [openModalReverse, setOpenModalReverse] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
   const balance = unApliedAmount - totalUnapliedAmount;
 
   // use effect
@@ -193,6 +196,24 @@ const CreateAllocation = ({
     // setSelectedRowKeys([]);
     // setSelectDataTable([]);
   };
+  // handle reverse allocation
+  const handleOpenModalReverse = (record) => {
+    setSelectedRecord(record);
+    setOpenModalReverse(true);
+  };
+
+  const handleSuccessReverse = () => {
+    dispatch(
+      getAllocation({
+        id: dataDetail?.id,
+        page: page,
+        pageSize: pageSize,
+        sort: sort,
+        search: encodeURIComponent(JSON.stringify(search)),
+      })
+    );
+  };
+
   return (
     <div className="w-full items-end flex flex-col gap-5">
       {dataDetail?.approvalDto?.isApprover === false && (
@@ -250,9 +271,10 @@ const CreateAllocation = ({
           setUpdateSelectRowKeys={setSelectedRowKeys}
           setUpdateTotalAmount={setTotalUnapliedAmount}
           rateAmount={unApliedAmount}
+          onReverse={handleOpenModalReverse}
           type="detail"
-          // onSort={onSort}
-          // dispatcher={dispatch}
+        // onSort={onSort}
+        // dispatcher={dispatch}
         />
         <div className="w-full flex flex-col">
           {totalUnapliedAmount > unApliedAmount && (
@@ -275,9 +297,9 @@ const CreateAllocation = ({
             {balance === 0
               ? 0
               : balance?.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
           </span>
         </div>
       </div>
@@ -342,7 +364,7 @@ const CreateAllocation = ({
             onChange={handleChange}
             rowSelection={rowSelection}
             onSizeChanger={handleChange}
-            // onSort={onSort}
+          // onSort={onSort}
           />
         </Spin>
         {totalUnapliedAmount > unApliedAmount && (
@@ -352,6 +374,13 @@ const CreateAllocation = ({
           </span>
         )}
       </ModalCustom>
+      <ModalReverseAllocation
+        isOpen={openModalReverse}
+        handleCancel={() => setOpenModalReverse(false)}
+        record={selectedRecord}
+        receiptId={dataDetail?.id}
+        onSuccess={handleSuccessReverse}
+      />
     </div>
   );
 };

@@ -5,11 +5,12 @@ import { getAllCalculationDetailPaginate } from "../../../../../../redux/slices/
 import { columnsCalculationDetail } from "./columns/ColumnsCalculationDetail";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const CalculationDetail = ({ ratingCodeId }) => {
+const CalculationDetail = ({ calculationCode }) => {
   const { data_calculationDetail, loading } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_calculationDetail?.result;
+  
+  const dataSource = data_calculationDetail?.result || [];
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -24,16 +25,18 @@ const CalculationDetail = ({ ratingCodeId }) => {
   }));
 
   useEffect(() => {
-    dispatch(
-      getAllCalculationDetailPaginate({
-        id: ratingCodeId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
+    if (calculationCode) {
+      dispatch(
+        getAllCalculationDetailPaginate({
+          calculationCode,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [calculationCode, search, page, pageSize, sort, dispatch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -71,16 +74,94 @@ const CalculationDetail = ({ ratingCodeId }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        search
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, pageSize, searchedColumn, searchText, search]
   );
 
+  // Process dataSource untuk menambahkan rowSpan pada Time Unit
+  const processedDataSource = useMemo(() => {
+    if (!dataSource || dataSource.length === 0) return [];
+
+    // Deep copy untuk menghindari error "object is not extensible"
+    const processed = dataSource.map(item => ({ ...item }));
+    let currentTimeUnit = null;
+    let timeUnitStartIndex = 0;
+
+    // First pass: identify time unit groups
+    processed.forEach((item, index) => {
+      if (item.timeUnit !== currentTimeUnit) {
+        // New time unit group starts
+        if (currentTimeUnit !== null) {
+          // Set rowSpan for previous group
+          const rowSpan = index - timeUnitStartIndex;
+          processed[timeUnitStartIndex].timeUnitRowSpan = rowSpan;
+          for (let i = timeUnitStartIndex + 1; i < index; i++) {
+            processed[i].timeUnitRowSpan = 0;
+          }
+        }
+        currentTimeUnit = item.timeUnit;
+        timeUnitStartIndex = index;
+      }
+    });
+
+    // Handle last group
+    if (currentTimeUnit !== null) {
+      const rowSpan = processed.length - timeUnitStartIndex;
+      processed[timeUnitStartIndex].timeUnitRowSpan = rowSpan;
+      for (let i = timeUnitStartIndex + 1; i < processed.length; i++) {
+        processed[i].timeUnitRowSpan = 0;
+      }
+    }
+
+    return processed;
+  }, [dataSource]);
+
   const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
+    const columnsWithKeys = baseColumns.map((col) => {
+      // Tambahkan render khusus untuk Time Unit dengan rowSpan
+      if (col.key === 'timeUnit' || col.dataIndex === 'timeUnit') {
+        const originalRender = col.render;
+        
+        return {
+          ...col,
+          key: col.key || col.dataIndex || col.title,
+          render: (text, record, index) => {
+            const rowSpan = record.timeUnitRowSpan;
+            
+            if (rowSpan === 0) {
+              return {
+                children: null,
+                props: {
+                  rowSpan: 0,
+                },
+              };
+            }
+            
+            // Apply original render if exists
+            let content;
+            if (originalRender) {
+              content = originalRender(text, record, index);
+            } else {
+              content = text || "-";
+            }
+            
+            return {
+              children: content,
+              props: {
+                rowSpan: rowSpan || 1,
+              },
+            };
+          },
+        };
+      }
+      
+      return {
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      };
+    });
     return columnsWithKeys;
   }, [baseColumns]);
 
@@ -98,7 +179,7 @@ const CalculationDetail = ({ ratingCodeId }) => {
   return (
     <div className="w-full pt-4">
       <TableRBI
-        dataSource={dataSource}
+        dataSource={processedDataSource}
         columns={processedColumns}
         current={page}
         pageSize={pageSize}

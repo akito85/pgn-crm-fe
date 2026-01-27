@@ -1,11 +1,11 @@
-import React, { Fragment, useRef } from "react";
+import React, { Fragment, useRef, useState, useMemo } from "react";
 import InputComponent from "../../../../../../components/InputComponent";
-import { Form, Select } from "antd";
+import { Form, Select, Spin } from "antd";
 import { requiredMessage } from "../../../../../../utils";
 import SelectComponent from "../../../../../../components/SelectComponent";
-import { useState } from "react";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { columnsTablePOSDetailInfo } from "../../Table/TablePOSDetailInfo";
+import BaseContainer from "../../../../../../components/BaseContainer";
+import TableRBI from "../../../../../../components/TableRBI";
 
 const CreateAndUpdatePOSDetail = ({
   data = [],
@@ -17,10 +17,13 @@ const CreateAndUpdatePOSDetail = ({
   onInputChange = () => {},
   dataItem = [],
   dataType = [],
+  loading = false,
 }) => {
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+  
+  // State untuk infinite scroll
+  const [displayedRowCount, setDisplayedRowCount] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
@@ -28,25 +31,23 @@ const CreateAndUpdatePOSDetail = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
+    // Reset displayed rows saat search
+    setDisplayedRowCount(20);
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // Handle load more untuk infinite scroll
+  const handleLoadMore = async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setDisplayedRowCount(prev => prev + 20);
+        resolve();
+      }, 300);
+    });
   };
 
   // Filter Table
@@ -97,28 +98,17 @@ const CreateAndUpdatePOSDetail = ({
         case "total":
         case "totalEqvIdr":
         case "totalEqvUsd":
-          // const tempValue = obj[fieldSort]
-          //   ? (obj[fieldSort] + "").split(".")
-          //   : [];
-          // const thousandSeparator = ".";
-          // const decimalSeparator = ",";
-          // const descimal = tempValue[1]
-          //   ? `${decimalSeparator}${tempValue[1]}`
-          //   : `${decimalSeparator}00`;
-          // const format =
-          //   tempValue.length > 0
-          //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-          //       descimal
-          //     : "";
-          return obj[fieldSort] ? (obj[fieldSort] || 0)?.toString()?.toLowerCase() : "0" ;
+          return obj[fieldSort]
+            ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
+            : "0";
         default:
           return obj[fieldSort]?.toLowerCase();
       }
     };
-  
+
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "price":
@@ -131,281 +121,337 @@ const CreateAndUpdatePOSDetail = ({
         case "total":
         case "totalEqvIdr":
         case "totalEqvUsd":
-          return Math.sign(parseInt(a) - parseInt(b))
+          return Math.sign(parseInt(a) - parseInt(b));
         default:
           return a.localeCompare(b);
       }
-    }
-  
+    };
+
     return handleCompare(fa, fb);
   };
 
+  // Data yang ditampilkan (slice berdasarkan displayedRowCount)
+  const displayedData = useMemo(() => {
+    return data.slice(0, displayedRowCount);
+  }, [data, displayedRowCount]);
+
+  // Check apakah masih ada data untuk di-load
+  const hasMore = displayedRowCount < data.length;
+
+  // Columns definition
+  const columns = useMemo(() => {
+    return columnsTablePOSDetailInfo(
+      search,
+      1,
+      displayedRowCount,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      onFilter,
+      sorter,
+    ).filter((item) => item.title !== "ACTION");
+  }, [search, searchedColumn, searchText, displayedRowCount]);
+
+  // Column definitions untuk Column Settings
+  const columnDefinitions = useMemo(() => {
+    return columns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [columns]);
+
   return (
     <Fragment>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"POS INFORMATION"}
-      </div>
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50 rounded-lg">
+          <Spin size="medium" tip="Calculating..." />
+        </div>
+      )}
 
-      <div className="grid grid-cols-4 gap-3">
-        <Form.Item
-          name={"type"}
-          label={"Type"}
-          rules={[{ message: requiredMessage("Type"), required: true }]}
-        >
-          <SelectComponent onChange={(e) => setType(e)}>
-            {(dataType || [])?.map((data) => (
-              <Select.Option key={data.Id} value={data?.Id}>
-                {data?.text}
-              </Select.Option>
-            ))}
-          </SelectComponent>
-        </Form.Item>
-
-        <Form.Item
-          name={"item"}
-          label={"Item"}
-          rules={[{ message: requiredMessage("Item"), required: true }]}
-        >
-          <SelectComponent onChange={(e) => setItem(e)}>
-            {(dataItem || [])?.map((data) => (
-              <Select.Option key={data?.id} value={data?.id}>
-                {data?.name}
-              </Select.Option>
-            ))}
-          </SelectComponent>
-        </Form.Item>
-      </div>
-
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"POS DETAIL INFORMATION"}
-      </div>
-
-      <div className="grid grid-cols-4 gap-3">
-        <span className="custom-number-input">
+      <BaseContainer
+        subHeader={<p className="-mt-[10px] text-primary">POS INFORMATION</p>}
+        border
+        className="mb-3"
+      >
+        <div className="grid grid-cols-2 gap-3">
           <Form.Item
-            name={"quantity"}
-            label={"Quantity"}
+            name={"type"}
+            label={"Type"}
+            rules={[{ message: requiredMessage("Type"), required: true }]}
+          >
+            <SelectComponent onChange={(e) => setType(e)} disabled={loading}>
+              {(dataType || [])?.map((data) => (
+                <Select.Option key={data.Id} value={data?.Id}>
+                  {data?.text}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            name={"item"}
+            label={"Item"}
+            rules={[{ message: requiredMessage("Item"), required: true }]}
+          >
+            <SelectComponent onChange={(e) => setItem(e)} disabled={loading}>
+              {(dataItem || [])?.map((data) => (
+                <Select.Option key={data?.id} value={data?.id}>
+                  {data?.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+        </div>
+      </BaseContainer>
+
+      <BaseContainer
+        subHeader={
+          <p className="-mt-[10px] text-primary">POS DETAIL INFORMATION</p>
+        }
+        border
+        className="mb-3"
+      >
+        <div className="grid grid-cols-5 gap-3">
+          <span className="custom-number-input">
+            <Form.Item
+              name={"quantity"}
+              label={"Quantity"}
+              rules={[
+                {
+                  message: requiredMessage("Quantity"),
+                  required: type === 2144 ? true : false,
+                },
+              ]}
+            >
+              <InputComponent
+                onInput={(e) =>
+                  (e.target.value = e.target.value.replace(/\D/g, ""))
+                }
+                onChange={(e) => onInputChange(e, "quantity")}
+                disabled={type === 2144 ? loading : true}
+              />
+            </Form.Item>
+          </span>
+          <Form.Item
+            name={"price"}
+            label={"Price"}
             rules={[
               {
-                message: requiredMessage("Quantity"),
-                required: type === 2144 ? true : false,
+                message: requiredMessage("Price"),
+                required: type === 2145 ? true : false,
               },
             ]}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
           >
             <InputComponent
-              onInput={(e) =>
-                (e.target.value = e.target.value.replace(/\D/g, ""))
-              }
-              onChange={(e) => onInputChange(e, "quantity")}
-              disabled={type === 2144 ? false : true}
+              disabled={type === 2145 ? loading : true}
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+              onChange={(e) => onInputChange(e, "amount")}
             />
           </Form.Item>
-        </span>
-        <Form.Item
-          name={"price"}
-          label={"Price"}
-          rules={[
-            {
-              message: requiredMessage("Price"),
-              required: type === 2145 ? true : false,
-            },
-          ]}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled={type === 2145 ? false : true}
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-            onChange={(e) => onInputChange(e, "amount")}
-          />
-        </Form.Item>
-        <Form.Item
-          name={"amount"}
-          label={"Amount"}
-          // rules={[
-          //   {
-          //     message: requiredMessage("Amount"),
-          //     required: type === 2145 ? true : false,
-          //   },
-          // ]}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-            // onChange={(e) => onInputChange(e, "amount")}
-          />
-        </Form.Item>
-        <Form.Item name={"uom"} label={"UOM"}>
-          <InputComponent disabled />
-        </Form.Item>
-        <Form.Item name={"currency"} label={"Currency"}>
-          <InputComponent disabled />
-        </Form.Item>
-        <Form.Item
-          name={"amountEqvIdr"}
-          label={"Amount EQV IDR"}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-          />
-        </Form.Item>
-        <Form.Item
-          name={"amountEqvUsd"}
-          label={"Amount EQV USD"}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-          />
-        </Form.Item>
-        <Form.Item
-          name={"eqvIdrTaxPurpose"}
-          label={"Amount IDR ( Tax Purpose )"}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-          />
-        </Form.Item>
-        <Form.Item
-          name={"discount"}
-          label={"Discount"}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-          />
-        </Form.Item>
-        <Form.Item
-          name={"total"}
-          label={"Total"}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-          />
-        </Form.Item>
-        <Form.Item
-          name={"totalEqvIdr"}
-          label={"Total EQV IDR"}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-          />
-        </Form.Item>
-        <Form.Item
-          name={"totalEqvUsd"}
-          label={"Total EQV USD"}
-          getValueFromEvent={(e) => {
-            return e.floatValue;
-          }}
-        >
-          <InputComponent
-            disabled
-            decimalScale={2}
-            thousandSeparator={","}
-            decimalSeparator={"."}
-            type="numeric"
-            fixedDecimalScale={true}
-          />
-        </Form.Item>
-      </div>
+          <Form.Item
+            name={"amount"}
+            label={"Amount"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+          <Form.Item name={"uom"} label={"UOM"}>
+            <InputComponent disabled />
+          </Form.Item>
+          <Form.Item name={"currency"} label={"Currency"}>
+            <InputComponent disabled />
+          </Form.Item>
+          <Form.Item
+            name={"amountEqvIdr"}
+            label={"Amount EQV IDR"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+          <Form.Item
+            name={"amountEqvUsd"}
+            label={"Amount EQV USD"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+          <Form.Item
+            name={"eqvIdrTaxPurpose"}
+            label={"Amount IDR ( Tax Purpose )"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+          <Form.Item
+            name={"discount"}
+            label={"Discount"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+          <Form.Item
+            name={"total"}
+            label={"Total"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+          <Form.Item
+            name={"totalEqvIdr"}
+            label={"Total EQV IDR"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+          <Form.Item
+            name={"totalEqvUsd"}
+            label={"Total EQV USD"}
+            getValueFromEvent={(e) => {
+              return e.floatValue;
+            }}
+          >
+            <InputComponent
+              disabled
+              decimalScale={2}
+              thousandSeparator={","}
+              decimalSeparator={"."}
+              type="numeric"
+              fixedDecimalScale={true}
+            />
+          </Form.Item>
+        </div>
+      </BaseContainer>
 
       {type === 2144 && quantity && item && quantity > 0 ? (
-        <div>
-          <div className="text-primary text-xs font-bold uppercase">
-            {"TAX INFORMATION"}
-          </div>
-
-          <div className="w-full">
-            <TablePaginationNew
-              type="FE"
-              dataSource={data}
-              totalData={data?.length}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              tableScrolled={{
-                x: 5000,
-                y: 300,
-              }}
-              columns={columnsTablePOSDetailInfo(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                onFilter,
-                sorter
-              ).filter((item) => item.title !== "ACTION")}
-            />
-          </div>
+        <div className="relative">
+          {loading && (
+            <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
+              <Spin />
+            </div>
+          )}
+          <BaseContainer
+            subHeader={
+              <p className="-mt-[10px] text-primary">TAX INFORMATION</p>
+            }
+            border
+            className="mb-3"
+          >
+            <div className="w-full">
+              <TableRBI
+                idTable="table-pos-detail-info"
+                dataSource={displayedData}
+                totalData={data?.length}
+                tableScrolled={{
+                  x: 2500,
+                  y: 300,
+                }}
+                columns={columns}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
+                useSelect={true}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
+                showExport={false}
+                showAdvanceSearch={false}
+                showSearchBar={false}
+                showRefresh={false}
+              />
+            </div>
+          </BaseContainer>
         </div>
       ) : null}
 
-      <div className="my-3">
-        <Form.Item name={"remark"} label={"Remark"}>
-          <InputComponent type="textarea" />
-        </Form.Item>
-      </div>
+      <BaseContainer
+        subHeader={<p className="-mt-[10px] text-primary">REMARK</p>}
+        border
+        className="mb-3"
+      >
+        <div className="my-3">
+          <Form.Item
+            name={"remark"}
+            label={"Remark"}
+            rules={[{ message: requiredMessage("Remark"), required: true }]}
+          >
+            <InputComponent type="textarea" disabled={loading} />
+          </Form.Item>
+        </div>
+      </BaseContainer>
     </Fragment>
   );
 };

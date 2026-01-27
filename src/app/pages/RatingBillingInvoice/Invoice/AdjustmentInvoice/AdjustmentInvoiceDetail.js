@@ -114,7 +114,7 @@ const AdjustmentInvoiceDetail = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Rating & Billing",
+      breadcrumbName: "Invoice",
     },
     {
       path: INVOICE_ROUTES.ADJUSTMENT_INVOICE_VIEW,

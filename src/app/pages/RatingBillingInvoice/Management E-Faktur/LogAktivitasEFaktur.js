@@ -84,7 +84,7 @@ const LogAktivitasEFaktur = ({
       width: 180,
       align: "left",
       render: (text) => {
-        if (!text) return "-";
+        if (!text) return " ";
         return moment(text).format("DD-MM-YYYY HH:mm:ss");
       },
     },
@@ -94,7 +94,7 @@ const LogAktivitasEFaktur = ({
       dataIndex: "createdBy",
       width: 200,
       align: "left",
-      render: (text) => text || "-",
+      render: (text) => text || " ",
     },
     {
       key: "activity",
@@ -102,7 +102,7 @@ const LogAktivitasEFaktur = ({
       dataIndex: "activity",
       width: 300,
       align: "left",
-      render: (text) => <div className="text-sm">{text || "-"}</div>,
+      render: (text) => <div className="text-sm">{text || " "}</div>,
     },
     {
       key: "message",
@@ -111,7 +111,7 @@ const LogAktivitasEFaktur = ({
       width: 350,
       align: "left",
       render: (text) => (
-        <div className="text-sm text-gray-600">{text || "-"}</div>
+        <div className="text-sm text-gray-600">{text || " "}</div>
       ),
     },
   ];

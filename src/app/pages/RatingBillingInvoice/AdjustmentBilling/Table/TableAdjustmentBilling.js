@@ -866,6 +866,84 @@ export const columnsAdjustmentBilling = (
     //   ),
   },
   {
+    key: "classification",
+    title: "CLASSIFICATION ADJUSTMENT",
+    dataIndex: "classification",
+    sorter: true,
+    width: 230,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "classification",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "classification",
+        hasValue(search["classification"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "postInvoice",
+    title: "POST INVOICE",
+    dataIndex: "postInvoice",
+    sorter: true,
+    width: 150,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "postInvoice",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "postInvoice",
+        hasValue(search["postInvoice"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "onDemand",
+    title: "ON DEMAND",
+    dataIndex: "onDemand",
+    sorter: true,
+    width: 140,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "onDemand",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "onDemand",
+        hasValue(search["onDemand"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",

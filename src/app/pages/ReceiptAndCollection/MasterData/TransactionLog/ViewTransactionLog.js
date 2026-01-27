@@ -130,7 +130,7 @@ const ViewTransactionLog = () => {
                             totalData={totalElements}
                             current={page}
                             pageSize={pageSize}
-                            tableScrolled={{ y: 525, x: 1800 }}
+                            tableScrolled={{ y: 525, x: "max-content" }}
                             onChange={handleChangeSize}
                             onSort={onSort}
                             columns={[
