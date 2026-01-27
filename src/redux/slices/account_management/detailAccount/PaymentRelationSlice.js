@@ -27,7 +27,7 @@ const initialState = {
 
 export const getPaymentRelationAttachment = createAsyncThunk(
   "GET_PAYMENT_RELATION_ATTACHMENT",
-  async ({ id, page, size, sort, searchs, listType }, thunkAPI) => {
+  async ({ id, page, size, sort, searchs, listType, isLoadMore }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams;
 
@@ -48,7 +48,10 @@ export const getPaymentRelationAttachment = createAsyncThunk(
         url += `?${queryParams.toString()}`;
 
       const response = await accountManagementService.getAll(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }

@@ -150,9 +150,10 @@ const PaymentRelationDetailAttch = ({
     if (nextPage <= totalPages) {
       await dispatch(
         getPaymentRelationAttachment({
-          search: JSON.stringify(search),
+          id: idPr,
+          searchs: JSON.stringify(search),
           page: nextPage,
-          pageSize: loadMoreSize,
+          size: loadMoreSize,
           sort,
           isLoadMore: true,
         })
@@ -163,8 +164,15 @@ const PaymentRelationDetailAttch = ({
 
   useEffect(() => {
     if (idPr)
-      dispatch(getPaymentRelationAttachment({ id: idPr, page, size: loadMoreSize, sort, searchs: JSON.stringify(search) }));
-  }, [page, loadMoreSize, sort, search, tempFilters]);
+      dispatch(getPaymentRelationAttachment({
+        id: idPr,
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        isLoadMore: false
+      }));
+  }, [sort, search, tempFilters]);
 
   return (
     <Spin spinning={loadingDownload}>
