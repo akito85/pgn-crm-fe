@@ -55,64 +55,6 @@ const dummyHierarchy = [
   },
 ];
 
-// const getColumnSearchProps = (
-//   dataIndex,
-//   searchInput,
-//   searchedColumn,
-//   searchText,
-//   handleSearch
-// ) => ({
-//   filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-//     <div
-//       style={{
-//         padding: 8,
-//       }}
-//       onKeyDown={(e) => e.stopPropagation()}
-//     >
-//       <Input
-//         ref={searchInput}
-//         placeholder={`Search`}
-//         value={selectedKeys[0]}
-//         onChange={(e) =>
-//           setSelectedKeys(e.target.value ? [e.target.value] : [])
-//         }
-//         onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-//         style={{
-//           marginBottom: 8,
-//           display: "block",
-//         }}
-//       />
-//     </div>
-//   ),
-//   filterIcon: (filtered) => (
-//     <FilterOutlined
-//       style={{
-//         color: filtered ? "#1890ff" : undefined,
-//       }}
-//     />
-//   ),
-//   onFilter: (value, record) =>
-//     record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-//   onFilterDropdownOpenChange: (visible) => {
-//     if (visible) {
-//       setTimeout(() => searchInput.current?.select(), 100);
-//     }
-//   },
-//   render: (text) =>
-//     searchedColumn === dataIndex ? (
-//       <Highlighter
-//         highlightStyle={{
-//           backgroundColor: "#ffc069",
-//           padding: 0,
-//         }}
-//         searchWords={[searchText]}
-//         autoEscape
-//         textToHighlight={text ? text.toString() : ""}
-//       />
-//     ) : (
-//       text
-//     ),
-// });
 const columnInactivateData = (
   searchInput,
   searchedColumn,
@@ -226,7 +168,7 @@ const ConfirmationModalHierarchy = ({
   handleSearch = () => {},
 }) => {
   return (
-    <Fragment>
+    <div className="flex flex-col gap-y-4">
       <div className="flex flex-col gap-y-1">
         <span className="font-bold">Approval Hieararchy</span>
         <span>{selectedApprovalName}</span>
@@ -247,7 +189,7 @@ const ConfirmationModalHierarchy = ({
           }}
         />
       ) : null}
-    </Fragment>
+    </div>
   );
 };
 
