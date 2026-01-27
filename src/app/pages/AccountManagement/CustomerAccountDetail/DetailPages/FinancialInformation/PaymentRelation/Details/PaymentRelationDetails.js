@@ -17,8 +17,8 @@ import DetailText from "../../../../../../../../components/DetailText";
 import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
-import CardContainer from "../../../../../../../../components/CardContainer";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 
 const tabs = [
   { value: "Payment Relation Information" },
@@ -88,8 +88,8 @@ const PaymentRelationDetails = ({
   ];
 
   //handle
-  const handleDetailSection = (e) => {
-    setTypeDetailSection(e.target.value);
+  const handleDetailSection = (key) => {
+    setTypeDetailSection(key);
   };
 
   const renderDate = (date) => {
@@ -199,7 +199,7 @@ const PaymentRelationDetails = ({
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         
-        <CardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
+        <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
           <div className="flex flex-col gap-y-4">
             <BaseContainer border header={"CUSTOMER INFORMATION"}>
               <div className="w-full grid grid-cols-4 gap-x-5">
@@ -240,19 +240,28 @@ const PaymentRelationDetails = ({
               </div>
             </BaseContainer>
           </div>
-        </CardContainer>
+        </NxCardContainer>
 
-        <div className="my-5">
-          <PaymentRelationDetailTabs
-            section={typeDetailSection}
-            options={tabs}
-            handleChangeOption={handleDetailSection}
-            dataDetail={detail_paymentRelation?.result}
-            subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
-            dispatch={dispatch}
-            idPr={idPr}
-          />
-        </div>
+        <PaymentRelationDetailTabs
+          section={typeDetailSection}
+          options={tabs}
+          handleChangeOption={handleDetailSection}
+          dataDetail={detail_paymentRelation?.result}
+          subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
+          dispatch={dispatch}
+          idPr={idPr}
+        />
+
+        <NxCardContainer header={"HISTORY LOG INFORMATION"}>
+          <div className="w-full grid grid-cols-5 gap-4">
+            {/* History Log Information */}
+            <DetailText label="Record Id">{detail_paymentRelation?.result?.id}</DetailText>
+            <DetailText label="Created Date">{detail_paymentRelation?.result?.createdDate ? moment(detail_paymentRelation?.result.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+            <DetailText label="Created By">{detail_paymentRelation?.result?.createdBy}</DetailText>
+            <DetailText label="Updated Date">{detail_paymentRelation?.result?.updatedDate ? moment(detail_paymentRelation?.result.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+            <DetailText label="Updated By">{detail_paymentRelation?.result?.updatedBy}</DetailText>
+          </div>
+        </NxCardContainer>
 
         <div>
           <div className="flex justify-between">

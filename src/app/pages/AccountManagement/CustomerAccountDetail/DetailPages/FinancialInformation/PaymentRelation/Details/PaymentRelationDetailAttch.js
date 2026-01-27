@@ -6,7 +6,6 @@ import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
 import { getBase64 } from "../../../../../../../../utils/getBase64";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import { configApp } from "../../../../../../../../constants/configApp";
-import CardContainer from "../../../../../../../../components/CardContainer";
 import NxTable from "../../../../../../../../components/Nx/NxTable";
 import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
 import { getPaymentRelationAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
@@ -176,26 +175,24 @@ const PaymentRelationDetailAttch = ({
 
   return (
     <Spin spinning={loadingDownload}>
-      <CardContainer header={"ATTACHMENTS"}>
-        <NxTable
-          idTable="payment-relation-detail-attachment-table"
-          dataSource={dataSourceWithKeys}
-          totalData={pagination_prDetailAttachment.totalElements}
-          current={page}
-          tableScrolled={{ y: 400, x: "max-content" }}
-          onSort={onSort}
-          columns={processedColumns}
-          usePagination={false}
-          useInfiniteScroll={true}
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          loadMoreThreshold={20}
-          setFixedColumns={setFixedColumns}
-          columnDefinitions={columnDefinitions}
-          loading={loading}
-          showAdvanceSearch={false}
-        />
-      </CardContainer>
+      <NxTable
+        idTable="payment-relation-detail-attachment-table"
+        dataSource={dataSourceWithKeys}
+        totalData={pagination_prDetailAttachment.totalElements}
+        current={page}
+        tableScrolled={{ y: 400, x: "max-content" }}
+        onSort={onSort}
+        columns={processedColumns}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={20}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columnDefinitions}
+        loading={loading}
+        showAdvanceSearch={false}
+      />
     </Spin>
   );
 };
