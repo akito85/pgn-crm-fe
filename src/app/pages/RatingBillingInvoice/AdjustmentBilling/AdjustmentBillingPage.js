@@ -37,7 +37,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 const AdjustmentBillingPage = () => {
   // Selector
   const { data, loading, data_approval_history, message } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -74,7 +74,7 @@ const AdjustmentBillingPage = () => {
         pageSize: 100, // Initial load 100 data
         sort,
         isLoadMore: false, // Flag untuk initial load
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -128,7 +128,7 @@ const AdjustmentBillingPage = () => {
           pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true, // Flag untuk load more
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -165,7 +165,7 @@ const AdjustmentBillingPage = () => {
         page,
         pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -194,7 +194,7 @@ const AdjustmentBillingPage = () => {
             pageSize: 100,
             sort,
             isLoadMore: false,
-          })
+          }),
         );
         setPage(1);
         handleCancel();
@@ -210,7 +210,6 @@ const AdjustmentBillingPage = () => {
 
   // Handle Approval History
   const handleApprovalHistory = (id) => {
-    // console.log(id);
     dispatch(getApprovalHistory(id));
     setModalApprovalHistory(true);
   };
@@ -285,20 +284,37 @@ const AdjustmentBillingPage = () => {
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={20}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={"text-black ml-3"}> Update</span>
+              <span
+                className={
+                  isEditable ? "text-black ml-3" : "text-gray-400 ml-3"
+                }
+              >
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-0">
+              <div
+                className="pt-0"
+                style={{ pointerEvents: !isEditable ? "none" : "auto" }}
+              >
                 <SVGIcon
                   name="IconEdit"
                   width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                  className={
+                    !isEditable ? "cursor-not-allowed" : "cursor-pointer"
+                  }
                 />
               </div>
             </Tooltip>
@@ -315,7 +331,7 @@ const AdjustmentBillingPage = () => {
             {content}
           </Link>
         ) : (
-          <div>{content}</div>
+          <div style={{ opacity: 0.5, cursor: "not-allowed" }}>{content}</div>
         );
       },
     },
@@ -338,19 +354,29 @@ const AdjustmentBillingPage = () => {
               }
               border={false}
               disabled={!isDelete}
+              onClick={isDelete ? () => handleDelete(record.id) : undefined}
             >
-              <span className={"text-black ml-3"}> Delete</span>
+              <span
+                className={isDelete ? "text-black ml-3" : "text-gray-400 ml-3"}
+              >
+                Delete
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Delete">
-              <div className="pt-0">
+              <div
+                className="pt-0"
+                style={{
+                  pointerEvents: !isDelete ? "none" : "auto",
+                  opacity: !isDelete ? 0.5 : 1,
+                  cursor: !isDelete ? "not-allowed" : "pointer",
+                }}
+              >
                 <SVGIcon
                   name="IconDelete"
                   width={20}
                   color={isDelete ? "#D90000" : "#8D91A0"}
-                  className={
-                    isDelete ? undefined : "disabled cursor-not-allowed"
-                  }
+                  className={isDelete ? "cursor-pointer" : "cursor-not-allowed"}
                   onClick={isDelete ? () => handleDelete(record.id) : undefined}
                 />
               </div>
@@ -394,7 +420,7 @@ const AdjustmentBillingPage = () => {
 
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: 100,
@@ -409,7 +435,7 @@ const AdjustmentBillingPage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [searchInput, searchedColumn, searchText, search]);
 
@@ -485,7 +511,7 @@ const AdjustmentBillingPage = () => {
         handleCancel={() => setModalDelete(false)}
         handleOk={handleDeleteOk}
         width={500}
-        useOk={true}
+        // useOk={true}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />

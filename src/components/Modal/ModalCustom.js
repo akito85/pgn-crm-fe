@@ -5,8 +5,8 @@ const ModalCustom = (props) => {
   const {
     loading = false, // ← FIX: Default value
     isOpen,
-    handleCancel = () => {},
-    handleOk = () => {},
+    handleCancel = () => { },
+    handleOk = () => { },
     header,
     children,
     width,
@@ -52,7 +52,6 @@ const ModalCustom = (props) => {
             {/* header section */}
             <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
               <div className={"flex gap-x-1.5 items-center"}>
-                <div className="p-2.5 modal-header-box rounded-sm"></div>
                 <span className="text-primary uppercase font-semibold">{header}</span>
               </div>
             </div>
@@ -67,7 +66,6 @@ const ModalCustom = (props) => {
             {/* header section */}
             <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
               <div className={"flex gap-x-1.5 items-center"}>
-                <div className="p-2.5 modal-header-box rounded-sm"></div>
                 <span className="text-primary uppercase font-semibold">{header}</span>
               </div>
             </div>

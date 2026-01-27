@@ -194,6 +194,7 @@ const ViewTransactionCalender = () => {
       width: 60,
       dataIndex: "key",
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -686,7 +687,7 @@ const ViewTransactionCalender = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 1800,
+              x: "max-content",
               y: 525,
             }}
           />

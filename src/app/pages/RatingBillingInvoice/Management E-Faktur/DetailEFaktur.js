@@ -264,7 +264,7 @@ const DetailEFaktur = () => {
           "date"
         ),
         render: (text) => {
-          if (!text) return "-";
+          if (!text) return " ";
           const formatted = moment(text).format("DD-MM-YYYY HH:mm:ss");
           return renderDateColumn(
             "createdDtm",
@@ -297,7 +297,7 @@ const DetailEFaktur = () => {
             "createdBy",
             hasValue(search["createdBy"]),
             searchText,
-            text || "-",
+            text || " ",
             false,
             "input",
             search
@@ -324,7 +324,7 @@ const DetailEFaktur = () => {
             "activity",
             hasValue(search["activity"]),
             searchText,
-            text || "-",
+            text || " ",
             false,
             "input",
             search
@@ -351,7 +351,7 @@ const DetailEFaktur = () => {
             "message",
             hasValue(search["message"]),
             searchText,
-            text || "-",
+            text || " ",
             false,
             "input",
             search

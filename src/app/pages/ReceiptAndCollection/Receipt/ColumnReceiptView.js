@@ -15,6 +15,7 @@ export const columnsReceipt = (
 ) => [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -34,6 +35,98 @@ export const columnsReceipt = (
         true
       ),
       render: (text) => renderColumn('receiptCode', searchedColumn, searchText, text, false, 'input', search)
+    },
+    {
+      title: "RECEIPT NUMBER",
+      dataIndex: "receiptNumber",
+      key: "receiptNumber",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "receiptNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('receiptNumber', searchedColumn, searchText, text, false, 'input', search)
+
+    },
+    {
+      title: "RECEIPT DATE",
+      dataIndex: "receiptDate",
+      key: "receiptDate",
+      sorter: true,
+      isClassification: true,
+      width: 220,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "receiptDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "datetime"
+      ),
+      render: (text) => renderDateColumn('receiptDate', hasValue(search['receiptDate']), searchText, text, 'datetime', search)
+
+    },
+    {
+      title: "ACCOUNT",
+      dataIndex: "account",
+      key: "account",
+      isNumber: true,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "account",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('account', searchedColumn, searchText, text, false, 'input', search)
+
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      sorter: true,
+      fixed: "right",
+      width: 120,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+
+    },
+    {
+      title: "STATUS APPROVAL",
+      dataIndex: "statusApproval",
+      key: "statusApproval",
+      sorter: true,
+      fixed: "right",
+      width: 190,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusApproval",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('statusApproval', searchedColumn, searchText, text, false, 'status', search)
     },
     {
       title: "COST CENTER",
@@ -73,6 +166,7 @@ export const columnsReceipt = (
     {
       title: "SOR",
       dataIndex: "sor",
+      key: "sor",
       // align: "center",
       sorter: true,
       // width: 150,
@@ -90,6 +184,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT TYPE",
       dataIndex: "accountType",
+      key: "accountType",
       isClassification: true,
       sorter: true,
       width: 180,
@@ -107,6 +202,7 @@ export const columnsReceipt = (
     {
       title: "ACCOUNT GROUP",
       dataIndex: "accountGroup",
+      key: "accountGroup",
       isClassification: true,
       sorter: true,
       width: 180,
@@ -123,25 +219,9 @@ export const columnsReceipt = (
 
     },
     {
-      title: "ACCOUNT",
-      dataIndex: "account",
-      isNumber: true,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "account",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('account', searchedColumn, searchText, text, false, 'input', search)
-
-    },
-    {
       title: "ACCOUNT SEGMENT",
       dataIndex: "accountSegment",
+      key: "accountSegment",
       isClassification: true,
       width: 200,
       sorter: true,
@@ -155,43 +235,6 @@ export const columnsReceipt = (
         true
       ),
       render: (text) => renderColumn('accountSegment', searchedColumn, searchText, text, false, 'input', search)
-
-    },
-    {
-      title: "RECEIPT NUMBER",
-      dataIndex: "receiptNumber",
-      key: "receiptNumber",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "receiptNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('receiptNumber', searchedColumn, searchText, text, false, 'input', search)
-
-    },
-    {
-      title: "RECEIPT DATE",
-      dataIndex: "receiptDate",
-      key: "receiptDate",
-      sorter: true,
-      isClassification: true,
-      width: 220,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "receiptDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "datetime"
-      ),
-      render: (text) => renderDateColumn('receiptDate', hasValue(search['receiptDate']), searchText, text, 'datetime', search)
 
     },
     {
@@ -322,6 +365,7 @@ export const columnsReceipt = (
     {
       title: "MISCELLANEOUS",
       dataIndex: "isMisc",
+      key: "isMisc",
       sorter: true,
       width: 180,
       isClassification: true,
@@ -796,43 +840,6 @@ export const columnsReceipt = (
         showTitle: false,
       },
       render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      sorter: true,
-      fixed: "right",
-      width: 120,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      key: "statusApproval",
-      sorter: true,
-      fixed: "right",
-      width: 190,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('statusApproval', searchedColumn, searchText, text, false, 'status', search)
     },
 
     // {

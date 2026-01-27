@@ -17,6 +17,7 @@ export const columns = (
       title: "NO",
       dataIndex: "no",
       width: 60,
+      isClassification: true,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
