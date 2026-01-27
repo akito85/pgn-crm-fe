@@ -378,11 +378,12 @@ export const getGlobalTermsOfPaymentData = createAsyncThunk(
   "GET_GLOBAL_TERMS_OF_PAYMENT_DATA",
   async (accountId, thunkAPI) => {
     try {
-      if (hasValue(accountId)) {
-        const url = `/v1/dbs/api/pos/term-of-payment-data/${accountId}`;
-        const response = await ratingBillingHttpService.getAll(url);
-        return response.data;
-      }
+      const url = hasValue(accountId)
+        ? `/v1/dbs/api/pos/term-of-payment-data/${accountId}`
+        : `/v1/dbs/api/pos/term-of-payment-data`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error, action: "GET_GLOBAL_TERMS_OF_PAYMENT_DATA" }),
