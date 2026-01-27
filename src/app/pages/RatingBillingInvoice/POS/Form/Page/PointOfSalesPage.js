@@ -17,6 +17,8 @@ import CardContainer from "../../../../../../components/CardContainer";
 const PointOfSalesPage = ({
   data_dynamic = {},
   form,
+  isCostCenterFilled,
+  isAccountSegmentFilled,
   data = [],
   setData = () => {},
   data_billingCycle,
@@ -192,8 +194,12 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <SelectComponent
-                mode="multiple"
-                onChange={onCostCenterChange}
+                onChange={(value) => {
+                  if (!value) {
+                    form.resetFields(["meterReadingCode"]);
+                  }
+                  onCostCenterChange(value);
+                }}
                 disabled={
                   defaultData?.costCenter && defaultData.costCenter.length > 0
                 }
@@ -211,9 +217,12 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <SelectComponent
-                mode="multiple"
                 onChange={onMeterReadingCodeChange}
-                disabled={!mergedArrayMrc || mergedArrayMrc.length === 0}
+                disabled={
+                  !mergedArrayMrc ||
+                  mergedArrayMrc.length === 0 ||
+                  !isCostCenterFilled
+                }
                 placeholder="Select Meter Reading Code"
                 options={(mergedArrayMrc || []).map((item) => ({
                   label: item?.name,
@@ -231,7 +240,12 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <SelectComponent
-                onChange={onAccountSegmentChange}
+                onChange={(value) => {
+                  if (!value) {
+                    form.resetFields(["accountGroupType"]);
+                  }
+                  onAccountSegmentChange(value);
+                }}
                 placeholder="Select Account Segment"
                 options={(data_account_segment || []).map((item) => ({
                   label: item?.name,
@@ -249,7 +263,8 @@ const PointOfSalesPage = ({
                 placeholder="Select Account Group Type"
                 disabled={
                   !data_account_group_type ||
-                  data_account_group_type.length === 0
+                  data_account_group_type.length === 0 ||
+                  !isAccountSegmentFilled
                 }
                 options={(data_account_group_type || []).map((item) => ({
                   label: item?.glbValue || item?.name,
@@ -258,7 +273,6 @@ const PointOfSalesPage = ({
               />
             </Form.Item>
 
-            {/* TAMBAHAN FIELD BARU: Email */}
             <Form.Item
               name="email"
               label="Email"
@@ -270,8 +284,7 @@ const PointOfSalesPage = ({
             >
               <InputComponent placeholder="Enter Email" />
             </Form.Item>
-
-            {/* TAMBAHAN FIELD BARU: Address - Full Width */}
+            
             <div className="col-span-5">
               <Form.Item
                 name="address"

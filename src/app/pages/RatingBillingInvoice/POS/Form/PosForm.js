@@ -107,6 +107,8 @@ const PosForm = ({ type }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [dataListDetailApproval, setDataListDetailApproval] = useState([]);
+  const [isCostCenterFilled, setIsCostCenterFilled] = useState(false);
+  const [isAccountSegmentFilled, setIsAccountSegmentFilled] = useState(false);
   const [dataSend, setDataSend] = useState({});
   const [accountNumber, setAccountNumber] = useState("");
   const [dataAccount, setDataAccount] = useState();
@@ -128,14 +130,12 @@ const PosForm = ({ type }) => {
   const [dataMissing, setDataMissing] = useState([]);
   const [dataPriority, setDataPriority] = useState([]);
 
-  const handleAccountSegmentChange = (selectedSegmentIds) => {
+  const handleAccountSegmentChange = (selectedSegmentId) => {
     form.resetFields(["accountGroupType"]);
+    setIsAccountSegmentFilled(!!selectedSegmentId);
 
-    if (selectedSegmentIds) {
-      const segmentArray = Array.isArray(selectedSegmentIds)
-        ? selectedSegmentIds
-        : [selectedSegmentIds];
-      dispatch(getAccountGroupTypeList(segmentArray));
+    if (selectedSegmentId) {
+      dispatch(getAccountGroupTypeList([selectedSegmentId]));
     }
   };
 
@@ -236,7 +236,6 @@ const PosForm = ({ type }) => {
         costCenter: tempDefaultData.costCenter,
       });
 
-      // Auto-load meter reading code jika ada default cost center
       if (tempDefaultData.costCenter && tempDefaultData.costCenter.length > 0) {
         const body = {
           ccIds: tempDefaultData.costCenter.map((id) => ({ ccId: id })),
@@ -347,7 +346,6 @@ const PosForm = ({ type }) => {
 
   useEffect(() => {
     if (customerType === "customer" && hasValue(accountNumber)) {
-      // Customer biasa: call dengan accountId
       const getAccountId = data_globalAccountNumber?.find(
         (item) => item?.accountNumber === accountNumber,
       )?.accountId;
@@ -356,8 +354,7 @@ const PosForm = ({ type }) => {
         dispatch(getGlobalTermsOfPaymentData(getAccountId));
       }
     } else if (customerType === "prospective") {
-      // Prospective: call tanpa accountId
-      dispatch(getGlobalTermsOfPaymentData(null)); // atau undefined
+      dispatch(getGlobalTermsOfPaymentData(null));
     }
   }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
 
@@ -1174,39 +1171,29 @@ const PosForm = ({ type }) => {
 
     // Handle field berdasarkan customer type
     if (customerType === "prospective") {
-      // PROSPECTIVE CUSTOMER (Type 2)
-
-      // Format cost center dari array ID ke string names
       if (Array.isArray(e?.costCenter) && e.costCenter.length > 0) {
         const costCenterNames = e.costCenter
           .map((ccId) => {
             const cc = data_cost_center_list?.find((item) => item.id === ccId);
-            return cc ? cc.name : ""; // Ambil name saja (sudah full format)
+            return cc ? cc.name : ""; 
           })
           .filter(Boolean)
           .join(", ");
 
         body.costcenter = costCenterNames;
       }
-
-      // Field khusus prospective: registrationNumber (bukan accountNumber)
-      body.registrationNumber = e?.accountNumber; // Field "Account Number" di form jadi registrationNumber
+      body.registrationNumber = e?.accountNumber;
 
       // Field tambahan untuk prospective
       body.email = e?.email || "";
       body.address = e?.address || "";
     } else {
-      // REGULAR CUSTOMER (Type 1)
-
-      // Account Number untuk customer biasa
       body.accountNumber = e?.accountNumber;
-
-      // Format cost center dari auto-fill
       body.costcenter = e?.costCenter || "";
     }
 
     // Clean up fields yang tidak diperlukan
-    delete body.costCenter; // Array dari form
+    delete body.costCenter;
     delete body.termType;
     delete body.apphierId;
     delete body.taxBasis;
@@ -1353,13 +1340,12 @@ const PosForm = ({ type }) => {
     ]);
   };
 
-  const handleChangeCostCenter = (selectedCostCenterIds) => {
+  const handleChangeCostCenter = (selectedCostCenterId) => {
     form.resetFields(["meterReadingCode"]);
+    setIsCostCenterFilled(!!selectedCostCenterId);
 
-    if (selectedCostCenterIds && selectedCostCenterIds.length > 0) {
-      const body = {
-        ccIds: selectedCostCenterIds.map((id) => ({ ccId: id })),
-      };
+    if (selectedCostCenterId) {
+      const body = { ccIds: [{ ccId: selectedCostCenterId }] };
       dispatch(getMeterReadingCodeList(body));
     }
   };
@@ -1432,6 +1418,8 @@ const PosForm = ({ type }) => {
       form.resetFields();
       setData([]);
       setAccountNumber();
+      setIsCostCenterFilled(false);
+      setIsAccountSegmentFilled(false);
       setCurrency();
       setInvoiceDate();
       form.setFieldsValue({
@@ -1482,6 +1470,9 @@ const PosForm = ({ type }) => {
           {/* Step 1: Point of Sales */}
           <div className={currentStep !== 0 ? "hidden" : ""}>
             <PointOfSalesPage
+              form={form}
+              isCostCenterFilled={isCostCenterFilled}
+              isAccountSegmentFilled={isAccountSegmentFilled}
               data_dynamic={dataDynamic}
               data={data}
               setData={setData}
