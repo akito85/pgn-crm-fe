@@ -17,6 +17,8 @@ import CardContainer from "../../../../../../components/CardContainer";
 const PointOfSalesPage = ({
   data_dynamic = {},
   form,
+  isCostCenterFilled,
+  isAccountSegmentFilled,
   data = [],
   setData = () => {},
   data_billingCycle,
@@ -115,7 +117,7 @@ const PointOfSalesPage = ({
         >
           <div className="w-full grid grid-cols-5 gap-1">
             {/* Row 1 */}
-            <Form.Item
+            {/* <Form.Item
               name="customerNumber"
               label="Customer Number"
               rules={[
@@ -124,7 +126,7 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <InputComponent placeholder="Enter Customer Number" />
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item
               name="customerName"
@@ -139,14 +141,17 @@ const PointOfSalesPage = ({
 
             <Form.Item
               name="accountNumber"
-              label="Account Number"
+              label="Registration Number"
               rules={[
-                { message: requiredMessage("Account Number"), required: true },
+                {
+                  message: requiredMessage("Registration Number"),
+                  required: true,
+                },
               ]}
               style={{ marginBottom: 0 }}
             >
               <InputComponent
-                placeholder="Enter Account Number"
+                placeholder="Enter Registration Number"
                 onChange={(e) => setAccountNumber(e.target.value)}
               />
             </Form.Item>
@@ -189,8 +194,12 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <SelectComponent
-                mode="multiple"
-                onChange={onCostCenterChange}
+                onChange={(value) => {
+                  if (!value) {
+                    form.resetFields(["meterReadingCode"]);
+                  }
+                  onCostCenterChange(value);
+                }}
                 disabled={
                   defaultData?.costCenter && defaultData.costCenter.length > 0
                 }
@@ -208,9 +217,12 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <SelectComponent
-                mode="multiple"
                 onChange={onMeterReadingCodeChange}
-                disabled={!mergedArrayMrc || mergedArrayMrc.length === 0}
+                disabled={
+                  !mergedArrayMrc ||
+                  mergedArrayMrc.length === 0 ||
+                  !isCostCenterFilled
+                }
                 placeholder="Select Meter Reading Code"
                 options={(mergedArrayMrc || []).map((item) => ({
                   label: item?.name,
@@ -228,7 +240,12 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <SelectComponent
-                onChange={onAccountSegmentChange}
+                onChange={(value) => {
+                  if (!value) {
+                    form.resetFields(["accountGroupType"]);
+                  }
+                  onAccountSegmentChange(value);
+                }}
                 placeholder="Select Account Segment"
                 options={(data_account_segment || []).map((item) => ({
                   label: item?.name,
@@ -246,7 +263,8 @@ const PointOfSalesPage = ({
                 placeholder="Select Account Group Type"
                 disabled={
                   !data_account_group_type ||
-                  data_account_group_type.length === 0
+                  data_account_group_type.length === 0 ||
+                  !isAccountSegmentFilled
                 }
                 options={(data_account_group_type || []).map((item) => ({
                   label: item?.glbValue || item?.name,
@@ -254,6 +272,34 @@ const PointOfSalesPage = ({
                 }))}
               />
             </Form.Item>
+
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[
+                { message: requiredMessage("Email"), required: true },
+                { type: "email", message: "Please enter a valid email" },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent placeholder="Enter Email" />
+            </Form.Item>
+            
+            <div className="col-span-5">
+              <Form.Item
+                name="address"
+                label="Address"
+                rules={[
+                  { message: requiredMessage("Address"), required: true },
+                ]}
+              >
+                <InputComponent
+                  type="textarea"
+                  rows={3}
+                  placeholder="Enter Address"
+                />
+              </Form.Item>
+            </div>
           </div>
         </CardContainer>
       );
@@ -326,10 +372,7 @@ const PointOfSalesPage = ({
             <Form.Item name={"sor"} label={"SOR"}>
               <InputComponent disabled />
             </Form.Item>
-            <Form.Item name={"costCenterCode"} label={"Cost Center Code"}>
-              <InputComponent disabled />
-            </Form.Item>
-            <Form.Item name={"costCenterName"} label={"Cost Center Name"}>
+            <Form.Item name={"costCenter"} label={"Cost Center"}>
               <InputComponent disabled />
             </Form.Item>
             <Form.Item name={"meterReadingCode"} label={"Meter Reading Code"}>

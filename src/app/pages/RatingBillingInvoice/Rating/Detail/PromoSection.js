@@ -5,7 +5,7 @@ import { getAllPromoServiceAgreementPaginate } from "../../../../../redux/slices
 import { columnsPromo } from "./Table/TablePromo";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const PromoSection = ({ ratingCodeId, calculationCode }) => {
+const PromoSection = ({ ratingCode, calculationCode }) => {
   const { data_promoSA, loading } = useSelector((state) => state.rating);
 
   const dispatch = useDispatch();
@@ -28,14 +28,14 @@ const PromoSection = ({ ratingCodeId, calculationCode }) => {
     // Dispatch dengan ratingCodeId sebagai id
     dispatch(
       getAllPromoServiceAgreementPaginate({
-        id: ratingCodeId,
+        id: ratingCode,
         search: search,
         page,
         pageSize,
         sort,
       })
     );
-  }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
+  }, [dispatch, ratingCode, search, page, pageSize, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -114,7 +114,7 @@ const PromoSection = ({ ratingCodeId, calculationCode }) => {
           <div className="flex flex-col gap-1">
             <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
             <p className="text-[20px] font-medium text-[#0075bf]">
-              {ratingCodeId || "-"}
+              {ratingCode || "-"}
             </p>
           </div>
         </div>
