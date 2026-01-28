@@ -149,11 +149,19 @@ const RatingPage = () => {
     });
   };
 
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data?.page?.totalPages || 0;
+  const initialPageSize = 100;
 
-    if (nextPage <= totalPages && selectedBillingPeriod) {
+  const handleLoadMore = async () => {
+    const totalElements = data?.page?.totalElements || 0;
+    const currentDataLength = dataSource?.length || 0;
+
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    if (selectedBillingPeriod) {
       await dispatch(
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
@@ -174,9 +182,9 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: page * loadMoreSize || 100,
+          pageSize: initialPageSize,
           sort,
-           period: selectedBillingPeriod,
+          period: selectedBillingPeriod,
           isLoadMore: false,
         }),
       );

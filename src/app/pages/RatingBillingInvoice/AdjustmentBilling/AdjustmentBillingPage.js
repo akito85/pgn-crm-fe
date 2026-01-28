@@ -65,21 +65,18 @@ const AdjustmentBillingPage = () => {
     right: ["status", "statusApproval", "action"],
   }));
 
-  // Handle Refresh
   const handleRefresh = useCallback(() => {
     dispatch(
       getAdjustmentBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: 100, // Initial load 100 data
+        pageSize: 100,
         sort,
-        isLoadMore: false, // Flag untuk initial load
+        isLoadMore: false,
       }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
-
-  // Use Effect - Initial fetch dengan 100 data
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
@@ -98,7 +95,6 @@ const AdjustmentBillingPage = () => {
     }
   }, [data_approval_history]);
 
-  // Function Search Column - Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -114,27 +110,28 @@ const AdjustmentBillingPage = () => {
     });
   };
 
-  // Load more handler
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data?.page?.totalPages || 0;
+    const totalElements = data?.page?.totalElements || 0;
+    const currentDataLength = dataSource?.length || 0;
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
-      await dispatch(
-        getAdjustmentBillingPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
-          sort,
-          isLoadMore: true, // Flag untuk load more
-        }),
-      );
-      setPage(nextPage);
+    if (currentDataLength >= totalElements) {
+      return;
     }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    await dispatch(
+      getAdjustmentBillingPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+    setPage(nextPage);
   };
 
-  // Calculate if there's more data
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
@@ -429,8 +426,8 @@ const AdjustmentBillingPage = () => {
 
   const baseColumns = useMemo(() => {
     return columnsAdjustmentBilling(
-      0, // Tidak digunakan untuk infinite scroll
-      0, // Tidak digunakan untuk infinite scroll
+      0,
+      0,
       searchInput,
       searchedColumn,
       searchText,
