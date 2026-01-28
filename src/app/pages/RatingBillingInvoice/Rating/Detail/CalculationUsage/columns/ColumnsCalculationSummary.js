@@ -1,27 +1,19 @@
 import React from "react";
 import { Spin } from "antd";
 import TableRBI from "../../../../../../../components/TableRBI";
-import { separatorNumber } from "../../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../utils";
+import {
+  numberFormatting,
+  currencyFormatting,
+} from "../../../../../../../utils/formatCurrency";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
-// Helper function untuk render number dengan decimal
-const renderNumber = (value, decimal = 3) => {
-  if (value === null || value === undefined || value === "") return "-";
-  return separatorNumber(value, decimal);
-};
-
-// Helper function untuk render date
-const renderDate = (value) => {
-  if (!value) return "-";
-  const date = new Date(value);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const year = date.getFullYear();
-  return `${day} ${month} ${year}`;
-};
-
-// Kolom untuk tabel utama (summary) - Data SEDIKIT
 export const columnsCalculationSummary = (
+  search = {},
   page,
   pageSize,
   searchInput,
@@ -30,13 +22,11 @@ export const columnsCalculationSummary = (
   handleSearch,
 ) => [
   {
-    title: "NO",
-    dataIndex: "no",
     key: "no",
-    width: 38,
-    align: "center",
-    fixed: "left",
-    render: (text, record, index) => (page - 1) * pageSize + index + 1,
+    title: "NO",
+    isClassification: true,
+    width: 60,
+    render: (text, object, index) => index + 1,
   },
   {
     title: "TRANSACTION DATE",
@@ -45,7 +35,7 @@ export const columnsCalculationSummary = (
     width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
-      {},
+      search,
       "transactionDate",
       searchInput,
       searchedColumn,
@@ -54,7 +44,15 @@ export const columnsCalculationSummary = (
       true,
       "date",
     ),
-    render: (text) => renderDate(text),
+    render: (text) =>
+      renderDateColumn(
+        "transactionDate",
+        hasValue(search["transactionDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     title: "USAGE",
@@ -63,17 +61,27 @@ export const columnsCalculationSummary = (
     width: 150,
     align: "right",
     sorter: true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
-      {},
+      search,
       "usage",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       true,
-      "input",
     ),
-    render: (text) => renderNumber(text, 3),
+    render: (text) =>
+      renderColumn(
+        "usage",
+        hasValue(search["usage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "number",
+      ),
   },
   {
     title: "SA TYPE",
@@ -82,15 +90,24 @@ export const columnsCalculationSummary = (
     width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
-      {},
+      search,
       "saType",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       true,
-      "input",
     ),
+    render: (text) =>
+      renderColumn(
+        "saType",
+        hasValue(search["saType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "AMOUNT",
@@ -99,17 +116,27 @@ export const columnsCalculationSummary = (
     width: 180,
     align: "right",
     sorter: true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
-      {},
+      search,
       "amount",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       true,
-      "input",
     ),
-    render: (text) => renderNumber(text, 3),
+    render: (text) =>
+      renderColumn(
+        "amount",
+        hasValue(search["amount"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "currency-idr",
+      ),
   },
   {
     title: "TOTAL AMOUNT",
@@ -118,19 +145,18 @@ export const columnsCalculationSummary = (
     width: 180,
     align: "right",
     sorter: true,
-    render: (text) => renderNumber(text, 3),
+    isNumber: true,
+    render: (text) => currencyFormatting(text, "idr"),
   },
 ];
 
-// Kolom untuk expanded table - Data BANYAK dengan semua partisi
 export const getExpandedColumns = () => [
   {
+    key: "no",
     title: "NO",
-    dataIndex: "no",
-    key: "expanded_no",
-    width: 50,
-    align: "center",
-    render: (text, record, index) => index + 1,
+    isClassification: true,
+    width: 60,
+    render: (text, object, index) => index + 1,
   },
   {
     title: "CALCULATED USAGE PARTITION",
@@ -149,7 +175,7 @@ export const getExpandedColumns = () => [
         key: "calculatedUsageMin",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => numberFormatting(text),
       },
       {
         title: "NORMAL",
@@ -157,7 +183,7 @@ export const getExpandedColumns = () => [
         key: "calculatedUsageNormal",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => numberFormatting(text),
       },
       {
         title: "OUP",
@@ -165,7 +191,7 @@ export const getExpandedColumns = () => [
         key: "calculatedUsageUop",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => numberFormatting(text),
       },
     ],
   },
@@ -186,7 +212,7 @@ export const getExpandedColumns = () => [
         key: "convertedCalculatedMin",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 8),
+        render: (text) => numberFormatting(text),
       },
       {
         title: "NORMAL",
@@ -194,7 +220,7 @@ export const getExpandedColumns = () => [
         key: "convertedCalculatedNormal",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 8),
+        render: (text) => numberFormatting(text),
       },
       {
         title: "OUP",
@@ -202,7 +228,7 @@ export const getExpandedColumns = () => [
         key: "convertedCalculatedOup",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 8),
+        render: (text) => numberFormatting(text),
       },
     ],
   },
@@ -231,7 +257,7 @@ export const getExpandedColumns = () => [
         key: "priceMin",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => currencyFormatting(text, "idr"),
       },
       {
         title: "NORMAL",
@@ -239,7 +265,7 @@ export const getExpandedColumns = () => [
         key: "priceNormal",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => currencyFormatting(text, "idr"),
       },
       {
         title: "OUP",
@@ -247,7 +273,7 @@ export const getExpandedColumns = () => [
         key: "priceOup",
         width: 150,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => currencyFormatting(text, "idr"),
       },
     ],
   },
@@ -268,7 +294,7 @@ export const getExpandedColumns = () => [
         key: "amountPartitionMin",
         width: 200,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => currencyFormatting(text, "idr"),
       },
       {
         title: "NORMAL",
@@ -276,7 +302,7 @@ export const getExpandedColumns = () => [
         key: "amountPartitionNormal",
         width: 200,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => currencyFormatting(text, "idr"),
       },
       {
         title: "OUP",
@@ -284,18 +310,18 @@ export const getExpandedColumns = () => [
         key: "amountPartitionOup",
         width: 200,
         align: "right",
-        render: (text) => renderNumber(text, 3),
+        render: (text) => currencyFormatting(text, "idr"),
       },
     ],
   },
 ];
 
-// Render expanded row - mengambil data dari redux
+// Render expanded row
 export const renderExpandedRow = (record, expandData, loadingExpand) => {
   const rowKey = `${record.transactionDate}-${record.saType}`;
   const isLoading = loadingExpand[rowKey];
   const expandedData = expandData[rowKey]?.result || [];
-  
+
   const expandedColumns = getExpandedColumns();
 
   // Show loading state
