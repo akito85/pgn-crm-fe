@@ -1056,7 +1056,7 @@ const financialInformationSlice = createSlice({
         pageSize: page?.size || 10,
       }
     },
-    [getInvoiceRelation.rejected]: (state) => {
+    [getInvoiceRelation.rejected]: (state, action) => {
       state.loading = false;
 
       if (!action.meta.arg?.isLoadMore) {
