@@ -807,9 +807,7 @@ const calculationSlice = createSlice({
     },
   },
   extraReducers: {
-    // get pagination calculation
     [getCalculationPaginate.pending]: (state, action) => {
-      // Hanya show loading saat initial fetch
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -820,26 +818,27 @@ const calculationSlice = createSlice({
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
-        // Append new data
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.calJobId)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.calJobId)
+        );
         state.data = {
           ...action.payload,
-          result: [...(state.data?.result || []), ...newResult],
+          result: [...(state.data?.result || []), ...uniqueNewData],
         };
       } else {
-        // Replace with new data
         state.data = action.payload;
       }
     },
     [getCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Jangan clear data saat load more gagal
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }
     },
-    // get pagination calculation history
     [getHistoryCalculationPaginate.pending]: (state, action) => {
-      // Hanya show loading saat initial fetch
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -850,19 +849,22 @@ const calculationSlice = createSlice({
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
-        // Append new data
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.resultId)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.resultId)
+        );
         state.data = {
           ...action.payload,
-          result: [...(state.data?.result || []), ...newResult],
+          result: [...(state.data?.result || []), ...uniqueNewData],
         };
       } else {
-        // Replace with new data
         state.data = action.payload;
       }
     },
     [getHistoryCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Jangan clear data saat load more gagal
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }

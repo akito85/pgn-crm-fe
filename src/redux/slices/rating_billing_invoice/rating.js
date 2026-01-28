@@ -859,9 +859,7 @@ const ratingSlice = createSlice({
   name: "rating",
   initialState,
   extraReducers: {
-    // Get All Rating Gas Pagination
     [getListRatingGasPaginate.pending]: (state, action) => {
-      // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -871,21 +869,23 @@ const ratingSlice = createSlice({
       const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
-      // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
-        // Append new data to existing data
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.ratingId)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.ratingId)
+        );
         state.data = {
           ...action.payload,
-          result: [...(state.data?.result || []), ...newResult],
+          result: [...(state.data?.result || []), ...uniqueNewData],
         };
       } else {
-        // Replace with new data (initial load or after search/sort)
         state.data = action.payload;
       }
     },
     [getListRatingGasPaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Only clear data on initial fetch failure, not on load more failure
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }
