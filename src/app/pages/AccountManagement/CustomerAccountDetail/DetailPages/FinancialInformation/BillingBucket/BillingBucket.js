@@ -1,5 +1,5 @@
-import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
+import { Fragment, memo } from "react";
+import { useEffect, useRef } from "react";
 import { useState } from "react";
 import { DatePicker, Input, Spin } from "antd";
 import moment from "moment";
@@ -215,4 +215,4 @@ const BillingBucket = ({ id = 0 }) => {
   );
 };
 
-export default BillingBucket;
+export default memo(BillingBucket);

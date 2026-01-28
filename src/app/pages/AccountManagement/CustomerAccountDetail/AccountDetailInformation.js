@@ -219,13 +219,13 @@ const AccountDetailInformation = ({
           "/account-management/account-standard/financial-information/payment-relation/details"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/create"
+          "/account-management/account-standard/financial-information/payment-relation/view"
         ) ||
         path.pathname.includes(
           "/account-management/account-standard/financial-information/payment-relation/update"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/invoice-relation/details"
+          "/account-management/account-standard/financial-information/invoice-relation/view"
         ) ||
         path.pathname.includes(
           "/account-management/account-standard/financial-information/invoice-relation/create"

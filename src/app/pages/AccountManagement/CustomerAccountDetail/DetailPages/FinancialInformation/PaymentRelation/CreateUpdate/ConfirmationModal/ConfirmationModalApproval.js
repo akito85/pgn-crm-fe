@@ -1,5 +1,6 @@
-import { useState, useRef, Fragment } from "react";
+import { useState, useRef } from "react";
 import ConfirmationModalHierarchy from "./ConfirmationModalHierarchy";
+import CardContainer from "../../../../../../../../../components/CardContainer";
 
 const ConfirmationModalApproval = ({
   dataTable = [],
@@ -16,10 +17,7 @@ const ConfirmationModalApproval = ({
   };
 
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        APPROVAL
-      </div>
+    <CardContainer header={"APPROVAL"}>
       <ConfirmationModalHierarchy
         dataTable={dataTable}
         selectedAppHierId={selectedAppHierId}
@@ -29,7 +27,7 @@ const ConfirmationModalApproval = ({
         searchText={searchText}
         handleSearch={handleSearch}
       />
-    </Fragment>
+    </CardContainer>
   );
 };
 

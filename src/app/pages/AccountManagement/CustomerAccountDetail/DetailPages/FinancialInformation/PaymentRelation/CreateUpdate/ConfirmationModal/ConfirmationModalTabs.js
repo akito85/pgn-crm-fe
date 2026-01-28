@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import RadioTabs from "../../../../../../../../../components/RadioTabs";
 import ConfirmationModalInfo from "./ConfirmationModalInfo";
 import ConfirmationModalApproval from "./ConfirmationModalApproval";

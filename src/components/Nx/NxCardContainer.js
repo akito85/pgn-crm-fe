@@ -1,9 +1,9 @@
-const CardContainer = ({ header, subHeader, children, type, element, className }) => {
+const NxCardContainer = ({ header, subHeader, children, type, element, className, hideChildren = false, withoutTopPadding = false }) => {
   return (
     <div className={`drop-shadow-lg bg-white rounded-lg w-full my-2 ${className}`}>
       {type === "profile" || type === "tab" ? (
         <>
-          <div style={{ padding: "16px" }}>{element}</div>
+          <div className="p-4">{element}</div>
         </>
       ) : (
         <div
@@ -14,10 +14,10 @@ const CardContainer = ({ header, subHeader, children, type, element, className }
           <div className="text-primary text-sm">{subHeader}</div>
         </div>
       )}
-      {type === "tabs" && <div className="p-3">{element}</div>}
-      <div style={{ padding: "16px" }}>{children}</div>
+      {type === "tabs" && <div className={`p-4 ${withoutTopPadding ? "pt-0" : ""}`}>{element}</div>}
+      {!hideChildren && <div className={`p-4 ${withoutTopPadding ? "pt-0" : ""}`}>{children}</div>}
     </div>
   );
 };
 
-export default CardContainer;
+export default NxCardContainer;

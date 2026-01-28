@@ -131,6 +131,7 @@ import gapuraManagementReducer from "../slices/receipt_collection/gapuraManageme
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
 import offsetReducer from "../slices/receipt_collection/offset";
 import writeOffReducer from "../slices/receipt_collection/writeOff";
+import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -182,6 +183,7 @@ const reducer = combineReducers({
   accountGasSource: accountGasSourceReducer,
   account: accountReducer,
   financialInformation: financialInformationReducer,
+  paymentRelation: paymentRelationReducer,
   premise: premiseReducer,
   servicePoint: servicePointReducer,
   distributionMedia: distributionMediaReducer,
