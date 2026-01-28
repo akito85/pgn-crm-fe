@@ -542,42 +542,10 @@ export const getAllAdjustmentPaginate = createAsyncThunk(
 
       const dummyData = {
         result: [
-          {
-            id: 1,
-            ratingAdjustmentType: "Volume Adjustment",
-            adjustmentItem: "Gas Shrinkage",
-            crDr: "CR",
-            uom: "MMBTU",
-            usage: 125.456,
-          },
-          {
-            id: 2,
-            ratingAdjustmentType: "Price Adjustment",
-            adjustmentItem: "Seasonal Discount",
-            crDr: "DR",
-            uom: "USD",
-            usage: 500.25,
-          },
-          {
-            id: 3,
-            ratingAdjustmentType: "Volume Adjustment",
-            adjustmentItem: "Meter Correction",
-            crDr: "CR",
-            uom: "M3",
-            usage: 75.789,
-          },
-          {
-            id: 4,
-            ratingAdjustmentType: "Tax Adjustment",
-            adjustmentItem: "VAT Correction",
-            crDr: "DR",
-            uom: "USD",
-            usage: 250.5,
-          },
         ],
         page: {
-          totalElements: 4,
-          totalPages: 1,
+          totalElements: 0,
+          totalPages: 0,
           size: pageSize,
           number: page - 1,
         },
