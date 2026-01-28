@@ -1,11 +1,11 @@
 import { Form } from "antd";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import { requiredMessage } from "../../../../../../../../../utils";
-import CardContainer from "../../../../../../../../../components/CardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalRemark = () => {
   return (
-    <CardContainer header={
+    <NxBaseContainer border header={
       <div className="flex items-center gap-x-1">
         <span>
           REMARK
@@ -27,7 +27,7 @@ const ConfirmationModalRemark = () => {
           placeholder={"Type your remark"}
         />
       </Form.Item>
-    </CardContainer>
+    </NxBaseContainer>
   );
 };
 

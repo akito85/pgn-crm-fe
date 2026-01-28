@@ -1,13 +1,13 @@
 import DetailText from "../../../../../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../../../utils";
-import CardContainer from "../../../../../../../../../components/CardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalInfo = ({
   data = {},
 }) => {
   return (
-    <CardContainer header={"PAYMENT RELATION INFORMATION"}>
+    <NxBaseContainer border header={"PAYMENT RELATION INFORMATION"}>
       <div className="w-full grid grid-cols-3 gap-x-5">
         <DetailText label="Account Number">{data.accountNumber}</DetailText>
         <DetailText label="Account Name">{data.accountName}</DetailText>
@@ -18,7 +18,7 @@ const ConfirmationModalInfo = ({
       <div className="w-full">
         <DetailText label="Description">{data.description}</DetailText>
       </div>
-    </CardContainer>
+    </NxBaseContainer>
   );
 };
 
