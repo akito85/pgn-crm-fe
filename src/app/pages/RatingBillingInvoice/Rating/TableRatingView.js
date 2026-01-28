@@ -1,6 +1,7 @@
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 
+
 export const columnsRating = (
   search,
   page = 0,
@@ -592,6 +593,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -619,6 +621,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -673,6 +676,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -732,6 +736,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -759,6 +764,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -786,6 +792,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -813,6 +820,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -840,6 +848,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
     ],
@@ -862,6 +871,7 @@ export const columnsRating = (
           searchedColumn,
           searchText,
           handleSearch,
+          "currency-idr",
         ),
         render: (text) =>
           renderColumn(
@@ -899,6 +909,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -926,6 +937,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -953,6 +965,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -980,6 +993,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -1007,6 +1021,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
     ],
@@ -1039,6 +1054,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -1066,6 +1082,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
       {
@@ -1093,6 +1110,7 @@ export const columnsRating = (
             false,
             "input",
             search,
+            "currency-idr",
           ),
       },
     ],
@@ -1121,6 +1139,7 @@ export const columnsRating = (
         false,
         "input",
         search,
+        "currency-idr",
       ),
   },
   {
@@ -1147,6 +1166,7 @@ export const columnsRating = (
         false,
         "input",
         search,
+        "currency-idr",
       ),
   },
   {
@@ -1173,6 +1193,7 @@ export const columnsRating = (
         false,
         "input",
         search,
+        "currency-idr",
       ),
   },
 ];
