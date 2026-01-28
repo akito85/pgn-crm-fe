@@ -485,13 +485,18 @@ const paymentRelationSlice = createSlice({
       state.loading = false;
       const { result, page, isLoadMore } = action.payload;
 
-      if (isLoadMore)
-        state.list_prAccountStandard = [
-          ...state.list_prAccountStandard,
-          ...result,
-        ];
-      else
-        state.list_prAccountStandard = result;
+      if (Array.isArray(result)) {
+        const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId))
+
+        const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId)) 
+        if (isLoadMore)
+          state.list_prAccountStandard = [
+            ...state.list_prAccountStandard,
+            ...filteredResult,
+          ];
+        else
+          state.list_prAccountStandard = result;
+      }
 
       state.pagination_prAccountStandard = {
         totalPages: page?.totalPages || 0,
