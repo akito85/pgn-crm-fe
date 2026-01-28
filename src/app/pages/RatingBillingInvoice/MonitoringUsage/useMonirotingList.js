@@ -115,7 +115,6 @@ export const useMonitoringList = (tabs, batchId) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
 
-  // use effect - Initial fetch only
   useEffect(() => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -162,7 +161,6 @@ export const useMonitoringList = (tabs, batchId) => {
     setPage(1);
   }, [dispatch, search, sort, tabs, batchId]);
 
-  // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -178,50 +176,57 @@ export const useMonitoringList = (tabs, batchId) => {
     });
   };
 
-  // Load more handler
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
     const searchRequest = encodeURIComponent(JSON.stringify(search));
 
-    let totalPages = 0;
     if (tabs === "Usage List") {
-      totalPages = dataUsage?.page?.totalPages || 0;
-      if (nextPage <= totalPages) {
-        await dispatch(
-          getListUsagePaginate({
-            search: searchRequest,
-            page: nextPage,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: true,
-          }),
-        );
-        setPage(nextPage);
+      const totalElements = dataUsage?.page?.totalElements || 0;
+      const currentDataLength = dataUsage?.result?.length || 0;
+
+      if (currentDataLength >= totalElements) {
+        return;
       }
+
+      const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+      await dispatch(
+        getListUsagePaginate({
+          search: searchRequest,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        }),
+      );
+      setPage(nextPage);
     } else if (tabs === "Batch List") {
-      totalPages = dataBatch?.page?.totalPages || 0;
-      if (nextPage <= totalPages) {
-        await dispatch(
-          getListBatchPaginate({
-            search: searchRequest,
-            page: nextPage,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: true,
-          }),
-        );
-        setPage(nextPage);
+      const totalElements = dataBatch?.page?.totalElements || 0;
+      const currentDataLength = dataBatch?.result?.length || 0;
+
+      if (currentDataLength >= totalElements) {
+        return;
       }
+
+      const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+      await dispatch(
+        getListBatchPaginate({
+          search: searchRequest,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        }),
+      );
+      setPage(nextPage);
     }
   };
 
-  // Calculate if there's more data
   const hasMoreUsage =
     (dataUsage?.result?.length || 0) < (dataUsage?.page?.totalElements || 0);
   const hasMoreBatch =
     (dataBatch?.result?.length || 0) < (dataBatch?.page?.totalElements || 0);
 
-  // onSort
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
