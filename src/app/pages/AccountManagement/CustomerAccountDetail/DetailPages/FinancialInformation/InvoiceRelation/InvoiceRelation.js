@@ -14,8 +14,6 @@ import { dateFormatting } from "../../../../../../../utils";
 import ModalConfirmationApprovalInvoiceRelation from "./ModalConfirmationApprovalInvoiceRelation";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
-import NxFilter from "../../../../../../../components/Nx/NxFilter";
 
 const InvoiceRelation = ({
   id = 0,
@@ -56,8 +54,6 @@ const InvoiceRelation = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [filterForm] = Form.useForm();
-  const [showFilterModal, setShowFilterModal] = useState(false);
   const [tempFilters, setTempFilters] = useState([]);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -76,20 +72,6 @@ const InvoiceRelation = ({
     type: "checkbox",
     preserveSelectedRowKeys: true,
   }
-
-  const handleSaveFilter = (values) => {
-    setTempFilters(values.query);
-    setPage(1);
-    setSort("");
-    setSearch({});
-    setSearchText("")
-    setShowFilterModal(false);
-  };
-
-  const handleCancelFilter = () => {
-    setShowFilterModal(false);
-    filterForm.setFieldValue({ query: tempFilters });
-  };
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
@@ -442,33 +424,8 @@ const InvoiceRelation = ({
           handleIsApproval={handleIsApproval}
           handleDownload={handleDownload}
           tempFilters={tempFilters}
-          setShowFilterModal={setShowFilterModal}
           setIsApproval={setIsApproval}
         />
-
-        {/* Advanced Filter Modal */}
-        <ModalCustom
-          isOpen={showFilterModal}
-          type={"confirmation"}
-          header={"QUERY"}
-          width={1200}
-          handleCancel={handleCancelFilter}
-        >
-          <Form form={filterForm} layout="vertical" onFinish={handleSaveFilter} id={"prFilterForm"}>
-            <NxFilter
-              form={filterForm}
-              onCancel={handleCancelFilter}
-              dispatch={dispatch}
-              reduxState={financialInformationState}
-              getColumnApi={getIrColumnApi}
-              getConditionApi={getIrConditionApi}
-              getOperatorApi={getIrOperatorApi}
-              maxFilters={5}
-              loading={loading}
-              formId="prFilterForm"
-            />
-          </Form>
-        </ModalCustom>
 
         <ModalConfirmationApprovalInvoiceRelation
           dataSource={selectedRows}
