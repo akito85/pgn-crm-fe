@@ -27,15 +27,20 @@ const FinancialInformation = ({
 }) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
-	const [current, setCurrent] = useState(0)
-  const dispatch = useDispatch();
+  const { path } = usePrevLocContext();
+  
+	const [current, setCurrent] = useState(
+    path?.pathname.includes("/account-management/account-standard/financial-information/payment-relation") ? 6
+    : path?.pathname.includes("/account-management/account-standard/financial-information/invoice-relation") ? 7
+    : 0
+  )
+  
   const location = useLocation();
+  const dispatch = useDispatch();
   
   const { access_account } = useSelector(
     (state) => state.accountManagement
   );
-
-  const { path } = usePrevLocContext();
 
   // Use Effect
   useEffect(() => {
@@ -74,26 +79,6 @@ const FinancialInformation = ({
       dispatch(getGrantedAccessAccount(`/account-management/account-onetime/financial-information${collapse}`))
     }
   }, [current]);
-
-  useEffect(() => {
-    if (
-      path &&
-      (path.pathname.includes(
-        "/account-management/account-standard/financial-information/payment-relation"
-      ))
-    ) {
-      setCurrent(6);
-    } else if (
-      path &&
-      (path.pathname.includes(
-        "/account-management/account-standard/financial-information/invoice-relation"
-      ))
-    ) {
-      setCurrent(7);
-    } else {
-      setCurrent(0);
-    }
-  }, [path]);
 
   const financialList = [
     // {

@@ -102,7 +102,7 @@ const PaymentRelationTable = ({
           </ButtonComponent>
         </div>
       ) : (
-        <Toolbar items={itemActions} type="detail" />
+        <Toolbar items={itemActions} type="detail" menu="payment-relation" />
       )}
       <NxTable
         idTable="payment-relation-table"
