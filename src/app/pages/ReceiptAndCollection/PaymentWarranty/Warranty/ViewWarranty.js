@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Radio, Tooltip, Dropdown, Menu } from "antd";
-import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
+import { EyeOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
+import { NavLink, Link } from "react-router-dom";
 
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ReloadOutlined, DownOutlined, PauseCircleOutlined, MailOutlined } from "@ant-design/icons";
@@ -28,7 +29,7 @@ import CardContainer from "../../../../../components/CardContainer";
 import { columnWarranty } from "./ColumnConfig/WarrantyColumns";
 
 // Redux / Service
-import { 
+import {
   getAllWarrantyListPaginate,
   downloadWarrantyList
 } from "../../../../../redux/slices/receipt_collection/warranty";
@@ -36,9 +37,7 @@ import {
 // Modal
 import ModalRefund from "./Modal/ModalRefund";
 import ModalHold from "./Modal/ModalHold";
-import ModalRelease from "./Modal/ModalRefund";
-// import ModalHold from "./Modal/ModalHold";
-// import ModalRelease from "./Modal/ModalRelease";
+import ModalRelease from "./Modal/ModalRelease";
 import { render } from "@testing-library/react";
 
 const BillingPage = () => {
@@ -231,69 +230,72 @@ const BillingPage = () => {
       </Menu.Item>
     </Menu>
   );
-  
+
   const itemGrantAccess = [
     {
-      action: "Hapus",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Aksi Lainnya">
-            <Dropdown
-              menu={{ items: [
-                {
-                  key: "log",
-                  label: "Log Aktivitas",
-                  icon: (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M9 12H15M9 8H15M9 16H12M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L18.7071 8.70711C18.8946 8.89464 19 9.149 19 9.41421V19C19 20.1046 18.1046 21 17 21Z"
-                        stroke="#52c41a"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  ),
-                  onClick: () => null,
-                },
-              ]}}
-              trigger={["click"]}
-              placement="bottomRight"
-            >
-              <div className="cursor-pointer">
-                <MoreOutlined style={{ fontSize: 20, color: "#595959" }} />
-              </div>
-            </Dropdown>
-          </Tooltip>
-        )
-      }
+      action: "Create",
+      render: (
+        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION}>
+          <ButtonComponent
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            type="submit"
+          >
+            Create Deduction
+          </ButtonComponent>
+        </NavLink>
+      ),
     },
+
+    // column action
     {
-      action: "Hapus",
+      action: "View",
       type: "table",
       render: (record) => {
-        const status = record.approvalStatus?.toUpperCase(); // Menggunakan 's' dan optional chaining
-        const isDelete = status === "DRAFT" || status === "REJECTED";
         return (
-          <Tooltip title="Delete">
-            <SVGIcon
-              name="IconDelete"
-              width={24}
-              color={isDelete ? "#D90000" : "#8D91A0"}
-              className={isDelete ? undefined : "disabled cursor-not-allowed"}
-              onClick={isDelete ? () => undefined : undefined}
-            />
+          <Tooltip title={"Detail"}>
+            <Link
+              // Ensure this route exists or use a placeholder if DETAIL_DEDUCTION is not yet defined
+              to={`${RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY}`}
+              state={{ id: record?.id }}
+            >
+              <EyeOutlined style={{ color: "#1890ff", fontSize: "24px" }} />
+            </Link>
           </Tooltip>
         );
       },
     },
+    {
+      action: "Delete",
+      action: "Hapus",
+      type: "table",
+      render: (record, record_length) => {
+        return (
+          <Tooltip title={"Delete"}>
+            <div onClick={() => console.log('Delete', record)} style={{ cursor: 'pointer' }}>
+              <SVGIcon name="IconDelete" width={24} />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      // action: 'History',
+      action: 'Hapus',
+      type: 'table',
+      render: (record, record_length) => {
+        return (
+          <Tooltip title={"History"}>
+            <div onClick={() => console.log('History', record)} style={{ cursor: 'pointer' }}>
+              <SVGIcon
+                name="IconLogHistory"
+                width={24}
+                color={"#0075bf"}
+              />
+            </div>
+          </Tooltip>
+        )
+      }
+    }
   ];
 
   const actionCols = useColumnActionPermission(
@@ -361,16 +363,16 @@ const BillingPage = () => {
         {/* <CardContainer header={"Warranty List"}> */}
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Warranty List</p>
-              <div className="flex gap-2">
-                  <Dropdown overlay={moreMenu} trigger={['click']}>
-                    <ButtonComponent
-                      type="default"
-                    >
-                      More Actions <DownOutlined />
-                    </ButtonComponent>
-                  </Dropdown>
-              </div>
+            <p className="mt-[15px] font-bold">Warranty List</p>
+            <div className="flex gap-2">
+              <Dropdown overlay={moreMenu} trigger={['click']}>
+                <ButtonComponent
+                  type="default"
+                >
+                  More Actions <DownOutlined />
+                </ButtonComponent>
+              </Dropdown>
+            </div>
           </div>
         }>
           <div className="my-5">
@@ -381,8 +383,8 @@ const BillingPage = () => {
               pageSize={pageSize}
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
-              totalData={ data?.page?.totalElements || 0 }
-              tableScrolled={{ x: 5000, y: 525 }}
+              totalData={data?.page?.totalElements || 0}
+              tableScrolled={{ x: "max-content", y: 525 }}
               onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
@@ -395,7 +397,7 @@ const BillingPage = () => {
                   cursor: "pointer",
                   backgroundColor:
                     activeRowKey ===
-                    (record.billingCode || record.invoiceNumber)
+                      (record.billingCode || record.invoiceNumber)
                       ? "#bae7ff"
                       : "transparent",
                   transition: "background-color 0.2s ease",
@@ -423,21 +425,21 @@ const BillingPage = () => {
 
         <ModalRefund
           isOpen={modalRefund}
-          handleCancel={() => setModalRefund(false)}
+          handleBack={() => setModalRefund(false)}
           handleRefresh={handleRefresh}
           handleOpenModal={() => setModalRefund(true)}
         />
 
         <ModalHold
           isOpen={modalHold}
-          handleCancel={() => setModalHold(false)}
+          handleBack={() => setModalHold(false)}
           handleRefresh={handleRefresh}
           handleOpenModal={() => setModalHold(true)}
         />
 
         <ModalRelease
           isOpen={modalRelease}
-          handleCancel={() => setModalRelease(false)}
+          handleBack={() => setModalRelease(false)}
           handleRefresh={handleRefresh}
           handleOpenModal={() => setModalRelease(true)}
         />

@@ -6,13 +6,17 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
   DownloadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
+
 import {
   renderColumn,
   renderDateColumn,
@@ -176,23 +180,26 @@ const ViewTransactionCalender = () => {
       setBody(data?.idTransCalendar)
       await dispatch(getApprovalHistory(data.idTransCalendar))?.unwrap();
       setOpenModalHistory(true);
-      
+
     } catch (error) {
       setOpenModalHistory(false);
-      
+
     }
   };
 
   const columns = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       dataIndex: "key",
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "BEGIN CYCLE",
+      key: "beginCycle",
       dataIndex: "beginCycle",
       align: "right",
       sorter: true,
@@ -217,6 +224,7 @@ const ViewTransactionCalender = () => {
     },
     {
       title: "END CYCLE",
+      key: "endCycle",
       dataIndex: "endCycle",
       align: "right",
       sorter: true,
@@ -241,6 +249,7 @@ const ViewTransactionCalender = () => {
     },
     {
       title: "TIME UNIT",
+      key: "timeUnit",
       dataIndex: "timeUnit",
       sorter: true,
       ...getColumnSearchPropsPaging(
@@ -264,6 +273,7 @@ const ViewTransactionCalender = () => {
     },
     {
       title: "START DATE",
+      key: "startDate",
       sorter: true,
       align: "center",
       dataIndex: "startDate",
@@ -288,6 +298,7 @@ const ViewTransactionCalender = () => {
     },
     {
       title: "END DATE",
+      key: "endDate",
       sorter: true,
       align: "center",
       dataIndex: "endDate",
@@ -312,8 +323,8 @@ const ViewTransactionCalender = () => {
     },
     {
       title: "DESCRIPTION",
-      dataIndex: "description",
       key: "description",
+      dataIndex: "description",
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -339,8 +350,8 @@ const ViewTransactionCalender = () => {
     },
     {
       title: "STATUS",
-      dataIndex: "status",
       key: "status",
+      dataIndex: "status",
       width: 150,
       sorter: true,
       fixed: "right",
@@ -364,8 +375,8 @@ const ViewTransactionCalender = () => {
     },
     {
       title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
       key: "statusApproval",
+      dataIndex: "statusApproval",
       sorter: true,
       width: 200,
       fixed: "right",
@@ -379,7 +390,7 @@ const ViewTransactionCalender = () => {
       ),
       render: (text) =>
         renderColumn(
-          "status",
+          "statusApproval",
           searchedColumn,
           searchText,
           text,
@@ -454,19 +465,6 @@ const ViewTransactionCalender = () => {
   const itemActions = [
     // toolbar items
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "Create",
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_TRANSACTION_CALENDER}>
@@ -496,7 +494,9 @@ const ViewTransactionCalender = () => {
                   icon={<SVGIcon name="IconDetail" width={24} />}
                   border={false}
                 /> */}
-              <SVGIcon name="IconDetail" width={24} />
+              <EyeOutlined
+                style={{ fontSize: "24px" }}
+              />
             </Link>
           </Tooltip>
         );
@@ -507,7 +507,7 @@ const ViewTransactionCalender = () => {
       type: "table",
       render: (record, data_length) => {
         const isEditable =
-        record.status === "Draft" && record.statusApproval === "Rejected" 
+          record.status === "Draft" && record.statusApproval === "Rejected"
         return (
           data_length > 3 ? (
             <Link
@@ -517,11 +517,11 @@ const ViewTransactionCalender = () => {
               <ButtonComponent
                 className="gap-5 w-full"
                 icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"}  />
+                  <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
                 }
                 border={false}
                 disabled={!isEditable}
-                
+
               >
                 <span
                   className={"text-black gap-2 text-xl text-center w-full"}
@@ -538,7 +538,7 @@ const ViewTransactionCalender = () => {
               >
                 <div border={false}>
                   <SVGIcon name="IconEdit"
-                    color={!isEditable? "#8D91A0" : "#ACC424"} width={24}
+                    color={!isEditable ? "#8D91A0" : "#ACC424"} width={24}
                     className={!isEditable ? "cursor-not-allowed" : undefined} />
                 </div>
               </Link>
@@ -553,13 +553,13 @@ const ViewTransactionCalender = () => {
       render: (record, data_length) => {
         const statusLowerCase = record?.status?.toLowerCase()
         const isActivateOrInactivate =
-        (record.statusApproval === "Approved" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Draft" && record.status === "Active") ||
-        (record.statusApproval === "Rejected" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Waiting Approval" &&
-          record.status === "Active");
+          (record.statusApproval === "Approved" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Draft" && record.status === "Active") ||
+          (record.statusApproval === "Rejected" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Waiting Approval" &&
+            record.status === "Active");
         return (
           data_length > 3 ?
             <ButtonComponent
@@ -579,7 +579,7 @@ const ViewTransactionCalender = () => {
                 // onClick={() => handleInactive(record)}
                 disabled={record?.status !== "Active"}
                 checked={record?.status !== "Active"}
-                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+              // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
               />
               <span className={"text-black ml-6 gap-2 text-xl text-center w-full"}>
                 {record?.status === "Active" ? "Inactivate" : "Activate"}
@@ -598,7 +598,7 @@ const ViewTransactionCalender = () => {
                   }}
                   checked={record?.status !== "Active"}
                   disabled={record?.status !== "Active"}
-                  // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
                 />
               </div>
             </Tooltip>
@@ -659,11 +659,21 @@ const ViewTransactionCalender = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"TRANSACTION CALENDAR LIST"}>
-          <TablePagination
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">TRANSACTION CALENDAR LIST</p>
+              <div className="flex gap-2">
+                <Toolbar items={itemActions} />
+              </div>
+            </div>
+          }
+        >
+          <TableRBI
             dataSource={data?.result}
             pageSize={pageSize}
+            showExport={true}
+            handleDownload={handleDownload}
             columns={[
               ...columns,
               ...useColumnActionPermission(
@@ -677,11 +687,11 @@ const ViewTransactionCalender = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 1800,
+              x: "max-content",
               y: 525,
             }}
           />
-        </BaseContainer>
+        </CardContainer>
 
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}

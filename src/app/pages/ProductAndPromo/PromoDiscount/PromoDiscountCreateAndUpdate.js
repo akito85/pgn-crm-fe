@@ -26,7 +26,6 @@ import {
   getDetailPromo,
   getDetailPromoDraft,
   getListCriteriaPromo,
-  getListPromoCategory,
   getListPromoType,
   getPromoAttachment,
   getListPromotionType,
@@ -58,10 +57,10 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     loading,
     data_promo_type,
     data_promotion_type,
-    data_promo_category,
     data_promoDiscountDetail,
     data_promoDiscountDetailDraft,
     data_listAttachment,
+    data_from_item,
   } = useSelector((state) => state.promo);
 
   // Declaration
@@ -79,7 +78,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         "name",
         "startDate",
         "endDate",
-        "promoCategory",
         "promoType",
         "promotionType",
         "criteria",
@@ -143,7 +141,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     dispatch(getListCriteriaPromo());
     dispatch(getListPromoType());
     dispatch(getListPromotionType());
-    dispatch(getListPromoCategory());
     dispatch(getAvailableApprovalPromo());
   }, [dispatch]);
 
@@ -183,7 +180,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
       form.setFieldsValue({
         name: dataDetail?.name,
-        promoCategory: dataDetail?.category,
         promoType: dataDetail?.type,
         promotionType: dataDetail?.promotionType,
         startDate: dataDetail?.startDate
@@ -322,12 +318,15 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     if (res.includes(139)) {
       res.push(28); //15
     }
+    if (res.includes(28)) {
+      res.push(3118);
+    }
     if (res.includes(33)) {
       //20
       res.push(32); //19
     }
     let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(37) ? [37] : outputArray;
+    outputArray = outputArray.includes(37) ? [37] : outputArray.includes(25) ? [25] : outputArray;
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
@@ -336,6 +335,9 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   const handleDeselectCriteria = (value) => {
     let res = criteriaValues.filter((item) => item !== value);
+    if (!res.includes(3118)) {
+      res = res.filter((item) => item !== 28);
+    }
     if (!res.includes(28)) {
       //15
       res = res.filter((item) => item !== 139); //39
@@ -353,12 +355,12 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       res = res.filter((item) => item !== 33); //20
     }
     let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(37) ? [37] : outputArray;
+    outputArray = outputArray.includes(37) ? [37] : outputArray.includes(25) ? [25] : outputArray;
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
     });
-    if (outputArray?.length > 0 && outputArray.includes(37)) {
+    if (outputArray?.length > 0 && (outputArray.includes(37) || outputArray.includes(25))) {
       setListDataCriteria([]);
     }
   };
@@ -422,13 +424,15 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   const handleBodyConfirm = useCallback(
     (bodyData) => {
-      let dataCriteriaObject = listDataCriteria.map((item, index) =>
-        handleMappingCriteriaGeneral({
-          item: item,
-          index: index,
-          columnsTable: columnsTableCriteriaPromo(),
-          criteriaValues: criteriaValues,
-          dataListCriteria: dataListCriteria,
+      let dataCriteriaObject = listDataCriteria.map((item, index) => ({
+          ...handleMappingCriteriaGeneral({
+            item: item,
+            index: index,
+            columnsTable: columnsTableCriteriaPromo(),
+            criteriaValues: criteriaValues,
+            dataListCriteria: dataListCriteria,
+          }),
+          fromItemSource: data_from_item.find((fromItem) => fromItem.value === item.fromItem?.value)?.source,
         })
       );
 
@@ -455,8 +459,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         typeName: bodyData?.typeName,
         promotionType: bodyData.promotionType,
         promotionTypeName: bodyData?.promotionTypeName,
-        category: bodyData.promoCategory,
-        categoryName: bodyData?.categoryName,
         startDate: moment(bodyData?.startDate).format(dateFormatting.date),
         endDate: bodyData?.endDate
           ? moment(bodyData?.endDate).format(dateFormatting.date)
@@ -490,6 +492,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       id,
       listDataCondition,
       listDataCriteria,
+      data_from_item,
       type,
     ]
   );
@@ -541,9 +544,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
               promotionTypeName: data_promotion_type?.find(
                 (item) => item?.id === formValue?.promotionType
               )?.text,
-              categoryName: data_promo_category?.find(
-                (item) => item?.id === formValue?.promoCategory
-              )?.text,
               status:
                 type === "update"
                   ? data_promoDiscountDetail?.status
@@ -557,7 +557,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
                   "name",
                   "startDate",
                   "endDate",
-                  "category",
                   "promoType",
                   "promotionType",
                   "criteria",
@@ -575,9 +574,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
                 )?.text,
                 promotionTypeName: data_promotion_type?.find(
                   (item) => item?.id === formValue?.promotionType
-                )?.text,
-                categoryName: data_promo_category?.find(
-                  (item) => item?.id === formValue?.promoCategory
                 )?.text,
               }),
               services: productPromoHttpService,
@@ -604,7 +600,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       dispatch,
       data_promo_type,
       data_promotion_type,
-      data_promo_category,
       handleBodyConfirm,
       type,
     ]
@@ -613,13 +608,15 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   const handleConfirm = () => {
     setModalConfirm(false);
 
-    let dataCriteriaObject = listDataCriteria.map((item, index) =>
-      handleMappingCriteriaGeneral({
-        item: item,
-        index: index,
-        columnsTable: columnsTableCriteriaPromo(),
-        criteriaValues: criteriaValues,
-        dataListCriteria: dataListCriteria,
+    let dataCriteriaObject = listDataCriteria.map((item, index) => ({
+        ...handleMappingCriteriaGeneral({
+          item: item,
+          index: index,
+          columnsTable: columnsTableCriteriaPromo(),
+          criteriaValues: criteriaValues,
+          dataListCriteria: dataListCriteria,
+        }),
+        fromItemSource: data_from_item.find((fromItem) => fromItem.value === item.fromItem?.value)?.source,
       })
     );
 
@@ -646,8 +643,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       typeName: bodyData?.typeName,
       promotionType: bodyData.promotionType,
       promotionTypeName: bodyData?.promotionTypeName,
-      category: bodyData.promoCategory,
-      categoryName: bodyData?.categoryName,
       startDate: moment(bodyData?.startDate).format(dateFormatting.date),
       endDate: bodyData?.endDate
         ? moment(bodyData?.endDate).format(dateFormatting.date)
@@ -793,7 +788,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             <Promo
               type={type}
               criteriaOptionsFix={criteriaOptions}
-              promoCategoryOptions={data_promo_category || []}
               promoTypeOptions={data_promo_type || []}
               promotionTypeOptions={data_promotion_type || []}
               handleSelectCriteria={handleSelectCriteria}

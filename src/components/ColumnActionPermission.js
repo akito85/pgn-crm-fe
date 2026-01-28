@@ -23,20 +23,20 @@ export const RenderContentActions = (
             <Space direction="vertical">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
-                ?.map((item) => {
+                ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
-                    return item?.render(record, totalLength);
-                  }else {
+                    return item?.render(record, totalLength, index);
+                  } else {
                     return null;
                   }
                 })}
             </Space>
           }
         >
-          <div className="pt-1">
+          <div className="pt-0">
             <MoreOutlined
               style={{
-                fontSize: "24px",
+                fontSize: "20px",
                 color: "#0075bf",
                 cursor: "pointer",
               }}
@@ -46,13 +46,13 @@ export const RenderContentActions = (
         <div className="pt-1">
           {itemRender
             ?.filter((item) => item?.action === sliceColumn?.toLowerCase())
-            ?.map((item) => {
+            ?.map((item, index) => {
               if (
                 permissions?.includes(sliceColumn?.toLowerCase()) === true &&
                 item?.action === sliceColumn?.toLowerCase()
               ) {
-                return item?.render(record, totalLength);
-              }else {
+                return item?.render(record, totalLength, index);
+              } else {
                 return null;
               }
             })}
@@ -61,11 +61,11 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 mt-1 items-start">
-        {itemRender?.map((item) => {
+      <div className="w-full flex justify-center gap-4 py-1 items-center">
+        {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
-            return item?.render(record, totalLength);
-          }else {
+            return item?.render(record, totalLength, index);
+          } else {
             return null;
           }
         })}
@@ -79,9 +79,9 @@ export const useColumnActionPermission = (
   permissionList = [],
   itemsRender = [],
   sliceColumn = "View",
-  type = 'page'
+  type = "page"
 ) => {
-  const access = useGrantAccessHooks(type)
+  const access = useGrantAccessHooks(type);
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),

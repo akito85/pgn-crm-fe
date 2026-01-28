@@ -1,0 +1,102 @@
+{
+    "data": {
+        "result": [
+            {
+                "id": "1",
+                "sor": "SOR-01",
+                "costCenter": "BEK001-Bekasi",
+                "customerNumber": "CUS001",
+                "customerName": "PT Pertamina Gas Negara Tbk",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "2",
+                "sor": "SOR-01",
+                "costCenter": "JKT001-Jakarta",
+                "customerNumber": "CUS008",
+                "customerName": "PT Gagas Energi Indonesia",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "3",
+                "sor": "SOR-01",
+                "costCenter": "TNG001-Tangerang",
+                "customerNumber": "CUS012",
+                "customerName": "PT PGAS Solution",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "4",
+                "sor": "SOR-01",
+                "costCenter": "SRG001-Serang",
+                "customerNumber": "CUS101",
+                "customerName": "PT Saka Energi Indonesia",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "5",
+                "sor": "SOR-02",
+                "costCenter": "SBY001-Surabaya",
+                "customerNumber": "CUS009",
+                "customerName": "PT Transportasi Gas Indonesia",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "6",
+                "sor": "SOR-02",
+                "costCenter": "SMG001-Semarang",
+                "customerNumber": "CUS011",
+                "customerName": "PT Permata Graha Nusantara",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "7",
+                "sor": "SOR-03",
+                "costCenter": "SMR001-Samarinda",
+                "customerNumber": "CUS190",
+                "customerName": "PT Pgn Lng Indonesia",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "8",
+                "sor": "SOR-03",
+                "costCenter": "BLP001-Balikpapan",
+                "customerNumber": "CUS202",
+                "customerName": "PGN Euro Finance 2003 Limited",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "9",
+                "sor": "SOR-03",
+                "costCenter": "MKS001-Makassar",
+                "customerNumber": "CUS014",
+                "customerName": "PT Pgas Telekomunikasi Nusantara",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            },
+            {
+                "id": "10",
+                "sor": "SOR-03",
+                "costCenter": "PON001-Pontianak",
+                "customerNumber": "CUS104",
+                "customerName": "PT Perta Daya Gas",
+                "customerSegment": "KI",
+                "customerGroup": "BUMN"
+            }
+        ],
+        "page": {
+            "totalElements": 50,
+            "totalPages": 5,
+            "size": 10,
+            "number": 0
+        }
+    }
+}

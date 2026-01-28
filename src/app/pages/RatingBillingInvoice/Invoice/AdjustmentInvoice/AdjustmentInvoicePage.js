@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
@@ -14,22 +20,25 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 import TableRBI from "../../../../../components/TableRBI";
 import { columnsAdjustmentInvoice } from "./Table/TableAdjustmentInvoice";
-import {
-  ModalConfirm,
-  ModalError,
-} from "../../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import {
+  getInvoiceAdjustmentPaginate,
+  getApprovalHistoryInvoiceAdjustment,
+  downloadInvoiceAdjustment,
+  deleteInvoiceAdjustment,
+} from "../../../../../redux/slices/rating_billing_invoice/adjustmentInvoice";
 
 const AdjustmentInvoicePage = () => {
-  // Selector - Placeholder for Redux state
-  const loading = false;
-  const data = { result: [], page: { totalElements: 0 } };
+  // Selector
+  const { data, pagination, loading } = useSelector(
+    (state) => state.adjustmentInvoice,
+  );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
 
   // State
   const [page, setPage] = useState(1);
@@ -40,8 +49,6 @@ const AdjustmentInvoicePage = () => {
   const [search, setSearch] = useState({});
   const [modalDelete, setModalDelete] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
-  const [modalError, setModalError] = useState(false);
-  const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [idDelete, setIdDelete] = useState();
 
@@ -50,17 +57,30 @@ const AdjustmentInvoicePage = () => {
     right: ["statusApproval", "action"],
   }));
 
-  // Use Effect - Initial fetch dengan 100 data
-  useEffect(() => {
-    // TODO: dispatch(getAdjustmentInvoicePaginate({
-    //   search: encodeURIComponent(JSON.stringify(search)),
-    //   page: 1,
-    //   pageSize: 100, // Initial load 100 data
-    //   sort,
-    //   isLoadMore: false,
-    // }))
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    const searchArray = Object.keys(search)
+      .filter((key) => search[key])
+      .map((key) => `${key}~${search[key]}`);
+
+    const sortArray = sort ? [sort] : [];
+
+    dispatch(
+      getInvoiceAdjustmentPaginate({
+        page: 1,
+        size: 100, // Initial load 100 data
+        sort: sortArray,
+        search: searchArray,
+        isLoadMore: false,
+      }),
+    );
     setPage(1);
   }, [dispatch, search, sort]);
+
+  // Use Effect - Initial fetch dengan 100 data
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   // Function Search Column - Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -81,23 +101,36 @@ const AdjustmentInvoicePage = () => {
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = data?.page?.totalPages || 0;
+    const totalPages = pagination?.totalPages || 0;
 
     // Check if there's more data to load
     if (nextPage <= totalPages) {
-      // TODO: await dispatch(getAdjustmentInvoicePaginate({
-      //   search: encodeURIComponent(JSON.stringify(search)),
-      //   page: nextPage,
-      //   pageSize: loadMoreSize, // Load 20 more
-      //   sort,
-      //   isLoadMore: true,
-      // }))
+      const searchArray = Object.keys(search)
+        .filter((key) => search[key])
+        .map((key) => `${key}~${search[key]}`);
+
+      const sortArray = sort ? [sort] : [];
+
+      await dispatch(
+        getInvoiceAdjustmentPaginate({
+          page: nextPage,
+          size: loadMoreSize, // Load 20 more
+          sort: sortArray,
+          search: searchArray,
+          isLoadMore: true,
+        }),
+      );
       setPage(nextPage);
     }
   };
 
+  // Get current data from Redux state with default empty array
+  const currentData = useMemo(() => {
+    return data || [];
+  }, [data]);
+
   // Calculate if there's more data
-  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
+  const hasMore = currentData.length < (pagination?.totalElements || 0);
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -111,7 +144,7 @@ const AdjustmentInvoicePage = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Rating & Billing",
+      breadcrumbName: "Invoice",
     },
     {
       path: INVOICE_ROUTES.ADJUSTMENT_INVOICE_VIEW,
@@ -121,7 +154,20 @@ const AdjustmentInvoicePage = () => {
 
   // Handle Download
   const handleDownload = () => {
-    // TODO: dispatch(downloadAdjustmentInvoice(...))
+    const searchArray = Object.keys(search)
+      .filter((key) => search[key])
+      .map((key) => `${key}~${search[key]}`);
+
+    const sortArray = sort ? [sort] : [];
+
+    dispatch(
+      downloadInvoiceAdjustment({
+        page: 1,
+        size: pagination?.totalElements || 1000,
+        sort: sortArray,
+        search: searchArray,
+      }),
+    );
   };
 
   // Handle Delete
@@ -137,17 +183,34 @@ const AdjustmentInvoicePage = () => {
   };
 
   // Handle Delete OK
-  const handleDeleteOk = (res, handleClear) => {
-    setModalDelete(false);
-    // TODO: dispatch(deleteAdjustmentInvoice(idDelete))
-    handleCancel();
-    handleClear();
+  const handleDeleteOk = async () => {
+    try {
+      await dispatch(deleteInvoiceAdjustment(idDelete)).unwrap();
+      setModalDelete(false);
+      handleCancel();
+      // Refresh the list after successful deletion
+      handleRefresh();
+    } catch (error) {
+      // Error is already handled by Redux slice (showModalError)
+      setModalDelete(false);
+    }
   };
 
   // Handle Approval History
-  const handleApprovalHistory = (id) => {
-    // TODO: dispatch(getApprovalHistory(id))
-    setModalApprovalHistory(true);
+  const handleApprovalHistory = async (id) => {
+    const result = await dispatch(getApprovalHistoryInvoiceAdjustment(id));
+    if (result.payload) {
+      // Extract nested data structure
+      const dataHistory = result.payload.dataHistory?.apr_inv_adjustment || [];
+      const dataApprover =
+        result.payload.dataApprover?.apr_inv_adjustment || [];
+
+      setDataApprovalHistory({
+        dataHistory,
+        dataApprover,
+      });
+      setModalApprovalHistory(true);
+    }
   };
 
   const itemGrantAccess = [
@@ -201,7 +264,7 @@ const AdjustmentInvoicePage = () => {
               state={{ id: record.id }}
             >
               <Tooltip title="Detail">
-                <div className="pt-1">
+                <div className="">
                   <SVGIcon name="IconDetail" width={20} />
                 </div>
               </Tooltip>
@@ -221,39 +284,57 @@ const AdjustmentInvoicePage = () => {
 
         const content =
           data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isEditable}
-            >
-              <span className={"text-black ml-3"}> Update</span>
-            </ButtonComponent>
+            isEditable ? (
+              <Link
+                to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+                state={{
+                  id: record.invAdjustmentId,
+                  invoiceNumber: record.invoiceNumber,
+                }}
+              >
+                <ButtonComponent
+                  icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
+                  border={false}
+                >
+                  <span className="text-black ml-3"> Update</span>
+                </ButtonComponent>
+              </Link>
+            ) : (
+              <div className="flex items-center cursor-not-allowed px-2 py-1">
+                <span className="pointer-events-none">
+                  <SVGIcon name="IconEdit" color="#8D91A0" width={24} />
+                </span>
+                <span className="text-gray-400 ml-3 pointer-events-none">
+                  {" "}
+                  Update
+                </span>
+              </div>
+            )
+          ) : isEditable ? (
+            <Tooltip title="Update">
+              <Link
+                to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_UPDATE}
+                state={{
+                  id: record.invAdjustmentId,
+                  invoiceNumber: record.invoiceNumber,
+                }}
+              >
+                <SVGIcon name="IconEdit" width={24} color="#ACC424" />
+              </Link>
+            </Tooltip>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
+              <Link>
+                <div className="cursor-not-allowed">
+                  <span className="pointer-events-none">
+                    <SVGIcon name="IconEdit" width={24} color="#8D91A0" />
+                  </span>
+                </div>
+              </Link>
             </Tooltip>
           );
 
-        return isEditable ? (
-          <Link
-            to={INVOICE_ROUTES.ADJUSTMENT_INVOICE_CREATE}
-            state={{
-              id: record.id,
-              invoiceNumber: record.invoiceNumber,
-            }}
-          >
-            {content}
-          </Link>
-        ) : (
-          <div>{content}</div>
-        );
+        return content;
       },
     },
     {
@@ -266,7 +347,7 @@ const AdjustmentInvoicePage = () => {
 
         return (
           <Tooltip title="Delete">
-            <div className="pt-1">
+            <div className="">
               <SVGIcon
                 name="IconDelete"
                 width={20}
@@ -296,7 +377,7 @@ const AdjustmentInvoicePage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
@@ -315,7 +396,7 @@ const AdjustmentInvoicePage = () => {
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
     itemGrantAccess,
-    "Delete"
+    "Delete",
   ).map((col) => ({
     ...col,
     width: 70,
@@ -330,7 +411,7 @@ const AdjustmentInvoicePage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [searchInput, searchedColumn, searchText, search]);
 
@@ -353,103 +434,87 @@ const AdjustmentInvoicePage = () => {
     }));
   }, [allColumns]);
 
+  // Map data to include keys for table rendering
   const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item) => ({
+    if (!currentData || currentData.length === 0) return [];
+
+    return currentData.map((item, index) => ({
       ...item,
-      key: item.id || item.invoiceNumber,
+      key: item.invAdjustmentId || item.invoiceNumber || index,
+      id: item.invAdjustmentId,
     }));
-  }, [dataSource]);
+  }, [currentData]);
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] text-primary">
-                ADJUSTMENT INVOICE LIST
-              </p>
-
-              <Toolbar items={itemGrantAccess} />
-            </div>
-          }
-        >
-          <div className="w-full">
-            <TableRBI
-              idTable="adjustment-invoice-table"
-              showExport={false}
-              dataSource={dataSourceWithKeys}
-              columns={processedColumns}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSort}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-              tableScrolled={{ y: 525, x: 5000 }}
-            />
-          </div>
-        </CardContainer>
-
-        {/* Modal Delete */}
-        <ModalConfirm
-          isOpen={modalDelete}
-          handleCancel={() => setModalDelete(false)}
-          handleOk={handleDeleteOk}
-          width={500}
-          useOk={true}
-        >
-          <div className="flex justify-center gap-[20px] mt-6">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              ADJUSTMENT INVOICE LIST
             </p>
+
+            <Toolbar items={itemGrantAccess} />
           </div>
-          <Alert
-            message="Warning! if you delete this data, it will be permanently."
-            type={"error"}
+        }
+      >
+        <div className="w-full">
+          <TableRBI
+            key={`adjustment-invoice-${page}-${currentData.length}`}
+            idTable="adjustment-invoice-table"
+            showExport={false}
+            dataSource={dataSourceWithKeys}
+            columns={processedColumns}
+            totalData={pagination?.totalElements || 0}
+            onSort={onSort}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+            tableScrolled={{ y: 525, x: 5000 }}
+            onRefresh={handleRefresh}
+            showRefresh={true}
           />
-        </ModalConfirm>
+        </div>
+      </CardContainer>
 
-        {/* Modal Error Delete */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={() => {
-            handleDeleteOk(bodyError.body, bodyError.handleClear);
-            setModalError(false);
-            setBodyError({});
-          }}
-          handleCancel={() => setModalError(false)}
-        >
-          <div className="px-8 py-8 justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconDelete" width={48} />
-              <p className="text-[18px] font-bold">Failed</p>
-            </div>
-            <p className="pl-[70px]">
-              {`Your data was not deleted. Please try again.`}
-            </p>
-          </div>
-        </ModalError>
-
-        {/* Modal Approval History */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          width={1000}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
+      {/* Modal Delete */}
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleDeleteOk}
+        width={500}
+        // useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className={"text-[18px] font-bold"}>
+            {`Are you sure want to delete it?`}
+          </p>
+        </div>
+        <Alert
+          message="Warning! if you delete this data, it will be permanently."
+          type={"error"}
         />
-      </Spin>
+      </ModalConfirm>
+
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
     </LayoutMenu>
   );
 };

@@ -25,8 +25,8 @@ const TableGlInformation = ({
   const dispatch = useDispatch();
 
 
-console.log(formValueHeader);
-  
+  console.log(formValueHeader);
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -57,66 +57,109 @@ console.log(formValueHeader);
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => { }
   ) => [
-    {
-      title: "NO",
-      dataIndex: "no",
-      width: "5%",
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "BANK ACCOUNT",
-      dataIndex: "bankAccountId",
-      sorter: true,
-      inputType: "select",
-      required: true,
-      options: dataBank,
-      ...getColumnSearchProps(
-        "bankAccountId",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      //   const bankName = text;
-      //   console.log("🚀 ~ bankName:", bankName);
-      //   searchedColumn === "bankAccountId" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={
-      //         text
-      //           ? data_bank &&
-      //             data_bank.filter((a) => a.id === text)?.find((b) => b.name)
-      //               ?.name
-      //           : data_bank &&
-      //             data_bank.filter((a) => a.id === text)?.find((b) => b.name)
-      //               ?.name
-      //       }
-      //     />
-      //   ) : text ? (
-      //     data_bank &&
-      //     data_bank.filter((a) => a.id === text)?.find((b) => b.name)?.name
-      //   ) : (
-      //     data_bank &&
-      //     data_bank.filter((a) => a.id === text)?.find((b) => b.name)?.name
-      //   );
-      // },
+      {
+        key: "no",
+        title: "NO",
+        dataIndex: "no",
+        width: "5%",
+        align: "center",
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        key: "bankAccountId",
+        title: "BANK ACCOUNT",
+        dataIndex: "bankAccountId",
+        sorter: true,
+        inputType: "select",
+        required: true,
+        options: dataBank,
+        ...getColumnSearchProps(
+          "bankAccountId",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch
+        ),
+        //   const bankName = text;
+        //   console.log("🚀 ~ bankName:", bankName);
+        //   searchedColumn === "bankAccountId" ? (
+        //     <Highlighter
+        //       highlightStyle={{
+        //         backgroundColor: "#ffc069",
+        //         padding: 0,
+        //       }}
+        //       searchWords={[searchText]}
+        //       autoEscape
+        //       textToHighlight={
+        //         text
+        //           ? data_bank &&
+        //             data_bank.filter((a) => a.id === text)?.find((b) => b.name)
+        //               ?.name
+        //           : data_bank &&
+        //             data_bank.filter((a) => a.id === text)?.find((b) => b.name)
+        //               ?.name
+        //       }
+        //     />
+        //   ) : text ? (
+        //     data_bank &&
+        //     data_bank.filter((a) => a.id === text)?.find((b) => b.name)?.name
+        //   ) : (
+        //     data_bank &&
+        //     data_bank.filter((a) => a.id === text)?.find((b) => b.name)?.name
+        //   );
+        // },
 
-      render: (text) => {
-        const bankName = data_bank
-          ?.filter((item) => item?.id === text)
-          .map((name) => name?.name)
-          .shift();
+        render: (text) => {
+          const bankName = data_bank
+            ?.filter((item) => item?.id === text)
+            .map((name) => name?.name)
+            .shift();
 
-        if (searchedColumn === "billingItem") {
-          const highlight = (
+          if (searchedColumn === "billingItem") {
+            const highlight = (
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={bankName || ""}
+              />
+            );
+            if (bankName) {
+              return highlight;
+            }
+            return highlight;
+          } else {
+            if (bankName) {
+              return bankName;
+            }
+            return "";
+          }
+        },
+      },
+      {
+        key: "glAccount",
+        title: "GL ACCOUNT",
+        dataIndex: "glAccount",
+        align: "",
+        // width: 350,
+        options: dataGLDDL,
+        inputType: "select",
+        required: true,
+        sorter: true,
+        ...getColumnSearchProps(
+          "glAccount",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch
+        ),
+        render: (text) =>
+          searchedColumn === "glAccount" ? (
             <Highlighter
               highlightStyle={{
                 backgroundColor: "#ffc069",
@@ -124,135 +167,97 @@ console.log(formValueHeader);
               }}
               searchWords={[searchText]}
               autoEscape
-              textToHighlight={bankName || ""}
+              textToHighlight={text ? text : ""}
             />
-          );
-          if (bankName) {
-            return highlight;
-          }
-          return highlight;
-        } else {
-          if (bankName) {
-            return bankName;
-          }
-          return "";
-        }
+          ) : text ? (
+            text
+          ) : (
+            " "
+          ),
       },
-    },
-    {
-      title: "GL ACCOUNT",
-      dataIndex: "glAccount",
-      align: "",
-      // width: 350,
-      options: dataGLDDL,
-      inputType: "select",
-      required: true,
-      sorter: true,
-      ...getColumnSearchProps(
-        "glAccount",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) =>
-        searchedColumn === "glAccount" ? (
-          <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
-            searchWords={[searchText]}
-            autoEscape
-            textToHighlight={text ? text : ""}
-          />
-        ) : text ? (
-          text
-        ) : (
-          " "
+      {
+        key: "startDate",
+        title: "START DATE",
+        dataIndex: "startDate",
+        inputType: "date",
+        align: "center",
+        editable: true,
+        sorter: true,
+        required: true,
+        // key: "startDate",
+        ...getColumnSearchProps(
+          "startDate",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "date"
         ),
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      inputType: "date",
-      align: "center",
-      editable: true,
-      sorter: true,
-      required: true,
-      key: "startDate",
-      ...getColumnSearchProps(
-        "startDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "date"
-      ),
-      render: (index) => {
-        const text = index ? moment(index).format("DD MMM YYYY") : "";
-        if (searchedColumn === "startDate") {
-          return (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[
-                searchText
-                  ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-                  : "",
-              ]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          );
-        } else {
-          return text || "";
-        }
+        render: (index) => {
+          const text = index ? moment(index).format("DD MMM YYYY") : "";
+          if (searchedColumn === "startDate") {
+            return (
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[
+                  searchText
+                    ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
+                    : "",
+                ]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            );
+          } else {
+            return text || "";
+          }
+        },
       },
-    },
-    {
-      title: "END DATE",
-      // width: 160,
-      sorter: true,
-      align: "center",
-      dataIndex: "endDate",
-      inputType: "date",
-      ...getColumnSearchProps(
-        "endDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "date"
-      ),
-      render: (index) => {
-        const text = index ? moment(index).format("DD MMM YYYY") : "";
-        if (searchedColumn === "endDate") {
-          return (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[
-                searchText
-                  ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-                  : "",
-              ]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          );
-        } else {
-          return text || "";
-        }
+      {
+        key: "endDate",
+        title: "END DATE",
+        // width: 160,
+        sorter: true,
+        align: "center",
+        dataIndex: "endDate",
+        inputType: "date",
+        ...getColumnSearchProps(
+          "endDate",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "date"
+        ),
+        render: (index) => {
+          const text = index ? moment(index).format("DD MMM YYYY") : "";
+          if (searchedColumn === "endDate") {
+            return (
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[
+                  searchText
+                    ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
+                    : "",
+                ]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            );
+          } else {
+            return text || "";
+          }
+        },
       },
-    },
-  ];
+    ];
   const handleChangePage = (page, pageSize) => {
     setPage(page);
     setPageSize(pageSize);

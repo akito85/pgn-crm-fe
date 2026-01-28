@@ -13,7 +13,12 @@ import {
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
-const StatusComponent = ({ children, colour, type = "status" }) => {
+const StatusComponent = ({
+  children,
+  colour,
+  type = "status",
+  size = "default",
+}) => {
   const { bgcolor, textColor } = useMemo(() => {
     if (!colour || typeof colour !== "string") {
       return { bgcolor: "bg-slate-600", textColor: "text-white" };
@@ -132,20 +137,25 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "primary":
       case "refund":
       case "unapplied":
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
+        break;
+
       case "hold":
       case "rating":
       case "standby":
-        bgColor = "bg-blue-500";
+        bgColor = "bg-[#F57C00]";
         tColor = "text-white";
         break;
 
       case "applied":
-        bgColor = "bg-[#ACC424]";
+        bgColor = "bg-[#288C44]";
         tColor = "text-white";
         break;
 
       case "reverse":
-        bgColor = "bg-[#910000]";
+      case "reversed":
+        bgColor = "bg-[#BE3036]";
         tColor = "text-white";
         break;
 
@@ -303,16 +313,19 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
   if (!children) return null;
 
+  const sizeClasses =
+    size === "small" ? "px-2 py-0 text-xs my-0.5" : "px-3 py-0 my-1";
+
   return (
     <div
       className={
         type === "status"
-          ? `flex gap-2 justify-center items-center my-1 ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
+          ? `flex gap-2 justify-center items-center ${bgcolor} ${textColor} ${sizeClasses} rounded-3xl text-center w-fit text-none`
           : `${textColor} font-semibold`
       }
     >
       {/* {renderIconStatus()} */}
-      {children}
+      {children.replace("_", " ")}
     </div>
   );
 };

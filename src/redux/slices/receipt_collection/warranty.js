@@ -347,6 +347,41 @@ export const requestedHold = createAsyncThunk(
   }
 );
 
+export const requestedRelease = createAsyncThunk(
+  "REQUESTED_HOLD",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billing/create-request-approve";
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: "Your data has been requested.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      await new Promise((resolve) => setTimeout(resolve, 500));;
+      return response.data;
+    } catch (response) {
+      const message =
+        response?.response?.data?.message ||
+        response?.message ||
+        response?.toString();
+      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
+        if (response?.data?.code === 419) {
+          thunkAPI.dispatch(setBodyError(response));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not requested. ${message}. Please try again.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(response);
+      }
+    }
+  }
+);
+
 export const downloadWarrantyList = createAsyncThunk(
   "DOWNLOAD_WARRANTY_LIST",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
@@ -507,6 +542,20 @@ const warrantySlice = createSlice({
       state.loading = false;
     },
     [requestedHold.rejected]: (state, action) => {
+      state.loading = false;
+      state.isFailed = true;
+      state.result = action.payload;
+    },
+
+    // Requested Release
+    [requestedRelease.pending]: (state) => {
+      state.loading = true;
+    },
+    [requestedRelease.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [requestedRelease.rejected]: (state, action) => {
       state.loading = false;
       state.isFailed = true;
       state.result = action.payload;

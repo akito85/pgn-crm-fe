@@ -6,6 +6,10 @@ const initialState = {
   data: [],
   list_billing_period: [],
   data_calculationUsage: [],
+  data_calculationSummary: [],
+  data_calculationSummaryExpand: {},
+  data_calculationDetail: [],
+  data_adjustment: [],
   data_serviceAgreement: [],
   data_detailServiceAgreement: [],
   data_calculationRuleServiceAgreement: [],
@@ -13,25 +17,28 @@ const initialState = {
   data_pricing: [],
   data_pricingRule: [],
   data_usageSA: [],
+  data_promoSA: [],
+  data_periodicSA: [],
   loading: false,
   data_detail: null,
   data_downlaod: null,
+  loadingExpand: {},
 };
 
 // list gas
 export const getListRatingGasPaginate = createAsyncThunk(
   "GET_LIST_RATING_GAS_PAGINATE",
   async (
-    { search, page, pageSize, sort, billPeriodId, isLoadMore = false },
-    thunkAPI
+    { search, page, pageSize, sort, period, isLoadMore = false },
+    thunkAPI,
   ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
 
-      // Tambahkan billPeriodId ke URL
-      const url = `/v1/dbs/api/rating/list-rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
+      // URL dengan parameter period
+      const url = `/v1/dbs/api/rating/rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&period=${encodeURIComponent(period)}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
 
@@ -56,7 +63,7 @@ export const getListRatingGasPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getListBillingPeriodForRating = createAsyncThunk(
@@ -100,7 +107,7 @@ export const getListBillingPeriodForRating = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getAllCalculationUsagePaginate = createAsyncThunk(
@@ -129,7 +136,7 @@ export const getAllCalculationUsagePaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllDetailServiceAgreementPaginate = createAsyncThunk(
@@ -157,7 +164,7 @@ export const getAllDetailServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllCalculationRuleServiceAgreementPaginate = createAsyncThunk(
@@ -186,7 +193,7 @@ export const getAllCalculationRuleServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllTOSServiceAgreementPaginate = createAsyncThunk(
@@ -215,7 +222,7 @@ export const getAllTOSServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllServiceAgreementPaginate = createAsyncThunk(
@@ -244,7 +251,7 @@ export const getAllServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
@@ -273,7 +280,7 @@ export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailPricing = createAsyncThunk(
@@ -299,7 +306,7 @@ export const getDetailPricing = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllPricingRuleSAPaginate = createAsyncThunk(
@@ -327,7 +334,7 @@ export const getAllPricingRuleSAPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // list non gas
@@ -342,7 +349,7 @@ export const getListRatingNonGasPaginate = createAsyncThunk(
       const params = { sortParams, page, pageSize, searchParams };
       const response = await ratingBillingHttpService.getListPagination(
         url,
-        params
+        params,
       );
       return response.data;
     } catch (error) {
@@ -361,7 +368,7 @@ export const getListRatingNonGasPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // download feat
@@ -373,16 +380,16 @@ export const downloadRatingGas = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rating/download-filter-gas?billPeriodId=${billPeriodId}&searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      
+
       const response = await ratingBillingHttpService.downloadData(url);
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_LIST", back: false })
+        validateError({ error: error, action: "DOWNLOAD_LIST", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // get detail rating gas
@@ -409,15 +416,450 @@ export const getDetailRatingGas = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
+
+// Calculation Summary - Tabel Utama
+export const getAllCalculationSummaryPaginate = createAsyncThunk(
+  "GET_ALL_CALCULATION_SUMMARY_PAGINATE",
+  async ({ ratingCode, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+      
+      // Endpoint untuk tabel utama (summary)
+      const url = `/v1/dbs/api/rating/summary-rating?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      
+      const response = await ratingBillingHttpService.getPagination(url);
+      
+      // Langsung return response data tanpa grouping
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// Calculation Summary Expand - Tabel yang di-expand
+export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
+  "GET_ALL_CALCULATION_SUMMARY_EXPAND_PAGINATE",
+  async ({ ratingCode, transactionDate, saType, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+      
+      // Endpoint untuk detail expanded
+      const url = `/v1/dbs/api/rating/summary-rating-expand?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      
+      const response = await ratingBillingHttpService.getPagination(url);
+      
+      // Return dengan identifier untuk row yang di-expand
+      return {
+        ...response.data,
+        transactionDate,
+        saType,
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// GET CALCULATION DETAIL
+export const getAllCalculationDetailPaginate = createAsyncThunk(
+  "GET_ALL_CALCULATION_DETAIL_PAGINATE",
+  async ({ calculationCode, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+      
+      // API endpoint menggunakan calculationCode, bukan id
+      const url = `/v1/dbs/api/rating/detail-rating?calculationCode=${calculationCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);    
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// GET ADJUSTMENT
+export const getAllAdjustmentPaginate = createAsyncThunk(
+  "GET_ALL_ADJUSTMENT_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-adjustment/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Hapus setelah backend ready
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const dummyData = {
+        result: [
+        ],
+        page: {
+          totalElements: 0,
+          totalPages: 0,
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyData;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// GET PROMO
+export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
+  "GET_ALL_PROMO_SERVICE_AGREEMENT_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-promo/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Sesuai dengan gambar yang diberikan
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const allDummyData = [
+        {
+          id: 1,
+          name: "Promo Gas Industri Q1",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "Volume Discount",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "5",
+        },
+        {
+          id: 2,
+          name: "Program Loyalty 2025",
+          type: "Billing",
+          promotionType: "Program",
+          promoCategory: "Customer Retention",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "10",
+        },
+        {
+          id: 3,
+          name: "Early Payment Discount",
+          type: "Rating & Billing",
+          promotionType: "Promo",
+          promoCategory: "Payment Incentive",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "3",
+        },
+        {
+          id: 4,
+          name: "Seasonal Gas Promo",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "Seasonal",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "15",
+        },
+        {
+          id: 5,
+          name: "New Customer Bonus",
+          type: "Billing",
+          promotionType: "Program",
+          promoCategory: "Acquisition",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "7.5",
+        },
+        {
+          id: 6,
+          name: "Bundle Package Discount",
+          type: "Rating & Billing",
+          promotionType: "Promo",
+          promoCategory: "Bundle Offer",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "12",
+        },
+        {
+          id: 7,
+          name: "Corporate Partnership",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "B2B Special",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "8",
+        },
+        {
+          id: 8,
+          name: "Year End Clearance",
+          type: "Billing",
+          promotionType: "Program",
+          promoCategory: "Clearance",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "20",
+        },
+        {
+          id: 9,
+          name: "Referral Reward Program",
+          type: "Rating & Billing",
+          promotionType: "Promo",
+          promoCategory: "Referral",
+          adjustmentType: "Mark Up",
+          adjustmentValue: "4",
+        },
+        {
+          id: 10,
+          name: "High Volume Incentive",
+          type: "Rating",
+          promotionType: "Diskon",
+          promoCategory: "Volume Incentive",
+          adjustmentType: "Mark Down",
+          adjustmentValue: "18",
+        },
+      ];
+
+      // Terapkan pencarian jika ada
+      let filteredData = [...allDummyData];
+
+      if (search && Object.keys(search).length > 0) {
+        filteredData = filteredData.filter((item) => {
+          return Object.keys(search).every((key) => {
+            if (!search[key]) return true;
+            const itemValue = String(item[key] || "").toLowerCase();
+            const searchValue = String(search[key]).toLowerCase();
+            return itemValue.includes(searchValue);
+          });
+        });
+      }
+
+      // Terapkan sorting jika ada
+      if (sort) {
+        const [field, order] = sort.split("~");
+        filteredData.sort((a, b) => {
+          const aVal = a[field] || "";
+          const bVal = b[field] || "";
+
+          if (order === "asc") {
+            return aVal > bVal ? 1 : -1;
+          } else {
+            return aVal < bVal ? 1 : -1;
+          }
+        });
+      }
+
+      // Terapkan pagination
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedData = filteredData.slice(startIndex, endIndex);
+
+      const dummyResponse = {
+        result: paginatedData,
+        page: {
+          totalElements: filteredData.length,
+          totalPages: Math.ceil(filteredData.length / pageSize),
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyResponse;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// get periodic
+export const getAllPeriodicServiceAgreementPaginate = createAsyncThunk(
+  "GET_ALL_PERIODIC_SERVICE_AGREEMENT_PAGINATE",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      // TODO: Ganti dengan API real setelah backend ready
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      // const url = `/v1/dbs/api/rating/list-periodic/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      // const response = await ratingBillingHttpService.getPagination(url);
+      // return response.data;
+
+      // DUMMY DATA - Sesuai dengan gambar yang diberikan
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const allDummyData = [
+        {
+          id: 1,
+          uom: "M3",
+          totalEstUsage: 100.0,
+          totalEstAmount: 150000.0,
+          accMinContract: 300.0,
+          accMaxContract: 360.0,
+          adjustmentUsage: 70.0,
+        },
+        {
+          id: 2,
+          uom: "M3",
+          totalEstUsage: 200.0,
+          totalEstAmount: 250000.0,
+          accMinContract: 400.0,
+          accMaxContract: 500.0,
+          adjustmentUsage: 80.0,
+        },
+        {
+          id: 3,
+          uom: "M3",
+          totalEstUsage: 150.0,
+          totalEstAmount: 180000.0,
+          accMinContract: 350.0,
+          accMaxContract: 420.0,
+          adjustmentUsage: 65.0,
+        },
+      ];
+
+      // Terapkan pencarian jika ada
+      let filteredData = [...allDummyData];
+
+      if (search && Object.keys(search).length > 0) {
+        filteredData = filteredData.filter((item) => {
+          return Object.keys(search).every((key) => {
+            if (!search[key]) return true;
+            const itemValue = String(item[key] || "").toLowerCase();
+            const searchValue = String(search[key]).toLowerCase();
+            return itemValue.includes(searchValue);
+          });
+        });
+      }
+
+      // Terapkan sorting jika ada
+      if (sort) {
+        const [field, order] = sort.split("~");
+        filteredData.sort((a, b) => {
+          const aVal = a[field] || "";
+          const bVal = b[field] || "";
+
+          if (order === "asc") {
+            return aVal > bVal ? 1 : -1;
+          } else {
+            return aVal < bVal ? 1 : -1;
+          }
+        });
+      }
+
+      // Terapkan pagination
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedData = filteredData.slice(startIndex, endIndex);
+
+      const dummyResponse = {
+        result: paginatedData,
+        page: {
+          totalElements: filteredData.length,
+          totalPages: Math.ceil(filteredData.length / pageSize),
+          size: pageSize,
+          number: page - 1,
+        },
+      };
+
+      return dummyResponse;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 const ratingSlice = createSlice({
   name: "rating",
   initialState,
   extraReducers: {
-    // Get All Rating Gas Pagination
     [getListRatingGasPaginate.pending]: (state, action) => {
-      // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -427,21 +869,23 @@ const ratingSlice = createSlice({
       const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
-      // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
-        // Append new data to existing data
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.ratingId)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.ratingId)
+        );
         state.data = {
           ...action.payload,
-          result: [...(state.data?.result || []), ...newResult],
+          result: [...(state.data?.result || []), ...uniqueNewData],
         };
       } else {
-        // Replace with new data (initial load or after search/sort)
         state.data = action.payload;
       }
     },
     [getListRatingGasPaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Only clear data on initial fetch failure, not on load more failure
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }
@@ -539,7 +983,7 @@ const ratingSlice = createSlice({
     },
     [getAllCalculationRuleServiceAgreementPaginate.fulfilled]: (
       state,
-      action
+      action,
     ) => {
       state.loading = false;
       state.data_calculationRuleServiceAgreement = action.payload;
@@ -547,6 +991,7 @@ const ratingSlice = createSlice({
     [getAllCalculationRuleServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
+    
 
     // Get All Rating Non Gas Pagination
     [getListRatingNonGasPaginate.pending]: (state) => {
@@ -594,6 +1039,87 @@ const ratingSlice = createSlice({
     },
     [getDetailRatingGas.rejected]: (state) => {
       state.loading = false;
+    },
+    // Get All Calculation Summary Pagination (Tabel Utama)
+    [getAllCalculationSummaryPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllCalculationSummaryPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_calculationSummary = action.payload;
+    },
+    [getAllCalculationSummaryPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_calculationSummary = [];
+    },
+
+    // Get All Calculation Summary Expand (Data di dalam expand)
+    [getAllCalculationSummaryExpandPaginate.pending]: (state, action) => {
+      const { transactionDate, saType } = action.meta.arg;
+      const key = `${transactionDate}-${saType}`;
+      state.loadingExpand[key] = true;
+    },
+    [getAllCalculationSummaryExpandPaginate.fulfilled]: (state, action) => {
+      const { transactionDate, saType } = action.payload;
+      const key = `${transactionDate}-${saType}`;
+      state.loadingExpand[key] = false;
+      state.data_calculationSummaryExpand[key] = action.payload;
+    },
+    [getAllCalculationSummaryExpandPaginate.rejected]: (state, action) => {
+      const { transactionDate, saType } = action.meta.arg;
+      const key = `${transactionDate}-${saType}`;
+      state.loadingExpand[key] = false;
+      state.data_calculationSummaryExpand[key] = null;
+    },
+
+    // Get All Calculation Detail Pagination
+    [getAllCalculationDetailPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllCalculationDetailPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_calculationDetail = action.payload;
+    },
+    [getAllCalculationDetailPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_calculationDetail = [];
+    },
+
+    // Get All Adjustment Pagination
+    [getAllAdjustmentPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllAdjustmentPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_adjustment = action.payload;
+    },
+    [getAllAdjustmentPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_adjustment = [];
+    },
+    // Get All Promo Service Agreement Pagination
+    [getAllPromoServiceAgreementPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllPromoServiceAgreementPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_promoSA = action.payload;
+    },
+    [getAllPromoServiceAgreementPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_promoSA = [];
+    },
+    // Get All Periodic Service Agreement Pagination
+    [getAllPeriodicServiceAgreementPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllPeriodicServiceAgreementPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_periodicSA = action.payload;
+    },
+    [getAllPeriodicServiceAgreementPaginate.rejected]: (state) => {
+      state.loading = false;
+      state.data_periodicSA = [];
     },
   },
 });

@@ -47,6 +47,7 @@ import monitoringUsageReducer from "../slices/rating_billing_invoice/monitoring_
 import itemReducer from "../slices/receipt_collection/paymentItem";
 import billingReducer from "../slices/rating_billing_invoice/billing";
 import adjustmentBillingReducer from "../slices/rating_billing_invoice/adjustmentBilling";
+import adjustmentInvoiceReducer from "../slices/rating_billing_invoice/adjustmentInvoice";
 import accountReducer from "../slices/account_management/Account/accountSlice";
 import cycleReducer from "../slices/receipt_collection/transactionCalender";
 import financialInformationReducer from "../slices/account_management/detailAccount/FinancialInformationSlice";
@@ -129,6 +130,8 @@ import deductionReducer from "../slices/receipt_collection/deduction";
 import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
 import offsetReducer from "../slices/receipt_collection/offset";
+import writeOffReducer from "../slices/receipt_collection/writeOff";
+import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -180,6 +183,7 @@ const reducer = combineReducers({
   accountGasSource: accountGasSourceReducer,
   account: accountReducer,
   financialInformation: financialInformationReducer,
+  paymentRelation: paymentRelationReducer,
   premise: premiseReducer,
   servicePoint: servicePointReducer,
   distributionMedia: distributionMediaReducer,
@@ -215,6 +219,7 @@ const reducer = combineReducers({
   monitoring_usage: monitoringUsageReducer,
   billing: billingReducer,
   adjustmentBilling: adjustmentBillingReducer,
+  adjustmentInvoice: adjustmentInvoiceReducer,
   rating: ratingReducer,
   pointOfSales: postOfSalesReducer,
   invoice: invoiceReducer,
@@ -282,6 +287,7 @@ const reducer = combineReducers({
   activityAction: activityActionReducer,
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
+  writeOff: writeOffReducer,
 
   // notifications
   notifications: notificationsReducer,

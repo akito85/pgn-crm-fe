@@ -1,12 +1,11 @@
 import { Modal } from "antd";
-import React from "react";
 
 const ModalCustom = (props) => {
   const {
     loading = false, // ← FIX: Default value
     isOpen,
-    handleCancel = () => {},
-    handleOk = () => {},
+    handleCancel = () => { },
+    handleOk = () => { },
     header,
     children,
     width,
@@ -16,6 +15,7 @@ const ModalCustom = (props) => {
     closable = true, // ← FIX: Default true
     title,
     maxHeight,
+    hideTopPadding = false,
   } = props;
 
   const typeModal = (type) => {
@@ -43,7 +43,7 @@ const ModalCustom = (props) => {
             </div>
 
             {/* content section */}
-            <div className={"flex flex-col w-full p-5"}>{children}</div>
+            <div className={`flex flex-col w-full p-4 ${hideTopPadding ? "pt-0" : ""}`}>{children}</div>
           </div>
         );
       case "detail":
@@ -52,7 +52,6 @@ const ModalCustom = (props) => {
             {/* header section */}
             <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
               <div className={"flex gap-x-1.5 items-center"}>
-                <div className="p-2.5 modal-header-box rounded-sm"></div>
                 <span className="text-primary uppercase font-semibold">{header}</span>
               </div>
             </div>
@@ -67,7 +66,6 @@ const ModalCustom = (props) => {
             {/* header section */}
             <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
               <div className={"flex gap-x-1.5 items-center"}>
-                <div className="p-2.5 modal-header-box rounded-sm"></div>
                 <span className="text-primary uppercase font-semibold">{header}</span>
               </div>
             </div>

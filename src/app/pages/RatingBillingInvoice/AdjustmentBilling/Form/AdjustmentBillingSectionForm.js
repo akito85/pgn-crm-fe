@@ -7,8 +7,6 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import DateComponent from "../../../../../components/DateComponent";
 import InvoiceSectionForm from "./InvoiceSectionForm";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
 import {
   getListAccount,
   getListAdjustmentReason,
@@ -18,9 +16,11 @@ import {
   getListInvoice,
   getListInvoiceInformation,
   getListType,
+  getListRateType,
+  getListClassification,
+  getListPostInvoice,
+  getListOnDemand,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
-import { currencyFormatting } from "../../../../../utils/formatCurrency";
-import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import moment from "moment";
 
@@ -42,6 +42,10 @@ const AdjustmentBillingSectionForm = ({
   setBillingPeriodId,
   setRangeDisableDate = () => {},
   rangeDisableDate,
+  selectedClassification,
+  setSelectedClassification = () => {},
+  selectedPostInvoice,
+  setSelectedPostInvoice = () => {},
 }) => {
   // Selector
   const {
@@ -53,6 +57,10 @@ const AdjustmentBillingSectionForm = ({
     dataListInvoiceInformation,
     dataListAdjustmentReason,
     dataCurrency,
+    dataListRateType,
+    dataListClassification,
+    dataListPostInvoice,
+    dataListOnDemand,
   } = useSelector((state) => state.adjustmentBilling);
 
   // Declaration
@@ -62,6 +70,8 @@ const AdjustmentBillingSectionForm = ({
   const [description, setDescription] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
+  const [referenceInvoiceNumber, setReferenceInvoiceNumber] = useState();
+  const [transactionDate, setTransactionDate] = useState(null);
 
   // Use Effect
   useEffect(() => {
@@ -70,13 +80,36 @@ const AdjustmentBillingSectionForm = ({
     dispatch(getListBillingCycle());
     dispatch(getListAdjustmentReason());
     dispatch(getListCurrency());
+    dispatch(getListRateType());
+    dispatch(getListClassification());
   }, [dispatch]);
+
+  // Fetch post invoice list when classification is "Post Invoice"
+  useEffect(() => {
+    if (selectedClassification === "Post Invoice") {
+      dispatch(getListPostInvoice());
+    }
+  }, [dispatch, selectedClassification]);
+
+  // Fetch on demand list when post invoice is "On Demand"
+  useEffect(() => {
+    if (selectedPostInvoice === "On Demand") {
+      dispatch(getListOnDemand());
+    }
+  }, [dispatch, selectedPostInvoice]);
 
   useEffect(() => {
     if (idInvoice && idInvoice !== 0) {
       dispatch(getListInvoiceInformation({ id: idInvoice }));
     }
   }, [dispatch, idInvoice]);
+
+  // Set reference invoice number from dataInvoice when available
+  useEffect(() => {
+    if (dataInvoice?.invoiceNumber && !referenceInvoiceNumber) {
+      setReferenceInvoiceNumber(dataInvoice.invoiceNumber);
+    }
+  }, [dataInvoice?.invoiceNumber, referenceInvoiceNumber]);
 
   useEffect(() => {
     if (cycleId && cycleId !== 0) {
@@ -107,7 +140,7 @@ const AdjustmentBillingSectionForm = ({
       const dataCycle = getFilteredData(dataListBillingCycle, cycleId);
       const dataBillingPeriod = getFilteredData(
         dataListBillingPeriod,
-        billingPeriodId
+        billingPeriodId,
       );
       const params = {
         accountNumber: dataAccount?.accountNumber,
@@ -130,7 +163,7 @@ const AdjustmentBillingSectionForm = ({
   useEffect(() => {
     if (idAccount && idAccount !== 0) {
       const dataAccount = dataListAccount?.filter(
-        (v) => v.accountId === idAccount
+        (v) => v.accountId === idAccount,
       )[0];
 
       form.setFieldsValue({
@@ -199,7 +232,7 @@ const AdjustmentBillingSectionForm = ({
       setDataInvoice(dataListInvoiceInformation);
 
       const dataTOP = dataListInvoice?.find(
-        (item) => item.invoiceNumber === idInvoice
+        (item) => item.invoiceNumber === idInvoice,
       );
 
       form.setFieldsValue({
@@ -214,12 +247,15 @@ const AdjustmentBillingSectionForm = ({
   useEffect(() => {
     if (hasValue(billingPeriodId)) {
       const findPeriod = dataListBillingPeriod?.find(
-        (item) => item?.id === billingPeriodId
+        (item) => item?.id === billingPeriodId,
       );
       setRangeDisableDate({
         startDate: findPeriod?.startDate,
         endDate: findPeriod?.endDate,
       });
+    } else {
+      setRangeDisableDate({});
+      setDefaultPicker("");
     }
   }, [billingPeriodId, dataListBillingPeriod, setRangeDisableDate]);
 
@@ -230,6 +266,17 @@ const AdjustmentBillingSectionForm = ({
     }
   }, [rangeDisableDate?.startDate]);
 
+  // Sync transactionDate state from form value (for update mode)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const txnDate = form.getFieldValue("transactionDate");
+      if (txnDate && !transactionDate) {
+        setTransactionDate(txnDate);
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [form, transactionDate]);
+
   const onChangeAccountNumber = (e) => {
     setIdAccount(e || undefined);
     return e;
@@ -237,6 +284,7 @@ const AdjustmentBillingSectionForm = ({
 
   const handleChangeInvoice = (e) => {
     setIdInvoice(e || undefined);
+    setReferenceInvoiceNumber(e || undefined);
     return e;
   };
 
@@ -244,14 +292,31 @@ const AdjustmentBillingSectionForm = ({
     setCycleId(e || undefined);
     setBillingPeriodId();
     setIdInvoice();
-    form.resetFields(["billingPeriod", "referenceInvoiceNumber"]);
+    setReferenceInvoiceNumber(undefined);
+    setTransactionDate(null);
+    form.resetFields([
+      "billingPeriod",
+      "referenceInvoiceNumber",
+      "transactionDate",
+      "documentDate",
+      "accountingDate",
+      "rateDate",
+    ]);
     return e;
   };
 
   const onChangeBillingPeriod = (e) => {
     setBillingPeriodId(e || undefined);
     setIdInvoice();
-    form.resetFields(["referenceInvoiceNumber"]);
+    setReferenceInvoiceNumber(undefined);
+    setTransactionDate(null);
+    form.resetFields([
+      "referenceInvoiceNumber",
+      "transactionDate",
+      "documentDate",
+      "accountingDate",
+      "rateDate",
+    ]);
     return e;
   };
 
@@ -261,7 +326,7 @@ const AdjustmentBillingSectionForm = ({
     .map((a) => a.adjustmentAmount);
   const sumIDR = dataIDR.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment USD
@@ -270,7 +335,7 @@ const AdjustmentBillingSectionForm = ({
     .map((a) => a.adjustmentAmount);
   const sumUSD = dataUSD.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment EQV IDR
@@ -286,13 +351,90 @@ const AdjustmentBillingSectionForm = ({
         current > moment(rangeDisableDate?.endDate).add(1, "days")
       );
     },
-    [rangeDisableDate]
+    [rangeDisableDate],
   );
+
+  // Disable dates for document date: must be within billing period AND not after transaction date
+  const disabledDocumentDate = useCallback(
+    (current) => {
+      // First check billing period range
+      const outsideBillingPeriod =
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days");
+
+      // Then check if after transaction date
+      const afterTransactionDate = transactionDate
+        ? current > moment(transactionDate).endOf("day")
+        : false;
+
+      return outsideBillingPeriod || afterTransactionDate;
+    },
+    [rangeDisableDate, transactionDate],
+  );
+
+  // Disable dates for accounting date: must be on or after transaction date, no end date limit
+  const disabledAccountingDate = useCallback(
+    (current) => {
+      // Only check if before transaction date (no end date limit)
+      const beforeTransactionDate = transactionDate
+        ? current < moment(transactionDate).startOf("day")
+        : true; // Disable all dates if no transaction date selected
+
+      return beforeTransactionDate;
+    },
+    [transactionDate],
+  );
+
+  // Disable dates for rate date: must be on or after billing period start date, no end date limit
+  const disabledRateDate = useCallback(
+    (current) => {
+      // Only check if before billing period start date (no end date limit)
+      if (!rangeDisableDate?.startDate) return false;
+      return current < moment(rangeDisableDate?.startDate);
+    },
+    [rangeDisableDate],
+  );
+
+  // Handle transaction date change
+  const handleTransactionDateChange = (date) => {
+    setTransactionDate(date);
+    // Re-validate document date and accounting date when transaction date changes
+    const currentDocDate = form.getFieldValue("documentDate");
+    const currentAccDate = form.getFieldValue("accountingDate");
+    if (currentDocDate || currentAccDate) {
+      form.validateFields(["documentDate", "accountingDate"]);
+    }
+  };
+
+  // Handler for Classification Adjustment change
+  const onChangeClassification = (value) => {
+    setSelectedClassification(value);
+    setSelectedPostInvoice(undefined);
+    form.setFieldsValue({
+      postInvoice: undefined,
+      onDemand: undefined,
+    });
+    return value;
+  };
+
+  // Handler for Post Invoice change
+  const onChangePostInvoice = (value) => {
+    setSelectedPostInvoice(value);
+    form.setFieldsValue({
+      onDemand: undefined,
+    });
+    return value;
+  };
 
   return (
     <div>
       {/* Customer Information */}
       <CardContainer subHeader={"Customer Information"}>
+        {/* Hidden field untuk accountNumber agar masuk ke payload (tidak ada visible input untuk field ini) */}
+        <Form.Item name="accountNumber" hidden>
+          <input type="hidden" />
+        </Form.Item>
+
         <div className="w-full grid grid-cols-4 gap-3">
           <Form.Item
             label={"Account Number"}
@@ -307,6 +449,7 @@ const AdjustmentBillingSectionForm = ({
           >
             <SelectComponent
               onChange={onChangeAccountNumber}
+              placeholder={"Choose Account Number"}
               disabled={type === "update" ? true : false}
             >
               {dataListAccount &&
@@ -323,7 +466,7 @@ const AdjustmentBillingSectionForm = ({
             name={"customerNumber"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item
@@ -331,15 +474,7 @@ const AdjustmentBillingSectionForm = ({
             name={"customerName"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
-          </Form.Item>
-
-          <Form.Item
-            label={"Account Number"}
-            name={"accountNumber"}
-            style={{ marginBottom: 0 }}
-          >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item
@@ -347,7 +482,7 @@ const AdjustmentBillingSectionForm = ({
             name={"accountName"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item
@@ -355,7 +490,7 @@ const AdjustmentBillingSectionForm = ({
             name={"accountSegment"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item
@@ -363,11 +498,11 @@ const AdjustmentBillingSectionForm = ({
             name={"accountGroupType"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item label={"SOR"} name={"sor"} style={{ marginBottom: 0 }}>
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item
@@ -375,7 +510,7 @@ const AdjustmentBillingSectionForm = ({
             name={"costCenterCode"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item
@@ -383,7 +518,7 @@ const AdjustmentBillingSectionForm = ({
             name={"costCenterName"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
 
           <Form.Item
@@ -391,17 +526,10 @@ const AdjustmentBillingSectionForm = ({
             name={"meterReadingCode"}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent disabled={true} />
+            <InputComponent placeholder={"Auto Filled"} disabled={true} />
           </Form.Item>
         </div>
       </CardContainer>
-
-      {/* Invoice Information */}
-      <InvoiceSectionForm
-        data={dataInvoice}
-        listDataABI={listDataABI}
-        type={type}
-      />
 
       <CardContainer subHeader={"ADJUSTMENT BILLING INFORMATION"}>
         <div className="w-full grid grid-cols-4 gap-3">
@@ -411,7 +539,7 @@ const AdjustmentBillingSectionForm = ({
             style={{ marginBottom: 0 }}
             rules={[{ required: true, message: "Please input your Type!" }]}
           >
-            <SelectComponent>
+            <SelectComponent placeholder="Choose Type">
               {dataListType &&
                 dataListType?.map((data, index) => (
                   <Select.Option value={data.id} key={index}>
@@ -420,6 +548,79 @@ const AdjustmentBillingSectionForm = ({
                 ))}
             </SelectComponent>
           </Form.Item>
+
+          <Form.Item
+            label={"Classification Adjustment"}
+            name={"classificationAdjustment"}
+            style={{ marginBottom: 0 }}
+            rules={[
+              {
+                required: true,
+                message: "Please select Classification Adjustment!",
+              },
+            ]}
+          >
+            <SelectComponent
+              onChange={onChangeClassification}
+              placeholder="Select Classification Adjustment"
+            >
+              {dataListClassification &&
+                dataListClassification?.map((data, index) => (
+                  <Select.Option value={data.name || data.text} key={index}>
+                    {data.name || data.text}
+                  </Select.Option>
+                ))}
+            </SelectComponent>
+          </Form.Item>
+
+          {selectedClassification === "Post Invoice" && (
+            <Form.Item
+              label={"Post Invoice"}
+              name={"postInvoice"}
+              style={{ marginBottom: 0 }}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select Post Invoice!",
+                },
+              ]}
+            >
+              <SelectComponent
+                onChange={onChangePostInvoice}
+                placeholder="Select Post Invoice"
+              >
+                {dataListPostInvoice &&
+                  dataListPostInvoice?.map((data, index) => (
+                    <Select.Option value={data.name || data.text} key={index}>
+                      {data.name || data.text}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+          )}
+
+          {selectedPostInvoice === "On Demand" && (
+            <Form.Item
+              label={"On Demand"}
+              name={"onDemand"}
+              style={{ marginBottom: 0 }}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select On Demand!",
+                },
+              ]}
+            >
+              <SelectComponent placeholder="Select On Demand">
+                {dataListOnDemand &&
+                  dataListOnDemand?.map((data, index) => (
+                    <Select.Option value={data.name || data.text} key={index}>
+                      {data.name || data.text}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+          )}
 
           <Form.Item
             label={"Billing Cycle"}
@@ -431,6 +632,7 @@ const AdjustmentBillingSectionForm = ({
           >
             <SelectComponent
               onChange={onChangeBillingCycle}
+              placeholder="Choose Billing Cycle"
               disabled={
                 !form.getFieldValue().accountNumberWithName ? true : false
               }
@@ -454,6 +656,7 @@ const AdjustmentBillingSectionForm = ({
           >
             <SelectComponent
               onChange={onChangeBillingPeriod}
+              placeholder="Choose Billing Period"
               disabled={
                 !form.getFieldValue().billingCycle ||
                 !form.getFieldValue().accountNumberWithName
@@ -480,6 +683,7 @@ const AdjustmentBillingSectionForm = ({
           >
             <SelectComponent
               onChange={handleChangeInvoice}
+              placeholder="Choose Invoice Number"
               disabled={
                 !form.getFieldValue().accountNumberWithName ||
                 !form.getFieldValue().billingCycle ||
@@ -503,7 +707,7 @@ const AdjustmentBillingSectionForm = ({
             style={{ marginBottom: 0 }}
             rules={[{ required: true, message: "Please input your Currency!" }]}
           >
-            <SelectComponent>
+            <SelectComponent placeholder="Choose currency">
               {dataCurrency &&
                 dataCurrency?.map((data, index) => (
                   <Select.Option value={data.text} key={index}>
@@ -511,25 +715,6 @@ const AdjustmentBillingSectionForm = ({
                   </Select.Option>
                 ))}
             </SelectComponent>
-          </Form.Item>
-
-          <Form.Item
-            label={"Document Date"}
-            name={"documentDate"}
-            style={{ marginBottom: 0 }}
-            rules={[
-              { required: true, message: "Please input your Document Date!" },
-            ]}
-          >
-            <DatePicker
-              format={dateFormatting?.date}
-              style={{
-                borderRadius: "6px",
-                boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-                padding: "4px 12px",
-              }}
-              className="w-full"
-            />
           </Form.Item>
 
           <Form.Item
@@ -547,6 +732,39 @@ const AdjustmentBillingSectionForm = ({
               dateDisable={disabledRangeDate}
               defaultPickerValue={defaultPicker}
               key={keyPicker}
+              onChange={handleTransactionDateChange}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={"Document Date"}
+            name={"documentDate"}
+            style={{ marginBottom: 0 }}
+            dependencies={["transactionDate"]}
+            rules={[
+              { required: true, message: "Please input your Document Date!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const txnDate = getFieldValue("transactionDate");
+                  if (!value || !txnDate) {
+                    return Promise.resolve();
+                  }
+                  if (moment(value).isAfter(moment(txnDate), "day")) {
+                    return Promise.reject(
+                      new Error(
+                        "Document Date cannot be later than Transaction Date!",
+                      ),
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <DateComponent
+              dateDisable={disabledDocumentDate}
+              defaultPickerValue={defaultPicker}
+              key={`document-${keyPicker}-${transactionDate}`}
             />
           </Form.Item>
 
@@ -554,49 +772,106 @@ const AdjustmentBillingSectionForm = ({
             label={"Accounting Date"}
             name={"accountingDate"}
             style={{ marginBottom: 0 }}
+            dependencies={["transactionDate"]}
             rules={[
               { required: true, message: "Please input your Accounting Date!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const txnDate = getFieldValue("transactionDate");
+                  if (!value || !txnDate) {
+                    return Promise.resolve();
+                  }
+                  if (moment(value).isAfter(moment(txnDate), "day")) {
+                    return Promise.reject(
+                      new Error(
+                        "Accounting Date cannot be later than Transaction Date!",
+                      ),
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              }),
             ]}
           >
             <DateComponent
-              dateDisable={disabledRangeDate}
+              dateDisable={disabledAccountingDate}
+              defaultPickerValue={defaultPicker}
+              key={`accounting-${keyPicker}-${transactionDate}`}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={"Terms Of Payment"}
+            name={"termsOfPayment"}
+            style={{ marginBottom: 0 }}
+          >
+            <InputComponent placeholder="Choose Type TOP" disabled={true} />
+          </Form.Item>
+
+          <Form.Item
+            label={"Rate Type"}
+            name={"rateType"}
+            style={{ marginBottom: 0 }}
+            rules={[
+              {
+                required: true,
+                message: "Please input your Rate Type!",
+              },
+            ]}
+          >
+            <SelectComponent
+              placeholder={"Choose Rate Type"}
+              disabled={
+                !form.getFieldValue().referenceInvoiceNumber ? true : false
+              }
+            >
+              {dataListRateType &&
+                dataListRateType?.map((data, index) => (
+                  <Select.Option value={data.text} key={index}>
+                    {data.text}
+                  </Select.Option>
+                ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            label={"Rate Date"}
+            name={"rateDate"}
+            style={{ marginBottom: 0 }}
+            rules={[
+              {
+                required: true,
+                message: "Please input your Rate Date!",
+              },
+            ]}
+          >
+            <DateComponent
+              dateDisable={disabledRateDate}
               defaultPickerValue={defaultPicker}
               key={keyPicker}
             />
           </Form.Item>
 
-          <div className="col-span-2">
-            <Form.Item
-              label={"Terms Of Payment"}
-              name={"termsOfPayment"}
-              style={{ marginBottom: 0 }}
-            >
-              <InputComponent disabled={true} />
-            </Form.Item>
-          </div>
-
-          <div className="col-span-2">
-            <Form.Item
-              label={"Adjustment Reason"}
-              name={"adjustmentReason"}
-              style={{ marginBottom: 0 }}
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your Adjustment Reason!",
-                },
-              ]}
-            >
-              <SelectComponent>
-                {dataListAdjustmentReason &&
-                  dataListAdjustmentReason?.map((data, index) => (
-                    <Select.Option value={data.Id} key={index}>
-                      {data.text}
-                    </Select.Option>
-                  ))}
-              </SelectComponent>
-            </Form.Item>
-          </div>
+          <Form.Item
+            label={"Adjustment Reason"}
+            name={"adjustmentReason"}
+            style={{ marginBottom: 0 }}
+            rules={[
+              {
+                required: true,
+                message: "Please input your Adjustment Reason!",
+              },
+            ]}
+          >
+            <SelectComponent placeholder={"Input Adjustment Reason"}>
+              {dataListAdjustmentReason &&
+                dataListAdjustmentReason?.map((data, index) => (
+                  <Select.Option value={data.Id} key={index}>
+                    {data.text}
+                  </Select.Option>
+                ))}
+            </SelectComponent>
+          </Form.Item>
 
           <div className="col-span-4">
             <Form.Item
@@ -618,48 +893,15 @@ const AdjustmentBillingSectionForm = ({
       </CardContainer>
 
       {/* Adjustment Billing Item Information */}
-      <CardContainer
-        subHeader={
-          <div className="flex -my-2 justify-between items-center">
-            <p className="w-full mt-[15px] text-primary">
-              Adjustment Billing Item Information
-            </p>
-            {type !== "detail" && type !== "show" ? (
-              <ButtonComponent
-                type={"submit"}
-                icon={<SVGIcon name="IconButtonCreate" width={20} />}
-                id="create-abi-button"
-              >
-                Create
-              </ButtonComponent>
-            ) : null}
-          </div>
-        }
-      >
+      <CardContainer header={"BILLING ADJUSTMENT ITEM INFORMATION"}>
         <AdjustmentBISectionForm
-          children={
-            <div className="w-full grid grid-cols-4 gap-3">
-              <DetailText label={"Total Adjustment IDR"}>
-                {sumIDR ? currencyFormatting(sumIDR, "idr") : sumIDR}
-              </DetailText>
-              <DetailText label={"Total Adjustment USD"}>
-                {sumUSD ? currencyFormatting(sumUSD, "idr") : sumUSD}
-              </DetailText>
-              <DetailText label={"Total Adjustment EQV IDR"}>
-                {isNaN(dataEqvIdr) ? 0 : currencyFormatting(dataEqvIdr, "idr")}
-              </DetailText>
-              <DetailText label={"Total Adjustment EQV USD"}>
-                {isNaN(dataEqvUSD) ? 0 : currencyFormatting(dataEqvUSD, "idr")}
-              </DetailText>
-            </div>
-          }
           type={type}
           listDataABI={listDataABI}
           setListDataABI={setListDataABI}
-          invoiceNumber={form.getFieldValue().referenceInvoiceNumber}
+          invoiceNumber={referenceInvoiceNumber}
           dataInvoice={dataInvoice}
           adjustmentId={adjustmentId}
-          showCreateButtonInHeader={true}
+          showCreateButtonInHeader={false}
           onCreateClick={(handler) => {
             const btn = document.getElementById("create-abi-button");
             if (btn) {
@@ -668,6 +910,13 @@ const AdjustmentBillingSectionForm = ({
           }}
         />
       </CardContainer>
+
+      {/* Invoice Information */}
+      <InvoiceSectionForm
+        data={dataInvoice}
+        listDataABI={listDataABI}
+        type={type}
+      />
     </div>
   );
 };

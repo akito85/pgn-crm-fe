@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
@@ -214,4 +214,4 @@ const TaxImplication = ({ id = 0 }) => {
   );
 };
 
-export default TaxImplication;
+export default memo(TaxImplication);

@@ -13,6 +13,8 @@ const DateComponent = ({
   placeholder,
   defaultPickerValue,
   key,
+  format = "DD MMM YYYY",
+  showTime = false,
   isPassingId = false,
   id,
 }) => {
@@ -45,7 +47,8 @@ const DateComponent = ({
         style={style}
         placeholder={placeholder}
         allowClear
-        format={"DD MMM YYYY"}
+        format={format}
+        showTime={showTime}
         defaultPickerValue={defaultPickerValue}
       />
     </div>

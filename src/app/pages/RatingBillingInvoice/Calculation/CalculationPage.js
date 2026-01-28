@@ -12,6 +12,9 @@ import {
   donwloadedHistoryExcel,
   getCalculationPaginate,
   getHistoryCalculationPaginate,
+  setFilters,
+  clearFilters,
+  resetCalculationData,
 } from "../../../../redux/slices/rating_billing_invoice/calculation";
 import {
   hasValue,
@@ -27,26 +30,63 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const CalculationPage = () => {
-  const { data: data_calculation, loading } = useSelector(
+  const { data: data_calculation, loading, filters } = useSelector(
     (state) => state.rbi_calculation
   );
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  // PERUBAHAN: State untuk infinite scroll
-  const [page, setPage] = useState(1); // Start from 1
-  const [loadMoreSize] = useState(20); // Load 20 data each time
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [tabHeader, setTabHeader] = useState("Calculation List");
+
+  // Tentukan current tab key
+  const currentTabKey =
+    tabHeader === "Calculation List"
+      ? "calculation_list"
+      : "calculation_history";
+
+  // UBAH: Initialize state dari Redux filters
+  const [page, setPage] = useState(filters[currentTabKey]?.page || 1);
+  const [loadMoreSize] = useState(20);
+  const [sort, setSort] = useState(filters[currentTabKey]?.sort || "");
+  const [search, setSearch] = useState(filters[currentTabKey]?.search || {});
+  const [searchedColumn, setSearchedColumn] = useState(
+    filters[currentTabKey]?.searchedColumn || ""
+  );
+  const [searchText, setSearchText] = useState(
+    filters[currentTabKey]?.searchText || ""
+  );
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["status", "action"],
   }));
+
+  useEffect(() => {
+    dispatch(
+      setFilters({
+        tab: currentTabKey,
+        filters: {
+          search,
+          sort,
+          searchText,
+          searchedColumn,
+          page,
+        },
+      })
+    );
+  }, [search, sort, searchText, searchedColumn, page, currentTabKey, dispatch]);
+
+  useEffect(() => {
+    const savedFilters = filters[currentTabKey];
+    if (savedFilters) {
+      setPage(savedFilters.page || 1);
+      setSort(savedFilters.sort || "");
+      setSearch(savedFilters.search || {});
+      setSearchedColumn(savedFilters.searchedColumn || "");
+      setSearchText(savedFilters.searchText || "");
+    }
+  }, [tabHeader, filters, currentTabKey]);
 
   useEffect(() => {
     if (tabHeader === "Calculation List") {
@@ -104,51 +144,53 @@ const CalculationPage = () => {
     });
   };
 
-  // TAMBAHAN: Load more handler
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data_calculation?.page?.totalPages || 0;
+    const totalElements = data_calculation?.page?.totalElements || 0;
+    const currentDataLength = data_calculation.result?.length || 0;
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
-      if (tabHeader === "Calculation List") {
-        await dispatch(
-          getCalculationPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: nextPage,
-            pageSize: loadMoreSize, // Load 20 more
-            sort,
-            isLoadMore: true, // Flag untuk load more
-          })
-        );
-      } else {
-        await dispatch(
-          getHistoryCalculationPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: nextPage,
-            pageSize: loadMoreSize, // Load 20 more
-            sort,
-            isLoadMore: true, // Flag untuk load more
-          })
-        );
-      }
-      setPage(nextPage);
+    if (currentDataLength >= totalElements) {
+      return;
     }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    if (tabHeader === "Calculation List") {
+      await dispatch(
+        getCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+    } else {
+      await dispatch(
+        getHistoryCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+    }
+    setPage(nextPage);
   };
 
-  // TAMBAHAN: Calculate if there's more data
+  const initialPageSize = 100;
+
   const hasMore =
     (data_calculation.result?.length || 0) <
     (data_calculation?.page?.totalElements || 0);
 
-  // Refresh handler
   const handleRefresh = () => {
     if (tabHeader === "Calculation List") {
       dispatch(
         getCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: page * loadMoreSize || 100,
+          pageSize: initialPageSize,
           sort,
           isLoadMore: false,
         })
@@ -158,7 +200,7 @@ const CalculationPage = () => {
         getHistoryCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: page * loadMoreSize || 100,
+          pageSize: initialPageSize,
           sort,
           isLoadMore: false,
         })
@@ -180,7 +222,7 @@ const CalculationPage = () => {
         key: "calculationCode",
         title: "CALCULATION CODE",
         dataIndex: "calculationCode",
-        width: 200,
+        width: 180,
         sorter: true,
         isClassification: true,
         filteredValue: [search?.calculationCode] || null,
@@ -500,34 +542,6 @@ const CalculationPage = () => {
           ),
       },
       {
-        key: "generateDate",
-        title: "GENERATE DATE",
-        dataIndex: "generateDate",
-        width: 160,
-        isClassification: true,
-        sorter: true,
-        filteredValue: [search?.generateDate] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "generateDate",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "datetime"
-        ),
-        render: (text) =>
-          renderDateColumn(
-            "generateDate",
-            hasValue(search["generateDate"]),
-            searchText,
-            text,
-            "datetime",
-            search
-          ),
-      },
-      {
         key: "progress",
         title: "Σ PROGRESS",
         dataIndex: "progress",
@@ -662,6 +676,92 @@ const CalculationPage = () => {
           renderColumn(
             "remark",
             hasValue(search["remark"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "generateDate",
+        title: "GENERATE DATE",
+        dataIndex: "generateDate",
+        width: 160,
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.generateDate] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "generateDate",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "datetime"
+        ),
+        render: (text) =>
+          renderDateColumn(
+            "generateDate",
+            hasValue(search["generateDate"]),
+            searchText,
+            text,
+            "datetime",
+            search
+          ),
+      },
+      {
+        key: "completionDate",
+        title: "COMPLETION DATE",
+        dataIndex: "completionDate",
+        width: 160,
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.completionDate] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "completionDate",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "datetime"
+        ),
+        render: (text) =>
+          renderDateColumn(
+            "completionDate",
+            hasValue(search["completionDate"]),
+            searchText,
+            text,
+            "datetime",
+            search
+          ),
+      },
+      {
+        key: "createdBy",
+        title: "CREATE BY",
+        dataIndex: "createdBy",
+        width: 200,
+        sorter: true,
+        filteredValue: [search?.createdBy] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "createdBy",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "createdBy",
+            hasValue(search["createdBy"]),
             searchText,
             text,
             true,
@@ -1327,16 +1427,30 @@ const CalculationPage = () => {
   ];
 
   const changeTab = (key) => {
-    setTabHeader((prevState) => {
-      if (prevState !== key) {
-        setPage(1); // Reset to 1
-        setSearch({});
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-      }
-      return key;
-    });
+    // Reset data untuk tab yang ditinggalkan
+    dispatch(resetCalculationData());
+
+    setTabHeader(key);
+
+    // Restore filters untuk tab yang dipilih
+    const newTabKey =
+      key === "Calculation List" ? "calculation_list" : "calculation_history";
+    const savedFilters = filters[newTabKey];
+
+    if (savedFilters) {
+      setSearch(savedFilters.search || {});
+      setSearchText(savedFilters.searchText || "");
+      setSearchedColumn(savedFilters.searchedColumn || "");
+      setSort(savedFilters.sort || "");
+      setPage(savedFilters.page || 1);
+    } else {
+      // Reset ke default jika belum ada saved filters
+      setSearch({});
+      setSearchText("");
+      setSearchedColumn("");
+      setSort("");
+      setPage(1);
+    }
   };
 
   const itemGrantAccess = [
@@ -1449,7 +1563,7 @@ const CalculationPage = () => {
                 dataSource={data_calculation.result}
                 columns={processedColumns}
                 totalData={data_calculation?.page?.totalElements || 0}
-                tableScrolled={{ x: 3000, y: 525 }}
+                tableScrolled={{ x: 2000, y: 525 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 handleDownload={handleDownload}
@@ -1475,7 +1589,7 @@ const CalculationPage = () => {
                 dataSource={data_calculation.result}
                 columns={processedColumns}
                 totalData={data_calculation?.page?.totalElements || 0}
-                tableScrolled={{ x: 2000, y: 525 }}
+                tableScrolled={{ x: 3000, y: 525 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 handleDownload={handleDownload}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
@@ -503,4 +503,4 @@ const InvoiceRelation = ({
   );
 };
 
-export default InvoiceRelation;
+export default memo(InvoiceRelation);

@@ -29,6 +29,22 @@ const initialState = {
   list_calculation_result: [],
   list_calculation_no_paging: [],
   data_user_calculation: {},
+  filters: {
+    calculation_list: {
+      search: {},
+      sort: "",
+      searchText: "",
+      searchedColumn: "",
+      page: 1,
+    },
+    calculation_history: {
+      search: {},
+      sort: "",
+      searchText: "",
+      searchedColumn: "",
+      page: 1,
+    },
+  },
 };
 
 // pagination slice
@@ -626,14 +642,17 @@ export const getDetailCalculationLog = createAsyncThunk(
 // detail calcultaion result
 export const getDetailCalculationResult = createAsyncThunk(
   "GET_DETAIL_CALCULATION_RESULT",
-  async ({ calCode, calType, search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
+  async (
+    { calCode, calType, search, page, pageSize, sort, isLoadMore = false },
+    thunkAPI
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationresult?calCode=${calCode}&calType=${calType}&sort=${sortParams}&page=${page}&size=${pageSize}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      
+
       return {
         ...response.data,
         isLoadMore, // Pass the flag to reducer
@@ -768,10 +787,27 @@ export const retryData = createAsyncThunk(
 const calculationSlice = createSlice({
   name: "calculation",
   initialState,
+  reducers: {
+    setFilters: (state, action) => {
+      const { tab, filters } = action.payload;
+      state.filters[tab] = { ...state.filters[tab], ...filters };
+    },
+    clearFilters: (state, action) => {
+      const { tab } = action.payload;
+      state.filters[tab] = {
+        search: {},
+        sort: "",
+        searchText: "",
+        searchedColumn: "",
+        page: 1,
+      };
+    },
+    resetCalculationData: (state) => {
+      state.data = [];
+    },
+  },
   extraReducers: {
-    // get pagination calculation
     [getCalculationPaginate.pending]: (state, action) => {
-      // Hanya show loading saat initial fetch
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -782,26 +818,27 @@ const calculationSlice = createSlice({
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
-        // Append new data
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.calJobId)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.calJobId)
+        );
         state.data = {
           ...action.payload,
-          result: [...(state.data?.result || []), ...newResult],
+          result: [...(state.data?.result || []), ...uniqueNewData],
         };
       } else {
-        // Replace with new data
         state.data = action.payload;
       }
     },
     [getCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Jangan clear data saat load more gagal
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }
     },
-    // get pagination calculation history
     [getHistoryCalculationPaginate.pending]: (state, action) => {
-      // Hanya show loading saat initial fetch
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -812,19 +849,22 @@ const calculationSlice = createSlice({
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
-        // Append new data
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.resultId)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.resultId)
+        );
         state.data = {
           ...action.payload,
-          result: [...(state.data?.result || []), ...newResult],
+          result: [...(state.data?.result || []), ...uniqueNewData],
         };
       } else {
-        // Replace with new data
         state.data = action.payload;
       }
     },
     [getHistoryCalculationPaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Jangan clear data saat load more gagal
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }
@@ -1034,7 +1074,10 @@ const calculationSlice = createSlice({
         // Append new data
         state.list_calculation_result = {
           ...action.payload,
-          result: [...(state.list_calculation_result?.result || []), ...newResult],
+          result: [
+            ...(state.list_calculation_result?.result || []),
+            ...newResult,
+          ],
         };
       } else {
         // Replace with new data
@@ -1198,5 +1241,6 @@ const calculationSlice = createSlice({
   },
 });
 
+export const { setFilters, clearFilters, resetCalculationData } = calculationSlice.actions;
 const { reducer } = calculationSlice;
 export default reducer;

@@ -1,6 +1,7 @@
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 
+
 export const columnsRating = (
   search,
   page = 0,
@@ -8,7 +9,7 @@ export const columnsRating = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
   // handleDetail = () => {}
 ) => [
   {
@@ -31,7 +32,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -41,7 +42,7 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -57,7 +58,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -67,33 +68,139 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
-    key: "rateTyoe",
-    title: "RATE TYPE",
-    dataIndex: "rateType",
+    key: "currency",
+    title: "CURRENCY",
+    dataIndex: "currency",
     isClassification: true,
     width: 130,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "rateType",
+      "currency",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
-        "rateType",
-        hasValue(search["rateType"]),
+        "currency",
+        hasValue(search["currency"]),
         searchText,
         text,
         false,
         "input",
-        search
+        search,
+      ),
+  },
+  {
+    key: "timeUnit",
+    title: "CONTRACT TIME UNIT",
+    dataIndex: "timeUnit",
+    width: 190,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "timeUnit",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+    render: (text) =>
+      renderColumn(
+        "timeUnit",
+        hasValue(search["timeUnit"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
+    key: "billingCycle",
+    title: "BILLING CYCLE",
+    dataIndex: "billingCycle",
+    width: 150,
+    isClassification: true,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "billingCycle",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+    render: (text) =>
+      renderColumn(
+        "billingCycle",
+        hasValue(search["billingCycle"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
+    key: "periodName",
+    title: "BILLING PERIOD",
+    width: 160,
+    sorter: true,
+    isClassification: true,
+    dataIndex: "periodName",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "periodName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "datePeriod",
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "periodName",
+        hasValue(search["periodName"]),
+        searchText,
+        text,
+        "datePeriod",
+        search,
+      ),
+  },
+  {
+    key: "transactionDate",
+    title: "TRANSACTION DATE",
+    width: 180,
+    sorter: true,
+    isClassification: true,
+    dataIndex: "transactionDate",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "transactionDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date",
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "transactionDate",
+        hasValue(search["transactionDate"]),
+        searchText,
+        text,
+        "date",
+        search,
       ),
   },
   {
@@ -108,7 +215,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -118,14 +225,14 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
-    width: 180,
+    width: 170,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -133,7 +240,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -143,14 +250,14 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
-    width: 180,
+    width: 170,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -158,7 +265,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -168,7 +275,7 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -183,7 +290,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -193,7 +300,7 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -209,7 +316,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -219,7 +326,7 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -235,7 +342,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -245,7 +352,7 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -261,7 +368,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -271,33 +378,7 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
-      ),
-  },
-  {
-    key: "mreadingCode",
-    title: "METER READING CODE",
-    dataIndex: "mreadingCode",
-    width: 200,
-    isClassification: true,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "mreadingCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "mreadingCode",
-        hasValue(search["mreadingCode"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
+        search,
       ),
   },
   {
@@ -313,7 +394,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -323,110 +404,59 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
-  {
-    key: "accGroupType",
+    {
+    key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
-    dataIndex: "accGroupType",
+    dataIndex: "accountGroupType",
     width: 210,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "accGroupType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "accGroupType",
-        hasValue(search["accGroupType"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "billingCycle",
-    title: "BILLING CYCLE",
-    dataIndex: "billingCycle",
-    width: 170,
-    isClassification: true,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "billingCycle",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "billingCycle",
-        hasValue(search["billingCycle"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "billingPeriod",
-    title: "BILLING PERIOD",
-    width: 160,
-    sorter: true,
-    isClassification: true,
-    dataIndex: "billingPeriod",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "billingPeriod",
+      "accountGroupType",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
-      "datePeriod"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "billingPeriod",
-        hasValue(search["billingPeriod"]),
-        searchText,
-        text,
-        "datePeriod",
-        search
-      ),
-  },
-  {
-    key: "saNumber",
-    title: "SA NUMBER",
-    dataIndex: "saNumber",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "saNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
     ),
     render: (text) =>
       renderColumn(
-        "saNumber",
-        hasValue(search["saNumber"]),
+        "accountGroupType",
+        hasValue(search["accountGroupType"]),
         searchText,
         text,
         false,
         "input",
-        search
+        search,
+      ),
+  },
+  {
+    key: "meterReadingCode",
+    title: "METER READING CODE",
+    dataIndex: "meterReadingCode",
+    width: 200,
+    isClassification: true,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "meterReadingCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+    render: (text) =>
+      renderColumn(
+        "meterReadingCode",
+        hasValue(search["meterReadingCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
       ),
   },
   {
@@ -441,7 +471,7 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -451,1273 +481,719 @@ export const columnsRating = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
-    key: "minContract",
-    title: "MIN CONTRACT",
+    title: "SERVICE AGREEMENT",
+    children: [
+      {
+        key: "saType",
+        title: "SA TYPE",
+        dataIndex: "saType",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "saType",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "saType",
+            hasValue(search["saType"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "paymentType",
+        title: "PAYMENT TYPE",
+        dataIndex: "paymentType",
+        width: 130,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "paymentType",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "paymentType",
+            hasValue(search["paymentType"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "saNumber",
+        title: "SA NUMBER",
+        dataIndex: "saNumber",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "saNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "saNumber",
+            hasValue(search["saNumber"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "minUsage",
+        title: "MIN USAGE",
+        dataIndex: "minUsage",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "minUsage",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "minUsage",
+            hasValue(search["minUsage"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "maxUsage",
+        title: "MAX USAGE",
+        dataIndex: "maxUsage",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "maxUsage",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "maxUsage",
+            hasValue(search["maxUsage"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "priceCode",
+        title: "PRICE CODE",
+        dataIndex: "priceCode",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "priceCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "priceCode",
+            hasValue(search["priceCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "price",
+        title: "PRICE",
+        dataIndex: "price",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "price",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "price",
+            hasValue(search["price"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "uom",
+        title: "UOM",
+        dataIndex: "uom",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "uom",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "uom",
+            hasValue(search["uom"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+    ],
+  },
+  {
+    title: "CALCULATED USAGE PARTITION",
+    children: [
+      {
+        key: "calculatedUsageMin",
+        title: "MIN",
+        dataIndex: "calculatedUsageMin",
+        width: 120,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calculatedUsageMin",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "calculatedUsageMin",
+            hasValue(search["calculatedUsageMin"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "calculatedUsageNormal",
+        title: "NOMRAL",
+        dataIndex: "calculatedUsageNormal",
+        width: 130,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calculatedUsageNormal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "calculatedUsageNormal",
+            hasValue(search["calculatedUsageNormal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "calculatedUsageUop",
+        title: "OUP",
+        dataIndex: "calculatedUsageUop",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calculatedUsageUop",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "calculatedUsageUop",
+            hasValue(search["calculatedUsageUop"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "calculatedAdjustment",
+        title: "ADJUSTMENT",
+        dataIndex: "calculatedAdjustment",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calculatedAdjustment",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "calculatedAdjustment",
+            hasValue(search["calculatedAdjustment"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "calculatedTotal",
+        title: "TOTAL CALCULATED",
+        dataIndex: "calculatedTotal",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calculatedTotal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "calculatedTotal",
+            hasValue(search["calculatedTotal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+    ],
+  },
+  {
+    title: "CONVERTED CALCULATED USAGE PARTITION",
+    children: [
+      {
+        key: "convertedCalculatedUom",
+        title: "UOM",
+        dataIndex: "convertedCalculatedUom",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "convertedCalculatedUom",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          "currency-idr",
+        ),
+        render: (text) =>
+          renderColumn(
+            "convertedCalculatedUom",
+            hasValue(search["convertedCalculatedUom"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "convertedCalculatedMin",
+        title: "MIN",
+        dataIndex: "convertedCalculatedMin",
+        width: 130,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "convertedCalculatedMin",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "convertedCalculatedMin",
+            hasValue(search["convertedCalculatedMin"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "convertedCalculatedNormal",
+        title: "NORMAL",
+        dataIndex: "convertedCalculatedNormal",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "convertedCalculatedNormal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "convertedCalculatedNormal",
+            hasValue(search["convertedCalculatedNormal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "convertedCalculatedOup",
+        title: "OUP",
+        dataIndex: "convertedCalculatedOup",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "convertedCalculatedOup",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "convertedCalculatedOup",
+            hasValue(search["convertedCalculatedOup"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "convertedCalculatedAdjustment",
+        title: "ADJUSMENT",
+        dataIndex: "convertedCalculatedAdjustment",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "convertedCalculatedAdjustment",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "convertedCalculatedAdjustment",
+            hasValue(search["convertedCalculatedAdjustment"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "convertedCalculatedTotal",
+        title: "TOTAL CALCULATED",
+        dataIndex: "convertedCalculatedTotal",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "convertedCalculatedTotal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "convertedCalculatedTotal",
+            hasValue(search["convertedCalculatedTotal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+    ],
+  },
+  {
+    title: "AMOUNT PARTITION",
+    children: [
+      {
+        key: "amountPartitionMin",
+        title: "MIN",
+        dataIndex: "amountPartitionMin",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "amountPartitionMin",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "amountPartitionMin",
+            hasValue(search["amountPartitionMin"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "amountPartitionNormal",
+        title: "NORMAL",
+        dataIndex: "amountPartitionNormal",
+        width: 130,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "amountPartitionNormal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "amountPartitionNormal",
+            hasValue(search["amountPartitionNormal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+      {
+        key: "amountPartitionOup",
+        title: "OUP",
+        dataIndex: "amountPartitionOup",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "amountPartitionOup",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+        ),
+        render: (text) =>
+          renderColumn(
+            "amountPartitionOup",
+            hasValue(search["amountPartitionOup"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            "currency-idr",
+          ),
+      },
+    ],
+  },
+  {
+    key: "amountPartition",
+    title: "AMOUNT",
     width: 160,
-    dataIndex: "minContract",
+    dataIndex: "amountPartition",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "minContract",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "minContract",
-        hasValue(search["minContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "maxContract",
-    title: "MAX CONTRACT",
-    width: 160,
-    dataIndex: "maxContract",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "maxContract",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "maxContract",
-        hasValue(search["maxContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "uom",
-    title: "UOM",
-    dataIndex: "uom",
-    width: 100,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "uom",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "uom",
-        hasValue(search["uom"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "timeUnitContract",
-    title: "CONTRACT TIME UNIT",
-    dataIndex: "timeUnitContract",
-    width: 190,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "timeUnitContract",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "timeUnitContract",
-        hasValue(search["timeUnitContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "usage",
-    title: "USAGE",
-    width: 110,
-    dataIndex: "usage",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "usage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "usage",
-        hasValue(search["usage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convUsageM3",
-    title: "CONVERTED USAGE M3",
-    width: 200,
-    dataIndex: "convUsageM3",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convUsageM3",
-        hasValue(search["convUsageM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convUsageMmbtu",
-    title: "CONVERTED USAGE MMBTU",
-    dataIndex: "convUsageMmbtu",
-    width: 230,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convUsageMmbtu",
-        hasValue(search["convUsageMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "discountUsage",
-    title: "DISCOUNT USAGE",
-    dataIndex: "discountUsage",
-    width: 180,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "discountUsage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "discountUsage",
-        hasValue(search["discountUsage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalUsage",
-    title: "TOTAL USAGE",
-    width: 150,
-    dataIndex: "totalUsage",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalUsage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalUsage",
-        hasValue(search["totalUsage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convTotalUsageM3",
-    title: "CONVERTED TOTAL USAGE M3",
-    dataIndex: "convTotalUsageM3",
-    width: 250,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convTotalUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convTotalUsageM3",
-        hasValue(search["convTotalUsageM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convTotalUsageMmbtu",
-    title: "CONVERTED TOTAL USAGE MMBTU",
-    width: 280,
-    dataIndex: "convTotalUsageMmbtu",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convTotalUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convTotalUsageMmbtu",
-        hasValue(search["convTotalUsageMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "minimumUsage",
-    title: "MINIMUM USAGE",
-    width: 170,
-    dataIndex: "minimumUsage",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "minimumUsage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "minimumUsage",
-        hasValue(search["minimumUsage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convMinimumUsageM3",
-    title: "CONVERTED MINIMUM USAGE M3",
-    width: 270,
-    dataIndex: "convMinimumUsageM3",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convMinimumUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convMinimumUsageM3",
-        hasValue(search["convMinimumUsageM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convMinimumUsageMmbtu",
-    title: "CONVERTED MINIMUM USAGE MMBTU",
-    dataIndex: "convMinimumUsageMmbtu",
-    width: 280,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convMinimumUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convMinimumUsageMmbtu",
-        hasValue(search["convMinimumUsageMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "normalUsage",
-    title: "NORMAL USAGE",
-    width: 160,
-    dataIndex: "normalUsage",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "normalUsage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "normalUsage",
-        hasValue(search["normalUsage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convNormalUsageM3",
-    title: "CONVERTED NORMAL USAGE M3",
-    width: 270,
-    dataIndex: "convNormalUsageM3",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convNormalUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convNormalUsageM3",
-        hasValue(search["convNormalUsageM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convNormalUsageMmbtu",
-    title: "CONVERTED NORMAL USAGE MMBTU",
-    width: 280,
-    dataIndex: "convNormalUsageMmbtu",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convNormalUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convNormalUsageMmbtu",
-        hasValue(search["convNormalUsageMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "oup",
-    title: "OUP",
-    dataIndex: "oup",
-    width: 120,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "oup",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "oup",
-        hasValue(search["oup"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convOupM3",
-    title: "CONVERTED OUP M3",
-    dataIndex: "convOupM3",
-    width: 200,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convOupM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convOupM3",
-        hasValue(search["convOupM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convOupMmbtu",
-    title: "CONVERTED OUP MMBTU",
-    width: 210,
-    dataIndex: "convOupMmbtu",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convOupMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convOupMmbtu",
-        hasValue(search["convOupMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "calculatedUsage",
-    title: "CALCULATED USAGE",
-    width: 190,
-    dataIndex: "calculatedUsage",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "calculatedUsage",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "calculatedUsage",
-        hasValue(search["calculatedUsage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convCalculatedUsageM3",
-    title: "CONVERTED CALCULATED USAGE M3",
-    dataIndex: "convCalculatedUsageM3",
-    width: 290,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convCalculatedUsageM3",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convCalculatedUsageM3",
-        hasValue(search["convCalculatedUsageM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "convCalculatedUsageMmbtu",
-    title: "CONVERTED CALCULATED USAGE MMBTU",
-    dataIndex: "convCalculatedUsageMmbtu",
-    width: 300,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convCalculatedUsageMmbtu",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "convCalculatedUsageMmbtu",
-        hasValue(search["convCalculatedUsageMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "currency",
-    title: "CURRENCY",
-    dataIndex: "currency",
-    width:150,
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "currency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "currency",
-        hasValue(search["currency"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "rate",
-    title: "RATE",
-    dataIndex: "rate",
-    width: 110,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "rate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "rate",
-        hasValue(search["rate"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "rateDate",
-    title: "RATE DATE",
-    sorter: true,
-    width: 130,
-    isClassification: true,
-    dataIndex: "rateDate",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "rateDate",
+      "amountPartition",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "rateDate",
-        hasValue(search["rateDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    key: "totalAmountMinIdr",
-    title: "TOTAL AMOUNT MINIMUM IDR",
-    dataIndex: "totalAmountMinIdr",
-    width: 250,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountMinIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
     ),
     render: (text) =>
       renderColumn(
-        "totalAmountMinIdr",
-        hasValue(search["totalAmountMinIdr"]),
+        "amountPartition",
+        hasValue(search["amountPartition"]),
         searchText,
         text,
         false,
         "input",
-        search
+        search,
+        "currency-idr",
       ),
   },
   {
-    key: "totalAmountMinUsd",
-    title: "TOTAL AMOUNT MINIMUM USD",
-    dataIndex: "totalAmountMinUsd",
-    width: 240,
+    key: "amountPartitionAdjustment",
+    title: "TOTAL ADJUSTMENT",
+    width: 160,
+    dataIndex: "amountPartitionAdjustment",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "totalAmountMinUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountMinUsd",
-        hasValue(search["totalAmountMinUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  // {
-  //   key: "totalAmountMinEqvIdr",
-  //   title: "TOTAL AMOUNT MINIMUM EQV IDR",
-  //   dataIndex: "totalAmountMinEqvIdr",
-  //   width: 270,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountMinEqvIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountMinEqvIdr",
-  //       hasValue(search["totalAmountMinEqvIdr"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  // {
-  //   key: "totalAmountMinEqvUsd",
-  //   title: "TOTAL AMOUNT MINIMUM EQV USD",
-  //   dataIndex: "totalAmountMinEqvUsd",
-  //   width: 270,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountMinEqvUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountMinEqvUsd",
-  //       hasValue(search["totalAmountMinEqvUsd"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  {
-    key: "totalAmountNormalIdr",
-    title: "TOTAL AMOUNT NORMAL IDR",
-    dataIndex: "totalAmountNormalIdr",
-    width: 250,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountNormalIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountNormalIdr",
-        hasValue(search["totalAmountNormalIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountNormalUsd",
-    title: "TOTAL AMOUNT NORMAL USD",
-    dataIndex: "totalAmountNormalUsd",
-    width: 250,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountNormalUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountNormalUsd",
-        hasValue(search["totalAmountNormalUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  // {
-  //   key: "totalAmountNormalEqvIdr",
-  //   title: "TOTAL AMOUNT NORMAL EQV IDR",
-  //   dataIndex: "totalAmountNormalEqvIdr",
-  //   width: 270,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountNormalEqvIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountNormalEqvIdr",
-  //       hasValue(search["totalAmountNormalEqvIdr"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  // {
-  //   key: "totalAmountNormalEqvUsd",
-  //   title: "TOTAL AMOUNT NORMAL EQV USD",
-  //   dataIndex: "totalAmountNormalEqvUsd",
-  //   width: 270,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountNormalEqvUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountNormalEqvUsd",
-  //       hasValue(search["totalAmountNormalEqvUsd"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  {
-    key: "totalAmountOupIdr",
-    title: "TOTAL AMOUNT OUP IDR",
-    dataIndex: "totalAmountOupIdr",
-    width: 210,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountOupIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountOupIdr",
-        hasValue(search["totalAmountOupIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountOupUsd",
-    title: "TOTAL AMOUNT OUP USD",
-    dataIndex: "totalAmountOupUsd",
-    width: 220,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountOupUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountOupUsd",
-        hasValue(search["totalAmountOupUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  // {
-  //   key: "totalAmountOupEqvIdr",
-  //   title: "TOTAL AMOUNT OUP EQV IDR",
-  //   dataIndex: "totalAmountOupEqvIdr",
-  //   width: 250,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountOupEqvIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountOupEqvIdr",
-  //       hasValue(search["totalAmountOupEqvIdr"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  // {
-  //   key: "totalAmountOupEqvUsd",
-  //   title: "TOTAL AMOUNT OUP EQV USD",
-  //   dataIndex: "totalAmountOupEqvUsd",
-  //   width: 250,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountOupEqvUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountOupEqvUsd",
-  //       hasValue(search["totalAmountOupEqvUsd"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  {
-    key: "amountIdr",
-    title: "AMOUNT IDR",
-    dataIndex: "amountIdr",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "amountIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "amountIdr",
-        hasValue(search["amountIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "amountUsd",
-    title: "AMOUNT USD",
-    dataIndex: "amountUsd",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "amountUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "amountUsd",
-        hasValue(search["amountUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  // {
-  //   key: "amountEqvIdr",
-  //   title: "AMOUNT EQV IDR",
-  //   dataIndex: "amountEqvIdr",
-  //   width: 170,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "amountEqvIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "amountEqvIdr",
-  //       hasValue(search["amountEqvIdr"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  // {
-  //   key: "amountEqvUsd",
-  //   title: "AMOUNT EQV USD",
-  //   dataIndex: "amountEqvUsd",
-  //   width: 170,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "amountEqvUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "amountEqvUsd",
-  //       hasValue(search["amountEqvUsd"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  {
-    key: "discountAmount",
-    title: "DISCOUNT AMOUNT",
-    dataIndex: "discountAmount",
-    width: 180,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "discountAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "discountAmount",
-        hasValue(search["discountAmount"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountIdr",
-    title: "TOTAL AMOUNT IDR",
-    dataIndex: "totalAmountIdr",
-    width: 190,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountIdr",
-        hasValue(search["totalAmountIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    key: "totalAmountUsd",
-    title: "TOTAL AMOUNT USD",
-    dataIndex: "totalAmountUsd",
-    width: 190,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountUsd",
-        hasValue(search["totalAmountUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  // {
-  //   key: "totalAmountEqvIdr",
-  //   title: "TOTAL AMOUNT EQV IDR",
-  //   dataIndex: "totalAmountEqvIdr",
-  //   width: 210,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountEqvIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountEqvIdr",
-  //       hasValue(search["totalAmountEqvIdr"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  // {
-  //   key: "totalAmountEqvUsd",
-  //   title: "TOTAL AMOUNT EQV USD",
-  //   dataIndex: "totalAmountEqvUsd",
-  //   width: 210,
-  //   sorter: true,
-  //   isNumber: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "totalAmountEqvUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "totalAmountEqvUsd",
-  //       hasValue(search["totalAmountEqvUsd"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  {
-    key: "transactionDate",
-    title: "TRANSACTION DATE",
-    width: 190,
-    sorter: true,
-    isClassification: true,
-    dataIndex: "transactionDate",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "transactionDate",
+      "amountPartitionAdjustment",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
-      "date"
     ),
     render: (text) =>
-      renderDateColumn(
-        "transactionDate",
-        hasValue(search["transactionDate"]),
+      renderColumn(
+        "amountPartitionAdjustment",
+        hasValue(search["amountPartitionAdjustment"]),
         searchText,
         text,
-        "date",
-        search
+        false,
+        "input",
+        search,
+        "currency-idr",
       ),
   },
-  // {
-  //   key: "accountingDate",
-  //   title: "ACCOUNTING DATE",
-  //   sorter: true,
-  //   align: "center",
-  //   dataIndex: "accountingDate",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "accountingDate",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //     true,
-  //     "date"
-  //   ),
-  //   render: (text) => renderDateColumn('accountingDate', hasValue(search['accountingDate']), searchText, text, 'date', search)
-  // },
+  {
+    key: "amountPartitionTotal",
+    title: "TOTAL AMOUNT",
+    width: 160,
+    dataIndex: "amountPartitionTotal",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "amountPartitionTotal",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+    render: (text) =>
+      renderColumn(
+        "amountPartitionTotal",
+        hasValue(search["amountPartitionTotal"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "currency-idr",
+      ),
+  },
 ];

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
@@ -11,6 +12,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
 import {
   DownloadOutlined,
+  EyeOutlined
 } from "@ant-design/icons";
 import {
   Checkbox,
@@ -19,6 +21,7 @@ import {
   Tooltip,
 } from "antd";
 import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import StatusComponent from "../../../../../components/StatusComponent";
 import {
   getAllApprovalList,
@@ -51,6 +54,7 @@ export const columnsBank = (
       title: "NO",
       width: 60,
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -448,11 +452,11 @@ const ViewBank = () => {
   const handleApprovalHistory = async (data) => {
     try {
       setBody(data);
-      await dispatch(getApprovalHistory(data.id))?.unwrap(); 
+      await dispatch(getApprovalHistory(data.id))?.unwrap();
       setOpenModalHistory(true);
     } catch (error) {
       setOpenModalHistory(false);
-      
+
     }
   };
 
@@ -469,20 +473,6 @@ const ViewBank = () => {
 
   const itemActions = [
     // toolbar items
-    {
-      action: "Download",
-      type: "table",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
     {
       action: "Create",
       type: "table",
@@ -515,7 +505,9 @@ const ViewBank = () => {
                   icon={<SVGIcon name="IconDetail" width={24} />}
                   border={falsFe}
                 /> */}
-              <SVGIcon name="IconDetail" width={24} />
+              <EyeOutlined
+                style={{ fontSize: "24px" }}
+              />
             </Link>
           </Tooltip>
         );
@@ -673,11 +665,21 @@ const ViewBank = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"BANK LIST"}>
-          <TablePagination
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">BANK LIST</p>
+              <div className="flex gap-2">
+                <Toolbar items={itemActions} />
+              </div>
+            </div>
+          }
+        >
+          <TableRBI
             dataSource={data?.result}
             pageSize={pageSize}
+            showExport={true}
+            handleDownload={handleDownload}
             columns={[
               ...columnsBank(
                 page,
@@ -701,11 +703,11 @@ const ViewBank = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 3800,
+              x: "max-content",
               y: 525,
             }}
           />
-        </BaseContainer>
+        </CardContainer>
 
         <ModalInactivateWithHierarchy
           dispatch={dispatch}

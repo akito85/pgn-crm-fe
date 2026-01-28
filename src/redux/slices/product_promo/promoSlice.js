@@ -21,6 +21,7 @@ const initialState = {
   isSuccess: false,
   message: "",
   data_budget: [],
+  data_country: [],
   data_province: [],
   data_city: [],
   data_industrial_sector: [],
@@ -33,6 +34,7 @@ const initialState = {
   data_cost_center: [],
   data_Gsizes: [],
   data_product: [],
+  data_product_version: [],
   data_customerSegment: [],
   data_customer: [],
   data_adjustment_type: [],
@@ -43,7 +45,6 @@ const initialState = {
   data_condition_type: [],
   data_promo_type: [],
   data_promotion_type: [],
-  data_promo_category: [],
   data_from_item: [],
   data_tiering: [],
   data_uom: [],
@@ -418,24 +419,6 @@ export const getListPromotionType = createAsyncThunk(
   }
 );
 
-export const getListPromoCategory = createAsyncThunk(
-  "GET_PROMO_CATEGORY_LIST",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/product-promo/promo-category`;
-      const response = await productPromoHttpService.getAll(url);
-      return response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error, action: "GET_PROMO_CATEGORY_LIST" })
-      );
-      return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
-      );
-    }
-  }
-);
-
 export const inactivePromo = createAsyncThunk(
   "INACTIVE_PROMO",
   async (body, thunkAPI) => {
@@ -483,6 +466,37 @@ export const getProductList = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/product`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.data?.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getProductVersionList = createAsyncThunk(
+  "GET_PRODUCT_VERSION_PROMO",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/product-version/${id}`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.data?.map((item) => {
         return {
@@ -635,9 +649,40 @@ export const getCityList = createAsyncThunk(
 
 export const getProvinceList = createAsyncThunk(
   "GET_PROVINCE_PROMO",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/province/${id}`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.map((item) => {
+        return {
+          value: item.id,
+          label: item.text,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getCountryList = createAsyncThunk(
+  "GET_COUNTRY_PROMO",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/product-promo/province`;
+      const url = `/v1/dbs/api/product-promo/country`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
@@ -1093,6 +1138,7 @@ export const getFromItemList = createAsyncThunk(
         return {
           value: item.id,
           label: item.text,
+          source: item.source,
         };
       });
     } catch (error) {
@@ -1276,6 +1322,19 @@ const promoSlice = createSlice({
       state.data_product = action.payload;
     },
 
+    [getProductVersionList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_product_version = action.payload;
+    },
+    [getProductVersionList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_product_version = action.payload;
+    },
+    [getProductVersionList.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_product_version = action.payload;
+    },
+
     [getBudgetList.pending]: (state, action) => {
       state.loading = true;
       state.data_budget = action.payload;
@@ -1339,6 +1398,19 @@ const promoSlice = createSlice({
     [getProvinceList.rejected]: (state, action) => {
       state.loading = false;
       state.data_province = action.payload;
+    },
+
+    [getCountryList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_country = action.payload;
+    },
+    [getCountryList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
+    },
+    [getCountryList.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
     },
 
     [getCostCenterList.pending]: (state, action) => {
@@ -1517,18 +1589,6 @@ const promoSlice = createSlice({
     [getListPromotionType.rejected]: (state, action) => {
       state.loading = false;
       state.data_promotion_type = action.payload;
-    },
-
-    [getListPromoCategory.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListPromoCategory.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_promo_category = action.payload;
-    },
-    [getListPromoCategory.rejected]: (state, action) => {
-      state.loading = false;
-      state.data_promo_category = action.payload;
     },
 
     [getAdjustmentTypeList.pending]: (state) => {

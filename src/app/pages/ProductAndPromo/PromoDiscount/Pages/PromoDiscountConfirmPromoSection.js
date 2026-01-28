@@ -38,6 +38,7 @@ const PromoDiscountConfirmPromoSection = ({
               "FROM ITEM",
               "TIERING",
             ]}
+            selector="promo"
           />
         );
       case "Conditions":

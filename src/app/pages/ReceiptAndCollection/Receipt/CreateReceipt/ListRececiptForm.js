@@ -1,5 +1,5 @@
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import { Form, Spin } from "antd";
+import { Form, Spin, Steps } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -41,6 +41,10 @@ import {
   getReceiptChanelDDL,
   resetConvertedAmount,
   resetDataAccountNumber,
+  getAccountTypeDDL,
+  getAccountNumberByTypeDDL,
+  getUnifiedCreateReceiptDdl,
+  getAllAccountNumberDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
@@ -66,6 +70,7 @@ const ListRececiptForm = ({ type }) => {
     dataListAppHierDetail,
     loading,
     data_converted_currency,
+    accountTypeDDL,
   } = useSelector((state) => state.receipt);
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -94,7 +99,6 @@ const ListRececiptForm = ({ type }) => {
   const [loadingForm, setLoadingForm] = useState(false);
   const [requestBodyConvertedRate, setRequestBodyConvertedRate] = useState({});
   const [allValues, setAllValues] = useState(null);
-  const [isMisc, setIsMisc] = useState(false);
 
   const isLoading = loading || loadingForm;
 
@@ -103,15 +107,18 @@ const ListRececiptForm = ({ type }) => {
     dispatch(resetDataAccountNumber());
     dispatch(getAllApprovalListReceipt());
     dispatch(getRateTypeDDL());
-    dispatch(getPayDeliverDDL());
-    dispatch(getPayGetwayDDL());
+    // dispatch(getPayDeliverDDL());
+    // dispatch(getPayGetwayDDL());
     dispatch(getBankDDL());
-    dispatch(getCollectionAgentDDL());
+    // dispatch(getCollectionAgentDDL());
     dispatch(getCusNumberDDL());
     dispatch(getCurrencyDDL());
-    dispatch(getPayTypeDDL());
-    dispatch(getPayMethodDDL());
+    // dispatch(getPayTypeDDL());
+    dispatch(getUnifiedCreateReceiptDdl());
+    // dispatch(getPayMethodDDL());
     dispatch(getReceiptChanelDDL());
+    dispatch(getAccountTypeDDL());
+    dispatch(getAllAccountNumberDDL());
   }, [dispatch]);
 
   // APPROVAL HIERARCHY
@@ -198,9 +205,16 @@ const ListRececiptForm = ({ type }) => {
 
       if (hasValue(accNumb)) {
         form.setFieldsValue({
-          cusName: accountNumbers?.data?.customerName,
-          area: accountNumbers?.data?.area,
-          segment: accountNumbers?.data?.segment,
+          cusName: dataAccountNumber?.data?.customerName,
+          area: dataAccountNumber?.data?.area,
+          segment: dataAccountNumber?.data?.segment,
+          accountType: dataAccountNumber?.data?.accountType,
+          accountGroupType: dataAccountNumber?.data?.accountType, // Same as Account Type
+          accountName: dataAccountNumber?.data?.accountName,
+          sor: dataAccountNumber?.data?.sor,
+          cusNumber: dataAccountNumber?.data?.customerNumber,
+          costCenterCode: dataAccountNumber?.data?.area, // TODO: Backend needs to split
+          costCenterName: dataAccountNumber?.data?.area, // TODO: Backend needs to split
         });
       }
     }
@@ -247,8 +261,9 @@ const ListRececiptForm = ({ type }) => {
     return Math.round(value * 10) / 10;
   };
 
-  const convertToInteger = (amount) => {
-    return parseInt(amount?.toString().replace(/\./g, "").replace(",", "."));
+  const convertToFloat = (amount) => {
+    if (!amount) return 0;
+    return parseFloat(amount?.toString().replace(/\./g, "").replace(",", "."));
   };
 
 
@@ -269,50 +284,40 @@ const ListRececiptForm = ({ type }) => {
         ? formValue?.amount
         : 0;
 
+      const rateAmountValue = data_converted_currency?.convertedRate?.toLocaleString(
+        "en-US",
+        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+      );
+
       if (
         hasValue(formValue?.convertedCurrency) &&
-        hasValue(formValue?.currency) &&
-        hasValue(formValue?.rateAmount)
+        hasValue(formValue?.currency)
       ) {
         if (formValue?.currency === 243) {
-          const eqAmountValue = data_converted_currency?.convertedRate * convertToInteger(convertedAmount);
+          const eqAmountValue = data_converted_currency?.convertedRate * convertToFloat(convertedAmount);
 
           form.setFieldsValue({
-            rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-              "en-US",
-              { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-            ),
+            rateAmount: rateAmountValue,
             eqAmount: eqAmountValue.toLocaleString("id-ID", {
-              minimumFractionDigits: 2, // Tambahkan dua angka desimal
+              minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }) || "0"
           });
         } else if (formValue?.currency === 244) {
-          const convertValue = convertToInteger(convertedAmount)
+          const convertValue = convertToFloat(convertedAmount)
           const eqAmountValue = roundToOneDecimal(convertValue / data_converted_currency?.convertedRate)
 
           form.setFieldsValue({
-            rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-              "en-US",
-              {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }
-            ),
+            rateAmount: rateAmountValue,
             eqAmount: eqAmountValue
-
           });
         }
       } else {
         form.setFieldsValue({
-          rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-            "en-US",
-            { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-          ),
+          rateAmount: rateAmountValue,
           eqAmount: 0,
         });
       }
-
     }
   }, [data_converted_currency, form, amount]);
 
@@ -390,19 +395,25 @@ const ListRececiptForm = ({ type }) => {
     {
       value: "Receipt",
       paramValue: [
-        "cusNumber",
+        "miscellaneous",
         "accNumber",
+        "cusNumber",
         "cusName",
-        "area",
+        "accountName",
         "segment",
+        "accountGroupType",
+        "sor",
+        "costCenterCode",
+        "costCenterName",
+        "receiptCode",
         "receiptChannel",
+        "paymentType",
         "paymentGateway",
         "collectingAgent",
         "deliveryChannel",
         "method",
-        "receiptDate",
-        "paymentType",
         "bank",
+        "receiptDate",
         "currency",
         "amount",
         "rateType",
@@ -410,6 +421,7 @@ const ListRececiptForm = ({ type }) => {
         "rateAmount",
         "convertedCurrency",
         "eqAmount",
+        "description",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -484,11 +496,17 @@ const ListRececiptForm = ({ type }) => {
       const dataValue = {
         // receiptId: ,
         appHierId: selectedHierarchy,
-        areaId: formValue?.area,
-        customerId: formValue?.cusNumber,
+        areaId: dataAccountNumber?.data?.areaId,
+        customerId: dataAccountNumber?.data?.customerId,
         accountId: formValue?.accNumber,
         customerName: formValue?.cusName,
-        segmentId: formValue?.segment,
+        segmentId: dataAccountNumber?.data?.segmentId,
+        accountType: formValue?.accountType,
+        accountName: formValue?.accountName,
+        customerNumber: formValue?.cusNumber,
+        sor: formValue?.sor,
+        area: formValue?.area,
+        segment: formValue?.segment,
         receiptDate: moment(formValue?.receiptDate).format(
           dateFormatting.dateTime
         ),
@@ -515,7 +533,7 @@ const ListRececiptForm = ({ type }) => {
         })),
         description: formValue?.description,
         receiptCode: formValue?.receiptCode,
-        isMisc: isMisc,
+        isMisc: formValue?.miscellaneous === "Yes", // Map "Yes"/"No" to true/false
       };
 
       setBodyData(dataValue);
@@ -600,7 +618,6 @@ const ListRececiptForm = ({ type }) => {
     setRequestBodyConvertedRate({});
     setListDataAttachment([]);
     setAppHierDataDetail([]);
-    setIsMisc();
     setTabData(
       tabData?.map((item) => {
         const { errorBadge, ...keys } = item;
@@ -633,6 +650,17 @@ const ListRececiptForm = ({ type }) => {
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
+      {/* Step Indicator */}
+      <div className="mb-3">
+        <Steps
+          current={tabData.findIndex(tab => tab.value === valuePage)}
+          items={[
+            { title: 'CREATE RECEIPT' },
+            { title: 'APPROVAL' },
+            { title: 'ATTACHMENT' }
+          ]}
+        />
+      </div>
       {/* <Spin spinning={loadingForm}> */}
       <RadioTabs
         data={tabData}
@@ -678,8 +706,7 @@ const ListRececiptForm = ({ type }) => {
               setRequestBodyConverted={setRequestBodyConvertedRate}
               rateAmountValues={data_converted_currency?.convertedRate}
               formValues={allValues}
-              isMisc={isMisc}
-              setIsMisc={setIsMisc}
+              accountTypeDDL={accountTypeDDL}
             />
           </div>
           <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
@@ -801,7 +828,6 @@ const ListRececiptForm = ({ type }) => {
           payMethodDDL={payMethodDDL}
           dataReceiptChannelDDL={dataReceiptChannelDDL}
           dataAccNumber={dataAccNumber}
-          isMisc={isMisc}
           rateString={formValue?.rateAmount}
         />
       </ModalCustom>

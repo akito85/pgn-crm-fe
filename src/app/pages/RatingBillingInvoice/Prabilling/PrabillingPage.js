@@ -13,6 +13,8 @@ import {
   getListBillingPeriodForPrabilling,
   resetSummaryData,
   resetAllTabData,
+  setFilters,
+  clearFilters,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
@@ -35,22 +37,29 @@ const PrabillingPage = () => {
     list_prabilling_summary,
     summary_pagination,
     list_period_summary,
+    filters,
   } = useSelector((state) => state.rbi_prabilling);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const detailRef = useRef(null);
 
-  const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20);
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [valueTab, setValueTab] = useState("All");
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
+  const currentTabKey = valueTab === "All" ? "all_tab" : "summary_tab";
+  const [page, setPage] = useState(filters[currentTabKey]?.page || 1);
+  const [loadMoreSize] = useState(20);
+  const [sort, setSort] = useState(filters[currentTabKey]?.sort || "");
+  const [search, setSearch] = useState(filters[currentTabKey]?.search || {});
+  const [searchedColumn, setSearchedColumn] = useState(
+    filters[currentTabKey]?.searchedColumn || ""
+  );
+  const [searchText, setSearchText] = useState(
+    filters[currentTabKey]?.searchText || ""
+  );
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(
+    filters[currentTabKey]?.selectedBillingPeriod || null
+  );
 
-  // States for detail view
   const [pageDetail, setPageDetail] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -60,12 +69,49 @@ const PrabillingPage = () => {
     right: valueTab === "All" ? ["action"] : [],
   }));
 
-  // Fetch billing periods on mount
+  useEffect(() => {
+    dispatch(
+      setFilters({
+        tab: currentTabKey,
+        filters: {
+          search,
+          sort,
+          searchText,
+          searchedColumn,
+          page,
+          selectedBillingPeriod,
+        },
+      })
+    );
+  }, [
+    search,
+    sort,
+    searchText,
+    searchedColumn,
+    page,
+    selectedBillingPeriod,
+    currentTabKey,
+    dispatch,
+  ]);
+
+  useEffect(() => {
+    const savedFilters = filters[currentTabKey];
+    if (savedFilters) {
+      setPage(savedFilters.page || 1);
+      setSort(savedFilters.sort || "");
+      setSearch(savedFilters.search || {});
+      setSearchedColumn(savedFilters.searchedColumn || "");
+      setSearchText(savedFilters.searchText || "");
+      if (savedFilters.selectedBillingPeriod !== null) {
+        setSelectedBillingPeriod(savedFilters.selectedBillingPeriod);
+      }
+    }
+  }, [valueTab, filters, currentTabKey]);
+
   useEffect(() => {
     dispatch(getListBillingPeriodForPrabilling());
   }, [dispatch]);
 
-  // Set default billing period
   useEffect(() => {
     if (
       list_period_summary &&
@@ -98,7 +144,6 @@ const PrabillingPage = () => {
     });
   }, [valueTab]);
 
-  // Scroll to detail when opened
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
       setTimeout(() => {
@@ -111,14 +156,15 @@ const PrabillingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // Fetch data based on active tab
+  const initialPageSize = 100;
+
   useEffect(() => {
     if (valueTab === "All" && selectedBillingPeriod) {
       dispatch(
         getListPrabillingInitPopulate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: 100,
+          pageSize: initialPageSize,
           sort,
           billPeriodId: selectedBillingPeriod,
           isLoadMore: false,
@@ -126,7 +172,6 @@ const PrabillingPage = () => {
       );
       setPage(1);
     } else if (valueTab === "Summary" && selectedBillingPeriod) {
-      // Untuk Summary tab, convert id ke name
       const selectedPeriod = list_period_summary.find(
         (item) => item.id === selectedBillingPeriod
       );
@@ -136,7 +181,7 @@ const PrabillingPage = () => {
             billPeriod: selectedPeriod.name,
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: 100,
+            pageSize: initialPageSize,
             sort,
             isLoadMore: false,
           })
@@ -169,12 +214,18 @@ const PrabillingPage = () => {
   };
 
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
     const currentPagination =
       valueTab === "All" ? prabilling_pagination : summary_pagination;
-    const totalPages = currentPagination?.totalPages || 0;
+    const totalElements = currentPagination?.totalElements || 0;
+    const currentDataLength = currentData.length;
 
-    if (nextPage <= totalPages && selectedBillingPeriod) {
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    if (selectedBillingPeriod) {
       if (valueTab === "All") {
         await dispatch(
           getListPrabillingInitPopulate({
@@ -214,7 +265,7 @@ const PrabillingPage = () => {
           getListPrabillingInitPopulate({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: page * loadMoreSize || 100,
+            pageSize: initialPageSize,
             sort,
             billPeriodId: selectedBillingPeriod,
             isLoadMore: false,
@@ -230,7 +281,7 @@ const PrabillingPage = () => {
               billPeriod: selectedPeriod.name,
               search: encodeURIComponent(JSON.stringify(search)),
               page: 1,
-              pageSize: page * loadMoreSize || 100,
+              pageSize: initialPageSize,
               sort,
               isLoadMore: false,
             })
@@ -241,22 +292,21 @@ const PrabillingPage = () => {
     }
   };
 
-  const handleDetail = (record, rowKey) => {
-    // Only work on Summary tab
-    if (valueTab !== "Summary") return;
+const handleDetail = (record, rowKey) => {
+  if (valueTab !== "Summary") return;
 
-    const recordKey = rowKey || record.customerNumber;
+  const recordKey = rowKey || record.customerNumber;
 
-    if (activeRowKey === recordKey && pageDetail) {
-      setPageDetail(false);
-      setActiveRowKey(null);
-      setSelectedRecord(null);
-    } else {
-      setSelectedRecord(record);
-      setActiveRowKey(recordKey);
-      setPageDetail(true);
-    }
-  };
+  if (activeRowKey === recordKey && pageDetail) {
+    setPageDetail(false);
+    setActiveRowKey(null);
+    setSelectedRecord(null);
+  } else {
+    setSelectedRecord(record);
+    setActiveRowKey(recordKey);
+    setPageDetail(true);
+  }
+};
 
   const currentData = useMemo(() => {
     if (valueTab === "All") {
@@ -279,7 +329,6 @@ const PrabillingPage = () => {
     }));
   }, [currentData, valueTab]);
 
-  // Get columns from separate file
   const allTabColumns = useMemo(
     () =>
       getAllTabColumns(
@@ -346,15 +395,34 @@ const PrabillingPage = () => {
     }
 
     setValueTab(key);
-    setSearch({});
-    setSearchText("");
-    setSearchedColumn("");
-    setSort("");
-    setPage(1);
+
+    // Restore filters untuk tab yang dipilih
+    const newTabKey = key === "All" ? "all_tab" : "summary_tab";
+    const savedFilters = filters[newTabKey];
+
+    if (savedFilters) {
+      setSearch(savedFilters.search || {});
+      setSearchText(savedFilters.searchText || "");
+      setSearchedColumn(savedFilters.searchedColumn || "");
+      setSort(savedFilters.sort || "");
+      setPage(savedFilters.page || 1);
+      if (savedFilters.selectedBillingPeriod !== null) {
+        setSelectedBillingPeriod(savedFilters.selectedBillingPeriod);
+      } else {
+        resetToCurrentPeriod();
+      }
+    } else {
+      setSearch({});
+      setSearchText("");
+      setSearchedColumn("");
+      setSort("");
+      setPage(1);
+      resetToCurrentPeriod();
+    }
+
     setPageDetail(false);
     setActiveRowKey(null);
     setSelectedRecord(null);
-    resetToCurrentPeriod();
   };
 
   const handleBillingPeriodChange = (value) => {
@@ -373,6 +441,20 @@ const PrabillingPage = () => {
     setPageDetail(false);
     setActiveRowKey(null);
     setSelectedRecord(null);
+
+    dispatch(
+      setFilters({
+        tab: currentTabKey,
+        filters: {
+          search: {},
+          sort: "",
+          searchText: "",
+          searchedColumn: "",
+          page: 1,
+          selectedBillingPeriod: value,
+        },
+      })
+    );
   };
 
   const itemGrantAccess = [
@@ -396,7 +478,7 @@ const PrabillingPage = () => {
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess).map(
     (col) => ({
       ...col,
-      width: 30,
+      width: 50,
       align: "center",
     })
   );
@@ -464,7 +546,7 @@ const PrabillingPage = () => {
               dataSource={dataSourceWithKeys}
               columns={processedColumns}
               totalData={currentPagination?.totalElements || 0}
-              tableScrolled={{ x: 3000, y: 525 }}
+              tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
               showExport={false}
               columnDefinitions={columnDefinitions}
