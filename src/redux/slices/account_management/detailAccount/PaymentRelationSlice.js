@@ -486,14 +486,15 @@ const paymentRelationSlice = createSlice({
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
-        const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId))
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
 
-        const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId)) 
-        if (isLoadMore)
           state.list_prAccountStandard = [
             ...state.list_prAccountStandard,
             ...filteredResult,
           ];
+        }
         else
           state.list_prAccountStandard = result;
       }
@@ -530,14 +531,15 @@ const paymentRelationSlice = createSlice({
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
-        const currentIds = new Set(state.list_paymentRelation.map((item) => item.id))
-        const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id))
-
-        if (isLoadMore)
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_paymentRelation.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          
           state.list_prDetailAttachment = [
             ...state.list_paymentRelation,
             ...filteredResult,
           ];
+        }
         else
           state.list_prDetailAttachment = result;
       }

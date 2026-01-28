@@ -1230,14 +1230,15 @@ const financialInformationSlice = createSlice({
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
-        const currentIds = new Set(state.list_paymentRelation.map((item) => item.id))
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_paymentRelation.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
 
-        const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id)) 
-        if (isLoadMore)
           state.list_paymentRelation = [
             ...state.list_paymentRelation,
             ...filteredResult,
           ];
+        }
         else
           state.list_paymentRelation = result;        
       }
