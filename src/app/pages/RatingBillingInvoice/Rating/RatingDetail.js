@@ -12,7 +12,7 @@ const RatingDetail = ({
   ratingCode,
   calculationCode, 
   accountNumber,
-  saType, // Tambahkan saType sebagai prop
+  saType,
   onClose 
 }) => {
   // State
@@ -38,10 +38,12 @@ const RatingDetail = ({
     {
       key: "Promo",
       label: "Promo",
+      disabled: true,
     },
     {
       key: "Periodic",
       label: "Periodic",
+      disabled: true,
     },
     {
       key: "Multi Destination",
@@ -83,6 +85,7 @@ const RatingDetail = ({
       case "Usage":
         return (
           <UsageSection
+            ratingCode={ratingCode}
             calculationCode={calculationCode}
           />
         );
@@ -90,18 +93,21 @@ const RatingDetail = ({
         return (
           <PromoSection
             calculationCode={calculationCode}
+            ratingCode={ratingCode}
           />
         );
       case "Periodic":
         return (
           <PeriodicSection
             calculationCode={calculationCode}
+            ratingCode={ratingCode}
           />
         );
       case "Multi Destination":
         return (
           <MuldestSection
             calculationCode={calculationCode}
+            ratingCode={ratingCode}
           />
         );
       default:

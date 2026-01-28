@@ -306,7 +306,6 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
       </div>
     );
   }
-
   // Show empty state
   if (!expandedData || expandedData.length === 0) {
     return (
