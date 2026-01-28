@@ -175,11 +175,11 @@ const columnAttachmentData = (
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex justify-center align-middle gap-2">
+          <div className="flex justify-center align-middle gap-2 py-1">
             <Tooltip title="Preview">
               <span className="flex justify-center">
                 <EyeOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
+                  style={{ fontSize: "20px", color: "#0075bf" }}
                   onClick={() => handleShow(r)}
                 />
               </span>
@@ -193,7 +193,7 @@ const columnAttachmentData = (
                   <SVGIcon
                     name="IconDelete"
                     color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
-                    width={24}
+                    width={20}
                     className={r.dataType === "exist" ? "disabled" : undefined}
                     onClick={
                       r.dataType !== "exist" ? () => handleDelete(r) : undefined
