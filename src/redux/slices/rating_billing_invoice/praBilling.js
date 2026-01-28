@@ -1857,9 +1857,15 @@ const prabillingSlice = createSlice({
       const isLoadMore = action.payload.isLoadMore;
 
       if (isLoadMore) {
+        const existingIds = new Set(
+          state.list_prabilling_summary.map((item) => item.prabillCustId)
+        );
+        const uniqueNewData = newData.filter(
+          (item) => !existingIds.has(item.prabillCustId)
+        );
         state.list_prabilling_summary = [
           ...state.list_prabilling_summary,
-          ...newData,
+          ...uniqueNewData,
         ];
       } else {
         state.list_prabilling_summary = newData;
@@ -2281,9 +2287,7 @@ const prabillingSlice = createSlice({
       state.loading = false;
     },
 
-    // Get list prabilling init populate
     [getListPrabillingInitPopulate.pending]: (state, action) => {
-      // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -2293,11 +2297,16 @@ const prabillingSlice = createSlice({
       const newData = action.payload.result || [];
       const isLoadMore = action.payload.isLoadMore;
 
-      // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
+        const existingIds = new Set(
+          state.list_prabilling_init.map((item) => item.initId)
+        );
+        const uniqueNewData = newData.filter(
+          (item) => !existingIds.has(item.initId)
+        );
         state.list_prabilling_init = [
           ...state.list_prabilling_init,
-          ...newData,
+          ...uniqueNewData,
         ];
       } else {
         state.list_prabilling_init = newData;
@@ -2312,7 +2321,6 @@ const prabillingSlice = createSlice({
     },
     [getListPrabillingInitPopulate.rejected]: (state, action) => {
       state.loading = false;
-      // Only clear data on initial fetch failure, not on load more failure
       if (!action.meta.arg?.isLoadMore) {
         state.list_prabilling_init = [];
         state.prabilling_pagination = {

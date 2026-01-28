@@ -118,14 +118,14 @@ export const updateAdjustmentBilling = createAsyncThunk(
 
 export const getAdjustmentBillingPaginate = createAsyncThunk(
   "GET_ADJUSTMENT_BILLING_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/adjustment/get-adjustment-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -901,16 +901,36 @@ const adjustmentBillingSlice = createSlice({
       state.loading = false;
     },
 
-    // get pagination calculation
-    [getAdjustmentBillingPaginate.pending]: (state) => {
-      state.loading = true;
+    [getAdjustmentBillingPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAdjustmentBillingPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.id)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.id)
+        );
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...uniqueNewData],
+        };
+      } else {
+        state.data = action.payload;
+      }
     },
-    [getAdjustmentBillingPaginate.rejected]: (state) => {
+    [getAdjustmentBillingPaginate.rejected]: (state, action) => {
       state.loading = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = { result: [], page: {} };
+      }
     },
 
     // Get List Approval Hierarchy
