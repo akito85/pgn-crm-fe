@@ -171,7 +171,7 @@ export const getDetailInvoiceRelation = createAsyncThunk(
 );
 
 export const getIrApprovalHierarchy = createAsyncThunk(
-  "GET_PR_APPROVAL_HIERARCHY",
+  "GET_IR_APPROVAL_HIERARCHY",
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/approval-hierarchies`;
@@ -184,7 +184,7 @@ export const getIrApprovalHierarchy = createAsyncThunk(
 )
 
 export const getDetailIrApprovalHierarchy = createAsyncThunk(
-  "GET_DETAIL_PR_APPROVAL_HIERARCHY",
+  "GET_DETAIL_IR_APPROVAL_HIERARCHY",
   async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/approval-hierarchy/${id}`;
@@ -197,7 +197,7 @@ export const getDetailIrApprovalHierarchy = createAsyncThunk(
 )
 
 export const getIrAttachmentCategory = createAsyncThunk(
-  "GET_PR_ATTACHMENT_CATEGORY",
+  "GET_IR_ATTACHMENT_CATEGORY",
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/attachment-category`;
@@ -210,7 +210,7 @@ export const getIrAttachmentCategory = createAsyncThunk(
 )
 
 export const getIrAccountStandard = createAsyncThunk(
-  "GET_PR_ACCOUNT_STANDARD",
+  "GET_IR_ACCOUNT_STANDARD",
   async ({ page, size, sort, searchs, id, isLoadMore }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams;
@@ -358,7 +358,7 @@ export const inactivateInvoiceRelation = createAsyncThunk(
 );
 
 export const getIrColumnApi = createAsyncThunk(
-  "GET_PR_COLUMN_API",
+  "GET_IR_COLUMN_API",
   async (thunkAPI) => {
     try {
       const url = "/v1/dbs/api/invoice-relation/list-search-column";
@@ -371,7 +371,7 @@ export const getIrColumnApi = createAsyncThunk(
 )
 
 export const getIrConditionApi = createAsyncThunk(
-  "GET_PR_CONDITION_API",
+  "GET_IR_CONDITION_API",
   async (thunkAPI) => {
     try {
       const url = "/v1/dbs/api/invoice-relation/list-search-condition";
@@ -384,7 +384,7 @@ export const getIrConditionApi = createAsyncThunk(
 )
 
 export const getIrOperatorApi = createAsyncThunk(
-  "GET_PR_OPERATOR_API",
+  "GET_IR_OPERATOR_API",
   async (thunkAPI) => {
     try {
       const url = "/v1/dbs/api/invoice-relation/list-search-operator";
@@ -401,8 +401,7 @@ const invoiceRelationSlice = createSlice({
   initialState,
   extraReducers: {
     /** Get Detail Invoice Relation */
-    [getDetailInvoiceRelation.pending]: (state, action) => {
-      state.detail_invoiceRelation = action.payload;
+    [getDetailInvoiceRelation.pending]: (state) => {
       state.loading = true;
     },
     [getDetailInvoiceRelation.fulfilled]: (state, action) => {
@@ -487,19 +486,19 @@ const invoiceRelationSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId));
+          const currentIds = new Set(state.list_irAccountStandard.map((item) => item.accountId));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
 
-          state.list_prAccountStandard = [
-            ...state.list_prAccountStandard,
+          state.list_irAccountStandard = [
+            ...state.list_irAccountStandard,
             ...filteredResult,
           ];
         }
         else
-          state.list_prAccountStandard = result;
+          state.list_irAccountStandard = result;
       }
 
-      state.pagination_prAccountStandard = {
+      state.pagination_irAccountStandard = {
         totalPages: page?.totalPages || 0,
         totalElements: page?.totalElements || 0,
         currentPage: page?.number || 0,
@@ -510,8 +509,8 @@ const invoiceRelationSlice = createSlice({
       state.loading = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_prAccountStandard = [];
-        state.pagination_prAccountStandard = {
+        state.list_irAccountStandard = [];
+        state.pagination_irAccountStandard = {
           totalPages: 0,
           totalElements: 0,
           currentPage: 0,
@@ -535,16 +534,16 @@ const invoiceRelationSlice = createSlice({
           const currentIds = new Set(state.list_invoiceRelation.map((item) => item.id));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
           
-          state.list_prDetailAttachment = [
+          state.list_irDetailAttachment = [
             ...state.list_invoiceRelation,
             ...filteredResult,
           ];
         }
         else
-          state.list_prDetailAttachment = result;
+          state.list_irDetailAttachment = result;
       }
 
-      state.pagination_prDetailAttachment = {
+      state.pagination_irDetailAttachment = {
         totalPages: page?.totalPages || 0,
         totalElements: page?.totalElements || 0,
         currentPage: page?.number || 0,
@@ -555,8 +554,8 @@ const invoiceRelationSlice = createSlice({
       state.loading = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_prDetailAttachment = [];
-        state.pagination_prDetailAttachment = {
+        state.list_irDetailAttachment = [];
+        state.pagination_irDetailAttachment = {
           totalPages: 0,
           totalElements: 0,
           currentPage: 0,
