@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
 import { Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
@@ -15,8 +15,8 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
-import CardContainer from "../../../../../../../../../../components/CardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
+import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -308,66 +308,68 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <CardContainer header={"ATTACHMENT"} className={`${className}`}>
-      <Spin spinning={loadingDownload}>
-        <div className="flex flex-col gap-y-4">
-          {type !== "detail" && type !== "preview" ? (
-            <div className="flex flex-col w-full gap-2 items-end">
-              <div className="flex flex-col gap-y-1 justify-start">
-                <p className="text-[13px] mb-0 text-dg-grey-dark">
-                  Attach File:
-                  {mandatory ? (
-                  <span className={"pl-1"} style={{ color: "red" }}>
-                    *
-                  </span>
-                ) : null}
-                </p>
-                <div className="flex flex-row gap-2 items-center">
-                  <ButtonComponent
-                    fontSizeClassname="text-[11px]"
-                    size="small"
-                    type="default"
-                    onClick={handleOpenModal}
-                  >
-                    Choose File
-                  </ButtonComponent>
-                  <p className="text-[11px] text-dg-grey-dark mb-0">
-                    No file choosen
+    <div className={`${className}`}>
+      <NxCardContainer header={"ATTACHMENT"} >
+        <Spin spinning={loadingDownload}>
+          <div className="flex flex-col gap-y-4">
+            {type !== "detail" && type !== "preview" ? (
+              <div className="flex flex-col w-full gap-2 items-end">
+                <div className="flex flex-col gap-y-1 justify-start">
+                  <p className="text-[13px] mb-0 text-dg-grey-dark">
+                    Attach File:
+                    {mandatory ? (
+                    <span className={"pl-1"} style={{ color: "red" }}>
+                      *
+                    </span>
+                  ) : null}
                   </p>
+                  <div className="flex flex-row gap-2 items-center">
+                    <ButtonComponent
+                      fontSizeClassname="text-[11px]"
+                      size="small"
+                      type="default"
+                      onClick={handleOpenModal}
+                    >
+                      Choose File
+                    </ButtonComponent>
+                    <p className="text-[11px] text-dg-grey-dark mb-0">
+                      No file choosen
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : null}
-          <NxTable
-            dataSource={data}
-            totalData={data.length}
-            tableScrolled={{ y: 300, x: 1500 }}
-            columns={columnAttachmentData(
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDelete,
-              type,
-              handleShow
-            )}
-            usePagination={false}
-          />
-        </div>
-      </Spin>
-      <ModalAttachment
-        openUpload={modalUpload}
-        updateData={updateData}
-        categoryOptions={categoryOptions}
-        handleCancel={() => setModalUpload(false)}
-        valueGuard={
-          configApplication === configApp.MASTER_MANAGEMENT
-            ? dataGlobalPropAttachment
-            : {}
-        }
-        withLink
-      />
-    </CardContainer>
+            ) : null}
+            <NxTable
+              dataSource={data}
+              totalData={data.length}
+              tableScrolled={{ y: 300, x: 1500 }}
+              columns={columnAttachmentData(
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                handleDelete,
+                type,
+                handleShow
+              )}
+              usePagination={false}
+            />
+          </div>
+        </Spin>
+        <ModalAttachment
+          openUpload={modalUpload}
+          updateData={updateData}
+          categoryOptions={categoryOptions}
+          handleCancel={() => setModalUpload(false)}
+          valueGuard={
+            configApplication === configApp.MASTER_MANAGEMENT
+              ? dataGlobalPropAttachment
+              : {}
+          }
+          withLink
+        />
+      </NxCardContainer>
+    </div>
   );
 };
 

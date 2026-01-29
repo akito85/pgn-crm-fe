@@ -1,6 +1,6 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import ApprovalHierarchy from "./ApprovalHierarchy";
-import CardContainer from "../../../../../../../../../../components/CardContainer";
+import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 
 const ApprovalSectionForm = ({
   dataTable,
@@ -21,7 +21,7 @@ const ApprovalSectionForm = ({
     setSearchedColumn(dataIndex);
   };
   return (
-    <CardContainer header={"APPROVAL"} className={`${className}`}>
+    <NxCardContainer header={"APPROVAL"} className={`${className}`}>
       <ApprovalHierarchy
         dataTable={dataTable}
         dataOption={dataOption}
@@ -35,7 +35,7 @@ const ApprovalSectionForm = ({
         disableSelect={disableSelect}
         approvalName={approvalName}
       />
-    </CardContainer>
+    </NxCardContainer>
   );
 };
 

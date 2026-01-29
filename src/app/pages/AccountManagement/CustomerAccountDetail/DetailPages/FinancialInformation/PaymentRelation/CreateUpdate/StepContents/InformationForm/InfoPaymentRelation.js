@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CardContainer from "../../../../../../../../../../components/CardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
+import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 
 export default function InfoPaymentRelation({
   accountId,
@@ -142,7 +143,7 @@ export default function InfoPaymentRelation({
 
   return(
     <div className={className}>
-      <CardContainer header={"PAYMENT RELATION INFORMATION"}>
+      <NxCardContainer header={"PAYMENT RELATION INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           <div className="flex gap-2 items-end">
             <Form.Item name={"objectId"} hidden>
@@ -257,7 +258,7 @@ export default function InfoPaymentRelation({
             />
           </Form.Item>
         </div>
-      </CardContainer>
+      </NxCardContainer>
 
       <ModalCustom
         isOpen={isOpen}
