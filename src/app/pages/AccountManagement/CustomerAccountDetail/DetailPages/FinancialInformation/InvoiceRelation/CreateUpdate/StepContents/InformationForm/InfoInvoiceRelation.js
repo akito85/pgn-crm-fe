@@ -155,6 +155,7 @@ export default function InfoInvoiceRelation({
             <Form.Item
               label={"Account Number"}
               required
+              className="no-margin-form"
             >
               <Input.Group compact>
                 <Form.Item
