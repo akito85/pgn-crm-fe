@@ -177,10 +177,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       breadcrumbName: "Account - Standard",
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      breadcrumbName: "Detail Account",
-    },
-    {
       path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Invoice Relation",
     },
