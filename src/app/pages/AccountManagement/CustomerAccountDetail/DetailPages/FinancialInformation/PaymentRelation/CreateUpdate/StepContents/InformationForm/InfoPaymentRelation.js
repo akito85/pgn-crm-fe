@@ -23,7 +23,6 @@ export default function InfoPaymentRelation({
 
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
-  const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const [searchText, setSearchText] = useState("");

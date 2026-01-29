@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Form, Input, Spin } from "antd";
+import { DatePicker, Form, Input } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
@@ -58,8 +58,6 @@ const PaymentRelation = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [filterForm] = Form.useForm();
-  const [showFilterModal, setShowFilterModal] = useState(false);
   const [tempFilters, setTempFilters] = useState([]);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -444,7 +442,6 @@ const PaymentRelation = ({
         handleIsApproval={handleIsApproval}
         handleDownload={handleDownload}
         tempFilters={tempFilters}
-        setShowFilterModal={setShowFilterModal}
         setIsApproval={setIsApproval}
         handleLoadMore={handleLoadMore}
         hasMore={hasMore}

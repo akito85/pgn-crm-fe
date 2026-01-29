@@ -205,7 +205,6 @@ const columnAttachmentData = (
           </div>
         );
       },
-      key: "action",
     },
   ];
   if (type === "preview") {
@@ -269,6 +268,7 @@ const AttachmentSectionForm = ({
     }
     setSearchedColumn(tempSearchColumn);
   };
+  
   const handleDelete = (record) => {
     updateData((prevState) => {
       const temp = prevState.filter((detail) => detail.key !== record.key);
@@ -341,10 +341,7 @@ const AttachmentSectionForm = ({
             </div>
           ) : null}
           <NxTable
-            dataSource={data.map((item, index) => ({
-              ...item,
-              no: (page - 1) * pageSize + index + 1,
-            }))}
+            dataSource={data}
             totalData={data.length}
             tableScrolled={{ y: 300, x: 1500 }}
             columns={columnAttachmentData(
