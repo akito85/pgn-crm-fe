@@ -1,16 +1,10 @@
-import { memo, useEffect, useRef } from "react";
-import {
-  FilterOutlined,
-} from "@ant-design/icons";
-import { DatePicker, Form, Input, Spin } from "antd";
+import { memo, useEffect, useMemo, useRef } from "react";
+import { Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import { approveOrRejectAllInvoiceRelation, downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, getIrColumnApi, getIrConditionApi, getIrOperatorApi, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
-import Highlighter from "react-highlight-words";
-import moment from "moment";
-import { dateFormatting } from "../../../../../../../utils";
 import ModalConfirmationApprovalInvoiceRelation from "./ModalConfirmationApprovalInvoiceRelation";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
@@ -31,16 +25,20 @@ const InvoiceRelation = ({
     (state) => state.financialInformation,
   )
 
-  const { data_invoiceRelation, loading, data_irApprovalHistory } = financialInformationState;
+  const {
+    list_invoiceRelation,
+    data_irApprovalHistory,
+    loading,
+    pagination_invoiceRelation
+  } = financialInformationState;
 
   //declare
   const searchInput = useRef(null);
 
   //state
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20)
   const [listType, setListType] = useState("all");
-  const [totalElement, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -72,6 +70,20 @@ const InvoiceRelation = ({
     type: "checkbox",
     preserveSelectedRowKeys: true,
   }
+
+  const currentData = useMemo(() => list_invoiceRelation, [list_invoiceRelation]);
+  
+  const currentPagination = pagination_invoiceRelation;
+  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!currentData || currentData.length === 0) return [];
+
+    return currentData.map((item, index) => ({
+      ...item,
+      key: `${item.id}-${index}`,
+    }));
+  }, [currentData]);
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
@@ -110,7 +122,7 @@ const InvoiceRelation = ({
         inputFields: tempFilters,
       }
 
-      dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
+      dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body }));
     })
     .catch(() => {});
   }
@@ -155,7 +167,7 @@ const InvoiceRelation = ({
         inputFields: tempFilters,
       }
 
-      dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), body }));
+      dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body }));
       setShowInactiveModal(false);
       handleClear();
     })
@@ -181,79 +193,7 @@ const InvoiceRelation = ({
       };
     });
   };
-
-  /**
-   * @param {string} dataIndex 
-   * @param {string} type 
-   * @returns
-   */
-  const getColumnSearchProps = (dataIndex, type) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
-      const onDataChange = (value, dateString) => {
-        setSelectedKeys(dateString ? [dateString] : []);
-        handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
-      };
-      return (
-        <div
-          style={{
-            padding: 8,
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          {type === "date" ? (
-            <DatePicker onChange={onDataChange} />
-          ) : (
-            <Input
-              ref={searchInput}
-              placeholder={`Search`}
-              value={selectedKeys[0]}
-              onChange={(e) =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])
-              }
-              onPressEnter={() => {
-                handleSearch(selectedKeys, confirm, dataIndex);
-              }}
-              style={{
-                marginBottom: 8,
-                display: "block",
-              }}
-            />
-          )}
-        </div>
-      );
-    },
-    filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered ? "#1890ff" : undefined,
-        }}
-      />
-    ),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 5000);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={
-            type === "date"
-              ? moment([searchText]).format(dateFormatting.dateFormal)
-              : [searchText]
-          }
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text || ""
-      ),
-  });
-
+  
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -300,24 +240,7 @@ const InvoiceRelation = ({
       inputFields: tempFilters,
     } 
 
-    dispatch(downloadInvoiceRelation({ page, size: pageSize, sort, searchs: search, body, id }));
-  };
-
-  /**
-   * @param {number} newPage
-   */
-  const handleChange = (newPage) => {
-    setPage(newPage);
-  };
-
-  /**
-   * @param {number} pageChange 
-   * @param {number} pageSizeChange 
-   */
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+    dispatch(downloadInvoiceRelation({ page, size: loadMoreSize, sort, searchs: search, body, id }));
   };
 
   /**
@@ -332,29 +255,40 @@ const InvoiceRelation = ({
     setSort(dataSort);
   };
 
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination_invoiceRelation?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      const body = {
+        inputFields: tempFilters,
+      }
+
+      await dispatch(
+        getInvoiceRelation({
+          id,
+          page,
+          size: loadMoreSize,
+          sort,
+          searchs: JSON.stringify(search),
+          listType,
+          body,
+          isLoadMore: true,
+        })
+      );
+    }
+    setPage(nextPage);
+  };
+
   useEffect(() => {
     const body = {
       inputFields: tempFilters,
     }
-    
-    console.log("search", search);
-    console.log("search JSON", JSON.stringify(search));
-    console.log("search encoded", JSON.stringify(search))
 
-    dispatch(getInvoiceRelation({ id, page, size: pageSize, sort, searchs: JSON.stringify(search), listType, body }));
-  }, [page, pageSize, sort, search, tempFilters, listType]);
+    dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), listType, body }));
+  }, [page, loadMoreSize, sort, search, tempFilters, listType]);
 
-  useEffect(() => {
-    if (
-      data_invoiceRelation && 
-      data_invoiceRelation.result &&
-      data_invoiceRelation.result.length > 0
-    ) {
-      setTotalElement(data_invoiceRelation?.page?.totalElements);
-    }
-  }, [data_invoiceRelation]);
-
-  // Listen to approve or reject button on the parent component
+  // Listen, pagination_invoiceRelation to approve or reject button on the parent component
   useEffect(() => {
     if (isActive) {
       if (submitApprovalCondition === "approve") {
@@ -398,64 +332,57 @@ const InvoiceRelation = ({
 
   return (
     <Spin spinning={loading}>
-      <Fragment>
-        <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-          {"INVOICE RELATION LIST"}
-        </div>
+      <InvoiceRelationTable
+        data={dataSourceWithKeys}
+        idAccount={id}
+        idCustomer={idCustomer}
+        totalElement={list_invoiceRelation.length}
+        page={page}
+        onSort={onSort}
+        rowSelection={isApproval ? rowSelection : undefined}
+        isApproval={isApproval}
+        handleInactivateModal={handleInactiveModal}
+        handleApprovalHistoryModal={handleApprovalHistoryModal}
+        handleIsApproval={handleIsApproval}
+        handleDownload={handleDownload}
+        tempFilters={tempFilters}
+        setIsApproval={setIsApproval}
+        handleLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        searchText={searchText}
+        search={search}
+        searchInput={searchInput}
+        handleSearch={handleSearch}
+        loading={loading}
+      />
 
-        <InvoiceRelationTable
-          data={data_invoiceRelation?.result?.map((invoiceRelation, index) => ({
-            ...invoiceRelation,
-            key: `invoice-relation-${index}`
-          }))}
-          idAccount={id}
-          idCustomer={idCustomer}
-          handleChange={handleChange}
-          handleChangeSize={handleChangeSize}
-          totalElement={totalElement}
-          page={page}
-          pageSize={pageSize}
-          onSort={onSort}
-          getColumnSearchProps={getColumnSearchProps}
-          rowSelection={isApproval ? rowSelection : undefined}
-          isApproval={isApproval}
-          handleInactiveModal={handleInactiveModal}
-          handleApprovalHistoryModal={handleApprovalHistoryModal}
-          handleIsApproval={handleIsApproval}
-          handleDownload={handleDownload}
-          tempFilters={tempFilters}
-          setIsApproval={setIsApproval}
-        />
+      <ModalConfirmationApprovalInvoiceRelation
+        dataSource={selectedRows}
+        isOpen={showApprovalModal}
+        setIsOpen={setShowApprovalModal}
+        handleCloseModal={handleCancelApprovalModal}
+        onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
+      />
 
-        <ModalConfirmationApprovalInvoiceRelation
-          dataSource={selectedRows}
-          isOpen={showApprovalModal}
-          setIsOpen={setShowApprovalModal}
-          getColumnSearchProps={getColumnSearchProps}
-          handleCloseModal={handleCancelApprovalModal}
-          onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
-        />
+      {/* Inactivate Modal */}
+      <ModalApproveOrReject
+        isOpen={showInactiveModal}
+        header={"INACTIVATE"}
+        handleCloseModal={() => handleInactiveModal(false)}
+        customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrAccountNumber}?`}
+        onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
+      />
 
-        {/* Inactivate Modal */}
-        <ModalApproveOrReject
-          isOpen={showInactiveModal}
-          header={"INACTIVATE"}
-          handleCloseModal={() => handleInactiveModal(false)}
-          customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrAccountNumber}?`}
-          onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
-        />
-
-        {/* Approval History Modal */}
-        <ModalHistory
-          isOpen={showApprovalHistoryModal}
-          handleClose={() => handleApprovalHistoryModal(false)}
-          header={"Approval History"}
-          width={850}
-          tabOptions={handleApprovalHistoryOptions()}
-          dataApprover={dataApprovalHistoryFix?.dataApprover}
-          dataHistory={dataApprovalHistoryFix?.dataHistory}
-        />
-      </Fragment>  
+      {/* Approval History Modal */}
+      <ModalHistory
+        isOpen={showApprovalHistoryModal}
+        handleClose={() => handleApprovalHistoryModal(false)}
+        header={"Approval History"}
+        width={850}
+        tabOptions={handleApprovalHistoryOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
     </Spin>
   );
 };
