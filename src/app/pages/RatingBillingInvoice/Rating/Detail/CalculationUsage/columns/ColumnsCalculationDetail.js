@@ -8,6 +8,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils
 import {
   currencyFormatting,
   numberFormatting,
+  usageFormatting,
 } from "../../../../../../../utils/formatCurrency";
 
 export const columnsCalculationDetail = (
@@ -98,20 +99,17 @@ export const columnsCalculationDetail = (
       false,
       "input",
     ),
-    render: (text) => {
-      if (hasValue(search["usage"])) {
-        return renderColumn(
-          "usage",
-          true,
-          searchText,
-          currencyFormatting(text, "idr"),
-          false,
-          "input",
-          search,
-        );
-      }
-      return currencyFormatting(text, "idr");
-    },
+    render: (text) =>
+      renderColumn(
+        "usage",
+        hasValue(search["usage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "usage",
+      ),
   },
   {
     title: "Min Usage",
@@ -130,20 +128,17 @@ export const columnsCalculationDetail = (
       false,
       "input",
     ),
-    render: (text) => {
-      if (hasValue(search["minUsage"])) {
-        return renderColumn(
-          "minUsage",
-          true,
-          searchText,
-          currencyFormatting(text, "idr"),
-          false,
-          "input",
-          search,
-        );
-      }
-      return currencyFormatting(text, "idr");
-    },
+    render: (text) =>
+      renderColumn(
+        "minUsage",
+        hasValue(search["minUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "usage",
+      ),
   },
   {
     title: "Max Usage",
@@ -162,20 +157,17 @@ export const columnsCalculationDetail = (
       false,
       "input",
     ),
-    render: (text) => {
-      if (hasValue(search["maxUsage"])) {
-        return renderColumn(
-          "maxUsage",
-          true,
-          searchText,
-          currencyFormatting(text, "idr"),
-          false,
-          "input",
-          search,
-        );
-      }
-      return currencyFormatting(text, "idr");
-    },
+    render: (text) =>
+      renderColumn(
+        "maxUsage",
+        hasValue(search["maxUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "usage",
+      ),
   },
   {
     title: "SA Type",
@@ -225,7 +217,7 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "NORMAL",
@@ -234,7 +226,7 @@ export const columnsCalculationDetail = (
         width: 150,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "OUP",
@@ -243,7 +235,7 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
     ],
   },
@@ -267,7 +259,7 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "NORMAL",
@@ -276,7 +268,7 @@ export const columnsCalculationDetail = (
         width: 150,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "OUP",
@@ -285,7 +277,7 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
     ],
   },
@@ -328,7 +320,7 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => currencyFormatting(text, "idr"),
       },
       {
         title: "NORMAL",
@@ -337,7 +329,7 @@ export const columnsCalculationDetail = (
         width: 150,
         isNumber: true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => currencyFormatting(text, "idr"),
       },
       {
         title: "OUP",
@@ -346,7 +338,7 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber:true,
         sorter: true,
-        render: (text) => numberFormatting(text),
+        render: (text) => currencyFormatting(text, "idr"),
       },
     ],
   },
