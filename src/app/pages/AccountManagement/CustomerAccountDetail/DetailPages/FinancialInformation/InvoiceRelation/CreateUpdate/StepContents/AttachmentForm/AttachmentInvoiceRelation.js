@@ -15,7 +15,8 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
-import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../../../../../../components/Nx/NxTable";
+import CardContainer from "../../../../../../../../../../components/CardContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -71,8 +72,6 @@ const sorter = (fieldSort, a, b) => {
 };
 
 const columnAttachmentData = (
-  page,
-  pageSize,
   searchInput,
   searchedColumn,
   searchText,
@@ -83,14 +82,16 @@ const columnAttachmentData = (
 ) => {
   const res = [
     {
+      key: "no",
       title: "NO",
-      width: 60,
+      width: 30,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "category",
       title: "CATEGORY",
-      width: 240,
+      width: 75,
       dataIndex: "fileCategoryName",
       onFilter: (value, record) => onFilter("fileCategoryName", value, record),
       sorter: (a, b) => sorter("fileCategoryName", a, b),
@@ -103,8 +104,9 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "fileName",
       title: "FILE NAME",
-      width: 240,
+      width: 200,
       dataIndex: "fileName",
       onFilter: (value, record) => onFilter("fileName", value, record),
       sorter: (a, b) => sorter("fileName", a, b),
@@ -117,8 +119,9 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "createdBy",
       title: "UPLOADED BY",
-      width: 240,
+      width: 100,
       dataIndex: "createdBy",
       onFilter: (value, record) => onFilter("createdBy", value, record),
       sorter: (a, b) => sorter("createdBy", a, b),
@@ -131,9 +134,10 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "createdDate",
       title: "UPLOADED DATE",
       align: "center",
-      width: 240,
+      width: 100,
       dataIndex: "createdDate",
       onFilter: (value, record) => onFilter("createdDate", value, record),
       sorter: (a, b) => sorter("createdDate", a, b),
@@ -146,9 +150,10 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "fileSize",
       title: "FILE SIZE",
       align: "center",
-      width: 240,
+      width: 100,
       dataIndex: "fileSize",
       onFilter: (value, record) => onFilter("fileSize", value, record),
       sorter: (a, b) => sorter("fileSize", a, b),
@@ -161,17 +166,18 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "action",
       title: "ACTION",
       align: "center",
-      width: 180,
+      width: 75,
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex justify-center align-middle gap-2">
+          <div className="flex justify-center align-middle gap-2 py-1">
             <Tooltip title="Preview">
               <span className="flex justify-center">
                 <EyeOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
+                  style={{ fontSize: "20px", color: "#0075bf" }}
                   onClick={() => handleShow(r)}
                 />
               </span>
@@ -185,7 +191,7 @@ const columnAttachmentData = (
                   <SVGIcon
                     name="IconDelete"
                     color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
-                    width={24}
+                    width={20}
                     className={r.dataType === "exist" ? "disabled" : undefined}
                     onClick={
                       r.dataType !== "exist" ? () => handleDelete(r) : undefined
@@ -197,7 +203,6 @@ const columnAttachmentData = (
           </div>
         );
       },
-      key: "action",
     },
   ];
   if (type === "preview") {
@@ -237,7 +242,7 @@ const AttachmentSectionForm = ({
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const { data_irAttachmentCategory, getConfigFile } = useSelector((state) => state.financialInformation);
+  const { data_irAttachmentCategory, getConfigFile } = useSelector((state) => state.invoiceRelation);
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
   useEffect(() => {
@@ -263,10 +268,7 @@ const AttachmentSectionForm = ({
     }
     setSearchedColumn(tempSearchColumn);
   };
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+  
   const handleDelete = (record) => {
     updateData((prevState) => {
       const temp = prevState.filter((detail) => detail.key !== record.key);
@@ -308,7 +310,7 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <div className={`${className} drop-shadow-lg bg-white rounded-lg w-full p-9`}>
+    <CardContainer header={"ATTACHMENT"} className={`${className}`}>
       <Spin spinning={loadingDownload}>
         <div className="flex flex-col w-full gap-5">
           <span className="text-primary text-sm font-bold uppercase">
@@ -341,17 +343,11 @@ const AttachmentSectionForm = ({
               </div>
             </div>
           ) : null}
-          <TablePaginationNew
-            type="FE"
+          <NxTable
             dataSource={data}
             totalData={data.length}
-            current={page}
-            pageSize={pageSize}
             tableScrolled={{ y: 300, x: 1500 }}
-            onChange={handleChangeSize}
             columns={columnAttachmentData(
-              page,
-              pageSize,
               searchInput,
               searchedColumn,
               searchText,
@@ -360,22 +356,23 @@ const AttachmentSectionForm = ({
               type,
               handleShow
             )}
-          />
-          <ModalAttachment
-            openUpload={modalUpload}
-            updateData={updateData}
-            categoryOptions={categoryOptions}
-            handleCancel={() => setModalUpload(false)}
-            valueGuard={
-              configApplication === configApp.MASTER_MANAGEMENT
-                ? dataGlobalPropAttachment
-                : {}
-            }
-            withLink
+            usePagination={false}
           />
         </div>
       </Spin>
-    </div>  
+      <ModalAttachment
+        openUpload={modalUpload}
+        updateData={updateData}
+        categoryOptions={categoryOptions}
+        handleCancel={() => setModalUpload(false)}
+        valueGuard={
+          configApplication === configApp.MASTER_MANAGEMENT
+            ? dataGlobalPropAttachment
+            : {}
+        }
+        withLink
+      />
+    </CardContainer>
   );
 };
 

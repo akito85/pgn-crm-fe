@@ -35,10 +35,11 @@ import {
   getIrApprovalHierarchy,
   getIrAttachmentCategory,
   updateInvoiceRelation,
-} from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
+import CardContainer from "../../../../../../../../components/CardContainer";
 
 const CreateUpdateInvoiceRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -59,8 +60,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     data_irApprovalHierarchy,
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
-    data_invoiceRelationAttachment,
-  } = useSelector((state) => state.financialInformation);
+    list_irDetailAttachment,
+  } = useSelector((state) => state.invoiceRelation);
 
   //declare
   const location = useLocation();
@@ -116,7 +117,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   useEffect(() => {
     if (
       type === "update" &&
-      detail_invoiceRelation?.result &&
+      detail_invoiceRelation &&
       data_irApprovalHierarchy?.length
     ) {
       const {
@@ -126,9 +127,9 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_invoiceRelation.result;
+      } = detail_invoiceRelation;
 
-      const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation.result;
+      const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation;
 
       formCreate.setFieldsValue({
         subjectId,
@@ -149,8 +150,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   }, [detail_invoiceRelation, data_irApprovalHierarchy]);
 
   useEffect(() => {
-    if (type === "update" && data_invoiceRelationAttachment?.result) {
-      const result = data_invoiceRelationAttachment.result?.map((item, index) => ({
+    if (type === "update" && list_irDetailAttachment) {
+      const result = list_irDetailAttachment.map((item, index) => ({
         ...item,
         key: `invoice-relation-attachment-${item.id}`,
         dataType: "exist"
@@ -159,7 +160,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         ...result,
       ]))
     }
-  }, [data_invoiceRelationAttachment])
+  }, [list_irDetailAttachment])
 
   useEffect(() => {
     dispatch(getIrApprovalHierarchy());
@@ -553,7 +554,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       setCurrent(0);
     } else if (type === "update") {
       if (
-        detail_invoiceRelation?.result &&
+        detail_invoiceRelation &&
         data_irApprovalHierarchy?.length
       ) {
         const {
@@ -563,9 +564,9 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           endDate,
           description,
           appHierId,
-        } = detail_invoiceRelation.result;
+        } = detail_invoiceRelation;
 
-        const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation.result;
+        const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation;
 
         formCreate.setFieldsValue({
           subjectId,
@@ -584,8 +585,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
       }
 
-      if (data_invoiceRelationAttachment?.result) {
-        const result = data_invoiceRelationAttachment.result?.map((item, index) => ({
+      if (list_irDetailAttachment) {
+        const result = list_irDetailAttachment?.map((item, index) => ({
           ...item,
           key: `invoice-relation-attachment-${item.id}`,
           dataType: "exist"
@@ -603,53 +604,48 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     <LayoutMenu>
       <div className="flex flex-col gap-y-5">
         <BreadCrumb routes={routes} />
-        <BaseContainer removeTopMargin>
-          <div className="flex flex-col gap-y-5">
-            {/* Customer Information */}
-            <div className="text-primary text-xs font-bold uppercase">
-              CUSTOMER INFORMATION
-            </div>
-            <div className="w-full grid grid-cols-4 gap-x-5">
-              <DetailText label="Customer Number">{data_customerDetail?.customerNumber}</DetailText>
-              <DetailText label="Identification Type">{data_customerDetail?.identificationType}</DetailText>
-              <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</DetailText>
-              <DetailText label="Customer Name">{data_customerDetail?.customerName}</DetailText>
-              <DetailText label="Customer Type">{data_customerDetail?.customerType}</DetailText>
-              <DetailText label="Description">{data_customerDetail?.description}</DetailText>
-              <DetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate)}</DetailText>
-              <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</DetailText>
-              <DetailText label="Sex">{data_customerDetail?.sex}</DetailText>
-              <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</DetailText>
-              <DetailText label="Search Key">{data_customerDetail?.searchKey}</DetailText>
-            </div>
-
-            {/* Account Information */}
-            <div className="text-primary text-xs font-bold uppercase">
-              ACCOUNT INFORMATION
-            </div>
-            <div className="w-full grid grid-cols-4 gap-x-4">
-              <DetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</DetailText>
-              <DetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</DetailText>
-              <DetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</DetailText>
-              <DetailText label="Category">{data_accountDetail?.accountSummary?.category}</DetailText>
-              <DetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</DetailText>
-              <DetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</DetailText>
-              <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.accountSummary?.meterReadingCodes || "")}</DetailText>
-              <DetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</DetailText>
-              <DetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</DetailText>
-              <DetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</DetailText>
-              <DetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</DetailText>
-              <DetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</DetailText>
-              <DetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</DetailText>
-              <DetailText label="District">{data_accountDetail?.accountSummary?.district}</DetailText>
-              <DetailText label="City">{data_accountDetail?.accountSummary?.city}</DetailText>
-              <DetailText label="Country">{data_accountDetail?.accountSummary?.country}</DetailText>
-              <DetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</DetailText>
-              <DetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</DetailText>
-              <DetailText label="Status">{data_accountDetail?.accountSummary?.status}</DetailText>    
-            </div>
+        <CardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
+          <div className="flex flex-col gap-y-4">
+            <BaseContainer border header={"CUSTOMER INFORMATION"}>
+              <div className="w-full grid grid-cols-4 gap-x-5">
+                <DetailText label="Customer Number">{data_customerDetail?.customerNumber}</DetailText>
+                <DetailText label="Identification Type">{data_customerDetail?.identificationType}</DetailText>
+                <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</DetailText>
+                <DetailText label="Customer Name">{data_customerDetail?.customerName}</DetailText>
+                <DetailText label="Customer Type">{data_customerDetail?.customerType}</DetailText>
+                <DetailText label="Description">{data_customerDetail?.description}</DetailText>
+                <DetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate)}</DetailText>
+                <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</DetailText>
+                <DetailText label="Sex">{data_customerDetail?.sex}</DetailText>
+                <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</DetailText>
+                <DetailText label="Search Key">{data_customerDetail?.searchKey}</DetailText>
+              </div>
+            </BaseContainer>
+            <BaseContainer border header={"ACCOUNT INFORMATION"}>
+              <div className="w-full grid grid-cols-4 gap-x-4">
+                <DetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</DetailText>
+                <DetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</DetailText>
+                <DetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</DetailText>
+                <DetailText label="Category">{data_accountDetail?.accountSummary?.category}</DetailText>
+                <DetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</DetailText>
+                <DetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</DetailText>
+                <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.accountSummary?.meterReadingCodes || "")}</DetailText>
+                <DetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</DetailText>
+                <DetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</DetailText>
+                <DetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</DetailText>
+                <DetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</DetailText>
+                <DetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</DetailText>
+                <DetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</DetailText>
+                <DetailText label="District">{data_accountDetail?.accountSummary?.district}</DetailText>
+                <DetailText label="City">{data_accountDetail?.accountSummary?.city}</DetailText>
+                <DetailText label="Country">{data_accountDetail?.accountSummary?.country}</DetailText>
+                <DetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</DetailText>
+                <DetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</DetailText>
+                <DetailText label="Status">{data_accountDetail?.accountSummary?.status}</DetailText>    
+              </div>
+            </BaseContainer>
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         <Spin
           spinning={loading}

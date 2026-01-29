@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import ApprovalHierarchy from "./ApprovalHierarchy";
+import CardContainer from "../../../../../../../../../../components/CardContainer";
 
 const ApprovalSectionForm = ({
   dataTable,
@@ -20,10 +21,7 @@ const ApprovalSectionForm = ({
     setSearchedColumn(dataIndex);
   };
   return (
-    <div className={`flex flex-col gap-y-5 ${className} drop-shadow-lg bg-white rounded-lg w-full p-9`} >
-      <span className="text-primary text-sm font-bold uppercase">
-        APPROVAL
-      </span>
+    <CardContainer header={"APPROVAL"} className={`${className}`}>
       <ApprovalHierarchy
         dataTable={dataTable}
         dataOption={dataOption}
@@ -37,7 +35,7 @@ const ApprovalSectionForm = ({
         disableSelect={disableSelect}
         approvalName={approvalName}
       />
-    </div>
+    </CardContainer>
   );
 };
 
