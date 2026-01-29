@@ -312,10 +312,7 @@ const AttachmentSectionForm = ({
   return (
     <CardContainer header={"ATTACHMENT"} className={`${className}`}>
       <Spin spinning={loadingDownload}>
-        <div className="flex flex-col w-full gap-5">
-          <span className="text-primary text-sm font-bold uppercase">
-            ATTACHMENT
-          </span>
+        <div className="flex flex-col gap-y-4">
           {type !== "detail" && type !== "preview" ? (
             <div className="flex flex-col w-full gap-2 items-end">
               <div className="flex flex-col gap-y-1 justify-start">
