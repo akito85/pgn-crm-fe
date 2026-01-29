@@ -1,9 +1,8 @@
 import { useEffect, memo } from "react";
-import { Collapse, Space } from "antd";
+import { Collapse } from "antd";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Fragment } from "react";
-import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";
 import WitholdingTax from "./WitholdingTax/WitholdingTax";
 import PaymentChannel from "./Payment Channel/PaymentChannel";
 import TaxIdentifierAndRelation from "./TaxIdentifier/TaxIdentifierAndRelation";
@@ -176,7 +175,6 @@ const FinancialInformation = ({
   };
 
   const panelStyle = {
-    marginBottom: 16,
     border: "1px solid #d9d9d9",
     borderRadius: 4,
     overflow: "hidden",
@@ -191,9 +189,9 @@ const FinancialInformation = ({
 
   return (
     <Fragment>
-      <MiniBaseContainer>
+      <NxBaseContainer>
 				{/* template collapse */}
-        <Space direction="vertical" style={{ width: "100%" }}>
+        <div className="flex flex-col gap-y-4">
           {financialList.map((elm, index) => (
             <Collapse
               key={index}
@@ -215,8 +213,8 @@ const FinancialInformation = ({
               </Panel>
             </Collapse>
           ))}
-        </Space>
-      </MiniBaseContainer>
+        </div>
+      </NxBaseContainer>
     </Fragment>
   );
 };
