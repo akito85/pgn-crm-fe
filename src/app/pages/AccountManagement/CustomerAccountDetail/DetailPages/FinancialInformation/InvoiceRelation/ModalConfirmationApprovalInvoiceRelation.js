@@ -1,54 +1,97 @@
-import { useState } from "react";
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../utils";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import { useRef, useState } from "react";
 
 const ModalConfirmationApprovalInvoiceRelation = ({
   dataSource,
   isOpen,
   handleCloseModal,
   onFinish,
-  getColumnSearchProps,
   approveOrReject,
 }) => {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const searchInput = useRef(null);
+  const [search, setSearch] = useState({});
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
 
-  const handleChangeDetail = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  /**
+   * @param {string[]} selectedKeys 
+   * @param {() => {}} confirm 
+   * @param {string} dataIndex 
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => ({
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      })
+    );
   };
 
   const columns = [
     {
+      key: "no",
       title: "NO",
       width: 50,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "accountNumber",
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       width: 150,
       sorter: true,
-      ...getColumnSearchProps("accountNumber"),
+      filteredValue: [search?.accountNumber] || null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+          search,
+          "accountNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+      ),
     },
     {
+      key: "priorty",
       title: "PRIORITY",
       dataIndex: "priorty",
       width: 100,
       sorter: true,
-      ...getColumnSearchProps("priorty"),
+      filteredValue: [search?.priorty] || null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "priorty",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
     },
     {
+      key: "startDate",
       title: "START DATE",
       dataIndex: "startDate",
       width: 150,
       align: "center",
-      ...getColumnSearchProps("startDate", "date"),
+      filteredValue: [search?.startDate] || null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "startDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (startDate) => moment(startDate, dateFormatting.f_date).format(dateFormatting.date),
     },
     {
@@ -56,7 +99,16 @@ const ModalConfirmationApprovalInvoiceRelation = ({
       dataIndex: "endDate",
       width: 150,
       align: "center",
-      ...getColumnSearchProps("endDate", "date"),
+      filteredValue: [search?.endDate] || null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "endDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (endDate) => endDate ? moment(endDate, dateFormatting.f_date).format(dateFormatting.date) : "",
     },
     {
@@ -66,7 +118,16 @@ const ModalConfirmationApprovalInvoiceRelation = ({
       sorter: true,
       align: "center",
       fixed: "right",
-      ...getColumnSearchProps("statusApproval"),
+      filteredValue: [search?.statusApproval] || null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "statusApproval",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (status) => {
         const displayText = {
           "approved": "Approved",
@@ -89,7 +150,16 @@ const ModalConfirmationApprovalInvoiceRelation = ({
       sorter: true,
       fixed: "right",
       width: 100,
-      ...getColumnSearchProps("status"),
+      filteredValue: [search?.status] || null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (status) => {
         const displayText = {
           "active": "Active",
@@ -117,14 +187,12 @@ const ModalConfirmationApprovalInvoiceRelation = ({
       customMessage={"Are you sure you want to approve selected data?"}
       header={"CONFIRMATION"}
     >
-      <TablePaginationNew
+      <NxTable
         dataSource={dataSource}
         totalData={dataSource.length}
         columns={columns}
-        onChange={handleChangeDetail}
-        current={page}
         tableScrolled={{ y: 200, x: 1500 }}
-        type="FE"
+        usePagination={false}
       />
     </ModalApproveOrReject>
   )
