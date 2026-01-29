@@ -40,6 +40,7 @@ import accountManagementService from "../../../../../../../../redux/services/acc
 import { configApp } from "../../../../../../../../constants/configApp";
 import CardContainer from "../../../../../../../../components/CardContainer";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -679,11 +680,17 @@ const CreatePaymentRelation = ({ type }) => {
           scrollToFirstError={true}
         >
           {/* Step Contents */}
-          <div className="flex flex-row gap-x-6 justify-center">
-            <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+          <NxBaseContainer border>
+            <div className="flex flex-row justify-center">
+              <div
+                onScroll={handleScroll}
+                ref={containerRef}
+                className="overflow-x-scroll scrollStepsCstm"
+              >
+                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+              </div>
             </div>
-          </div>
+          </NxBaseContainer>
           <div className="steps-content my-6">
           {
             steps.map((step) => step.content)

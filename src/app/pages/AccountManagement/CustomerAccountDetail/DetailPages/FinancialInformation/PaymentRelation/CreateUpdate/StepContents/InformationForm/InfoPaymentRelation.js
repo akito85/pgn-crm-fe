@@ -150,35 +150,42 @@ export default function InfoPaymentRelation({
             </Form.Item>
 
             <Form.Item
-              key="accountNumber"
-              name={"accountNumber"}
               label={"Account Number"}
+              required
               className="no-margin-form"
-              rules={[
-                {
-                  message: requiredMessage("Account Number"),
-                  required: true,
-                }
-              ]}
             >
-              <InputComponent disabled />
+              <Input.Group compact>
+                <Form.Item
+                  key="accountNumber"
+                  name={"accountNumber"}
+                  rules={[
+                    {
+                      message: requiredMessage("Account Number"),
+                      required: true,
+                    }
+                  ]}
+                  noStyle
+                >
+                  <InputComponent disabled />
+                </Form.Item>
+                <Button
+                  type="primary"
+                  className="h-9 px-4 justify-center items-center"
+                  style={{
+                    backgroundColor: "#0075bf",
+                    borderColor: "#0075bf",
+                    borderRadius: "5px",
+                    minWidth: "112px",
+                  }}
+                  onClick={() => {
+                    // Add your select logic here
+                    setIsOpen(true)
+                  }}
+                >
+                  Select
+                </Button>
+              </Input.Group>
             </Form.Item>
-            <Button
-              type="primary"
-              className="h-9 px-4 justify-center items-center"
-              style={{
-                backgroundColor: "#0075bf",
-                borderColor: "#0075bf",
-                borderRadius: "5px",
-                minWidth: "112px",
-              }}
-              onClick={() => {
-                // Add your select logic here
-                setIsOpen(true)
-              }}
-            >
-              Select
-            </Button>
           </div>
 
           <Form.Item
