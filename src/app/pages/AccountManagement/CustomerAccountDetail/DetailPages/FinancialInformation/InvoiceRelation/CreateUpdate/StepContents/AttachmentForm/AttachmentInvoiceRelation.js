@@ -16,7 +16,7 @@ import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
-import CardContainer from "../../../../../../../../../../components/CardContainer";
+import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -310,7 +310,8 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <CardContainer header={"ATTACHMENT"} className={`${className}`}>
+    <div className={`${className}`}>
+      <NxCardContainer header={"ATTACHMENT"} >
       <Spin spinning={loadingDownload}>
         <div className="flex flex-col gap-y-4">
           {type !== "detail" && type !== "preview" ? (
@@ -369,7 +370,8 @@ const AttachmentSectionForm = ({
         }
         withLink
       />
-    </CardContainer>
+      </NxCardContainer>
+    </div>
   );
 };
 

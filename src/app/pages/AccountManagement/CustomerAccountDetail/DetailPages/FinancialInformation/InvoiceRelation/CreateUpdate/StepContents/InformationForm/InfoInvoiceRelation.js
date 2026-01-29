@@ -11,7 +11,7 @@ import DateComponent from "../../../../../../../../../../components/DateComponen
 import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
-import CardContainer from "../../../../../../../../../../components/CardContainer";
+import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 
 export default function InfoInvoiceRelation({
@@ -145,7 +145,7 @@ export default function InfoInvoiceRelation({
   
   return(
     <div className={className}>
-      <CardContainer header={"INVOICE RELATION INFORMATION"} removeBottomMargin>
+      <NxCardContainer header={"INVOICE RELATION INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           <div className="flex gap-2 items-end">
             <Form.Item name={"objectId"} hidden>
@@ -245,7 +245,7 @@ export default function InfoInvoiceRelation({
             />
           </Form.Item>
         </div>
-      </CardContainer>
+      </NxCardContainer>
 
       <ModalCustom
         isOpen={isOpen}
@@ -253,7 +253,7 @@ export default function InfoInvoiceRelation({
         handleOk={handleOk}
         header={"CHOOSE ACCOUNT"}
         width={1100}
-        type={"custom"}
+        type={"confirmation"}
         footer={[
           <Button key="close" onClick={handleClose}>
             Close

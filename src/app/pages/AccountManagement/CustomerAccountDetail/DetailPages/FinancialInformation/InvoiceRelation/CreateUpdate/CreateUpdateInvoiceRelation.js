@@ -6,7 +6,6 @@ import { Steps, Button, Form, Spin } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumb from "../../../../../../../../components/BreadCrumb";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
@@ -39,8 +38,9 @@ import {
 import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
-import CardContainer from "../../../../../../../../components/CardContainer";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 
 const CreateUpdateInvoiceRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -603,9 +603,9 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
   return (
     <LayoutMenu>
-      <div className="flex flex-col gap-y-5">
-        <BreadCrumb routes={routes} />
-        <CardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
+      <div className="flex flex-col gap-y-4">
+        <NxBreadCrumb routes={routes} />
+        <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
           <div className="flex flex-col gap-y-4">
             <BaseContainer border header={"CUSTOMER INFORMATION"}>
               <div className="w-full grid grid-cols-4 gap-x-5">
@@ -646,7 +646,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               </div>
             </BaseContainer>
           </div>
-        </CardContainer>
+        </NxCardContainer>
 
         <Spin
           spinning={loading}
@@ -658,6 +658,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             onFinish={handleSubmitForm}
             // onFinishFailed={handleErrorSubmit}
             scrollToFirstError={true}
+            className="flex flex-col gap-y-4"
           >
             {/* Step Contents */}
             <NxBaseContainer border>
@@ -671,14 +672,11 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
                 </div>
               </div>
             </NxBaseContainer>
-            <div className="steps-content my-6">
-            {
-              steps.map((step) => step.content)
-            }
-            </div>
+
+            {steps.map((step) => step.content)}
 
             {/* Section Action Steps */}
-            <div className="steps-action my-8 flex w-full justify-between gap-x-2">
+            <div className="steps-action flex w-full justify-between gap-x-2">
               <ButtonComponent
                 type={"submit"}
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}

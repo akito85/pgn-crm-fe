@@ -14,21 +14,17 @@ export default function AttachmentForm({
   configApplication,
 }){
   return(
-    <Form.Item
-      name={"attachments"}
-    >
-      <AttachmentInvoiceRelation
-        type={type}
-        value={value}
-        updateData={updateData}
-        dispatch={dispatch}
-        mandatory={mandatory}
-        className={className}
-        getAPICategory={getAPICategory}
-        data={data}
-        service={service}
-        configApplication={configApplication}
-      />
-    </Form.Item>
+    <AttachmentInvoiceRelation
+      type={type}
+      value={value}
+      updateData={updateData}
+      dispatch={dispatch}
+      mandatory={mandatory}
+      className={className}
+      getAPICategory={getAPICategory}
+      data={data}
+      service={service}
+      configApplication={configApplication}
+    />
   )
 }
