@@ -1,6 +1,6 @@
 const NxCardContainer = ({ header, subHeader, children, type, element, className, hideChildren = false, withoutTopPadding = false }) => {
   return (
-    <div className={`drop-shadow-lg bg-white rounded-lg w-full my-2 ${className}`}>
+    <div className={`drop-shadow-lg bg-white rounded-lg w-full ${className}`}>
       {type === "profile" || type === "tab" ? (
         <>
           <div className="p-4">{element}</div>
