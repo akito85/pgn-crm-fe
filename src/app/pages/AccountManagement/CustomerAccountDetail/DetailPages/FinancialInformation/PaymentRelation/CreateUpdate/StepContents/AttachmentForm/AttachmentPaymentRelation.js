@@ -72,8 +72,6 @@ const sorter = (fieldSort, a, b) => {
 };
 
 const columnAttachmentData = (
-  page,
-  pageSize,
   searchInput,
   searchedColumn,
   searchText,
@@ -345,8 +343,6 @@ const AttachmentSectionForm = ({
             totalData={data.length}
             tableScrolled={{ y: 300, x: 1500 }}
             columns={columnAttachmentData(
-              page,
-              pageSize,
               searchInput,
               searchedColumn,
               searchText,
