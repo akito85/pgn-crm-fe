@@ -10,7 +10,7 @@ const NxBaseContainer = ({
   // Determine class based on border prop
   const containerClass = border
     ? `bg-white rounded-lg w-full p-4 ${className}`
-    : "drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]";
+    : "drop-shadow-md bg-white rounded-lg w-full p-4";
 
   // Use inline style for border to ensure visibility
   const containerStyle = border ? { border: "1px solid #C8CDD4" } : {};
@@ -21,13 +21,13 @@ const NxBaseContainer = ({
         <>
           <div className="p-0">{element}</div>
         </>
-      ) : (
+      ) : (header || subHeader) && (
         <>
           <div className="p-0">
             <div className="text-primary text-xs font-bold uppercase">
               {header}
             </div>
-            <div className="text-primary text-xs font-bold mt-3">
+            <div className="text-primary text-xs font-bold">
               {subHeader}
             </div>
           </div>
