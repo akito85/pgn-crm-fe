@@ -1,12 +1,10 @@
 import { NumericFormat } from "react-number-format";
 import { useSelector } from "react-redux";
 
-// ✅ Helper function untuk get config
 const useFormatConfig = () => {
   return useSelector((state) => state.globalProp.globalProp);
 };
 
-// ✅ Component wrapper untuk currency formatting
 export const CurrencyFormatting = ({ value, type }) => {
   const config = useFormatConfig();
 
@@ -40,12 +38,10 @@ export const CurrencyFormatting = ({ value, type }) => {
   }
 };
 
-// ✅ Untuk backward compatibility (function style)
 export const currencyFormatting = (value, type) => {
   return <CurrencyFormatting value={value} type={type} />;
 };
 
-// ✅ Number formatting
 export const NumberFormatting = ({ value }) => {
   const config = useFormatConfig();
   
@@ -62,7 +58,6 @@ export const numberFormatting = (value) => {
   return <NumberFormatting value={value} />;
 };
 
-// ✅ Usage formatting
 export const UsageFormatting = ({ value }) => {
   const config = useFormatConfig();
   
