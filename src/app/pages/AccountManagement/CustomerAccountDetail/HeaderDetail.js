@@ -1,13 +1,13 @@
 import { Fragment } from "react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import DetailText from "../../../../components/DetailText";
-import BaseContainer from "../../../../components/BaseContainer";
 import { useSelector } from "react-redux";
 import {
   getAccountOneTimeDetail,
   getAccountStandardDetail,
 } from "../../../../redux/slices/account_management/accountManagement";
 import { renderDate } from "../../RatingBillingInvoice/POS/Utils";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const HeaderDetail = ({
   data_header = [],
@@ -32,7 +32,7 @@ const HeaderDetail = ({
 
   return (
     <Fragment>
-      <BaseContainer header={data_header[0]}>
+      <NxBaseContainer header={data_header[0]}>
         <div className="w-full grid grid-cols-4 gap-4">
           {/* cusstomer information */}
           <DetailText label="Customer Number">
@@ -150,7 +150,7 @@ const HeaderDetail = ({
             {/* </DetailText> */}
           </div>
         </div>
-      </BaseContainer>
+      </NxBaseContainer>
     </Fragment>
   );
 };

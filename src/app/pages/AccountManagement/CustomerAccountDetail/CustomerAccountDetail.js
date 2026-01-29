@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import BreadCrumb from "../../../../components/BreadCrumb";
+import { useEffect } from "react";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
@@ -10,6 +9,7 @@ import HeaderDetail from "./HeaderDetail";
 import { useState } from "react";
 import AccountDetailInformation from "./AccountDetailInformation";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 
 const data = [
   // { value: "Customer Information" },
@@ -117,89 +117,82 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading} className={"w-full justify-bottom"}>
-        <BreadCrumb routes={routes} />
-        <div className="w-full">
-          <HeaderDetail
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            dispatch={dispatch}
-            idAccount={id}
-            idCustomer={idCustomer}
-            type={type}
-          />
-        </div>
-        <div className="flex flex-col gap-3 mt-8">
-          {/* {type.section === "" ? ( */}
-          <div>
-            <AccountDetailInformation
-              id={id}
-              section={typeAccountInfoDetailSection}
-              options={tabs}
-              handleChangeOption={handleAccountInfoDetailSection}
+      <Spin spinning={loading}>
+        <div className="flex flex-col gap-y-4">
+          <NxBreadCrumb routes={routes} />
+          <div className="flex flex-col gap-y-4">
+            <HeaderDetail
+              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+              dispatch={dispatch}
+              idAccount={id}
               idCustomer={idCustomer}
               type={type}
-              setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
-              dispatch = {dispatch}
-              isApproval={isApproval}
-              setIsApproval={setIsApproval}
-              setShowApprovalButton={setShowApprovalButton}
-              submitApprovalCondition={submitApprovalCondition}
-              setSubmitApprovalCondition={setSubmitApprovalCondition}
-              // handleChangeInteraction={handleSetType}
             />
-            <div className="my-5 flex justify-between">
-              <Link
-                to={
-                  type === "standard"
-                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                }
-              >
-                <ButtonComponent
-                  type={"submit"}
-                  // onClick={() => {
-                  //   navigate(-1)
-                  // }}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 24,
-                        justifyItems: "center",
-                      }}
-                    />
+            <div className="flex flex-col gap-y-4">
+              <AccountDetailInformation
+                id={id}
+                section={typeAccountInfoDetailSection}
+                options={tabs}
+                handleChangeOption={handleAccountInfoDetailSection}
+                idCustomer={idCustomer}
+                type={type}
+                setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
+                dispatch = {dispatch}
+                isApproval={isApproval}
+                setIsApproval={setIsApproval}
+                setShowApprovalButton={setShowApprovalButton}
+                submitApprovalCondition={submitApprovalCondition}
+                setSubmitApprovalCondition={setSubmitApprovalCondition}
+                // handleChangeInteraction={handleSetType}
+              />
+              <div className="flex justify-between">
+                <Link
+                  to={
+                    type === "standard"
+                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
                   }
                 >
-                  Back
-                </ButtonComponent>
-              </Link>
+                  <ButtonComponent
+                    type={"submit"}
+                    // onClick={() => {
+                    //   navigate(-1)
+                    // }}
+                    icon={
+                      <LeftOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 24,
+                          justifyItems: "center",
+                        }}
+                      />
+                    }
+                  >
+                    Back
+                  </ButtonComponent>
+                </Link>
 
-              {showApprovalButton && (
-              <div className={"w-full flex justify-end gap-5"}>
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => setSubmitApprovalCondition("reject")}
-                  disabled={!!submitApprovalCondition}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => setSubmitApprovalCondition("approve")}
-                  disabled={!!submitApprovalCondition}
-                >
-                  Approve
-                </ButtonComponent>
+                {showApprovalButton && (
+                <div className={"w-full flex justify-end gap-4"}>
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => setSubmitApprovalCondition("reject")}
+                    disabled={!!submitApprovalCondition}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => setSubmitApprovalCondition("approve")}
+                    disabled={!!submitApprovalCondition}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
+              )}
               </div>
-            )}
             </div>
           </div>
-          {/* ) : (
-           <UpdatePageInformation
-          type={type}
-          handleChangeInteraction={handleSetType}
-          />
-        )} */}
         </div>
       </Spin>
     </LayoutMenu>
