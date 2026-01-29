@@ -1,72 +1,57 @@
-import { Fragment } from "react";
-import RadioTabs from "../../../../../../../../components/RadioTabs";
 import InvoiceRelationDetailAttch from "./InvoiceRelationDetailAttch";
 import InvoiceRelationDetailInfo from "./InvoiceRelationDetailInfo";
-
-const dataTabs = {
-  iri: "Invoice Relation Information",
-  attch: "Attachment",
-};
+import { Tabs } from "antd";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import { useState } from "react";
 
 const InvoiceRelationDetailTabs = ({
   subjectAccountNumber,
+  idIr = 0,
   dataDetail = {},
-  dataAttachment = [],
-  section = "",
-  options = [],
-  handleChangeOption = () => {},
+  dispatch = () => {},
 }) => {
   // Use provided options or fall back to default tabs
-  const tabOptions = options.length > 0 ? options : [
-    { value: "iri", label: "Invoice Relation Information" },
-    { value: "attch", label: "Attachment" },
+  const tabOptions = [
+    {
+      key: "iri",
+      label: "Invoice Relation Information",
+      children: (
+        <InvoiceRelationDetailInfo
+          subjectAccountNumber={subjectAccountNumber}
+          dataDetail={dataDetail}
+        />
+      )
+    },
+    {
+      key: "attch",
+      label: "Attachment",
+      children: (
+        <InvoiceRelationDetailAttch
+          dispatch={dispatch}
+          idIr={idIr}
+        />
+      )
+    },
   ];
 
-  const AccountType = () => {
-    // Path form URL
-    const path = window.location.pathname
-
-    // Strict whitelist (prevents XSS, traversal, unicode injections)
-    const allowed = /^[a-zA-Z0-9-_]+$/;
-
-    // Match only your known route structure:
-    // /account-management/<dynamic>/view
-    const match = path.match(/^\/account-management\/([a-zA-Z0-9-_]+)\/view\/?$/);
-
-    if (!match) return null;
-
-    const dynamicPart = match[1];
-
-    return allowed.test(dynamicPart) ? dynamicPart : null;
-  }
-
-  const renderSection = () => {
-    switch (section) {
-      case dataTabs.iri:
-        return <InvoiceRelationDetailInfo subjectAccountNumber={subjectAccountNumber} dataDetail={dataDetail} type={AccountType}/>;
-      case dataTabs.attch:
-        return <InvoiceRelationDetailAttch dataAttachment={dataAttachment} />;
-      default:
-        return <InvoiceRelationDetailInfo />;
-    }
-  };
+  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
 
   return (
-    <Fragment>
-      <div className="flex flex-col gap-4">
-        {/* Wrapper div to ensure proper styling */}
-        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
-          <div className="w-full">
-            <RadioTabs
-              currentPosition={section}
-              data={tabOptions}
-              onChange={handleChangeOption}
-            />
-          </div>
-        </div>
-        {renderSection()}
-      </div>
-    </Fragment>
+    <NxCardContainer
+      header={"DETAIL INFORMATION"}
+      type="tabs"
+      element={
+        <Tabs
+          items={tabOptions}
+          onChange={setActiveKey}
+          activeKey={activeKey}
+          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-tab]:py-4 [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+        />
+      }
+      hideChildren
+      withoutTopPadding
+    >
+    </NxCardContainer>
   );
 };
 
