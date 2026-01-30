@@ -45,7 +45,9 @@ const ConfirmationModal = ({
       header={"CONFIRMATION PAYMENT RELATION"}
       type={"confirmation"}
       handleCancel={handleCancel}
-      hideTopPadding
+      hidePadding={{
+        top: true,
+      }}
       footer={[
         <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
           {activeTab > 0 ? (
