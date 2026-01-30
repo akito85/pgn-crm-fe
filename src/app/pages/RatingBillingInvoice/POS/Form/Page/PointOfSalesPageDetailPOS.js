@@ -107,6 +107,7 @@ const PointOfSalesPageDetailPOS = ({
   transactionDate,
   accountNumber,
   idPos,
+  dataUomCodes = [],
 }) => {
   const { data_calculate, loading } = useSelector((state) => state.pointOfSales);
 
@@ -696,6 +697,7 @@ const PointOfSalesPageDetailPOS = ({
             dataItem={dataItemFilter}
             dataType={dataType}
             loading={loading}
+            dataUomCodes={dataUomCodes}
           />
         </Form>
       </ModalCustom>
