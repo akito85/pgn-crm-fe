@@ -31,6 +31,9 @@ const initialState = {
   dataListRateType: [],
   dataInvoiceInfo: null,
   dataBillingItemList: [],
+  dataListClassification: [],
+  dataListPostInvoice: [],
+  dataListOnDemand: [],
   loading: false,
   message: "",
 };
@@ -115,14 +118,14 @@ export const updateAdjustmentBilling = createAsyncThunk(
 
 export const getAdjustmentBillingPaginate = createAsyncThunk(
   "GET_ADJUSTMENT_BILLING_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/rbi/adjustment/get-adjustment-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -698,6 +701,84 @@ export const getSelectTOP = createAsyncThunk(
   }
 );
 
+export const getListClassification = createAsyncThunk(
+  "GET_LIST_CLASSIFICATION",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/adjustment/adjustment-classification";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getListPostInvoice = createAsyncThunk(
+  "GET_LIST_POST_INVOICE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/adjustment/post-invoice-list";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getListOnDemand = createAsyncThunk(
+  "GET_LIST_ON_DEMAND",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/adjustment/on-demand-list";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
 export const getListItem = createAsyncThunk(
   "GET_LIST_ITEM",
   async (id, thunkAPI) => {
@@ -820,16 +901,36 @@ const adjustmentBillingSlice = createSlice({
       state.loading = false;
     },
 
-    // get pagination calculation
-    [getAdjustmentBillingPaginate.pending]: (state) => {
-      state.loading = true;
+    [getAdjustmentBillingPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAdjustmentBillingPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.id)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.id)
+        );
+        state.data = {
+          ...action.payload,
+          result: [...(state.data?.result || []), ...uniqueNewData],
+        };
+      } else {
+        state.data = action.payload;
+      }
     },
-    [getAdjustmentBillingPaginate.rejected]: (state) => {
+    [getAdjustmentBillingPaginate.rejected]: (state, action) => {
       state.loading = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.data = { result: [], page: {} };
+      }
     },
 
     // Get List Approval Hierarchy
@@ -1090,6 +1191,45 @@ const adjustmentBillingSlice = createSlice({
     },
     [getSelectTOP.rejected]: (state, action) => {
       state.dataListSelectTOP = action.payload;
+      state.loading = false;
+    },
+
+    /* Get List Classification */
+    [getListClassification.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListClassification.fulfilled]: (state, action) => {
+      state.dataListClassification = action.payload;
+      state.loading = false;
+    },
+    [getListClassification.rejected]: (state) => {
+      state.dataListClassification = [];
+      state.loading = false;
+    },
+
+    /* Get List Post Invoice */
+    [getListPostInvoice.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListPostInvoice.fulfilled]: (state, action) => {
+      state.dataListPostInvoice = action.payload;
+      state.loading = false;
+    },
+    [getListPostInvoice.rejected]: (state) => {
+      state.dataListPostInvoice = [];
+      state.loading = false;
+    },
+
+    /* Get List On Demand */
+    [getListOnDemand.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListOnDemand.fulfilled]: (state, action) => {
+      state.dataListOnDemand = action.payload;
+      state.loading = false;
+    },
+    [getListOnDemand.rejected]: (state) => {
+      state.dataListOnDemand = [];
       state.loading = false;
     },
 

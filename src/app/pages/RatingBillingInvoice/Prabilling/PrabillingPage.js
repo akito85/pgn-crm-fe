@@ -44,10 +44,7 @@ const PrabillingPage = () => {
   const searchInput = useRef(null);
   const detailRef = useRef(null);
 
-  // UBAH state initialization menjadi:
   const [valueTab, setValueTab] = useState("All");
-
-  // Gunakan filter dari Redux sebagai initial value
   const currentTabKey = valueTab === "All" ? "all_tab" : "summary_tab";
   const [page, setPage] = useState(filters[currentTabKey]?.page || 1);
   const [loadMoreSize] = useState(20);
@@ -63,7 +60,6 @@ const PrabillingPage = () => {
     filters[currentTabKey]?.selectedBillingPeriod || null
   );
 
-  // States for detail view
   const [pageDetail, setPageDetail] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -73,8 +69,6 @@ const PrabillingPage = () => {
     right: valueTab === "All" ? ["action"] : [],
   }));
 
-  // TAMBAHKAN useEffect baru ini setelah state declarations:
-  // Save filters ke Redux setiap kali berubah
   useEffect(() => {
     dispatch(
       setFilters({
@@ -100,7 +94,6 @@ const PrabillingPage = () => {
     dispatch,
   ]);
 
-  // Restore filters saat tab berubah
   useEffect(() => {
     const savedFilters = filters[currentTabKey];
     if (savedFilters) {
@@ -115,12 +108,10 @@ const PrabillingPage = () => {
     }
   }, [valueTab, filters, currentTabKey]);
 
-  // Fetch billing periods on mount
   useEffect(() => {
     dispatch(getListBillingPeriodForPrabilling());
   }, [dispatch]);
 
-  // Set default billing period
   useEffect(() => {
     if (
       list_period_summary &&
@@ -153,7 +144,6 @@ const PrabillingPage = () => {
     });
   }, [valueTab]);
 
-  // Scroll to detail when opened
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
       setTimeout(() => {
@@ -166,14 +156,15 @@ const PrabillingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // Fetch data based on active tab
+  const initialPageSize = 100;
+
   useEffect(() => {
     if (valueTab === "All" && selectedBillingPeriod) {
       dispatch(
         getListPrabillingInitPopulate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: 100,
+          pageSize: initialPageSize,
           sort,
           billPeriodId: selectedBillingPeriod,
           isLoadMore: false,
@@ -181,7 +172,6 @@ const PrabillingPage = () => {
       );
       setPage(1);
     } else if (valueTab === "Summary" && selectedBillingPeriod) {
-      // Untuk Summary tab, convert id ke name
       const selectedPeriod = list_period_summary.find(
         (item) => item.id === selectedBillingPeriod
       );
@@ -191,7 +181,7 @@ const PrabillingPage = () => {
             billPeriod: selectedPeriod.name,
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: 100,
+            pageSize: initialPageSize,
             sort,
             isLoadMore: false,
           })
@@ -224,12 +214,18 @@ const PrabillingPage = () => {
   };
 
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
     const currentPagination =
       valueTab === "All" ? prabilling_pagination : summary_pagination;
-    const totalPages = currentPagination?.totalPages || 0;
+    const totalElements = currentPagination?.totalElements || 0;
+    const currentDataLength = currentData.length;
 
-    if (nextPage <= totalPages && selectedBillingPeriod) {
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    if (selectedBillingPeriod) {
       if (valueTab === "All") {
         await dispatch(
           getListPrabillingInitPopulate({
@@ -269,7 +265,7 @@ const PrabillingPage = () => {
           getListPrabillingInitPopulate({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: page * loadMoreSize || 100,
+            pageSize: initialPageSize,
             sort,
             billPeriodId: selectedBillingPeriod,
             isLoadMore: false,
@@ -285,7 +281,7 @@ const PrabillingPage = () => {
               billPeriod: selectedPeriod.name,
               search: encodeURIComponent(JSON.stringify(search)),
               page: 1,
-              pageSize: page * loadMoreSize || 100,
+              pageSize: initialPageSize,
               sort,
               isLoadMore: false,
             })
@@ -333,7 +329,6 @@ const handleDetail = (record, rowKey) => {
     }));
   }, [currentData, valueTab]);
 
-  // Get columns from separate file
   const allTabColumns = useMemo(
     () =>
       getAllTabColumns(
@@ -392,7 +387,6 @@ const handleDetail = (record, rowKey) => {
     }
   };
 
-  // UBAH function onChangeTab:
   const onChangeTab = (key) => {
     if (valueTab === "All") {
       dispatch(resetAllTabData());
@@ -431,7 +425,6 @@ const handleDetail = (record, rowKey) => {
     setSelectedRecord(null);
   };
 
-  // UBAH function handleBillingPeriodChange:
   const handleBillingPeriodChange = (value) => {
     if (valueTab === "Summary") {
       dispatch(resetSummaryData());
@@ -449,7 +442,6 @@ const handleDetail = (record, rowKey) => {
     setActiveRowKey(null);
     setSelectedRecord(null);
 
-    // TAMBAHKAN: Save ke Redux juga
     dispatch(
       setFilters({
         tab: currentTabKey,

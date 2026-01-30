@@ -131,6 +131,7 @@ import gapuraManagementReducer from "../slices/receipt_collection/gapuraManageme
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
 import offsetReducer from "../slices/receipt_collection/offset";
 import writeOffReducer from "../slices/receipt_collection/writeOff";
+import globalPropReducer from "../slices/globalPropSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -207,6 +208,9 @@ const reducer = combineReducers({
   accounting_rules: accountingRulesReducer,
   tax_implication: taxImplicationReducer,
   assets: assetsReducer,
+
+  // Global reducer
+  globalProp: globalPropReducer,
 
   // RBI reducer
   prabillingLog: prabillingLogReducer,

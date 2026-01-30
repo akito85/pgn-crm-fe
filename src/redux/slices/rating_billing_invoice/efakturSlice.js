@@ -122,6 +122,9 @@ const initialState = {
   dataListFakturType: [],
   dataListTaxPeriod: [],
   dataListCountry: [],
+  dataListFakturCode: [],
+  dataListTaxYears: [],
+  dataListProductCode: [],
   dataDetail: null,
 };
 
@@ -1114,23 +1117,34 @@ export const getListProductType = createAsyncThunk(
   "EFAKTUR/GET_LIST_PRODUCT_TYPE",
   async (_, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = "/v1/dbs/api/rbi/e-invoice/product-type-list";
-      // const response = await ratingBillingHttpService.getAll(url);
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-product-types";
+      const response = await ratingBillingHttpService.getAll(url);
 
-      // Data dummy
-      const dummyData = [
-        { id: 1, name: "Barang" },
-        { id: 2, name: "Jasa" },
-        { id: 3, name: "Barang dan Jasa" },
-      ];
-
-      return dummyData;
+      return response.data || [];
     } catch (error) {
       return handleApiError(
         error,
         thunkAPI,
         "Gagal mengambil list product type",
+      );
+    }
+  },
+);
+
+//  get list product code
+export const getListProductCode = createAsyncThunk(
+  "EFAKTUR/GET_LIST_PRODUCT_CODE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-product-codes";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list product code",
       );
     }
   },
@@ -1143,23 +1157,10 @@ export const getListUOM = createAsyncThunk(
   "EFAKTUR/GET_LIST_UOM",
   async (_, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = "/v1/dbs/api/rbi/e-invoice/uom-list";
-      // const response = await ratingBillingHttpService.getAll(url);
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-uom-codes";
+      const response = await ratingBillingHttpService.getAll(url);
 
-      // Data dummy
-      const dummyData = [
-        { code: "PCS", name: "Pieces" },
-        { code: "KG", name: "Kilogram" },
-        { code: "MTR", name: "Meter" },
-        { code: "BOX", name: "Box" },
-        { code: "UNIT", name: "Unit" },
-        { code: "SET", name: "Set" },
-        { code: "ROLL", name: "Roll" },
-        { code: "PAK", name: "Pack" },
-      ];
-
-      return dummyData;
+      return response.data || [];
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil list UOM");
     }
@@ -1169,76 +1170,76 @@ export const getListUOM = createAsyncThunk(
 // ========================================
 // GET LIST APPROVAL HIERARCHY (DUMMY)
 // ========================================
-export const getListApprovalHierarchy = createAsyncThunk(
-  "EFAKTUR/GET_LIST_APPROVAL_HIERARCHY",
-  async (_, thunkAPI) => {
-    try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = "/v1/dbs/api/rbi/e-invoice/approval-hierarchy-list";
-      // const response = await ratingBillingHttpService.getAll(url);
+// export const getListApprovalHierarchy = createAsyncThunk(
+//   "EFAKTUR/GET_LIST_APPROVAL_HIERARCHY",
+//   async (_, thunkAPI) => {
+//     try {
+//       // TODO: Ganti dengan API call yang sebenarnya
+//       // const url = "/v1/dbs/api/rbi/e-invoice/approval-hierarchy-list";
+//       // const response = await ratingBillingHttpService.getAll(url);
 
-      // Data dummy
-      const dummyData = [
-        { appHierId: 1, approvalName: "Standard Approval" },
-        { appHierId: 2, approvalName: "Express Approval" },
-        { appHierId: 3, approvalName: "Special Approval" },
-      ];
+//       // Data dummy
+//       const dummyData = [
+//         { appHierId: 1, approvalName: "Standard Approval" },
+//         { appHierId: 2, approvalName: "Express Approval" },
+//         { appHierId: 3, approvalName: "Special Approval" },
+//       ];
 
-      return dummyData;
-    } catch (error) {
-      return handleApiError(
-        error,
-        thunkAPI,
-        "Gagal mengambil list approval hierarchy",
-      );
-    }
-  },
-);
+//       return dummyData;
+//     } catch (error) {
+//       return handleApiError(
+//         error,
+//         thunkAPI,
+//         "Gagal mengambil list approval hierarchy",
+//       );
+//     }
+//   },
+// );
 
 // ========================================
 // GET LIST APPROVAL HIERARCHY DETAIL (DUMMY)
 // ========================================
-export const getListApprovalHierarchyDetail = createAsyncThunk(
-  "EFAKTUR/GET_LIST_APPROVAL_HIERARCHY_DETAIL",
-  async ({ id }, thunkAPI) => {
-    try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = `/v1/dbs/api/rbi/e-invoice/approval-hierarchy-detail/${id}`;
-      // const response = await ratingBillingHttpService.getDetail(url);
+// export const getListApprovalHierarchyDetail = createAsyncThunk(
+//   "EFAKTUR/GET_LIST_APPROVAL_HIERARCHY_DETAIL",
+//   async ({ id }, thunkAPI) => {
+//     try {
+//       // TODO: Ganti dengan API call yang sebenarnya
+//       // const url = `/v1/dbs/api/rbi/e-invoice/approval-hierarchy-detail/${id}`;
+//       // const response = await ratingBillingHttpService.getDetail(url);
 
-      // Data dummy
-      const dummyData = [
-        {
-          level: 1,
-          approvalName: "Supervisor",
-          employeeDetail: [
-            { employeeId: 1, employeeName: "John Doe", position: "Supervisor" },
-            {
-              employeeId: 2,
-              employeeName: "Jane Smith",
-              position: "Supervisor",
-            },
-          ],
-        },
-        {
-          level: 2,
-          approvalName: "Manager",
-          employeeDetail: [
-            { employeeId: 3, employeeName: "Bob Johnson", position: "Manager" },
-          ],
-        },
-      ];
+//       // Data dummy
+//       const dummyData = [
+//         {
+//           level: 1,
+//           approvalName: "Supervisor",
+//           employeeDetail: [
+//             { employeeId: 1, employeeName: "John Doe", position: "Supervisor" },
+//             {
+//               employeeId: 2,
+//               employeeName: "Jane Smith",
+//               position: "Supervisor",
+//             },
+//           ],
+//         },
+//         {
+//           level: 2,
+//           approvalName: "Manager",
+//           employeeDetail: [
+//             { employeeId: 3, employeeName: "Bob Johnson", position: "Manager" },
+//           ],
+//         },
+//       ];
 
-      return dummyData;
-    } catch (error) {
-      return handleApiError(
-        error,
-        thunkAPI,
-        "Gagal mengambil detail approval hierarchy",
-      );
-    }
-  },
-);
+//       return dummyData;
+//     } catch (error) {
+//       return handleApiError(
+//         error,
+//         thunkAPI,
+//         "Gagal mengambil detail approval hierarchy",
+//       );
+//     }
+//   },
+// );
 
 // ========================================
 // GET LIST FAKTUR TYPE (DUMMY)
@@ -1247,26 +1248,34 @@ export const getListFakturType = createAsyncThunk(
   "EFAKTUR/GET_LIST_FAKTUR_TYPE",
   async (_, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = "/v1/dbs/api/rbi/e-invoice/faktur-type-list";
-      // const response = await ratingBillingHttpService.getAll(url);
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-faktur-types";
+      const response = await ratingBillingHttpService.getAll(url);
 
-      // Data dummy
-      const dummyData = [
-        { id: 1, name: "01 - Kepada Pihak yang Bukan Pemungut PPN" },
-        { id: 2, name: "02 - Kepada Pemungut Bendaharawan" },
-        { id: 3, name: "03 - Kepada Pemungut Selain Bendaharawan" },
-        { id: 4, name: "04 - DPP Nilai Lain" },
-        { id: 5, name: "07 - Penyerahan yang PPN-nya Tidak Dipungut" },
-        { id: 6, name: "08 - Penyerahan yang PPN-nya Dibebaskan" },
-      ];
-
-      return dummyData;
+      return response.data || [];
     } catch (error) {
       return handleApiError(
         error,
         thunkAPI,
         "Gagal mengambil list faktur type",
+      );
+    }
+  },
+);
+
+// faktur code
+export const getListFakturCode = createAsyncThunk(
+  "EFAKTUR/GET_LIST_FAKTUR_CODE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-faktur-codes";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list faktur code",
       );
     }
   },
@@ -1279,29 +1288,26 @@ export const getListTaxPeriod = createAsyncThunk(
   "EFAKTUR/GET_LIST_TAX_PERIOD",
   async (_, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = "/v1/dbs/api/rbi/e-invoice/tax-period-list";
-      // const response = await ratingBillingHttpService.getAll(url);
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-tax-periods";
+      const response = await ratingBillingHttpService.getAll(url);
 
-      // Data dummy - 12 bulan
-      const dummyData = [
-        { id: 1, period: "Januari" },
-        { id: 2, period: "Februari" },
-        { id: 3, period: "Maret" },
-        { id: 4, period: "April" },
-        { id: 5, period: "Mei" },
-        { id: 6, period: "Juni" },
-        { id: 7, period: "Juli" },
-        { id: 8, period: "Agustus" },
-        { id: 9, period: "September" },
-        { id: 10, period: "Oktober" },
-        { id: 11, period: "November" },
-        { id: 12, period: "Desember" },
-      ];
-
-      return dummyData;
+      return response.data || [];
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil list tax period");
+    }
+  },
+);
+
+export const getListTaxYears = createAsyncThunk(
+  "EFAKTUR/GET_LIST_TAX_YEARS",
+  async (taxPeriod, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/e-invoice/create/get-tax-years/${taxPeriod}`;
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal mengambil list tax years");
     }
   },
 );
@@ -1313,25 +1319,10 @@ export const getListCountry = createAsyncThunk(
   "EFAKTUR/GET_LIST_COUNTRY",
   async (_, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = "/v1/dbs/api/rbi/e-invoice/country-list";
-      // const response = await ratingBillingHttpService.getAll(url);
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-countries";
+      const response = await ratingBillingHttpService.getAll(url);
 
-      // Data dummy
-      const dummyData = [
-        { code: "ID", name: "Indonesia" },
-        { code: "MY", name: "Malaysia" },
-        { code: "SG", name: "Singapore" },
-        { code: "TH", name: "Thailand" },
-        { code: "PH", name: "Philippines" },
-        { code: "VN", name: "Vietnam" },
-        { code: "US", name: "United States" },
-        { code: "GB", name: "United Kingdom" },
-        { code: "JP", name: "Japan" },
-        { code: "CN", name: "China" },
-      ];
-
-      return dummyData;
+      return response.data || [];
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil list country");
     }
@@ -1341,71 +1332,35 @@ export const getListCountry = createAsyncThunk(
 // ========================================
 // CREATE E-FAKTUR (DUMMY)
 // ========================================
-export const createEFaktur = createAsyncThunk(
-  "EFAKTUR/CREATE",
+export const createEFakturManual = createAsyncThunk(
+  "EFAKTUR/CREATE_MANUAL",
   async ({ body }, thunkAPI) => {
     try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = "/v1/dbs/api/rbi/e-invoice/create";
-      // const response = await ratingBillingHttpService.createData(url, body);
+      const url = "/v1/dbs/api/rbi/e-invoice/create/manual";
 
-      // Simulasi response sukses
-      const dummyResponse = {
-        success: true,
-        message: "E-Faktur berhasil dibuat",
-        data: {
-          id: Math.floor(Math.random() * 10000),
-          efakturNumber: `EF-${Date.now()}`,
-          ...body,
-        },
-      };
-
-      thunkAPI.dispatch(
-        showModalSuccess({
-          title: "Success",
-          description: dummyResponse.message,
-          return: false,
-        }),
+      const response = await ratingBillingHttpService.createData(
+        url,
+        body 
       );
 
-      return dummyResponse.data;
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: response.message || "E-Faktur berhasil dibuat",
+            return: false,
+          }),
+        );
+
+        return {
+          ...response.data,
+          efakturId: response.data.created_id,
+        };
+      } else {
+        throw new Error(response.message || "Gagal membuat E-Faktur");
+      }
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal membuat E-Faktur");
-    }
-  },
-);
-
-// ========================================
-// UPDATE E-FAKTUR (DUMMY)
-// ========================================
-export const updateEFaktur = createAsyncThunk(
-  "EFAKTUR/UPDATE",
-  async ({ body }, thunkAPI) => {
-    try {
-      // TODO: Ganti dengan API call yang sebenarnya
-      // const url = `/v1/dbs/api/rbi/e-invoice/update/${body.id}`;
-      // const response = await ratingBillingHttpService.updateData(url, body);
-
-      // Simulasi response sukses
-      const dummyResponse = {
-        success: true,
-        message: "E-Faktur berhasil diupdate",
-        data: {
-          ...body,
-        },
-      };
-
-      thunkAPI.dispatch(
-        showModalSuccess({
-          title: "Success",
-          description: dummyResponse.message,
-          return: false,
-        }),
-      );
-
-      return dummyResponse.data;
-    } catch (error) {
-      return handleApiError(error, thunkAPI, "Gagal update E-Faktur");
     }
   },
 );
@@ -1419,6 +1374,9 @@ const efakturSlice = createSlice({
     },
     clearBillingItems: (state) => {
       state.data_billingItem = [];
+    },
+    clearTaxYears: (state) => {
+      state.dataListTaxYears = [];
     },
     updateUploadProgress: (state, action) => {
       state.upload_progress = action.payload;
@@ -1792,32 +1750,6 @@ const efakturSlice = createSlice({
       state.dataListUOM = [];
     },
 
-    // GET LIST APPROVAL HIERARCHY
-    [getListApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListApprovalHierarchy.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.dataListAppHierId = action.payload || [];
-    },
-    [getListApprovalHierarchy.rejected]: (state) => {
-      state.loading = false;
-      state.dataListAppHierId = [];
-    },
-
-    // GET LIST APPROVAL HIERARCHY DETAIL
-    [getListApprovalHierarchyDetail.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListApprovalHierarchyDetail.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.dataListAppHierDetail = action.payload || [];
-    },
-    [getListApprovalHierarchyDetail.rejected]: (state) => {
-      state.loading = false;
-      state.dataListAppHierDetail = [];
-    },
-
     // GET LIST FAKTUR TYPE
     [getListFakturType.pending]: (state) => {
       state.loading = true;
@@ -1857,27 +1789,54 @@ const efakturSlice = createSlice({
       state.dataListCountry = [];
     },
 
-    // CREATE E-FAKTUR
-    [createEFaktur.pending]: (state) => {
-      state.loading_modal = true;
+    // GET LIST FAKTUR CODE
+    [getListFakturCode.pending]: (state) => {
+      state.loading = true;
     },
-    [createEFaktur.fulfilled]: (state, action) => {
-      state.loading_modal = false;
-      state.dataDetail = action.payload;
+    [getListFakturCode.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListFakturCode = action.payload || [];
     },
-    [createEFaktur.rejected]: (state) => {
-      state.loading_modal = false;
+    [getListFakturCode.rejected]: (state) => {
+      state.loading = false;
+      state.dataListFakturCode = [];
     },
 
-    // UPDATE E-FAKTUR
-    [updateEFaktur.pending]: (state) => {
+    // GET LIST TAX YEARS
+    [getListTaxYears.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListTaxYears.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListTaxYears = action.payload || [];
+    },
+    [getListTaxYears.rejected]: (state) => {
+      state.loading = false;
+      state.dataListTaxYears = [];
+    },
+
+    // GET LIST PRODUCT CODE
+    [getListProductCode.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListProductCode.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListProductCode = action.payload || [];
+    },
+    [getListProductCode.rejected]: (state) => {
+      state.loading = false;
+      state.dataListProductCode = [];
+    },
+
+    // CREATE E-FAKTUR MANUAL
+    [createEFakturManual.pending]: (state) => {
       state.loading_modal = true;
     },
-    [updateEFaktur.fulfilled]: (state, action) => {
+    [createEFakturManual.fulfilled]: (state, action) => {
       state.loading_modal = false;
       state.dataDetail = action.payload;
     },
-    [updateEFaktur.rejected]: (state) => {
+    [createEFakturManual.rejected]: (state) => {
       state.loading_modal = false;
     },
 
@@ -1955,6 +1914,7 @@ export const {
   clearBillingItems,
   updateUploadProgress,
   resetUploadProgress,
+  clearTaxYears,
 } = efakturSlice.actions;
 
 export default efakturSlice.reducer;

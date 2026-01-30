@@ -1,5 +1,6 @@
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../../../utils";
+import moment from "moment";
 
 export const columnsCalculation = (
   page = 1,
@@ -226,16 +227,20 @@ export const columnsCalculation = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
+    render: (text) =>{
+      const formattedDate = text
+        ? moment(text).format("DD MMM YYYY HH:mm:ss")
+        : "";
+     return renderColumn(
         "createdDate",
         hasValue(search["createdDate"]),
         searchText,
-        text,
+        formattedDate,
         true,
         "input",
         search
-      ),
+      );
+    }
   },
   {
     title: "UPDATED DATE",
@@ -262,16 +267,20 @@ export const columnsCalculation = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text) =>{
+      const formattedDate = text
+        ? moment(text).format("DD MMM YYYY HH:mm:ss")
+        : "";
       renderColumn(
         "updatedDate",
         hasValue(search["updatedDate"]),
         searchText,
-        text,
+        formattedDate,
         true,
         "input",
         search
-      ),
+      );
+    }
   },
   {
     title: "IS TRY",

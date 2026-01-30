@@ -3,15 +3,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button } from "antd";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import TableRBI from "../../../../../../components/TableRBI";
-import { getAllCalculationSummaryPaginate } from "../../../../../../redux/slices/rating_billing_invoice/rating";
+import { 
+  getAllCalculationSummaryPaginate,
+  getAllCalculationSummaryExpandPaginate 
+} from "../../../../../../redux/slices/rating_billing_invoice/rating";
 import { 
   columnsCalculationSummary, 
   renderExpandedRow 
 } from "./columns/ColumnsCalculationSummary";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const CalculationSummary = ({ ratingCodeId }) => {
-  const { data_calculationSummary, loading } = useSelector((state) => state.rating);
+const CalculationSummary = ({ ratingCode, saType }) => {
+  const { 
+    data_calculationSummary, 
+    data_calculationSummaryExpand,
+    loadingExpand,
+    loading 
+  } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
@@ -28,25 +36,54 @@ const CalculationSummary = ({ ratingCodeId }) => {
     right: [],
   }));
 
-  // Tambahkan unique key untuk setiap row
+  // Data source untuk tabel utama
   const dataSource = useMemo(() => {
     return (data_calculationSummary?.result || []).map((item, index) => ({
       ...item,
-      key: item.id || item.recordId || `row-${index}`,
+      key: `${item.transactionDate}-${item.saType}`,
     }));
   }, [data_calculationSummary]);
 
+  // Fetch data tabel utama
   useEffect(() => {
-    dispatch(
-      getAllCalculationSummaryPaginate({
-        id: ratingCodeId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
+    if (ratingCode) {
+      dispatch(
+        getAllCalculationSummaryPaginate({
+          ratingCode,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [ratingCode, search, page, pageSize, sort, dispatch]);
+
+  // Handle expand row - fetch data untuk row yang di-expand
+  const handleExpand = (expanded, record) => {
+    const rowKey = `${record.transactionDate}-${record.saType}`;
+    
+    if (expanded) {
+      // Add to expanded keys
+      setExpandedRowKeys([...expandedRowKeys, rowKey]);
+      
+      // Fetch data untuk expanded row
+      dispatch(
+        getAllCalculationSummaryExpandPaginate({
+          ratingCode,
+          transactionDate: record.transactionDate,
+          saType: record.saType,
+          page: 1,
+          pageSize: 100, // Ambil semua data expand sekaligus
+          search: "",
+          sort: "",
+        })
+      );
+    } else {
+      // Remove from expanded keys
+      setExpandedRowKeys(expandedRowKeys.filter(key => key !== rowKey));
+    }
+  };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -119,7 +156,7 @@ const CalculationSummary = ({ ratingCodeId }) => {
         onChange={handleChange}
         onSizeChanger={handleChange}
         totalData={data_calculationSummary?.page?.totalElements || 0}
-        tableScrolled={{ y: 400, x: 1000 }}
+        tableScrolled={{x: 1000 }}
         onSort={onSortApi}
         showExport={true}
         columnDefinitions={columnDefinitions}
@@ -128,9 +165,13 @@ const CalculationSummary = ({ ratingCodeId }) => {
         loading={loading}
         expandable={{
           expandedRowKeys,
-          onExpandedRowsChange: setExpandedRowKeys,
-          expandedRowRender: renderExpandedRow,
-          rowExpandable: (record) => record.partitions && record.partitions.length > 0,
+          onExpand: handleExpand,
+          expandedRowRender: (record) => renderExpandedRow(
+            record, 
+            data_calculationSummaryExpand,
+            loadingExpand
+          ),
+          rowExpandable: () => true, // Semua row bisa di-expand
           columnWidth: 32,
           expandIcon: ({ expanded, onExpand, record }) => (
             <Button

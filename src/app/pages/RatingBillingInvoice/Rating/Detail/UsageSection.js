@@ -5,7 +5,7 @@ import { getAllUsageServiceAgreementPaginate } from "../../../../../redux/slices
 import { columnsUsage } from "./Table/TableUsage";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const UsageSection = ({ ratingCodeId, calculationCode }) => {
+const UsageSection = ({ ratingCode, calculationCode }) => {
   const { data_usageSA } = useSelector((state) => state.rating);
 
   const dispatch = useDispatch();
@@ -27,14 +27,14 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
   useEffect(() => {
     dispatch(
       getAllUsageServiceAgreementPaginate({
-        id: ratingCodeId,
+        id: ratingCode,
         search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
       })
     );
-  }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
+  }, [dispatch, ratingCode, search, page, pageSize, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -113,7 +113,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
           <div className="flex flex-col gap-1">
             <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
             <p className="text-[20px] font-medium text-[#0075bf]">
-              {ratingCodeId}
+              {ratingCode}
             </p>
           </div>
         </div>

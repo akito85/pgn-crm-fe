@@ -144,51 +144,53 @@ const CalculationPage = () => {
     });
   };
 
-  // TAMBAHAN: Load more handler
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data_calculation?.page?.totalPages || 0;
+    const totalElements = data_calculation?.page?.totalElements || 0;
+    const currentDataLength = data_calculation.result?.length || 0;
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
-      if (tabHeader === "Calculation List") {
-        await dispatch(
-          getCalculationPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: nextPage,
-            pageSize: loadMoreSize, // Load 20 more
-            sort,
-            isLoadMore: true, // Flag untuk load more
-          })
-        );
-      } else {
-        await dispatch(
-          getHistoryCalculationPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: nextPage,
-            pageSize: loadMoreSize, // Load 20 more
-            sort,
-            isLoadMore: true, // Flag untuk load more
-          })
-        );
-      }
-      setPage(nextPage);
+    if (currentDataLength >= totalElements) {
+      return;
     }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    if (tabHeader === "Calculation List") {
+      await dispatch(
+        getCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+    } else {
+      await dispatch(
+        getHistoryCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+    }
+    setPage(nextPage);
   };
 
-  // TAMBAHAN: Calculate if there's more data
+  const initialPageSize = 100;
+
   const hasMore =
     (data_calculation.result?.length || 0) <
     (data_calculation?.page?.totalElements || 0);
 
-  // Refresh handler
   const handleRefresh = () => {
     if (tabHeader === "Calculation List") {
       dispatch(
         getCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: page * loadMoreSize || 100,
+          pageSize: initialPageSize,
           sort,
           isLoadMore: false,
         })
@@ -198,7 +200,7 @@ const CalculationPage = () => {
         getHistoryCalculationPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: page * loadMoreSize || 100,
+          pageSize: initialPageSize,
           sort,
           isLoadMore: false,
         })

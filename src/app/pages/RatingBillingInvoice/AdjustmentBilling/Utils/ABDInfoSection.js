@@ -16,7 +16,7 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
     .map((a) => a.adjustmentAmount);
   const sumIDR = dataIDR.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment USD
@@ -25,7 +25,7 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
     .map((a) => a.adjustmentAmount);
   const sumUSD = dataUSD.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   return (
@@ -34,6 +34,9 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
         <CustomerInfoSection data={data} />
       </CardContainer>
 
+      <CardContainer header={"ADJUSTMENT BILLING INFORMATION"}>
+        <AdjustmentBillingInfoSection data={data} />
+      </CardContainer>
       <CardContainer header={"INVOICE INFORMATION"}>
         <InvoiceSectionForm
           listDataABI={listDataABI}
@@ -42,15 +45,11 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
         />
       </CardContainer>
 
-      <CardContainer header={"ADJUSTMENT BILLING INFORMATION"}>
-        <AdjustmentBillingInfoSection data={data} />
-      </CardContainer>
-
       <CardContainer header={"Adjustment Billing Item Information"}>
         <AdjustmentBISectionForm
           listDataABI={listDataABI}
-          type="show"
-          showAction={"show"}
+          type="detail"
+          // showAction={"show"}
           // children={
           //   <div className="w-full grid grid-cols-2 gap-4">
           //     <DetailText label={"Total Adjustment IDR"}>
