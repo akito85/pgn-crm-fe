@@ -64,7 +64,6 @@ const AccountDetailInformation = ({
   // handleChangeInteraction = () => {},
   isApproval = false,
   setIsApproval = () => {},
-  setShowApprovalButton = () => {},
   submitApprovalCondition = "",
   setSubmitApprovalCondition = () => {},
 }) => {
@@ -340,7 +339,6 @@ const AccountDetailInformation = ({
             idCustomer={idCustomer}
             isApproval={isApproval}
             setIsApproval={setIsApproval}
-            setShowApprovalButton={setShowApprovalButton}
             submitApprovalCondition={submitApprovalCondition}
             setSubmitApprovalCondition={setSubmitApprovalCondition}
           />
@@ -393,7 +391,6 @@ const AccountDetailInformation = ({
             idCustomer={idCustomer}
             isApproval={isApproval}
             setIsApproval={setIsApproval}
-            setShowApprovalButton={setShowApprovalButton}
             submitApprovalCondition={submitApprovalCondition}
             setSubmitApprovalCondition={setSubmitApprovalCondition}
           />

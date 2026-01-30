@@ -45,7 +45,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.accountManagement);
   //declare
-  const navigate = useNavigate();
   const location = useLocation();
   const id = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
@@ -54,7 +53,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
   //state
   const [tabs, setTabs] = useState([]);
   const [isApproval, setIsApproval] = useState(false);
-  const [showApprovalButton, setShowApprovalButton] = useState(false);
   const [submitApprovalCondition, setSubmitApprovalCondition] = useState("");
 
   useEffect(() => {
@@ -136,7 +134,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 dispatch = {dispatch}
                 isApproval={isApproval}
                 setIsApproval={setIsApproval}
-                setShowApprovalButton={setShowApprovalButton}
                 submitApprovalCondition={submitApprovalCondition}
                 setSubmitApprovalCondition={setSubmitApprovalCondition}
                 // handleChangeInteraction={handleSetType}
@@ -167,25 +164,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                     Back
                   </ButtonComponent>
                 </Link>
-
-                {showApprovalButton && (
-                <div className={"w-full flex justify-end gap-4"}>
-                  <ButtonComponent
-                    type="reject"
-                    onClick={() => setSubmitApprovalCondition("reject")}
-                    disabled={!!submitApprovalCondition}
-                  >
-                    Reject
-                  </ButtonComponent>
-                  <ButtonComponent
-                    type="approve"
-                    onClick={() => setSubmitApprovalCondition("approve")}
-                    disabled={!!submitApprovalCondition}
-                  >
-                    Approve
-                  </ButtonComponent>
-                </div>
-              )}
               </div>
             </div>
           </div>
