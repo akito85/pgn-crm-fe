@@ -4,10 +4,10 @@ import { useColumnActionPermission } from "../../../../../../../components/Colum
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { useMemo, useState } from "react";
-import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns";
+import { useEffect, useMemo, useState } from "react";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const PaymentRelationTable = ({
   data = [],
@@ -48,10 +48,13 @@ const PaymentRelationTable = ({
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    statusApproval: "right",
-    status: "right",
-    action: "right",
+    right: ["statusApproval", "status", "action"],
+    left: [],
   }));
+
+  useEffect(() => {
+    console.log("fixedColumns", fixedColumns);
+  }, [fixedColumns])
 
   const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History"], itemActions, "View", "table").map(
     (col) => ({
@@ -80,7 +83,7 @@ const PaymentRelationTable = ({
   }, [baseColumns, actionCols]);
 
   const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
+    return nxApplyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
@@ -118,6 +121,7 @@ const PaymentRelationTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
+        fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
