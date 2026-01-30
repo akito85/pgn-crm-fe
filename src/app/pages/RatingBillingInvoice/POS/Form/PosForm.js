@@ -39,6 +39,7 @@ import {
   getUserDetailForPOS,
   getSorList,
   getCostCenterList,
+  getUomCodes,
 } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import PointOfSalesPageAttachment from "./Page/PointOfSalesPageAttachment";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -80,6 +81,7 @@ const PosForm = ({ type }) => {
     data_user_detail,
     data_sor_list,
     data_cost_center_list,
+    data_uom_codes,
   } = useSelector((state) => state.pointOfSales);
 
   //declare
@@ -292,6 +294,7 @@ const PosForm = ({ type }) => {
     // dispatch(getGlobalTermsOfPaymentData());
     dispatch(getGlobalProductItem());
     dispatch(getGlobalBillingItem());
+    dispatch(getUomCodes());
     // setDataApproval([]);
   }, [dispatch]);
 
@@ -1512,6 +1515,7 @@ const PosForm = ({ type }) => {
               data_meter_reading_code_list={data_meter_reading_code}
               data_sor_list={data_sor_list}
               data_cost_center_list={data_cost_center_list}
+              data_uom_codes={data_uom_codes}
               mergedArrayMrc={mergedArrayMrc}
             />
           </div>
