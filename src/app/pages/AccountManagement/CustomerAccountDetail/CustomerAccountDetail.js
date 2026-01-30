@@ -86,10 +86,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
     useState(section || data[0].value);
 
   const handleAccountInfoDetailSection = (e) => {
-    console.log("e.target.value", e.target.value);
-    console.log("typeAccountInfoDetailSection", typeAccountInfoDetailSection);
-    console.log("section", section);
-    console.log("data", data);
     setTypeAccountInfoDetailSection(e.target.value);
   };
 
