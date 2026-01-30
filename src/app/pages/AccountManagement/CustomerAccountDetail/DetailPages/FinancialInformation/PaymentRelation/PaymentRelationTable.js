@@ -16,7 +16,6 @@ const PaymentRelationTable = ({
   totalElement = 0,
   page = 0,
   onSort = () => {},
-  rowSelection,
   isApproval = false,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
@@ -115,7 +114,6 @@ const PaymentRelationTable = ({
         tableScrolled={{ y: 400, x: "max-content" }}
         onSort={onSort}
         columns={processedColumns}
-        rowSelection={rowSelection}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
