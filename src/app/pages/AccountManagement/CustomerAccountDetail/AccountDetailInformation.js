@@ -60,12 +60,7 @@ const AccountDetailInformation = ({
   idCustomer = 0,
   type = "",
   setTypeAccountInfoDetailSection = () => {},
-  dispatch,
   // handleChangeInteraction = () => {},
-  isApproval = false,
-  setIsApproval = () => {},
-  submitApprovalCondition = "",
-  setSubmitApprovalCondition = () => {},
 }) => {
   const { path } = usePrevLocContext();
   // useEffect(() => {
@@ -337,10 +332,6 @@ const AccountDetailInformation = ({
           <FinancialInformation
             id={id}
             idCustomer={idCustomer}
-            isApproval={isApproval}
-            setIsApproval={setIsApproval}
-            submitApprovalCondition={submitApprovalCondition}
-            setSubmitApprovalCondition={setSubmitApprovalCondition}
           />
         )
       case dataTabs.accountAddress:
@@ -389,10 +380,6 @@ const AccountDetailInformation = ({
           <MultiDestination
             id={id}
             idCustomer={idCustomer}
-            isApproval={isApproval}
-            setIsApproval={setIsApproval}
-            submitApprovalCondition={submitApprovalCondition}
-            setSubmitApprovalCondition={setSubmitApprovalCondition}
           />
         )
       default:

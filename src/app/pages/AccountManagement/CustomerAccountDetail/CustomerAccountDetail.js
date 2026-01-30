@@ -52,8 +52,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
 
   //state
   const [tabs, setTabs] = useState([]);
-  const [isApproval, setIsApproval] = useState(false);
-  const [submitApprovalCondition, setSubmitApprovalCondition] = useState("");
 
   useEffect(() => {
     if (type != "standard") {
@@ -132,10 +130,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 type={type}
                 setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
                 dispatch = {dispatch}
-                isApproval={isApproval}
-                setIsApproval={setIsApproval}
-                submitApprovalCondition={submitApprovalCondition}
-                setSubmitApprovalCondition={setSubmitApprovalCondition}
                 // handleChangeInteraction={handleSetType}
               />
               <div className="flex justify-between">
