@@ -57,7 +57,7 @@ export const updateSingleUsage = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 export const getSingleBatch = createAsyncThunk(
@@ -70,7 +70,7 @@ export const getSingleBatch = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // export const deleteSingleUsage = createAsyncThunk(
@@ -132,7 +132,7 @@ export const deleteBatch = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 export const getListUsagePaginate = createAsyncThunk(
@@ -165,7 +165,7 @@ export const getListUsagePaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListBatchPaginate = createAsyncThunk(
   "GET_MONITORING_BATCH_PAGINATE",
@@ -197,7 +197,7 @@ export const getListBatchPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // list approval
@@ -228,7 +228,7 @@ export const getListApproval = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchy = createAsyncThunk(
@@ -258,7 +258,7 @@ export const getApprovalHierarchy = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -285,7 +285,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -312,14 +312,14 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailBatch = createAsyncThunk(
   "GET_DETAIL_BATCH",
   async (
     { batchId, page, pageSize, search, sort, isLoadMore = false },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search || "";
@@ -347,7 +347,7 @@ export const getDetailBatch = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getFormatUsageType = createAsyncThunk(
@@ -360,7 +360,7 @@ export const getFormatUsageType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAssetType = createAsyncThunk(
@@ -373,7 +373,7 @@ export const getAssetType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSource = createAsyncThunk("GET_SOURCE", async (thunkAPI) => {
@@ -396,7 +396,7 @@ export const getAccountNumber = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveRejectData = createAsyncThunk(
@@ -406,7 +406,7 @@ export const approveRejectData = createAsyncThunk(
       const url = "/v1/dbs/api/usage/approve-reject-usage";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successMessage = {
         title: "Successfull",
@@ -435,7 +435,7 @@ export const approveRejectData = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const saveSubmitData = createAsyncThunk(
@@ -445,7 +445,7 @@ export const saveSubmitData = createAsyncThunk(
       const url = "/v1/dbs/api/usage/save-usage";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successMessage = {
         title: "Successful",
@@ -484,7 +484,7 @@ export const saveSubmitData = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 export const getDownloadList = createAsyncThunk(
@@ -503,11 +503,11 @@ export const getDownloadList = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MONITORING_USAGE_LIST",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDownloadBatchList = createAsyncThunk(
@@ -526,11 +526,11 @@ export const getDownloadBatchList = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MONITORING_BATCH_LIST",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDownloadTemplate = createAsyncThunk(
@@ -541,7 +541,7 @@ export const getDownloadTemplate = createAsyncThunk(
 
       const response = await ratingBillingHttpService.downloadXlsx(
         url,
-        "monitoring_usage_template"
+        "monitoring_usage_template",
       );
 
       return response;
@@ -554,7 +554,7 @@ export const getDownloadTemplate = createAsyncThunk(
           error: error?.response,
           action: "DOWNLOAD_MONITORING_USAGE_TEMPLATE",
           back: false,
-        })
+        }),
       );
 
       const errorBody = {
@@ -565,7 +565,7 @@ export const getDownloadTemplate = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 export const getDownloadFailed = createAsyncThunk(
@@ -581,11 +581,11 @@ export const getDownloadFailed = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MONITORING_USAGE_FAILED",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const uploadMonitoringUsage = createAsyncThunk(
@@ -601,7 +601,7 @@ export const uploadMonitoringUsage = createAsyncThunk(
       const data = await ratingBillingHttpService.uploadAttachment(
         url,
         dataRequest,
-        onProgress
+        onProgress,
       );
       const successMessage = {
         title: "Successfull",
@@ -618,7 +618,7 @@ export const uploadMonitoringUsage = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(e?.response);
     }
-  }
+  },
 );
 
 const monitoringUsageSlice = createSlice({
@@ -649,10 +649,8 @@ const monitoringUsageSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // pagination monitoring usage list
     builder
       .addCase(getListUsagePaginate.pending, (state, action) => {
-        // Only show loading on initial fetch, not on load more
         if (!action.meta.arg?.isLoadMore) {
           state.loading = true;
         }
@@ -662,11 +660,16 @@ const monitoringUsageSlice = createSlice({
         const newData = action.payload.result || [];
         const isLoadMore = action.payload.isLoadMore;
 
-        // If it's load more, append data. Otherwise, replace data
         if (isLoadMore) {
+          const existingIds = new Set(
+            (state.data_list_usage.result || []).map((item) => item.recordId),
+          );
+          const uniqueNewData = newData.filter(
+            (item) => !existingIds.has(item.recordId),
+          );
           state.data_list_usage = {
             ...action.payload,
-            result: [...(state.data_list_usage.result || []), ...newData],
+            result: [...(state.data_list_usage.result || []), ...uniqueNewData],
           };
         } else {
           state.data_list_usage = action.payload;
@@ -675,17 +678,14 @@ const monitoringUsageSlice = createSlice({
       })
       .addCase(getListUsagePaginate.rejected, (state, action) => {
         state.loading = false;
-        // Only clear data on initial fetch failure, not on load more failure
         if (!action.meta.arg?.isLoadMore) {
           state.data_list_usage = { result: [], page: {} };
           state.data = { result: [], page: {} };
         }
       });
 
-    // pagination monitoring batch list
     builder
       .addCase(getListBatchPaginate.pending, (state, action) => {
-        // Only show loading on initial fetch, not on load more
         if (!action.meta.arg?.isLoadMore) {
           state.loading = true;
         }
@@ -695,11 +695,16 @@ const monitoringUsageSlice = createSlice({
         const newData = action.payload.result || [];
         const isLoadMore = action.payload.isLoadMore;
 
-        // If it's load more, append data. Otherwise, replace data
         if (isLoadMore) {
+          const existingIds = new Set(
+            (state.data_list_batch.result || []).map((item) => item.batchId),
+          );
+          const uniqueNewData = newData.filter(
+            (item) => !existingIds.has(item.batchId),
+          );
           state.data_list_batch = {
             ...action.payload,
-            result: [...(state.data_list_batch.result || []), ...newData],
+            result: [...(state.data_list_batch.result || []), ...uniqueNewData],
           };
         } else {
           state.data_list_batch = action.payload;
@@ -708,14 +713,12 @@ const monitoringUsageSlice = createSlice({
       })
       .addCase(getListBatchPaginate.rejected, (state, action) => {
         state.loading = false;
-        // Only clear data on initial fetch failure, not on load more failure
         if (!action.meta.arg?.isLoadMore) {
           state.data_list_batch = { result: [], page: {} };
           state.data = { result: [], page: {} };
         }
       });
 
-    // pagination monitoring approval list
     builder
       .addCase(getListApproval.pending, (state, action) => {
         // Only show loading on initial fetch, not on load more
@@ -794,7 +797,7 @@ const monitoringUsageSlice = createSlice({
         state.loading = false;
       });
 
-      builder
+    builder
       .addCase(getDownloadBatchList.pending, (state) => {
         state.loading = true;
       })
@@ -863,7 +866,7 @@ const monitoringUsageSlice = createSlice({
         // Remove batch dari list
         if (state.data_list_batch?.result) {
           state.data_list_batch.result = state.data_list_batch.result.filter(
-            (item) => item.batchId !== action.payload.batchId
+            (item) => item.batchId !== action.payload.batchId,
           );
           // Update total count
           if (state.data_list_batch.page?.totalElements) {
@@ -897,7 +900,7 @@ const monitoringUsageSlice = createSlice({
         // Update data di detail_batch.usageList jika ada
         if (state.detail_batch?.usageList?.result) {
           const index = state.detail_batch.usageList.result.findIndex(
-            (item) => item.recordId === action.meta.arg.recordId
+            (item) => item.recordId === action.meta.arg.recordId,
           );
           if (index !== -1) {
             state.detail_batch.usageList.result[index] = {
@@ -909,7 +912,10 @@ const monitoringUsageSlice = createSlice({
         }
 
         // Track batchId yang diupdate untuk refresh di list
-        if (action.payload?.batchId && !state.updatedBatchIds.includes(action.payload.batchId)) {
+        if (
+          action.payload?.batchId &&
+          !state.updatedBatchIds.includes(action.payload.batchId)
+        ) {
           state.updatedBatchIds.push(action.payload.batchId);
         }
       })
@@ -918,25 +924,24 @@ const monitoringUsageSlice = createSlice({
       });
 
     // Get single batch (untuk refresh specific row di list)
-    builder
-      .addCase(getSingleBatch.fulfilled, (state, action) => {
-        // Update specific batch di data_list_batch
-        if (state.data_list_batch?.result && action.payload?.data) {
-          const index = state.data_list_batch.result.findIndex(
-            (item) => item.batchId === action.payload.batchId
-          );
-          if (index !== -1) {
-            state.data_list_batch.result[index] = action.payload.data;
-            // Update state.data juga
-            state.data = state.data_list_batch;
-          }
-        }
-
-        // Remove from updatedBatchIds setelah berhasil refresh
-        state.updatedBatchIds = state.updatedBatchIds.filter(
-          (id) => id !== action.payload.batchId
+    builder.addCase(getSingleBatch.fulfilled, (state, action) => {
+      // Update specific batch di data_list_batch
+      if (state.data_list_batch?.result && action.payload?.data) {
+        const index = state.data_list_batch.result.findIndex(
+          (item) => item.batchId === action.payload.batchId,
         );
-      });
+        if (index !== -1) {
+          state.data_list_batch.result[index] = action.payload.data;
+          // Update state.data juga
+          state.data = state.data_list_batch;
+        }
+      }
+
+      // Remove from updatedBatchIds setelah berhasil refresh
+      state.updatedBatchIds = state.updatedBatchIds.filter(
+        (id) => id !== action.payload.batchId,
+      );
+    });
 
     // Delete single usage
     // builder
@@ -1025,5 +1030,10 @@ const monitoringUsageSlice = createSlice({
 
 const { reducer } = monitoringUsageSlice;
 export default reducer;
-export const { setClearData, addDeletedData, clearUpdated, clearUpdatedDeleted, clearUpdatedBatchIds } =
-  monitoringUsageSlice.actions;
+export const {
+  setClearData,
+  addDeletedData,
+  clearUpdated,
+  clearUpdatedDeleted,
+  clearUpdatedBatchIds,
+} = monitoringUsageSlice.actions;

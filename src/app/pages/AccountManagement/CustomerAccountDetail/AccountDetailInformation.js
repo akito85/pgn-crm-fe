@@ -216,10 +216,10 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/details"
+          "/account-management/account-standard/financial-information/payment-relation/view"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/view"
+          "/account-management/account-standard/financial-information/payment-relation/create"
         ) ||
         path.pathname.includes(
           "/account-management/account-standard/financial-information/payment-relation/update"

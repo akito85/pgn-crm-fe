@@ -15,6 +15,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import InvoiceRelation from "./InvoiceRelation/InvoiceRelation";
 import { usePrevLocContext } from "../../../../../../utils/usePrevLoc";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+
+const { Panel } = Collapse;
 
 const FinancialInformation = ({
   id = 0,
@@ -27,15 +30,20 @@ const FinancialInformation = ({
 }) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
-	const [current, setCurrent] = useState(0)
-  const dispatch = useDispatch();
+  const { path } = usePrevLocContext();
+  
+	const [current, setCurrent] = useState(
+    path?.pathname.includes("/account-management/account-standard/financial-information/payment-relation") ? 6
+    : path?.pathname.includes("/account-management/account-standard/financial-information/invoice-relation") ? 7
+    : 0
+  )
+  
   const location = useLocation();
+  const dispatch = useDispatch();
   
   const { access_account } = useSelector(
     (state) => state.accountManagement
   );
-
-  const { path } = usePrevLocContext();
 
   // Use Effect
   useEffect(() => {
@@ -74,26 +82,6 @@ const FinancialInformation = ({
       dispatch(getGrantedAccessAccount(`/account-management/account-onetime/financial-information${collapse}`))
     }
   }, [current]);
-
-  useEffect(() => {
-    if (
-      path &&
-      (path.pathname.includes(
-        "/account-management/account-standard/financial-information/payment-relation"
-      ))
-    ) {
-      setCurrent(6);
-    } else if (
-      path &&
-      (path.pathname.includes(
-        "/account-management/account-standard/financial-information/invoice-relation"
-      ))
-    ) {
-      setCurrent(7);
-    } else {
-      setCurrent(0);
-    }
-  }, [path]);
 
   const financialList = [
     // {
@@ -183,6 +171,24 @@ const FinancialInformation = ({
 		}
 	}
 
+  const collapseStyle = {
+    borderRadius: 5,
+  };
+
+  const panelStyle = {
+    marginBottom: 16,
+    border: "1px solid #d9d9d9",
+    borderRadius: 4,
+    overflow: "hidden",
+  };
+
+  const headerStyle = {
+    fontSize: 15,
+    fontWeight: 500,
+    color: "#0075bf",
+    textTransform: "uppercase",
+  };
+
   return (
     <Fragment>
       <MiniBaseContainer>
@@ -195,11 +201,18 @@ const FinancialInformation = ({
 							onChange={
 								(e) => handleCollapse(e,index)
 							}
-              style={{ borderRadius: "8px",backgroundColor: "#E6F1F9"}}
+              style={collapseStyle}
             >
-              <Collapse.Panel header={elm.header}>
-                {elm.children}
-              </Collapse.Panel>
+              <Panel
+                header={
+                  <span style={headerStyle}>{elm.header}</span>
+                }
+                style={panelStyle}
+              >
+                <NxBaseContainer border>
+                  {elm.children}
+                </NxBaseContainer>
+              </Panel>
             </Collapse>
           ))}
         </Space>

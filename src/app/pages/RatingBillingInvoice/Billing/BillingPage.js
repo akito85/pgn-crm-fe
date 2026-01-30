@@ -35,9 +35,8 @@ const BillingPage = () => {
   const dataSource = data?.result;
   const detailRef = useRef(null);
 
-  // PERUBAHAN: State untuk infinite scroll
-  const [page, setPage] = useState(1); // Start from 1
-  const [loadMoreSize] = useState(20); // Load 20 data each time
+  const [page, setPage] = useState(1);
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -73,15 +72,14 @@ const BillingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
       getAllBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: 100, // Initial load 100 data
+        pageSize: 100,
         sort,
-        isLoadMore: false, // Flag untuk initial load
+        isLoadMore: false,
       }),
     );
     setPage(1);
@@ -126,14 +124,13 @@ const BillingPage = () => {
     },
   ];
 
-  // PERUBAHAN: Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1); // Reset to 1
+        setPage(1);
       }
       return {
         ...prevState,
@@ -142,27 +139,30 @@ const BillingPage = () => {
     });
   };
 
-  // TAMBAHAN: Load more handler
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data?.page?.totalPages || 0;
+  const initialPageSize = 100;
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
-      await dispatch(
-        getAllBillingPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
-          sort,
-          isLoadMore: true, // Flag untuk load more
-        }),
-      );
-      setPage(nextPage);
+  const handleLoadMore = async () => {
+    const totalElements = data?.page?.totalElements || 0;
+    const currentDataLength = dataSource?.length || 0;
+
+    if (currentDataLength >= totalElements) {
+      return;
     }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    await dispatch(
+      getAllBillingPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+    setPage(nextPage);
   };
 
-  // TAMBAHAN: Calculate if there's more data
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
@@ -214,37 +214,24 @@ const BillingPage = () => {
   const onChangeTab = (key) => {
     setValueTab(key);
     setSearch({});
-    setPage(1); // Reset to 1
+    setPage(1);
   };
 
   const handleRefresh = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    const pageSize = page * loadMoreSize || 100;
 
-    // Refresh based on current tab
-    if (valueTab === "Billing Gas") {
+    if (valueTab === "Billing Gas" || valueTab === "All") {
       dispatch(
         getAllBillingPaginate({
           search: reqSearch,
           page: 1,
-          pageSize: pageSize,
-          sort,
-          isLoadMore: false,
-        }),
-      );
-    } else if (valueTab === "All") {
-      dispatch(
-        getAllBillingPaginate({
-          search: reqSearch,
-          page: 1,
-          pageSize: pageSize,
+          pageSize: initialPageSize,
           sort,
           isLoadMore: false,
         }),
       );
     }
 
-    // Refresh approval lists
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
     setPage(1);
@@ -325,7 +312,7 @@ const BillingPage = () => {
     if (valueTab === "All") {
       return columnsAllBilling(
         0, // Tidak digunakan untuk infinite scroll
-        0, // Tidak digunakan untuk infinite scroll
+        0,
         searchInput,
         searchedColumn,
         searchText,
@@ -334,8 +321,8 @@ const BillingPage = () => {
       );
     }
     return columnsBilling(
-      0, // Tidak digunakan untuk infinite scroll
-      0, // Tidak digunakan untuk infinite scroll
+      0,
+      0,
       searchInput,
       searchedColumn,
       searchText,

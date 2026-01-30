@@ -26,11 +26,11 @@ const PaymentRelationTable = ({
   handleLoadMore = () => {},
   hasMore = false,
   searchText="",
-  search="",
-  searchedColumn={},
-  searchInput="",
+  search = "",
+  searchedColumn = {},
+  searchInput = "",
   handleSearch=() => {},
-  loading = false 
+  loading = false, 
 }) => {
   const navigate = useNavigate();
 

@@ -132,6 +132,7 @@ import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty
 import offsetReducer from "../slices/receipt_collection/offset";
 import writeOffReducer from "../slices/receipt_collection/writeOff";
 import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
+import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -184,6 +185,7 @@ const reducer = combineReducers({
   account: accountReducer,
   financialInformation: financialInformationReducer,
   paymentRelation: paymentRelationReducer,
+  invoiceRelation: invoiceRelationReducer,
   premise: premiseReducer,
   servicePoint: servicePointReducer,
   distributionMedia: distributionMediaReducer,

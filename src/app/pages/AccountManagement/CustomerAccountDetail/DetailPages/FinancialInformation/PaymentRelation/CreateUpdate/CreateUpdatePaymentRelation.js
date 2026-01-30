@@ -40,6 +40,9 @@ import accountManagementService from "../../../../../../../../redux/services/acc
 import { configApp } from "../../../../../../../../constants/configApp";
 import CardContainer from "../../../../../../../../components/CardContainer";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -625,9 +628,9 @@ const CreatePaymentRelation = ({ type }) => {
 
   return (
     <LayoutMenu>
-      <div className="flex flex-col gap-y-5">
-        <BreadCrumb routes={routes} />
-        <CardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
+      <div className="flex flex-col gap-y-4">
+        <NxBreadCrumb routes={routes} />
+        <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
           <div className="flex flex-col gap-y-4">
             <BaseContainer border header={"CUSTOMER INFORMATION"}>
               <div className="w-full grid grid-cols-4 gap-x-5">
@@ -668,7 +671,7 @@ const CreatePaymentRelation = ({ type }) => {
               </div>
             </BaseContainer>
           </div>
-        </CardContainer>
+        </NxCardContainer>
 
         <Form
           id="paymentRelationForm"
@@ -677,21 +680,25 @@ const CreatePaymentRelation = ({ type }) => {
           onFinish={handleSubmitForm}
           // onFinishFailed={handleErrorSubmit}
           scrollToFirstError={true}
+          className="flex flex-col gap-y-4"
         >
           {/* Step Contents */}
-          <div className="flex flex-row gap-x-6 justify-center">
-            <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+          <NxBaseContainer border>
+            <div className="flex flex-row justify-center">
+              <div
+                onScroll={handleScroll}
+                ref={containerRef}
+                className="overflow-x-scroll scrollStepsCstm"
+              >
+                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
+              </div>
             </div>
-          </div>
-          <div className="steps-content my-6">
-          {
-            steps.map((step) => step.content)
-          }
-          </div>
+          </NxBaseContainer>
+
+          {steps.map((step) => step.content)}
 
           {/* Section Action Steps */}
-          <div className="steps-action my-8 flex w-full justify-between gap-x-2">
+          <div className="steps-action flex w-full justify-between gap-x-2">
             <ButtonComponent
               type={"submit"}
               icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}

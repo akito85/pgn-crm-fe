@@ -4,29 +4,29 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
-  list_prDetailAttachment: [],
-  pagination_prDetailAttachment: {
+  list_irDetailAttachment: [],
+  pagination_irDetailAttachment: {
     totalPages: 0,
     totalElements: 0,
     currentPage: 0,
     pageSize: 10,
   },
-  data_prApprovalHierarchy: [],
-  detail_prApprovalHierarchy: [],
-  data_prAttachmentCategory: [],
-  list_prAccountStandard: [],
-  pagination_prAccountStandard: {
+  data_irApprovalHierarchy: [],
+  detail_irApprovalHierarchy: [],
+  data_irAttachmentCategory: [],
+  list_irAccountStandard: [],
+  pagination_irAccountStandard: {
     totalPages: 0,
     totalElements: 0,
     currentPage: 0,
     pageSize: 10,
   },
-  detail_paymentRelation: {},
-  data_prApprovalHistory: {},
+  detail_invoiceRelation: {},
+  data_irApprovalHistory: {},
 };
 
-export const getPaymentRelationAttachment = createAsyncThunk(
-  "GET_PAYMENT_RELATION_ATTACHMENT",
+export const getInvoiceRelationAttachment = createAsyncThunk(
+  "GET_INVOICE_RELATION_ATTACHMENT",
   async ({ id, page, size, sort, searchs, listType, isLoadMore }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams;
@@ -42,7 +42,7 @@ export const getPaymentRelationAttachment = createAsyncThunk(
       if (listType)
         queryParams.append("listType", listType);
 
-      let url = `/v1/dbs/api/payment-relation/list-attachment/${id}`;
+      let url = `/v1/dbs/api/invoice-relation/list-attachment/${id}`;
 
       if (queryParams.toString().length)
         url += `?${queryParams.toString()}`;
@@ -58,16 +58,16 @@ export const getPaymentRelationAttachment = createAsyncThunk(
   }
 )
 
-export const createPaymentRelation = createAsyncThunk(
-  "CREATE_PAYMENT_RELATION",
+export const createInvoiceRelation = createAsyncThunk(
+  "CREATE_INVOICE_RELATION",
   async ({ body: createBody, attachments = [] }, thunkAPI) => {
     try {
-      const createUrl = "/v1/dbs/api/payment-relation/create";
+      const createUrl = "/v1/dbs/api/invoice-relation/create";
       const response = await accountManagementService.createData(createUrl, createBody);
 
       const { id } = response.data;
 
-      const uploadUrl = `/v1/dbs/api/payment-relation/upload-attachment`;
+      const uploadUrl = `/v1/dbs/api/invoice-relation/upload-attachment`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(uploadUrl, {
         files:  attachment.file,
@@ -107,14 +107,14 @@ export const createPaymentRelation = createAsyncThunk(
   }
 );
 
-export const updatePaymentRelation = createAsyncThunk(
-  "UPDATE_PAYMENT_RELATION",
+export const updateInvoiceRelation = createAsyncThunk(
+  "UPDATE_INVOICE_RELATION",
   async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
     try {
-      const updateUrl = `/v1/dbs/api/payment-relation/${id}`;
+      const updateUrl = `/v1/dbs/api/invoice-relation/${id}`;
       const response = await accountManagementService.updateData(updateUrl, updateBody);
 
-      const uploadUrl = `/v1/dbs/api/payment-relation/upload-attachment`;
+      const uploadUrl = `/v1/dbs/api/invoice-relation/upload-attachment`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
@@ -157,11 +157,11 @@ export const updatePaymentRelation = createAsyncThunk(
   }
 );
 
-export const getDetailPaymentRelation = createAsyncThunk(
-  "GET_DETAIL_PAYMENT_RELATION",
+export const getDetailInvoiceRelation = createAsyncThunk(
+  "GET_DETAIL_INVOICE_RELATION",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/detail/${id}`;
+      const url = `/v1/dbs/api/invoice-relation/detail/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -170,11 +170,11 @@ export const getDetailPaymentRelation = createAsyncThunk(
   }
 );
 
-export const getPrApprovalHierarchy = createAsyncThunk(
-  "GET_PR_APPROVAL_HIERARCHY",
+export const getIrApprovalHierarchy = createAsyncThunk(
+  "GET_IR_APPROVAL_HIERARCHY",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/approval-hierarchies`;
+      const url = `/v1/dbs/api/invoice-relation/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -183,11 +183,11 @@ export const getPrApprovalHierarchy = createAsyncThunk(
   }
 )
 
-export const getDetailPrApprovalHierarchy = createAsyncThunk(
-  "GET_DETAIL_PR_APPROVAL_HIERARCHY",
+export const getDetailIrApprovalHierarchy = createAsyncThunk(
+  "GET_DETAIL_IR_APPROVAL_HIERARCHY",
   async ({ id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/approval-hierarchy/${id}`;
+      const url = `/v1/dbs/api/invoice-relation/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -196,11 +196,11 @@ export const getDetailPrApprovalHierarchy = createAsyncThunk(
   }
 )
 
-export const getPrAttachmentCategory = createAsyncThunk(
-  "GET_PR_ATTACHMENT_CATEGORY",
+export const getIrAttachmentCategory = createAsyncThunk(
+  "GET_IR_ATTACHMENT_CATEGORY",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/attachment-category`;
+      const url = `/v1/dbs/api/invoice-relation/attachment-category`;
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -209,8 +209,8 @@ export const getPrAttachmentCategory = createAsyncThunk(
   }
 )
 
-export const getPrAccountStandard = createAsyncThunk(
-  "GET_PR_ACCOUNT_STANDARD",
+export const getIrAccountStandard = createAsyncThunk(
+  "GET_IR_ACCOUNT_STANDARD",
   async ({ page, size, sort, searchs, id, isLoadMore }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams;
@@ -224,7 +224,7 @@ export const getPrAccountStandard = createAsyncThunk(
       if (searchs)
         queryParams.append("searchs", searchs);
 
-      let url = `/v1/dbs/api/payment-relation/list-account/${id}`;
+      let url = `/v1/dbs/api/invoice-relation/list-account/${id}`;
 
       if (queryParams.toString().length)
         url += `?${queryParams.toString()}`;
@@ -240,11 +240,11 @@ export const getPrAccountStandard = createAsyncThunk(
   }
 );
 
-export const approveOrRejectPaymentRelation = createAsyncThunk(
-  "APPROVE_OR_REJECT_PAYMENT_RELATION",
+export const approveOrRejectInvoiceRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_INVOICE_RELATION",
   async ({ body, action }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-relation/approve";
+      const url = "/v1/dbs/api/invoice-relation/approve";
       const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
@@ -279,11 +279,11 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
   }
 );
 
-export const approveOrRejectInactivePaymentRelation = createAsyncThunk(
-  "APPROVE_OR_REJECT_INACTIVE_PAYMENT_RELATION",
+export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_INACTIVE_INVOICE_RELATION",
   async ({ body, action }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-relation/approve-inactive";
+      const url = "/v1/dbs/api/invoice-relation/approve-inactive";
       const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
@@ -318,11 +318,11 @@ export const approveOrRejectInactivePaymentRelation = createAsyncThunk(
   }
 );
 
-export const inactivatePaymentRelation = createAsyncThunk(
-  "INACTIVATE_PAYMENT_RELATION",
+export const inactivateInvoiceRelation = createAsyncThunk(
+  "INACTIVATE_INVOICE_RELATION",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-relation/inactive";
+      const url = "/v1/dbs/api/invoice-relation/inactive";
       const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
@@ -357,11 +357,11 @@ export const inactivatePaymentRelation = createAsyncThunk(
   }
 );
 
-export const getPrColumnApi = createAsyncThunk(
-  "GET_PR_COLUMN_API",
+export const getIrColumnApi = createAsyncThunk(
+  "GET_IR_COLUMN_API",
   async (thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-relation/list-search-column";
+      const url = "/v1/dbs/api/invoice-relation/list-search-column";
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -370,11 +370,11 @@ export const getPrColumnApi = createAsyncThunk(
   }
 )
 
-export const getPrConditionApi = createAsyncThunk(
-  "GET_PR_CONDITION_API",
+export const getIrConditionApi = createAsyncThunk(
+  "GET_IR_CONDITION_API",
   async (thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-relation/list-search-condition";
+      const url = "/v1/dbs/api/invoice-relation/list-search-condition";
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -383,11 +383,11 @@ export const getPrConditionApi = createAsyncThunk(
   }
 )
 
-export const getPrOperatorApi = createAsyncThunk(
-  "GET_PR_OPERATOR_API",
+export const getIrOperatorApi = createAsyncThunk(
+  "GET_IR_OPERATOR_API",
   async (thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-relation/list-search-operator";
+      const url = "/v1/dbs/api/invoice-relation/list-search-operator";
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -396,122 +396,121 @@ export const getPrOperatorApi = createAsyncThunk(
   }
 )
 
-const paymentRelationSlice = createSlice({
-  name: "paymentRelation",
+const invoiceRelationSlice = createSlice({
+  name: "invoiceRelation",
   initialState,
   extraReducers: {
-    /** Get Detail Payment Relation */
-    [getDetailPaymentRelation.pending]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
+    /** Get Detail Invoice Relation */
+    [getDetailInvoiceRelation.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailPaymentRelation.fulfilled]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
+    [getDetailInvoiceRelation.fulfilled]: (state, action) => {
+      state.detail_invoiceRelation = action.payload?.result || {};
       state.loading = false;
     },
-    [getDetailPaymentRelation.rejected]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
+    [getDetailInvoiceRelation.rejected]: (state, action) => {
+      state.detail_invoiceRelation = {};
       state.loading = false;
     },
 
-    /** Create Payment Relation */
-    [createPaymentRelation.pending]: (state) => {
+    /** Create Invoice Relation */
+    [createInvoiceRelation.pending]: (state) => {
       state.loading = true;
     },
-    [createPaymentRelation.fulfilled]: (state) => {
+    [createInvoiceRelation.fulfilled]: (state) => {
       state.loading = false;
     },
-    [createPaymentRelation.pending]: (state) => {
+    [createInvoiceRelation.pending]: (state) => {
       state.loading = false;
     },
 
-    /** Update Payment Relation */
-    [updatePaymentRelation.pending]: (state) => {
+    /** Update Invoice Relation */
+    [updateInvoiceRelation.pending]: (state) => {
       state.loading = true;
     },
-    [updatePaymentRelation.fulfilled]: (state) => {
+    [updateInvoiceRelation.fulfilled]: (state) => {
       state.loading = false;
     },
-    [updatePaymentRelation.pending]: (state) => {
+    [updateInvoiceRelation.pending]: (state) => {
       state.loading = false;
     },
 
-    /** Get Payment Relation Approval Hierarchy */
-    [getPrApprovalHierarchy.pending]: (state) => {
+    /** Get Invoice Relation Approval Hierarchy */
+    [getIrApprovalHierarchy.pending]: (state) => {
       state.loading = true;
     },
-    [getPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.data_prApprovalHierarchy = action.payload;
+    [getIrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.data_irApprovalHierarchy = action.payload;
       state.loading = false;
     },
-    [getPrApprovalHierarchy.rejected]: (state) => {
-      state.data_prApprovalHierarchy = [];
+    [getIrApprovalHierarchy.rejected]: (state) => {
+      state.data_irApprovalHierarchy = [];
       state.loading = false;
     },
 
-    /** Get Payment Relation Detail Approval Hierarchy */
-    [getDetailPrApprovalHierarchy.pending]: (state) => {
+    /** Get Invoice Relation Detail Approval Hierarchy */
+    [getDetailIrApprovalHierarchy.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.detail_prApprovalHierarchy = action.payload;
+    [getDetailIrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.detail_irApprovalHierarchy = action.payload;
       state.loading = false;
     },
-    [getDetailPrApprovalHierarchy.rejected]: (state) => {
-      state.detail_prApprovalHierarchy = [];
+    [getDetailIrApprovalHierarchy.rejected]: (state) => {
+      state.detail_irApprovalHierarchy = [];
       state.loading = false;
     },
 
-    /** Get Payment Relation Attachment Category */
-    [getPrAttachmentCategory.pending]: (state) => {
+    /** Get Invoice Relation Attachment Category */
+    [getIrAttachmentCategory.pending]: (state) => {
       state.loading = true;
     },
-    [getPrAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_prAttachmentCategory = action.payload;
+    [getIrAttachmentCategory.fulfilled]: (state, action) => {
+      state.data_irAttachmentCategory = action.payload;
       state.loading = false;
     },
-    [getPrAttachmentCategory.rejected]: (state) => {
-      state.data_prAttachmentCategory = [];
+    [getIrAttachmentCategory.rejected]: (state) => {
+      state.data_irAttachmentCategory = [];
       state.loading = false;
     },
 
-    /** Get Payment Relation Account Standard */
-    [getPrAccountStandard.pending]: (state, action) => {
+    /** Get Invoice Relation Account Standard */
+    [getIrAccountStandard.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
     },
-    [getPrAccountStandard.fulfilled]: (state, action) => {
+    [getIrAccountStandard.fulfilled]: (state, action) => {
       state.loading = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId));
+          const currentIds = new Set(state.list_irAccountStandard.map((item) => item.accountId));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
 
-          state.list_prAccountStandard = [
-            ...state.list_prAccountStandard,
+          state.list_irAccountStandard = [
+            ...state.list_irAccountStandard,
             ...filteredResult,
           ];
         }
         else
-          state.list_prAccountStandard = result;
+          state.list_irAccountStandard = result;
       }
 
-      state.pagination_prAccountStandard = {
+      state.pagination_irAccountStandard = {
         totalPages: page?.totalPages || 0,
         totalElements: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getPrAccountStandard.rejected]: (state, action) => {
+    [getIrAccountStandard.rejected]: (state, action) => {
       state.loading = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_prAccountStandard = [];
-        state.pagination_prAccountStandard = {
+        state.list_irAccountStandard = [];
+        state.pagination_irAccountStandard = {
           totalPages: 0,
           totalElements: 0,
           currentPage: 0,
@@ -520,43 +519,43 @@ const paymentRelationSlice = createSlice({
       }
     },
 
-    /** Get Payment Relation Attachment */
-    [getPaymentRelationAttachment.pending]: (state, action) => {
+    /** Get Invoice Relation Attachment */
+    [getInvoiceRelationAttachment.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
     },
-    [getPaymentRelationAttachment.fulfilled]: (state, action) => {
+    [getInvoiceRelationAttachment.fulfilled]: (state, action) => {
       state.loading = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_paymentRelation.map((item) => item.id));
+          const currentIds = new Set(state.list_invoiceRelation.map((item) => item.id));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
           
-          state.list_prDetailAttachment = [
-            ...state.list_paymentRelation,
+          state.list_irDetailAttachment = [
+            ...state.list_invoiceRelation,
             ...filteredResult,
           ];
         }
         else
-          state.list_prDetailAttachment = result;
+          state.list_irDetailAttachment = result;
       }
 
-      state.pagination_prDetailAttachment = {
+      state.pagination_irDetailAttachment = {
         totalPages: page?.totalPages || 0,
         totalElements: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getPaymentRelationAttachment.rejected]: (state, action) => {
+    [getInvoiceRelationAttachment.rejected]: (state, action) => {
       state.loading = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_prDetailAttachment = [];
-        state.pagination_prDetailAttachment = {
+        state.list_irDetailAttachment = [];
+        state.pagination_irDetailAttachment = {
           totalPages: 0,
           totalElements: 0,
           currentPage: 0,
@@ -565,75 +564,75 @@ const paymentRelationSlice = createSlice({
       }
     },
 
-    /** Approve or Reject Payment Relation */
-    [approveOrRejectPaymentRelation.pending]: (state) => {
+    /** Approve or Reject Invoice Relation */
+    [approveOrRejectInvoiceRelation.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectPaymentRelation.fulfilled]: (state) => {
+    [approveOrRejectInvoiceRelation.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approveOrRejectPaymentRelation.rejected]: (state) => {
+    [approveOrRejectInvoiceRelation.rejected]: (state) => {
       state.loading = false;
     },
 
-    /** Approve or Reject Inactive Payment Relation */
-    [approveOrRejectInactivePaymentRelation.pending]: (state) => {
+    /** Approve or Reject Inactive Invoice Relation */
+    [approveOrRejectInactiveInvoiceRelation.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInactivePaymentRelation.fulfilled]: (state) => {
+    [approveOrRejectInactiveInvoiceRelation.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approveOrRejectInactivePaymentRelation.rejected]: (state) => {
+    [approveOrRejectInactiveInvoiceRelation.rejected]: (state) => {
       state.loading = false;
     },
 
-    /** Inactivate Payment Relation Attachment */
-    [inactivatePaymentRelation.pending]: (state) => {
+    /** Inactivate Invoice Relation Attachment */
+    [inactivateInvoiceRelation.pending]: (state) => {
       state.loading = true;
     },
-    [inactivatePaymentRelation.fulfilled]: (state) => {
+    [inactivateInvoiceRelation.fulfilled]: (state) => {
       state.loading = false;
     },
-    [inactivatePaymentRelation.rejected]: (state) => {
+    [inactivateInvoiceRelation.rejected]: (state) => {
       state.loading = false;
     },
 
-    /** Get Payment Relation Column API  */
-    [getPrColumnApi.pending]: (state) => {
+    /** Get Invoice Relation Column API  */
+    [getIrColumnApi.pending]: (state) => {
       state.loading = true;
     },
-    [getPrColumnApi.fulfilled]: (state, action) => {
+    [getIrColumnApi.fulfilled]: (state, action) => {
       state.data_globalTypeColumn = action.payload;
       state.loading = false;
     },
-    [getPrColumnApi.rejected]: (state) => {
+    [getIrColumnApi.rejected]: (state) => {
       state.loading = false;
     },
 
-    /** Get Payment Relation Condition API  */
-    [getPrConditionApi.pending]: (state) => {
+    /** Get Invoice Relation Condition API  */
+    [getIrConditionApi.pending]: (state) => {
       state.loading = true;
     },
-    [getPrConditionApi.fulfilled]: (state, action) => {
+    [getIrConditionApi.fulfilled]: (state, action) => {
       state.data_globalTypeCondition = action.payload;
       state.loading = false;
     },
-    [getPrConditionApi.rejected]: (state) => {
+    [getIrConditionApi.rejected]: (state) => {
       state.loading = false;
     },
 
-    /** Get Payment Relation Operator API  */
-    [getPrOperatorApi.pending]: (state) => {
+    /** Get Invoice Relation Operator API  */
+    [getIrOperatorApi.pending]: (state) => {
       state.loading = true;
     },
-    [getPrOperatorApi.fulfilled]: (state, action) => {
+    [getIrOperatorApi.fulfilled]: (state, action) => {
       state.data_globalTypeOperator = action.payload;
       state.loading = false;
     },
-    [getPrOperatorApi.rejected]: (state) => {
+    [getIrOperatorApi.rejected]: (state) => {
       state.loading = false
     },
   },
 });
-const { reducer } = paymentRelationSlice;
+const { reducer } = invoiceRelationSlice;
 export default reducer;

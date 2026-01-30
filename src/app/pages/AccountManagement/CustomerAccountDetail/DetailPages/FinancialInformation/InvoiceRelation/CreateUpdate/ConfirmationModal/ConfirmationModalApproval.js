@@ -1,5 +1,7 @@
-import { useState, useRef, Fragment } from "react";
+import { useState, useRef } from "react";
 import ConfirmationModalHierarchy from "./ConfirmationModalHierarchy";
+import BaseContainer from "../../../../../../../../../components/BaseContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalApproval = ({
   dataTable = [],
@@ -16,10 +18,7 @@ const ConfirmationModalApproval = ({
   };
 
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        APPROVAL
-      </div>
+    <NxBaseContainer border header={"APPROVAL"}>
       <ConfirmationModalHierarchy
         dataTable={dataTable}
         selectedAppHierId={selectedAppHierId}
@@ -29,7 +28,7 @@ const ConfirmationModalApproval = ({
         searchText={searchText}
         handleSearch={handleSearch}
       />
-    </Fragment>
+    </NxBaseContainer>
   );
 };
 

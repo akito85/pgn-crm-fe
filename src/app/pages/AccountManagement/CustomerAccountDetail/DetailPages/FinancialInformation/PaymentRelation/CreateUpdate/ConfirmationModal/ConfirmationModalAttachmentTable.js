@@ -265,6 +265,7 @@ const ConfirmationModalAttachmentTable = ({
             handleShow
           )}
           usePagination={false}
+          showAdvanceSearch={false}
         />
       </div>
     </Spin>
