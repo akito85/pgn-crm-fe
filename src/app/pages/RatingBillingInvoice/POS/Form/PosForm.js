@@ -1175,7 +1175,7 @@ const PosForm = ({ type }) => {
         const costCenterNames = e.costCenter
           .map((ccId) => {
             const cc = data_cost_center_list?.find((item) => item.id === ccId);
-            return cc ? cc.name : ""; 
+            return cc ? cc.name : "";
           })
           .filter(Boolean)
           .join(", ");
@@ -1220,6 +1220,9 @@ const PosForm = ({ type }) => {
             );
           }
 
+          // Navigate back
+          navigate(RBI_ROUTES.POS_VIEW, { replace: true });
+
           // Reset form
           form.resetFields();
           setLoadingForm(false);
@@ -1231,9 +1234,6 @@ const PosForm = ({ type }) => {
           setCurrency();
           setInvoiceDate();
           setDdlFinal("DATE");
-
-          // Navigate back
-          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1271,6 +1271,8 @@ const PosForm = ({ type }) => {
             );
           }
 
+          navigate(RBI_ROUTES.POS_VIEW, { replace: true });
+
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1281,8 +1283,6 @@ const PosForm = ({ type }) => {
           setCurrency();
           setInvoiceDate();
           setDdlFinal("DATE");
-
-          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1693,7 +1693,6 @@ const PosForm = ({ type }) => {
           isOpen={modalDailyRate}
           handleOk={() => setModalDailyRate(false)}
           handleCancel={() => setModalDailyRate(false)}
-          // customText={"Try Again"}
         >
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
