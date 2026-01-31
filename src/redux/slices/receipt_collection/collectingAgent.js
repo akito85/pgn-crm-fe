@@ -6,6 +6,7 @@ import {
     showModalSuccess,
     validateError,
 } from "../general_slice";
+import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
     loading: false,
@@ -232,6 +233,101 @@ export const approveOrRejectCollectingAgent = createAsyncThunk(
     }
 );
 
+// Approve or reject inactive
+export const approveOrRejectInactiveCollectingAgent = createAsyncThunk(
+    "APPROVE_OR_REJECT_FOR_INACTIVE_COLLECTING_AGENT",
+    async ({ body }, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/collecting-agent/approve-inactive";
+            const response =
+                await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+            const message = response?.message;
+            const successMessage = {
+                title: "Successfull",
+                description: `${message}`,
+                return: true,
+            };
+            thunkAPI.dispatch(showModalSuccess(successMessage));
+            return response.data;
+        } catch (error) {
+            const message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
+                error.message ||
+                error.toString();
+            if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+                const errorBody = {
+                    title: "Failed",
+                    description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+                        }. ${message}.`,
+                    return: false,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const saveDraftCollectingAgent = createAsyncThunk(
+    "SAVE_DRAFT_COLLECTING_AGENT",
+    async (body, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/collecting-agent/save-draft`;
+            const data = await receiptCollectionHttpService.createData(url, body);
+            const successBody = {
+                title: "Successfull",
+                description: `Your data has been saved as draft`,
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successBody));
+            return data.data;
+        } catch (error) {
+            const message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
+                error.message ||
+                error.toString();
+            const errorBody = {
+                title: "Failed",
+                data: error.response.data.data,
+                description: `Your draft was not saved. ${message}.`,
+            };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const getDetailDraftCollectingAgent = createAsyncThunk(
+    "GET_DETAIL_DRAFT_COLLECTING_AGENT",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/collecting-agent/draft-detail/${id}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
 // Get approval hierarchy list
 export const getAllApprovalListCollectingAgent = createAsyncThunk(
     "GET_ALL_APPROVAL_LIST_COLLECTING_AGENT",
@@ -316,6 +412,37 @@ export const getListCategoryCollectingAgent = createAsyncThunk(
                 thunkAPI.dispatch(showModalError(errorBody));
             }
             return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+// Inactive Collecting Agent
+export const inactiveCollectingAgent = createAsyncThunk(
+    "INACTIVE_COLLECTING_AGENT",
+    async ({ body }, thunkAPI) => {
+        let status = body?.status === "Active" ? "Inactivate" : "Activate";
+        try {
+            const url = `/v1/dbs/api/collecting-agent/active-inactive`;
+            const response = await receiptCollectionHttpService.activationWithRemarkPost(
+                url,
+                body
+            );
+            const successMessage = {
+                title: "Successfull",
+                description: "Your data has been submitted.",
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successMessage));
+            return response.data;
+        } catch (response) {
+            thunkAPI.dispatch(
+                validateError({
+                    error: errorBody(errorCode(response), status, errorMessage(response)),
+                    action: "INACTIVE_COLLECTING_AGENT",
+                    back: false,
+                })
+            );
+            return thunkAPI.rejectWithValue(response.response.data);
         }
     }
 );
@@ -420,6 +547,41 @@ const ViewCollectingAgentSlice = createSlice({
             state.message = action.payload;
         },
 
+        // Approve or Reject Inactive
+        [approveOrRejectInactiveCollectingAgent.pending]: (state) => {
+            state.loading = true;
+        },
+        [approveOrRejectInactiveCollectingAgent.fulfilled]: (state) => {
+            state.isSuccess = true;
+            state.loading = false;
+        },
+        [approveOrRejectInactiveCollectingAgent.rejected]: (state, action) => {
+            state.isFailed = true;
+            state.loading = false;
+            state.message = action.payload;
+        },
+
+        [saveDraftCollectingAgent.pending]: (state) => {
+            state.loading = true;
+        },
+        [saveDraftCollectingAgent.fulfilled]: (state) => {
+            state.loading = false;
+        },
+        [saveDraftCollectingAgent.rejected]: (state) => {
+            state.loading = false;
+        },
+
+        [getDetailDraftCollectingAgent.pending]: (state) => {
+            state.loading = true;
+        },
+        [getDetailDraftCollectingAgent.fulfilled]: (state, action) => {
+            state.data_detail = action.payload;
+            state.loading = false;
+        },
+        [getDetailDraftCollectingAgent.rejected]: (state) => {
+            state.loading = false;
+        },
+
         // Create
         [createCollectingAgent.pending]: (state, action) => {
             state.data = action.payload;
@@ -469,6 +631,19 @@ const ViewCollectingAgentSlice = createSlice({
         },
         [createValidasiCollectingAgent.rejected]: (state, action) => {
             state.error = action.payload;
+            state.loading = false;
+        },
+
+        // Inactive
+        [inactiveCollectingAgent.pending]: (state) => {
+            state.loading = true;
+        },
+        [inactiveCollectingAgent.fulfilled]: (state) => {
+            state.isSuccess = true;
+            state.loading = false;
+        },
+        [inactiveCollectingAgent.rejected]: (state) => {
+            state.isFailed = true;
             state.loading = false;
         },
     },

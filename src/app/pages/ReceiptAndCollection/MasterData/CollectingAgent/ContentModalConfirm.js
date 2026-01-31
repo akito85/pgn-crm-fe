@@ -1,10 +1,11 @@
 import moment from "moment";
-import { Fragment, useState } from "react";
+import { useState } from "react";
+import { Tabs } from "antd";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
 import { dateFormatting } from "../../../../../utils";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
+import { UpOutlined, DownOutlined } from "@ant-design/icons";
 
 const ContentModalConfirm = ({
   data,
@@ -15,62 +16,89 @@ const ContentModalConfirm = ({
   selectedHierarchy,
 }) => {
   const [valuePage, setValuePage] = useState(tabData[0].value);
+  const [expanded, setExpanded] = useState(true);
 
-  console.log("data in content modal confirm: ", data);
-
-  const showSection = () => {
-    switch (valuePage) {
-      case tabData[0].value:
-        return (
-          <div className="grid grid-cols-2 w-full">
-            <DetailText label="Collection Agent Code">{data?.caCode}</DetailText>
-            <DetailText label="Name">{data?.name}</DetailText>
-            <DetailText label="Type">{data?.type}</DetailText>
-            <DetailText label={"Start Date"}>
-              {moment(data?.effStartDate).format(dateFormatting.date)}
-            </DetailText>
-            <DetailText label={"End Date"}>
-              {data?.effEndDate
-                ? moment(data?.effEndDate).format(dateFormatting.date)
-                : ""}
-            </DetailText>
+  const items = [
+    {
+      key: tabData[0].value,
+      label: tabData[0].value,
+      children: (
+        <div className="p-5 bg-[#f8f7fa] min-h-[200px]">
+          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
+            <div
+              className="flex justify-between items-center cursor-pointer mb-4"
+              onClick={() => setExpanded(!expanded)}
+            >
+              <div className="text-[#0075bf] text-sm font-semibold uppercase">
+                COLLECTING AGENT INFORMATION
+              </div>
+              <div>{expanded ? <UpOutlined /> : <DownOutlined />}</div>
+            </div>
+            {expanded && (
+              <div className="grid grid-cols-5 gap-y-4 gap-x-2 w-full">
+                <DetailText label={"Collection Agent Code"}>{data?.caCode}</DetailText>
+                <DetailText label={"Name"}>{data?.name}</DetailText>
+                <DetailText label={"Type"}>{data?.type}</DetailText>
+                <DetailText label={"Start Date"}>
+                  {data?.effStartDate ? moment(data?.effStartDate).format(dateFormatting.date) : ""}
+                </DetailText>
+                <DetailText label={"End Date"}>
+                  {data?.effEndDate ? moment(data?.effEndDate).format(dateFormatting.date) : ""}
+                </DetailText>
+              </div>
+            )}
           </div>
-        );
-      case tabData[1].value:
-        return (
-          <ApprovalComponentGeneral
-            showSelect={false}
-            disableSelect={true}
-            approvalName={
-              (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
-              )?.[0].name || ""
-            }
-            dataTable={listDataAppHierDetail}
-            selectedHierarchy
-          />
-        );
-      case tabData[2].value:
-        return (
-          <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
-        );
-      default:
-        return <Fragment></Fragment>;
-    }
-  };
-  const handleMethod = (e) => {
-    setValuePage(e.target.value);
-  };
+        </div>
+      ),
+    },
+    {
+      key: tabData[1].value,
+      label: tabData[1].value,
+      children: (
+        <div className="p-5 bg-[#f8f7fa] min-h-[200px]">
+          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
+            <ApprovalComponentGeneral
+              showSelect={false}
+              disableSelect={true}
+              approvalName={
+                (dataOption || []).filter((data) => data.value === selectedHierarchy)?.[0].name ||
+                ""
+              }
+              dataTable={listDataAppHierDetail}
+              selectedHierarchy
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: tabData[2].value,
+      label: tabData[2].value,
+      children: (
+        <div className="p-5 bg-[#f8f7fa] min-h-[200px]">
+          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
+            <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <RadioTabs data={tabData} onChange={handleMethod} />
-      <div className="flex flex-col gap-4">
-        <div className="text-primary text-xs font-bold uppercase">
-          {`${valuePage} INFORMATION`}
-        </div>
-        {showSection()}
-      </div>
+    <div className="flex flex-col gap-0 -mt-5 -mx-5 -mb-5 bg-white">
+      <Tabs
+        defaultActiveKey={tabData[0].value}
+        activeKey={valuePage}
+        onChange={(key) => setValuePage(key)}
+        items={items}
+        className="custom-confirm-tabs"
+        tabBarStyle={{
+          paddingLeft: "20px",
+          paddingRight: "20px",
+          marginBottom: 0,
+          borderBottom: "1px solid #dbdade"
+        }}
+      />
     </div>
   );
 };
