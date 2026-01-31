@@ -23,650 +23,650 @@ export const columnsAllocation = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => { }
 ) => [
-  {
-    title: "NO",
-    width: 60,
-    align: "center",
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  },
-  {
-    title: "ALLOCATION ID",
-    dataIndex: "id",
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsPaging(
-      "id",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "allocationId") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              {text}
-            </Tooltip>
-          );
-        }
-        return "";
-      }
+    {
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
-  },
-  {
-    title: "ALLOCATION NUMBER",
-    dataIndex: "allocationNumber",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "allocationNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "allocationNumber") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              {text}
-            </Tooltip>
-          );
-        }
-        return "";
-      }
-    },
-  },
-  {
-    title: "ALLOCATION TYPE",
-    dataIndex: "allocationType",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "allocationType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "allocationType") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              {text}
-            </Tooltip>
-          );
-        }
-        return "";
-      }
-    },
-  },
-  {
-    title: "BILLING ITEM",
-    dataIndex: "billingItem",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "billingItem",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "billingItem") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              {text}
-            </Tooltip>
-          );
-        }
-        return "";
-      }
-    },
-  },
-  {
-    title: "ALLOCATE DATE",
-    dataIndex: "allocationDate",
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsPaging(
-      "allocationDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      searchedColumn === "allocationDate" ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[
-            searchText
-              ? moment(searchText, "YYYY-MM-DD").format(dateFormatting.date)
-              : "",
-          ]}
-          autoEscape
-          textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
-        />
-      ) : text === null ? (
-        ""
-      ) : (
-        moment(text).format(dateFormatting.date)
+    {
+      title: "ALLOCATION ID",
+      dataIndex: "id",
+      sorter: true,
+      align: "right",
+      ...getColumnSearchPropsPaging(
+        "id",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
       ),
-  },
-  {
-    title: "INVOICE CURRENCY",
-    dataIndex: "invoiceCurrency",
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsPaging(
-      "invoiceCurrency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "invoiceCurrency") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
+      render: (text) => {
+        if (searchedColumn === "allocationId") {
           return (
             <Tooltip placement="topLeft" title={text}>
-              {text}
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
             </Tooltip>
           );
-        }
-        return "";
-      }
-    },
-  },
-  {
-    title: "BILLING ITEM AMOUNT",
-    dataIndex: "billingItemAmount",
-    align: "right",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "billingItemAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "billingItemAmount") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              {/* {parseInt(text).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} */}
-              {text}
-            </Tooltip>
-          );
-        }
-        return "";
-      }
-    },
-  },
-  {
-    title: "ALLOCATION AMOUNT",
-    dataIndex: "allocationAmount",
-    align: "right",
-    inputType: "number",
-    sorter: true,
-    onInput: (e) => (e.target.value = e.target.value.replace(/\D/g, "")),
-    ...getColumnSearchPropsPaging(
-      "allocationAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "allocationAmount") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              {/* {parseInt(text).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} */}
-              {text}
-            </Tooltip>
-          );
-        }
-        return "";
-      }
-    },
-  },
-  {
-    title: "BILLING ITEM BALANCE",
-    dataIndex: "billingItemBalance",
-    sorter: (a, b) => sorterFunction("billingItemBalance", a, b, "number"),
-    align: "right",
-    ...getColumnSearchPropsPaging(
-      "billingItemBalance",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    // render: (text) => text.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  },
-  {
-    title: "ALLOCATION STATUS",
-    dataIndex: "allocationStatus",
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsPaging(
-      "allocationStatus",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "allocationStatus") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <div className={" flex justify-center"}>
-              <StatusComponent colour={text}>
-                {toTitleCase(text)}
-              </StatusComponent>
-            </div>
-          );
-        }
-        return "";
-      }
-    },
-  },
-
-  {
-    title: "INVOICE NUMBER",
-    dataIndex: "invoiceNumber",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "invoiceNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "invoiceNumber") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              {text}
-            </Tooltip>
-          );
-        }
-        return "";
-      }
-    },
-  },
-  {
-    title: "INVOICE PERIOD",
-    dataIndex: "billingPeriod",
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsPaging(
-      "billingPeriod",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "datePeriod"
-    ),
-    render: (text) =>
-      searchedColumn === "billingPeriod" ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[
-            searchText
-              ? moment(searchText, "YYYY-MM").format(dateFormatting.datePeriod)
-              : "",
-          ]}
-          autoEscape
-          textToHighlight={
-            text ? moment(text).format(dateFormatting.datePeriod) : ""
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
           }
-        />
-      ) : text === null ? (
-        ""
-      ) : (
-        moment(text).format(dateFormatting.datePeriod)
+          return "";
+        }
+      },
+    },
+    {
+      title: "ALLOCATION NUMBER",
+      dataIndex: "allocationNumber",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "allocationNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
       ),
-  },
-  {
-    title: "RATE DATE",
-    dataIndex: "rateDate",
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsPaging(
-      "rateDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      searchedColumn === "rateDate" ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[
-            searchText
-              ? moment(searchText, "YYYY-MM-DD").format(dateFormatting.date)
-              : "",
-          ]}
-          autoEscape
-          textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
-        />
-      ) : text === null ? (
-        ""
-      ) : (
-        moment(text).format(dateFormatting.date)
+      render: (text) => {
+        if (searchedColumn === "allocationNumber") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
+        }
+      },
+    },
+    {
+      title: "ALLOCATION TYPE",
+      dataIndex: "allocationType",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "allocationType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
       ),
-  },
-  {
-    title: "RATE",
-    dataIndex: "rateAmount",
-    align: "right",
-    inputType: "number",
-    sorter: true,
-    onInput: (e) => (e.target.value = e.target.value.replace(/\D/g, "")),
-    ...getColumnSearchPropsPaging(
-      "rateAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "rateAmount") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
+      render: (text) => {
+        if (searchedColumn === "allocationType") {
           return (
             <Tooltip placement="topLeft" title={text}>
-              {/* {parseInt(text).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} */}
-              {text}
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
             </Tooltip>
           );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
         }
-        return "";
-      }
+      },
     },
-  },
-  {
-    title: "CONVERTED CURRENCY",
-    dataIndex: "convertedCurrency",
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsPaging(
-      "convertedCurrency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "convertedCurrency") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
+    {
+      title: "BILLING ITEM",
+      dataIndex: "billingItem",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "billingItem",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "billingItem") {
           return (
             <Tooltip placement="topLeft" title={text}>
-              {text}
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
             </Tooltip>
           );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
         }
-        return "";
-      }
+      },
     },
-  },
-  {
-    title: "EQUIVALENT AMOUNT",
-    dataIndex: "equivalentAmount",
-    align: "right",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "equivalentAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => {
-      if (searchedColumn === "equivalentAmount") {
-        return (
-          <Tooltip placement="topLeft" title={text}>
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          </Tooltip>
-        );
-      } else {
-        if (text) {
+    {
+      title: "ALLOCATE DATE",
+      dataIndex: "allocationDate",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "allocationDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        searchedColumn === "allocationDate" ? (
+          <Highlighter
+            highlightStyle={{
+              backgroundColor: "#ffc069",
+              padding: 0,
+            }}
+            searchWords={[
+              searchText
+                ? moment(searchText, "YYYY-MM-DD").format(dateFormatting.date)
+                : "",
+            ]}
+            autoEscape
+            textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
+          />
+        ) : text === null ? (
+          ""
+        ) : (
+          moment(text).format(dateFormatting.date)
+        ),
+    },
+    {
+      title: "INVOICE CURRENCY",
+      dataIndex: "invoiceCurrency",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "invoiceCurrency",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "invoiceCurrency") {
           return (
             <Tooltip placement="topLeft" title={text}>
-              {text}
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
             </Tooltip>
           );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
         }
-        return "";
-      }
+      },
     },
-  },
-  {
-    title: "CREATED DATE",
-    dataIndex: "createdDate",
-    align: "center",
-    sorter: true,
-    ...getColumnSearchPropsPaging("createdDate", "date"),
-    render: (text) => moment(text).format("DD MMM YYYY HH:mm:ss"),
-  },
-  {
-    title: "CREATED BY",
-    dataIndex: "createdBy",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "createdBy",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-  },
-];
+    {
+      title: "BILLING ITEM AMOUNT",
+      dataIndex: "billingItemAmount",
+      align: "right",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "billingItemAmount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "billingItemAmount") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {/* {parseInt(text).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} */}
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
+        }
+      },
+    },
+    {
+      title: "ALLOCATION AMOUNT",
+      dataIndex: "allocationAmount",
+      align: "right",
+      inputType: "number",
+      sorter: true,
+      onInput: (e) => (e.target.value = e.target.value.replace(/\D/g, "")),
+      ...getColumnSearchPropsPaging(
+        "allocationAmount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "allocationAmount") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {/* {parseInt(text).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} */}
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
+        }
+      },
+    },
+    {
+      title: "BILLING ITEM BALANCE",
+      dataIndex: "billingItemBalance",
+      sorter: (a, b) => sorterFunction("billingItemBalance", a, b, "number"),
+      align: "right",
+      ...getColumnSearchPropsPaging(
+        "billingItemBalance",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      // render: (text) => text.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    },
+    {
+      title: "ALLOCATION STATUS",
+      dataIndex: "allocationStatus",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "allocationStatus",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "allocationStatus") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <div className={" flex justify-center"}>
+                <StatusComponent colour={text}>
+                  {toTitleCase(text)}
+                </StatusComponent>
+              </div>
+            );
+          }
+          return "";
+        }
+      },
+    },
+
+    {
+      title: "INVOICE NUMBER",
+      dataIndex: "invoiceNumber",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "invoiceNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "invoiceNumber") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
+        }
+      },
+    },
+    {
+      title: "INVOICE PERIOD",
+      dataIndex: "billingPeriod",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "billingPeriod",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "datePeriod"
+      ),
+      render: (text) =>
+        searchedColumn === "billingPeriod" ? (
+          <Highlighter
+            highlightStyle={{
+              backgroundColor: "#ffc069",
+              padding: 0,
+            }}
+            searchWords={[
+              searchText
+                ? moment(searchText, "YYYY-MM").format(dateFormatting.datePeriod)
+                : "",
+            ]}
+            autoEscape
+            textToHighlight={
+              text ? moment(text).format(dateFormatting.datePeriod) : ""
+            }
+          />
+        ) : text === null ? (
+          ""
+        ) : (
+          moment(text).format(dateFormatting.datePeriod)
+        ),
+    },
+    {
+      title: "RATE DATE",
+      dataIndex: "rateDate",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "rateDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        searchedColumn === "rateDate" ? (
+          <Highlighter
+            highlightStyle={{
+              backgroundColor: "#ffc069",
+              padding: 0,
+            }}
+            searchWords={[
+              searchText
+                ? moment(searchText, "YYYY-MM-DD").format(dateFormatting.date)
+                : "",
+            ]}
+            autoEscape
+            textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
+          />
+        ) : text === null ? (
+          ""
+        ) : (
+          moment(text).format(dateFormatting.date)
+        ),
+    },
+    {
+      title: "RATE",
+      dataIndex: "rateAmount",
+      align: "right",
+      inputType: "number",
+      sorter: true,
+      onInput: (e) => (e.target.value = e.target.value.replace(/\D/g, "")),
+      ...getColumnSearchPropsPaging(
+        "rateAmount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "rateAmount") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {/* {parseInt(text).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} */}
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
+        }
+      },
+    },
+    {
+      title: "CONVERTED CURRENCY",
+      dataIndex: "convertedCurrency",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsPaging(
+        "convertedCurrency",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "convertedCurrency") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
+        }
+      },
+    },
+    {
+      title: "EQUIVALENT AMOUNT",
+      dataIndex: "equivalentAmount",
+      align: "right",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "equivalentAmount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        if (searchedColumn === "equivalentAmount") {
+          return (
+            <Tooltip placement="topLeft" title={text}>
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+              />
+            </Tooltip>
+          );
+        } else {
+          if (text) {
+            return (
+              <Tooltip placement="topLeft" title={text}>
+                {text}
+              </Tooltip>
+            );
+          }
+          return "";
+        }
+      },
+    },
+    {
+      title: "CREATED DATE",
+      dataIndex: "createdDate",
+      align: "center",
+      sorter: true,
+      ...getColumnSearchPropsPaging("createdDate", "date"),
+      render: (text) => moment(text).format("DD MMM YYYY HH:mm:ss"),
+    },
+    {
+      title: "CREATED BY",
+      dataIndex: "createdBy",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "createdBy",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+    },
+  ];
 
 const DetailReceipt = ({
   data_detail,
   id,
-  setIsInsert = () => {},
-  setAllocationTable = () => {},
-  setBalance = () => {},
+  setIsInsert = () => { },
+  setAllocationTable = () => { },
+  setBalance = () => { },
 }) => {
   const { data_allocation, loading } = useSelector((state) => state.receipt);
 
@@ -833,8 +833,8 @@ const DetailReceipt = ({
             <DetailText label="Bank Statement Date">
               {data_detail?.bankStatementDate
                 ? moment(data_detail?.bankStatementDate).format(
-                    dateFormatting.dateTime
-                  )
+                  dateFormatting.dateTime
+                )
                 : " "}
             </DetailText>
             <DetailText label="Status">{data_detail?.status}</DetailText>
@@ -861,8 +861,8 @@ const DetailReceipt = ({
               {data_detail?.rateDate === null
                 ? ""
                 : moment(data_detail?.rateDate).format(
-                    dateFormatting.dateCapital
-                  )}
+                  dateFormatting.dateCapital
+                )}
             </DetailText>
             <DetailText label="Amount Equivalent">
               {data_detail?.equivalentAmount}
@@ -895,6 +895,18 @@ const DetailReceipt = ({
             <DetailText label="Description">
               {data_detail?.description}
             </DetailText>
+          </div>
+        </BaseContainer>
+        <BaseContainer header={"Approval Receipt"}>
+          <div className="w-full grid grid-cols-3 gap-3">
+            <DetailText label="Approval Group">{data_detail?.approvalReceipt?.group}</DetailText>
+            <DetailText label="Approver">{data_detail?.approvalReceipt?.approver}</DetailText>
+          </div>
+        </BaseContainer>
+        <BaseContainer header={"Approval Allocation"}>
+          <div className="w-full grid grid-cols-3 gap-3">
+            <DetailText label="Approval Group">{data_detail?.approvalAllocation?.group}</DetailText>
+            <DetailText label="Approver">{data_detail?.approvalAllocation?.approver}</DetailText>
           </div>
         </BaseContainer>
 
@@ -949,12 +961,12 @@ const DetailReceipt = ({
               dataDetail={data_detail}
               totalUnapliedAmount={totalAllocationAmount}
               setTotalUnapliedAmount={setTotalAllocationAmount}
-              // amount={amount}
-              // totalAllocationAmount={totalAllocationAmount}
-              // setTotalAllocationAmount={setTotalAllocationAmount}
-              // accountNumberSelected={accNumb?.name}
-              // rateAmountValue={rateAmountValues}
-              // formValues={formValues}
+            // amount={amount}
+            // totalAllocationAmount={totalAllocationAmount}
+            // setTotalAllocationAmount={setTotalAllocationAmount}
+            // accountNumberSelected={accNumb?.name}
+            // rateAmountValue={rateAmountValues}
+            // formValues={formValues}
             />
           </div>
         </BaseContainer>

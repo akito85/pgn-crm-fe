@@ -1,6 +1,7 @@
 import {
     Spin,
     Tooltip,
+    Checkbox,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CardContainer from "../../../../../components/CardContainer";
@@ -15,7 +16,9 @@ import {
 import {
     renderColumn,
     renderDateColumn,
+    disabledActionByStatus,
 } from "../../../../../utils";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +27,9 @@ import {
     getApprovalHistoryCollectingAgent,
     getDownloadCollectingAgent,
     getPaginateCollectingAgent,
+    getAllApprovalListCollectingAgent,
+    getListApprovalByIdCollectingAgent,
+    inactiveCollectingAgent,
 } from "../../../../../redux/slices/receipt_collection/collectingAgent";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
@@ -52,6 +58,10 @@ const ViewCollectingAgent = () => {
     const [openModalHistory, setOpenModalHistory] = useState(false);
     const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
     const [body, setBody] = useState({});
+    const [status, setStatus] = useState("");
+    const [id, setId] = useState("");
+    const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
+    const [openModalInactivate, setOpenModalInactivate] = useState(false);
 
     const handleFetch = useCallback(() => {
         dispatch(
@@ -111,9 +121,11 @@ const ViewCollectingAgent = () => {
             const temp = {
                 dataApprover: {
                     create: dataApprovalHistory?.dataApprover?.COLLECTING_AGENT || [],
+                    inactive: dataApprovalHistory?.dataApprover?.INACTIVE_COLLECTING_AGENT || [],
                 },
                 dataHistory: {
                     create: dataApprovalHistory?.dataHistory?.COLLECTING_AGENT || [],
+                    inactive: dataApprovalHistory?.dataHistory?.INACTIVE_COLLECTING_AGENT || [],
                 },
             };
             setDataApprovalHistoryFix(temp);
@@ -132,6 +144,46 @@ const ViewCollectingAgent = () => {
         }
     };
 
+    const handleInactive = (r) => {
+        setOpenModalInactivate(true);
+        setId(r?.id);
+        setNameModalActiveOrInactivate(
+            r?.caCode + " - " + r?.name
+        );
+        setStatus(r?.status);
+    };
+
+    const handleCancelModalInactivate = () => {
+        setOpenModalInactivate(false);
+    };
+
+    const handleSubmitModalInactivate = (res, handleClear) => {
+        const body = {
+            id: id,
+            appHierId: res.approvalHierarchy,
+            status: status === "Inactive" ? "Active" : "Inactive",
+            remark: res.remark,
+        };
+        setBody({ body });
+        dispatch(inactiveCollectingAgent({ body }))
+            .unwrap()
+            .then(() => {
+                handleClear();
+                handleCancelModalInactivate();
+                let tempSearch = "";
+                for (const dataIndex in search) {
+                    if (Object.hasOwnProperty.call(search, dataIndex)) {
+                        const tempSearchText = search[dataIndex];
+                        if (tempSearchText) {
+                            tempSearch += `${dataIndex}~${tempSearchText},`;
+                        }
+                    }
+                }
+                tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+                dispatch(getPaginateCollectingAgent({ search: tempSearch, page, pageSize, sort }));
+            });
+    };
+
     const columns = [
         {
             title: "NO",
@@ -141,7 +193,7 @@ const ViewCollectingAgent = () => {
             render: (text, object, index) => (page - 1) * pageSize + index + 1,
         },
         {
-            title: "CA",
+            title: "CA Code",
             dataIndex: "caCode",
             key: "caCode",
             sorter: true,
@@ -165,7 +217,7 @@ const ViewCollectingAgent = () => {
                 ),
         },
         {
-            title: "NAME",
+            title: "CA NAME",
             dataIndex: "name",
             key: "name",
             sorter: true,
@@ -261,27 +313,28 @@ const ViewCollectingAgent = () => {
                 ),
         },
         {
-            title: "APP HIER ID",
-            dataIndex: "apphierId",
-            key: "apphierId",
+            title: "STATUS",
+            dataIndex: "status",
+            key: "status",
             sorter: true,
+            width: 100,
+            fixed: "right",
             ...getColumnSearchPropsPaging(
-                "apphierId",
+                "status",
                 searchInput,
                 searchedColumn,
                 searchText,
                 handleSearch,
-                true
+                false
             ),
             render: (text) =>
                 renderColumn(
-                    "apphierId",
+                    "status",
                     searchedColumn,
                     searchText,
                     text,
-                    true,
-                    "input",
-                    search
+                    false,
+                    "status"
                 ),
         },
         {
@@ -289,7 +342,7 @@ const ViewCollectingAgent = () => {
             dataIndex: "statusApproval",
             key: "statusApproval",
             sorter: true,
-            width: 100,
+            width: 150,
             fixed: "right",
             ...getColumnSearchPropsPaging(
                 "statusApproval",
@@ -313,7 +366,7 @@ const ViewCollectingAgent = () => {
 
     const [fixedColumns, setFixedColumns] = useState(() => ({
         left: ["no"],
-        right: ["statusApproval", "action"],
+        right: ["status", "statusApproval", "action"],
     }));
 
     const onSort = (_, __, sort) => {
@@ -337,6 +390,20 @@ const ViewCollectingAgent = () => {
     };
 
     const itemActions = [
+        // toolbar items
+        {
+            action: "Download",
+            render: (
+                <ButtonComponent
+                    onClick={handleDownload}
+                    type={"submit"}
+                    border={false}
+                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+                >
+                    Download List
+                </ButtonComponent>
+            ),
+        },
         {
             action: "Create",
             render: (
@@ -363,7 +430,7 @@ const ViewCollectingAgent = () => {
                             state={{ id: record?.id }}
                         >
                             {/* <SVGIcon name="IconDetail" width={24} /> */}
-                            <EyeOutlined />
+                            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
                         </Link>
                     </Tooltip>
                 );
@@ -373,7 +440,7 @@ const ViewCollectingAgent = () => {
             action: "Update",
             type: "table",
             render: (record, data_length) => {
-                const isEditable = record.statusApproval === "Rejected";
+                const isEditable = record.statusApproval === "Draft" || record.statusApproval === "Rejected";
 
                 return (
                     data_length > 3 ? (
@@ -421,6 +488,49 @@ const ViewCollectingAgent = () => {
             },
         },
         {
+            action: "Activate",
+            type: "table",
+            render: (record, data_length) => {
+                const statusLowerCase = record?.status?.toLowerCase()
+
+                return (
+                    data_length > 3 ?
+                        <div className="w-full">
+                            <ButtonComponent
+                                border={false}
+                                className={'gap-5 w-full'}
+                                onClick={() => handleInactive(record)}
+                                disabled={
+                                    disabledActionByStatus('activate', record?.status, record?.statusApproval)
+                                }
+                            >
+                                <Checkbox
+                                    onClick={() => handleInactive(record)}
+                                    checked={record?.status !== "Active"}
+                                    disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                                />
+                                <span
+                                    className={"text-black ml-6 gap-2 text-xl text-center w-full"}
+                                >
+                                    {record?.status === "Active" ? "Inactivate" : "Activate"}
+                                </span>
+                            </ButtonComponent>
+                        </div>
+                        :
+                        <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
+                            <div >
+                                <Checkbox
+                                    border={false}
+                                    onClick={() => handleInactive(record)}
+                                    checked={record?.status !== "Active"}
+                                    disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                                />
+                            </div>
+                        </Tooltip>
+                );
+            }
+        },
+        {
             action: "history",
             type: "table",
             render: (record, data_length) => {
@@ -455,7 +565,9 @@ const ViewCollectingAgent = () => {
     const handleRetry = () => {
         try {
             handleCancelTryAgain();
-            if (bodyError?.action === "GET_APPROVAL_HISTORY_COLLECTING_AGENT") {
+            if (bodyError?.action === "INACTIVE_COLLECTING_AGENT") {
+                dispatch(inactiveCollectingAgent(body));
+            } else if (bodyError?.action === "GET_APPROVAL_HISTORY_COLLECTING_AGENT") {
                 dispatch(getApprovalHistoryCollectingAgent(body));
             } else if (bodyError?.action === "DOWNLOAD_COLLECTING_AGENT") {
                 handleDownload();
@@ -475,7 +587,7 @@ const ViewCollectingAgent = () => {
                 {/* <Toolbar items={itemActions} /> */}
                 <CardContainer header={
                     <div className="flex -my-4 justify-between items-center">
-                        <p className="mt-[15px] font-bold">Collecting Agent List</p>
+                        <p className="mt-[15px] font-bold">COLLECTING AGENT LIST</p>
                         <div className="flex gap-2">
                             <Toolbar items={itemActions} />
                         </div>
@@ -505,7 +617,19 @@ const ViewCollectingAgent = () => {
                         fixedColumns={fixedColumns}
                         setFixedColumns={setFixedColumns}
                     />
+
                 </CardContainer>
+
+                <ModalActiveInactive
+                    dispatch={dispatch}
+                    getAPIOption={getAllApprovalListCollectingAgent}
+                    getAPIDetail={getListApprovalByIdCollectingAgent}
+                    selector={"collectingAgent"}
+                    alertMessage={`Are you sure you want to inactivate this Collecting Agent with CA Code ${nameModalActiveOrInactivate}?`}
+                    openModalInactivate={openModalInactivate}
+                    handleCloseModalInactivate={handleCancelModalInactivate}
+                    onFinish={handleSubmitModalInactivate}
+                />
 
                 <ModalHistory
                     isOpen={openModalHistory && dataApprovalHistoryFix}

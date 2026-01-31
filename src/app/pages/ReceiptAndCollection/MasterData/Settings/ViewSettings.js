@@ -12,6 +12,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
   EyeOutlined,
+  DownloadOutlined
 } from "@ant-design/icons";
 import {
   renderColumn,
@@ -142,12 +143,12 @@ const ViewSettings = () => {
   const handleApprovalHistory = async (data) => {
     try {
       setBody(data);
-     await dispatch(getApprovalHistory(data))?.unwrap();
+      await dispatch(getApprovalHistory(data))?.unwrap();
       setOpenModalHistory(true);
-      
+
     } catch (error) {
       setOpenModalHistory(false);
-      
+
     }
   };
 
@@ -240,7 +241,7 @@ const ViewSettings = () => {
       dataIndex: "dateStart",
       align: "center",
       key: "dateStart",
-      isNumber:true,
+      isNumber: true,
       sorter: true,
       ...getColumnSearchPropsPaging(
         "dateStart",
@@ -257,7 +258,7 @@ const ViewSettings = () => {
       title: "DATE END",
       dataIndex: "dateEnd",
       align: "center",
-      isNumber:true,
+      isNumber: true,
       key: "dateEnd",
       sorter: true,
       ...getColumnSearchPropsPaging(
@@ -275,7 +276,7 @@ const ViewSettings = () => {
       title: "HOUR START",
       dataIndex: "hourStart",
       sorter: true,
-      isNumber:true,
+      isNumber: true,
       align: "center",
       key: "hourStart",
       ...getColumnSearchPropsPaging(
@@ -293,7 +294,7 @@ const ViewSettings = () => {
       title: "HOUR END",
       dataIndex: "hourEnd",
       sorter: true,
-      isNumber:true,
+      isNumber: true,
       align: "center",
       key: "hourEnd",
       ...getColumnSearchPropsPaging(
@@ -311,7 +312,7 @@ const ViewSettings = () => {
       title: "MINUTE START",
       dataIndex: "minuteStart",
       sorter: true,
-      isNumber:true,
+      isNumber: true,
       align: "center",
       key: "minuteStart",
       ...getColumnSearchPropsPaging(
@@ -329,7 +330,7 @@ const ViewSettings = () => {
       title: "MINUTE END",
       dataIndex: "minuteEnd",
       sorter: true,
-      isNumber:true,
+      isNumber: true,
       align: "center",
       key: "minuteEnd",
       ...getColumnSearchPropsPaging(
@@ -372,10 +373,10 @@ const ViewSettings = () => {
     {
       title: "STATUS",
       dataIndex: "status",
-      sorter: true,
-      width: 150,
-      fixed: "right",
       key: "status",
+      sorter: true,
+      width: 100,
+      fixed: "right",
       ...getColumnSearchPropsPaging(
         "status",
         searchInput,
@@ -392,7 +393,7 @@ const ViewSettings = () => {
       dataIndex: "statusApproval",
       key: "statusApproval",
       sorter: true,
-      width: 200,
+      width: 150,
       fixed: "right",
       ...getColumnSearchPropsPaging(
         "statusApproval",
@@ -403,14 +404,7 @@ const ViewSettings = () => {
         false
       ),
       render: (text) =>
-        renderColumn(
-          "status",
-          searchedColumn,
-          searchText,
-          text,
-          false,
-          "status"
-        ),
+        renderColumn("status", searchedColumn, searchText, text, false, "status"),
     },
   ];
 
@@ -427,9 +421,9 @@ const ViewSettings = () => {
     setSort(dataSort);
   };
 
-  
 
-  
+
+
 
   // handle download
   const handleDownload = () => {
@@ -451,6 +445,19 @@ const ViewSettings = () => {
   const itemActions = [
     // toolbar items
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Create",
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_SETTINGS}>
@@ -458,7 +465,7 @@ const ViewSettings = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Setting
+            Create
           </ButtonComponent>
         </NavLink>
       ),
@@ -480,7 +487,7 @@ const ViewSettings = () => {
                   icon={<EyeOutlined />}
                   border={false}
                 /> */}
-              <EyeOutlined />
+              <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
             </Link>
           </Tooltip>
         );
@@ -637,7 +644,7 @@ const ViewSettings = () => {
       handleCancelTryAgain();
       if (bodyError?.action === "INACTIVE_RECEIPT_SETTING") {
         dispatch(inactiveSetting(body));
-      }else if (bodyError?.action === "GET_APPROVAL_SETTINGS") {
+      } else if (bodyError?.action === "GET_APPROVAL_SETTINGS") {
         dispatch(getApprovalHistory(body));
       } else if (bodyError?.action === "DOWNLOAD_SETTINGS") {
         handleDownload();
@@ -688,10 +695,10 @@ const ViewSettings = () => {
         {/* <Toolbar items={itemActions} /> */}
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">SETTINGS</p>
-              <div className="flex gap-2">
-                  <Toolbar items={itemActions} />
-              </div>
+            <p className="mt-[15px] font-bold uppercase">Settings List</p>
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
           </div>
         }>
           <TableRBI
