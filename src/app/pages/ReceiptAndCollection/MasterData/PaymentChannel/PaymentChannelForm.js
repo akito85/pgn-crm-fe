@@ -1,4 +1,4 @@
-import { Select, Input,InputNumber } from "antd";
+import { Select, Input, InputNumber } from "antd";
 import { Form } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { formMessageRequired } from "../../../../../utils";
@@ -56,8 +56,8 @@ const PaymentChannelForm = (props) => {
 
   return (
     <div>
-      <BaseContainer header={"PAYMENT CHANNEL"}>
-        <div className="w-full grid grid-cols-2 gap-5">
+      <BaseContainer header={"PAYMENT CHANNEL INFORMATION"}>
+        <div className="w-full grid grid-cols-6 gap-5">
           <Form.Item
             label={"Payment Channel Code"}
             name={"ciCode"}
@@ -73,30 +73,6 @@ const PaymentChannelForm = (props) => {
             <InputComponent />
           </Form.Item>
           <Form.Item
-            label={"Eff Start Date"}
-            name={"effStartDate"}
-            rules={[
-              {
-                required: true,
-                message: "Please input your Start Date!",
-              },
-            ]}
-          >
-            <DateComponent
-              dateDisable={disabledStartDate}
-              onChange={handleStartDate}
-            />
-          </Form.Item>
-          <Form.Item 
-            label={"Eff End Date"} 
-            name={"effEndDate"}
-            rules={formMessageRequired("Eff End Date")}
-          >
-            <DateComponent dateDisable={disabledDate} />
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-1">
-          <Form.Item
             label={"Category"}
             name={"category"}
             rules={formMessageRequired("Category")}
@@ -109,8 +85,6 @@ const PaymentChannelForm = (props) => {
               ))}
             </SelectComponent>
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-1">
           <Form.Item
             label={"Type"}
             name={"type"}
@@ -124,8 +98,29 @@ const PaymentChannelForm = (props) => {
               ))}
             </SelectComponent>
           </Form.Item>
+          <Form.Item
+            label={"Start Date"}
+            name={"effStartDate"}
+            rules={[
+              {
+                required: true,
+                message: "Please input your Start Date!",
+              },
+            ]}
+          >
+            <DateComponent
+              dateDisable={disabledStartDate}
+              onChange={handleStartDate}
+            />
+          </Form.Item>
+          <Form.Item
+            label={"End Date"}
+            name={"effEndDate"}
+            rules={formMessageRequired("Eff End Date")}
+          >
+            <DateComponent dateDisable={disabledDate} />
+          </Form.Item>
         </div>
-        
       </BaseContainer>
     </div>
   );

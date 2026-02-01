@@ -101,20 +101,7 @@ export const columnAllocation = (
         handleSearch
       ),
     },
-    {
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycle",
-      key: "billingCycle",
-      sorter: (a, b) => sorterFunction("billingCycle", a, b),
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "billingCycle",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
+
     {
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",

@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
@@ -41,6 +40,8 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import { saveDraftSetting } from "../../../../../redux/slices/receipt_collection/setting";
 
 const ListFormSettings = (props) => {
   const { type } = props;
@@ -167,11 +168,12 @@ const ListFormSettings = (props) => {
     }
   }, [data_detail, id]);
 
-  // Define tabData before using it in useState
-
   const [tabData, setTabData] = useState([
     {
-      value: "Setting", paramValue: ["dateStart",
+      title: "Setting",
+      value: "Setting",
+      paramValue: [
+        "dateStart",
         "dateEnd",
         "hourStart",
         "hourEnd",
@@ -180,18 +182,30 @@ const ListFormSettings = (props) => {
         "caCode",
         "partnerCode",
         "ciCode",
-        "type"
-      ]
+        "type",
+      ],
     },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
+    { title: "Approval", value: "Approval", paramValue: ["apphierId"] },
+    { title: "Attachment", value: "Attachment" },
   ]);
 
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const [sendBody, setSendBody] = useState();
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  const [current, setCurrent] = useState(0);
+  const [loadingSave, setLoadingSave] = useState(false);
+
+  const next = async () => {
+    try {
+      await form.validateFields(tabData[current].paramValue);
+      setCurrent(current + 1);
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+
+  const [sendBody, setSendBody] = useState();
 
   useEffect(() => {
     if (
@@ -267,13 +281,38 @@ const ListFormSettings = (props) => {
     }
   };
 
+  const handleSaveDraft = () => {
+    const formValue = form.getFieldsValue();
+    const dataValue = {
+      dateStart: formValue.dateStart,
+      dateEnd: formValue.dateEnd,
+      hourStart: formValue.hourStart,
+      hourEnd: formValue.hourEnd,
+      minuteStart: formValue.minuteStart,
+      minuteEnd: formValue.minuteEnd,
+      caCode: formValue.caCode,
+      partnerCode: formValue.partnerCode,
+      ciCode: formValue.ciCode,
+      type: formValue.type,
+      apphierId: formValue.apphierId,
+      id: data_detail?.settings?.id,
+    };
+    dispatch(saveDraftSetting(dataValue))
+      .unwrap()
+      .then(() => {
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS);
+      });
+  };
+
   const handleClear = () => {
     if (type === "create") {
       form.resetFields();
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setCurrent(0);
     } else {
       dispatch(getDetailSetting(id));
+      setCurrent(0);
     }
   };
 
@@ -321,7 +360,7 @@ const ListFormSettings = (props) => {
 
   //kriim bodyy
   const handleSave = async () => {
-    setModalConfirm(false);
+    setLoadingSave(true);
     const successMessageCreate = {
       title: "Successfull",
       description: `Your data has been submited`,
@@ -363,8 +402,11 @@ const ListFormSettings = (props) => {
           setListDataAttachment([]);
           dispatch(showModalSuccess(successMessageUpdate));
           handleClear();
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -399,8 +441,11 @@ const ListFormSettings = (props) => {
           handleCancelModalConfirm();
           handleClear();
           dispatch(showModalSuccess(successMessageCreate));
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -418,10 +463,11 @@ const ListFormSettings = (props) => {
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
-        <RadioTabs
-          data={tabData}
-          onChange={onChange}
-          currentPosition={valuePage}
+        <FormStepper
+          current={current}
+          steps={tabData}
+          onPrev={prev}
+          onNext={next}
         />
         <Form
           layout="vertical"
@@ -431,7 +477,7 @@ const ListFormSettings = (props) => {
         >
           <div
             style={{
-              display: valuePage !== tabData[0].value ? "none" : undefined,
+              display: current !== 0 ? "none" : undefined,
             }}
           >
             <SettingsForm
@@ -444,7 +490,7 @@ const ListFormSettings = (props) => {
           </div>
           <div
             style={{
-              display: valuePage !== tabData[1].value ? "none" : undefined,
+              display: current !== 1 ? "none" : undefined,
             }}
           >
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -458,7 +504,7 @@ const ListFormSettings = (props) => {
           </div>
           <div
             style={{
-              display: valuePage !== tabData[2].value ? "none" : undefined,
+              display: current !== 2 ? "none" : undefined,
             }}
           >
             <BaseContainer header={"ATTACHMENT INFORMATION"}>
@@ -475,47 +521,16 @@ const ListFormSettings = (props) => {
               />
             </BaseContainer>
           </div>
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-              // onClick={() => setModalConfirm(true)}
-              // disabled={disableSubmit}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={tabData.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            type={type}
+          />
         </Form>
       </Spin>
       <ModalCustom
@@ -525,11 +540,19 @@ const ListFormSettings = (props) => {
         width={1000}
         type={"confirmation"}
         footer={
-          <div className="w-full flex justify-end gap-5 p-4">
-            <ButtonComponent onClick={handleCancelModalConfirm} type="default">
+          <div className="w-full flex justify-end gap-3 p-4">
+            <ButtonComponent
+              onClick={handleCancelModalConfirm}
+              className="!border-[#0075BF] !text-[#0075BF]"
+            >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleSave}>
+            <ButtonComponent
+              type="submit"
+              onClick={handleSave}
+              isPrimary
+              loading={loadingSave}
+            >
               Confirm
             </ButtonComponent>
           </div>
