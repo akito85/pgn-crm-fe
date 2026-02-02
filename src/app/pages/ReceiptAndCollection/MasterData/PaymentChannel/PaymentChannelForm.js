@@ -116,7 +116,7 @@ const PaymentChannelForm = (props) => {
           <Form.Item
             label={"End Date"}
             name={"effEndDate"}
-            rules={formMessageRequired("Eff End Date")}
+            rules={formMessageRequired("End Date")}
           >
             <DateComponent dateDisable={disabledDate} />
           </Form.Item>
