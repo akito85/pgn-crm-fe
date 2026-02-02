@@ -8,7 +8,7 @@ const ConfirmationModalInfo = ({
 }) => {
   return (
     <NxBaseContainer border header={"INVOICE RELATION INFORMATION"}>
-      <div className="w-full grid grid-cols-3 gap-x-5">
+      <div className="w-full grid grid-cols-3 gap-4">
         <DetailText label="Account Number">{data.accountNumber}</DetailText>
         <DetailText label="Account Name">{data.accountName}</DetailText>
         <DetailText label="Start Date">{moment(data.startDate, dateFormatting.f_date).format(dateFormatting.date)}</DetailText>

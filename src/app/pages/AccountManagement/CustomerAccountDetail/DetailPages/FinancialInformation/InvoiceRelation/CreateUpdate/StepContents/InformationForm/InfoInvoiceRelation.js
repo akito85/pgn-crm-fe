@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
+import NxModal from "../../../../../../../../../../components/Nx/NxModal";
+import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
 
 export default function InfoInvoiceRelation({
   setAccount,
@@ -247,7 +249,7 @@ export default function InfoInvoiceRelation({
         </div>
       </NxCardContainer>
 
-      <ModalCustom
+      <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
@@ -260,22 +262,26 @@ export default function InfoInvoiceRelation({
           </Button>,
         ]}
       >
-        <NxTable
-          idTable="invoice-relation-account-standard"
-          dataSource={dataSourceWithKeys}
-          totalData={pagination_irAccountStandard.totalElements || 0}
-          current={page}
-          tableScrolled={{ y: 525, x: 3000 }}
-          onSort={onSort}
-          columns={allColumns}
-          usePagination={false}
-          useInfiniteScroll
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          loadMoreThreshold={20}
-          columnDefinitions={columnDefinitions}
-        />
-      </ModalCustom>
+        <div className="p-4">
+          <NxBaseContainer border>
+            <NxTable
+              idTable="invoice-relation-account-standard"
+              dataSource={dataSourceWithKeys}
+              totalData={pagination_irAccountStandard.totalElements || 0}
+              current={page}
+              tableScrolled={{ y: 525, x: 3000 }}
+              onSort={onSort}
+              columns={allColumns}
+              usePagination={false}
+              useInfiniteScroll
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
+              columnDefinitions={columnDefinitions}
+            />
+          </NxBaseContainer>
+        </div>
+      </NxModal>
     </div>
   )
 }

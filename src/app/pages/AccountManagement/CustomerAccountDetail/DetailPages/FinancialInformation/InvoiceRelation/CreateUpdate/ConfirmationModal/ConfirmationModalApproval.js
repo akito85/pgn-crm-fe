@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import ConfirmationModalHierarchy from "./ConfirmationModalHierarchy";
-import BaseContainer from "../../../../../../../../../components/BaseContainer";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalApproval = ({
@@ -18,7 +17,7 @@ const ConfirmationModalApproval = ({
   };
 
   return (
-    <NxBaseContainer border header={"APPROVAL"}>
+    <NxBaseContainer border header={"APPROVAL INFORMATION"}>
       <ConfirmationModalHierarchy
         dataTable={dataTable}
         selectedAppHierId={selectedAppHierId}
