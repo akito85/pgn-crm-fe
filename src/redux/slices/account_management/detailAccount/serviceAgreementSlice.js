@@ -595,6 +595,20 @@ export const checkValidateCreateSa = createAsyncThunk(
   }
 );
 
+// Export Excel
+export const downloadServiceAgreement = createAsyncThunk(
+  "DOWNLOAD_SERVICE_AGREEMENT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/download`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 const accountServiceAgreementSlice = createSlice({
   name: "accountAgreement",
   initialState,

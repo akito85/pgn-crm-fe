@@ -432,7 +432,7 @@ const SaInformation = ({
       <div>
         <div className="pt-8 pb-4">
           <h3 className="text-primary text-xs font-bold uppercase">
-            ADDITIONAL INFORMATION          
+            ADDITIONAL INFORMATION      
           </h3>
         </div>
         <div className={"grid grid-cols-3 w-full gap-x-6"}>
@@ -454,7 +454,7 @@ const SaInformation = ({
             getValueFromEvent={(e)=>handleSaInformationObj(e, "gasInPlanDate")}
             rules={[
               {
-                message: "Please input your ",
+                message: "Please input Gas In Plan Date",
                 // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? !saInfoObj?.alreadyGasIn: true,
                 required: (saInfoObj?.serviceType === 608 ) ? !saInfoObj?.alreadyGasIn: true,
               },
