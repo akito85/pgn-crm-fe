@@ -22,6 +22,13 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  list_paymentRelationApproval: [],
+  pagination_paymentRelationApproval: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   list_invoiceRelation: [],
   pagination_invoiceRelation: {
     totalPages: 0,
@@ -421,6 +428,34 @@ export const getPaymentRelation = createAsyncThunk(
   "GET_PAYMENT_RELATION",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
+      body = {
+        ...body,
+        listType: "all"
+      }
+
+      const url = `/v1/dbs/api/payment-relation/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+          headers: { "Accept": "application/json, text/plain, */*" }
+        });
+      return {
+        ...response.data,
+        isLoadMore,
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getPaymentRelationApproval = createAsyncThunk(
+  "GET_PAYMENT_RELATION_APPROVAL",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      body = {
+        ...body,
+        listType: "approval"
+      }
+
       const url = `/v1/dbs/api/payment-relation/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
@@ -1019,6 +1054,51 @@ const financialInformationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_paymentRelation = [];
         state.pagination_paymentRelation = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
+    },
+
+    /** Get Payment Relation Approval */
+    [getPaymentRelationApproval.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getPaymentRelationApproval.fulfilled]: (state, action) => {
+      state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_paymentRelationApproval.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_paymentRelationApproval = [
+            ...state.list_paymentRelationApproval,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_paymentRelationApproval = result;        
+      }
+
+      state.pagination_paymentRelationApproval = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
+    },
+    [getPaymentRelationApproval.rejected]: (state, action) => {
+      state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_paymentRelationApproval = [];
+        state.pagination_paymentRelationApproval = {
           totalPages: 0,
           totalElements: 0,
           currentPage: 0,

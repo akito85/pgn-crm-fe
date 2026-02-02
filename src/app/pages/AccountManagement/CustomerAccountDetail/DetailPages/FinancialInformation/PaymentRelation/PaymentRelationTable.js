@@ -51,10 +51,6 @@ const PaymentRelationTable = ({
     left: [],
   }));
 
-  useEffect(() => {
-    console.log("fixedColumns", fixedColumns);
-  }, [fixedColumns])
-
   const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
@@ -93,7 +89,7 @@ const PaymentRelationTable = ({
   }, [allColumns]);
 
   return (
-    <div className="flex flex-col gap-y-6">
+    <div className="flex flex-col gap-y-4">
       {isApproval ? (
         <div className="flex justify-end gap-5 mb-5">
           <ButtonComponent

@@ -8,7 +8,8 @@ const getPaymentRelationColumns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
+  includeStatus = true,
 ) => [
   {
     key: "no",
@@ -106,7 +107,7 @@ const getPaymentRelationColumns = (
     ),
     render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
   },
-  {
+  includeStatus && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
@@ -140,7 +141,7 @@ const getPaymentRelationColumns = (
       );
     },
   },
-  {
+  includeStatus && {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
@@ -171,6 +172,6 @@ const getPaymentRelationColumns = (
       )
     },
   },
-];
+].filter(Boolean);
 
 export { getPaymentRelationColumns };
