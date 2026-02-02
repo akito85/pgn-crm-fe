@@ -36,6 +36,13 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  list_invoiceRelationApproval: [],
+  pagination_invoiceRelationApproval: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
   detail_taxImplication: {},
@@ -472,7 +479,7 @@ export const getPaymentRelationApproval = createAsyncThunk(
 
 export const getInvoiceRelation = createAsyncThunk(
   "GET_INVOICE_RELATION",
-  async ({ id, body, page, size, sort, searchs, listType }, thunkAPI) => {
+  async ({ id, body, page, size, sort, searchs, listType, isLoadMore }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams;
 
@@ -495,7 +502,45 @@ export const getInvoiceRelation = createAsyncThunk(
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
         headers: { "Accept": "application/json, text/plain, */*" }
       });
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getInvoiceRelationApproval = createAsyncThunk(
+  "GET_INVOICE_RELATION_APPROVAL",
+  async ({ id, body, page, size, sort, searchs, isLoadMore }, thunkAPI) => {
+    try {
+      const queryParams = new URLSearchParams;
+
+      if (page)
+        queryParams.append("page", page);
+      if (size)
+        queryParams.append("size", size);
+      if (sort)
+        queryParams.append("sort", sort);
+      if (searchs)
+        queryParams.append("searchs", searchs);
+
+      queryParams.append("listType", "approval");
+
+      let url = `/v1/dbs/api/invoice-relation/list/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+        headers: { "Accept": "application/json, text/plain, */*" }
+      });
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -745,7 +790,7 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        description: `Your data has been ${action}.`,
         return: false,
       };
 
@@ -1142,6 +1187,51 @@ const financialInformationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelation = [];
         state.pagination_invoiceRelation = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
+    },
+
+    /** Get Invoice Relation Approval */
+    [getInvoiceRelationApproval.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getInvoiceRelationApproval.fulfilled]: (state, action) => {
+      state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_invoiceRelationApproval.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_invoiceRelationApproval = [
+            ...state.list_invoiceRelationApproval,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_invoiceRelationApproval = result;
+      }
+
+      state.pagination_invoiceRelationApproval = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
+    },
+    [getInvoiceRelationApproval.rejected]: (state, action) => {
+      state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_invoiceRelationApproval = [];
+        state.pagination_invoiceRelationApproval = {
           totalPages: 0,
           totalElements: 0,
           currentPage: 0,
