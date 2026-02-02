@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Spin, Form, Steps } from "antd";
+import { Spin, Form } from "antd";
 import moment from "moment";
 import { LeftOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
@@ -17,6 +17,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import { configApp } from "../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import CardContainer from "../../../../../components/CardContainer";
+import { FormStepper } from "../../../../../components/FormStepNavigation"; // ✅ Import FormStepper
 import {
   createEFakturManual,
   getAllApprovalList,
@@ -39,10 +40,9 @@ const EFakturForm = ({ type }) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const location = useLocation();
-  const containerRef = useRef(null);
 
   // State
-  const [currentStep, setCurrentStep] = useState(0);
+  const [current, setCurrent] = useState(0); // ✅ Ubah dari currentStep ke current
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -80,40 +80,44 @@ const EFakturForm = ({ type }) => {
 
   const isLoading = loading || loadingForm;
 
-  // Steps configuration
+  // ✅ Steps configuration - update untuk FormStepper
   const steps = [
-    { title: "CREATE E-FAKTUR" },
-    { title: "APPROVAL" },
-    { title: "ATTACHMENT" },
+    { title: "CREATE E-FAKTUR", value: "Create-Faktur" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
   ];
 
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
+  const [valuePage, setValuePage] = useState(steps[0].value);
 
-  // Scroll handlers
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
 
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Navigation handlers
+  // ✅ Navigation handlers - update untuk compatibility dengan FormStepper
   const next = () => {
-    setCurrentStep(currentStep + 1);
-    scrollRightHandler();
+    const fieldsToValidate = tabPages[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
   };
 
   const prev = () => {
-    setCurrentStep(currentStep - 1);
-    scrollLeftHandler();
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
   };
 
   // Use Effect
@@ -161,7 +165,7 @@ const EFakturForm = ({ type }) => {
     },
     {
       path: INVOICE_ROUTES.EFAKTUR_VIEW,
-      breadcrumbName: "Manajemen E-Faktur",
+      breadcrumbName: "E-Faktur Management",
     },
     {
       path: INVOICE_ROUTES.EFAKTUR_CREATE,
@@ -407,22 +411,13 @@ const EFakturForm = ({ type }) => {
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         
-        {/* Steps Navigation */}
-        <div className="bg-white rounded-lg p-4 mb-6">
-          <div className="flex flex-row justify-center">
-            <div
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              <Steps
-                current={currentStep}
-                items={items}
-                labelPlacement="vertical"
-              />
-            </div>
-          </div>
-        </div>
+        {/* ✅ Gunakan FormStepper component */}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
+        />
 
         <Form
           layout="vertical"
@@ -431,7 +426,11 @@ const EFakturForm = ({ type }) => {
           onFinishFailed={handleError}
         >
           {/* Step 1: Create E-Faktur */}
-          <div className={currentStep !== 0 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== tabPages[0].value ? "none" : undefined,
+            }}
+          >
             <EFakturSectionForm
               type={type}
               form={form}
@@ -441,7 +440,11 @@ const EFakturForm = ({ type }) => {
           </div>
 
           {/* Step 2: Approval */}
-          <div className={currentStep !== 1 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== tabPages[1].value ? "none" : undefined,
+            }}
+          >
             <CardContainer subHeader={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
@@ -454,7 +457,11 @@ const EFakturForm = ({ type }) => {
           </div>
 
           {/* Step 3: Attachment */}
-          <div className={currentStep !== 2 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== tabPages[2].value ? "none" : undefined,
+            }}
+          >
             <CardContainer subHeader={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
@@ -472,7 +479,7 @@ const EFakturForm = ({ type }) => {
             </CardContainer>
           </div>
 
-          {/* Footer Buttons */}
+          {/* Footer Buttons - Tetap menggunakan custom footer */}
           <div className="w-full flex justify-between mt-10">
             <div className="flex">
               <ButtonComponent
@@ -486,7 +493,7 @@ const EFakturForm = ({ type }) => {
 
             <div className="flex gap-5">
               {/* Previous Button - tampil jika bukan step pertama */}
-              {currentStep > 0 && (
+              {current > 0 && (
                 <ButtonComponent
                   onClick={prev}
                   type={"default"}
@@ -514,7 +521,7 @@ const EFakturForm = ({ type }) => {
               </Form.Item>
 
               {/* Next Button - tampil jika bukan step terakhir */}
-              {currentStep < steps.length - 1 && (
+              {current < steps.length - 1 && (
                 <ButtonComponent
                   onClick={next}
                   type={"submit"}
@@ -527,7 +534,7 @@ const EFakturForm = ({ type }) => {
               )}
 
               {/* Save Buttons - tampil jika step terakhir */}
-              {currentStep === steps.length - 1 && (
+              {current === steps.length - 1 && (
                 <>
                   <Form.Item>
                     <ButtonComponent
