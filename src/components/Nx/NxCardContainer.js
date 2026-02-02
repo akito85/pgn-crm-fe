@@ -1,4 +1,4 @@
-const NxCardContainer = ({ header, subHeader, children, type, element, className, hideChildren = false, withoutTopPadding = false, actionElement = null }) => {
+const NxCardContainer = ({ header, subHeader, children, type, element, className, hideChildren = false, withoutPadding = false, actionElement = null }) => {
   return (
     <div className={`drop-shadow-lg bg-white rounded-lg w-full ${className}`}>
       {type === "profile" || type === "tab" ? (
@@ -7,8 +7,7 @@ const NxCardContainer = ({ header, subHeader, children, type, element, className
         </>
       ) : (
         <div
-          className="flex flex-col bg-[#F9F9F9] rounded-t-lg uppercase"
-          style={{ borderBottom: "1px solid #BDBDBD", padding: "16px" }}
+          className="flex flex-col bg-[#F9F9F9] rounded-t-lg uppercase p-4 border-0 border-b border-solid border-[#C8CDD4]"
         >
           {
             actionElement ? (
@@ -27,8 +26,8 @@ const NxCardContainer = ({ header, subHeader, children, type, element, className
           
         </div>
       )}
-      {type === "tabs" && <div className={`p-4 ${withoutTopPadding ? "pt-0" : ""}`}>{element}</div>}
-      {!hideChildren && <div className={`p-4 ${withoutTopPadding ? "pt-0" : ""}`}>{children}</div>}
+      {type === "tabs" && <div className={`${withoutPadding ? "" : "p-4"}`}>{element}</div>}
+      {!hideChildren && <div className={`${withoutPadding ? "" : "p-4"}`}>{children}</div>}
     </div>
   );
 };
