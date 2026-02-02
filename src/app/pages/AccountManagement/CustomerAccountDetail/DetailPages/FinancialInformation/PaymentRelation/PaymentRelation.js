@@ -11,12 +11,6 @@ import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
 const PaymentRelation = ({
   id = 0,
   idCustomer = 0,
-  isActive = false,
-  isApproval = false,
-  setIsApproval = () => {},
-  setShowApprovalButton = () => {},
-  submitApprovalCondition = "",
-  setSubmitApprovalCondition = () => {},
 }) => {
   const dispatch = useDispatch();
 
@@ -49,23 +43,6 @@ const PaymentRelation = ({
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [tempFilters, setTempFilters] = useState([]);
-
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys, newSelectedRows) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
-      if (!newSelectedRowKeys.length)
-        setShowApprovalButton(false);
-      else
-        setShowApprovalButton(true);
-    },
-    type: "checkbox",
-    preserveSelectedRowKeys: true,
-  }
 
   const currentData = useMemo(() => list_paymentRelation, [list_paymentRelation]);
 
@@ -192,16 +169,6 @@ const PaymentRelation = ({
     }
   }
 
-  /**
-   * @param {boolean} newIsApproval 
-   */
-  const handleIsApproval = (newIsApproval) => {
-    if (newIsApproval)
-      setShowApprovalModal(true);
-    else
-      setShowApprovalModal(false);
-  }
-
   const handleDownload = () => {
     const body = {
       page,
@@ -262,29 +229,6 @@ const PaymentRelation = ({
     dispatch(getPaymentRelation({ id, body, isLoadMore: false }));
   }, [sort, search, tempFilters]);
 
-  // Listen to approve or reject button on the parent component
-  useEffect(() => {
-    if (isActive) {
-      if (submitApprovalCondition === "approve") {
-        setShowApprovalModal(true);
-      } else if (submitApprovalCondition === "reject") {
-        setShowApprovalModal(true);
-      }
-    }
-  }, [submitApprovalCondition]);
-
-  // Reset accordian when it's not the current one that's opened
-  useEffect(() => {
-    if (!isActive)
-      handleIsApproval(false);
-  }, [isActive]);
-
-  useEffect(() => {
-    if (!isApproval) {
-      handleIsApproval(false);
-    }
-  }, [isApproval]);
-
   useEffect(() => {
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
       const temp = {
@@ -313,14 +257,11 @@ const PaymentRelation = ({
         totalElement={pagination_paymentRelation.totalElements}
         page={page}
         onSort={onSort}
-        rowSelection={isApproval ? rowSelection : undefined}
-        isApproval={isApproval}
         handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
-        handleIsApproval={handleIsApproval}
+        handleApproval={setShowApprovalModal}
         handleDownload={handleDownload}
         tempFilters={tempFilters}
-        setIsApproval={setIsApproval}
         handleLoadMore={handleLoadMore}
         hasMore={hasMore}
         searchText={searchText}

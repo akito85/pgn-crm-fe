@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
@@ -16,12 +15,10 @@ const PaymentRelationTable = ({
   totalElement = 0,
   page = 0,
   onSort = () => {},
-  isApproval = false,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
-  handleIsApproval = () => {},
+  handleApproval = () => {},
   handleDownload = () => {},
-  setIsApproval = () => {},
   handleLoadMore = () => {},
   hasMore = false,
   searchText="",
@@ -40,7 +37,7 @@ const PaymentRelationTable = ({
     updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION,
     detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
     navigate,
-    handleApproval: handleIsApproval,
+    handleApproval,
     handleApprovalHistory: handleApprovalHistoryModal,
     handleDownload,
     handleInactivate: handleInactivateModal,
@@ -90,18 +87,7 @@ const PaymentRelationTable = ({
 
   return (
     <div className="flex flex-col gap-y-4">
-      {isApproval ? (
-        <div className="flex justify-end gap-5 mb-5">
-          <ButtonComponent
-            type="reject"
-            onClick={() => setIsApproval(false)}
-          >
-            Cancel
-          </ButtonComponent>
-        </div>
-      ) : (
-        <Toolbar items={itemActions} type="detail" />
-      )}
+      <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="payment-relation-table"
         dataSource={data}
