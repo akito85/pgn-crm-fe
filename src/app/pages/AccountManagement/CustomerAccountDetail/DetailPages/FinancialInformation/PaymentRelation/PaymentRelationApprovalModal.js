@@ -4,8 +4,6 @@ import { Steps, Form } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../../components/DetailText";
-import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
-import { IconModal } from "../../../../../../../utils/Icon";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
@@ -18,7 +16,6 @@ const PaymentRelationApprovalModal = ({
   id = 0,
   isOpen,
   handleCancel = () => {},
-  handleOpenModal = () => {},
   afterFinish = () => {},
 }) => {
   // Selector
@@ -42,24 +39,22 @@ const PaymentRelationApprovalModal = ({
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [remark, setRemark] = useState("");
-  const [action, setAction] = useState("");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-  
-  const [modalError, setModalError] = useState(false);
-  const [bodyError, setBodyError] = useState({});
+
+  const [tempFilters, setTempFilters] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
     right: [] 
   });
 
-  // Initial fetch - Load 100 data pertama
+  // Initial fetch - Load data when modal opens
   useEffect(() => {
     if (isOpen) {
       const body = {
+        inputFields: tempFilters,
         page,
         size: loadMoreSize,
         sort,
@@ -101,7 +96,8 @@ const PaymentRelationApprovalModal = ({
     // Check if there's more data to load
     if (nextPage <= totalPages) {
       const body = {
-        page,
+        inputFields: tempFilters,
+        page: nextPage,
         size: loadMoreSize,
         sort,
         searchs: search,
@@ -111,7 +107,7 @@ const PaymentRelationApprovalModal = ({
         getPaymentRelationApproval({
           id,
           body,
-          isLoadMore: false,
+          isLoadMore: true,
         })
       );
       setPage(nextPage);
@@ -223,7 +219,6 @@ const PaymentRelationApprovalModal = ({
     handleCancel();
     setSelectedRowKeys([]);
     setSelectedRows([]);
-    setRemark("");
     setCurrent(0);
     setSearch({});
     setPage(1);
@@ -233,36 +228,37 @@ const PaymentRelationApprovalModal = ({
     form.resetFields();
   };
 
-  // Handle Save for Modal Confirmation
-  const handleSave = (formValue) => {
-    const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
-      id: row.id,
-      approvalId: row.tappId,
-      action,
-      description: formValue.remark,
-    }));
 
-    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
-      id: row.id,
-      approvalId: row.tappId,
-      action,
-      description: formValue.remark,
-    }))
+  const handleSave = async (action) => {
+    try {
+      const values = await form.validateFields();
 
-    dispatch(
-      approveOrRejectAllPaymentRelation({
-        body,
-        inactiveBody,
-        action: action === "APPROVE" ? "approved" : "rejected",
-      })
-    )
+      const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
+        id: row.id,
+        approvalId: row.tappId,
+        action,
+        description: values.remark,
+      }));
+
+      const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
+        id: row.id,
+        approvalId: row.tappId,
+        action,
+        description: values.remark,
+      }))
+
+      dispatch(
+        approveOrRejectAllPaymentRelation({
+          body,
+          inactiveBody,
+          action: action === "APPROVE" ? "approved" : "rejected",
+        })
+      )
       .unwrap()
       .then(() => {
         afterFinish();
         setCurrent(0);
         form.resetFields();
-        setRemark("");
-        setAction("");
         handleCancel();
         setSelectedRowKeys([]);
         setSelectedRows([]);
@@ -272,28 +268,10 @@ const PaymentRelationApprovalModal = ({
         setSearchText("");
         setSearchedColumn("");
       })
-      .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message });
-          setModalError(true);
-        }
-      });
-  };
+      .catch((error) => {})
+    } catch {
 
-  const handleCloseModalError = () => {
-    setModalError(false);
-    handleOpenModal();
-    setBodyError({});
-  };
-
-  const handleRetry = () => {
-    handleSave();
-    setModalError(false);
-    setBodyError({});
+    }
   };
 
   const baseColumns = useMemo(
@@ -320,10 +298,6 @@ const PaymentRelationApprovalModal = ({
   const processedColumns = useMemo(() => {
     return nxApplyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
-  
-  useEffect(() => {
-    console.log("processedColumns", processedColumns);
-  }, [processedColumns]);
 
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
@@ -346,7 +320,6 @@ const PaymentRelationApprovalModal = ({
         type={"confirmation"}
         header="Approval Payment Relation Information"
         handleCancel={handleCancelForm}
-        onFinish={handleSave}
         width={1000}
         hidePadding={true}
         footer={
@@ -366,7 +339,7 @@ const PaymentRelationApprovalModal = ({
               >
                 Previous
               </ButtonComponent>
-              
+
               { current < steps.length - 1 && (
                 <ButtonComponent
                   onClick={() => handleButtonNext()}
@@ -380,18 +353,14 @@ const PaymentRelationApprovalModal = ({
                 <>
                   <ButtonComponent
                     type={"reject"}
-                    htmlType={"submit"}
-                    form={"formApprove"}
-                    onClick={() => setAction("REJECT")}
+                    onClick={() => handleSave("REJECT")}
                     loading={loading}
                   >
                     Reject
                   </ButtonComponent>
                   <ButtonComponent
                     type={"approve"}
-                    htmlType={"submit"}
-                    form={"formApprove"}
-                    onClick={() => setAction("APPROVE")}
+                    onClick={() => handleSave("APPROVE")}
                     loading={loading}
                   >
                     Approve
@@ -430,7 +399,6 @@ const PaymentRelationApprovalModal = ({
               layout="vertical"
               form={form}
               id={"formApprove"}
-              onFinish={handleSave}
             >
               <div className="w-full grid grid-cols-1 gap-x-4">
                 <NxBaseContainer
@@ -457,18 +425,17 @@ const PaymentRelationApprovalModal = ({
                     loadMoreThreshold={20}
                   />
                   <Form.Item
+                    key="remark"
                     label={"Remark"}
                     name={"remark"}
                     rules={[
                       { required: true, message: "Please input your Remark!" },
                     ]}
-                  className="no-margin-form" 
+                    className="no-margin-form"
                   >
                     <InputComponent
                       rows={1}
                       type="textarea"
-                      value={remark}
-                      onChange={(e) => setRemark(e.target.value)}
                       placeholder={"Type your remark for approval/rejection"}
                     />
                   </Form.Item>
@@ -481,58 +448,33 @@ const PaymentRelationApprovalModal = ({
           <div
             className={`steps-content ${current !== 1 ? "hidden" : ""}`}
           >
-            <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-primary uppercase font-bold">
-                  Confirmation
-                </p>
-                <p className="text-sm font-semibold text-blue-600">
-                  {selectedRows.length} {selectedRows.length === 1 ? 'row' : 'rows'} will be {action === 'APPROVE' ? 'approved' : action === 'REJECT' ? 'rejected' : 'processed'}
-                </p>
-              </div>
-              <NxTable
-                dataSource={selectedRows}
-                columns={processedColumns}
-                totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                tableScrolled={{ y: 400, x: "max-content" }}
-                onSort={onSort}
-                columnDefinitions={columnDefinitions}
-                fixedColumns={fixedColumns}
-                setFixedColumns={setFixedColumns}
-                loading={false}
-                usePagination={false}
-                useInfiniteScroll={false}
-              />
-              <div className="pt-[30px]">
-                <DetailText label={"Remark"}>
+            <NxBaseContainer
+              border
+              header={"Confirmation"}
+            >
+              <div className="flex flex-col gap-y-4">
+
+                <NxTable
+                  dataSource={selectedRows}
+                  columns={processedColumns}
+                  totalData={pagination_paymentRelationApproval?.totalElements || 0}
+                  tableScrolled={{ y: 400, x: "max-content" }}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={false}
+                  usePagination={false}
+                  useInfiniteScroll={false}
+                />
+                <DetailText label={"Remark"} className="flex flex-col gap-y-2">
                   {form.getFieldValue().remark}
                 </DetailText>
               </div>
-            </div>
+            </NxBaseContainer>
           </div>
         </div>
       </NxModal>
-
-      {/** Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={() => handleRetry()}
-        handleCancel={() => handleCloseModalError()}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {bodyError.type === "inactivate"
-              ? IconModal["icon_error_inactivate"]
-              : IconModal["icon_error_default"]}
-            <p className="text-[18px] font-bold">{"Failed"}</p>
-          </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            action === "APPROVE" ? "approved" : "rejected"
-          }. ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
     </Fragment>
   );
 };
