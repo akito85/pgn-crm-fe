@@ -16,7 +16,6 @@ const InvoiceRelationApprovalModal = ({
   id = 0,
   isOpen,
   handleCancel = () => {},
-  handleOpenModal = () => {},
   afterFinish = () => {},
 }) => {
   // Selector
@@ -40,13 +39,9 @@ const InvoiceRelationApprovalModal = ({
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [action] = useState("");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-
-  const [modalError, setModalError] = useState(false);
-  const [bodyError, setBodyError] = useState({});
 
   const [tempFilters, setTempFilters] = useState([]);
 
@@ -277,18 +272,6 @@ const InvoiceRelationApprovalModal = ({
     } catch {
 
     }
-  };
-
-  const handleCloseModalError = () => {
-    setModalError(false);
-    handleOpenModal();
-    setBodyError({});
-  };
-
-  const handleRetry = () => {
-    handleSave();
-    setModalError(false);
-    setBodyError({});
   };
 
   const baseColumns = useMemo(
