@@ -6,14 +6,22 @@ const NxBaseContainer = ({
   element,
   border = false,
   className="",
+  rounded = true
 }) => {
   // Determine class based on border prop
   const containerClass = border
-    ? `bg-white rounded-lg w-full p-4 ${className}`
+    ? `flex flex-col gap-y-4 bg-white ${rounded ? "rounded-lg" : ""} w-full p-4 ${className}`
     : "drop-shadow-md bg-white rounded-lg w-full p-4";
 
   // Use inline style for border to ensure visibility
-  const containerStyle = border ? { border: "1px solid #C8CDD4" } : {};
+  const containerStyle = border ? {
+    "borderTop": border.top === false ? "0" : "1px",
+    "borderRight": border.right === false ? "0" : "1px",
+    "borderBottom": border.bottom === false ? "0" : "1px",
+    "borderLeft": border.left === false ? "0" : "1px",
+    "borderStyle": "solid",
+    "borderColor": "#C8CDD4",
+  } : {};
 
   return (
     <div className={containerClass} style={containerStyle}>
