@@ -1,28 +1,24 @@
 import { useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import { useMemo, useState } from "react";
-import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const InvoiceRelationTable = ({
   data = [],
   idAccount = 0,
   idCustomer = 0,
   totalElement = 0,
-  page = {},
+  page = 0,
   onSort = () => {},
-  rowSelection,
-  isApproval = false,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
-  handleIsApproval = () => {},
+  handleApproval = () => {},
   handleDownload = () => {},
-  setIsApproval = () => {},
   handleLoadMore = () => {},
   hasMore = false,
   searchText = "",
@@ -41,16 +37,15 @@ const InvoiceRelationTable = ({
     updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION,
     detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION,
     navigate,
-    handleApproval: handleIsApproval,
+    handleApproval,
     handleApprovalHistory: handleApprovalHistoryModal,
     handleDownload,
     handleInactivate: handleInactivateModal,
-  })
+  });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    statusApproval: "right",
-    status: "right",
-    action: "right",
+    right: ["statusApproval", "status", "action"],
+    left: [],
   }));
 
   const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History"], itemActions, "View", "table").map(
@@ -80,7 +75,7 @@ const InvoiceRelationTable = ({
   }, [baseColumns, actionCols]);
 
   const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
+    return nxApplyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
@@ -91,33 +86,22 @@ const InvoiceRelationTable = ({
   }, [allColumns]);
 
   return (
-    <div className="flex flex-col gap-y-6">
-      {isApproval ? (
-        <div className="flex justify-end gap-5 mb-5">
-          <ButtonComponent
-            type="reject"
-            onClick={() => setIsApproval(false)}
-          >
-            Cancel
-          </ButtonComponent>
-        </div>
-      ) : (
-        <Toolbar items={itemActions} type="detail" />
-      )}
+    <div className="flex flex-col gap-y-4">
+      <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="invoice-relation-table"
         dataSource={data}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: data.length ? "max-content" : "100%" }}
+        tableScrolled={{ y: 400, x: "max-content" }}
         onSort={onSort}
         columns={processedColumns}
-        rowSelection={rowSelection}
         usePagination={false}
-        useInfiniteScroll
+        useInfiniteScroll={true}
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
+        fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
