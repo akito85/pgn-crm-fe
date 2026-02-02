@@ -1,9 +1,8 @@
-import { useState } from "react";
 import ConfirmationModalInfo from "./ConfirmationModalInfo";
 import ConfirmationModalApproval from "./ConfirmationModalApproval";
 import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
-import { Tabs } from "antd";
+import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
 
 const ConfirmationModalTabs = ({
   selectedAppHierId,
@@ -55,11 +54,11 @@ const ConfirmationModalTabs = ({
   ].filter(Boolean);
 
   return (
-    <Tabs
+    <NxTabs
       items={tabOptions}
       onChange={setActiveTab}
       activeKey={activeTab}
-      className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-tab]:py-4 [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+      forModal
     />
   );
 };
