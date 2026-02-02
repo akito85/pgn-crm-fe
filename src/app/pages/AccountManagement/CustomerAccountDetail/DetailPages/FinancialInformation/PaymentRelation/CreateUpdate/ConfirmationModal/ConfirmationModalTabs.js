@@ -58,7 +58,6 @@ const ConfirmationModalTabs = ({
       items={tabOptions}
       onChange={setActiveTab}
       activeKey={activeTab}
-      forModal
     />
   );
 };
