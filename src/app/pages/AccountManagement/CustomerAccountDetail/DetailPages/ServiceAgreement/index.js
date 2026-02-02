@@ -17,6 +17,7 @@ import ModalDeleteDraft from "./Modal/ModalDeleteDraft";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ServiceAgreementTable from "./ServiceAgreementTable";
+import ServiceAgreementApprovalModal from "./ServiceAgreementApprovalModal";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
@@ -119,6 +120,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
           <ButtonComponent
             icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
             type="submit"
+            onClick={() => setShowApprovalModal(true)}
           >
             Approval
           </ButtonComponent>
@@ -148,7 +150,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
           </NavLink>
         ),
       }
-      
+
     ],
     [id, idCustomer, type]
   );
@@ -169,7 +171,22 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     dispatch(downloadServiceAgreement({ body }))
 
   }
-  
+
+  // Handle refresh after approval
+  const handleRefresh = () => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(
+      getListServiceAgreement({
+        id,
+        search: reqSearch,
+        sort,
+        page: 1,
+        pageSize: loadMoreSize,
+      })
+    );
+    setPage(1);
+  };
+
   // const toolbarActions = nxGetAccountActions({
   //   idAccount: id,
   //   idCustomer: idCustomer,
@@ -409,6 +426,15 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
+
+      {/* Modal Approval */}
+      <ServiceAgreementApprovalModal
+        id={id}
+        isOpen={showApprovalModal}
+        handleCancel={() => setShowApprovalModal(false)}
+        handleOpenModal={() => setShowApprovalModal(true)}
+        afterFinish={handleRefresh}
       />
     </>
   );
