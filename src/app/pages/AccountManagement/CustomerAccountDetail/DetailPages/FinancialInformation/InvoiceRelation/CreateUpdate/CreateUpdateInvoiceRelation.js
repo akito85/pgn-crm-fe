@@ -2,7 +2,7 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, Form, Spin } from "antd";
+import { Steps, Form, Spin } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
@@ -41,6 +41,7 @@ import { configApp } from "../../../../../../../../constants/configApp";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
+import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 
 const CreateUpdateInvoiceRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -602,45 +603,45 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
         <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
-          <div className="flex flex-col gap-y-4">
-            <BaseContainer border header={"CUSTOMER INFORMATION"}>
-              <div className="w-full grid grid-cols-4 gap-x-5">
-                <DetailText label="Customer Number">{data_customerDetail?.customerNumber}</DetailText>
-                <DetailText label="Identification Type">{data_customerDetail?.identificationType}</DetailText>
-                <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</DetailText>
-                <DetailText label="Customer Name">{data_customerDetail?.customerName}</DetailText>
-                <DetailText label="Customer Type">{data_customerDetail?.customerType}</DetailText>
-                <DetailText label="Description">{data_customerDetail?.description}</DetailText>
-                <DetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate)}</DetailText>
-                <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</DetailText>
-                <DetailText label="Sex">{data_customerDetail?.sex}</DetailText>
-                <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</DetailText>
-                <DetailText label="Search Key">{data_customerDetail?.searchKey}</DetailText>
+          <div className="flex flex-col gap-4">
+            <NxBaseContainer border header={"CUSTOMER INFORMATION"}>
+              <div className="w-full grid grid-cols-4 gap-4">
+                <NxDetailText className="flex flex-col gap-y-2" label="Customer Number">{data_customerDetail?.customerNumber}</NxDetailText>
+                <NxDetailText label="Identification Type">{data_customerDetail?.identificationType}</NxDetailText>
+                <NxDetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</NxDetailText>
+                <NxDetailText label="Customer Name">{data_customerDetail?.customerName}</NxDetailText>
+                <NxDetailText label="Customer Type">{data_customerDetail?.customerType}</NxDetailText>
+                <NxDetailText label="Description">{data_customerDetail?.description}</NxDetailText>
+                <NxDetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate)}</NxDetailText>
+                <NxDetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</NxDetailText>
+                <NxDetailText label="Sex">{data_customerDetail?.sex}</NxDetailText>
+                <NxDetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</NxDetailText>
+                <NxDetailText label="Search Key">{data_customerDetail?.searchKey}</NxDetailText>
               </div>
-            </BaseContainer>
-            <BaseContainer border header={"ACCOUNT INFORMATION"}>
-              <div className="w-full grid grid-cols-4 gap-x-4">
-                <DetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</DetailText>
-                <DetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</DetailText>
-                <DetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</DetailText>
-                <DetailText label="Category">{data_accountDetail?.accountSummary?.category}</DetailText>
-                <DetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</DetailText>
-                <DetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</DetailText>
-                <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.accountSummary?.meterReadingCodes || "")}</DetailText>
-                <DetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</DetailText>
-                <DetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</DetailText>
-                <DetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</DetailText>
-                <DetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</DetailText>
-                <DetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</DetailText>
-                <DetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</DetailText>
-                <DetailText label="District">{data_accountDetail?.accountSummary?.district}</DetailText>
-                <DetailText label="City">{data_accountDetail?.accountSummary?.city}</DetailText>
-                <DetailText label="Country">{data_accountDetail?.accountSummary?.country}</DetailText>
-                <DetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</DetailText>
-                <DetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</DetailText>
-                <DetailText label="Status">{data_accountDetail?.accountSummary?.status}</DetailText>    
+            </NxBaseContainer>
+            <NxBaseContainer border header={"ACCOUNT INFORMATION"}>
+              <div className="w-full grid grid-cols-4 gap-4">
+                <NxDetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</NxDetailText>
+                <NxDetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</NxDetailText>
+                <NxDetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</NxDetailText>
+                <NxDetailText label="Category">{data_accountDetail?.accountSummary?.category}</NxDetailText>
+                <NxDetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</NxDetailText>
+                <NxDetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</NxDetailText>
+                <NxDetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.accountSummary?.meterReadingCodes || "")}</NxDetailText>
+                <NxDetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</NxDetailText>
+                <NxDetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</NxDetailText>
+                <NxDetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</NxDetailText>
+                <NxDetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</NxDetailText>
+                <NxDetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</NxDetailText>
+                <NxDetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</NxDetailText>
+                <NxDetailText label="District">{data_accountDetail?.accountSummary?.district}</NxDetailText>
+                <NxDetailText label="City">{data_accountDetail?.accountSummary?.city}</NxDetailText>
+                <NxDetailText label="Country">{data_accountDetail?.accountSummary?.country}</NxDetailText>
+                <NxDetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</NxDetailText>
+                <NxDetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</NxDetailText>
+                <NxDetailText label="Status">{data_accountDetail?.accountSummary?.status}</NxDetailText>    
               </div>
-            </BaseContainer>
+            </NxBaseContainer>
           </div>
         </NxCardContainer>
 
