@@ -133,6 +133,7 @@ import offsetReducer from "../slices/receipt_collection/offset";
 import writeOffReducer from "../slices/receipt_collection/writeOff";
 import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
 import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
+import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -186,6 +187,7 @@ const reducer = combineReducers({
   financialInformation: financialInformationReducer,
   paymentRelation: paymentRelationReducer,
   invoiceRelation: invoiceRelationReducer,
+  serviceRequest: serviceRequestReducer,
   premise: premiseReducer,
   servicePoint: servicePointReducer,
   distributionMedia: distributionMediaReducer,
