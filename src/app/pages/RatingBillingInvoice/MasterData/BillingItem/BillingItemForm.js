@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Form, Spin } from "antd";
-import { WarningOutlined, LeftOutlined } from "@ant-design/icons";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { WarningOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -17,6 +16,7 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import SVGIcon from "../../../../../assets/Icon/index";
 import { configApp } from "../../../../../constants/configApp";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import BillingItemSectionForm from "./Form/BillingItemSectionForm";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import {
@@ -50,28 +50,38 @@ const BillingItemForm = (props) => {
   //Selector
   const {
     data_billingItemCategory,
-    data_billType, //list map
+    data_billType,
     dataListAppHierId,
     dataListAppHierDetail,
     detail_mapping_category,
     data_BillingItemDetail,
     data_billingItemCategoryDdl,
     data_detailDraft,
-    loading, //list detail map ( dependent on category )
+    loading,
   } = useSelector((state) => state.billing_item);
 
   // Declaration
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const id = location?.state?.id; //id
+  const id = location?.state?.id;
 
-  // State
+  const { type } = props;
+  const [form] = Form.useForm();
+
+  // State untuk Stepper
+  const [current, setCurrent] = useState(0);
+
+  const steps = [
+    { title: "BILLING ITEM", value: "Billing Item" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Billing Item",
       paramValue: [
-        //mandatory fields
         "billingItemCategory",
         "name",
         "billType",
@@ -84,19 +94,16 @@ const BillingItemForm = (props) => {
     { value: "Attachment" },
   ]);
 
-  //radio tab
-  const [valuePage, setValuePage] = useState(listSectionInfo[0].value);
+  const [valuePage, setValuePage] = useState(steps[0].value);
 
-  const { type } = props;
-  const [form] = Form.useForm();
-
-  const [openModal, setOpenModal] = useState(false); //modal confirm
+  // State lainnya
+  const [openModal, setOpenModal] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
-  const [modalValidationTable, setModalValidationTable] = useState(false)
+  const [modalValidationTable, setModalValidationTable] = useState(false);
 
-  const [detailMapping, setDetailMapping] = useState(false); //map detail shown
+  const [detailMapping, setDetailMapping] = useState(false);
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [startDateMap, setStartDateMap] = useState();
@@ -123,8 +130,41 @@ const BillingItemForm = (props) => {
   const [category, setCategory] = useState("");
   const [typeSubmit, setTypeSubmit] = useState(false);
 
-  const [loadingForm, setLoadingForm] = useState(false); //loading
+  const [loadingForm, setLoadingForm] = useState(false);
   const [dataSend, setDataSend] = useState({});
+
+  const isLoading = loading || loadingForm;
+
+  // Stepper navigation handlers
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  const next = () => {
+    const fieldsToValidate = listSectionInfo[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
 
   // Use Effect
   useEffect(() => {
@@ -138,31 +178,35 @@ const BillingItemForm = (props) => {
   useEffect(() => {
     if (type === "update" && id) {
       dispatch(getBillingItemDetail({ id }));
-      dispatch(getDetailDraft({id}))
+      dispatch(getDetailDraft({ id }));
     }
   }, [dispatch, type, id]);
 
-  const handleDataTypeExist = ( //for billing item
+  const handleDataTypeExist = (
     status,
     statusApproval,
     dataDetail,
     dataCompare,
-    table = "mapping",
+    table = "mapping"
   ) => {
     switch (status) {
       case "ACTIVE":
         if (statusApproval === "DRAFT" && table === "mapping") {
           return dataCompare?.some(
             (item) => item?.categoryId === dataDetail?.categoryId
-          ) ? { dataType: "exist" } : null;
-        } else if (statusApproval === "DRAFT"){
+          )
+            ? { dataType: "exist" }
+            : null;
+        } else if (statusApproval === "DRAFT") {
           return dataCompare?.some((item) =>
             item?.detailMappingInfo?.some(
               (detail) => detail?.item === dataDetail?.item
             )
-          ) ? { dataType: "exist" } : null;
+          )
+            ? { dataType: "exist" }
+            : null;
         } else {
-          return { dataType: "exist" }; // for active & approve
+          return { dataType: "exist" };
         }
       case "DRAFT":
         return null;
@@ -194,8 +238,6 @@ const BillingItemForm = (props) => {
                 createdDate: moment(item.createdDate).format(
                   dateFormatting.date
                 ),
-                // fileSize: bytesConverter(item.fileSize || 0),
-                // urlFile1: `${urlLink(item?.id)}`,
                 dataType: "exist",
               };
             })
@@ -215,7 +257,12 @@ const BillingItemForm = (props) => {
               ? moment(item?.endDate).format(dateFormatting.date)
               : null,
             description: item?.description,
-            ...(handleDataTypeExist(dataDetail?.status, dataDetail?.statusApproval, item, dataCompare)),
+            ...handleDataTypeExist(
+              dataDetail?.status,
+              dataDetail?.statusApproval,
+              item,
+              dataCompare
+            ),
           };
         }) || []
       );
@@ -237,7 +284,13 @@ const BillingItemForm = (props) => {
                     ? moment(detail?.endDate).format(dateFormatting.date)
                     : null,
                   description: detail?.description,
-                  ...(handleDataTypeExist(dataDetail?.status, dataDetail?.statusApproval, detail, dataCompare, "detailMap")),
+                  ...handleDataTypeExist(
+                    dataDetail?.status,
+                    dataDetail?.statusApproval,
+                    detail,
+                    dataCompare,
+                    "detailMap"
+                  ),
                 };
               }) || [],
           };
@@ -258,11 +311,10 @@ const BillingItemForm = (props) => {
         data_BillingItemDetail?.status === "ACTIVE" &&
         data_BillingItemDetail?.statusApproval === "DRAFT" &&
         data_BillingItemDetail.billingItemCode === id
-      ){
-        
+      ) {
         const body = {
           ...data_detailDraft,
-          startDate : data_detailDraft.startDate,
+          startDate: data_detailDraft.startDate,
           endDate: data_detailDraft?.endDate,
           approvalHierarchy: data_detailDraft?.approvalHierarchy,
           billingItemCategory: data_detailDraft?.billingItemCategoryId,
@@ -274,7 +326,7 @@ const BillingItemForm = (props) => {
           paymentWarranty: data_detailDraft?.paymentWarranty,
           status: data_BillingItemDetail?.status,
           statusApproval: data_BillingItemDetail?.statusApproval,
-        }
+        };
 
         handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
       } else {
@@ -318,10 +370,6 @@ const BillingItemForm = (props) => {
     }
   }, [dataListAppHierId]);
 
-  const onChange = (e) => {
-    setValuePage(e.target.value);
-  };
-
   const handleStartDate = (e) => {
     form.resetFields(["endDate"]);
     if (e === null || e === undefined) {
@@ -337,7 +385,7 @@ const BillingItemForm = (props) => {
     } else {
       setEndDate(moment(e));
     }
-  }
+  };
 
   const handleChangesPayment = (e) => {
     setCheckedPaymentWarranty(e.target.checked);
@@ -347,77 +395,54 @@ const BillingItemForm = (props) => {
     setCheckedLateCharge(e.target.checked);
   };
 
-  const handleCheckDetailDateConflict = (data) =>{
+  const handleCheckDetailDateConflict = (data) => {
     const index = data_billingItemCategory
-    ?.filter((category) => category?.name === data.categoryName)
-    .find((data) => data?.id)?.id
+      ?.filter((category) => category?.name === data.categoryName)
+      .find((data) => data?.id)?.id;
     let result = false;
-    if(allDataDetailTable[index]?.length || 0 > 0){
+    if ((allDataDetailTable[index]?.length || 0) > 0) {
       result = allDataDetailTable[index].some((dataDetail) => {
-        if(moment(data.startDate) > moment(dataDetail.startDate)){
+        if (
+          moment(data.startDate) > moment(dataDetail.startDate)
+        ) {
           const body = {
             title: "Failed",
             description: `Detail Mapping has conflicted Date. Please try again.`,
             return: false,
-          }
+          };
           dispatch(showModalError(body));
           return true;
-          }
-        })
-        return result;
-      }
-      return false
+        }
+      });
+      return result;
     }
+    return false;
+  };
 
   const handleChangesMapInformation = (e, newData = {}) => {
-    if(!handleCheckDetailDateConflict(newData)){
+    if (!handleCheckDetailDateConflict(newData)) {
       const temp = e.map((item) => {
         return {
           ...item,
-          ...(hasValue(item.categoryName) //looking for name for filtering table to get ID
+          ...(hasValue(item.categoryName)
             ? {
-                category: data_billingItemCategory
-                  ?.filter((category) => category?.name === item.categoryName)
-                  .find((item) => item?.id)?.id  || item?.category,
-                // startDate: moment(item.startDate).format(dateFormatting.date),
-                // endDate: item?.endDate
-                //   ? moment(item.endDate).format(dateFormatting.date)
-                //   : null,
+                category:
+                  data_billingItemCategory
+                    ?.filter((category) => category?.name === item.categoryName)
+                    .find((item) => item?.id)?.id || item?.category,
               }
             : {}),
         };
       });
-  
-      setdataTable(
-        // e.map((item) => {
-        //   return {
-        //     ...item,
-        //     ...(hasValue(item.categoryName) //looking for name for filtering table to get ID
-        //       ? {
-        //           category: data_billingItemCategory
-        //             ?.filter((category) => category?.name === item.categoryName)
-        //             .find((item) => item?.id)?.id,
-        //           startDate: moment(item.startDate).format(dateFormatting.date),
-        //           endDate: item?.endDate
-        //             ? moment(item.endDate).format(dateFormatting.date)
-        //             : null,
-        //         }
-        //       : {}),
-        //   };
-        // })
-        temp
-      );
-  
+
+      setdataTable(temp);
+
       setStartDateMap(
-        moment(
-          temp?.find((item) => item.category === category)?.startDate
-        )
+        moment(temp?.find((item) => item.category === category)?.startDate)
       );
       setEndDateMap(
-        moment(
-          temp?.find((item) => item.category === category)?.endDate
-        )
-      )
+        moment(temp?.find((item) => item.category === category)?.endDate)
+      );
     }
   };
 
@@ -425,15 +450,12 @@ const BillingItemForm = (props) => {
     const temp = e.map((item) => {
       return {
         ...item,
-        ...(hasValue(item.itemName) //looking for name for filtering table to get ID
+        ...(hasValue(item.itemName)
           ? {
-              item: detail_mapping_category
-                ?.filter((category) => category?.name === item.itemName)
-                .find((item) => item?.id)?.id || item?.item,
-              // startDate: moment(item.startDate).format(dateFormatting.date),
-              // endDate: item?.endDate
-              //   ? moment(item.endDate).format(dateFormatting.date)
-              //   : null,
+              item:
+                detail_mapping_category
+                  ?.filter((category) => category?.name === item.itemName)
+                  .find((item) => item?.id)?.id || item?.item,
             }
           : {}),
       };
@@ -442,7 +464,6 @@ const BillingItemForm = (props) => {
     setdataDetailTable(temp);
   };
 
-  //checking if there are missing in detail map
   const handleCheckMissingDetailMap = (data, dataDetail) => {
     return (
       dataDetail.some(
@@ -451,7 +472,6 @@ const BillingItemForm = (props) => {
     );
   };
 
-  //getting all name of missing detail map
   const handleAllMissingDetailMap = (data, dataDetail) => {
     const missingCategories = [];
     Object.keys(dataDetail).forEach((key) => {
@@ -477,23 +497,14 @@ const BillingItemForm = (props) => {
       .join(", ")}`;
   };
 
-  //handle data for submit to API
   const handleMappingInfo = (data) => {
     return dataTable.map((item) => {
-      // console.log(item, "item");
       return {
         ...item,
         detail:
           data[item?.category].map((detail) => {
             return {
               ...detail,
-              // item: detail.item,
-              // startDate: detail?.startDate,
-              // ? moment(detail.startDate).format(dateFormatting.date)
-              // : null
-              // endDate: detail?.endDate,
-              // ? moment(detail.endDate).format(dateFormatting.date)
-              // : null
             };
           }) || [],
       };
@@ -504,13 +515,11 @@ const BillingItemForm = (props) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
   };
 
-  //for changes dynamic table
   const handleChangesCreateButtonDetail = (
     oldCategory,
     newCategory,
     dataDetailTable
   ) => {
-    // setLoadingDetail(true);
     setAllDataDetailTable((prev) => ({
       ...prev,
       ...(oldCategory !== "" ? { [oldCategory]: dataDetailTable } : {}),
@@ -520,7 +529,6 @@ const BillingItemForm = (props) => {
         ? allDataDetailTable[newCategory] || []
         : prevState;
     });
-    // setLoadingDetail(false);
   };
 
   const handleValidateUpdate = (dataTable, bodyData, status, isValidate) => {
@@ -536,20 +544,21 @@ const BillingItemForm = (props) => {
         ] || [];
 
       temp?.forEach((item) => {
-        if(moment(item?.startDate) < moment(bodyData?.startDate) || moment(item?.endDate) > moment(bodyData?.endDate)){
+        if (
+          moment(item?.startDate) < moment(bodyData?.startDate) ||
+          moment(item?.endDate) > moment(bodyData?.endDate)
+        ) {
           dataConflict.push(item);
         }
-      })
-      if(dataConflict?.length > 0){
-        setModalValidationTable(true)
+      });
+      if (dataConflict?.length > 0) {
+        setModalValidationTable(true);
       }
-      return dataConflict?.length > 0 ? false : true 
+      return dataConflict?.length > 0 ? false : true;
     }
-
   };
 
   const handleCreate = (e) => {
-    //changing data Detail Table with handle create button
     handleChangesCreateButtonDetail(category, e.category, dataDetailTable);
     if (e.category === category) {
       setDetailMapping(false);
@@ -562,16 +571,13 @@ const BillingItemForm = (props) => {
         )
       );
       setEndDateMap(
-        moment(
-          dataTable?.find((item) => item.category === e.category)?.endDate
-        )
-      )
+        moment(dataTable?.find((item) => item.category === e.category)?.endDate)
+      );
       setCategory(e.category);
       setDetailMapping(true);
     }
   };
 
-  //checking if category is active but deleted from  table mapping
   const filteringAllDataDetailTable = useCallback(() => {
     Object.keys(allDataDetailTable).forEach((key) => {
       if (!dataTable.map((data) => data.category).includes(parseInt(key))) {
@@ -580,7 +586,6 @@ const BillingItemForm = (props) => {
     });
   }, [allDataDetailTable, dataTable]);
 
-  //changes for dataTable
   useEffect(() => {
     filteringAllDataDetailTable();
     if (category !== "") {
@@ -590,8 +595,7 @@ const BillingItemForm = (props) => {
     }
   }, [dataTable, category, filteringAllDataDetailTable]);
 
-   // Validate Data before Modal
-   const checkDataValidity = async (data) => {
+  const checkDataValidity = async (data) => {
     const url =
       type === "create"
         ? "/v1/dbs/api/billingitem/validate-create"
@@ -614,7 +618,7 @@ const BillingItemForm = (props) => {
 
   const onFinish = async (e) => {
     if (listDataAttachment.length === 0) {
-      handleMandatory(setListSectionInfo, listDataAttachment); // attachment mandatory onFinish
+      handleMandatory(setListSectionInfo, listDataAttachment);
     } else {
       handleMandatory(setListSectionInfo, listDataAttachment);
       if (dataTable.length === 0) {
@@ -650,18 +654,15 @@ const BillingItemForm = (props) => {
         };
 
         delete body.apphierId;
-        // console.log(body);
 
         const isDataValid = await checkDataValidity(body);
 
         if (isDataValid) {
           setDataSend(body);
           setOpenModal(true);
-          
         } else {
-          setOpenModal(false)
+          setOpenModal(false);
         }
-
       }
     }
   };
@@ -693,7 +694,6 @@ const BillingItemForm = (props) => {
   );
 
   const handleSave = (e) => {
-    //dataSend
     dispatch(type === "create" ? createBillingItem(e) : updateBillingItem(e))
       .unwrap()
       .then(async (data) => {
@@ -717,13 +717,6 @@ const BillingItemForm = (props) => {
         setLoadingForm(false);
         handleClear("clear");
         handleDescriptionSuccess(e, type);
-        // const successBody = {
-        //   title: "Successful",
-        //   description: `Your data has been ${
-        //     e.action === "DRAFT" ? "created" : "submitted"
-        //   }.`,
-        // };
-        // dispatch(showModalSuccess(successBody));
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -758,41 +751,59 @@ const BillingItemForm = (props) => {
       setCheckedLateCharge(false);
       setCheckedPaymentWarranty(false);
       setTypeSubmit(false);
-      setStartDate(null)
-      setStartDateMap(null)
-      setEndDate(null)
-      setEndDateMap(null)
+      setStartDate(null);
+      setStartDateMap(null);
+      setEndDate(null);
+      setEndDateMap(null);
     } else {
-      setDetailMapping(false)
+      setDetailMapping(false);
       setCategory("");
-        if (
-          data_BillingItemDetail?.status === "ACTIVE" &&
-          data_BillingItemDetail?.statusApproval === "DRAFT" &&
-          data_BillingItemDetail.billingItemCode === id
-        ){
-          const body = {
-            ...data_detailDraft,
-            startDate : data_detailDraft.startDate,
-            endDate: data_detailDraft?.endDate,
-            approvalHierarchy: data_detailDraft?.approvalHierarchy,
-            billingItemCategory: data_detailDraft?.billingItemCategoryId,
-            name: data_detailDraft?.billingItemName,
-            billType: data_detailDraft?.billingTypeId,
-            apphierId: data_detailDraft?.approvalHierarchy,
-            attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
-            lateCharge: data_detailDraft?.lateCharge,
-            paymentWarranty: data_detailDraft?.paymentWarranty,
-            status: data_BillingItemDetail?.status,
-            statusApproval: data_BillingItemDetail?.statusApproval,
-          }
+      if (
+        data_BillingItemDetail?.status === "ACTIVE" &&
+        data_BillingItemDetail?.statusApproval === "DRAFT" &&
+        data_BillingItemDetail.billingItemCode === id
+      ) {
+        const body = {
+          ...data_detailDraft,
+          startDate: data_detailDraft.startDate,
+          endDate: data_detailDraft?.endDate,
+          approvalHierarchy: data_detailDraft?.approvalHierarchy,
+          billingItemCategory: data_detailDraft?.billingItemCategoryId,
+          name: data_detailDraft?.billingItemName,
+          billType: data_detailDraft?.billingTypeId,
+          apphierId: data_detailDraft?.approvalHierarchy,
+          attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
+          lateCharge: data_detailDraft?.lateCharge,
+          paymentWarranty: data_detailDraft?.paymentWarranty,
+          status: data_BillingItemDetail?.status,
+          statusApproval: data_BillingItemDetail?.statusApproval,
+        };
 
-          handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
-        } else {
-          handleSetDataUpdate(data_BillingItemDetail);
+        handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
+      } else {
+        handleSetDataUpdate(data_BillingItemDetail);
       }
     }
     setOpenModal(false);
   };
+
+  const handleBack = () => {
+    setModalBack(true);
+  };
+
+  const handleSubmit = () => {
+    setTypeSubmit(true);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
+
+   const handleSaveDraft = () => {
+    setTypeSubmit(false);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
 
   const routes = [
     {
@@ -817,17 +828,11 @@ const BillingItemForm = (props) => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading || loadingForm}>
+      <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex flex-col"}>
-          <div className={"w-full flex justify-start"}>
-            <RadioTabs
-              data={listSectionInfo}
-              onChange={onChange}
-              currentPosition={valuePage}
-            />
-          </div>
-        </div>
+        
+        {/* FormStepper menggantikan RadioTabs */}
+        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
 
         <Form
           id={"form"}
@@ -837,72 +842,66 @@ const BillingItemForm = (props) => {
           onFinishFailed={onFinishFailed}
           scrollToFirstError={true}
         >
-          <div
-            style={{
-              display:
-                valuePage !== listSectionInfo[0].value ? "none" : undefined,
-            }}
-          >
-            <BillingItemSectionForm
-              type={type}
-              dispatch={dispatch}
-              statusDetail={data_BillingItemDetail?.status === "ACTIVE"}
-              data_billType={data_billType}
-              data_billingItemCategory={data_billingItemCategoryDdl}
-              data_glAccount={[]}
-              checkedLateCharge={checkedLateCharge}
-              checkedPaymentWarranty={checkedPaymentWarranty}
-              onChangeLateCharge={handleChangesLateCharge}
-              onChangePayment={handleChangesPayment}
-              startDate={startDate}
-              endDate={endDate}
-              handleStartDate={handleStartDate}
-              mappingData={dataTable?.length || 0}
-              handleEndDate={handleEndDate}
-            />
-            <MappingInformation
-              key="mappingInformation"
-              dataCategoryMapList={data_billingItemCategory}
-              dataTable={dataTable}
-              handleCreate={handleCreate}
-              handleDataMapChanges={handleChangesMapInformation}
-              isEditabled={isEditable}
-              setIsEditabled={setIsEditable}
-              type={type}
-              startDate={startDate}
-              endDate={endDate}
-              setModalRequired={setModalRequired}
-              handleValidateUpdate={handleValidateUpdate}
-            />
-            {detailMapping &&
-            dataTable?.length > 0 &&
-            (dataTable || []).find((item) => item.category === category) ? (
-              <DetailMappingInformation
-                key="mappingDetailInformation"
-                dataMapDetailItemList={detail_mapping_category}
-                subHeader={`${
-                  (data_billingItemCategory || []).find(
-                    (item) => item.id === category
-                  )?.name
-                }`}
-                dataTable={dataDetailTable || []}
-                handleDataMapChanges={handleChangesMapDetailInformation}
-                setIsEditabled={setIsEditable}
-                isEditabled={isEditable}
+          {/* Step 1: Billing Item - Conditional Rendering */}
+          {valuePage === listSectionInfo[0].value && (
+            <>
+              <BillingItemSectionForm
                 type={type}
-                startDateMappping={startDateMap}
-                endDateMapping={endDateMap}
+                dispatch={dispatch}
+                statusDetail={data_BillingItemDetail?.status === "ACTIVE"}
+                data_billType={data_billType}
+                data_billingItemCategory={data_billingItemCategoryDdl}
+                data_glAccount={[]}
+                checkedLateCharge={checkedLateCharge}
+                checkedPaymentWarranty={checkedPaymentWarranty}
+                onChangeLateCharge={handleChangesLateCharge}
+                onChangePayment={handleChangesPayment}
+                startDate={startDate}
+                endDate={endDate}
+                handleStartDate={handleStartDate}
+                mappingData={dataTable?.length || 0}
+                handleEndDate={handleEndDate}
+              />
+              <MappingInformation
+                key="mappingInformation"
+                dataCategoryMapList={data_billingItemCategory}
+                dataTable={dataTable}
+                handleCreate={handleCreate}
+                handleDataMapChanges={handleChangesMapInformation}
+                isEditabled={isEditable}
+                setIsEditabled={setIsEditable}
+                type={type}
+                startDate={startDate}
+                endDate={endDate}
+                setModalRequired={setModalRequired}
                 handleValidateUpdate={handleValidateUpdate}
               />
-            ) : null}
-          </div>
+              {detailMapping &&
+              dataTable?.length > 0 &&
+              (dataTable || []).find((item) => item.category === category) ? (
+                <DetailMappingInformation
+                  key="mappingDetailInformation"
+                  dataMapDetailItemList={detail_mapping_category}
+                  subHeader={`${
+                    (data_billingItemCategory || []).find(
+                      (item) => item.id === category
+                    )?.name
+                  }`}
+                  dataTable={dataDetailTable || []}
+                  handleDataMapChanges={handleChangesMapDetailInformation}
+                  setIsEditabled={setIsEditable}
+                  isEditabled={isEditable}
+                  type={type}
+                  startDateMappping={startDateMap}
+                  endDateMapping={endDateMap}
+                  handleValidateUpdate={handleValidateUpdate}
+                />
+              ) : null}
+            </>
+          )}
 
-          <div
-            style={{
-              display:
-                valuePage !== listSectionInfo[1].value ? "none" : undefined,
-            }}
-          >
+          {/* Step 2: Approval - Conditional Rendering */}
+          {valuePage === listSectionInfo[1].value && (
             <BaseContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
@@ -912,14 +911,10 @@ const BillingItemForm = (props) => {
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
             </BaseContainer>
-          </div>
+          )}
 
-          <div
-            style={{
-              display:
-                valuePage !== listSectionInfo[2].value ? "none" : undefined,
-            }}
-          >
+          {/* Step 3: Attachment - Conditional Rendering */}
+          {valuePage === listSectionInfo[2].value && (
             <BaseContainer header={"Attachment Information"}>
               <AttachmentSectionComponent
                 type={type}
@@ -935,65 +930,25 @@ const BillingItemForm = (props) => {
                 mandatory={true}
               />
             </BaseContainer>
-          </div>
+          )}
+
+          {/* FormFooter menggantikan tombol manual */}
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+            disabled={isEditable}
+          />
         </Form>
 
-        <div className="flex w-full justify-between align-middle my-3">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => setModalBack(true)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Back
-          </ButtonComponent>
-          <div className="flex align-middle gap-3">
-            <ButtonComponent
-              icon={
-                <SVGIcon
-                  name={
-                    type === "update" ? `IconButtonReset` : `IconButtonClear`
-                  }
-                  width={24}
-                />
-              }
-              type="submit"
-              onClick={!isEditable ? handleClear : undefined}
-              disabled={isEditable}
-            >
-              {type === "update" ? "Reset" : "Clear"}
-            </ButtonComponent>
-            <ButtonComponent
-              type="submit"
-              htmlType={"submit"}
-              form={"form"}
-              onClick={() => setTypeSubmit(false)}
-              disabled={isEditable}
-              // disabled={disableSubmit}
-            >
-              Save as Draft
-            </ButtonComponent>
-            <ButtonComponent
-              type="submit"
-              htmlType={"submit"}
-              form={"form"}
-              onClick={() => setTypeSubmit(true)}
-              disabled={isEditable}
-              // disabled={disableSubmit}
-            >
-              Save & Submit
-            </ButtonComponent>
-          </div>
-        </div>
-
-        {openModal ? (
+        {/* Modal Confirmation */}
+        {openModal && (
           <ModalCustom
             isOpen={openModal}
             handleCancel={() => setOpenModal(false)}
@@ -1015,7 +970,7 @@ const BillingItemForm = (props) => {
                   onClick={() => {
                     handleSave(dataSend);
                   }}
-                  disabled={loading || loadingForm}
+                  disabled={isLoading}
                 >
                   Confirm
                 </ButtonComponent>
@@ -1032,9 +987,10 @@ const BillingItemForm = (props) => {
               listApproval={appHierOptions}
             />
           </ModalCustom>
-        ) : null}
+        )}
 
-        {modalError ? (
+        {/* Modal Error */}
+        {modalError && (
           <ModalError
             isOpen={modalError}
             handleOk={handleRetry}
@@ -1054,8 +1010,9 @@ const BillingItemForm = (props) => {
               <p className="pl-[70px]">Please try again.</p>
             </div>
           </ModalError>
-        ) : null}
+        )}
 
+        {/* Modal Back */}
         <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
@@ -1070,12 +1027,11 @@ const BillingItemForm = (props) => {
           </div>
         </ModalConfirm>
 
-        {/* Modal Start Date still empty or null */}
+        {/* Modal Start Date Required */}
         <ModalError
           isOpen={modalRequired}
           handleOk={() => setModalRequired(false)}
           handleCancel={() => setModalRequired(false)}
-          // customText={"Try Again"}
         >
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
@@ -1086,22 +1042,22 @@ const BillingItemForm = (props) => {
           </div>
         </ModalError>
 
-        {modalValidationTable ? (
+        {/* Modal Validation Table */}
+        {modalValidationTable && (
           <ModalError
             isOpen={modalValidationTable}
             handleOk={() => setModalValidationTable(false)}
             handleCancel={() => setModalValidationTable(false)}
-            // customText={"Try Again"}
           >
             <div className="px-5 pt-5 pb-[10px] justify-center">
               <div className="w-full flex gap-[20px]">
                 <SVGIcon name="IconFailed" width={48} />
                 <p className="text-[18px] font-bold">{"Failed"}</p>
               </div>
-              <p className="pl-[70px]">{`You can't update Mapping Information. Start date and enda date can't be overlap`}</p>
+              <p className="pl-[70px]">{`You can't update Mapping Information. Start date and end date can't be overlap`}</p>
             </div>
           </ModalError>
-        ) : null}
+        )}
       </Spin>
     </LayoutMenu>
   );

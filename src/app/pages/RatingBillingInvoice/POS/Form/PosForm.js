@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import { Form, Spin, Steps } from "antd";
+import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { useState } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -8,9 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PointOfSalesPage from "./Page/PointOfSalesPage";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
-  LeftOutlined,
   WarningOutlined,
-  RightOutlined,
 } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
@@ -55,6 +53,7 @@ import { handleMandatory, isDateString, renderDate } from "../Utils";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import BaseContainer from "../../../../../components/BaseContainer";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 
 const PosForm = ({ type }) => {
   const {
@@ -100,8 +99,7 @@ const PosForm = ({ type }) => {
   const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
 
   //state
-  const containerRef = useRef(null);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [current, setCurrent] = useState(0);
   const [data, setData] = useState([]);
   const [dataDynamic, setDataDynamic] = useState({});
   const [dataApproval, setDataApproval] = useState([]);
@@ -144,38 +142,36 @@ const PosForm = ({ type }) => {
   const handleMeterReadingCodeChange = (selectedMrcIds) => {};
 
   const steps = [
-    { title: "POINT OF SALES" },
-    { title: "APPROVAL" },
-    { title: "ATTACHMENT" },
+    { title: "POINT OF SALES", value: "Point of Sales" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
   ];
-
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
-  // Scroll handlers
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
 
   // Navigation handlers
   const next = () => {
-    setCurrentStep(currentStep + 1);
-    scrollRightHandler();
+    const fieldsToValidate = dataTabs[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
   };
 
   const prev = () => {
-    setCurrentStep(currentStep - 1);
-    scrollLeftHandler();
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
   };
 
   //state dynamic
@@ -200,8 +196,12 @@ const PosForm = ({ type }) => {
     { value: "Attachment" },
   ]);
 
-  const [tabHeader, setTabHeader] = useState(dataTabs[0].value);
+  const [valuePage, setValuePage] = useState(steps[0].value);
   const [rangeDisableDate, setRangeDisableDate] = useState({});
+
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
 
   useEffect(() => {
     if (type === "create") {
@@ -268,7 +268,6 @@ const PosForm = ({ type }) => {
 
   useEffect(() => {
     if (data && invoiceDate && currency && data.length < 1) {
-      // console.log(`invoice date ${moment(invoiceDate).format(dateFormatting.dateFormal)} currency ${currency}}`)
       dispatch(
         getRateTax({
           invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
@@ -291,11 +290,9 @@ const PosForm = ({ type }) => {
     dispatch(getApprovalList());
     dispatch(getGlobalTermsOfPayment());
     dispatch(getGlobalAccountNumber());
-    // dispatch(getGlobalTermsOfPaymentData());
     dispatch(getGlobalProductItem());
     dispatch(getGlobalBillingItem());
     dispatch(getUomCodes());
-    // setDataApproval([]);
   }, [dispatch]);
 
   useEffect(() => {
@@ -314,17 +311,13 @@ const PosForm = ({ type }) => {
       },
     ];
 
-    // Filter out data with undefined or empty values
     const missingData = newData.filter((data) => !data.data);
-
-    // Set the state
     setDataMissing(missingData);
     setDataPriority(newData);
   }, [currency, accountNumber, invoiceDate]);
 
   useEffect(() => {
     if (type === "update") {
-      //code
       dispatch(getDetailPOS(idUpdate));
     } else {
       setDataDynamic({
@@ -334,13 +327,11 @@ const PosForm = ({ type }) => {
         amountUsd: 0,
         discountAmountIdr: 0,
         discountAmountUsd: 0,
-        // taxBasis: 0, // TODO delete
-        taxBasisIdr: 0, //new
-        taxBasisUsd: 0, //new
+        taxBasisIdr: 0,
+        taxBasisUsd: 0,
         taxBasisEqvIdr: 0,
-        // vat: 0, //TODO delete
-        vatIdr: 0, //new
-        vatUsd: 0, //new
+        vatIdr: 0,
+        vatUsd: 0,
         vatEqvIdr: 0,
         withholdingTax: 0,
       });
@@ -364,11 +355,6 @@ const PosForm = ({ type }) => {
   const handleSetFormUpdate = useCallback(
     (data_detailPos, data_globalCurrency) => {
       form.setFieldsValue({
-        // termType: {
-        //   termValueDdl: isDateString(data_detailPos?.termsOfPayment)
-        //     ? "DATE"
-        //     : "TOP",
-        // },
         ...data_detailPos,
         currency: data_globalCurrency?.find(
           (item) => item.text === data_detailPos?.currency,
@@ -377,11 +363,6 @@ const PosForm = ({ type }) => {
         transactionDate: moment(data_detailPos?.transactionDate),
         invoiceDate: moment(data_detailPos?.invoiceDate),
         costCenter: data_detailPos?.costCenter,
-        // termType: {
-        //   termValue: isDateString(data_detailPos?.termsOfPayment)
-        //     ? moment(data_detailPos?.termsOfPayment || "")
-        //     : data_detailPos?.termsOfPayment,
-        // },
       });
     },
     [form],
@@ -408,10 +389,7 @@ const PosForm = ({ type }) => {
         )?.Id,
       );
       setAccountNumber(data_detailPos?.accountNumber);
-      setInvoiceDate(
-        moment(data_detailPos?.invoiceDate),
-        // .format(dateFormatting.dateFormal)
-      );
+      setInvoiceDate(moment(data_detailPos?.invoiceDate));
       setDataBillingCycle(
         data_globalBillingCycle?.find(
           (item) => item.name === data_detailPos?.billingCycle,
@@ -422,7 +400,6 @@ const PosForm = ({ type }) => {
         rateType: data_detailPos.rateType || "",
         rate: data_detailPos.rate || "",
         rateDate: data_detailPos.taxRateDate || "",
-        // rateValue: data_detailPos.rateValue,
         taxRate: data_detailPos.taxRateValue || "",
         taxRateDate: data_detailPos.taxRateDate || "",
         taxRateType: data_detailPos.taxRateType || "",
@@ -431,8 +408,6 @@ const PosForm = ({ type }) => {
         data_detailPos?.mrbiPosDetails?.map((item, index) => {
           let temp = {
             ...item,
-            // referenceName: item.referenceName,
-            // referenceId: item?.reference,
             price: item?.price || 0,
             amount: item?.amount || 0,
             amountEqvUsd: Number(item?.amountEqvUsd.toFixed(2)) || 0,
@@ -440,19 +415,7 @@ const PosForm = ({ type }) => {
             eqvIdr: item?.eqvIdr || 0,
             totalEqvIdr: item?.totalEqvIdr || 0,
             totalEqvUsd: Number(item?.totalEqvUsd.toFixed(2)) || 0,
-            // lineNumber: index + 1,
           };
-          // if (
-          //   item?.item === "PPN" &&
-          //   item?.item === "PPH" &&
-          //   item?.item === "Meterai" &&
-          //   item?.item === null || undefined
-          // ) {
-          //   temp = {
-          //     ...temp,
-          //     dataType: "exist",
-          //   };
-          // }
           return temp;
         }),
       );
@@ -481,7 +444,6 @@ const PosForm = ({ type }) => {
         rateDate: data_rate.rateDate
           ? moment(data_rate?.rateDate).format(dateFormatting.date)
           : "",
-        // rateValue: data_rate?.rateValue,
         taxRateType: data_rate_tax?.rateType,
         taxRate: data_rate_tax?.rate,
         taxRateDate: data_rate_tax?.rateDate
@@ -490,8 +452,6 @@ const PosForm = ({ type }) => {
       });
     }
   }, [data_rate, data_rate_tax]);
-
-  // console.log(data, "data");
 
   //calculating POS info
   useEffect(() => {
@@ -508,13 +468,11 @@ const PosForm = ({ type }) => {
           (sums, item) => {
             let tempSum = { ...sums };
             if (
-              /* yang punya tax ( dari product )*/
               item.typeId === 2144 &&
               data.some(
                 (dataItem) => dataItem.reference === parseInt(item.itemId),
               )
             ) {
-              // tempSum.taxBasis += item.total || 0;
               tempSum.taxBasisEqvIdr += item.eqvIdr || 0;
               if (item.currency === "USD") {
                 tempSum.taxBasisUsd += item.total || 0;
@@ -526,8 +484,6 @@ const PosForm = ({ type }) => {
               item.typeId === 2342 ||
               item?.typeValueName?.toLowerCase()?.includes("ppn")
             ) {
-              /* Tax PPN saja type Id*/
-              // tempSum.vat += item.total || 0;
               tempSum.vatEqvIdr += item.eqvIdr || 0;
               if (item.currency === "USD") {
                 tempSum.vatUsd += item.total || 0;
@@ -539,12 +495,8 @@ const PosForm = ({ type }) => {
               item.typeId === 2343 ||
               item?.typeValueName?.toLowerCase()?.includes("pph")
             ) {
-              /*tax pph saja*/
               tempSum.withholdingTax += item.totalEqvIdr || 0;
             }
-            //All others by currency
-            // console.log(typeof item.total ,"type data total")
-            // console.log(item, "item")
             if (item.currency === "USD") {
               tempSum.totalAmountUsd +=
                 item.typeId !== 2343 ||
@@ -557,7 +509,6 @@ const PosForm = ({ type }) => {
                   ? item.amount || 0
                   : 0;
               tempSum.discountAmountUsd += item.discount || 0;
-              //new Vat USD , tax basis USD
             } else if (item.currency === "IDR") {
               tempSum.totalAmountIdr +=
                 item.typeId !== 2343 ||
@@ -570,9 +521,7 @@ const PosForm = ({ type }) => {
                   ? item.amount || 0
                   : 0;
               tempSum.discountAmountIdr += item.discount || 0;
-              //new Vat IDR , tax basis IDR
             }
-            //netral ( except pph )
             tempSum.totalEqvIdr +=
               item.typeId !== 2343 ||
               !item?.typeValueName?.toLowerCase()?.includes("pph")
@@ -592,16 +541,14 @@ const PosForm = ({ type }) => {
             amountUsd: 0,
             discountAmountIdr: 0,
             discountAmountUsd: 0,
-            // taxBasis: 0, // TODO delete
-            taxBasisIdr: 0, //new
-            taxBasisUsd: 0, //new
+            taxBasisIdr: 0,
+            taxBasisUsd: 0,
             taxBasisEqvIdr: 0,
-            // vat: 0, //TODO delete
-            vatIdr: 0, //new
-            vatUsd: 0, //new
+            vatIdr: 0,
+            vatUsd: 0,
             vatEqvIdr: 0,
             withholdingTax: 0,
-            totalEqvIdr: 0, //for materai
+            totalEqvIdr: 0,
             totalEqvUsd: 0,
           },
         );
@@ -611,8 +558,6 @@ const PosForm = ({ type }) => {
           (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
         )
       ) {
-        // console.log(newDataDynamic.totalEqvIdr, "totalEqvIdr");
-        // console.log(data,"data")
         dispatch(
           getMaterai({
             transactionDate: moment(invoiceDate).format(
@@ -622,15 +567,12 @@ const PosForm = ({ type }) => {
         )
           .unwrap()
           .then((dataRes) => {
-            // console.log(dataRes, "dataRes")
             dataMaterai = {
               typeId: dataRes?.type,
               type: dataRes?.typeName,
               itemId: parseInt(dataRes?.item),
               item: dataRes?.itemName,
               price: dataRes?.price,
-              // referenceId: dataRes?.reference,
-              // referenceName: dataRes?.referenceName,
               quantity: dataRes?.quantity,
               uom: dataRes?.uom,
               currency: dataRes?.currency,
@@ -643,7 +585,6 @@ const PosForm = ({ type }) => {
               totalEqvUsd: Number(dataRes?.totalEqvUsd.toFixed(2)),
               totalEqvIdr: dataRes?.totalEqvIdr,
               remark: dataRes?.remark || "",
-              // dataTypeExist: "exist",
             };
             const temp = [...data, dataMaterai || {}];
             setData(
@@ -659,8 +600,6 @@ const PosForm = ({ type }) => {
         newDataDynamic.totalEqvIdr < 5000000 &&
         data.some((item) => item.item === "Meterai" || item.itemId === 297)
       ) {
-        // console.log(data,"data un materai")
-        // console.log(newDataDynamic.totalEqvIdr, "totalEqvIdr");
         setData(
           data
             .filter(
@@ -675,9 +614,6 @@ const PosForm = ({ type }) => {
             }),
         );
       } else {
-        // console.log(data,"data akhir")
-        // console.log(dataMaterai, "dataMaterai")
-        // console.log(newDataDynamic, "newDataDynamic")
         const dataCalculate = {
           totalAmountIdr:
             newDataDynamic.totalAmountIdr +
@@ -701,13 +637,9 @@ const PosForm = ({ type }) => {
             (dataMaterai.currency === "USD"
               ? parseInt(dataMaterai.discount)
               : 0),
-          // taxBasis: newDataDynamic.taxBasis,
           taxBasisUsd: newDataDynamic.taxBasisUsd,
           taxBasisIdr: newDataDynamic.taxBasisIdr,
           taxBasisEqvIdr: newDataDynamic.taxBasisEqvIdr,
-          // +
-          // (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
-          // vat: newDataDynamic.vat,
           vatUsd: newDataDynamic.vatUsd,
           vatIdr: newDataDynamic.vatIdr,
           vatEqvIdr: newDataDynamic.vatEqvIdr,
@@ -717,10 +649,8 @@ const PosForm = ({ type }) => {
             (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
           totalEqvUsd:
             newDataDynamic.totalEqvUsd +
-            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqUsd) : 0),
-          // Add other properties as needed
+            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqvUsd) : 0),
         };
-        // console.log(dataCalculate, "dataCalculate")
         setDataDynamic({ ...dataDynamic, ...dataCalculate });
       }
     }
@@ -812,14 +742,26 @@ const PosForm = ({ type }) => {
     [form],
   );
 
+  const handleSubmit = () => {
+    setTypeSubmit(true);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
+
+  const handleSaveDraft = () => {
+    setTypeSubmit(false);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
+
   const handleValue = (e) => {
-    //handling non moment to moment date ( error date.clone )
     return isDateString(e) ? moment(e) : e;
   };
 
   const handleSetFormTypeTOP = useCallback(
     (value, data_detailPos) => {
-      // console.log(value, "value set TOP");
       if (value.action === "setData") {
         form.setFieldsValue({
           ...(value?.action === "setData"
@@ -841,9 +783,7 @@ const PosForm = ({ type }) => {
     [form],
   );
 
-  //handling non moment to moment date ( error date.clone )
   useEffect(() => {
-    // console.log(valueDdl, "valueDdl");
     if (valueDdl) {
       form.resetFields(["termType", "termValue"]);
       handleSetFormTypeValueDdl(valueDdl, data_detailPos);
@@ -852,25 +792,10 @@ const PosForm = ({ type }) => {
   }, [valueDdl, handleSetFormTypeValueDdl]);
 
   useEffect(() => {
-    // console.log(ddlFinal, "ddlFinal");
     if (hasValue(ddlFinal?.value)) {
       handleSetFormTypeTOP(ddlFinal, data_detailPos);
     }
-    // form.setFieldsValue({
-    //   termType: {
-    //     termValueDdl: ddlFinal === "TOP" ? "TOP" : "DATE",
-    //   },
-    // });
   }, [ddlFinal, handleSetFormTypeTOP]);
-
-  // useEffect(() => {
-  //   form.resetFields(["billingPeriod"]);
-  // }, [dataBillingCycle]);
-
-  // change tabs
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
-  };
 
   // routes
   const routes = [
@@ -890,33 +815,13 @@ const PosForm = ({ type }) => {
     },
   ];
 
-  // check has overlapping data
-  const checkOverlappingData = useCallback((formHeader, dataTable) => {
-    const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
-      ) {
-        dataOverlap?.push(item);
-      }
-    });
-
-    if (dataOverlap?.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }, []);
-
   //handleAction
   const onFinish = (e) => {
     let errorBody = {};
     if (dataAttachment.length === 0) {
-      handleMandatory(setDataTabs, dataAttachment); // attachment mandatory onFinish
+      handleMandatory(setDataTabs, dataAttachment);
     } else {
-      handleMandatory(setDataTabs, dataAttachment); // clearing all badge
+      handleMandatory(setDataTabs, dataAttachment);
       if (data.length === 0 && dataAttachment.length === 0) {
         errorBody = {
           title: "Failed",
@@ -991,37 +896,31 @@ const PosForm = ({ type }) => {
     }
   };
 
-  // console.log(dataDynamic, "dataDynamic");
   const handleSendData = (e) => {
     setModalConfirm(false);
 
-    // Summary Amount
     const calculateAmount = data.map((a) => a.amount);
     const sumAmount = calculateAmount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
       0,
     );
 
-    // Summary Discount
     const calculateDiscount = data.map((a) => a.discount);
     const sumDiscount = calculateDiscount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
       0,
     );
 
-    // Find topDataType
     const dataTypeTOP = data_globalTermsOfPaymentValue?.find(
       (item) => item.Id === e.termType.termValue,
     );
 
-    // Check Date String
     const isDateString = moment(
       e?.termsOfPayment,
       dateFormatting.date,
       true,
     ).isValid();
 
-    // Get SOR name for prospective customer
     const getSorName = () => {
       if (customerType === "prospective" && e?.sor) {
         const sorItem = data_sor_list?.find((item) => item.id === e.sor);
@@ -1030,7 +929,6 @@ const PosForm = ({ type }) => {
       return e?.sor || "";
     };
 
-    // Get MRC name for prospective customer
     const getMrcName = () => {
       if (customerType === "prospective" && e?.meterReadingCode) {
         const mrcIds = Array.isArray(e.meterReadingCode)
@@ -1047,7 +945,6 @@ const PosForm = ({ type }) => {
       return e?.meterReadingCode || "";
     };
 
-    // Get Account Segment name
     const getAccountSegmentName = () => {
       if (customerType === "prospective" && e?.accountSegment) {
         const segment = data_account_segment?.find(
@@ -1058,7 +955,6 @@ const PosForm = ({ type }) => {
       return e?.accountSegment || "";
     };
 
-    // Get Account Group Type name
     const getAccountGroupTypeName = () => {
       if (customerType === "prospective" && e?.accountGroupType) {
         const groupType = data_account_group_type?.find(
@@ -1069,26 +965,17 @@ const PosForm = ({ type }) => {
       return e?.accountGroupType || "";
     };
 
-    // Prepare base body
     let body = {
       id: type === "create" ? undefined : idUpdate,
       posNumber: type === "create" ? undefined : idPos,
-
-      // Customer Type (1 = customer, 2 = prospective)
       customerType: getCustomerTypeNumber(customerType),
-
-      // Customer Information
       ...(customerType === "customer" && { customerNumber: e?.customerNumber }),
       customerName: e?.customerName,
       accountName: e?.accountName,
-
-      // SOR & Cost Center
       sor: getSorName(),
       meterReadingCode: getMrcName(),
       accountSegment: getAccountSegmentName(),
       accountGroupType: getAccountGroupTypeName(),
-
-      // Billing Information
       billingCycle:
         data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
           ?.name || e?.billingCycle,
@@ -1106,14 +993,10 @@ const PosForm = ({ type }) => {
             (item) => item.Id === e?.termType?.termValue,
           )?.text || e?.termType?.termValue,
       remark: e?.remark,
-
-      // Approval
       appHierId: dataApprovalId,
       submit: typeSubmit,
       topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
       topId: e.termType.termValueDdl,
-
-      // Rate & Tax Information
       rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
       rateDate: dataDynamic?.rateDate
         ? moment(dataDynamic.rateDate, dateFormatting.date).format(
@@ -1128,8 +1011,6 @@ const PosForm = ({ type }) => {
           )
         : null,
       taxRateType: dataDynamic?.taxRateType || null,
-
-      // Amount Calculations
       amount: sumAmount,
       discountAmount: sumDiscount,
       totalAmountIdr: dataDynamic?.totalAmountIdr || 0,
@@ -1147,8 +1028,6 @@ const PosForm = ({ type }) => {
       withholdingTax: dataDynamic?.withholdingTax || 0,
       totalEqvIdr: dataDynamic?.totalEqvIdr || 0,
       totalEqvUsd: dataDynamic?.totalEqvUsd || 0,
-
-      // POS Details
       mrbiPosDetails: data?.map((item) => ({
         posDetailId: item?.posDetailId,
         posNumber: item?.posNumber,
@@ -1172,7 +1051,6 @@ const PosForm = ({ type }) => {
       })),
     };
 
-    // Handle field berdasarkan customer type
     if (customerType === "prospective") {
       if (Array.isArray(e?.costCenter) && e.costCenter.length > 0) {
         const costCenterNames = e.costCenter
@@ -1186,8 +1064,6 @@ const PosForm = ({ type }) => {
         body.costcenter = costCenterNames;
       }
       body.registrationNumber = e?.accountNumber;
-
-      // Field tambahan untuk prospective
       body.email = e?.email || "";
       body.address = e?.address || "";
     } else {
@@ -1195,13 +1071,11 @@ const PosForm = ({ type }) => {
       body.costcenter = e?.costCenter || "";
     }
 
-    // Clean up fields yang tidak diperlukan
     delete body.costCenter;
     delete body.termType;
     delete body.apphierId;
     delete body.taxBasis;
 
-    // Dispatch create or update
     if (type === "create") {
       dispatch(createPOS(body))
         .unwrap()
@@ -1209,7 +1083,6 @@ const PosForm = ({ type }) => {
           const id = data?.id;
           setLoadingForm(true);
 
-          // Upload attachments
           for (let icon = 0; icon < dataAttachment.length; icon++) {
             const element = dataAttachment[icon];
             const attachBody = {
@@ -1223,10 +1096,8 @@ const PosForm = ({ type }) => {
             );
           }
 
-          // Navigate back
           navigate(RBI_ROUTES.POS_VIEW, { replace: true });
 
-          // Reset form
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1251,7 +1122,6 @@ const PosForm = ({ type }) => {
           }
         });
     } else {
-      // Update logic sama, hanya tambah upload attachment untuk yang baru
       dispatch(updatePOS(body))
         .unwrap()
         .then(async (data) => {
@@ -1309,32 +1179,10 @@ const PosForm = ({ type }) => {
   };
 
   const handleErrorSubmit = ({ values, errorFields, outOfDate }) => {
-    // setDataTabs((prevState) => {
-    //   const res = prevState.map((item) => {
-    //     if (!item.paramValue || item.paramValue.length < 0) {
-    //       return {
-    //         value: item.value,
-    //         paramValue: item.paramValue,
-    //       };
-    //     }
-    //     const errorBadge = errorFields.reduce(
-    //       (current, next) =>
-    //         item.paramValue.includes(next.name[0]) ? current + 1 : current,
-    //       0
-    //     );
-    //     return {
-    //       value: item.value,
-    //       paramValue: item.paramValue,
-    //       errorBadge,
-    //     };
-    //   });
-    //   return res;
-    // });
     handleMandatory(setDataTabs, dataAttachment, errorFields);
   };
 
   const handleChangeSOR = (selectedSorId) => {
-    // Reset semua field yang depend on SOR
     form.resetFields([
       "costCenter",
       "meterReadingCode",
@@ -1365,8 +1213,6 @@ const PosForm = ({ type }) => {
           data_detailPos?.mrbiPosDetails?.map((item, index) => {
             let temp = {
               ...item,
-              // referenceName: item.referenceName,
-              // referenceId: item?.reference,
               price: item?.price || 0,
               amount: item?.amount || 0,
               amountEqvUsd: Number(item?.amountEqvUsd.toFixed(2)) || 0,
@@ -1374,19 +1220,7 @@ const PosForm = ({ type }) => {
               eqvIdr: item?.eqvIdr || 0,
               totalEqvIdr: item?.totalEqvIdr || 0,
               totalEqvUsd: Number(item?.totalEqvUsd.toFixed(2)) || 0,
-              // lineNumber: index + 1,
             };
-            // if (
-            //   item?.item === "PPN" &&
-            //   item?.item === "PPH" &&
-            //   item?.item === "Meterai" &&
-            //   item?.item === null || undefined
-            // ) {
-            //   temp = {
-            //     ...temp,
-            //     dataType: "exist",
-            //   };
-            // }
             return temp;
           }),
         );
@@ -1396,10 +1230,7 @@ const PosForm = ({ type }) => {
           )?.Id,
         );
         setAccountNumber(data_detailPos?.accountNumber);
-        setInvoiceDate(
-          moment(data_detailPos?.invoiceDate),
-          // .format(dateFormatting.dateFormal)
-        );
+        setInvoiceDate(moment(data_detailPos?.invoiceDate));
         setDataBillingCycle(
           data_globalBillingCycle?.find(
             (item) => item.name === data_detailPos?.billingCycle,
@@ -1408,13 +1239,10 @@ const PosForm = ({ type }) => {
         setDataAttachment(
           (data_detailPos?.mattachments || []).map((item) => ({
             ...item,
-            // createdDate: moment(item.createdDate).format("DD MMM YYYY"),
-            // fileSize: bytesConverter(item.fileSize || 0),
             dataType: "exist",
           })),
         );
         setDataApprovalId(data_detailPos?.appHierId);
-        // setDataApproval(data_detailPos?.appHierId);
       }
     } else {
       setRangeDisableDate({});
@@ -1441,26 +1269,22 @@ const PosForm = ({ type }) => {
     }
   };
 
+  const handleBack = () => {
+    setModalBack(true);
+  };
+
   return (
     <LayoutMenu>
       <Spin spinning={loading || loadingForm || loadingAccount}>
         <BreadCrumb routes={routes} />
-        {/* Steps Navigation dengan background putih */}
-        <div className="bg-white rounded-lg p-4 mb-6">
-          <div className="flex flex-row justify-center">
-            <div
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              <Steps
-                current={currentStep}
-                items={items}
-                labelPlacement="vertical"
-              />
-            </div>
-          </div>
-        </div>
+        
+        {/* FormStepper menggantikan Steps manual */}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
+        />
 
         <Form
           id={"form"}
@@ -1471,7 +1295,11 @@ const PosForm = ({ type }) => {
           scrollToFirstError={true}
         >
           {/* Step 1: Point of Sales */}
-          <div className={currentStep !== 0 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== dataTabs[0].value ? "none" : undefined,
+            }}
+          >
             <PointOfSalesPage
               form={form}
               isCostCenterFilled={isCostCenterFilled}
@@ -1521,7 +1349,11 @@ const PosForm = ({ type }) => {
           </div>
 
           {/* Step 2: Approval */}
-          <div className={currentStep !== 1 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== dataTabs[1].value ? "none" : undefined,
+            }}
+          >
             <BaseContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={dataListDetailApproval}
@@ -1533,7 +1365,11 @@ const PosForm = ({ type }) => {
           </div>
 
           {/* Step 3: Attachment */}
-          <div className={currentStep !== 2 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== dataTabs[2].value ? "none" : undefined,
+            }}
+          >
             <PointOfSalesPageAttachment
               dispatch={dispatch}
               dataAttachment={dataAttachment}
@@ -1542,97 +1378,18 @@ const PosForm = ({ type }) => {
             />
           </div>
 
-          {/* Footer Buttons */}
-          <div className={"w-full flex justify-between mt-10"}>
-            <div className="flex">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setModalBack(true)}
-                icon={<LeftOutlined style={{ color: "#fff", fontSize: 24 }} />}
-              >
-                Back
-              </ButtonComponent>
-            </div>
-
-            <div className={"flex gap-5"}>
-              {/* Previous Button - tampil jika bukan step pertama */}
-              {currentStep > 0 && (
-                <ButtonComponent
-                  onClick={prev}
-                  type={"default"}
-                  icon={
-                    <LeftOutlined style={{ color: "#1890ff", fontSize: 24 }} />
-                  }
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    borderColor: "#1890ff",
-                    color: "#1890ff",
-                  }}
-                >
-                  Previous
-                </ButtonComponent>
-              )}
-
-              <Form.Item>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                      color={"#FFFFFF"}
-                    />
-                  }
-                  type="submit"
-                  onClick={handleClearOrReset}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-
-              {/* Next Button - tampil jika bukan step terakhir */}
-              {currentStep < steps.length - 1 && (
-                <ButtonComponent
-                  onClick={next}
-                  type={"submit"}
-                  icon={
-                    <RightOutlined style={{ color: "#fff", fontSize: 18 }} />
-                  }
-                >
-                  Next
-                </ButtonComponent>
-              )}
-
-              {/* Save Buttons - tampil jika step terakhir */}
-              {currentStep === steps.length - 1 && (
-                <>
-                  <Form.Item>
-                    <ButtonComponent
-                      type="submit"
-                      htmlType={"submit"}
-                      form={"form"}
-                      onClick={() => setTypeSubmit(false)}
-                    >
-                      Save As Draft
-                    </ButtonComponent>
-                  </Form.Item>
-                  <Form.Item>
-                    <ButtonComponent
-                      type="submit"
-                      htmlType={"submit"}
-                      form={"form"}
-                      onClick={() => setTypeSubmit(true)}
-                    >
-                      Save & Submit
-                    </ButtonComponent>
-                  </Form.Item>
-                </>
-              )}
-            </div>
-          </div>
+          {/* FormFooter menggantikan footer buttons manual */}
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClearOrReset}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+          />
         </Form>
 
         {/* Existing Modals */}
