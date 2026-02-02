@@ -3,22 +3,22 @@
  * Utility functions for promo operations
  */
 
-import { PROMO_STATUS, DATE_FORMAT } from '../constants/promoConstants';
-import moment from 'moment';
+import { PROMO_STATUS, DATE_FORMAT } from "../constants/promoConstants";
+import moment from "moment";
 
 /**
  * Format promo status for display
  */
 export const formatPromoStatus = (status) => {
   const statusMap = {
-    [PROMO_STATUS.ACTIVE]: { text: 'Active', color: 'green' },
-    [PROMO_STATUS.INACTIVE]: { text: 'Inactive', color: 'gray' },
-    [PROMO_STATUS.EXPIRED]: { text: 'Expired', color: 'red' },
-    [PROMO_STATUS.PENDING]: { text: 'Pending', color: 'orange' },
-    [PROMO_STATUS.CANCELLED]: { text: 'Cancelled', color: 'red' },
+    [PROMO_STATUS.ACTIVE]: { text: "Active", color: "green" },
+    [PROMO_STATUS.INACTIVE]: { text: "Inactive", color: "gray" },
+    [PROMO_STATUS.EXPIRED]: { text: "Expired", color: "red" },
+    [PROMO_STATUS.PENDING]: { text: "Pending", color: "orange" },
+    [PROMO_STATUS.CANCELLED]: { text: "Cancelled", color: "red" },
   };
 
-  return statusMap[status] || { text: status, color: 'default' };
+  return statusMap[status] || { text: status, color: "default" };
 };
 
 /**
@@ -26,7 +26,7 @@ export const formatPromoStatus = (status) => {
  */
 export const isPromoActive = (promo) => {
   if (!promo) return false;
-  
+
   const now = moment();
   const startDate = moment(promo.startDate);
   const endDate = moment(promo.endDate);
@@ -43,7 +43,7 @@ export const isPromoActive = (promo) => {
  */
 export const isPromoExpired = (promo) => {
   if (!promo) return false;
-  
+
   const now = moment();
   const endDate = moment(promo.endDate);
 
@@ -71,11 +71,11 @@ export const formatDateRange = (startDate, endDate) => {
  */
 export const calculateValidityDays = (startDate, endDate) => {
   if (!startDate || !endDate) return 0;
-  
+
   const start = moment(startDate);
   const end = moment(endDate);
-  
-  return end.diff(start, 'days') + 1;
+
+  return end.diff(start, "days") + 1;
 };
 
 /**
@@ -83,23 +83,148 @@ export const calculateValidityDays = (startDate, endDate) => {
  */
 export const calculateRemainingDays = (endDate) => {
   if (!endDate) return 0;
-  
+
   const now = moment();
   const end = moment(endDate);
-  
-  const days = end.diff(now, 'days');
+
+  const days = end.diff(now, "days");
   return days > 0 ? days : 0;
 };
 
 /**
  * Format discount value
  */
-export const formatDiscountValue = (value, type = 'percentage') => {
+export const formatDiscountValue = (value, type = "percentage") => {
   if (!value && value !== 0) return "";
-  
-  return type === 'percentage' ? `${value}%` : `Rp ${value.toLocaleString('id-ID')}`;
-};
 
+  return type === "percentage"
+    ? `${value}%`
+    : `Rp ${value.toLocaleString("id-ID")}`;
+};
+export const dummyPromoData = [
+  {
+    key: "1",
+    no: 1,
+    id: 101,
+    name: "DISKON INTERNET 50%",
+    promotionTypeName: "Discount",
+    typeName: "Internet",
+    categoryName: "Monthly Promo",
+    criterias: "Minimum usage 10GB",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    description: "Potongan harga 50% untuk paket internet bulanan",
+    status: "ACTIVE",
+  },
+  {
+    key: "2",
+    no: 2,
+    id: 102,
+    name: "BONUS SMS 100",
+    promotionTypeName: "Bonus",
+    typeName: "SMS",
+    categoryName: "Limited Promo",
+    criterias: "Active number",
+    startDate: "2024-02-01",
+    endDate: "2024-06-30",
+    description: "Gratis 100 SMS ke semua operator",
+    status: "ACTIVE",
+  },
+  {
+    key: "3",
+    no: 3,
+    id: 103,
+    name: "CASHBACK TAGIHAN",
+    promotionTypeName: "Cashback",
+    typeName: "Billing",
+    categoryName: "Special Promo",
+    criterias: "Payment via e-wallet",
+    startDate: "2023-10-01",
+    endDate: "2023-12-31",
+    description: "Cashback 10% untuk pembayaran tagihan",
+    status: "EXPIRED",
+  },
+  {
+    key: "4",
+    no: 4,
+    id: 104,
+    name: "BONUS DATA ROAMING",
+    promotionTypeName: "Bonus",
+    typeName: "Roaming",
+    categoryName: "International Promo",
+    criterias: "Roaming Asia",
+    startDate: "2024-03-01",
+    endDate: "2024-09-30",
+    description: "Bonus 2GB data roaming Asia",
+    status: "ACTIVE",
+  },
+];
+
+export const dummyPromoDetailMap = {
+  101: {
+    id: 101,
+    name: "DISKON INTERNET 50%",
+    promotionTypeName: "Discount",
+    typeName: "Internet",
+    categoryName: "Monthly Promo",
+    criterias: "Minimum usage 10GB",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    description: "Potongan harga 50% untuk paket internet bulanan",
+    createdBy: "Annisa",
+    createdDate: "2023-12-21 23:11:09",
+    updatedBy: "Aldri",
+    updatedDate: "2023-12-28 23:11:09",
+  },
+
+  102: {
+    id: 102,
+    name: "BONUS SMS 100",
+    promotionTypeName: "Bonus",
+    typeName: "SMS",
+    categoryName: "Limited Promo",
+    criterias: "Active number",
+    startDate: "2024-02-01",
+    endDate: "2024-06-30",
+    description: "Gratis 100 SMS ke semua operator",
+    createdBy: "System",
+    createdDate: "2024-01-01 10:00:00",
+    updatedBy: "System",
+    updatedDate: "2024-01-15 12:00:00",
+  },
+
+  103: {
+    id: 103,
+    name: "CASHBACK TAGIHAN",
+    promotionTypeName: "Cashback",
+    typeName: "Billing",
+    categoryName: "Special Promo",
+    criterias: "Payment via e-wallet",
+    startDate: "2023-10-01",
+    endDate: "2023-12-31",
+    description: "Cashback 10% untuk pembayaran tagihan",
+    createdBy: "Finance",
+    createdDate: "2023-09-15 09:30:00",
+    updatedBy: "Finance",
+    updatedDate: "2023-10-01 08:00:00",
+  },
+
+  104: {
+    id: 104,
+    name: "BONUS DATA ROAMING",
+    promotionTypeName: "Bonus",
+    typeName: "Roaming",
+    categoryName: "International Promo",
+    criterias: "Roaming Asia",
+    startDate: "2024-03-01",
+    endDate: "2024-09-30",
+    description: "Bonus 2GB data roaming Asia",
+    createdBy: "Marketing",
+    createdDate: "2024-02-01 14:00:00",
+    updatedBy: "Marketing",
+    updatedDate: "2024-02-10 16:30:00",
+  },
+};
 /**
  * Validate promo data
  */
@@ -107,27 +232,27 @@ export const validatePromoData = (promo) => {
   const errors = {};
 
   if (!promo.promoCode) {
-    errors.promoCode = 'Promo code is required';
+    errors.promoCode = "Promo code is required";
   }
 
   if (!promo.promoName) {
-    errors.promoName = 'Promo name is required';
+    errors.promoName = "Promo name is required";
   }
 
   if (!promo.startDate) {
-    errors.startDate = 'Start date is required';
+    errors.startDate = "Start date is required";
   }
 
   if (!promo.endDate) {
-    errors.endDate = 'End date is required';
+    errors.endDate = "End date is required";
   }
 
   if (promo.startDate && promo.endDate) {
     const start = moment(promo.startDate);
     const end = moment(promo.endDate);
-    
+
     if (end.isBefore(start)) {
-      errors.endDate = 'End date must be after start date';
+      errors.endDate = "End date must be after start date";
     }
   }
 
@@ -173,16 +298,16 @@ export const parsePromoQueryParams = (filters, pagination) => {
  * @returns {string} - Field name in camelCase
  */
 const convertValueToFieldName = (value) => {
-  if (!value) return '';
-  
+  if (!value) return "";
+
   return value
     .toLowerCase()
-    .split(' ')
+    .split(" ")
     .map((word, index) => {
       if (index === 0) return word;
       return word.charAt(0).toUpperCase() + word.slice(1);
     })
-    .join('');
+    .join("");
 };
 
 /**
@@ -196,7 +321,7 @@ export const transformApiColumnsToTable = (apiColumns, onViewDetail) => {
     return [];
   }
 
-  console.log('API Columns:', apiColumns);
+  console.log("API Columns:", apiColumns);
 
   const transformedColumns = [
     {
@@ -204,28 +329,36 @@ export const transformApiColumnsToTable = (apiColumns, onViewDetail) => {
       dataIndex: "no",
       key: "no",
       width: 60,
-      fixed: 'left',
+      fixed: "left",
       disableFilter: true,
       disableSorter: true,
       render: (_, __, index) => index + 1,
     },
     ...apiColumns.map((col) => {
       // Get field name from API response
-      const fieldName = convertValueToFieldName(col.value || col.column || col.name);
+      const fieldName = convertValueToFieldName(
+        col.value || col.column || col.name,
+      );
       const title = col.value || col.label || col.column || col.name;
-      
+
       // Set default width based on column type
       let width = 150;
-      if (title.toLowerCase().includes('date')) {
+      if (title.toLowerCase().includes("date")) {
         width = 120;
-      } else if (title.toLowerCase().includes('name') || title.toLowerCase().includes('description')) {
+      } else if (
+        title.toLowerCase().includes("name") ||
+        title.toLowerCase().includes("description")
+      ) {
         width = 200;
-      } else if (title.toLowerCase().includes('status')) {
+      } else if (title.toLowerCase().includes("status")) {
         width = 100;
-      } else if (title.toLowerCase().includes('type') || title.toLowerCase().includes('category')) {
+      } else if (
+        title.toLowerCase().includes("type") ||
+        title.toLowerCase().includes("category")
+      ) {
         width = 130;
       }
-      
+
       return {
         title: title,
         dataIndex: fieldName,
@@ -243,14 +376,14 @@ export const transformApiColumnsToTable = (apiColumns, onViewDetail) => {
       dataIndex: "action",
       key: "action",
       width: 80,
-      fixed: 'right',
+      fixed: "right",
       disableFilter: true,
       disableSorter: true,
       render: (_, record) => onViewDetail(record),
     });
   }
 
-  console.log('Transformed Columns:', transformedColumns);
+  console.log("Transformed Columns:", transformedColumns);
 
   return transformedColumns;
 };
@@ -408,12 +541,12 @@ export const buildAdvancedSearchBody = (searchCriteria = {}) => {
 
   Object.keys(searchCriteria).forEach((key) => {
     const value = searchCriteria[key];
-    
-    if (value !== null && value !== undefined && value !== '') {
+
+    if (value !== null && value !== undefined && value !== "") {
       inputFields.push({
-        condition: searchCriteria.condition || 'AND',
+        condition: searchCriteria.condition || "AND",
         column: key,
-        operator: searchCriteria.operator || 'EQUALS',
+        operator: searchCriteria.operator || "EQUALS",
         value: value,
       });
     }
@@ -430,12 +563,12 @@ export const buildAdvancedSearchBody = (searchCriteria = {}) => {
  * @returns {Array} - Array of criteria items
  */
 export const formatPromoCriteria = (criteria) => {
-  if (!criteria || criteria === 'All') {
-    return ['All'];
+  if (!criteria || criteria === "All") {
+    return ["All"];
   }
 
   return criteria
-    .split(',')
+    .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
 };
@@ -447,12 +580,12 @@ export const formatPromoCriteria = (criteria) => {
  */
 export const getPromoTypeBadgeColor = (typeName) => {
   const typeColorMap = {
-    'RATING': 'blue',
-    'BILLING': 'green',
-    'RATING & BILLING': 'purple',
+    RATING: "blue",
+    BILLING: "green",
+    "RATING & BILLING": "purple",
   };
 
-  return typeColorMap[typeName] || 'default';
+  return typeColorMap[typeName] || "default";
 };
 
 /**
@@ -462,11 +595,11 @@ export const getPromoTypeBadgeColor = (typeName) => {
  */
 export const getPromoCategoryBadgeColor = (categoryName) => {
   const categoryColorMap = {
-    'ALL': 'cyan',
-    'SPECIFIED': 'orange',
+    ALL: "cyan",
+    SPECIFIED: "orange",
   };
 
-  return categoryColorMap[categoryName] || 'default';
+  return categoryColorMap[categoryName] || "default";
 };
 
 /**
@@ -490,7 +623,19 @@ export const transformPromoHistoryResponse = (apiResponse) => {
 
   // Transform invoice as main row with details as nested data
   const dataSource = result.map((invoice, index) => {
-    const { invoiceNumber, billingCode, billingPeriod, billingCycle, promoApplied, details = [], id, createdDate, createdBy, updatedDate, updatedBy } = invoice;
+    const {
+      invoiceNumber,
+      billingCode,
+      billingPeriod,
+      billingCycle,
+      promoApplied,
+      details = [],
+      id,
+      createdDate,
+      createdBy,
+      updatedDate,
+      updatedBy,
+    } = invoice;
 
     // Get first detail for display in main row
     const firstDetail = details[0] || {};
@@ -515,7 +660,7 @@ export const transformPromoHistoryResponse = (apiResponse) => {
       updatedDate: updatedDate,
       updatedBy: updatedBy,
       // Store all details for expandable row
-      details: details.map(detail => ({
+      details: details.map((detail) => ({
         key: detail.id,
         id: detail.id,
         name: detail.name || "",

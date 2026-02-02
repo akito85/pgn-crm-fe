@@ -14,7 +14,7 @@ const API_PATH = "/v1/dbs/api/promo";
 
 const promoRepository = {
   // ==================== PROMO OPERATIONS ====================
-  
+
   /**
    * Get list of valid promos with pagination and advanced search
    * POST /v1/dbs/api/promo/valid
@@ -28,10 +28,21 @@ const promoRepository = {
         headers: tokenHeader(),
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/valid`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/valid`,
+        body,
+        config,
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -45,9 +56,12 @@ const promoRepository = {
    */
   getDetailValidPromoById: async (promoId) => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/valid/${promoId}`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/valid/${promoId}`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -68,40 +82,58 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/download-valid`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/download-valid`,
+        body,
+        config,
+      );
 
-      console.log('Download response:', response);
-      console.log('Download headers:', response.headers);
-      console.log('Content-Disposition:', response.headers['content-disposition']);
+      console.log("Download response:", response);
+      console.log("Download headers:", response.headers);
+      console.log(
+        "Content-Disposition:",
+        response.headers["content-disposition"],
+      );
 
-      const contentDisposition = response.headers['content-disposition'];
-      
+      const contentDisposition = response.headers["content-disposition"];
+
       if (contentDisposition) {
-        const filename = contentDisposition
-          .split(";")
-          .find((n) => n.includes("filename="))
-          ?.replace("filename=", "")
-          .trim()
-          .replace(/['"]/g, '') || 'promo_list.xlsx';
+        const filename =
+          contentDisposition
+            .split(";")
+            .find((n) => n.includes("filename="))
+            ?.replace("filename=", "")
+            .trim()
+            .replace(/['"]/g, "") || "promo_list.xlsx";
 
         const blob = response.data;
-        console.log('Saving file:', filename, 'Blob size:', blob.size);
+        console.log("Saving file:", filename, "Blob size:", blob.size);
         FileSaver.saveAs(blob, filename);
       } else {
         // Fallback jika tidak ada content-disposition
         const blob = response.data;
         const defaultFilename = `promo_list_${new Date().getTime()}.xlsx`;
-        console.log('No content-disposition, using default filename:', defaultFilename);
+        console.log(
+          "No content-disposition, using default filename:",
+          defaultFilename,
+        );
         FileSaver.saveAs(blob, defaultFilename);
       }
 
       // Return success message instead of blob response
-      return { success: true, message: 'Download completed' };
+      return { success: true, message: "Download completed" };
     } catch (error) {
-      console.error('Download error:', error);
+      console.error("Download error:", error);
       throw error;
     }
   },
@@ -121,10 +153,21 @@ const promoRepository = {
         headers: tokenHeader(),
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/criteria`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/criteria`,
+        body,
+        config,
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -138,9 +181,12 @@ const promoRepository = {
    */
   getDetailValidPromoCriteria: async (criteriaId) => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/criteria/${criteriaId}`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/criteria/${criteriaId}`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -161,10 +207,21 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/download-criteria`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/download-criteria`,
+        body,
+        config,
+      );
 
       if (hasValue(response.headers?.get("content-disposition"))) {
         const filename = response.headers
@@ -199,10 +256,21 @@ const promoRepository = {
         headers: tokenHeader(),
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/condition`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/condition`,
+        body,
+        config,
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -216,9 +284,12 @@ const promoRepository = {
    */
   getDetailValidPromoCondition: async (conditionId) => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/condition/${conditionId}`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/condition/${conditionId}`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -239,10 +310,21 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/download-condition`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/download-condition`,
+        body,
+        config,
+      );
 
       if (hasValue(response.headers?.get("content-disposition"))) {
         const filename = response.headers
@@ -270,9 +352,12 @@ const promoRepository = {
    */
   getAdvanceSearchCondition: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-condition`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/list-search-condition`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -285,9 +370,12 @@ const promoRepository = {
    */
   getAdvanceSearchOperator: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-operator`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/list-search-operator`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -300,9 +388,12 @@ const promoRepository = {
    */
   getAdvancePromoColumn: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-column`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/list-search-promo-column`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -315,9 +406,12 @@ const promoRepository = {
    */
   getAdvancePromoCriteriaColumn: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-criteria-column`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/list-search-promo-criteria-column`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -330,9 +424,12 @@ const promoRepository = {
    */
   getAdvancePromoConditionColumn: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-condition-column`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/list-search-promo-condition-column`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -345,9 +442,12 @@ const promoRepository = {
    */
   getAdvancePromoHistoryColumn: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-history-column`, {
-        headers: tokenHeader(),
-      });
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/list-search-promo-history-column`,
+        {
+          headers: tokenHeader(),
+        },
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -369,10 +469,21 @@ const promoRepository = {
         headers: tokenHeader(),
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/history`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/history`,
+        body,
+        config,
+      );
       return response?.data;
     } catch (error) {
       throw error;
@@ -387,22 +498,30 @@ const promoRepository = {
    */
   getDetailPromoHistoryById: async (billingCode, accountId) => {
     try {
-      console.log('API Call - billingCode:', billingCode, 'accountId:', accountId);
+      console.log(
+        "API Call - billingCode:",
+        billingCode,
+        "accountId:",
+        accountId,
+      );
 
       const config = {
         headers: tokenHeader(),
-        params: {}
+        params: {},
       };
 
       if (accountId) {
         config.params.accountId = accountId;
       }
 
-      console.log('API Config:', config);
-      const response = await axios.get(`${BASE_URL}${API_PATH}/history/${billingCode}`, config);
+      console.log("API Config:", config);
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/history/${billingCode}`,
+        config,
+      );
       return response?.data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       throw error;
     }
   },
@@ -418,18 +537,21 @@ const promoRepository = {
     try {
       const config = {
         headers: tokenHeader(),
-        params: {}
+        params: {},
       };
 
       if (accountId) {
         config.params.accountId = accountId;
       }
 
-      console.log('API Config:', config);
-      const response = await axios.get(`${BASE_URL}${API_PATH}/history/${billingCode}/${detailId}`, config);
+      console.log("API Config:", config);
+      const response = await axios.get(
+        `${BASE_URL}${API_PATH}/history/${billingCode}/${detailId}`,
+        config,
+      );
       return response?.data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       throw error;
     }
   },
@@ -448,10 +570,21 @@ const promoRepository = {
         responseType: "blob",
       };
 
-      const body = (advancedSearch && advancedSearch.inputFields && advancedSearch.inputFields.length > 0)
-        ? advancedSearch
-        : { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
-      const response = await axios.post(`${BASE_URL}${API_PATH}/download-history`, body, config);
+      const body =
+        advancedSearch &&
+        advancedSearch.inputFields &&
+        advancedSearch.inputFields.length > 0
+          ? advancedSearch
+          : {
+              inputFields: [
+                { condition: "", column: "", operator: "", value: "" },
+              ],
+            };
+      const response = await axios.post(
+        `${BASE_URL}${API_PATH}/download-history`,
+        body,
+        config,
+      );
 
       if (hasValue(response.headers?.get("content-disposition"))) {
         const filename = response.headers
@@ -481,7 +614,8 @@ const promoRepository = {
   getColumns: (handleViewDetail) => {
     const { UnorderedListOutlined } = require("@ant-design/icons");
     const { Col } = require("antd");
-    const StatusComponent = require("../../../../../../../components/StatusComponent").default;
+    const StatusComponent =
+      require("../../../../../../../components/StatusComponent").default;
     const { toTitleCase } = require("../../../../../../../utils");
 
     return [
@@ -549,21 +683,23 @@ const promoRepository = {
         dataIndex: "status",
         key: "status",
         width: 100,
-        fixed: 'right',
+        fixed: "right",
         disableFilter: true,
         disableSorter: true,
         render: (status) => {
           const displayText = {
-            "ACTIVE": "Active",
-            "INACTIVE": "Inactive",
-            "active": "Active",
-            "inactive": "Inactive",
+            ACTIVE: "Active",
+            INACTIVE: "Inactive",
+            active: "Active",
+            inactive: "Inactive",
           };
 
           return (
             <div className=" flex justify-center">
               <StatusComponent colour={status?.toLowerCase()}>
-                {displayText[status] || toTitleCase(String(status || "")) || "-"}
+                {displayText[status] ||
+                  toTitleCase(String(status || "")) ||
+                  "-"}
               </StatusComponent>
             </div>
           );
@@ -574,13 +710,17 @@ const promoRepository = {
         dataIndex: "action",
         key: "action",
         width: 80,
-        fixed: 'right',
+        fixed: "right",
         disableFilter: true,
         disableSorter: true,
         render: (_, record) => (
           <Col span={24} className="text-center">
             <UnorderedListOutlined
-              style={{ cursor: "pointer" }}
+              style={{
+                fontSize: 16,
+                color: "#1570EF",
+                cursor: "pointer",
+              }}
               onClick={() => handleViewDetail(record)}
             />
           </Col>
