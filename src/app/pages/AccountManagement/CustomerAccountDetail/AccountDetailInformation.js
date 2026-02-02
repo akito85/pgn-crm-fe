@@ -2,7 +2,7 @@ import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
 import React, { useEffect } from "react";
 import AccountInformation from "./DetailPages/AccountInformation/AccountInformation";
 import LastActivity from "./DetailPages/LastActivity";
-// import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
+import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
 import RadioTabs from "../../../../components/RadioTabs";
 import DistributionMedia from "./DetailPages/DistributionMedia/DistributionMedia";
 import GasSourceInformation from "./DetailPages/GasSource/GasSourceInformation";
@@ -301,8 +301,13 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.sr:
-        return <></>;
-      // return <ServiceRequest />;
+        return(
+          <ServiceRequest 
+            idAccount={id}
+            idCustomer={idCustomer}
+            type={type}
+          />
+        );
       case dataTabs.dm:
         return (
           <DistributionMedia
