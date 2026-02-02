@@ -32,7 +32,7 @@ const NxModal = (props) => {
       closable={closeable}
       confirmLoading={loading} // ← FIX: Show loading di OK button (jika ada)
     >
-      <h2 className="m-0 p-4 bg-[#F5F5F5] text-[#0075bf] border-0 border-b border-solid border-[#C8CDD4]">
+      <h2 className="m-0 p-4 bg-[#F5F5F5] text-[#0075bf] border-0 border-b border-solid border-[#C8CDD4] uppercase">
         {header}
       </h2>
       {children}
