@@ -218,6 +218,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
           const body = {
             stepNumber: current + 1,
+            type: type.toUpperCase(),
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
@@ -226,7 +227,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               endDate,
               appHierId,
               id: idIr,
-              type: type.toUpperCase(),
             }
           };
 
@@ -377,6 +377,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
         const body = {
           stepNumber: current + 1,
+          type: type.toUpperCase(),
           data : {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
@@ -385,7 +386,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             endDate,
             appHierId,
             id: idIr,
-            type: type.toUpperCase(),
           }
         };
 
@@ -428,6 +428,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
           const body = {
             stepNumber: i + 1,
+            type: type.toUpperCase(),
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
@@ -436,7 +437,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               endDate,
               appHierId,
               id: idIr,
-              type: type.toUpperCase(),
             }
           };
 
