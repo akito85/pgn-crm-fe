@@ -32,7 +32,7 @@ const NxBaseContainer = ({
       ) : (header || subHeader) && (
         <>
           <div className="p-0">
-            <div className="text-primary text-xs font-bold uppercase">
+            <div className="text-primary text-sm uppercase">
               {header}
             </div>
             <div className="text-primary text-xs font-bold">
