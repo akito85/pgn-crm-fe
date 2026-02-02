@@ -87,6 +87,7 @@ export const FormFooter = ({
     onClear,
     onSaveDraft,
     type,
+    onSubmit,
 }) => {
     return (
         <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
@@ -167,7 +168,8 @@ export const FormFooter = ({
                     ) : (
                         <Button
                             key="btn-submit"
-                            htmlType="submit"
+                            htmlType="button"
+                            onClick={onSubmit}
                             type="primary"
                             style={{
                                 backgroundColor: "#388E3C",
