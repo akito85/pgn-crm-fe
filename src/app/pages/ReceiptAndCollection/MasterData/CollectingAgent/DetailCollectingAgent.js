@@ -1,5 +1,5 @@
 import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
+import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 
@@ -9,8 +9,8 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
             {data_req?.isApprover &&
                 data_req?.approvalType &&
                 data_req?.approvalType === "INACTIVE_COLLECTING_AGENT" ? (
-                <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
-                    <div className="grid grid-cols-4 w-full">
+                <DetailSection header={"INACTIVE REQUEST INFORMATION"}>
+                    <div className="grid grid-cols-5 w-full gap-4">
                         <DetailText label={"Requested Date"}>
                             {data_req?.requestedDate
                                 ? moment(data_req?.requestedDate).format("DD MMM YYYY HH:mm:ss")
@@ -19,12 +19,14 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                         <DetailText label={"Requested By"}>
                             {data_req?.requestedBy}
                         </DetailText>
-                        <DetailText label={"Remark"}>{data_req?.remarks}</DetailText>
+                        <DetailText label={"Remark"} className="col-span-3">
+                            {data_req?.remarks}
+                        </DetailText>
                     </div>
-                </BaseContainer>
+                </DetailSection>
             ) : null}
-            <BaseContainer header={"COLLECTING AGENT INFORMATION"}>
-                <div className="w-full grid grid-cols-3 gap-3">
+            <DetailSection header={"COLLECTING AGENT INFORMATION"}>
+                <div className="w-full grid grid-cols-5 gap-4">
                     <DetailText label="Collection Agent Code">
                         {data_detail?.caCode}
                     </DetailText>
@@ -35,24 +37,27 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                         {data_detail?.type}
                     </DetailText>
                     <DetailText label="Start Date">
-                        {moment(data_detail?.effStartDate).format(dateFormatting.date)}
+                        {data_detail?.effStartDate ? moment(data_detail?.effStartDate).format(dateFormatting.date) : ""}
                     </DetailText>
                     <DetailText label="End Date">
                         {data_detail?.effEndDate
                             ? moment(data_detail?.effEndDate).format(dateFormatting.date)
                             : ""}
                     </DetailText>
+                    <DetailText label="Status">
+                        {data_detail?.status}
+                    </DetailText>
                     <DetailText label="Status Approval">
                         {data_detail?.statusApproval}
                     </DetailText>
                 </div>
-            </BaseContainer>
+            </DetailSection>
 
-            <BaseContainer header={"LOG INFORMATION"}>
-                <div className="w-full grid grid-cols-5">
+            <DetailSection header={"HISTORY LOG INFORMATION"}>
+                <div className="w-full grid grid-cols-5 gap-4">
                     <DetailText label={"Record ID"}>{data_detail?.id}</DetailText>
                     <DetailText label={"Created Date"}>
-                        {moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")}
+                        {data_detail?.createdDate ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss") : ""}
                     </DetailText>
                     <DetailText label={"Created By"}>{data_detail?.createdBy}</DetailText>
                     <DetailText label={"Updated Date"}>
@@ -62,7 +67,7 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                     </DetailText>
                     <DetailText label={"Updated By"}>{data_detail?.updatedBy}</DetailText>
                 </div>
-            </BaseContainer>
+            </DetailSection>
         </div>
     );
 };

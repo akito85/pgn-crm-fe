@@ -6,12 +6,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { Tabs } from "antd";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
     approveOrRejectCaPaymentChannel,
+    approveOrRejectInactiveCaPaymentChannel,
     getDetailCaPaymentChannel,
 } from "../../../../../redux/slices/receipt_collection/caPaymentChannel";
+import FooterDetail from "../../../../../components/FooterDetail";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailCaPaymentChannel from "./DetailCaPaymentChannel";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -30,20 +32,15 @@ const ListDetailCaPaymentChannel = () => {
     const [listDataAttachment, setListDataAttachment] = useState([]);
     // const [isShowButton, setIsShowButton] = useState(false);
 
-    // Define tabData before using it in useState
-    const [tabData, setTabData] = useState([
-        { value: "Ca Payment Channel" },
-        { value: "Attachment" },
-    ]);
+    // const [isShowButton, setIsShowButton] = useState(false);
 
+    // const { loading, data_detail } = useSelector(
+    //     (state) => state.caPaymentChannel
+    // );
     const { loading, data_detail } = useSelector(
         (state) => state.caPaymentChannel
     );
-    const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
-
-    const handleSegmentedPage = (e) => {
-        setSegmentedPage(e.target.value);
-    };
+    const [segmentedPage, setSegmentedPage] = useState("Ca Payment Channel");
 
     useEffect(() => {
         dispatch(getDetailCaPaymentChannel(id));
@@ -78,33 +75,7 @@ const ListDetailCaPaymentChannel = () => {
         }
     }, [id, data_detail]);
 
-    const renderSection = (segmentedPage) => {
-        switch (segmentedPage) {
-            case "Ca Payment Channel":
-                return (
-                    <DetailCaPaymentChannel
-                        key={"active"}
-                        data_detail={dataHeader}
-                        data_req={data_detail?.tapprovalDto}
-                    />
-                );
-            case "Attachment":
-                return (
-                    <BaseContainer header={"ATTACHMENT INFORMATION"}>
-                        <AttachmentComponent
-                            type={"detail"}
-                            data={listDataAttachment}
-                            updateData={setListDataAttachment}
-                            typeSelector="caPaymentChannel"
-                            service={receiptCollectionHttpService}
-                            configApplication={configApp.PAYMENT_SERVICE}
-                        />
-                    </BaseContainer>
-                );
-            default:
-                return <></>;
-        }
-    };
+
 
     const isShowButton = data_detail?.tapprovalDto?.isApprover;
 
@@ -134,7 +105,11 @@ const ListDetailCaPaymentChannel = () => {
             approvalId: data_detail?.tapprovalDto?.tAppId,
             action: approveOrReject.toUpperCase(),
         };
-        dispatch(approveOrRejectCaPaymentChannel({ body: data }));
+        if (data_detail?.tapprovalDto?.approvalType === "INACTIVE_CA_PAYMENT_CHANNEL") {
+            dispatch(approveOrRejectInactiveCaPaymentChannel({ body: data }));
+        } else {
+            dispatch(approveOrRejectCaPaymentChannel({ body: data }));
+        }
         handleClear();
         setModalApprove(false);
     };
@@ -146,10 +121,39 @@ const ListDetailCaPaymentChannel = () => {
     return (
         <LayoutMenu>
             <BreadCrumb routes={routes} />
-            <div>
-                <RadioTabs data={tabData} onChange={handleSegmentedPage} />
-                {renderSection(segmentedPage)}
-            </div>
+            <Tabs
+                activeKey={segmentedPage}
+                onChange={setSegmentedPage}
+                items={[
+                    {
+                        label: "Ca Payment Channel",
+                        key: "Ca Payment Channel",
+                        children: (
+                            <DetailCaPaymentChannel
+                                key={"active"}
+                                data_detail={dataHeader}
+                                data_req={data_detail?.tapprovalDto}
+                            />
+                        ),
+                    },
+                    {
+                        label: "Attachment",
+                        key: "Attachment",
+                        children: (
+                            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+                                <AttachmentComponent
+                                    type={"detail"}
+                                    data={listDataAttachment}
+                                    updateData={setListDataAttachment}
+                                    typeSelector="caPaymentChannel"
+                                    service={receiptCollectionHttpService}
+                                    configApplication={configApp.PAYMENT_SERVICE}
+                                />
+                            </BaseContainer>
+                        ),
+                    },
+                ]}
+            />
 
             <ModalApproveOrReject
                 isOpen={modalApprove}
@@ -161,46 +165,18 @@ const ListDetailCaPaymentChannel = () => {
                 named={data_detail?.name}
             />
 
-            <div className="flex mt-[30px] justify-between py-5">
-                <ButtonComponent
-                    type={"submit"}
-                    onClick={() => navigate(-1)}
-                    icon={
-                        <LeftOutlined
-                            style={{
-                                color: "#fff",
-                                fontSize: 24,
-                                justifyItems: "center",
-                            }}
-                        />
-                    }
-                >
-                    Back
-                </ButtonComponent>
-
-                {isShowButton === true ? (
-                    <div className="flex align-middle gap-5">
-                        <ButtonComponent
-                            type="reject"
-                            onClick={() => {
-                                setModalApprove(true);
-                                setApproveOrReject("reject");
-                            }}
-                        >
-                            Reject
-                        </ButtonComponent>
-                        <ButtonComponent
-                            type="approve"
-                            onClick={() => {
-                                setModalApprove(true);
-                                setApproveOrReject("approve");
-                            }}
-                        >
-                            Approve
-                        </ButtonComponent>
-                    </div>
-                ) : null}
-            </div>
+            <FooterDetail
+                onCancel={() => navigate(-1)}
+                onApprove={() => {
+                    setModalApprove(true);
+                    setApproveOrReject("approve");
+                }}
+                onReject={() => {
+                    setModalApprove(true);
+                    setApproveOrReject("reject");
+                }}
+                showApproval={isShowButton === true}
+            />
         </LayoutMenu>
     );
 };

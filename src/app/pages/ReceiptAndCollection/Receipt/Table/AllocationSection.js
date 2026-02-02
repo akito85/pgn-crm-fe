@@ -150,6 +150,7 @@ const AllocationSection = ({
   const parsedAmount = parseAmount(amount);
   const balance = parsedAmount - totalAllocationAmount;
   // use effec
+  const [modalForm] = Form.useForm();
 
 
   useEffect(() => {
@@ -174,16 +175,23 @@ const AllocationSection = ({
         );
       } else {
         setDataRecomendation(
-          data_recomendation_allocation?.map((item) => ({
-            ...item,
-            key: item?.id,
-            billingPeriod: moment(item?.billingPeriod)?.format(
-              dateFormatting?.datePeriod
-            ),
-            createdDate: moment(item.createdDate).format(
-              dateFormatting?.dateTime
-            ),
-          }))
+          data_recomendation_allocation
+            ?.filter(
+              (item) =>
+                item?.billingItemAmount !== 0 &&
+                (item?.allocationStatus === "Unpaid" ||
+                  item?.allocationStatus === "Partially Paid")
+            )
+            ?.map((item) => ({
+              ...item,
+              key: item?.id,
+              billingPeriod: moment(item?.billingPeriod)?.format(
+                dateFormatting?.datePeriod
+              ),
+              createdDate: moment(item.createdDate).format(
+                dateFormatting?.dateTime
+              ),
+            }))
         );
       }
     }
@@ -194,18 +202,21 @@ const AllocationSection = ({
     if (dataRecomendation && dataTable?.length === 0) {
       setSelectedRowKeys(
         dataRecomendation
-          ?.filter((item) => item?.allocationAmount !== 0)
           ?.map((item) => item?.key)
       );
     }
   }, [dataRecomendation]);
 
   // count total amount
-  // useEffect(() => {
-  //     if (selectDataTable?.length > 0) {
-  //         setTotalAllocationAmount(selectDataTable?.reduce((total, row) => total + row.allocationAmount, 0))
-  //     }
-  // }, [selectDataTable]);
+  useEffect(() => {
+    if (dataTable?.length > 0) {
+      setTotalAllocationAmount(
+        dataTable?.reduce((total, row) => total + row.allocationAmount, 0)
+      );
+    } else {
+      setTotalAllocationAmount(0);
+    }
+  }, [dataTable]);
 
   // update table selected data
   useEffect(() => {
@@ -334,6 +345,7 @@ const AllocationSection = ({
     setForceObj({});
     setListDataAttachment([]);
     setConfirmationTab("Allocation");
+    modalForm.resetFields();
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -373,6 +385,8 @@ const AllocationSection = ({
     // setSelectDataTable([]);
   };
 
+  const { userData } = useSelector((state) => state.auth);
+
   // handle save data table
   const handleSaveDataTable = () => {
     if (totalAllocationAmount > parsedAmount) {
@@ -387,10 +401,11 @@ const AllocationSection = ({
         ...row,
         remark: forceObj.remark,
         approvalHierarchyId: forceObj.approvalHierarchy,
-        attachments: listDataAttachment
+        attachments: listDataAttachment,
+        createdBy: userData?.userName
       }));
 
-      setDataTable(enrichedData);
+      setDataTable((prev) => [...prev, ...enrichedData]);
 
       // handleCancel();
       setOpenModalAllocation(false);
@@ -399,6 +414,7 @@ const AllocationSection = ({
       setCurrentStep(0);
       setForceObj({});
       setListDataAttachment([]);
+      modalForm.resetFields();
     }
   };
 
@@ -614,6 +630,7 @@ const AllocationSection = ({
           <Form
             layout="vertical"
             className="mt-3"
+            form={modalForm}
           >
             <Spin spinning={loading}>
               {/* Step 1: Allocation Information */}

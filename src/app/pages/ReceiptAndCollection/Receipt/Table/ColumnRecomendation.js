@@ -67,21 +67,6 @@ export const columnRecommendation = (
       ),
     },
     {
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycle",
-      key: "billingCycle",
-      // sorter:true,
-      sorter: (a, b) => sorterFunction("billingCycle", a, b, "date"),
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "billingCycle",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
       key: "billingPeriod",
