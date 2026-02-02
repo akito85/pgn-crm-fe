@@ -612,7 +612,7 @@ const ViewMaintainElectronicBankStatement = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["statusBankStatement",  "action"],
+    right: ["statusBankStatement", "action"],
   }));
 
   //dispatch
@@ -704,7 +704,7 @@ const ViewMaintainElectronicBankStatement = () => {
               }
               state={{ id: record?.id }}
             >
-              <EyeOutlined />
+              <EyeOutlined style={{ fontSize: "24px" }} />
             </Link>
           </Tooltip>
         );
