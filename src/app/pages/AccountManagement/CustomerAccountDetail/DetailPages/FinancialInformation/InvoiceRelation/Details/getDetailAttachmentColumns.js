@@ -82,7 +82,7 @@ const getDetailAttachmentColumns = (
               color={"#0075bf"}
               width={20}
               onClick={() => {
-                handleShow(handleShow);
+                handleShow(record);
               }}
             />
           </Tooltip>
