@@ -182,8 +182,8 @@ const accountGasUtilizationSlice = createSlice({
       state.loading = false;
     },
     [getCurrentGasUtilization.fulfilled]: (state, action) => {
-      state.data_current = action.payload;
       state.loading = false;
+      state.data_current = action.payload;
     },
 
     // Get Detail Gas Utilization History
