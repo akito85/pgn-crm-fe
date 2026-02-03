@@ -77,16 +77,23 @@ const CreateAllocation = ({
         );
       } else {
         setDataRecomendation(
-          data_recomendation_allocation?.map((item) => ({
-            ...item,
-            key: item?.id,
-            billingPeriod: moment(item?.billingPeriod)?.format(
-              dateFormatting?.datePeriod
-            ),
-            createdDate: moment(item.createdDate).format(
-              dateFormatting?.dateTime
-            ),
-          }))
+          data_recomendation_allocation
+            ?.filter(
+              (item) =>
+                item?.billingItemAmount !== 0 &&
+                (item?.allocationStatus === "Unpaid" ||
+                  item?.allocationStatus === "Partially Paid")
+            )
+            ?.map((item) => ({
+              ...item,
+              key: item?.id,
+              billingPeriod: moment(item?.billingPeriod)?.format(
+                dateFormatting?.datePeriod
+              ),
+              createdDate: moment(item.createdDate).format(
+                dateFormatting?.dateTime
+              ),
+            }))
         );
       }
     }
@@ -107,7 +114,6 @@ const CreateAllocation = ({
     if (dataRecomendation) {
       setSelectedRowKeys(
         dataRecomendation
-          ?.filter((item) => item?.allocationAmount !== 0)
           ?.map((item) => item?.key)
       );
     }

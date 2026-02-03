@@ -156,7 +156,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
         onChange={handleChange}
         onSizeChanger={handleChange}
         totalData={data_calculationSummary?.page?.totalElements || 0}
-        tableScrolled={{ y: 400, x: 1000 }}
+        tableScrolled={{x: 1000 }}
         onSort={onSortApi}
         showExport={true}
         columnDefinitions={columnDefinitions}

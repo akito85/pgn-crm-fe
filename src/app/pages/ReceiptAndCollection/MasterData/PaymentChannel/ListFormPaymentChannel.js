@@ -2,14 +2,14 @@ import {
   LeftOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Form,Spin } from "antd";
+import { Form, Spin } from "antd";
 import moment from "moment";
-import  { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
@@ -20,7 +20,8 @@ import {
   getListApprovalById,
   getListCategory,
   updatePaymentChannel,
-  getCategoryPayment
+  getCategoryPayment,
+  saveDraftPaymentChannel,
 } from "../../../../../redux/slices/receipt_collection/paymentChannel";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -65,12 +66,48 @@ const ListFormPaymentChannel = (props) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [current, setCurrent] = useState(0);
 
-  
+  const steps = [
+    { title: "Create", value: "Create", paramValue: ["ciCode", "name", "category", "type", "effStartDate", "effEndDate"] },
+    { title: "Approval", value: "Approval", paramValue: ["apphierId"] },
+    { title: "Attachment", value: "Attachment" },
+  ];
 
-  
+  const handleError = ({ values, errorFields, outOfDate }) => {
+    console.log("Validation Failed:", errorFields);
+  };
 
-  
+  const next = () => {
+    const fieldsToValidate = steps[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((err) => {
+          handleError({ values: form.getFieldsValue(), errorFields: err.errorFields });
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+
+
+
+
+
+
 
   useEffect(() => {
     if (id && type === "update") {
@@ -79,7 +116,7 @@ const ListFormPaymentChannel = (props) => {
   }, [dispatch, id, type]);
 
 
- 
+
 
   useEffect(() => {
     dispatch(getAllApprovalList());
@@ -96,7 +133,7 @@ const ListFormPaymentChannel = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-  
+
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -132,7 +169,7 @@ const ListFormPaymentChannel = (props) => {
   }, [formValue, appHierOptions, form]);
 
   useEffect(() => {
-    if (id  && data_detail) {
+    if (id && data_detail) {
 
       form.setFieldsValue({
         id: data_detail?.peOpCi?.id,
@@ -163,83 +200,51 @@ const ListFormPaymentChannel = (props) => {
     }
   }, [data_detail, id]);
 
-  // Define tabData before using it in useState
-
-  const [tabData, setTabData] = useState([
-    { value: "Payment Channel", paramValue: ["ciCode", 
-                                      "name",
-                                      "effStartDate",
-                                      "effEndDate",
-                                      "type",
-                                      "category"
-                                     ] },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
-
-  const [valuePage, setValuePage] = useState(tabData[0].value);
   const [sendBody, setSendBody] = useState();
-  const onChange = (e) => {
-    setValuePage(e.target.value);
-  };
-
-  useEffect(() => {
-    if (
-      formValue.apphierId &&
-      !appHierOptions.map((item) => item.value).includes(formValue.apphierId)
-    ) {
-      form.setFieldsValue({ apphierId: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
-
-  
 
   const handleSubmitForm = (formValue) => {
-      const dataValue = {
-        // id: id,
-        ciCode: formValue.ciCode,
-        name: formValue.name,
-        type: formValue.type,
-        effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
-        effEndDate: formValue.effEndDate
-          ? moment(formValue.effEndDate).format(dateFormatting.date)
-          : null,
-        appHierId: formValue.apphierId,
-        category: formValue.category,
-      };
+    const dataValue = {
+      ciCode: formValue.ciCode,
+      name: formValue.name,
+      type: formValue.type,
+      effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
+      effEndDate: formValue.effEndDate
+        ? moment(formValue.effEndDate).format(dateFormatting.date)
+        : null,
+      appHierId: formValue.apphierId,
+      category: formValue.category,
+    };
 
-      setSendBody(dataValue);
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: data_detail?.peOpCi?.id,
-      };
-      if (type !== "update") {
-        dispatch(createValidasiPaymentChannel(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-          });
-      }else{
-        dispatch(createValidasiPaymentChannel(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-            setSendBody(bodyValidasiUpdate)
-          });
-      }
-      
+    setSendBody(dataValue);
+    const bodyValidasiUpdate = {
+      ...dataValue,
+      id: data_detail?.peOpCi?.id,
+    };
+    if (type !== "update") {
+      dispatch(createValidasiPaymentChannel(dataValue))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+        });
+    } else {
+      dispatch(createValidasiPaymentChannel(bodyValidasiUpdate))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+          setSendBody(bodyValidasiUpdate)
+        });
+    }
   };
 
-  
+
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
@@ -267,30 +272,6 @@ const ListFormPaymentChannel = (props) => {
   };
 
   //handle Error
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    setTabData((prevState) => {
-      const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length < 0) {
-          return {
-            value: item.value,
-            paramValue: item.paramValue,
-          };
-        }
-        const errorBadge = errorFields.reduce(
-          (current, next) =>
-            item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
-        );
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
-  };
-
   // Breadcrumbs
   const routes = [
     {
@@ -306,11 +287,11 @@ const ListFormPaymentChannel = (props) => {
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
-  
+
 
   //kriim bodyy
   const handleSave = async () => {
-    setModalConfirm(false);
+    setLoadingSave(true);
     const successMessageCreate = {
       title: "Successfull",
       description: `Your data has been submited`,
@@ -352,8 +333,11 @@ const ListFormPaymentChannel = (props) => {
           setListDataAttachment([]);
           dispatch(showModalSuccess(successMessageUpdate));
           handleClear();
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -388,8 +372,11 @@ const ListFormPaymentChannel = (props) => {
           handleCancelModalConfirm();
           handleClear();
           dispatch(showModalSuccess(successMessageCreate));
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -403,14 +390,35 @@ const ListFormPaymentChannel = (props) => {
     }
   };
 
+  const handleSaveDraft = () => {
+    const dataValue = {
+      ciCode: formValue.ciCode,
+      name: formValue.name,
+      type: formValue.type,
+      effStartDate: formValue.effStartDate ? moment(formValue.effStartDate).format(dateFormatting.date) : null,
+      effEndDate: formValue.effEndDate
+        ? moment(formValue.effEndDate).format(dateFormatting.date)
+        : null,
+      appHierId: formValue.apphierId,
+      category: formValue.category,
+    };
+    dispatch(saveDraftPaymentChannel(dataValue))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleBack();
+      });
+  };
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
-        <RadioTabs
-          data={tabData}
-          onChange={onChange}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
         <Form
           layout="vertical"
@@ -420,7 +428,7 @@ const ListFormPaymentChannel = (props) => {
         >
           <div
             style={{
-              display: valuePage !== tabData[0].value ? "none" : undefined,
+              display: current !== 0 ? "none" : undefined,
             }}
           >
             <PaymentChannelForm
@@ -431,7 +439,7 @@ const ListFormPaymentChannel = (props) => {
           </div>
           <div
             style={{
-              display: valuePage !== tabData[1].value ? "none" : undefined,
+              display: current !== 1 ? "none" : undefined,
             }}
           >
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -445,7 +453,7 @@ const ListFormPaymentChannel = (props) => {
           </div>
           <div
             style={{
-              display: valuePage !== tabData[2].value ? "none" : undefined,
+              display: current !== 2 ? "none" : undefined,
             }}
           >
             <BaseContainer header={"ATTACHMENT INFORMATION"}>
@@ -462,47 +470,16 @@ const ListFormPaymentChannel = (props) => {
               />
             </BaseContainer>
           </div>
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-              // onClick={() => setModalConfirm(true)}
-              // disabled={disableSubmit}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            type={type}
+          />
         </Form>
       </Spin>
       <ModalCustom
@@ -512,11 +489,17 @@ const ListFormPaymentChannel = (props) => {
         width={1000}
         type={"confirmation"}
         footer={
-          <div className="w-full flex justify-end gap-5 p-4">
+          <div className="w-full flex justify-between gap-5 p-4">
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleSave}>
+            <ButtonComponent
+              type="submit"
+              onClick={handleSave}
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+              isPrimary
+              loading={loadingSave}
+            >
               Confirm
             </ButtonComponent>
           </div>
@@ -524,7 +507,7 @@ const ListFormPaymentChannel = (props) => {
       >
         <ContentModalConfirm
           data={sendBody}
-          tabData={tabData}
+          tabData={steps}
           listDataAttachment={listDataAttachment}
           listDataAppHierDetail={appHierDataDetail}
           dataOption={appHierOptions}

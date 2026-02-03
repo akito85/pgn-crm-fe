@@ -9,6 +9,7 @@ import {
 import {
   numberFormatting,
   currencyFormatting,
+  usageFormatting,
 } from "../../../../../../../utils/formatCurrency";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
@@ -80,7 +81,7 @@ export const columnsCalculationSummary = (
         false,
         "input",
         search,
-        "number",
+        "usage",
       ),
   },
   {
@@ -175,7 +176,7 @@ export const getExpandedColumns = () => [
         key: "calculatedUsageMin",
         width: 150,
         align: "right",
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "NORMAL",
@@ -183,7 +184,7 @@ export const getExpandedColumns = () => [
         key: "calculatedUsageNormal",
         width: 150,
         align: "right",
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "OUP",
@@ -191,7 +192,7 @@ export const getExpandedColumns = () => [
         key: "calculatedUsageUop",
         width: 150,
         align: "right",
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
     ],
   },
@@ -212,7 +213,7 @@ export const getExpandedColumns = () => [
         key: "convertedCalculatedMin",
         width: 150,
         align: "right",
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "NORMAL",
@@ -220,7 +221,7 @@ export const getExpandedColumns = () => [
         key: "convertedCalculatedNormal",
         width: 150,
         align: "right",
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
       {
         title: "OUP",
@@ -228,7 +229,7 @@ export const getExpandedColumns = () => [
         key: "convertedCalculatedOup",
         width: 150,
         align: "right",
-        render: (text) => numberFormatting(text),
+        render: (text) => usageFormatting(text),
       },
     ],
   },
@@ -317,6 +318,7 @@ export const getExpandedColumns = () => [
 ];
 
 // Render expanded row
+// Render expanded row
 export const renderExpandedRow = (record, expandData, loadingExpand) => {
   const rowKey = `${record.transactionDate}-${record.saType}`;
   const isLoading = loadingExpand[rowKey];
@@ -341,14 +343,43 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     );
   }
 
+  const handleWheel = (e) => {
+    const expandedContainer = e.currentTarget;
+    const expandedTableWrapper =
+      expandedContainer.querySelector(".ant-table-body");
+    if (expandedTableWrapper) {
+      const { scrollLeft, scrollWidth, clientWidth } = expandedTableWrapper;
+      const hasHorizontalScroll = scrollWidth > clientWidth;
+      const isHorizontalScrolling = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+
+      if (isHorizontalScrolling && hasHorizontalScroll) {
+        return;
+      }
+      if (hasHorizontalScroll) {
+        const isAtLeftEdge = scrollLeft === 0 && e.deltaX < 0;
+        const isAtRightEdge =
+          scrollLeft + clientWidth >= scrollWidth - 1 && e.deltaX > 0;
+        if (!isAtLeftEdge && !isAtRightEdge) {
+          e.stopPropagation();
+        }
+      } else {
+        e.stopPropagation();
+      }
+    }
+  };
+
   return (
-    <div className="bg-white" style={{ marginLeft: "28px" }}>
+    <div
+      className="bg-white"
+      style={{ marginLeft: "28px" }}
+      onWheel={handleWheel}
+    >
       <TableRBI
         idTable={`expanded-table-${rowKey}`}
         columns={expandedColumns}
         dataSource={expandedData}
         size="small"
-        tableScrolled={{ x: 2000 }}
+        tableScrolled={{ x: 2000, y:200}}
         showExport={false}
         showAdvanceSearch={false}
         showSearchBar={false}

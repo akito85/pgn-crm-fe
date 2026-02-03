@@ -47,15 +47,9 @@ const PartnerCaForm = (props) => {
 
   return (
     <div>
-      <BaseContainer header={"PARTNER"}>
-        <div className="w-full grid grid-cols-2 gap-5">
-          {/* <Form.Item
-            label={"Partner Code"}
-            name={"partnerCode"}
-            rules={formMessageRequired("Partner Code")}
-          >
-            <Input allowClear maxLength={4} />
-          </Form.Item> */}
+      <BaseContainer header={"PARTNER CA INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-5">
+
           <Form.Item
             label={"Partner Code"}
             name={"partnerCode"}
@@ -69,13 +63,7 @@ const PartnerCaForm = (props) => {
               ))}
             </SelectComponent>
           </Form.Item>
-          {/* <Form.Item
-            label={"Collection Agent Code"}
-            name={"caCode"}
-            rules={formMessageRequired("Ca Code")}
-          >
-            <InputComponent maxLength={15} />
-          </Form.Item> */}
+
 
           <Form.Item
             label={"Collection Agent Code"}
@@ -91,7 +79,14 @@ const PartnerCaForm = (props) => {
             </SelectComponent>
           </Form.Item>
           <Form.Item
-            label={"Eff Start Date"}
+            label={"Settlement Bank"}
+            name={"settlementBank"}
+            rules={formMessageRequired("Settlement Bank")}
+          >
+            <InputComponent />
+          </Form.Item>
+          <Form.Item
+            label={"Start Date"}
             name={"effStartDate"}
             rules={[
               {
@@ -106,18 +101,11 @@ const PartnerCaForm = (props) => {
             />
           </Form.Item>
           <Form.Item
-            label={"Eff End Date"}
+            label={"End Date"}
             name={"effEndDate"}
             rules={formMessageRequired("Eff End Date")}
           >
             <DateComponent dateDisable={disabledDate} />
-          </Form.Item>
-          <Form.Item
-            label={"Settlement Bank"}
-            name={"settlementBank"}
-            rules={formMessageRequired("Settlement Bank")}
-          >
-            <InputComponent />
           </Form.Item>
 
         </div>

@@ -48,7 +48,7 @@ const CaPaymentChannelForm = (props) => {
     return (
         <div>
             <BaseContainer header={"CA PAYMENT CHANNEL"}>
-                <div className="w-full grid grid-cols-2 gap-5">
+                <div className="w-full grid grid-cols-5 gap-5">
                     {/* <Form.Item
                         label={"Collection Agent Code"}
                         name={"caCode"}
@@ -146,7 +146,7 @@ const CaPaymentChannelForm = (props) => {
                     </Form.Item>
 
                     <Form.Item
-                        label={"Eff Start Date"}
+                        label={"Start Date"}
                         name={"effStartDate"}
                         rules={[
                             {
@@ -161,7 +161,7 @@ const CaPaymentChannelForm = (props) => {
                         />
                     </Form.Item>
                     <Form.Item
-                        label={"Eff End Date"}
+                        label={"End Date"}
                         name={"effEndDate"}
                         rules={formMessageRequired("Eff End Date")}
                     >

@@ -56,7 +56,6 @@ const PrabillingForm = ({ type }) => {
     loadingCreate,
   } = useSelector((state) => state.rbi_prabilling);
 
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -88,7 +87,7 @@ const PrabillingForm = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
   const [defaultData, setDefaultData] = useState({});
 
-  const [searchCustomerValue, setSearchCustomerValue] = useState(""); 
+  const [searchCustomerValue, setSearchCustomerValue] = useState("");
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const searchTimeoutRef = useRef(null);
   const [selectedCustomersMap, setSelectedCustomersMap] = useState({});
@@ -169,7 +168,7 @@ const PrabillingForm = ({ type }) => {
   useEffect(() => {
     let dataMrc = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     setMergedArrayMrc(dataMrc);
   }, [dispatch, list_meter_reading_code]);
@@ -204,7 +203,7 @@ const PrabillingForm = ({ type }) => {
   const handleSelectCustomer = useCallback(
     (value, option) => {
       const customerData = filteredCustomerList.find(
-        (item) => item.accountNumber === value
+        (item) => item.accountNumber === value,
       );
 
       if (customerData) {
@@ -225,7 +224,7 @@ const PrabillingForm = ({ type }) => {
         limit: DEFAULT_SEARCH_LIMIT,
       }));
     },
-    [filteredCustomerList]
+    [filteredCustomerList],
   );
 
   useEffect(() => {
@@ -269,7 +268,7 @@ const PrabillingForm = ({ type }) => {
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setBillingCycle(null); 
+    setBillingCycle(null);
 
     setDataSpecificCustomer({
       sorId: defaultData?.sor || null,
@@ -310,7 +309,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             mreadingCode: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
         (id) => {
@@ -319,7 +318,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             accSegment: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
         (id) => {
@@ -328,7 +327,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             accGroupType: id,
           };
-        }
+        },
       ),
       rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
         (id) => {
@@ -337,7 +336,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             custNumb: id,
           };
-        }
+        },
       ),
     };
 
@@ -365,19 +364,19 @@ const PrabillingForm = ({ type }) => {
 
   const handleSave = async () => {
     const selectedBillingCycle = (list_billing_cycle || []).find(
-      (item) => item.id === dataFinal?.billingCycle
+      (item) => item.id === dataFinal?.billingCycle,
     );
 
     const selectedBillingPeriod = list_billing_period?.data?.find(
-      (item) => item.id === dataFinal?.billingPeriod
+      (item) => item.id === dataFinal?.billingPeriod,
     );
 
     const selectedSor = list_sor?.data?.find(
-      (item) => item.id === dataFinal?.sor
+      (item) => item.id === dataFinal?.sor,
     );
 
     const selectedSchedulerType = list_scheduler_type?.find(
-      (item) => item.id === dataFinal?.scheduleType
+      (item) => item.id === dataFinal?.scheduleType,
     );
 
     if (!user_profile) {
@@ -401,16 +400,16 @@ const PrabillingForm = ({ type }) => {
         selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
       sor: selectedSor?.name || "",
       costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
-        (item) => item.costCenter
+        (item) => item.costCenter,
       ),
       meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
-        (item) => item.mreadingCode
+        (item) => item.mreadingCode,
       ),
       accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
-        (item) => item.accSegment
+        (item) => item.accSegment,
       ),
       accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
-        (item) => item.accGroupType
+        (item) => item.accGroupType,
       ),
 
       billingCycleId: dataFinal?.billingCycle,
@@ -984,27 +983,17 @@ const PrabillingForm = ({ type }) => {
               </div>
             </div>
           </CardContainer>
-          <div className={"w-full flex mt-5"}>
-            <div className={"w-full justify-start"}>
-              <Form.Item>
-                <ButtonComponent
-                  type={"submit"}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 16,
-                        justifyItems: "left",
-                      }}
-                    />
-                  }
-                  onClick={handleBackPage}
-                >
-                  Back
-                </ButtonComponent>
-              </Form.Item>
+          <div
+            className={
+              "flex justify-between items-center bg-white rounded-md p-3 w-full mb-4"
+            }
+          >
+            <div className={"w-full"}>
+              <ButtonComponent type={"submit"} onClick={handleBackPage}>
+                Back
+              </ButtonComponent>
             </div>
-            <div className={"w-full justify-end flex gap-2"}>
+            <div className={"flex gap-2"}>
               <ButtonComponent
                 type={"submit"}
                 icon={
@@ -1019,11 +1008,9 @@ const PrabillingForm = ({ type }) => {
               >
                 {type === "create" ? "Clear" : "Reset"}
               </ButtonComponent>
-              <Form.Item>
-                <ButtonComponent type={"submit"} htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
+              <ButtonComponent type={"submit"} htmlType={"submit"}>
+                Save
+              </ButtonComponent>
             </div>
           </div>
         </Form>
@@ -1083,7 +1070,7 @@ const PrabillingForm = ({ type }) => {
                     </span>
                     <span className="text-[13px] text-gray-600">
                       {list_sor?.data?.find(
-                        (item) => item.id === pendingDataFinal?.sor
+                        (item) => item.id === pendingDataFinal?.sor,
                       )?.name || "All"}
                     </span>
                   </div>
@@ -1194,10 +1181,18 @@ const PrabillingForm = ({ type }) => {
         loading={loadingCreate}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)} disabled={loadingCreate}  > 
+            <ButtonComponent
+              onClick={() => setOpenModal(false)}
+              disabled={loadingCreate}
+            >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave} isLoading={loadingCreate} disabled={loadingCreate}>
+            <ButtonComponent
+              type={"submit"}
+              onClick={handleSave}
+              isLoading={loadingCreate}
+              disabled={loadingCreate}
+            >
               Confirm
             </ButtonComponent>
           </div>

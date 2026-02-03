@@ -15,7 +15,7 @@ import { getDetailPrabillingInit } from "../../../../redux/slices/rating_billing
 const PrabillingDetail = () => {
   // Selector
   const { detail_prabilling_init, loading_detail_prabilling } = useSelector(
-    (state) => state.rbi_prabilling
+    (state) => state.rbi_prabilling,
   );
 
   // Declaration
@@ -94,11 +94,11 @@ const PrabillingDetail = () => {
           activeKey={activeTab}
           items={tabItems}
           onChange={handleTabChange}
-          style={{ marginBottom: "-24px" }}
+          // style={{ marginBottom: "-24px" }}
         />
       </div>
 
-      <div className="w-full flex justify-start mt-4">
+      <div className="bg-white rounded-md w-full flex justify-start mb-4 p-3">
         <ButtonComponent
           type="submit"
           border={false}

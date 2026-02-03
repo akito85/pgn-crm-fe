@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Form, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { LeftOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import moment from "moment";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -11,7 +11,7 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import ContentSectionForm from "./ContentSectionForm";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import { showModalError } from "../../../../../redux/slices/general_slice";
@@ -33,9 +33,9 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
 import { configApp } from "../../../../../constants/configApp";
 import { columnsTableCriteriaBillingBucket } from "./Table/TableCriteriaBillingBucket";
-import ModalBack from "../../../../../components/Modal/ModalBack";
-import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ConfirmationContentManagement from "./Modal/ConfirmationContentManagement";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
 
 // ✅ Helper function untuk transform data dari API ke format form
 const transformApiDataToForm = (apiData) => {
@@ -123,18 +123,15 @@ const ContentManagementForm = ({ type }) => {
   const status = location?.state?.status;
   const statusApproval = location?.state?.statusApproval;
 
-  // State
-  const [appHierOptions, setAppHierOptions] = useState([]);
-  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
-  const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [listDataCriteria, setListDataCriteria] = useState([]);
-  const [criteriaOptions, setCriteriaOptions] = useState([]);
-  const [criteriaValues, setCriteriaValues] = useState([]);
-  const [selectedHierarchy, setSelectedHierarchy] = useState();
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
-  const [flag, setFlag] = useState(false);
-  const [valuePage, setValuePage] = useState("Content Information");
+  // State untuk Stepper
+  const [current, setCurrent] = useState(0);
+
+  const steps = [
+    { title: "CONTENT", value: "Content Information" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Content Information",
@@ -153,8 +150,22 @@ const ContentManagementForm = ({ type }) => {
     { value: "Attachment" },
   ]);
 
+  const [valuePage, setValuePage] = useState(steps[0].value);
+
+  // State lainnya
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [listDataCriteria, setListDataCriteria] = useState([]);
+  const [criteriaOptions, setCriteriaOptions] = useState([]);
+  const [criteriaValues, setCriteriaValues] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState();
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+  const [flag, setFlag] = useState(false);
   const [storedDataInline, setStoredDataInline] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -178,6 +189,37 @@ const ContentManagementForm = ({ type }) => {
   }, [form, listDataCriteria]);
 
   const isLoading = loading || loadingForm;
+
+  // Stepper navigation handlers
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  const next = () => {
+    const fieldsToValidate = listSectionInfo[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
 
   // Use Effect
   useEffect(() => {
@@ -209,7 +251,6 @@ const ContentManagementForm = ({ type }) => {
 
   // ✅ useEffect untuk populate form - DENGAN TRANSFORM
   useEffect(() => {
-    // Transform data dari API
     const transformedDetail = data_detail ? transformApiDataToForm(data_detail) : null;
     const transformedDraft = data_detail_draft ? transformApiDataToForm(data_detail_draft) : null;
 
@@ -218,7 +259,6 @@ const ContentManagementForm = ({ type }) => {
       transformedDraft?.information?.id === id &&
       transformedDetail?.information?.id === id
     ) {
-      // ✅ SKENARIO: Ada draft dan detail
       const criteriaSelect = transformedDraft?.criteria?.map((item) => ({
         contentCriteriaId: item.contentCriteriaId,
         criteria: item.criteria,
@@ -301,7 +341,6 @@ const ContentManagementForm = ({ type }) => {
       !transformedDraft?.information?.id &&
       transformedDetail?.information?.id === id
     ) {
-      // ✅ SKENARIO: Hanya ada detail (tidak ada draft)
       const criteriaSelect = transformedDetail?.criteria?.map((item) => ({
         contentCriteriaId: item.contentCriteriaId,
         criteria: item.criteria,
@@ -731,8 +770,8 @@ const ContentManagementForm = ({ type }) => {
     }
   };
 
-  // ✅ handleConfirm untuk CREATE dan UPDATE
   const handleConfirm = () => {
+    setLoadingSave(true);
     setModalConfirm(false);
 
     const body = processData({
@@ -759,6 +798,7 @@ const ContentManagementForm = ({ type }) => {
             setBodyError({
               message: "Failed to get template ID from response",
             });
+            setLoadingSave(false);
             return;
           }
 
@@ -789,10 +829,11 @@ const ContentManagementForm = ({ type }) => {
           }
 
           setLoadingForm(false);
-          setModalConfirm(false);
+          setLoadingSave(false);
           handleClear();
         })
         .catch((error) => {
+          setLoadingSave(false);
           console.log(error);
           if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
             const message =
@@ -806,11 +847,10 @@ const ContentManagementForm = ({ type }) => {
           }
         });
     } else {
-      // ✅ UPDATE - Pass ID ke action
       dispatch(updateContentManagement({ body: body, id: id }))
         .unwrap()
         .then(async (dataForm) => {
-          const templateId = id; // ✅ Gunakan ID dari state
+          const templateId = id;
 
           console.log("Template updated with ID:", templateId);
 
@@ -845,10 +885,11 @@ const ContentManagementForm = ({ type }) => {
           }
 
           setLoadingForm(false);
-          setModalConfirm(false);
+          setLoadingSave(false);
           handleClear();
         })
         .catch((error) => {
+          setLoadingSave(false);
           if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -892,7 +933,6 @@ const ContentManagementForm = ({ type }) => {
     });
   };
 
-  // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, [], errorFields);
   };
@@ -943,6 +983,24 @@ const ContentManagementForm = ({ type }) => {
     setBodyError({});
   };
 
+  const handleBack = () => {
+    setModalBack(true);
+  };
+
+  const handleSubmit = () => {
+    setFlag(true);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
+
+  const handleSaveDraft = () => {
+    setFlag(false);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
+
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
     setStartDate(value);
@@ -958,11 +1016,9 @@ const ContentManagementForm = ({ type }) => {
     <LayoutMenu>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
-        />
+        
+        {/* FormStepper menggantikan RadioTabs */}
+        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
 
         <Form
           layout="vertical"
@@ -970,10 +1026,8 @@ const ContentManagementForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          {/* Content Information Section */}
-          <div
-            className={`${valuePage !== "Content Information" ? "hidden" : ""}`}
-          >
+          {/* Step 1: Content Information - Conditional Rendering */}
+          {valuePage === listSectionInfo[0].value && (
             <ContentSectionForm
               type={type}
               form={form}
@@ -995,9 +1049,10 @@ const ContentManagementForm = ({ type }) => {
               bodyValue={bodyValue}
               setBodyValue={setBodyValue}
             />
-          </div>
+          )}
 
-          <div className={valuePage !== "Approval" ? "hidden" : ""}>
+          {/* Step 2: Approval - Conditional Rendering */}
+          {valuePage === listSectionInfo[1].value && (
             <BaseContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
@@ -1007,9 +1062,10 @@ const ContentManagementForm = ({ type }) => {
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
             </BaseContainer>
-          </div>
+          )}
 
-          <div className={valuePage !== "Attachment" ? "hidden" : ""}>
+          {/* Step 3: Attachment - Conditional Rendering */}
+          {valuePage === listSectionInfo[2].value && (
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
@@ -1025,87 +1081,74 @@ const ContentManagementForm = ({ type }) => {
                 mandatory={true}
               />
             </BaseContainer>
-          </div>
+          )}
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedDataInline}
-            >
-              Back
-            </ButtonComponent>
-
-            <div className="w-full flex justify-end gap-5">
-              <ButtonComponent
-                disabled={storedDataInline ? true : false}
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? "IconButtonReset" : "IconButtonClear"
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={() => {
-                  handleClear();
-                }}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(false)}
-                disabled={storedDataInline}
-              >
-                Save as Draft
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(true)}
-                disabled={storedDataInline}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          {/* FormFooter menggantikan tombol manual */}
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+            disabled={storedDataInline}
+          />
         </Form>
 
         {/* Modal Confirmation */}
-        <ConfirmationContentManagement
+        <ModalCustom
           isOpen={modalConfirm}
-          data={bodyData}
-          selectedHierarchy={selectedHierarchy}
-          apiFormat={data_format}
-          apiCategory={data_category}
-          apiMedia={data_media}
-          apiCriteria={data_criteria}
-          criteriaValues={criteriaValues}
-          listDataAppHierDetail={appHierDataDetail}
-          listDataCriteria={listDataCriteria}
-          dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
-          handleConfirm={() => handleConfirm()}
-        />
+          header={"CONFIRMATION"}
+          width={1200}
+          type={"confirmation"}
+          footer={
+            <div className="w-full flex justify-end gap-5 p-4">
+              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+                isPrimary
+                onClick={handleConfirm}
+                loading={loadingSave}
+              >
+                Confirm
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <ConfirmationContentManagement
+            data={bodyData}
+            selectedHierarchy={selectedHierarchy}
+            apiFormat={data_format}
+            apiCategory={data_category}
+            apiMedia={data_media}
+            apiCriteria={data_criteria}
+            criteriaValues={criteriaValues}
+            listDataAppHierDetail={appHierDataDetail}
+            listDataCriteria={listDataCriteria}
+            dataOption={appHierOptions}
+          />
+        </ModalCustom>
 
         {/* Modal Back */}
-        <ModalBack
+        <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-        />
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
 
         {/* Modal Retry */}
         <ModalError

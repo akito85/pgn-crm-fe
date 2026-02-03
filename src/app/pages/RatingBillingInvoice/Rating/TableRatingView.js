@@ -593,7 +593,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -621,7 +621,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -736,7 +736,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -764,7 +764,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -792,7 +792,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -820,7 +820,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -848,7 +848,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
     ],
@@ -871,7 +871,6 @@ export const columnsRating = (
           searchedColumn,
           searchText,
           handleSearch,
-          "currency-idr",
         ),
         render: (text) =>
           renderColumn(
@@ -909,7 +908,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -937,7 +936,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -965,7 +964,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -993,7 +992,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
       {
@@ -1021,7 +1020,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            "usage",
           ),
       },
     ],

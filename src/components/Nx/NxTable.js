@@ -107,13 +107,15 @@ const ResizableTitle = (props) => {
 const NxTable = ({
   idTable,
   dataSource,
+  dataMain, // Alias for dataSource (backward compatibility)
   columns = [],
-  pageSize,
-  current,
+  columnMain, // Alias for columns (backward compatibility)
+  pageSize = 10, // Default pagination size
+  current = 1, // Default current page
   loading,
   onChange = () => {},
   onSizeChanger = () => {},
-  totalData,
+  totalData = 0, // Default total
   onDelete,
   rowSelection,
   onRowClicked = () => {},
@@ -144,6 +146,11 @@ const NxTable = ({
   selectedRowKey = null,
   onRowClick = () => {},
 }) => {
+  // Resolve aliases for backward compatibility
+  const resolvedDataSource = dataSource || dataMain || [];
+  const resolvedColumns = columns.length > 0 ? columns : (columnMain || []);
+  const resolvedTotalData = totalData || resolvedDataSource.length || 0;
+
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -181,11 +188,11 @@ const NxTable = ({
 
   // Initialize column order when columns change
   React.useEffect(() => {
-    if (columns && columns.length > 0 && columnOrder.length === 0) {
-      const initialOrder = getAllColumnKeys(columns);
+    if (resolvedColumns && resolvedColumns.length > 0 && columnOrder.length === 0) {
+      const initialOrder = getAllColumnKeys(resolvedColumns);
       setColumnOrder(initialOrder);
     }
-  }, [columns, columnOrder.length, getAllColumnKeys]);
+  }, [resolvedColumns, columnOrder.length, getAllColumnKeys]);
 
   // Infinite scroll handler
   React.useEffect(() => {
@@ -407,7 +414,7 @@ const NxTable = ({
   );
 
   const displayedColumns = useMemo(() => {
-    const cols = (columns || []).map((c) => ({
+    const cols = (resolvedColumns || []).map((c) => ({
       ...c,
       key: c.key || c.dataIndex || c.title,
     }));
@@ -486,7 +493,7 @@ const NxTable = ({
 
     return finalCols;
   }, [
-    columns,
+    resolvedColumns,
     optionSelectedCol,
     fixedColumns,
     columnOrder,
@@ -700,7 +707,7 @@ const NxTable = ({
         <div className={"w-full flex mb-3 justify-between items-center"}>
           <div className="flex items-center gap-4">
             <ColumnSettings
-              columns={columnDefinitions || columns}
+              columns={columnDefinitions || resolvedColumns}
               hiddenColumns={optionSelectedCol}
               onHiddenColumnsChange={setOptionSelectedCol}
               fixedColumns={fixedColumns}
@@ -774,7 +781,7 @@ const NxTable = ({
       ) : null}
 
       <Table
-        dataSource={dataSource}
+        dataSource={resolvedDataSource}
         columns={displayedColumns}
         components={components}
         scroll={tableScrolled}
@@ -794,9 +801,9 @@ const NxTable = ({
       {useInfiniteScroll ? (
         <div className={"w-full flex justify-end mt-3 items-center"}>
           <span style={{ fontSize: "12px", color: "#666" }}>
-            Showing {dataSource?.length || 0} rows
+            Showing {resolvedDataSource?.length || 0} rows
             {isLoadingMore && " | Loading..."}
-            {!hasMore && dataSource?.length > 0 && (
+            {!hasMore && resolvedDataSource?.length > 0 && (
               <span style={{ color: "#52c41a", fontWeight: "500" }}>
                 {" "}
                 | All data showed
@@ -822,11 +829,11 @@ const NxTable = ({
             </Select>
             <span style={{ fontSize: "12px" }}>
               Showing {(current - 1) * pageSize + 1} to{" "}
-              {Math.min(current * pageSize, totalData)} of {totalData} entries
+              {Math.min(current * pageSize, resolvedTotalData)} of {resolvedTotalData} entries
             </span>
           </div>
           <Pagination
-            total={totalData}
+            total={resolvedTotalData}
             current={current}
             pageSize={pageSize}
             onChange={onChange}
@@ -843,7 +850,7 @@ const NxTable = ({
         onClose={() => setIsAdvanceOpen(false)}
         onSearch={handleAdvanceSearch}
         onClear={handleClearFilter}
-        columns={columnDefinitions || columns}
+        columns={columnDefinitions || resolvedColumns}
         modalWidth={600}
       />
     </div>
