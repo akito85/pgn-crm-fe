@@ -1,22 +1,20 @@
 import { Modal } from "antd";
 
-const NxModal = (props) => {
-  const {
-    loading = false, // ← FIX: Default value
-    isOpen,
-    header,
-    children,
-    width,
-    title,
-    maxHeight,
-    className,
-    footer = [],
-    centered = true,
-    closeable = false,
-    handleCancel = () => { },
-    handleOk = () => { },
-  } = props;
-
+const NxModal = ({
+  loading = false, // ← FIX: Default value
+  isOpen,
+  header,
+  children,
+  width,
+  title,
+  maxHeight,
+  className,
+  footer = [],
+  centered = true,
+  closeable = false,
+  handleCancel = () => { },
+  handleOk = () => { },
+}) => {
   return (
     <Modal
       open={isOpen}
