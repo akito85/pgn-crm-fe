@@ -7,6 +7,8 @@ import {
     validateError,
 } from "../general_slice";
 
+import { errorBody, errorCode, errorMessage } from "../../../utils";
+
 const initialState = {
     loading: false,
     data: null,
@@ -433,6 +435,103 @@ export const getPartnerList = createAsyncThunk(
     }
 );
 
+export const activeInactiveCaPaymentChannel = createAsyncThunk(
+    "INACTIVE_CA_PAYMENT_CHANNEL",
+    async ({ body }, thunkAPI) => {
+        let status = body?.status === "Active" ? "Inactivate" : "Activate";
+        try {
+            const url = `/v1/dbs/api/ca-payment-channel/active-inactive`;
+            const response = await receiptCollectionHttpService.activationWithRemarkPost(
+                url,
+                body
+            );
+            const successMessage = {
+                title: "Successfull",
+                description: "Your data has been submitted.",
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successMessage));
+            return response.data;
+        } catch (response) {
+            thunkAPI.dispatch(
+                validateError({
+                    error: errorBody(errorCode(response), status, errorMessage(response)),
+                    action: "INACTIVE_CA_PAYMENT_CHANNEL",
+                    back: false,
+                })
+            );
+            return thunkAPI.rejectWithValue(response.response.data);
+        }
+    }
+);
+
+export const approveOrRejectInactiveCaPaymentChannel = createAsyncThunk(
+    "APPROVE_OR_REJECT_FOR_INACTIVE_CA_PAYMENT_CHANNEL",
+    async ({ body }, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/ca-payment-channel/approve-inactive";
+            const response =
+                await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+            const message = response?.message;
+            const successMessage = {
+                title: "Successfull",
+                description: `${message}`,
+                return: true,
+            };
+            thunkAPI.dispatch(showModalSuccess(successMessage));
+            return response.data;
+        } catch (error) {
+            const message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
+                error.message ||
+                error.toString();
+            if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+                const errorBody = {
+                    title: "Failed",
+                    description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+                        }. ${message}.`,
+                    return: false,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const saveDraftCaPaymentChannel = createAsyncThunk(
+    "SAVE_DRAFT_CA_PAYMENT_CHANNEL",
+    async (body, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/ca-payment-channel/save-draft`;
+            const data = await receiptCollectionHttpService.createData(url, body);
+            const successBody = {
+                title: "Successfull",
+                description: `Your data has been saved as draft`,
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successBody));
+            return data.data;
+        } catch (error) {
+            const message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
+                error.message ||
+                error.toString();
+            const errorBody = {
+                title: "Failed",
+                data: error.response.data.data,
+                description: `Your draft was not saved. ${message}.`,
+            };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const caPaymentChannelSlice = createSlice({
     name: "caPaymentChannel",
     initialState,
@@ -622,6 +721,39 @@ const caPaymentChannelSlice = createSlice({
         },
         [getType.rejected]: (state, action) => {
             state.error = action.payload;
+            state.loading = false;
+        },
+
+        [activeInactiveCaPaymentChannel.pending]: (state) => {
+            state.loading = true;
+        },
+        [activeInactiveCaPaymentChannel.fulfilled]: (state) => {
+            state.isSuccess = true;
+            state.loading = false;
+        },
+        [activeInactiveCaPaymentChannel.rejected]: (state) => {
+            state.isFailed = true;
+            state.loading = false;
+        },
+        [approveOrRejectInactiveCaPaymentChannel.pending]: (state) => {
+            state.loading = true;
+        },
+        [approveOrRejectInactiveCaPaymentChannel.fulfilled]: (state) => {
+            state.isSuccess = true;
+            state.loading = false;
+        },
+        [approveOrRejectInactiveCaPaymentChannel.rejected]: (state, action) => {
+            state.isFailed = true;
+            state.loading = false;
+            state.message = action.payload;
+        },
+        [saveDraftCaPaymentChannel.pending]: (state) => {
+            state.loading = true;
+        },
+        [saveDraftCaPaymentChannel.fulfilled]: (state) => {
+            state.loading = false;
+        },
+        [saveDraftCaPaymentChannel.rejected]: (state) => {
             state.loading = false;
         },
     },

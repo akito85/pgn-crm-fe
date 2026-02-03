@@ -56,6 +56,7 @@ const PointOfSalesPage = ({
   data_account_group_type = [],
   data_sor_list = [],
   data_cost_center_list = [],
+  data_uom_codes = [],
   mergedArrayMrc = [],
 }) => {
   const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
@@ -401,6 +402,7 @@ const PointOfSalesPage = ({
             currency={currency}
             transactionDate={transactionDate}
             idPos={idPos}
+            dataUomCodes={data_uom_codes}
           />
         );
       case listDetailPage[1].value:
@@ -419,6 +421,7 @@ const PointOfSalesPage = ({
             accountNumber={accountNumber}
             currency={currency}
             transactionDate={transactionDate}
+            dataUomCodes={data_uom_codes}
           />
         );
     }
