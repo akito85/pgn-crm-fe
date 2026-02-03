@@ -21,11 +21,6 @@ const { Panel } = Collapse;
 const FinancialInformation = ({
   id = 0,
   idCustomer = 0,
-  isApproval = false,
-  setIsApproval = () => {},
-  setShowApprovalButton = () => {},
-  submitApprovalCondition = "",
-  setSubmitApprovalCondition = () => {},
 }) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
@@ -122,11 +117,6 @@ const FinancialInformation = ({
           id={id}
           idCustomer={idCustomer}
           isActive={current === 6}
-          isApproval={isApproval}
-          setIsApproval={setIsApproval}
-          setShowApprovalButton={setShowApprovalButton}
-          submitApprovalCondition={submitApprovalCondition}
-          setSubmitApprovalCondition={setSubmitApprovalCondition}
         />
       ),
     },
@@ -137,11 +127,6 @@ const FinancialInformation = ({
           id={id}
           idCustomer={idCustomer}
           isActive={current === 7}
-          isApproval={isApproval}
-          setIsApproval={setIsApproval}
-          setShowApprovalButton={setShowApprovalButton}
-          submitApprovalCondition={submitApprovalCondition}
-          setSubmitApprovalCondition={setSubmitApprovalCondition}
         />
       ),
     },

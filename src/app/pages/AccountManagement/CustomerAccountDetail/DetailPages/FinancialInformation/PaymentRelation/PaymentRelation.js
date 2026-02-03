@@ -1,42 +1,27 @@
 import { memo, useEffect, useMemo, useRef } from "react";
-import {
-  FilterOutlined,
-} from "@ant-design/icons";
-import { DatePicker, Form, Input } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
-import Highlighter from "react-highlight-words";
-import moment from "moment";
-import { dateFormatting } from "../../../../../../../utils";
-import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
+import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
 
 const PaymentRelation = ({
   id = 0,
   idCustomer = 0,
-  isActive = false,
-  isApproval = false,
-  setIsApproval = () => {},
-  setShowApprovalButton = () => {},
-  submitApprovalCondition = "",
-  setSubmitApprovalCondition = () => {},
 }) => {
   const dispatch = useDispatch();
-
-  const financialInformationState = useSelector(
-    (state) => state.financialInformation
-  );
 
   const {
     list_paymentRelation,
     pagination_paymentRelation,
     data_prApprovalHistory,
     loading,
-  } = financialInformationState;
+  } = useSelector(
+    (state) => state.financialInformation
+  );
 
   //declare
   const searchInput = useRef(null);
@@ -44,7 +29,6 @@ const PaymentRelation = ({
   //state
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
-  const [listType, setListType] = useState("all");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -60,23 +44,6 @@ const PaymentRelation = ({
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [tempFilters, setTempFilters] = useState([]);
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys, newSelectedRows) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
-      if (!newSelectedRowKeys.length)
-        setShowApprovalButton(false);
-      else
-        setShowApprovalButton(true);
-    },
-    type: "checkbox",
-    preserveSelectedRowKeys: true,
-  }
-
   const currentData = useMemo(() => list_paymentRelation, [list_paymentRelation]);
 
   const currentPagination = pagination_paymentRelation;
@@ -91,51 +58,24 @@ const PaymentRelation = ({
     }));
   }, [currentData]);
 
-  const handleCancelApprovalModal = () => {
-    setShowApprovalModal(false);
-    setSubmitApprovalCondition("");
-  }
+  const handleRefresh = () => {
+    const body = {
+      page: 1,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      inputFields: tempFilters,
+    }
 
-  /**
-   * @param {string} description 
-   * @param {"approve"|"reject"} submitApprovalCondition 
-   * @param {() => {}} handleClear 
-   */
-  const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
-    const action = submitApprovalCondition.toUpperCase();
-
-    const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
-      id: row.id,
-      approvalId: row.tappId,
-      action,
-      description,
-    }));
-
-    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
-      id: row.id,
-      approvalId: row.tappId,
-      action,
-      description,
-    }))
-
-    dispatch(approveOrRejectAllPaymentRelation({ body, inactiveBody, action }))
-    .unwrap()
-    .then(() => {
-      handleClear();
-      handleIsApproval(false)
-
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        inputFields: tempFilters,
-      }
-
-      dispatch(getPaymentRelation({ id, body, isLoadMore: false }))
-    })
-    .catch(() => {});
-  }
+    dispatch(
+      getPaymentRelation({
+        id,
+        body,
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  };
 
   /**
    * Open or close inactivate modal
@@ -208,78 +148,6 @@ const PaymentRelation = ({
     });
   };
 
-  /**
-   * @param {string} dataIndex 
-   * @param {string} type 
-   * @returns
-   */
-  const getColumnSearchProps = (dataIndex, type) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
-      const onDataChange = (value, dateString) => {
-        setSelectedKeys(dateString ? [dateString] : []);
-        handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
-      };
-      return (
-        <div
-          style={{
-            padding: 8,
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          {type === "date" ? (
-            <DatePicker onChange={onDataChange} />
-          ) : (
-            <Input
-              ref={searchInput}
-              placeholder={`Search`}
-              value={selectedKeys[0]}
-              onChange={(e) =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])
-              }
-              onPressEnter={() => {
-                handleSearch(selectedKeys, confirm, dataIndex);
-              }}
-              style={{
-                marginBottom: 8,
-                display: "block",
-              }}
-            />
-          )}
-        </div>
-      );
-    },
-    filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered ? "#1890ff" : undefined,
-        }}
-      />
-    ),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 5000);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={
-            type === "date"
-              ? moment([searchText]).format(dateFormatting.dateFormal)
-              : [searchText]
-          }
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text || ""
-      ),
-  });
-
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -298,27 +166,6 @@ const PaymentRelation = ({
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
-    }
-  }
-
-  /**
-   * @param {boolean} newIsApproval 
-   */
-  const handleIsApproval = (newIsApproval) => {
-    setPage(1);
-    if (newIsApproval) {
-      setListType("approval");
-      setIsApproval(true);
-    } else {
-      setSearchText("");
-      setSearchedColumn("");
-      setListType("all");
-      setIsApproval(false);
-      setSelectedRowKeys([]);
-      setSelectedRows([]);
-      setSubmitApprovalCondition("");
-      setShowApprovalButton(false);
-      setShowApprovalModal(false);
     }
   }
 
@@ -357,7 +204,6 @@ const PaymentRelation = ({
         sort,
         searchs: JSON.stringify(search),
         inputFields: tempFilters,
-        listType,
       }
 
       await dispatch(
@@ -378,34 +224,10 @@ const PaymentRelation = ({
       sort,
       searchs: search,
       inputFields: tempFilters,
-      listType,
     }
 
     dispatch(getPaymentRelation({ id, body, isLoadMore: false }));
-  }, [sort, search, tempFilters, listType]);
-
-  // Listen to approve or reject button on the parent component
-  useEffect(() => {
-    if (isActive) {
-      if (submitApprovalCondition === "approve") {
-        setShowApprovalModal(true);
-      } else if (submitApprovalCondition === "reject") {
-        setShowApprovalModal(true);
-      }
-    }
-  }, [submitApprovalCondition]);
-
-  // Reset accordian when it's not the current one that's opened
-  useEffect(() => {
-    if (!isActive)
-      handleIsApproval(false);
-  }, [isActive]);
-
-  useEffect(() => {
-    if (!isApproval) {
-      handleIsApproval(false);
-    }
-  }, [isApproval]);
+  }, [sort, search, tempFilters]);
 
   useEffect(() => {
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
@@ -435,14 +257,11 @@ const PaymentRelation = ({
         totalElement={pagination_paymentRelation.totalElements}
         page={page}
         onSort={onSort}
-        rowSelection={isApproval ? rowSelection : undefined}
-        isApproval={isApproval}
         handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
-        handleIsApproval={handleIsApproval}
+        handleApproval={setShowApprovalModal}
         handleDownload={handleDownload}
         tempFilters={tempFilters}
-        setIsApproval={setIsApproval}
         handleLoadMore={handleLoadMore}
         hasMore={hasMore}
         searchText={searchText}
@@ -453,13 +272,11 @@ const PaymentRelation = ({
         loading={loading}
       />
 
-      <ModalConfirmationApprovalPaymentRelation
-        dataSource={selectedRows}
+      <PaymentRelationApprovalModal
+        id={id}
         isOpen={showApprovalModal}
-        setIsOpen={setShowApprovalModal}
-        getColumnSearchProps={getColumnSearchProps}
-        handleCloseModal={handleCancelApprovalModal}
-        onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
+        handleCancel={() => setShowApprovalModal(false)}
+        afterFinish={handleRefresh}
       />
 
       {/* Inactivate Modal */}

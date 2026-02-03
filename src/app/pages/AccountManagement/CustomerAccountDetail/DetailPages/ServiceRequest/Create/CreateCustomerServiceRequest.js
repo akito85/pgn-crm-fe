@@ -1,13 +1,18 @@
-import { useEffect,  useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, message, Form } from "antd";
-import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
+import { Steps, Button, message, Form, Spin } from "antd";
+import {
+  LeftCircleOutlined,
+  RightCircleOutlined,
+  RightOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
-// import StepContents from "./StepContents";
+import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 
@@ -32,17 +37,47 @@ import {
   getListCategoryFile,
   updateCustomer,
 } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
+
+import { getDetailContact } from "../../../../../../../redux/slices/account_management/MasterData/contact_slice";
+
+import {
+  getListDetailAccountContact,
+  getDetailAccountContact,
+} from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
+
+import {
+  getListDetailAccountAddress,
+  getListChooseAddress,
+} from "../../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
+
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 
-const CreateCustomerServiceRequest = ({ type }) => {
+import {
+  getServiceRequestById,
+  getServiceRequestTypes,
+  getServiceRequestCategories,
+  getServiceRequestSubcategories,
+  getServiceRequestChannels,
+  getServiceRequestPriorities,
+  getServiceRequestSources,
+  getServiceRequestDataRequirements,
+  getServiceRequestPrerequisites,
+} from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequest";
+
+const CreateCustomerServiceRequest = (props) => {
   const containerRef = useRef(null);
-  const [current, setCurrent] = useState(0);
+  const location = useLocation();
+
+  // Restore step from location state if returning from prerequisite create
+  const [current, setCurrent] = useState(location?.state?.returnToStep || 0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const { type } = props;
 
   const dispatch = useDispatch();
+
   const {
     data_customerDetailAttachment,
     data_customerDetail,
@@ -53,20 +88,34 @@ const CreateCustomerServiceRequest = ({ type }) => {
     loading,
   } = useSelector((state) => state.customerAccount);
 
+  const { data_accountDetail, loading: loadingAccount } = useSelector(
+    (state) => state.accountManagement,
+  );
+
+  const { dropdowns, serviceRequestDetail } = useSelector(
+    (state) => state.serviceRequest,
+  );
+
+  const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
+
   const {
-    data_accountDetail,
-    loading: loadingAccount,
-  } = useSelector((state) => state.accountManagement);
+    data_country,
+    data_province,
+    data_city,
+    data_district,
+    data_subdistrict,
+    data_postalcode,
+    data_type,
+    data_business_purpose,
+  } = useSelector((state) => state.accountAddress);
 
   //declare
-  const location = useLocation();
   const [formCreate] = Form.useForm();
   const id = location?.state?.id;
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const accountType = location?.state?.type; // "standard" or "onetime"
-  // const id = 7;
-    
+
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
   const [data, setData] = useState({});
@@ -82,12 +131,27 @@ const CreateCustomerServiceRequest = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
 
   const [customerType, setCustomerType] = useState(0);
+  const [identificationDdlValue, setIdentificationDdlValue] = useState([]);
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  // Service Request step state objects (following StandardForm pattern)
+  const [srObj, setSrObj] = useState({}); // Service Request information
+  const [contactsData, setContactsData] = useState([]); // Contacts table
+  const [prerequisitesData, setPrerequisitesData] = useState([]); // Prerequisites table
+  const [attachmentsData, setAttachmentsData] = useState([]); // Attachments
 
   const isLoading = loading || loadingForm || loadingAccount;
 
- 
-  // const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
-  const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = {};
+  const {
+    InformationForm,
+    AttachmentForm,
+    ApprovalForm,
+    ContactForm,
+    PreRequisiteForm,
+  } = StepContents;
+  const [dropdownsLoaded, setDropdownsLoaded] = useState(false);
 
   const routes = [
     {
@@ -103,7 +167,7 @@ const CreateCustomerServiceRequest = ({ type }) => {
       breadcrumbName: "Detail Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
       breadcrumbName: "Service Requests",
     },
     {
@@ -125,15 +189,54 @@ const CreateCustomerServiceRequest = ({ type }) => {
   useEffect(() => {
     if (id) {
       dispatch(getCustomerDetail(id));
+      // dispatch(getDetailContact(id));
     }
   }, [dispatch, id]);
+
+  useEffect(() => {
+    dispatch(
+      getListDetailAccountContact({
+        id: idAccount,
+        page: 1,
+        pageSize: 111,
+        sort: "createdDate~desc",
+      }),
+    );
+
+    dispatch(getDetailAccountContact(idCustomer));
+    // dispatch(getServiceRequestById(idAccount));
+  }, [dispatch, idAccount]);
 
   useEffect(() => {
     dispatch(getGlobalCustomerType());
     dispatch(getGlobalIdentificationType());
     dispatch(getGlobalSex());
     dispatch(getGlobalMartialStatus());
+    dispatch(getServiceRequestTypes());
+    dispatch(getServiceRequestSubcategories());
+    dispatch(getServiceRequestCategories());
+    dispatch(getServiceRequestPriorities());
+    dispatch(getServiceRequestChannels());
+    dispatch(getServiceRequestSources());
+    dispatch(getServiceRequestPrerequisites());
+    dispatch(getServiceRequestDataRequirements());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (
+      dropdowns &&
+      dropdowns.serviceRequestTypes?.data &&
+      dropdowns.serviceRequestCategories?.data &&
+      dropdowns.serviceRequestSubcategories?.data &&
+      dropdowns.serviceRequestChannels?.data &&
+      dropdowns.serviceRequestPriorities?.data &&
+      dropdowns.serviceRequestSources?.data &&
+      dropdowns.serviceRequestPrerequisites?.data &&
+      dropdowns.serviceRequestDataRequirements?.data
+    ) {
+      setDropdownsLoaded(true);
+    }
+  }, [dropdowns]);
 
   const handleSetData = (e) => {
     const temp = (e?.customerName || "").split(" ");
@@ -152,6 +255,9 @@ const CreateCustomerServiceRequest = ({ type }) => {
       customerName: (e?.customerName || "").toUpperCase(),
       description: e?.description,
     });
+    setFirstName((temp[0] || "").toUpperCase());
+    setMiddleName((temp[1] || "").toUpperCase());
+    setLastName((temp[2] || "").toUpperCase());
   };
 
   useEffect(() => {
@@ -162,65 +268,141 @@ const CreateCustomerServiceRequest = ({ type }) => {
   }, [data_customerDetail]);
 
   useEffect(() => {
+    if (customerType === 58) {
+      setIdentificationDdlValue(
+        data_globalIdentificationType?.filter((item) => item?.id !== 1123),
+      );
+    } else {
+      setIdentificationDdlValue(data_globalIdentificationType);
+    }
+  }, [customerType, data_globalIdentificationType]);
+
+  useEffect(() => {
+    formCreate.setFieldsValue({
+      customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstName, middleName, lastName]);
+
+  useEffect(() => {
     formCreate.setFieldsValue({
       ...data,
     });
-  }, [data, formCreate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   // Populate form with Account Standard/OneTime information
   useEffect(() => {
     if (data_accountDetail?.accountInformation) {
       const accountInfo = data_accountDetail.accountInformation;
+      const accountSums = data_accountDetail.accountSummary;
+
       formCreate.setFieldsValue({
-        account: accountInfo?.accountId || "",
-        accountType: accountInfo?.accountType || "",
-        longitude: accountInfo?.longitude || "",
-        accountSegment: accountInfo?.accountSegment || "",
-        city: accountInfo?.city || "",
-        accountCostCenter: accountInfo?.costCenter || "",
-        subdistrict: accountInfo?.subDistrict || "",
-        meterReadingCode: accountInfo?.mrc || "",
-        district: accountInfo?.district || "",
-        accountSOR: accountInfo?.sor || "",
-        premiseAddress: accountInfo?.premiseAddress || "",
-        latitude: accountInfo?.latitude || "",
         accountGroupType: accountInfo?.accountGroupType || "",
-        country: accountInfo?.country || "",
+        srFormAccountId: accountInfo?.accountId || "",
+        srFormAccountSor: accountInfo?.sor || "",
+        srFormAccountCostCenter: accountSums?.costCenter || "",
+        srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
+        srFormAccountSegment: accountInfo?.segment || "",
+        srFormAccountGroupType: accountInfo?.accountGroupType || "",
+        srFormAccountType: accountInfo?.accountType || "",
+        srFormPremiseAddress: data_detail?.contactAddress || "",
+        srFormDistrict: data_district || "",
+        srFormSubdistrict: data_subdistrict || "",
+        srFormCity: data_city || "",
+        srFormCountry: data_country || "",
       });
     }
-    console.log(data_accountDetail.accountInformation)
-  }, [data_accountDetail, formCreate]);
+    console.log(data_district)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data_accountDetail, data_detail, data_district, data_subdistrict, data_city, data_country]);
 
-  const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
-  
+  const handleChangeName = (e, type) => {
+    switch (type) {
+      case "firstName":
+        setFirstName(e.target.value);
+        break;
+      case "middleName":
+        setMiddleName(e.target.value);
+        break;
+      case "lastName":
+        setLastName(e.target.value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}`
+
   const steps = [
     {
       title: "Service Request",
-      content: <InformationForm />,
-      disabled: false
+      content: dropdownsLoaded ? (
+        <InformationForm
+          form={formCreate}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          dropdowns={dropdowns}
+        />
+      ) : (
+        <div className="flex justify-center items-center h-64">
+          <Spin size="large" tip="Loading dropdown data..." />
+        </div>
+      ),
+      disabled: !dropdownsLoaded,
     },
     {
       title: "Contact",
-      content: <ContactForm />,
-      disabled: false
-    },    
-    {
-      title: "Pre-Requisite",
-      content: <PreRequisiteForm />,
-      disabled: false
+      content: (
+        <ContactForm
+          form={formCreate}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          accountType={accountType}
+        />
+      ),
+      disabled: false,
     },
     {
-      title: "Attachment",
-      content: <AttachmentForm />,
-      disabled: false
+      title: "Pre-Requisite",
+      content: (
+        <PreRequisiteForm
+          form={formCreate}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          dropdowns={dropdowns}
+          currentStep={current}
+        />
+      ),
+      disabled: false,
     },
     {
       title: "Approval",
-      content: <ApprovalForm />,
-      disabled: false
-    }
+      content: (
+        <ApprovalForm
+          form={formCreate}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          dropdowns={dropdowns}
+          contactsData={contactsData}
+          prerequisitesData={prerequisitesData}
+          attachmentsData={attachmentsData}
+        />
+      ),
+      disabled: false,
+    },
+    {
+      title: "Attachment",
+      content: (
+        <AttachmentForm
+          attachmentsData={attachmentsData}
+          setAttachmentsData={setAttachmentsData}
+        />
+      ),
+      disabled: false,
+    },
   ];
-  
 
   const navigate = useNavigate();
   const next = () => {
@@ -236,9 +418,9 @@ const CreateCustomerServiceRequest = ({ type }) => {
   };
   const handleButtonNext = () => {
     next();
-    scrollRightHandler()
-  }
-  
+    scrollRightHandler();
+  };
+
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -274,16 +456,26 @@ const CreateCustomerServiceRequest = ({ type }) => {
         {/* Step Contents */}
         <div className="flex flex-row gap-x-6 justify-center">
           <span className="mt-[10px]">
-            <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
+            <LeftCircleOutlined
+              style={{ fontSize: "24px", color: "#0075bf" }}
+              onClick={scrollLeftHandler}
+            />
           </span>
-          <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+          <div
+            onScroll={handleScroll}
+            ref={containerRef}
+            className="overflow-x-scroll scrollStepsCstm"
+          >
             <Steps current={current} items={items} labelPlacement="vertical" />
           </div>
           <span className="mt-[10px]">
-            <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
+            <RightCircleOutlined
+              style={{ fontSize: "24px", color: "#0075bf" }}
+              onClick={scrollRightHandler}
+            />
           </span>
         </div>
-        
+
         <div className="steps-content my-6">{steps[current].content}</div>
 
         {/* Section Action Steps */}
@@ -291,7 +483,9 @@ const CreateCustomerServiceRequest = ({ type }) => {
           <ButtonComponent
             type={"submit"}
             icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-            onClick={()=>{setModalBack(true)}}
+            onClick={() => {
+              setModalBack(true);
+            }}
           >
             Back
           </ButtonComponent>
@@ -338,7 +532,6 @@ const CreateCustomerServiceRequest = ({ type }) => {
           </div>
         </div>
       </Form>
-
 
       {/* Modal Back */}
       <ModalConfirm

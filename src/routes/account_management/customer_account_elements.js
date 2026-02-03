@@ -51,8 +51,10 @@ import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerA
 import PaymentRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetails"; 
 import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
 
-// import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
-// import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
+import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
+import PreRequisiteCreateForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/StepContents/PreRequisiteForm/Create";
+
 import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetails";
 import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
 import MultiDestinationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/Details/MultiDestinationDetails";
@@ -103,9 +105,10 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_ACCOUNT_CONTACT_PAGE: <FormAccountContact type={"update"} />,
 
   // Service Request Detail
-  // VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
-  // CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
+  VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
+  CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
   // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
+  CREATE_SERVICE_REQUEST_PREREQUISITE_PAGE: <PreRequisiteCreateForm />,
 
   // Payment Relation Detail
   VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails />,
