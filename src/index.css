@@ -272,6 +272,41 @@ button.ant-btn.ant-btn-submit:disabled {
   display: inline-flex;
 }
 
+button.ant-btn.ant-btn-secondary {
+  background: #E6F4FA;
+  border-radius: 8px;
+  color: #0075BF;
+  height: auto;
+  width: auto;
+  align-items: center;
+  display: inline-flex;
+  border: none;
+  padding: 8px;
+}
+
+button.ant-btn.ant-btn-secondary:disabled {
+  background: #E0E0E0;
+  color: #BDBDBD;
+}
+
+button.ant-btn.ant-btn-menu {
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 1px solid #C8CDD4 !important;
+  color: #000000;
+  height: auto;
+  width: auto;
+  align-items: center;
+  display: inline-flex;
+  padding: 8px;
+}
+
+button.ant-btn.ant-btn-menu:disabled {
+  background: #E0E0E0;
+  color: #BDBDBD;
+  border: none;
+}
+
 button.ant-btn.ant-btn-action {
   background: transparent;
   border-radius: 8px;

@@ -490,17 +490,6 @@ const CreateUpdatePaymentRelation = ({ type }) => {
     await next();
     scrollRightHandler()
   }
-  
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -690,70 +679,61 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           {steps.map((step) => step.content)}
 
           {/* Section Action Steps */}
-          <div className="steps-action flex w-full justify-between gap-x-2">
-            <ButtonComponent
-              type={"submit"}
-              icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{navigate(-1)}}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex w-full justify-end gap-x-4">
+          <NxBaseContainer border>
+            <div className="flex justify-between">
               <ButtonComponent
-                onClick={handleClear}
-                type={"submit"}
-                icon={<SVGIcon name="IconButtonClear" width={24} />}
+                type={"menu"}
+                onClick={()=>{navigate(-1)}}
               >
-                { type === "update" ? "Reset" : "Clear" }
+                Cancel
               </ButtonComponent>
-              {current > 0 && current !== (steps.length-1) && (
+              <div className="flex w-full justify-end gap-x-4">
+                <ButtonComponent
+                  onClick={handleClear}
+                  type={"reject"}
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
+                >
+                  { type === "update" ? "Reset" : "Clear" }
+                </ButtonComponent>
+                <ButtonComponent
+                  onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                  type={"secondary"}
+                  disabled={current !== steps.length - 1}
+                >
+                  Save as Draft
+                </ButtonComponent>
                 <ButtonComponent
                   onClick={() => {
                     prev();
                     scrollLeftHandler();
                   }}
-                  type={"submit"}
-                  icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                  type={"menu"}
+                  disabled={current < 1}
                 >
                   Previous
                 </ButtonComponent>
-              )}
-              {current < steps.length - 1 && (
-                <ButtonComponent
-                  onClick={handleButtonNext}
-                  type={"submit"}
-                  disabled={steps[current].disabled}
-                >
-                  <div className="flex gap-x-2 items-center">
-                    <span>Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </div>
-                </ButtonComponent>
-              )}
-              {current === steps.length - 1 && (
-                <>
+                {current < steps.length - 1 && (
                   <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                    onClick={handleButtonNext}
                     type={"submit"}
+                    disabled={steps[current].disabled}
                   >
-                    Save as Draft
+                    Next
                   </ButtonComponent>
-                  <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "submit")}
-                    type={"submit"}
-                  >
-                    Save & Submit
-                  </ButtonComponent>
-                </>
-              )}
+                )}
+                {current === steps.length - 1 && (
+                  <>
+                    <ButtonComponent
+                      onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                      type={"submit"}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          </NxBaseContainer>
           <ConfirmationModal
             form={"paymentRelationForm"}
             isOpen={showConfirmationModal}
