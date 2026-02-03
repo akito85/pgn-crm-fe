@@ -10,7 +10,7 @@ import {
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import StatusComponent from "../components/StatusComponent";
-import { currencyFormatting, numberFormatting } from "./formatCurrency";
+import { currencyFormatting, numberFormatting, usageFormatting} from "./formatCurrency";
 
 export const tableNumbering = () => {
   const n = {
@@ -269,6 +269,9 @@ export const renderColumn = (
     }
     if (formatType === "currency-usd") {
       return currencyFormatting(text, "usd");
+    }
+    if (formatType === "usage") {
+      return usageFormatting(text);
     }
 
     if (useTooltip) {

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment";
+import { WarningOutlined } from "@ant-design/icons";
 import { dateFormatting } from "../../../../../utils";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import {
@@ -12,18 +13,17 @@ import {
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import EFakturCodeSectionForm from "./EFakturCodeSectionForm";
 import BaseContainer from "../../../../../components/BaseContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../../constants/configApp";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import ConfirmationEFakturCode from "./ConfirmationEfakturCode";
-import ModalBack from "../../../../../components/Modal/ModalBack";
-import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import {
   getDetailEfakturCode,
   getApprovalHierarchyList,
@@ -55,15 +55,15 @@ const EFakturCodeForm = ({ type }) => {
   const status = location?.state?.status;
   const statusApproval = location?.state?.statusApproval;
 
-  // State
-  const [appHierOptions, setAppHierOptions] = useState([]);
-  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
-  const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [listAdditionalCode, setListAdditionalCode] = useState([]);
-  const [selectedHierarchy, setSelectedHierarchy] = useState();
+  // State untuk Stepper
+  const [current, setCurrent] = useState(0);
 
-  const [flag, setFlag] = useState(false);
-  const [valuePage, setValuePage] = useState("Efaktur Code");
+  const steps = [
+    { title: "E-FAKTUR CODE", value: "Efaktur Code" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Efaktur Code",
@@ -73,8 +73,19 @@ const EFakturCodeForm = ({ type }) => {
     { value: "Attachment" },
   ]);
 
+  const [valuePage, setValuePage] = useState(steps[0].value);
+
+  // State lainnya
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [listAdditionalCode, setListAdditionalCode] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState();
+
+  const [flag, setFlag] = useState(false);
   const [storedDataInline, setStoredDataInline] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -82,6 +93,37 @@ const EFakturCodeForm = ({ type }) => {
   const [bodyData, setBodyData] = useState({});
 
   const isLoading = loading || loadingForm;
+
+  // Stepper navigation handlers
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  const next = () => {
+    const fieldsToValidate = listSectionInfo[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
 
   // Use Effect
   useEffect(() => {
@@ -106,7 +148,7 @@ const EFakturCodeForm = ({ type }) => {
       const additionalCodes = data_detail?.additionalCodes || [];
       const attachments = data_detail?.attachments || [];
 
-      // Data Additional Code Detail - mapping dari additionalCodes
+      // Data Additional Code Detail
       const mappedAdditionalCode = additionalCodes.map((item, index) => ({
         id: item.additionalId,
         key: index + 1,
@@ -125,7 +167,7 @@ const EFakturCodeForm = ({ type }) => {
         updatedDate: item.updatedDate || null,
       }));
 
-      // Data Attachment Information - mapping dari attachments
+      // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
         id: item.id || index,
         size: item.size || 0,
@@ -144,7 +186,6 @@ const EFakturCodeForm = ({ type }) => {
         dataType: "exist",
       }));
 
-      // Set form values dari fakturCode
       form.setFieldsValue({
         efakturCode: fakturCode?.einvoiceCode || "",
         description: fakturCode?.description || "",
@@ -224,7 +265,6 @@ const EFakturCodeForm = ({ type }) => {
     dateFormatting,
     flag,
   }) => {
-    // Map additionalCodes sesuai format backend
     const additionalCodes = listAdditionalCode?.map((item) => ({
       code: item.code,
       description: item.description,
@@ -236,7 +276,6 @@ const EFakturCodeForm = ({ type }) => {
         : null,
     }));
 
-    // Struktur payload sesuai backend
     const body = {
       id: type === "create" ? null : id,
       code: bodyData.efakturCode,
@@ -249,7 +288,6 @@ const EFakturCodeForm = ({ type }) => {
     return body;
   };
 
-  // Validate Data before Modal
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
@@ -280,7 +318,6 @@ const EFakturCodeForm = ({ type }) => {
     }
   };
 
-  // check has overlapping data
   const checkOverlappingData = useCallback((dataTable) => {
     const dataOverlap = [];
 
@@ -294,7 +331,6 @@ const EFakturCodeForm = ({ type }) => {
         const start2 = moment(item2.startDate);
         const end2 = item2.endDate ? moment(item2.endDate) : null;
 
-        // Check for overlap
         const hasOverlap =
           (start1.isSameOrBefore(start2) &&
             (!end1 || end1.isSameOrAfter(start2))) ||
@@ -310,7 +346,6 @@ const EFakturCodeForm = ({ type }) => {
     return dataOverlap.length > 0;
   }, []);
 
-  // Handle Save Form
   const handleSave = async (formValue) => {
     let errorBody = {};
     const hasOverlapping = checkOverlappingData(listAdditionalCode);
@@ -361,6 +396,7 @@ const EFakturCodeForm = ({ type }) => {
   };
 
   const handleConfirm = () => {
+    setLoadingSave(true);
     setModalConfirm(false);
 
     const body = processData({
@@ -388,11 +424,12 @@ const EFakturCodeForm = ({ type }) => {
             await dispatch(uploadAttachment({ body }));
           }
           setLoadingForm(false);
-          setModalConfirm(false);
+          setLoadingSave(false);
           handleClear();
         })
         .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          setLoadingSave(false);
+          if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
             const message =
               (error.response &&
                 error.response.data &&
@@ -422,11 +459,12 @@ const EFakturCodeForm = ({ type }) => {
             await dispatch(uploadAttachment({ body }));
           }
           setLoadingForm(false);
-          setModalConfirm(false);
+          setLoadingSave(false);
           handleClear();
         })
         .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          setLoadingSave(false);
+          if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
             const message =
               (error.response &&
                 error.response.data &&
@@ -469,7 +507,6 @@ const EFakturCodeForm = ({ type }) => {
     });
   };
 
-  // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
   };
@@ -507,17 +544,31 @@ const EFakturCodeForm = ({ type }) => {
     setBodyError({});
   };
 
-  console.log("data: ", listDataAttachment);
+  const handleBack = () => {
+    setModalBack(true);
+  };
+
+  const handleSubmit = () => {
+    setFlag(true);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
+
+  const handleSaveDraft = () => {
+    setFlag(false);
+    setTimeout(() => {
+        form.submit();
+    }, 0);
+};
 
   return (
     <LayoutMenu>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
-        />
+        
+        {/* FormStepper menggantikan RadioTabs */}
+        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
 
         <Form
           layout="vertical"
@@ -525,8 +576,8 @@ const EFakturCodeForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          {/* E-Faktur Code Section */}
-          <div className={`${valuePage !== "Efaktur Code" ? "hidden" : ""}`}>
+          {/* Step 1: E-Faktur Code - Conditional Rendering */}
+          {valuePage === listSectionInfo[0].value && (
             <EFakturCodeSectionForm
               type={type}
               form={form}
@@ -537,9 +588,10 @@ const EFakturCodeForm = ({ type }) => {
               status={status}
               statusApproval={statusApproval}
             />
-          </div>
+          )}
 
-          <div className={valuePage !== "Approval" ? "hidden" : ""}>
+          {/* Step 2: Approval - Conditional Rendering */}
+          {valuePage === listSectionInfo[1].value && (
             <BaseContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
@@ -549,9 +601,10 @@ const EFakturCodeForm = ({ type }) => {
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
             </BaseContainer>
-          </div>
+          )}
 
-          <div className={valuePage !== "Attachment" ? "hidden" : ""}>
+          {/* Step 3: Attachment - Conditional Rendering */}
+          {valuePage === listSectionInfo[2].value && (
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
@@ -567,83 +620,70 @@ const EFakturCodeForm = ({ type }) => {
                 mandatory={true}
               />
             </BaseContainer>
-          </div>
+          )}
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedDataInline}
-            >
-              Back
-            </ButtonComponent>
-
-            <div className="w-full flex justify-end gap-5">
-              <ButtonComponent
-                disabled={storedDataInline ? true : false}
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? "IconButtonReset" : "IconButtonClear"
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={() => {
-                  handleClear();
-                }}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(false)}
-                disabled={storedDataInline}
-              >
-                Save as Draft
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(true)}
-                disabled={storedDataInline}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          {/* FormFooter menggantikan tombol manual */}
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+            disabled={storedDataInline}
+          />
         </Form>
 
         {/* Modal Confirmation */}
-        <ConfirmationEFakturCode
+        <ModalCustom
           isOpen={modalConfirm}
-          data={bodyData}
-          selectedHierarchy={selectedHierarchy}
-          listDataAppHierDetail={appHierDataDetail}
-          listDataAttachment={listDataAttachment}
-          listAdditionalCode={listAdditionalCode}
-          dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
-          handleConfirm={() => handleConfirm()}
-        />
+          header={"CONFIRMATION"}
+          width={1200}
+          type={"confirmation"}
+          footer={
+            <div className="w-full flex justify-end gap-5 p-4">
+              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+                isPrimary
+                onClick={handleConfirm}
+                loading={loadingSave}
+              >
+                Confirm
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <ConfirmationEFakturCode
+            data={bodyData}
+            selectedHierarchy={selectedHierarchy}
+            listDataAppHierDetail={appHierDataDetail}
+            listDataAttachment={listDataAttachment}
+            listAdditionalCode={listAdditionalCode}
+            dataOption={appHierOptions}
+          />
+        </ModalCustom>
 
         {/* Modal Back */}
-        <ModalBack
+        <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-        />
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
 
         {/* Modal Retry */}
         <ModalError
@@ -658,7 +698,7 @@ const EFakturCodeForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              flag ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>

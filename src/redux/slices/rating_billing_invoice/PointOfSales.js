@@ -41,6 +41,7 @@ const initialState = {
   data_user_detail: {},
   data_sor_list: [],
   data_cost_center_list: [],
+  data_uom_codes: [],
   loading_prospective: false,
 };
 
@@ -864,6 +865,33 @@ export const getCostCenterList = createAsyncThunk(
   },
 );
 
+export const getUomCodes = createAsyncThunk(
+  "GET_UOM_CODES_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/uom-codes`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 const pointOfSalesSlice = createSlice({
   name: "pointOfSales",
   initialState,
@@ -1287,6 +1315,19 @@ const pointOfSalesSlice = createSlice({
     [getCostCenterList.rejected]: (state) => {
       state.loading_prospective = false;
       state.data_cost_center_list = [];
+    },
+
+    // UOM Codes
+    [getUomCodes.pending]: (state) => {
+      state.loading = true;
+    },
+    [getUomCodes.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_uom_codes = action.payload?.data || action.payload || [];
+    },
+    [getUomCodes.rejected]: (state) => {
+      state.loading = false;
+      state.data_uom_codes = [];
     },
   },
 });

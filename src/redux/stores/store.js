@@ -133,6 +133,7 @@ import offsetReducer from "../slices/receipt_collection/offset";
 import writeOffReducer from "../slices/receipt_collection/writeOff";
 import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
 import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
+import globalPropReducer from "../slices/globalPropSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -211,6 +212,9 @@ const reducer = combineReducers({
   accounting_rules: accountingRulesReducer,
   tax_implication: taxImplicationReducer,
   assets: assetsReducer,
+
+  // Global reducer
+  globalProp: globalPropReducer,
 
   // RBI reducer
   prabillingLog: prabillingLogReducer,

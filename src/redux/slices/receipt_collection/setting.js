@@ -523,7 +523,7 @@ export const getPaymentChannelList = createAsyncThunk(
 
 export const getPaymentChannelListByCa = createAsyncThunk(
   "GET_LIST_PAYMENT_CHANNEL_BY_CA",
-  async (caCode,thunkAPI) => {
+  async (caCode, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-channel/list-by-ca/${caCode}`;
       const data = await receiptCollectionHttpService.getAll(url);
@@ -551,7 +551,7 @@ export const getPaymentChannelListByCa = createAsyncThunk(
 
 export const getPartnerListByCa = createAsyncThunk(
   "GET_LIST_PARTNER_BY_CA",
-  async (caCode,thunkAPI) => {
+  async (caCode, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/partner/list-by-ca/${caCode}`;
       const data = await receiptCollectionHttpService.getAll(url);
@@ -576,6 +576,36 @@ export const getPartnerListByCa = createAsyncThunk(
   }
 );
 
+export const saveDraftSetting = createAsyncThunk(
+  "SAVE_DRAFT_SETTINGS",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/settings/save-draft`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: "Successfull",
+        description: `Your data has been saved as draft`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return data.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        data: error.response.data.data,
+        description: `Your draft was not saved. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const settingSlice = createSlice({
   name: "setting",
@@ -838,6 +868,16 @@ const settingSlice = createSlice({
     },
     [getPaymentChannelListByCa.rejected]: (state, action) => {
       state.dataPaymentChannelList = action.payload;
+      state.loading = false;
+    },
+
+    [saveDraftSetting.pending]: (state) => {
+      state.loading = true;
+    },
+    [saveDraftSetting.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [saveDraftSetting.rejected]: (state) => {
       state.loading = false;
     },
 

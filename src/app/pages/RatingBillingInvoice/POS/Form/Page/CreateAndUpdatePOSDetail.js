@@ -18,10 +18,11 @@ const CreateAndUpdatePOSDetail = ({
   dataItem = [],
   dataType = [],
   loading = false,
+  dataUomCodes = [],
 }) => {
   const searchInput = useRef(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
-  
+
   // State untuk infinite scroll
   const [displayedRowCount, setDisplayedRowCount] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -44,7 +45,7 @@ const CreateAndUpdatePOSDetail = ({
   const handleLoadMore = async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        setDisplayedRowCount(prev => prev + 20);
+        setDisplayedRowCount((prev) => prev + 20);
         resolve();
       }, 300);
     });
@@ -273,7 +274,13 @@ const CreateAndUpdatePOSDetail = ({
             />
           </Form.Item>
           <Form.Item name={"uom"} label={"UOM"}>
-            <InputComponent disabled />
+            <SelectComponent disabled={loading}>
+              {(dataUomCodes || [])?.map((uom) => (
+                <Select.Option key={uom?.label} value={uom?.label}>
+                  {uom?.label}
+                </Select.Option>
+              ))}
+            </SelectComponent>
           </Form.Item>
           <Form.Item name={"currency"} label={"Currency"}>
             <InputComponent disabled />

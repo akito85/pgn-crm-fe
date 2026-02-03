@@ -1,5 +1,6 @@
 import {
   Spin,
+  Checkbox,
   Tooltip,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -20,15 +21,23 @@ import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Col
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
 import {
+  getAllApprovalList,
+  getListApprovalById,
   getApprovalHistory,
   getDownloadPartner,
   getPaginatePartner,
+  inactivePartner
 } from "../../../../../redux/slices/receipt_collection/partner";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import {
+  DownloadOutlined,
+} from "@ant-design/icons";
+import { disabledActionByStatus } from "../../../../../utils";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 
 const ViewPartner = () => {
   // Selector
@@ -52,6 +61,10 @@ const ViewPartner = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [status, setStatus] = useState("");
+  const [id, setId] = useState("");
+  const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
+  const [openModalInactivate, setOpenModalInactivate] = useState(false);
 
   const handleFetch = useCallback(() => {
     dispatch(
@@ -112,13 +125,13 @@ const ViewPartner = () => {
       const temp = {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PARTNER || [],
-          // inactive:
-          //   dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_METHOD || [],
+          inactive:
+            dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PARTNER || [],
-          // inactive:
-          //   dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_METHOD || [],
+          inactive:
+            dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -197,8 +210,36 @@ const ViewPartner = () => {
           search
         ),
     },
+
     {
-      title: "EFF START DATE",
+      title: "TYPE",
+      dataIndex: "type",
+      key: "type",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsPaging(
+        "type",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false
+      ),
+      render: (text) =>
+        renderColumn(
+          "type",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "START DATE",
       sorter: true,
       align: "center",
       key: "effStartDate",
@@ -223,7 +264,7 @@ const ViewPartner = () => {
         ),
     },
     {
-      title: "EFF END DATE",
+      title: "END DATE",
       sorter: true,
       align: "center",
       key: "effEndDate",
@@ -302,15 +343,14 @@ const ViewPartner = () => {
         ),
     },
     {
-      title: "TYPE",
-      dataIndex: "type",
-      key: "type",
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
       sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
+      width: 100,
+      fixed: "right",
       ...getColumnSearchPropsPaging(
-        "type",
+        "status",
         searchInput,
         searchedColumn,
         searchText,
@@ -319,13 +359,12 @@ const ViewPartner = () => {
       ),
       render: (text) =>
         renderColumn(
-          "type",
+          "status",
           searchedColumn,
           searchText,
           text,
-          true,
-          "input",
-          search
+          false,
+          "status"
         ),
     },
     {
@@ -333,7 +372,7 @@ const ViewPartner = () => {
       dataIndex: "statusApproval",
       key: "statusApproval",
       sorter: true,
-      width: 200,
+      width: 150,
       fixed: "right",
       ...getColumnSearchPropsPaging(
         "statusApproval",
@@ -357,7 +396,7 @@ const ViewPartner = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["statusApproval", "action"],
+    right: ["status", "statusApproval", "action"],
   }));
 
   const onSort = (_, __, sort) => {
@@ -385,8 +424,61 @@ const ViewPartner = () => {
     );
   };
 
+  const handleInactive = (r) => {
+    setOpenModalInactivate(true);
+    setId(r?.id);
+    setNameModalActiveOrInactivate(
+      r?.partnerCode + " - " + r?.partnerName
+    );
+    setStatus(r?.status);
+  };
+
+  const handleCancelModalInactivate = () => {
+    setOpenModalInactivate(false);
+  };
+
+  const handleSubmitModalInactivate = (res, handleClear) => {
+    const body = {
+      id: id,
+      appHierId: res.approvalHierarchy,
+      status: status === "Inactive" ? "Active" : "Inactive",
+      remark: res.remark,
+    };
+    setBody({ body });
+    dispatch(inactivePartner({ body }))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancelModalInactivate();
+        let tempSearch = "";
+        for (const dataIndex in search) {
+          if (Object.hasOwnProperty.call(search, dataIndex)) {
+            const tempSearchText = search[dataIndex];
+            if (tempSearchText) {
+              tempSearch += `${dataIndex}~${tempSearchText},`;
+            }
+          }
+        }
+        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+        dispatch(getPaginatePartner({ search: tempSearch, page, pageSize, sort }));
+      });
+  };
+
   const itemActions = [
     // toolbar items
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (
@@ -427,7 +519,7 @@ const ViewPartner = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
-        const isEditable = record.statusApproval === "Rejected"
+        const isEditable = record.statusApproval === "Draft" || record.statusApproval === "Rejected";
         // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
         // (record.status !== "Active" && record.statusApproval !== "Approved") 
 
@@ -478,6 +570,49 @@ const ViewPartner = () => {
       },
     },
     {
+      action: "Activate",
+      type: "table",
+      render: (record, data_length) => {
+        const statusLowerCase = record?.status?.toLowerCase()
+
+        return (
+          data_length > 3 ?
+            <div className="w-full">
+              <ButtonComponent
+                border={false}
+                className={'gap-5 w-full'}
+                onClick={() => handleInactive(record)}
+                disabled={
+                  disabledActionByStatus('activate', record?.status, record?.statusApproval)
+                }
+              >
+                <Checkbox
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+                <span
+                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
+                >
+                  {record?.status === "Active" ? "Inactivate" : "Activate"}
+                </span>
+              </ButtonComponent>
+            </div>
+            :
+            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
+              <div >
+                <Checkbox
+                  border={false}
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+              </div>
+            </Tooltip>
+        );
+      }
+    },
+    {
       action: "history",
       type: "table",
       render: (record, data_length) => {
@@ -512,7 +647,9 @@ const ViewPartner = () => {
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
-      if (bodyError?.action === "GET_APPROVAL_PARTNER") {
+      if (bodyError?.action === "INACTIVE_RECEIPT_PARTNER") {
+        dispatch(inactivePartner(body));
+      } else if (bodyError?.action === "GET_APPROVAL_PARTNER") {
         dispatch(getApprovalHistory(body));
       } else if (bodyError?.action === "DOWNLOAD_PARTNER") {
         handleDownload();
@@ -565,7 +702,16 @@ const ViewPartner = () => {
           />
         </CardContainer>
 
-
+        <ModalActiveInactive
+          dispatch={dispatch}
+          getAPIOption={getAllApprovalList}
+          getAPIDetail={getListApprovalById}
+          selector={"partner"}
+          alertMessage={`Are you sure you want to inactivate this Partner with Partner Code ${nameModalActiveOrInactivate}?`}
+          openModalInactivate={openModalInactivate}
+          handleCloseModalInactivate={handleCancelModalInactivate}
+          onFinish={handleSubmitModalInactivate}
+        />
 
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}
