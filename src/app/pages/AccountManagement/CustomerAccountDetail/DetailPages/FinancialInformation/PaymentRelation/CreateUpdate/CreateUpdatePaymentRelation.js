@@ -69,7 +69,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   const [formCreate] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
-  const idPr = location?.state?.idPr;
+  const idPr = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
 
   //state
