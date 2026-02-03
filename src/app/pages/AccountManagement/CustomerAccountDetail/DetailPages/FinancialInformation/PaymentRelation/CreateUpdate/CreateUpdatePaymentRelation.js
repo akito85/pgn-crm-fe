@@ -183,11 +183,15 @@ const CreateUpdatePaymentRelation = ({ type }) => {
     },
     {
       path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      breadcrumbName: "Payment Relation",
+      breadcrumbName: "Detail Account",
+      state: {
+        idAccount,
+        idCustomer,
+      }
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create" : (type === "update") ? "Update" : "",
+      breadcrumbName: (type === "create") ? "Create Payment Relation" : (type === "update") ? "Update Payment Relation" : "",
     },
   ];
 
