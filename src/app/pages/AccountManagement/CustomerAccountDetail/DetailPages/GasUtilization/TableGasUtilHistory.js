@@ -1,7 +1,7 @@
 import React,{ useEffect, useState, useRef, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { Tooltip } from 'antd'
+import { Button, Tooltip } from 'antd'
 
 import DetailGasUtilHistory from './DetailGasUtilHistory'
 import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
@@ -14,6 +14,7 @@ import { useColumnActionPermission } from '../../../../../../components/ColumnAc
 import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColumns'
 import { WarningOutlined } from '@ant-design/icons'
 import { hasValue, renderDateColumn } from '../../../../../../utils'
+import ModalCustom from '../../../../../../components/Modal/ModalCustom'
 
 const columns = (
   search,
@@ -336,14 +337,27 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
       <DetailGasUtilHistory isOpen={modalDetail} setIsOpen={setModalDetail} dataDetail={data_detail} />
 
       {/* Modal Delete */}
-      <ModalConfirm
+      <ModalCustom
         isOpen={openModalDelete}
         handleCancel={()=>{
           setIdSelected('')
           setOpenModalDelete(false)
         }}
         handleOk={handleConfirmModalDelete}
+        header={"Delete Gas Utilization"}
         width={500}
+        type={"confirmation"}
+        footer={[
+          <Button key="cancel" onClick={()=>{
+            setIdSelected('')
+            setOpenModalDelete(false)
+          }}>
+            Cancel
+          </Button>,
+          <Button key="ok" type="primary" danger onClick={handleConfirmModalDelete}>
+            Delete
+          </Button>,
+        ]}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
@@ -351,11 +365,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
             Are you sure want to delete gas utilization ?
           </p>
         </div>
-        {/* <Alert
-          message="Warning! your data will deleted permanently"
-          type={"error"}
-        /> */}
-      </ModalConfirm>
+      </ModalCustom>
     </>
   )
 }
