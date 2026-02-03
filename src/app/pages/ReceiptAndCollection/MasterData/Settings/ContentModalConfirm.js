@@ -2,7 +2,7 @@ import moment from "moment";
 import { Fragment, useState } from "react";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { Tabs } from "antd";
 import { dateFormatting } from "../../../../../utils";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 
@@ -22,7 +22,21 @@ const ContentModalConfirm = ({
     switch (valuePage) {
       case tabData[0].value:
         return (
-          <div className="grid grid-cols-2 w-full">
+          <div className="grid grid-cols-5 w-full">
+            <DetailText label={"Collecting Agent Code"}>
+              {data?.caCode}
+            </DetailText>
+            <DetailText label={"Partner Code"}>
+              {data?.partnerCode}
+            </DetailText>
+
+            <DetailText label={"Payment Channel Code"}>
+              {data?.ciCode}
+            </DetailText>
+
+            <DetailText label={"Type"}>
+              {data?.type}
+            </DetailText>
             <DetailText label={"Date Start"}>
               {data?.dateStart}
             </DetailText>
@@ -47,22 +61,7 @@ const ContentModalConfirm = ({
               {data?.minuteEnd}
             </DetailText>
 
-            <DetailText label={"CA Code"}>
-              {data?.caCode}
-            </DetailText>
 
-
-            <DetailText label={"Partner Code"}>
-              {data?.partnerCode}
-            </DetailText>
-
-            <DetailText label={"CI Code"}>
-              {data?.ciCode}
-            </DetailText>
-
-            <DetailText label={"Type"}>
-              {data?.type}
-            </DetailText>
           </div>
         );
       case tabData[1].value:
@@ -87,13 +86,20 @@ const ContentModalConfirm = ({
         return <Fragment></Fragment>;
     }
   };
-  const handleMethod = (e) => {
-    setValuePage(e.target.value);
+  const handleMethod = (key) => {
+    setValuePage(key);
   };
 
   return (
     <div className="flex flex-col gap-4">
-      <RadioTabs data={tabData} onChange={handleMethod} />
+      <Tabs
+        activeKey={valuePage}
+        onChange={handleMethod}
+        items={tabData.map((tab) => ({
+          key: tab.value,
+          label: tab.value,
+        }))}
+      />
       <div className="flex flex-col gap-4">
         <div className="text-primary text-xs font-bold uppercase">
           {`${valuePage} INFORMATION`}

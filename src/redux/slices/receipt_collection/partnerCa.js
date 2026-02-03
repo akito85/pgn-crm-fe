@@ -411,6 +411,103 @@ export const getCollectionAgentList = createAsyncThunk(
   }
 );
 
+export const inactivePartnerCa = createAsyncThunk(
+  "INACTIVE_PARTNER_CA",
+  async ({ body }, thunkAPI) => {
+    let status = body?.status === "Active" ? "Inactivate" : "Activate";
+    try {
+      const url = `/v1/dbs/api/partner-ca/active-inactive`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(
+        url,
+        body
+      );
+      const successMessage = {
+        title: "Successfull",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(response), status, errorMessage(response)),
+          action: "INACTIVE_PARTNER_CA",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(response.response.data);
+    }
+  }
+);
+
+export const approveOrRejectInactivePartnerCa = createAsyncThunk(
+  "APPROVE_OR_REJECT_FOR_INACTIVE_PARTNER_CA",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/partner-ca/approve-inactive";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const message = response?.message;
+      const successMessage = {
+        title: "Successfull",
+        description: `${message}`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const saveDraftPartnerCa = createAsyncThunk(
+  "SAVE_DRAFT_PARTNER_CA",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner-ca/save-draft`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: "Successfull",
+        description: `Your data has been saved as draft`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return data.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        data: error.response.data.data,
+        description: `Your draft was not saved. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const partnerCaSlice = createSlice({
   name: "partnerCa",
   initialState,
@@ -608,6 +705,40 @@ const partnerCaSlice = createSlice({
     [getCollectionAgentList.rejected]: (state, action) => {
       state.dataCollectionAgent = action.payload;
       state.loading = true;
+    },
+    [inactivePartnerCa.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivePartnerCa.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [inactivePartnerCa.rejected]: (state) => {
+      state.isFailed = true;
+      state.loading = false;
+    },
+
+    [approveOrRejectInactivePartnerCa.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactivePartnerCa.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectInactivePartnerCa.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    [saveDraftPartnerCa.pending]: (state) => {
+      state.loading = true;
+    },
+    [saveDraftPartnerCa.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [saveDraftPartnerCa.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });

@@ -9,8 +9,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+
+
 import {
   getTypeDDL,
   createPartner,
@@ -22,6 +24,7 @@ import {
   updatePartner,
   getPartnerList,
   getCollectionAgentList,
+  saveDraftPartnerCa,
 } from "../../../../../redux/slices/receipt_collection/partnerCa";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -67,6 +70,45 @@ const ListFormPartnerCa = (props) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [current, setCurrent] = useState(0);
+
+  const steps = [
+    { title: "Create", value: "Create", paramValue: ["partnerCode", "caCode", "effStartDate", "effEndDate", "settlementBank"] },
+    { title: "Approval", value: "Approval", paramValue: ["apphierId"] },
+    { title: "Attachment", value: "Attachment" },
+  ];
+
+
+
+  const handleError = ({ values, errorFields, outOfDate }) => {
+    console.log("Validation Failed:", errorFields);
+  };
+
+  const next = () => {
+    const fieldsToValidate = steps[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((err) => {
+          // Handle validation errors if needed
+          handleError({ values: form.getFieldsValue(), errorFields: err.errorFields });
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    setCurrent(current - 1);
+  };
 
 
 
@@ -167,26 +209,7 @@ const ListFormPartnerCa = (props) => {
     }
   }, [data_detail, id]);
 
-  // Define tabData before using it in useState
 
-  const [tabData, setTabData] = useState([
-    {
-      value: "Partner Ca", paramValue: ["partnerCode",
-        "caCode",
-        "effStartDate",
-        "effEndDate",
-        "settlementBank",
-      ]
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
-
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const [sendBody, setSendBody] = useState();
-  const onChange = (e) => {
-    setValuePage(e.target.value);
-  };
 
   useEffect(() => {
     if (
@@ -199,6 +222,8 @@ const ListFormPartnerCa = (props) => {
   }, [formValue, appHierOptions, form]);
 
 
+
+  const [sendBody, setSendBody] = useState();
 
   const handleSubmitForm = (formValue) => {
     const dataValue = {
@@ -252,14 +277,7 @@ const ListFormPartnerCa = (props) => {
 
   // Validation Button Back
   const handleBack = () => {
-    if (
-      form.getFieldValue() === null ||
-      Object.keys(form.getFieldValue()).length === 0
-    ) {
-      navigate(-1);
-    } else {
-      setModalBack(true);
-    }
+    navigate(-1);
   };
 
   const handleClear = () => {
@@ -272,30 +290,7 @@ const ListFormPartnerCa = (props) => {
     }
   };
 
-  //handle Error
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    setTabData((prevState) => {
-      const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length < 0) {
-          return {
-            value: item.value,
-            paramValue: item.paramValue,
-          };
-        }
-        const errorBadge = errorFields.reduce(
-          (current, next) =>
-            item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
-        );
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
-  };
+
 
   // Breadcrumbs
   const routes = [
@@ -316,7 +311,7 @@ const ListFormPartnerCa = (props) => {
 
   //kriim bodyy
   const handleSave = async () => {
-    setModalConfirm(false);
+    setLoadingSave(true);
     const successMessageCreate = {
       title: "Successfull",
       description: `Your data has been submited`,
@@ -357,9 +352,13 @@ const ListFormPartnerCa = (props) => {
           setSelectedHierarchy("");
           setListDataAttachment([]);
           dispatch(showModalSuccess(successMessageUpdate));
+          dispatch(showModalSuccess(successMessageUpdate));
           handleClear();
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -394,8 +393,11 @@ const ListFormPartnerCa = (props) => {
           handleCancelModalConfirm();
           handleClear();
           dispatch(showModalSuccess(successMessageCreate));
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -409,14 +411,35 @@ const ListFormPartnerCa = (props) => {
     }
   };
 
+  const handleSaveDraft = () => {
+    const dataValue = {
+      // partnerId: id,
+      partnerCode: formValue.partnerCode,
+      caCode: formValue.caCode,
+      settlementBank: formValue.settlementBank,
+      effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
+      effEndDate: formValue.effEndDate
+        ? moment(formValue.endDate).format(dateFormatting.date)
+        : null,
+      appHierId: formValue.apphierId,
+    };
+    dispatch(saveDraftPartnerCa(dataValue))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleBack();
+      });
+  };
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
-        <RadioTabs
-          data={tabData}
-          onChange={onChange}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
         <Form
           layout="vertical"
@@ -426,7 +449,7 @@ const ListFormPartnerCa = (props) => {
         >
           <div
             style={{
-              display: valuePage !== tabData[0].value ? "none" : undefined,
+              display: current !== 0 ? "none" : undefined,
             }}
           >
             <PartnerCaForm
@@ -438,7 +461,7 @@ const ListFormPartnerCa = (props) => {
           </div>
           <div
             style={{
-              display: valuePage !== tabData[1].value ? "none" : undefined,
+              display: current !== 1 ? "none" : undefined,
             }}
           >
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -452,7 +475,7 @@ const ListFormPartnerCa = (props) => {
           </div>
           <div
             style={{
-              display: valuePage !== tabData[2].value ? "none" : undefined,
+              display: current !== 2 ? "none" : undefined,
             }}
           >
             <BaseContainer header={"ATTACHMENT INFORMATION"}>
@@ -469,47 +492,16 @@ const ListFormPartnerCa = (props) => {
               />
             </BaseContainer>
           </div>
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-              // onClick={() => setModalConfirm(true)}
-              // disabled={disableSubmit}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            type={type}
+          />
         </Form>
       </Spin>
       <ModalCustom
@@ -519,11 +511,17 @@ const ListFormPartnerCa = (props) => {
         width={1000}
         type={"confirmation"}
         footer={
-          <div className="w-full flex justify-end gap-5 p-4">
+          <div className="w-full flex justify-between gap-5 p-4">
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleSave}>
+            <ButtonComponent
+              type="submit"
+              onClick={handleSave}
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+              isPrimary
+              loading={loadingSave}
+            >
               Confirm
             </ButtonComponent>
           </div>
@@ -531,7 +529,7 @@ const ListFormPartnerCa = (props) => {
       >
         <ContentModalConfirm
           data={sendBody}
-          tabData={tabData}
+          tabData={steps}
           listDataAttachment={listDataAttachment}
           listDataAppHierDetail={appHierDataDetail}
           dataOption={appHierOptions}
@@ -553,7 +551,7 @@ const ListFormPartnerCa = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </LayoutMenu >
   );
 };
 

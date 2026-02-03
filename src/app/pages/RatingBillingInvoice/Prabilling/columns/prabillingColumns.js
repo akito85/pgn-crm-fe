@@ -16,7 +16,7 @@ export const getAllTabColumns = (
   {
     key: "no",
     title: "NO",
-    width:30,
+    width:45,
     isClassification: true,
     render: (text, object, index) => index + 1,
   },

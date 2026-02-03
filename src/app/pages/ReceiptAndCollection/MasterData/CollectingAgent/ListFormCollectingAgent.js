@@ -9,8 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
     createCollectingAgent,
     createValidasiCollectingAgent,
@@ -19,6 +19,8 @@ import {
     getListApprovalByIdCollectingAgent,
     getListCategoryCollectingAgent,
     updateCollectingAgent,
+    saveDraftCollectingAgent,
+    getDetailDraftCollectingAgent,
 } from "../../../../../redux/slices/receipt_collection/collectingAgent";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -53,7 +55,7 @@ const ListFormCollectingAgent = (props) => {
     const [form] = Form.useForm();
     const formValue = form.getFieldsValue();
     const location = useLocation();
-    const { id } = location?.state || {};
+    const { id, status } = location?.state || {};
     const [listDataAttachment, setListDataAttachment] = useState([]);
     const [selectedHierarchy, setSelectedHierarchy] = useState();
     const [modalConfirm, setModalConfirm] = useState(false);
@@ -61,12 +63,24 @@ const ListFormCollectingAgent = (props) => {
     const [appHierOptions, setAppHierOptions] = useState([]);
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [loadingForm, setLoadingForm] = useState(loading);
+    const [loadingSave, setLoadingSave] = useState(false);
+    const [current, setCurrent] = useState(0);
+
+    const steps = [
+        { title: "CREATE", value: "Collecting Agent" },
+        { title: "APPROVAL", value: "Approval" },
+        { title: "ATTACHMENT", value: "Attachment" },
+    ];
 
     useEffect(() => {
         if (id && type === "update") {
-            dispatch(getDetailCollectingAgent(id));
+            if (status === "Draft") {
+                dispatch(getDetailDraftCollectingAgent(id));
+            } else {
+                dispatch(getDetailCollectingAgent(id));
+            }
         }
-    }, [dispatch, id, type]);
+    }, [dispatch, id, type, status]);
 
     useEffect(() => {
         dispatch(getAllApprovalListCollectingAgent());
@@ -162,10 +176,41 @@ const ListFormCollectingAgent = (props) => {
         { value: "Attachment" },
     ]);
 
-    const [valuePage, setValuePage] = useState(tabData[0].value);
+    const [valuePage, setValuePage] = useState(steps[0].value);
     const [sendBody, setSendBody] = useState();
+
+    useEffect(() => {
+        setValuePage(steps[current].value);
+    }, [current]);
+
     const onChange = (e) => {
-        setValuePage(e.target.value);
+        // setValuePage(e.target.value);
+    };
+
+    const next = () => {
+        const fieldsToValidate = tabData[current]?.paramValue;
+        if (fieldsToValidate) {
+            form
+                .validateFields(fieldsToValidate)
+                .then(() => {
+                    if (current < steps.length - 1) {
+                        setCurrent(current + 1);
+                    }
+                })
+                .catch((error) => {
+                    console.log("Validation failed:", error);
+                });
+        } else {
+            if (current < steps.length - 1) {
+                setCurrent(current + 1);
+            }
+        }
+    };
+
+    const prev = () => {
+        if (current > 0) {
+            setCurrent(current - 1);
+        }
     };
 
     useEffect(() => {
@@ -193,7 +238,7 @@ const ListFormCollectingAgent = (props) => {
         setSendBody(dataValue);
         const bodyValidasiUpdate = {
             ...dataValue,
-            id: data_detail?.id,
+            id: data_detail?.collectingAgent?.id,
         };
         if (type !== "update") {
             dispatch(createValidasiCollectingAgent(dataValue))
@@ -217,6 +262,25 @@ const ListFormCollectingAgent = (props) => {
                     setSendBody(bodyValidasiUpdate);
                 });
         }
+    };
+
+    const handleSaveDraft = () => {
+        const values = form.getFieldsValue();
+        const dataValue = {
+            id: id,
+            caCode: values.caCode,
+            name: values.name,
+            type: values.type,
+            effStartDate: values.effStartDate ? moment(values.effStartDate).format(dateFormatting.date) : null,
+            effEndDate: values.effEndDate ? moment(values.effEndDate).format(dateFormatting.date) : null,
+            apphierId: values.apphierId,
+        };
+
+        dispatch(saveDraftCollectingAgent(dataValue))
+            .unwrap()
+            .then(() => {
+                navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT);
+            });
     };
 
     const handleCancelModalConfirm = () => {
@@ -288,7 +352,7 @@ const ListFormCollectingAgent = (props) => {
 
     //kirim body
     const handleSave = async () => {
-        setModalConfirm(false);
+        setLoadingSave(true);
         const successMessageCreate = {
             title: "Successfull",
             description: `Your data has been submited`,
@@ -305,6 +369,7 @@ const ListFormCollectingAgent = (props) => {
             dispatch(updateCollectingAgent(sendBody))
                 .unwrap()
                 .then(async () => {
+                    const id = data_detail?.collectingAgent?.id;
                     setLoadingForm(true);
                     const filterDataAttach = listDataAttachment.filter(
                         (item) => item.dataType !== "exist"
@@ -312,7 +377,7 @@ const ListFormCollectingAgent = (props) => {
                     for (let icon = 0; icon < filterDataAttach.length; icon++) {
                         const element = filterDataAttach[icon];
                         const body = {
-                            referensiId: data_detail?.id,
+                            referensiId: data_detail?.collectingAgent?.id,
                             files: element.file,
                             category: "COLLECTING_AGENT",
                             fileCategoryId: element.fileCategoryId,
@@ -329,8 +394,11 @@ const ListFormCollectingAgent = (props) => {
                     setListDataAttachment([]);
                     dispatch(showModalSuccess(successMessageUpdate));
                     handleClear();
+                    setLoadingSave(false);
                 })
                 .catch((error) => {
+                    setLoadingSave(false);
+                    setModalConfirm(false);
                     if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
                         const message =
                             (error.response &&
@@ -355,6 +423,7 @@ const ListFormCollectingAgent = (props) => {
                             fileCategoryId: element.fileCategoryId,
                             referensiId: id,
                             category: "COLLECTING_AGENT",
+                            fileCategoryId: element.fileCategoryId,
                         };
                         await receiptCollectionHttpService.uploadImage(
                             `/v1/dbs/api/attachment/upload/v1`,
@@ -365,8 +434,11 @@ const ListFormCollectingAgent = (props) => {
                     handleCancelModalConfirm();
                     handleClear();
                     dispatch(showModalSuccess(successMessageCreate));
+                    setLoadingSave(false);
                 })
                 .catch((error) => {
+                    setLoadingSave(false);
+                    setModalConfirm(false);
                     if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
                         const message =
                             (error.response &&
@@ -383,11 +455,12 @@ const ListFormCollectingAgent = (props) => {
     return (
         <LayoutMenu>
             <BreadCrumb routes={routes} />
-            <Spin spinning={loadingForm}>
-                <RadioTabs
-                    data={tabData}
-                    onChange={onChange}
-                    currentPosition={valuePage}
+            <Spin spinning={loading || loadingForm}>
+                <FormStepper
+                    steps={steps}
+                    current={current}
+                    onPrev={prev}
+                    onNext={next}
                 />
                 <Form
                     layout="vertical"
@@ -435,42 +508,16 @@ const ListFormCollectingAgent = (props) => {
                             />
                         </BaseContainer>
                     </div>
-                    <div className="flex w-full justify-between align-middle my-3">
-                        <ButtonComponent
-                            type={"submit"}
-                            onClick={() => handleBack()}
-                            icon={
-                                <LeftOutlined
-                                    style={{
-                                        color: "#fff",
-                                        fontSize: 24,
-                                        justifyItems: "center",
-                                    }}
-                                />
-                            }
-                        >
-                            Back
-                        </ButtonComponent>
-                        <div className="flex align-middle gap-3">
-                            <ButtonComponent
-                                icon={
-                                    <SVGIcon
-                                        name={
-                                            type === "update" ? `IconButtonReset` : `IconButtonClear`
-                                        }
-                                        width={24}
-                                    />
-                                }
-                                type="submit"
-                                onClick={handleClear}
-                            >
-                                {type === "update" ? "Reset" : "Clear"}
-                            </ButtonComponent>
-                            <ButtonComponent htmlType="submit" type="submit">
-                                Save & Submit
-                            </ButtonComponent>
-                        </div>
-                    </div>
+                    <FormFooter
+                        current={current}
+                        totalSteps={steps.length}
+                        onPrev={prev}
+                        onNext={next}
+                        onCancel={handleBack}
+                        onClear={handleClear}
+                        onSaveDraft={handleSaveDraft}
+                        type={type}
+                    />
                 </Form>
             </Spin>
             <ModalCustom
@@ -480,11 +527,16 @@ const ListFormCollectingAgent = (props) => {
                 width={1000}
                 type={"confirmation"}
                 footer={
-                    <div className="w-full flex justify-end gap-5 p-4">
+                    <div className="w-full flex justify-between gap-5 p-4">
                         <ButtonComponent onClick={handleCancelModalConfirm} type="default">
                             Cancel
                         </ButtonComponent>
-                        <ButtonComponent type="submit" onClick={handleSave}>
+                        <ButtonComponent
+                            className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+                            isPrimary
+                            onClick={handleSave}
+                            loading={loadingSave}
+                        >
                             Confirm
                         </ButtonComponent>
                     </div>
