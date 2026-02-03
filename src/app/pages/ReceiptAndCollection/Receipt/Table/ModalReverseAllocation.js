@@ -89,6 +89,11 @@ const ModalReverseAllocation = ({ isOpen, handleCancel, record, receiptId, onSuc
             ...prevState,
             [type]: result,
         }));
+
+        if (type === "approvalHierarchy") {
+            form.setFieldsValue({ approvalHierarchy: result });
+        }
+
         return result;
     };
 
