@@ -12,7 +12,7 @@
  *   { key: 'action', title: 'Action', dataIndex: 'action' }
  * ];
  *
- * const fixedColumns = { left: Set(['id']), right: Set(['action']) };
+ * const fixedColumns = { left: ['id'], right: ['action'] };
  *
  * const result = nxApplyFixedColumns(columns, fixedColumns);
  * // Returns columns with 'id' fixed left and 'action' fixed right
