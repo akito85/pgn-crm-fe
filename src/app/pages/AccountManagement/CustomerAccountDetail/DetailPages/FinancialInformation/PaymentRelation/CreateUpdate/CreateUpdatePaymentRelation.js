@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Form, Spin } from "antd";
-import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import StepContents from "./StepContents";
@@ -41,6 +40,7 @@ import NxCardContainer from "../../../../../../../../components/Nx/NxCardContain
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import { FormStepper } from "../../../../../../../../components/FormStepNavigation";
+import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 
 const CreateUpdatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -674,7 +674,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
             className="flex flex-col gap-y-4"
           >
           {/* Step Contents */}
-          <FormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
+          <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
           {steps.map((step) => step.content)}
 
