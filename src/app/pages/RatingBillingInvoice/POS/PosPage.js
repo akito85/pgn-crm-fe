@@ -373,6 +373,9 @@ const PosPage = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
+        const customerTypeForNav =
+          record.customerType === 2 ? "prospective" : "customer";
+
         const content =
           data > 3 ? (
             <ButtonComponent
@@ -401,6 +404,7 @@ const PosPage = () => {
             state={{
               id: record.id,
               idPos: record.posNumber,
+              customerType: customerTypeForNav,
             }}
           >
             {content}
