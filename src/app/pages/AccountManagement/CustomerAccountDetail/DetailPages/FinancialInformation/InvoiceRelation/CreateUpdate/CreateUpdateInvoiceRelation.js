@@ -68,7 +68,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const [formCreate] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
-  const idIr = location?.state?.idIr;
+  const idIr = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
 
   //state
@@ -229,6 +229,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           const body = {
             stepNumber: current + 1,
             type: type.toUpperCase(),
+            id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
@@ -236,7 +237,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               startDate,
               endDate,
               appHierId,
-              id: idIr,
             }
           };
 
@@ -395,6 +395,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         const body = {
           stepNumber: current + 1,
           type: type.toUpperCase(),
+          id: idIr,
           data : {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
@@ -402,7 +403,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             startDate,
             endDate,
             appHierId,
-            id: idIr,
           }
         };
 
@@ -453,6 +453,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           const body = {
             stepNumber: i + 1,
             type: type.toUpperCase(),
+            id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
@@ -460,7 +461,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               startDate,
               endDate,
               appHierId,
-              id: idIr,
             }
           };
 
