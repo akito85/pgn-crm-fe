@@ -2,7 +2,7 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Form, Spin } from "antd";
+import { Form, Spin } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
@@ -40,6 +40,7 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
+import { FormStepper } from "../../../../../../../../components/FormStepNavigation";
 
 const CreateUpdatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -684,17 +685,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
             className="flex flex-col gap-y-4"
           >
           {/* Step Contents */}
-          <NxBaseContainer border>
-            <div className="flex flex-row justify-center">
-              <div
-                onScroll={handleScroll}
-                ref={containerRef}
-                className="overflow-x-scroll scrollStepsCstm"
-              >
-                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
-              </div>
-            </div>
-          </NxBaseContainer>
+          <FormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
           {steps.map((step) => step.content)}
 
