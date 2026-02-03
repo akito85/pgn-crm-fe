@@ -5,7 +5,6 @@ import { getCurrentGasUtilization } from '../../../../../../redux/slices/account
 import DetailText from '../../../../../../components/DetailText'
 import NxTable from '../../../../../../components/Nx/NxTable'
 import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColumns'
-import { useColumnActionPermission } from '../../../../../../components/ColumnActionPermission'
 import { nxGetAccountActions } from '../../../../../../components/Nx/NxGetAccountActions'
 import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
@@ -82,7 +81,6 @@ const TableGasUtilCurrent = ({idAccount}) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
