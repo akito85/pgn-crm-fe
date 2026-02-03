@@ -8,6 +8,78 @@ import PopupDetailCondition from "./Detail/PopupDetailCondition";
 
 const USE_DUMMY = true;
 
+// Helper function untuk normalisasi nilai
+const normalize = (val = "") => String(val).toLowerCase().trim();
+
+// Helper function untuk apply filter pada data dummy
+const applyDummyFilter = (data, filters) => {
+  if (!filters || filters.length === 0) return data;
+
+  return data.filter((item) => {
+    let result = true;
+
+    filters.forEach((f, index) => {
+      const rawValue = item[f.column];
+      if (rawValue === undefined || rawValue === null) return;
+
+      const itemValue = normalize(rawValue);
+      const filterValue = normalize(f.value);
+
+      let match = false;
+
+      switch (f.operator) {
+        case "Equal to":
+        case "Equals":
+        case "=":
+          match = itemValue === filterValue;
+          break;
+
+        case "Not equal to":
+        case "!=":
+          match = itemValue !== filterValue;
+          break;
+
+        case "Contains":
+          match = itemValue.includes(filterValue);
+          break;
+
+        case "Does not contain":
+          match = !itemValue.includes(filterValue);
+          break;
+
+        case "Greater than":
+          match = Number(rawValue) > Number(f.value);
+          break;
+
+        case "Less than":
+          match = Number(rawValue) < Number(f.value);
+          break;
+
+        case "Is empty":
+          match = itemValue === "";
+          break;
+
+        case "Is not empty":
+          match = itemValue !== "";
+          break;
+
+        default:
+          match = false;
+      }
+
+      if (index === 0) {
+        result = match;
+      } else if (f.condition === "OR") {
+        result = result || match;
+      } else {
+        result = result && match;
+      }
+    });
+
+    return result;
+  });
+};
+
 const CriteriaConditionTabs = ({ selectedTab, onChangeTab }) => (
   <div
     style={{
@@ -38,11 +110,23 @@ const CriteriaConditionTabs = ({ selectedTab, onChangeTab }) => (
 
 const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
   const [activeTab, setActiveTab] = useState("criteria");
+
+  // Data state
+  const [originalCriteriaData, setOriginalCriteriaData] = useState([]);
+  const [originalConditionData, setOriginalConditionData] = useState([]);
   const [criteriaDataSource, setCriteriaDataSource] = useState([]);
   const [conditionDataSource, setConditionDataSource] = useState([]);
+
+  // Filter state
+  const [criteriaFilters, setCriteriaFilters] = useState([]);
+  const [conditionFilters, setConditionFilters] = useState([]);
+
+  // Modal state
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [detailData, setDetailData] = useState({});
   const [detailType, setDetailType] = useState(null);
+
+  // Fixed columns state
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
     right: ["action"],
@@ -61,40 +145,154 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
     const fetchData = async () => {
       try {
         if (USE_DUMMY) {
-          setCriteriaDataSource(promoCriteriaRepository.getMockCriteriaData());
-          setConditionDataSource(
-            promoConditionRepository.getMockConditionData(),
-          );
+          const criteriaData = promoCriteriaRepository.getMockCriteriaData();
+          const conditionData = promoConditionRepository.getMockConditionData();
+
+          setOriginalCriteriaData(criteriaData);
+          setOriginalConditionData(conditionData);
+          setCriteriaDataSource(criteriaData);
+          setConditionDataSource(conditionData);
         } else {
           const pagingParams = { promoId, page: 1, size: 1000 };
 
+          // Criteria
           const criteriaRes =
             await promoCriteriaRepository.getPromoCriteriaList(
               pagingParams,
               {},
             );
-          const criteriaList =
-            promoCriteriaRepository.transformPromoCriteriaList(criteriaRes);
-          setCriteriaDataSource(criteriaList);
+          setOriginalCriteriaData(criteriaRes.data || []);
+          setCriteriaDataSource(criteriaRes.data || []);
 
+          // Condition
           const conditionRes =
             await promoConditionRepository.getPromoConditionList(
               pagingParams,
               {},
             );
-          const conditionList =
-            promoConditionRepository.transformPromoConditionList(conditionRes);
-          setConditionDataSource(conditionList);
+          setOriginalConditionData(conditionRes.data || []);
+          setConditionDataSource(conditionRes.data || []);
         }
       } catch (error) {
         console.error("Failed to load criteria & condition data", error);
-        setCriteriaDataSource([]);
-        setConditionDataSource([]);
+        // ... error handling ...
       }
     };
 
     fetchData();
   }, [promoId]);
+
+  /* =========================
+     FILTER HANDLERS
+  ========================= */
+  const mapAdvanceSearchToBE = (searchData) => {
+    if (!searchData) return [];
+
+    const result = [];
+
+    // main filters
+    searchData.filters?.forEach((f) => {
+      if (f.column && f.operator) {
+        result.push({
+          condition: f.logic || "AND",
+          column: f.column,
+          operator: f.operator,
+          value: f.value || "",
+        });
+      }
+    });
+
+    // rule groups
+    searchData.filterRules?.forEach((rule) => {
+      rule.filters?.forEach((f, idx) => {
+        if (f.column && f.operator) {
+          result.push({
+            condition: idx === 0 ? rule.groupLogic : f.logic,
+            column: f.column,
+            operator: f.operator,
+            value: f.value || "",
+          });
+        }
+      });
+    });
+
+    return result;
+  };
+
+  // Fungsi untuk memproses filter criteria
+  const handleCriteriaAdvanceSearch = useCallback(
+    (searchData) => {
+      const mappedFilters = mapAdvanceSearchToBE(searchData);
+      setCriteriaFilters(mappedFilters);
+
+      if (USE_DUMMY) {
+        const filteredData = applyDummyFilter(
+          originalCriteriaData,
+          mappedFilters,
+        );
+        setCriteriaDataSource(filteredData);
+      } else {
+        // Panggil API dengan filter
+        const fetchFilteredCriteria = async () => {
+          try {
+            const pagingParams = { promoId, page: 1, size: 1000 };
+            const response = await promoCriteriaRepository.getPromoCriteriaList(
+              pagingParams,
+              searchData, // Kirim filter ke API
+            );
+            setCriteriaDataSource(response.data || []);
+          } catch (error) {
+            console.error("Error fetching filtered criteria:", error);
+          }
+        };
+        fetchFilteredCriteria();
+      }
+    },
+    [USE_DUMMY, originalCriteriaData, promoId],
+  );
+
+  // Fungsi serupa untuk condition
+  const handleConditionAdvanceSearch = useCallback(
+    (searchData) => {
+      const mappedFilters = mapAdvanceSearchToBE(searchData);
+      setConditionFilters(mappedFilters);
+
+      if (USE_DUMMY) {
+        const filteredData = applyDummyFilter(
+          originalConditionData,
+          mappedFilters,
+        );
+        setConditionDataSource(filteredData);
+      } else {
+        const fetchFilteredCondition = async () => {
+          try {
+            const pagingParams = { promoId, page: 1, size: 1000 };
+            const response =
+              await promoConditionRepository.getPromoConditionList(
+                pagingParams,
+                searchData,
+              );
+            setConditionDataSource(response.data || []);
+          } catch (error) {
+            console.error("Error fetching filtered condition:", error);
+          }
+        };
+        fetchFilteredCondition();
+      }
+    },
+    [USE_DUMMY, originalConditionData, promoId],
+  );
+
+  // Reset filter ketika tab berubah
+  useEffect(() => {
+    if (USE_DUMMY) {
+      if (activeTab === "criteria") {
+        setCriteriaDataSource(originalCriteriaData);
+      } else {
+        setConditionDataSource(originalConditionData);
+      }
+    }
+  }, [activeTab, USE_DUMMY, originalCriteriaData, originalConditionData]);
 
   /* =========================
      DETAIL HANDLER
@@ -143,6 +341,9 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
     }
   }, [handleDownload, onRegisterDownload]);
 
+  /* =========================
+     COLUMNS
+  ========================= */
   const criteriaColumns = useMemo(() => {
     const baseColumns = promoCriteriaRepository.getColumns(
       handleViewCriteriaDetail,
@@ -156,19 +357,18 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
 
     return applyFixedColumns(orderedColumns, setFixedColumns);
   }, [handleViewCriteriaDetail]);
+
   const conditionColumns = useMemo(() => {
     const baseColumns = promoConditionRepository.getColumns(
       handleViewConditionDetail,
     );
 
-    // Tambahkan properti order yang eksplisit untuk setiap kolom
     const columnsWithOrder = baseColumns.map((col, index) => ({
       ...col,
       key: col.key || col.dataIndex || `condition-col-${index}`,
-      order: index + 1, // Pastikan order dimulai dari 1
+      order: index + 1,
     }));
 
-    // Sort berdasarkan order sebelum diterapkan fixed columns
     const sortedColumns = [...columnsWithOrder].sort(
       (a, b) => (a.order || 999) - (b.order || 999),
     );
@@ -176,6 +376,9 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
     return applyFixedColumns(sortedColumns, setConditionFixedColumns);
   }, [handleViewConditionDetail]);
 
+  /* =========================
+     RENDER TABLE
+  ========================= */
   const renderTable = () => {
     if (activeTab === "criteria") {
       return (
@@ -188,6 +391,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
           loading={false}
           showSearchBar
           showAdvanceSearch
+          onAdvanceSearch={handleCriteriaAdvanceSearch}
           usePagination={false}
           tableScrolled={{ y: 250 }}
         />
@@ -204,6 +408,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
         loading={false}
         showSearchBar
         showAdvanceSearch
+        onAdvanceSearch={handleConditionAdvanceSearch}
         usePagination={false}
         tableScrolled={{ y: 250 }}
       />

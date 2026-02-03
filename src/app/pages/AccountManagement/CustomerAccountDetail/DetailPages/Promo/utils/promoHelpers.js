@@ -687,3 +687,123 @@ export const transformPromoHistoryResponse = (apiResponse) => {
     pagination,
   };
 };
+
+/**
+ * Transform API promo response to dataSource format
+ * @param {Object} apiResponse - Raw API response from Redux
+ * @returns {Array} - Array of transformed data for table
+ */
+export const transformApiPromoResponse = (apiResponse) => {
+  if (!apiResponse?.data) {
+    return [];
+  }
+
+  const apiData = apiResponse.data.content || apiResponse.data.data || [];
+  const currentPage = apiResponse.data.pageable?.pageNumber || 0;
+  const pageSize = apiResponse.data.pageable?.pageSize || 10;
+
+  return apiData.map((item, index) => ({
+    key: item.id || `promo-${currentPage}-${index}`,
+    no: currentPage * pageSize + index + 1,
+    id: item.id,
+    name: item.name || item.promoName,
+    promotionType: item.promotionType || item.type,
+    typeName: item.typeName || item.promoType,
+    categoryName: item.categoryName || item.category,
+    criteria: item.criteria || item.criteriaCount || "-",
+    startDate: item.startDate || item.startDateTime,
+    endDate: item.endDate || item.endDateTime,
+    description: item.description || "-",
+    status: item.status,
+    _original: item,
+  }));
+};
+
+/**
+ * Get loading state from Redux store
+ * @param {Object} state - Redux state object
+ * @returns {Object} - { dataSource, loading, error, hasMore, total }
+ */
+export const getPromoListState = (state) => {
+  if (!state) {
+    return {
+      dataSource: [],
+      loading: false,
+      error: null,
+      hasMore: false,
+      total: 0,
+    };
+  }
+
+  const data = state.data || {};
+  const content = data.content || data.data || [];
+
+  return {
+    dataSource: transformApiPromoResponse(state),
+    loading: state.loading || false,
+    error: state.error || null,
+    hasMore: content.length > 0 && (data.totalElements || 0) > content.length,
+    total: data.totalElements || data.total || 0,
+  };
+};
+
+/**
+ * Transform valid promo API response to table data source
+ * @param {Object} apiData - API response data
+ * @param {number} currentPage - Current page number (0-based)
+ * @param {number} pageSize - Page size
+ * @returns {Array} - Transformed data source for table
+ */
+export const transformValidPromoApiData = (
+  apiData,
+  currentPage = 0,
+  pageSize = 20,
+) => {
+  if (!apiData) return [];
+
+  const content = apiData.content || apiData.data || [];
+
+  return content.map((item, index) => {
+    // Debug log untuk melihat struktur data
+    console.log("Transforming item:", item);
+
+    return {
+      key: item.id || `promo-${currentPage}-${index}`,
+      no: currentPage * pageSize + index + 1,
+      id: item.id,
+      name: item.name || item.promoName || "-",
+      promotionType: item.promotionType || item.type || "-",
+      typeName: item.typeName || item.promoType || "-",
+      categoryName: item.categoryName || item.category || "-",
+      criteria: item.criteria || item.criteriaCount || "-",
+      startDate: item.startDate || item.startDateTime,
+      endDate: item.endDate || item.endDateTime,
+      description: item.description || "-",
+      status: item.status || "-",
+      _original: item,
+    };
+  });
+};
+
+/**
+ * Get pagination info from API response
+ * @param {Object} apiData - API response data
+ * @returns {Object} - Pagination info { total, currentPage, pageSize, totalPages }
+ */
+export const getPromoPaginationInfo = (apiData) => {
+  if (!apiData) {
+    return {
+      total: 0,
+      currentPage: 0,
+      pageSize: 20,
+      totalPages: 0,
+    };
+  }
+
+  return {
+    total: apiData.totalElements || apiData.total || 0,
+    currentPage: apiData.pageable?.pageNumber || 0,
+    pageSize: apiData.pageable?.pageSize || 20,
+    totalPages: apiData.totalPages || 0,
+  };
+};

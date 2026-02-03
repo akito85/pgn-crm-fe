@@ -1,15 +1,17 @@
 import { UnorderedListOutlined } from "@ant-design/icons";
-import { Col, Tooltip } from "antd";
+import { Tooltip } from "antd";
 import moment from "moment";
 import promoRepository from "./promoRepository";
 import * as XLSX from "xlsx";
 
 const formatDate = (date) => (date ? moment(date).format("DD MMM YYYY") : "-");
+const formatDateTime = (date) =>
+  date ? moment(date).format("DD MMM YYYY HH:mm") : "-";
 
 export const transformPromoConditionList = (responseData) => {
-  if (!responseData?.data) return [];
+  if (!responseData?.data?.content) return [];
 
-  return responseData.data.map((item, index) => ({
+  return responseData.data.content.map((item, index) => ({
     key: item.id || item.conditionId || `condition-${index}`,
     no: index + 1,
     id: item.id || item.conditionId,
@@ -18,14 +20,14 @@ export const transformPromoConditionList = (responseData) => {
     operator: item.operator || "-",
     dataType: item.dataType || "-",
     value: item.value || item.conditionValue || "-",
-    startDate: item.startDate,
-    endDate: item.endDate,
+    startDate: item.startDate || item.startDateTime,
+    endDate: item.endDate || item.endDateTime,
     status: item.status || "-",
     description: item.description || "-",
     createdBy: item.createdBy,
-    createdDate: item.createdDate,
+    createdDate: item.createdDate || item.createdAt,
     updatedBy: item.updatedBy,
-    updatedDate: item.updatedDate,
+    updatedDate: item.updatedDate || item.updatedAt,
     _original: item,
   }));
 };
@@ -42,13 +44,14 @@ export const transformPromoConditionDetail = (responseData) => {
     operator: data.operator,
     dataType: data.dataType,
     value: data.value || data.conditionValue,
-    startDate: data.startDate,
-    endDate: data.endDate,
+    startDate: data.startDate || data.startDateTime,
+    endDate: data.endDate || data.endDateTime,
+    status: data.status,
     description: data.description,
     createdBy: data.createdBy,
-    createdDate: data.createdDate,
+    createdDate: data.createdDate || data.createdAt,
     updatedBy: data.updatedBy,
-    updatedDate: data.updatedDate,
+    updatedDate: data.updatedDate || data.updatedAt,
   };
 };
 
@@ -60,10 +63,10 @@ const promoConditionRepository = {
     }
     const excelData = dataSource.map((item, index) => ({
       NO: index + 1,
-      NAME: item.name || "-",
+      "CONDITION NAME": item.name || "-",
       OPERATOR: item.operator || "-",
       "DATA TYPE": item.dataType || "-",
-      "ADJUSTMENT VALUE": item.value || "-",
+      VALUE: item.value || "-",
       "START DATE": formatDate(item.startDate),
       "END DATE": formatDate(item.endDate),
       STATUS: item.status || "-",
@@ -79,26 +82,98 @@ const promoConditionRepository = {
 
     XLSX.writeFile(workbook, fileName);
   },
+
   /* =======================
    * API Operations
    * ======================= */
 
   getPromoConditionList: async (params, advancedSearch = {}) => {
-    return await promoRepository.getListValidPromoConditionByPromoId(
-      params,
-      advancedSearch,
-    );
+    try {
+      const response =
+        await promoRepository.getListValidPromoConditionByPromoId(
+          params,
+          advancedSearch,
+        );
+
+      // Transform data untuk konsistensi
+      const transformedData = transformPromoConditionList(response);
+
+      // Return dalam format yang diharapkan oleh komponen
+      return {
+        data: transformedData,
+        total: response?.data?.totalElements || transformedData.length,
+        page: response?.data?.number || 1,
+        size: response?.data?.size || transformedData.length,
+      };
+    } catch (error) {
+      console.error("Error fetching promo condition list:", error);
+      throw error;
+    }
   },
 
   getPromoConditionDetail: async (conditionId) => {
-    return await promoRepository.getDetailValidPromoCondition(conditionId);
+    try {
+      const response =
+        await promoRepository.getDetailValidPromoCondition(conditionId);
+      const transformedData = transformPromoConditionDetail(response);
+
+      return {
+        data: transformedData,
+        success: true,
+      };
+    } catch (error) {
+      console.error("Error fetching promo condition detail:", error);
+      throw error;
+    }
   },
 
-  downloadPromoCondition: async (params, advancedSearch = {}) => {
-    return await promoRepository.downloadListValidPromoCondition(
-      params,
-      advancedSearch,
-    );
+  downloadPromoCondition: async (promoId, advancedSearch = {}) => {
+    try {
+      const params = {
+        promoId,
+        page: 1,
+        size: 10000, // Untuk download ambil semua data
+      };
+
+      const response = await promoRepository.downloadListValidPromoCondition(
+        params,
+        advancedSearch,
+      );
+
+      // Jika response adalah blob (file Excel), return langsung
+      if (response instanceof Blob) {
+        return response;
+      }
+
+      // Jika response adalah data JSON, buat Excel secara manual
+      const data = transformPromoConditionList(response);
+
+      const excelData = data.map((item, index) => ({
+        NO: index + 1,
+        "CONDITION NAME": item.name || "-",
+        OPERATOR: item.operator || "-",
+        "DATA TYPE": item.dataType || "-",
+        VALUE: item.value || "-",
+        "START DATE": formatDate(item.startDate),
+        "END DATE": formatDate(item.endDate),
+        STATUS: item.status || "-",
+        DESCRIPTION: item.description || "-",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Promo Condition");
+
+      const timestamp = moment().format("YYYYMMDDHHmmss");
+      const fileName = `PROMO_CONDITION_${timestamp}.xlsx`;
+
+      XLSX.writeFile(workbook, fileName);
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error downloading promo condition:", error);
+      throw error;
+    }
   },
 
   transformPromoConditionList,
@@ -108,24 +183,24 @@ const promoConditionRepository = {
     {
       title: "NO",
       dataIndex: "no",
-      key: "no", // Pastikan key unik
+      key: "no",
       width: 60,
       align: "center",
       render: (text, record, index) => index + 1,
       order: 1,
-      fixed: "left", // Tetapkan sebagai fixed column jika perlu
+      fixed: "left",
     },
     {
       title: "CONDITION NAME",
       dataIndex: "name",
-      key: "name", // Pastikan key unik
+      key: "name",
       width: 180,
       order: 2,
     },
     {
       title: "OPERATOR",
       dataIndex: "operator",
-      key: "operator", // Pastikan key unik
+      key: "operator",
       width: 100,
       align: "center",
       order: 3,
@@ -133,29 +208,44 @@ const promoConditionRepository = {
     {
       title: "DATA TYPE",
       dataIndex: "dataType",
-      key: "dataType", // Pastikan key unik
+      key: "dataType",
       width: 120,
       order: 4,
     },
     {
       title: "VALUE",
       dataIndex: "value",
-      key: "value", // Pastikan key unik
+      key: "value",
       width: 150,
       order: 5,
     },
     {
       title: "STATUS",
       dataIndex: "status",
-      key: "status", // Pastikan key unik
+      key: "status",
       width: 120,
       align: "center",
       order: 6,
+      render: (status) => (
+        <span
+          style={{
+            color:
+              status === "ACTIVE"
+                ? "#52C41A"
+                : status === "INACTIVE"
+                  ? "#FF4D4F"
+                  : "#666666",
+            fontWeight: "500",
+          }}
+        >
+          {status || "-"}
+        </span>
+      ),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
-      key: "startDate", // Pastikan key unik
+      key: "startDate",
       width: 120,
       render: formatDate,
       order: 7,
@@ -163,7 +253,7 @@ const promoConditionRepository = {
     {
       title: "END DATE",
       dataIndex: "endDate",
-      key: "endDate", // Pastikan key unik
+      key: "endDate",
       width: 120,
       render: formatDate,
       order: 8,
@@ -171,9 +261,15 @@ const promoConditionRepository = {
     {
       title: "DESCRIPTION",
       dataIndex: "description",
-      key: "description", // Pastikan key unik
+      key: "description",
       width: 260,
       order: 9,
+      ellipsis: { showTitle: false },
+      render: (text) => (
+        <Tooltip title={text}>
+          <span>{text || "-"}</span>
+        </Tooltip>
+      ),
     },
     {
       title: "ACTION",
@@ -181,18 +277,19 @@ const promoConditionRepository = {
       width: 90,
       align: "center",
       order: 10,
-      fixed: "right", // Tetapkan sebagai fixed column
+      fixed: "right",
       render: (_, record) => (
         <UnorderedListOutlined
           style={{ fontSize: 16, color: "#1570EF", cursor: "pointer" }}
           onClick={() => handleClickDetail(record)}
+          title="View Detail"
         />
       ),
     },
   ],
 
   getMockConditionData: () => {
-    return Array.from({ length: 10 }).map((_, index) => ({
+    return Array.from({ length: 30 }).map((_, index) => ({
       key: `mock-condition-${index + 1}`,
       no: index + 1,
       id: index + 100,

@@ -127,6 +127,117 @@ const ChildTableWithInfiniteScroll = ({
 };
 
 /* =======================
+ * HELPER FUNCTIONS
+ * ======================= */
+
+// Helper function untuk normalisasi nilai
+const normalize = (val = "") => String(val).toLowerCase().trim();
+
+// Helper function untuk apply filter pada data dummy
+const applyDummyFilter = (data, filters) => {
+  if (!filters || filters.length === 0) return data;
+
+  return data.filter((item) => {
+    let result = true;
+
+    filters.forEach((f, index) => {
+      const rawValue = item[f.column];
+      if (rawValue === undefined || rawValue === null) return;
+
+      const itemValue = normalize(rawValue);
+      const filterValue = normalize(f.value);
+
+      let match = false;
+
+      switch (f.operator) {
+        case "Equal to":
+        case "Equals":
+        case "=":
+          match = itemValue === filterValue;
+          break;
+
+        case "Not equal to":
+        case "!=":
+          match = itemValue !== filterValue;
+          break;
+
+        case "Contains":
+          match = itemValue.includes(filterValue);
+          break;
+
+        case "Does not contain":
+          match = !itemValue.includes(filterValue);
+          break;
+
+        case "Greater than":
+          match = Number(rawValue) > Number(f.value);
+          break;
+
+        case "Less than":
+          match = Number(rawValue) < Number(f.value);
+          break;
+
+        case "Is empty":
+          match = itemValue === "";
+          break;
+
+        case "Is not empty":
+          match = itemValue !== "";
+          break;
+
+        default:
+          match = false;
+      }
+
+      if (index === 0) {
+        result = match;
+      } else if (f.condition === "OR") {
+        result = result || match;
+      } else {
+        result = result && match;
+      }
+    });
+
+    return result;
+  });
+};
+
+// Fungsi untuk mapping advanced search format
+const mapAdvanceSearchToBE = (searchData) => {
+  if (!searchData) return [];
+
+  const result = [];
+
+  // main filters
+  searchData.filters?.forEach((f) => {
+    if (f.column && f.operator) {
+      result.push({
+        condition: f.logic || "AND",
+        column: f.column,
+        operator: f.operator,
+        value: f.value || "",
+      });
+    }
+  });
+
+  // rule groups
+  searchData.filterRules?.forEach((rule) => {
+    rule.filters?.forEach((f, idx) => {
+      if (f.column && f.operator) {
+        result.push({
+          condition: idx === 0 ? rule.groupLogic : f.logic,
+          column: f.column,
+          operator: f.operator,
+          value: f.value || "",
+        });
+      }
+    });
+  });
+
+  return result;
+};
+
+/* =======================
  * MAIN VIEW
  * ======================= */
 
@@ -149,7 +260,10 @@ const PromoHistoryViewData = ({
   const pageSize = 10;
   const childPageSize = 5;
 
+  // State untuk data utama
+  const [originalDataSource, setOriginalDataSource] = useState([]);
   const [dataSource, setDataSource] = useState([]);
+  const [activeFilters, setActiveFilters] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -157,6 +271,7 @@ const PromoHistoryViewData = ({
   const [error, setError] = useState(null);
   const [expandedRows, setExpandedRows] = useState([]);
 
+  // State untuk child tables
   const [childState, setChildState] = useState({});
 
   const updateChildState = (billingCode, patch) => {
@@ -172,6 +287,9 @@ const PromoHistoryViewData = ({
     }));
   };
 
+  /* =========================
+     DOWNLOAD HANDLER
+  ========================= */
   const downloadDummyPromoHistory = (data = []) => {
     if (!data.length) return;
 
@@ -206,6 +324,33 @@ const PromoHistoryViewData = ({
     onRegisterDownload?.(handleDownload);
   }, [handleDownload]);
 
+  /* =========================
+     ADVANCED SEARCH HANDLER
+  ========================= */
+  const handleAdvanceSearch = useCallback(
+    (searchData) => {
+      const mappedFilters = mapAdvanceSearchToBE(searchData);
+      setActiveFilters(mappedFilters);
+
+      if (USE_DUMMY) {
+        const filteredData = applyDummyFilter(originalDataSource, mappedFilters);
+        setDataSource(filteredData);
+        setHasMore(true);
+        setPage(1);
+        setExpandedRows([]); 
+      } else {
+        setPage(1);
+        setHasMore(true);
+        setDataSource([]);
+        setExpandedRows([]);
+      }
+    },
+    [USE_DUMMY, originalDataSource]
+  );
+
+  /* =========================
+     DATA LOADING
+  ========================= */
   const loadMoreData = async (reset = false) => {
     if (loading) return;
 
@@ -215,22 +360,48 @@ const PromoHistoryViewData = ({
     try {
       if (USE_DUMMY) {
         const mock = promoHistoryRepository.getMockPromoHistoryList();
-        const currentPage = reset ? 1 : page;
+        
+        // Simpan data original jika belum ada
+        if (originalDataSource.length === 0 || reset) {
+          setOriginalDataSource(mock);
+        }
 
+        // Jika ada filter aktif, gunakan applyDummyFilter
+        let filteredMock = mock;
+        if (activeFilters.length > 0) {
+          filteredMock = applyDummyFilter(mock, activeFilters);
+        }
+
+        const currentPage = reset ? 1 : page;
         const start = (currentPage - 1) * pageSize;
-        const slice = mock.slice(start, start + pageSize);
+        const slice = filteredMock.slice(start, start + pageSize);
 
         setDataSource((prev) => (reset ? slice : [...prev, ...slice]));
-        setHasMore(start + pageSize < mock.length);
+        setHasMore(start + pageSize < filteredMock.length);
         setPage(currentPage + 1);
         return;
       }
 
-      await loadPromoHistoryList({
-        page,
+      // Real API call dengan filter jika ada
+      const params = {
+        page: reset ? 1 : page,
         size: pageSize,
         accountId,
-      });
+      };
+
+      // Tambahkan advanced search jika ada filter aktif
+      const advancedSearch = activeFilters.length > 0
+        ? {
+            inputFields: activeFilters.map((q) => ({
+              condition: q.condition || "",
+              column: q.column || "",
+              operator: q.operator || "",
+              value: q.value || "",
+            })),
+          }
+        : undefined;
+
+      await loadPromoHistoryList(params, advancedSearch);
     } catch (e) {
       setError(e.message || "Load failed");
     } finally {
@@ -239,10 +410,21 @@ const PromoHistoryViewData = ({
     }
   };
 
+  // Load data awal
   useEffect(() => {
     loadMoreData(true);
   }, []);
 
+  // Re-load data ketika filter berubah (untuk real API)
+  useEffect(() => {
+    if (!USE_DUMMY && activeFilters.length > 0) {
+      loadMoreData(true);
+    }
+  }, [activeFilters, USE_DUMMY]);
+
+  /* =========================
+     CHILD DATA LOADING
+  ========================= */
   const loadMoreChildData = async (billingCode) => {
     const state = childState[billingCode] || {};
     if (state.loading || state.hasMore === false) return;
@@ -289,6 +471,9 @@ const PromoHistoryViewData = ({
     }
   };
 
+  /* =========================
+     TABLE COLUMNS
+  ========================= */
   const parentColumns = useMemo(
     () =>
       applyFixedColumns(
@@ -298,7 +483,7 @@ const PromoHistoryViewData = ({
         }),
         { left: ["no"], right: ["action"] },
       ),
-    [],
+    [setSelectedHistoryData, setPopupDetailHistoryVisible],
   );
 
   const childColumns = useMemo(
@@ -307,7 +492,7 @@ const PromoHistoryViewData = ({
         setSelectedHistoryDetailData(record);
         setPopupDetailHistoryDetailVisible(true);
       }),
-    [],
+    [setSelectedHistoryDetailData, setPopupDetailHistoryDetailVisible],
   );
 
   /* =======================
@@ -325,6 +510,9 @@ const PromoHistoryViewData = ({
         useInfiniteScroll
         hasMore={hasMore}
         onLoadMore={loadMoreData}
+        showSearchBar
+        showAdvanceSearch
+        onAdvanceSearch={handleAdvanceSearch}
         tableScrolled={{ y: 250 }}
         scrollBodyStyle={{ minHeight: 250 }}
         expandable={{

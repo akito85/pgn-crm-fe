@@ -1,4 +1,4 @@
-import {
+import React, {
   Fragment,
   useCallback,
   useEffect,
@@ -13,8 +13,11 @@ import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns"
 import { usePromo } from "../hooks/usePromo";
 import promoRepository from "../repository/promoRepository";
 import "../infiniteScroll.css";
-import { dummyPromoData, dummyPromoDetailMap } from "../utils/promoHelpers";
-import { transformValidPromoResponse } from "../utils/promoHelpers";
+import {
+  dummyPromoData,
+  dummyPromoDetailMap,
+  formatDate,
+} from "../utils/promoHelpers";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -30,12 +33,36 @@ const LoadingIndicator = ({ size = "default" }) => {
   );
 };
 
-const ErrorMessage = ({ error, onRetry }) => (
-  <div className="promo-error-message">
-    <div>Error loading data: {error}</div>
-    <button onClick={onRetry}>Retry</button>
-  </div>
-);
+const ErrorMessage = ({ error, onRetry }) => {
+  // Extract error message from object if needed
+  const errorMessage =
+    typeof error === "object"
+      ? error.message || error.error || JSON.stringify(error)
+      : error;
+
+  return (
+    <div
+      className="promo-error-message"
+      style={{ padding: "20px", textAlign: "center", color: "#ff4d4f" }}
+    >
+      <div>Error loading data: {errorMessage}</div>
+      <button
+        onClick={onRetry}
+        style={{
+          marginTop: "10px",
+          padding: "8px 16px",
+          backgroundColor: "#1890ff",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+        }}
+      >
+        Retry
+      </button>
+    </div>
+  );
+};
 
 const PromoViewData = ({
   isModalPromoVisible,
@@ -50,45 +77,97 @@ const PromoViewData = ({
     loadValidPromoList,
     downloadValidPromo,
     clearValidPromo,
+    loadValidPromoDetail,
+    validPromoDetail,
   } = usePromo();
+
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
     right: ["action"],
   });
 
   const [dataSource, setDataSource] = useState([]);
-  const [activeFilters] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [activeFilters, setActiveFilters] = useState([]);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0); // API menggunakan zero-based index
   const [error, setError] = useState(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [totalElements, setTotalElements] = useState(0);
+
   const pageSize = 20;
   const containerRef = useRef(null);
-  const USE_DUMMY = true;
+  const USE_DUMMY = true; // Ubah ke false untuk API real
+
+  // Destructure validPromoList state
+  const {
+    loading: loadingInitial,
+    error: apiError,
+    data: apiData,
+  } = validPromoList;
 
   // Handlers
   const handleViewDetail = useCallback(
-    (record) => {
+    async (record) => {
       if (!record?.id) return;
 
       if (USE_DUMMY) {
         const dummyDetail = dummyPromoDetailMap[record.id];
-
         if (!dummyDetail) {
           console.warn("Dummy promo detail not found:", record.id);
           return;
         }
-
         setDetailPromoData(dummyDetail);
       } else {
-        setDetailPromoData(record);
+        try {
+          // Load detail dari Redux store
+          await loadValidPromoDetail(record.id);
+        } catch (error) {
+          console.error("Error loading promo detail:", error);
+          // Fallback ke data record yang ada
+          setDetailPromoData(record);
+        }
       }
-
       setIsModalPromoVisible(true);
     },
-    [USE_DUMMY, setDetailPromoData, setIsModalPromoVisible],
+    [
+      USE_DUMMY,
+      loadValidPromoDetail,
+      setDetailPromoData,
+      setIsModalPromoVisible,
+    ],
   );
+
+  // Effect untuk menangani perubahan validPromoDetail
+  useEffect(() => {
+    if (!USE_DUMMY && validPromoDetail?.data && !validPromoDetail.loading) {
+      // Perhatikan: validPromoDetail.data adalah response API penuh
+      const apiResponse = validPromoDetail.data;
+      console.log("Detail API Response:", apiResponse);
+
+      // Extract data dari response
+      const detailData = apiResponse?.data;
+      if (detailData) {
+        const transformedData = {
+          key: detailData.id,
+          id: detailData.id,
+          name: detailData.name || detailData.promoName,
+          promotionType: detailData.promotionType || detailData.type,
+          typeName: detailData.typeName || detailData.promoType,
+          categoryName: detailData.categoryName || detailData.category,
+          criteria: detailData.criteria || detailData.criteriaCount,
+          startDate: detailData.startDate || detailData.startDateTime,
+          endDate: detailData.endDate || detailData.endDateTime,
+          description: detailData.description,
+          status: detailData.status,
+          createdBy: detailData.createdBy,
+          createdDate: detailData.createdDate || detailData.createdAt,
+          updatedBy: detailData.updatedBy,
+          updatedDate: detailData.updatedDate || detailData.updatedAt,
+        };
+        setDetailPromoData(transformedData);
+      }
+    }
+  }, [validPromoDetail, USE_DUMMY, setDetailPromoData]);
 
   const downloadDummyPromo = (data) => {
     if (!data || data.length === 0) return;
@@ -100,15 +179,14 @@ const PromoViewData = ({
       "TYPE NAME": promo.typeName,
       "CATEGORY NAME": promo.categoryName,
       CRITERIAS: promo.criterias,
-      "START DATE": promo.startDate,
-      "END DATE": promo.endDate,
+      "START DATE": formatDate(promo.startDate),
+      "END DATE": formatDate(promo.endDate),
       DESCRIPTION: promo.description,
       STATUS: promo.status,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
-
     XLSX.utils.book_append_sheet(workbook, worksheet, "PROMO");
 
     const excelBuffer = XLSX.write(workbook, {
@@ -135,28 +213,76 @@ const PromoViewData = ({
         return;
       }
 
-      if (!accountId) return;
+      if (!accountId) {
+        console.error("Account ID is required for download");
+        return;
+      }
 
       const params = {
-        page: 1,
-        size: dataSource.length,
+        page: 0,
+        size: totalElements || 1000,
         accountId,
+        sort: "id~desc",
       };
 
+      // Gabungkan activeFilters dengan searchKeyword untuk download
+      let allFilters = [...activeFilters];
+      if (searchKeyword) {
+        allFilters.push({
+          condition: "OR",
+          column: "name",
+          operator: "Contains",
+          value: searchKeyword,
+        });
+      }
+
       const advancedSearch = {
-        inputFields: activeFilters.map((q) => ({
-          condition: q.condition || "",
-          column: q.column || "",
-          operator: q.operator || "",
-          value: q.value || "",
-        })),
+        inputFields:
+          allFilters.length > 0
+            ? allFilters
+            : [{ condition: "", column: "", operator: "", value: "" }],
       };
 
       await downloadValidPromo(params, advancedSearch);
     } catch (err) {
       console.error("Download promo failed:", err);
+      // Fallback: Download dari data yang sudah dimuat
+      if (dataSource.length > 0) {
+        const formattedData = dataSource.map((promo, index) => ({
+          NO: index + 1,
+          NAME: promo.name,
+          "PROMOTION TYPE": promo.promotionType,
+          "TYPE NAME": promo.typeName,
+          "CATEGORY NAME": promo.categoryName,
+          CRITERIA: promo.criteria,
+          "START DATE": formatDate(promo.startDate),
+          "END DATE": formatDate(promo.endDate),
+          DESCRIPTION: promo.description,
+          STATUS: promo.status,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "PROMO");
+
+        const timestamp = new Date()
+          .toISOString()
+          .replace(/[-:T.Z]/g, "")
+          .slice(0, 14);
+        const fileName = `PROMO_UNDER_ACCOUNT_${timestamp}.xlsx`;
+
+        XLSX.writeFile(workbook, fileName);
+      }
     }
-  }, [USE_DUMMY, dataSource, accountId, activeFilters, downloadValidPromo]);
+  }, [
+    USE_DUMMY,
+    dataSource,
+    accountId,
+    activeFilters,
+    searchKeyword,
+    totalElements,
+    downloadValidPromo,
+  ]);
 
   // Register download handler
   useEffect(() => {
@@ -165,133 +291,430 @@ const PromoViewData = ({
     }
   }, [handleDownload, onRegisterDownload]);
 
-  // Data Loading function
-  const loadMoreData = useCallback(
-    async (reset = false) => {
-      if (loading || (!hasMore && !reset)) return;
-
-      try {
-        setLoading(true);
-        setError(null);
-        const currentPage = reset ? 1 : page;
-
-        if (USE_DUMMY) {
-          // Handle dummy data
-          if (reset) {
-            setDataSource(dummyPromoData);
-            setPage(1);
-            setHasMore(false);
-          }
-        } else {
-          // Handle real API data
-          const params = {
-            page: currentPage,
-            size: pageSize,
-            accountId,
-            sort: "id~desc",
-          };
-
-          const advancedSearch =
-            activeFilters.length > 0
-              ? {
-                  inputFields: activeFilters.map((q) => ({
-                    condition: q.condition || "",
-                    column: q.column || "",
-                    operator: q.operator || "",
-                    value: q.value || "",
-                  })),
-                }
-              : undefined;
-
-          await loadValidPromoList(params, advancedSearch);
-
-          if (reset) {
-            setPage(1);
-            setHasMore(true);
-          } else {
-            setPage((prev) => prev + 1);
-          }
-        }
-      } catch (err) {
-        setError(err.message);
-        console.error("Error loading data:", err);
-      } finally {
-        setLoading(false);
-        setLoadingInitial(false);
-      }
-    },
-    [
-      loading,
-      hasMore,
-      page,
-      accountId,
-      activeFilters,
-      loadValidPromoList,
-      USE_DUMMY,
-    ],
-  );
-
-  useEffect(() => {
-    if (USE_DUMMY) {
-      setDataSource(dummyPromoData);
-      setLoadingInitial(false);
-      setHasMore(false);
-    } else {
-      loadMoreData(true);
-    }
-  }, [loadMoreData, USE_DUMMY]);
-
-  // Transform API response
+  // Transform apiData dari Redux ke dataSource - PERBAIKAN UTAMA
   useEffect(() => {
     if (USE_DUMMY) return;
 
-    if (validPromoList?.data && !validPromoList.loading) {
-      const { dataSource: transformedData } = transformValidPromoResponse(
-        validPromoList.data,
-      );
+    console.log("API Data from Redux:", apiData);
+    console.log("API Error from Redux:", apiError);
+    console.log("Loading State:", loadingInitial);
 
-      if (page === 1) {
-        setDataSource(transformedData);
-      } else {
-        setDataSource((prev) => {
-          const existingIds = new Set(prev.map((item) => item.id));
-          const filtered = transformedData.filter(
-            (item) => !existingIds.has(item.id),
+    // Handle API errors
+    if (apiError) {
+      console.error("API Error received:", apiError);
+      // Extract error message properly
+      const errorMessage =
+        typeof apiError === "object"
+          ? apiError.message || apiError.error || JSON.stringify(apiError)
+          : apiError;
+      setError(errorMessage);
+      return;
+    }
+
+    // Process API data when available
+    if (apiData && !loadingInitial) {
+      try {
+        console.log("Processing API data:", apiData);
+
+        // Extract data from API response - ini adalah kunci perbaikan
+        // apiData adalah response API penuh: {success, code, message, data}
+        const responseData = apiData.data; // Ambil data property
+
+        if (!responseData) {
+          console.warn("No data property in API response:", apiData);
+          setDataSource([]);
+          setTotalElements(0);
+          setHasMore(false);
+          return;
+        }
+
+        const content = responseData.content || responseData.data || [];
+        console.log("Content data:", content);
+
+        const total =
+          responseData.totalElements || responseData.total || content.length;
+        const currentPage = responseData.pageable?.pageNumber || page;
+        const pageSizeApi = responseData.pageable?.pageSize || pageSize;
+
+        // Transform data for table
+        const transformedData = content.map((item, index) => {
+          console.log("Transforming item:", item);
+
+          return {
+            key: item.id || `promo-${currentPage}-${index}`,
+            no: currentPage * pageSizeApi + index + 1,
+            id: item.id,
+            name: item.name || item.promoName || "-",
+            promotionType: item.promotionType || item.type || "-",
+            typeName: item.typeName || item.promoType || "-",
+            categoryName: item.categoryName || item.category || "-",
+            criteria: item.criteria || item.criteriaCount || "-",
+            startDate: item.startDate || item.startDateTime,
+            endDate: item.endDate || item.endDateTime,
+            description: item.description || "-",
+            status: item.status || "-",
+            _original: item,
+          };
+        });
+
+        console.log("Transformed data:", transformedData);
+
+        if (page === 0) {
+          // First page - replace data
+          setDataSource(transformedData);
+        } else {
+          // Append data - filter duplicates
+          setDataSource((prev) => {
+            const existingIds = new Set(prev.map((item) => item.id));
+            const filtered = transformedData.filter(
+              (item) => item.id && !existingIds.has(item.id),
+            );
+            return [...prev, ...filtered];
+          });
+        }
+
+        setTotalElements(total);
+
+        // Check if has more data
+        const loadedCount =
+          page === 0
+            ? transformedData.length
+            : dataSource.length + transformedData.length;
+        setHasMore(loadedCount < total);
+
+        // Clear any previous errors
+        setError(null);
+      } catch (error) {
+        console.error("Error transforming API data:", error);
+        setError("Failed to process data: " + error.message);
+      }
+    } else if (!loadingInitial && !apiData) {
+      // No data loaded yet
+      setDataSource([]);
+      setHasMore(true);
+    }
+  }, [
+    apiData,
+    loadingInitial,
+    apiError,
+    page,
+    USE_DUMMY,
+    dataSource.length,
+    pageSize,
+  ]);
+
+  const normalize = (val = "") => String(val).toLowerCase().trim();
+
+  const applyDummyFilter = (data, filters) => {
+    if (!filters || filters.length === 0) return data;
+
+    return data.filter((item) => {
+      let result = true;
+
+      filters.forEach((f, index) => {
+        const rawValue = item[f.column];
+        if (rawValue === undefined || rawValue === null) return;
+
+        const itemValue = normalize(rawValue);
+        const filterValue = normalize(f.value);
+
+        let match = false;
+
+        switch (f.operator) {
+          case "Equal to":
+          case "Equals":
+          case "=":
+            match = itemValue === filterValue;
+            break;
+
+          case "Not equal to":
+          case "!=":
+            match = itemValue !== filterValue;
+            break;
+
+          case "Contains":
+            match = itemValue.includes(filterValue);
+            break;
+
+          case "Does not contain":
+            match = !itemValue.includes(filterValue);
+            break;
+
+          case "Greater than":
+            match = Number(rawValue) > Number(f.value);
+            break;
+
+          case "Less than":
+            match = Number(rawValue) < Number(f.value);
+            break;
+
+          case "Is empty":
+            match = itemValue === "";
+            break;
+
+          case "Is not empty":
+            match = itemValue !== "";
+            break;
+
+          default:
+            match = false;
+        }
+
+        if (index === 0) {
+          result = match;
+        } else if (f.condition === "OR") {
+          result = result || match;
+        } else {
+          result = result && match;
+        }
+      });
+
+      return result;
+    });
+  };
+
+  const handleSearch = useCallback(
+    (keyword) => {
+      setSearchKeyword(keyword);
+
+      if (USE_DUMMY) {
+        if (!keyword) {
+          setDataSource(dummyPromoData);
+        } else {
+          const keywordLower = keyword.toLowerCase();
+          const filteredData = dummyPromoData.filter((item) =>
+            Object.values(item).some(
+              (value) =>
+                value !== null &&
+                value !== undefined &&
+                String(value).toLowerCase().includes(keywordLower),
+            ),
           );
-          return [...prev, ...filtered];
+          setDataSource(filteredData);
+        }
+        setHasMore(false);
+      } else {
+        // Untuk API real, reset state dan load data dengan keyword
+        setActiveFilters([]);
+        setPage(0);
+        setHasMore(true);
+        setDataSource([]);
+        setTotalElements(0);
+        setError(null);
+      }
+    },
+    [USE_DUMMY],
+  );
+
+  const loadMoreData = useCallback(
+    async (reset = false) => {
+      if (USE_DUMMY) return;
+      if (!accountId) {
+        console.warn("Account ID is required for loading data");
+        return;
+      }
+
+      const currentPage = reset ? 0 : page;
+
+      const params = {
+        page: currentPage,
+        size: pageSize,
+        accountId,
+        sort: "id~desc",
+      };
+
+      let allFilters = [...activeFilters];
+      if (searchKeyword) {
+        allFilters.push({
+          condition: "OR",
+          column: "name",
+          operator: "Contains",
+          value: searchKeyword,
         });
       }
 
-      if (validPromoList.data.length < pageSize) {
-        setHasMore(false);
+      const advancedSearch = {
+        inputFields:
+          allFilters.length > 0
+            ? allFilters
+            : [{ condition: "", column: "", operator: "", value: "" }],
+      };
+
+      console.log("Loading data with params:", { params, advancedSearch });
+
+      try {
+        await loadValidPromoList(params, advancedSearch);
+
+        if (reset) {
+          setPage(0);
+        }
+      } catch (err) {
+        console.error("Error in loadMoreData:", err);
+        setError(err.message || "Failed to load data");
       }
+    },
+    [
+      page,
+      accountId,
+      activeFilters,
+      searchKeyword,
+      loadValidPromoList,
+      USE_DUMMY,
+      pageSize,
+    ],
+  );
+
+  // Effect untuk load data saat searchKeyword atau accountId berubah
+  useEffect(() => {
+    if (!USE_DUMMY && accountId) {
+      const timer = setTimeout(() => {
+        loadMoreData(true);
+      }, 300);
+
+      return () => clearTimeout(timer);
     }
-  }, [validPromoList, page, USE_DUMMY]);
+  }, [searchKeyword, accountId, USE_DUMMY]);
+
+  const handleRefresh = useCallback(() => {
+    if (USE_DUMMY) {
+      setDataSource(dummyPromoData);
+      setSearchKeyword("");
+      setActiveFilters([]);
+      setHasMore(false);
+    } else {
+      // Reset semua state dan load ulang data
+      setSearchKeyword("");
+      setActiveFilters([]);
+      setPage(0);
+      setHasMore(true);
+      setDataSource([]);
+      setTotalElements(0);
+      setError(null);
+      loadMoreData(true);
+    }
+  }, [USE_DUMMY, loadMoreData]);
+
+  const loadDataWithFilter = useCallback(
+    async (filters = [], reset = true) => {
+      if (USE_DUMMY) {
+        const filteredData = applyDummyFilter(dummyPromoData, filters);
+        setDataSource(filteredData);
+        setHasMore(false);
+      } else {
+        setActiveFilters(filters);
+        setSearchKeyword("");
+        if (reset) {
+          setPage(0);
+          setHasMore(true);
+          setDataSource([]);
+          setTotalElements(0);
+          setError(null);
+
+          // Load data dengan filter baru
+          setTimeout(() => {
+            loadMoreData(true);
+          }, 0);
+        }
+      }
+    },
+    [USE_DUMMY, loadMoreData],
+  );
+
+  // Inisialisasi data
+  useEffect(() => {
+    if (USE_DUMMY) {
+      setDataSource(dummyPromoData);
+      setHasMore(false);
+    } else if (accountId) {
+      console.log("Initializing with accountId:", accountId);
+      loadMoreData(true);
+    }
+  }, [USE_DUMMY, accountId]);
+
+  const mapAdvanceSearchToBE = (searchData) => {
+    if (!searchData) return [];
+
+    const result = [];
+
+    // main filters
+    searchData.filters?.forEach((f) => {
+      if (f.column && f.operator) {
+        result.push({
+          condition: f.logic || "AND",
+          column: f.column,
+          operator: f.operator,
+          value: f.value || "",
+        });
+      }
+    });
+
+    // rule groups
+    searchData.filterRules?.forEach((rule) => {
+      rule.filters?.forEach((f, idx) => {
+        if (f.column && f.operator) {
+          result.push({
+            condition: idx === 0 ? rule.groupLogic : f.logic,
+            column: f.column,
+            operator: f.operator,
+            value: f.value || "",
+          });
+        }
+      });
+    });
+
+    return result;
+  };
+
+  const handleAdvanceSearch = useCallback(
+    (searchData) => {
+      const mappedFilters = mapAdvanceSearchToBE(searchData);
+      loadDataWithFilter(mappedFilters, true);
+    },
+    [loadDataWithFilter],
+  );
 
   // Cleanup
   useEffect(() => {
     return () => {
-      clearValidPromo();
+      if (!USE_DUMMY) {
+        clearValidPromo();
+      }
       setDetailPromoData({});
     };
-  }, [clearValidPromo, setDetailPromoData]);
+  }, [clearValidPromo, setDetailPromoData, USE_DUMMY]);
 
-  // Table Columns
+  // Table Columns - FIX untuk menghindari render object
   const baseColumns = useMemo(
     () => promoRepository.getColumns(handleViewDetail),
     [handleViewDetail],
   );
 
   const allColumns = useMemo(() => {
-    return baseColumns.map((col) => ({
+    return baseColumns.map((col, index) => ({
       ...col,
-      key: col.key || col.dataIndex || col.title,
+      key: col.key || col.dataIndex || `col-${index}`,
+      // Pastikan render function tidak mengembalikan object
+      render: col.render
+        ? (text, record, index) => {
+            const result = col.render(text, record, index);
+            // Pastikan result bukan object React child yang tidak valid
+            if (
+              result &&
+              typeof result === "object" &&
+              !React.isValidElement(result)
+            ) {
+              console.warn("Invalid render result:", result);
+              return String(result);
+            }
+            return result;
+          }
+        : undefined,
     }));
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
+    return applyFixedColumns(allColumns, setFixedColumns);
+  }, [allColumns]);
 
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
@@ -300,16 +723,10 @@ const PromoViewData = ({
     }));
   }, [allColumns]);
 
-  const enhancedDataSource = useMemo(() => {
-    const result = [...dataSource];
-    if (loading && page > 1 && !USE_DUMMY) {
-      result.push({
-        key: "loading-row",
-        isLoading: true,
-      });
-    }
-    return result;
-  }, [dataSource, loading, page, USE_DUMMY]);
+  // Cek dataSource sebelum render
+  console.log("Current dataSource:", dataSource);
+  console.log("Has error:", error);
+  console.log("Loading:", loadingInitial);
 
   return (
     <Fragment>
@@ -319,30 +736,61 @@ const PromoViewData = ({
         style={{
           backgroundColor: "#FFFFFF",
           marginTop: 0,
+          height: "500px",
+          overflowY: "auto",
         }}
       >
-        <NxTable
-          idTable="account-promo-table"
-          dataSource={enhancedDataSource}
-          columns={processedColumns}
-          loading={loadingInitial}
-          columnDefinitions={columnDefinitions}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          showSearchBar
-          showAdvanceSearch
-          usePagination={false}
-          useInfiniteScroll={true}
-          hasMore={hasMore}
-          onLoadMore={loadMoreData}
-          loadMoreThreshold={20}
-          tableScrolled={{ y: 110 }}
-          scrollBodyStyle={{ minHeight: 110 }}
-        />
+        {!error && (
+          <NxTable
+            idTable="account-promo-table"
+            dataSource={dataSource}
+            columns={processedColumns}
+            loading={loadingInitial}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            showSearchBar
+            onSearch={handleSearch}
+            showAdvanceSearch
+            onAdvanceSearch={handleAdvanceSearch}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            usePagination={false}
+            useInfiniteScroll
+            hasMore={hasMore}
+            onLoadMore={() => {
+              if (!loadingInitial && hasMore) {
+                setPage((prev) => {
+                  const nextPage = prev + 1;
+                  loadMoreData();
+                  return nextPage;
+                });
+              }
+            }}
+            loadMoreThreshold={50}
+            tableScrolled={{ y: 400 }}
+            scrollBodyStyle={{ minHeight: 400 }}
+          />
+        )}
 
-        {loadingInitial && !USE_DUMMY && <LoadingIndicator size="large" />}
-        {error && !USE_DUMMY && (
-          <ErrorMessage error={error} onRetry={() => loadMoreData(true)} />
+        {loadingInitial && page > 0 && (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <LoadingIndicator size="small" />
+          </div>
+        )}
+
+        {loadingInitial && page === 0 && !error && (
+          <LoadingIndicator size="large" />
+        )}
+
+        {error && (
+          <ErrorMessage
+            error={error}
+            onRetry={() => {
+              setError(null);
+              loadMoreData(true);
+            }}
+          />
         )}
       </div>
     </Fragment>
