@@ -466,9 +466,7 @@ const billingSlice = createSlice({
       state.result = action.payload;
     },
 
-    // Get All Billing Pagination
     [getAllBillingPaginate.pending]: (state, action) => {
-      // Hanya show loading saat initial fetch
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -479,19 +477,22 @@ const billingSlice = createSlice({
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
-        // Append new data
+        const existingIds = new Set(
+          (state.data?.result || []).map((item) => item.billingId)
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.billingId)
+        );
         state.data = {
           ...action.payload,
-          result: [...(state.data?.result || []), ...newResult],
+          result: [...(state.data?.result || []), ...uniqueNewData],
         };
       } else {
-        // Replace with new data
         state.data = action.payload;
       }
     },
     [getAllBillingPaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Jangan clear data saat load more gagal
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }

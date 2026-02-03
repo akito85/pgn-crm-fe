@@ -8,7 +8,7 @@ import AdjustmentSection from "./CalculationUsage/AdjustmentSection";
 
 const { Panel } = Collapse;
 
-const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
+const CalculationUsageSection = ({ calculationCode, ratingCode, accountNumber, saType }) => {
   const [activeKey, setActiveKey] = useState(["1"]);
 
   const handleCollapseChange = (keys) => {
@@ -48,7 +48,8 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         >
           <CalculationItemInfo
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
+            ratingCode={ratingCode}
+            accountNumber={accountNumber}
           />
         </Panel>
 
@@ -57,7 +58,9 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
           key="2"
           style={panelStyle}
         >
-          <CalculationSummary ratingCodeId={ratingCodeId} />
+          <CalculationSummary 
+            ratingCode={ratingCode}
+          />
         </Panel>
 
         <Panel
@@ -65,7 +68,9 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
           key="3"
           style={panelStyle}
         >
-          <CalculationDetail ratingCodeId={ratingCodeId} />
+          <CalculationDetail 
+            calculationCode={calculationCode}
+          />
         </Panel>
 
         <Panel
@@ -73,7 +78,9 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
           key="4"
           style={panelStyle}
         >
-          <AdjustmentSection ratingCodeId={ratingCodeId} />
+          <AdjustmentSection 
+            calculationCode={calculationCode}
+          />
         </Panel>
       </Collapse>
     </div>

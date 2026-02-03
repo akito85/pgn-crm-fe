@@ -42,6 +42,7 @@ import {
   hideModalSuccess,
   showModalError,
 } from "../../redux/slices/general_slice";
+import { getGlobalFormatConfig } from "../../redux/slices/globalPropSlice";
 import NotFound from "../../app/NotFound";
 import { IconModal } from "../../utils/Icon";
 import InputComponent from "../InputComponent";
@@ -54,9 +55,14 @@ const LayoutMenu = ({ children }) => {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const publicPaths = ["/invoice/generate-invoice", "/relationship", "/notifications/view", "/notifications/settings/view"];
+  const publicPaths = [
+    "/invoice/generate-invoice",
+    "/relationship",
+    "/notifications/view",
+    "/notifications/settings/view",
+  ];
   const isPublicPath = publicPaths.some((path) =>
-    location.pathname.includes(path)
+    location.pathname.includes(path),
   );
 
   const { user, remember, data_switch } = useSelector((state) => state.auth);
@@ -71,9 +77,10 @@ const LayoutMenu = ({ children }) => {
   const [form] = Form.useForm();
   const [collapsed, setCollapsed] = useState(false);
   const [modalConfirmation, setModalConfirmation] = useState(false);
-  const isIdleTimerEnabled = process.env.REACT_APP_IDLE_TIMER_ENABLED === 'true';
+  const isIdleTimerEnabled =
+    process.env.REACT_APP_IDLE_TIMER_ENABLED === "true";
   const tokenJSON = JSON.parse(
-    localStorage.getItem("token") || window.sessionStorage.getItem("token")
+    localStorage.getItem("token") || window.sessionStorage.getItem("token"),
   );
   // const config =
   //   localStorage.getItem("config") || window.sessionStorage.getItem("config");
@@ -92,6 +99,10 @@ const LayoutMenu = ({ children }) => {
     dispatch(checkGrantedAccess(location?.pathname));
     dispatch(getProfile());
   }, [dispatch, location, data_switch]);
+
+  useEffect(() => {
+    dispatch(getGlobalFormatConfig());
+  }, [dispatch]);
 
   // use effect kick user
   useEffect(() => {
@@ -276,7 +287,7 @@ const LayoutMenu = ({ children }) => {
                 navigate(
                   tokenJSON?.userLevel === "Super User"
                     ? "/switch-entity"
-                    : "/switch-position"
+                    : "/switch-position",
                 )
               }
             >
@@ -394,7 +405,7 @@ const LayoutMenu = ({ children }) => {
                       color: "#4B465C",
                       width: "24px",
                     },
-                  }
+                  },
                 )}
             </div>
           </div>
@@ -420,32 +431,32 @@ const LayoutMenu = ({ children }) => {
                         color: "#FFFFFF",
                         width: "24px",
                       },
-                    }
+                    },
                   )}
               </div>
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
                 <NotificationDropdown />
                 <Dropdown overlay={menu} trigger={["click"]}>
-                    <a onClick={(e) => e.preventDefault()}>
-                      {data_profile?.data?.urlImage2 === null ? (
-                        data_profile?.data?.username === "" ? (
-                          <Avatar size={"middle"} icon={<UserOutlined />} />
-                        ) : (
-                          <Avatar size={"middle"}>
-                            <span className={"text-[1rem]"}>
-                              {initialAvatar(data_profile?.data?.username)}
-                            </span>
-                          </Avatar>
-                        )
+                  <a onClick={(e) => e.preventDefault()}>
+                    {data_profile?.data?.urlImage2 === null ? (
+                      data_profile?.data?.username === "" ? (
+                        <Avatar size={"middle"} icon={<UserOutlined />} />
                       ) : (
-                        <Avatar
-                          size={"middle"}
-                          src={data_profile?.data?.urlImage2}
-                        />
-                      )}
-                    </a>
-                  </Dropdown>
-                  {/* <IconArrowNarrowLeft
+                        <Avatar size={"middle"}>
+                          <span className={"text-[1rem]"}>
+                            {initialAvatar(data_profile?.data?.username)}
+                          </span>
+                        </Avatar>
+                      )
+                    ) : (
+                      <Avatar
+                        size={"middle"}
+                        src={data_profile?.data?.urlImage2}
+                      />
+                    )}
+                  </a>
+                </Dropdown>
+                {/* <IconArrowNarrowLeft
                   name={"IconArrowNarrowLeft"}
                   style={{ fontSize: "24px" }}
                   className="flex items-center text-white hover:text-white"

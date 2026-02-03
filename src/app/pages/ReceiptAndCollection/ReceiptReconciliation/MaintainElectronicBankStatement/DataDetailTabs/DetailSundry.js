@@ -47,7 +47,7 @@ import {
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import ContentModalConfirmSundry from "../ContentModalConfirmSundry";
 import TableSundryFE from "./TableSundryFE";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 import { configApp } from "../../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
 import { Link } from "react-router-dom";
@@ -521,7 +521,7 @@ export const columnAwal = (
 
 //ATAS COLUMNs
 
-const DetailSundry = ({ data, id, isApprover }) => {
+const DetailSundry = ({ data, id, isApprover, isSubmitter }) => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -1614,16 +1614,19 @@ const DetailSundry = ({ data, id, isApprover }) => {
   return (
     <div className="my-5">
       <div className="w-full flex justify-end my-5 gap-5">
-        <ButtonComponent
-          //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={() => {
-            setModalRequest(true);
-            setShowModal(false);
-          }}
-        >
-          Request
-        </ButtonComponent>
+        {isSubmitter ? (
+          <ButtonComponent
+            //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
+            type="submit"
+            onClick={() => {
+              setModalRequest(true);
+              setShowModal(false);
+            }}
+          >
+            Request
+          </ButtonComponent>
+        ) : null}
+
         {isApprover ? (
           <>
             <ButtonComponent
@@ -1638,7 +1641,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
           </>
         ) : null}
       </div>
-      <TablePaginationNew
+      <TableRBI
         dataSource={data?.result}
         totalData={data?.page?.totalElements || 0}
         columns={columnAwal(

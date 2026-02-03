@@ -40,13 +40,16 @@ const DetailCaPaymentChannel = ({ data_detail, data_req }) => {
                     <DetailText label="Type">
                         {data_detail?.type}
                     </DetailText>
-                    <DetailText label="Eff Start Date">
+                    <DetailText label="Start Date">
                         {moment(data_detail?.effStartDate).format(dateFormatting.date)}
                     </DetailText>
-                    <DetailText label="Eff End Date">
+                    <DetailText label="End Date">
                         {data_detail?.effEndDate
                             ? moment(data_detail?.effEndDate).format(dateFormatting.date)
                             : ""}
+                    </DetailText>
+                    <DetailText label="Status">
+                        {data_detail?.status}
                     </DetailText>
                     <DetailText label="Status Approval">
                         {data_detail?.statusApproval}

@@ -1,14 +1,17 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import { Form, Spin } from "antd";
+import { Form, Spin, Steps } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
 import { useState } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import PointOfSalesPage from "./Page/PointOfSalesPage";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import {
+  LeftOutlined,
+  WarningOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -30,6 +33,13 @@ import {
   getRate,
   getRateTax,
   updatePOS,
+  getAccountSegmentList,
+  getAccountGroupTypeList,
+  getMeterReadingCodeList,
+  getUserDetailForPOS,
+  getSorList,
+  getCostCenterList,
+  getUomCodes,
 } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import PointOfSalesPageAttachment from "./Page/PointOfSalesPageAttachment";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -65,6 +75,13 @@ const PosForm = ({ type }) => {
     loadingAccount,
     data_rate_tax,
     data_materai,
+    data_account_segment,
+    data_account_group_type,
+    data_meter_reading_code,
+    data_user_detail,
+    data_sor_list,
+    data_cost_center_list,
+    data_uom_codes,
   } = useSelector((state) => state.pointOfSales);
 
   //declare
@@ -74,8 +91,17 @@ const PosForm = ({ type }) => {
   const [form] = Form.useForm();
   const idUpdate = type === "create" ? undefined : location?.state?.id;
   const idPos = type === "create" ? undefined : location?.state?.idPos;
+  const customerTypeFromNav = location?.state?.customerType;
+  const [customerType, setCustomerType] = useState(customerTypeFromNav || null);
+  const getCustomerTypeNumber = (type) => {
+    return type === "prospective" ? 2 : 1;
+  };
+  const [defaultData, setDefaultData] = useState({});
+  const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
 
   //state
+  const containerRef = useRef(null);
+  const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState([]);
   const [dataDynamic, setDataDynamic] = useState({});
   const [dataApproval, setDataApproval] = useState([]);
@@ -83,6 +109,8 @@ const PosForm = ({ type }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [dataListDetailApproval, setDataListDetailApproval] = useState([]);
+  const [isCostCenterFilled, setIsCostCenterFilled] = useState(false);
+  const [isAccountSegmentFilled, setIsAccountSegmentFilled] = useState(false);
   const [dataSend, setDataSend] = useState({});
   const [accountNumber, setAccountNumber] = useState("");
   const [dataAccount, setDataAccount] = useState();
@@ -103,6 +131,52 @@ const PosForm = ({ type }) => {
   const [invoiceDate, setInvoiceDate] = useState();
   const [dataMissing, setDataMissing] = useState([]);
   const [dataPriority, setDataPriority] = useState([]);
+
+  const handleAccountSegmentChange = (selectedSegmentId) => {
+    form.resetFields(["accountGroupType"]);
+    setIsAccountSegmentFilled(!!selectedSegmentId);
+
+    if (selectedSegmentId) {
+      dispatch(getAccountGroupTypeList([selectedSegmentId]));
+    }
+  };
+
+  const handleMeterReadingCodeChange = (selectedMrcIds) => {};
+
+  const steps = [
+    { title: "POINT OF SALES" },
+    { title: "APPROVAL" },
+    { title: "ATTACHMENT" },
+  ];
+
+  const items = steps.map((item) => ({
+    key: item.title,
+    title: item.title,
+  }));
+
+  // Scroll handlers
+  const scrollLeftHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft -= 250;
+    }
+  };
+
+  const scrollRightHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft += 250;
+    }
+  };
+
+  // Navigation handlers
+  const next = () => {
+    setCurrentStep(currentStep + 1);
+    scrollRightHandler();
+  };
+
+  const prev = () => {
+    setCurrentStep(currentStep - 1);
+    scrollLeftHandler();
+  };
 
   //state dynamic
   const [dataBillingCycle, setDataBillingCycle] = useState();
@@ -129,6 +203,57 @@ const PosForm = ({ type }) => {
   const [tabHeader, setTabHeader] = useState(dataTabs[0].value);
   const [rangeDisableDate, setRangeDisableDate] = useState({});
 
+  useEffect(() => {
+    if (type === "create") {
+      dispatch(getUserDetailForPOS());
+      dispatch(getSorList());
+      dispatch(getCostCenterList());
+      dispatch(getAccountSegmentList());
+    }
+  }, [dispatch, type]);
+
+  useEffect(() => {
+    if (
+      type === "create" &&
+      customerType === "prospective" &&
+      data_user_detail
+    ) {
+      const defaultSor = data_user_detail?.sorId || null;
+      const defaultCostCenter = data_user_detail?.ccId || null;
+
+      const tempDefaultData = {
+        sor: defaultSor,
+        costCenter:
+          defaultCostCenter && defaultCostCenter !== null
+            ? typeof defaultCostCenter === "number"
+              ? [defaultCostCenter]
+              : defaultCostCenter
+            : [],
+      };
+
+      setDefaultData(tempDefaultData);
+
+      form.setFieldsValue({
+        sor: defaultSor,
+        costCenter: tempDefaultData.costCenter,
+      });
+
+      if (tempDefaultData.costCenter && tempDefaultData.costCenter.length > 0) {
+        const body = {
+          ccIds: tempDefaultData.costCenter.map((id) => ({ ccId: id })),
+        };
+        dispatch(getMeterReadingCodeList(body));
+      }
+    }
+  }, [type, customerType, data_user_detail, form, dispatch]);
+
+  useEffect(() => {
+    let dataMrc = data_meter_reading_code?.reduce(
+      (result, current) => result?.concat(current?.dtoList),
+      [],
+    );
+    setMergedArrayMrc(dataMrc);
+  }, [data_meter_reading_code]);
 
   //useEffect
   useEffect(() => {
@@ -148,13 +273,13 @@ const PosForm = ({ type }) => {
         getRateTax({
           invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
           currency,
-        })
+        }),
       );
       dispatch(
         getRate({
           invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
           currency,
-        })
+        }),
       );
     }
   }, [dispatch, invoiceDate, currency]);
@@ -169,6 +294,7 @@ const PosForm = ({ type }) => {
     // dispatch(getGlobalTermsOfPaymentData());
     dispatch(getGlobalProductItem());
     dispatch(getGlobalBillingItem());
+    dispatch(getUomCodes());
     // setDataApproval([]);
   }, [dispatch]);
 
@@ -221,13 +347,19 @@ const PosForm = ({ type }) => {
     }
   }, [dispatch, type]);
 
-
   useEffect(() => {
-    if (hasValue(accountNumber)) {
-      const getAccountId = data_globalAccountNumber?.find(item => item?.accountNumber === accountNumber)?.accountId;
-      dispatch(getGlobalTermsOfPaymentData(getAccountId));
+    if (customerType === "customer" && hasValue(accountNumber)) {
+      const getAccountId = data_globalAccountNumber?.find(
+        (item) => item?.accountNumber === accountNumber,
+      )?.accountId;
+
+      if (getAccountId) {
+        dispatch(getGlobalTermsOfPaymentData(getAccountId));
+      }
+    } else if (customerType === "prospective") {
+      dispatch(getGlobalTermsOfPaymentData(null));
     }
-  }, [accountNumber, data_globalAccountNumber, dispatch]);
+  }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
 
   const handleSetFormUpdate = useCallback(
     (data_detailPos, data_globalCurrency) => {
@@ -239,11 +371,12 @@ const PosForm = ({ type }) => {
         // },
         ...data_detailPos,
         currency: data_globalCurrency?.find(
-          (item) => item.text === data_detailPos?.currency
+          (item) => item.text === data_detailPos?.currency,
         )?.Id,
         apphierId: data_detailPos?.appHierId,
         transactionDate: moment(data_detailPos?.transactionDate),
         invoiceDate: moment(data_detailPos?.invoiceDate),
+        costCenter: data_detailPos?.costCenter,
         // termType: {
         //   termValue: isDateString(data_detailPos?.termsOfPayment)
         //     ? moment(data_detailPos?.termsOfPayment || "")
@@ -251,7 +384,7 @@ const PosForm = ({ type }) => {
         // },
       });
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -271,18 +404,18 @@ const PosForm = ({ type }) => {
       handleSetFormUpdate(data_detailPos, data_globalCurrency);
       setCurrency(
         data_globalCurrency?.find(
-          (item) => item.text === data_detailPos?.currency
-        )?.Id
+          (item) => item.text === data_detailPos?.currency,
+        )?.Id,
       );
       setAccountNumber(data_detailPos?.accountNumber);
       setInvoiceDate(
-        moment(data_detailPos?.invoiceDate)
+        moment(data_detailPos?.invoiceDate),
         // .format(dateFormatting.dateFormal)
       );
       setDataBillingCycle(
         data_globalBillingCycle?.find(
-          (item) => item.name === data_detailPos?.billingCycle
-        )?.id
+          (item) => item.name === data_detailPos?.billingCycle,
+        )?.id,
       );
       setDataDynamic({
         ...dataDynamic,
@@ -321,13 +454,13 @@ const PosForm = ({ type }) => {
           //   };
           // }
           return temp;
-        })
+        }),
       );
       setDataAttachment(
         (data_detailPos?.mattachments || []).map((item) => ({
           ...item,
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [
@@ -365,11 +498,11 @@ const PosForm = ({ type }) => {
     if (data) {
       let dataMaterai =
         data.filter(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297
+          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
         )[0] || {};
       const newDataDynamic = data
         .filter(
-          (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297
+          (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297,
         )
         .reduce(
           (sums, item) => {
@@ -378,7 +511,7 @@ const PosForm = ({ type }) => {
               /* yang punya tax ( dari product )*/
               item.typeId === 2144 &&
               data.some(
-                (dataItem) => dataItem.reference === parseInt(item.itemId)
+                (dataItem) => dataItem.reference === parseInt(item.itemId),
               )
             ) {
               // tempSum.taxBasis += item.total || 0;
@@ -389,7 +522,10 @@ const PosForm = ({ type }) => {
                 tempSum.taxBasisIdr += item.total || 0;
               }
             }
-            if (item.typeId === 2342 || item?.typeValueName?.toLowerCase()?.includes("ppn")) {
+            if (
+              item.typeId === 2342 ||
+              item?.typeValueName?.toLowerCase()?.includes("ppn")
+            ) {
               /* Tax PPN saja type Id*/
               // tempSum.vat += item.total || 0;
               tempSum.vatEqvIdr += item.eqvIdr || 0;
@@ -399,7 +535,10 @@ const PosForm = ({ type }) => {
                 tempSum.vatIdr += item.total || 0;
               }
             }
-            if (item.typeId === 2343 || item?.typeValueName?.toLowerCase()?.includes("pph")) {
+            if (
+              item.typeId === 2343 ||
+              item?.typeValueName?.toLowerCase()?.includes("pph")
+            ) {
               /*tax pph saja*/
               tempSum.withholdingTax += item.totalEqvIdr || 0;
             }
@@ -408,22 +547,42 @@ const PosForm = ({ type }) => {
             // console.log(item, "item")
             if (item.currency === "USD") {
               tempSum.totalAmountUsd +=
-                item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.total || 0 : 0;
-              tempSum.amountUsd += item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.amount || 0 : 0;
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.total || 0
+                  : 0;
+              tempSum.amountUsd +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.amount || 0
+                  : 0;
               tempSum.discountAmountUsd += item.discount || 0;
               //new Vat USD , tax basis USD
             } else if (item.currency === "IDR") {
               tempSum.totalAmountIdr +=
-                item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.total || 0 : 0;
-              tempSum.amountIdr += item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.amount || 0 : 0;
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.total || 0
+                  : 0;
+              tempSum.amountIdr +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.amount || 0
+                  : 0;
               tempSum.discountAmountIdr += item.discount || 0;
               //new Vat IDR , tax basis IDR
             }
             //netral ( except pph )
             tempSum.totalEqvIdr +=
-              item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.totalEqvIdr || 0 : 0;
+              item.typeId !== 2343 ||
+              !item?.typeValueName?.toLowerCase()?.includes("pph")
+                ? item.totalEqvIdr || 0
+                : 0;
             tempSum.totalEqvUsd +=
-              item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.totalEqvUsd || 0 : 0;
+              item.typeId !== 2343 ||
+              !item?.typeValueName?.toLowerCase()?.includes("pph")
+                ? item.totalEqvUsd || 0
+                : 0;
             return tempSum;
           },
           {
@@ -444,12 +603,12 @@ const PosForm = ({ type }) => {
             withholdingTax: 0,
             totalEqvIdr: 0, //for materai
             totalEqvUsd: 0,
-          }
+          },
         );
       if (
         newDataDynamic.totalEqvIdr >= 5000000 &&
         !data.some(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297
+          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
         )
       ) {
         // console.log(newDataDynamic.totalEqvIdr, "totalEqvIdr");
@@ -457,9 +616,9 @@ const PosForm = ({ type }) => {
         dispatch(
           getMaterai({
             transactionDate: moment(invoiceDate).format(
-              dateFormatting.dateFormal
+              dateFormatting.dateFormal,
             ),
-          })
+          }),
         )
           .unwrap()
           .then((dataRes) => {
@@ -493,7 +652,7 @@ const PosForm = ({ type }) => {
                   ...items,
                   lineNumber: index + 1,
                 };
-              })
+              }),
             );
           });
       } else if (
@@ -505,14 +664,15 @@ const PosForm = ({ type }) => {
         setData(
           data
             .filter(
-              (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297
+              (item) =>
+                item.item !== "Meterai" || parseInt(item.itemId) !== 297,
             )
             .map((items, index) => {
               return {
                 ...items,
                 lineNumber: index + 1,
               };
-            })
+            }),
         );
       } else {
         // console.log(data,"data akhir")
@@ -609,8 +769,8 @@ const PosForm = ({ type }) => {
     if (accountNumber) {
       setDataAccount(
         data_globalAccountNumber?.find(
-          (item) => item.accountNumber === accountNumber
-        )
+          (item) => item.accountNumber === accountNumber,
+        ),
       );
     }
   }, [accountNumber]);
@@ -631,25 +791,25 @@ const PosForm = ({ type }) => {
     } else {
       return "TOP";
     }
-  }
+  };
 
   const handleSetFormTypeValueDdl = useCallback(
     (value, data_detailPos) => {
       form.setFieldsValue({
         ...(value?.action === "setData"
           ? {
-            termType: {
-              termValueDdl: handleValueDdlSet(data_detailPos?.termsOfPayment),
-            },
-          }
+              termType: {
+                termValueDdl: handleValueDdlSet(data_detailPos?.termsOfPayment),
+              },
+            }
           : {
-            termType: {
-              termValueDdl: handleValueDdlSet(value.value),
-            },
-          }),
+              termType: {
+                termValueDdl: handleValueDdlSet(value.value),
+              },
+            }),
       });
     },
-    [form]
+    [form],
   );
 
   const handleValue = (e) => {
@@ -664,21 +824,21 @@ const PosForm = ({ type }) => {
         form.setFieldsValue({
           ...(value?.action === "setData"
             ? {
-              termType: {
-                termValue: handleValue(data_detailPos?.termsOfPayment),
-              },
-            }
+                termType: {
+                  termValue: handleValue(data_detailPos?.termsOfPayment),
+                },
+              }
             : {
-              termType: {
-                termValue: isDateString(value?.value)
-                  ? moment(value?.value)
-                  : value?.value,
-              },
-            }),
+                termType: {
+                  termValue: isDateString(value?.value)
+                    ? moment(value?.value)
+                    : value?.value,
+                },
+              }),
         });
       }
     },
-    [form]
+    [form],
   );
 
   //handling non moment to moment date ( error date.clone )
@@ -724,8 +884,9 @@ const PosForm = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "create" ? "Create" : "Update"
-        } Point of Sales`,
+      breadcrumbName: `${
+        type === "create" ? "Create" : "Update"
+      } Point of Sales`,
     },
   ];
 
@@ -733,19 +894,21 @@ const PosForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate) < moment(formHeader?.startDate) ||
+        moment(item?.endDate) > moment(formHeader?.endDate)
+      ) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
   }, []);
-
 
   //handleAction
   const onFinish = (e) => {
@@ -775,11 +938,11 @@ const PosForm = ({ type }) => {
         dispatch(showModalError(errorBody));
       } else {
         const findBillingCycle = data_globalBillingCycle?.find(
-          (item) => item.id === e?.billingCycle
+          (item) => item.id === e?.billingCycle,
         )?.name;
 
         const findBillingPeriod = data_globalBillingPeriod?.find(
-          (item) => item.id === e?.billingPeriod
+          (item) => item.id === e?.billingPeriod,
         )?.name;
 
         setDataSend({
@@ -793,14 +956,14 @@ const PosForm = ({ type }) => {
           currency: data_globalCurrency?.find((item) => item.Id === e?.currency)
             ?.text,
           transactionDate: moment(e?.transactionDate).format(
-            dateFormatting.date
+            dateFormatting.date,
           ),
           invoiceDate: moment(e?.invoiceDate).format(dateFormatting.date),
           termsOfPayment: moment.isMoment(e?.termType?.termValue)
             ? moment(e?.termType?.termValue).format(dateFormatting.date)
             : data_globalTermsOfPaymentValue?.find(
-              (item) => item.Id === e?.termType?.termValue
-            )?.text,
+                (item) => item.Id === e?.termType?.termValue,
+              )?.text,
           remark: e?.remark,
           submit: typeSubmit,
           topId: e.termType.termValueDdl,
@@ -831,107 +994,236 @@ const PosForm = ({ type }) => {
   // console.log(dataDynamic, "dataDynamic");
   const handleSendData = (e) => {
     setModalConfirm(false);
+
     // Summary Amount
     const calculateAmount = data.map((a) => a.amount);
     const sumAmount = calculateAmount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     // Summary Discount
     const calculateDiscount = data.map((a) => a.discount);
     const sumDiscount = calculateDiscount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     // Find topDataType
     const dataTypeTOP = data_globalTermsOfPaymentValue?.find(
-      (item) => item.Id === e.termType.termValue
+      (item) => item.Id === e.termType.termValue,
     );
 
     // Check Date String
     const isDateString = moment(
       e?.termsOfPayment,
       dateFormatting.date,
-      true
+      true,
     ).isValid();
 
-    //code
-    const body = {
-      ...e,
-      id: type === "create" ? undefined : idUpdate,
-      posNumber: type === "create" ? undefined : idPos,
-      costcenter: `${e?.costCenterCode || ""} - ${e?.costCenterName || ""}`,
-      termsOfPayment:
-        isDateString === true
-          ? moment(e?.termsOfPayment).format(dateFormatting.dateFormal)
-          : e?.termsOfPayment,
-      ...dataDynamic,
-      appHierId: dataApprovalId,
-      rate: parseFloat(dataDynamic?.rate.replace(/,/g, '')) || 0,
-      // rateType: dataDynamic?.rateType || null,
-      rateDate: renderDate(dataDynamic?.rateDate) || null,
-      amount: sumAmount,
-      // taxBasisIdr: 0,
-      // taxBasisUsd: 0,
-      // taxBasisEqvUsd: 0,
-      // vatIdr: 0,
-      // vatUsd: 0,
-      taxRate: parseFloat(dataDynamic?.taxRate.replace(/,/g, '')) || 0,
-      taxRateDate: renderDate(dataDynamic?.taxRateDate) || null,
-      // taxRateType: dataDynamic?.rateType || null,
-      discountAmount: sumDiscount,
-      topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
-      mrbiPosDetails: data?.map((item) => {
-        return {
-          posDetailId: item?.posDetailId,
-          posNumber: item?.posNumber,
-          type: item?.typeId,
-          item: item?.itemId,
-          price: item?.price || 0,
-          reference: item?.reference || null,
-          quantity: item?.quantity,
-          uom: item?.uom || null,
-          currency: item?.currency || null,
-          amount: item?.amount || 0,
-          amountEqvIdr: item?.amountEqvIdr || 0,
-          amountEqvUsd: item?.amountEqvUsd || 0,
-          eqvIdr: item?.eqvIdr || 0,
-          discount: item?.discount || 0,
-          total: item?.total || 0,
-          totalEqvUsd: item?.totalEqvUsd || 0,
-          totalEqvIdr: item?.totalEqvIdr || 0,
-          remark: item?.remark || null,
-          lineNumber: item?.lineNumber || 0,
-        };
-      }),
+    // Get SOR name for prospective customer
+    const getSorName = () => {
+      if (customerType === "prospective" && e?.sor) {
+        const sorItem = data_sor_list?.find((item) => item.id === e.sor);
+        return sorItem ? sorItem.name : "";
+      }
+      return e?.sor || "";
     };
 
-    delete body.costCenterCode;
-    delete body.costCenterName;
+    // Get MRC name for prospective customer
+    const getMrcName = () => {
+      if (customerType === "prospective" && e?.meterReadingCode) {
+        const mrcIds = Array.isArray(e.meterReadingCode)
+          ? e.meterReadingCode
+          : [e.meterReadingCode];
+        const mrcNames = mrcIds
+          .map((mrcId) => {
+            const mrc = mergedArrayMrc?.find((item) => item.id === mrcId);
+            return mrc ? mrc.name : "";
+          })
+          .filter(Boolean);
+        return mrcNames.join(", ");
+      }
+      return e?.meterReadingCode || "";
+    };
+
+    // Get Account Segment name
+    const getAccountSegmentName = () => {
+      if (customerType === "prospective" && e?.accountSegment) {
+        const segment = data_account_segment?.find(
+          (item) => item.id === e.accountSegment,
+        );
+        return segment ? segment.name : "";
+      }
+      return e?.accountSegment || "";
+    };
+
+    // Get Account Group Type name
+    const getAccountGroupTypeName = () => {
+      if (customerType === "prospective" && e?.accountGroupType) {
+        const groupType = data_account_group_type?.find(
+          (item) => item.glbTypeValId === e.accountGroupType,
+        );
+        return groupType ? groupType.glbValue || groupType.name : "";
+      }
+      return e?.accountGroupType || "";
+    };
+
+    // Prepare base body
+    let body = {
+      id: type === "create" ? undefined : idUpdate,
+      posNumber: type === "create" ? undefined : idPos,
+
+      // Customer Type (1 = customer, 2 = prospective)
+      customerType: getCustomerTypeNumber(customerType),
+
+      // Customer Information
+      ...(customerType === "customer" && { customerNumber: e?.customerNumber }),
+      customerName: e?.customerName,
+      accountName: e?.accountName,
+
+      // SOR & Cost Center
+      sor: getSorName(),
+      meterReadingCode: getMrcName(),
+      accountSegment: getAccountSegmentName(),
+      accountGroupType: getAccountGroupTypeName(),
+
+      // Billing Information
+      billingCycle:
+        data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
+          ?.name || e?.billingCycle,
+      billingPeriod:
+        data_globalBillingPeriod?.find((item) => item.id === e?.billingPeriod)
+          ?.name || e?.billingPeriod,
+      currency:
+        data_globalCurrency?.find((item) => item.Id === e?.currency)?.text ||
+        e?.currency,
+      transactionDate: moment(e?.transactionDate).format("DD MMM YYYY"),
+      invoiceDate: moment(e?.invoiceDate).format("DD MMM YYYY"),
+      termsOfPayment: moment.isMoment(e?.termType?.termValue)
+        ? moment(e?.termType?.termValue).format(dateFormatting.date)
+        : data_globalTermsOfPaymentValue?.find(
+            (item) => item.Id === e?.termType?.termValue,
+          )?.text || e?.termType?.termValue,
+      remark: e?.remark,
+
+      // Approval
+      appHierId: dataApprovalId,
+      submit: typeSubmit,
+      topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
+      topId: e.termType.termValueDdl,
+
+      // Rate & Tax Information
+      rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
+      rateDate: dataDynamic?.rateDate
+        ? moment(dataDynamic.rateDate, dateFormatting.date).format(
+            "DD MMM YYYY",
+          )
+        : null,
+      rateType: dataDynamic?.rateType || null,
+      taxRate: parseFloat(dataDynamic?.taxRate.replace(/,/g, "")) || 0,
+      taxRateDate: dataDynamic?.taxRateDate
+        ? moment(dataDynamic.taxRateDate, dateFormatting.date).format(
+            "DD MMM YYYY",
+          )
+        : null,
+      taxRateType: dataDynamic?.taxRateType || null,
+
+      // Amount Calculations
+      amount: sumAmount,
+      discountAmount: sumDiscount,
+      totalAmountIdr: dataDynamic?.totalAmountIdr || 0,
+      totalAmountUsd: dataDynamic?.totalAmountUsd || 0,
+      amountIdr: dataDynamic?.amountIdr || 0,
+      amountUsd: dataDynamic?.amountUsd || 0,
+      discountAmountIdr: dataDynamic?.discountAmountIdr || 0,
+      discountAmountUsd: dataDynamic?.discountAmountUsd || 0,
+      taxBasisIdr: dataDynamic?.taxBasisIdr || 0,
+      taxBasisUsd: dataDynamic?.taxBasisUsd || 0,
+      taxBasisEqvIdr: dataDynamic?.taxBasisEqvIdr || 0,
+      vatIdr: dataDynamic?.vatIdr || 0,
+      vatUsd: dataDynamic?.vatUsd || 0,
+      vatEqvIdr: dataDynamic?.vatEqvIdr || 0,
+      withholdingTax: dataDynamic?.withholdingTax || 0,
+      totalEqvIdr: dataDynamic?.totalEqvIdr || 0,
+      totalEqvUsd: dataDynamic?.totalEqvUsd || 0,
+
+      // POS Details
+      mrbiPosDetails: data?.map((item) => ({
+        posDetailId: item?.posDetailId,
+        posNumber: item?.posNumber,
+        lineNumber: item?.lineNumber || 0,
+        type: item?.typeId,
+        item: item?.itemId,
+        price: item?.price || 0,
+        reference: item?.reference || null,
+        quantity: item?.quantity,
+        uom: item?.uom || null,
+        currency: item?.currency || null,
+        amount: item?.amount || 0,
+        amountEqvIdr: item?.amountEqvIdr || 0,
+        amountEqvUsd: item?.amountEqvUsd || 0,
+        eqvIdr: item?.eqvIdr || 0,
+        discount: item?.discount || 0,
+        total: item?.total || 0,
+        totalEqvUsd: item?.totalEqvUsd || 0,
+        totalEqvIdr: item?.totalEqvIdr || 0,
+        remark: item?.remark || null,
+      })),
+    };
+
+    // Handle field berdasarkan customer type
+    if (customerType === "prospective") {
+      if (Array.isArray(e?.costCenter) && e.costCenter.length > 0) {
+        const costCenterNames = e.costCenter
+          .map((ccId) => {
+            const cc = data_cost_center_list?.find((item) => item.id === ccId);
+            return cc ? cc.name : ""; 
+          })
+          .filter(Boolean)
+          .join(", ");
+
+        body.costcenter = costCenterNames;
+      }
+      body.registrationNumber = e?.accountNumber;
+
+      // Field tambahan untuk prospective
+      body.email = e?.email || "";
+      body.address = e?.address || "";
+    } else {
+      body.accountNumber = e?.accountNumber;
+      body.costcenter = e?.costCenter || "";
+    }
+
+    // Clean up fields yang tidak diperlukan
+    delete body.costCenter;
     delete body.termType;
     delete body.apphierId;
     delete body.taxBasis;
 
+    // Dispatch create or update
     if (type === "create") {
       dispatch(createPOS(body))
         .unwrap()
         .then(async (data) => {
           const id = data?.id;
           setLoadingForm(true);
+
+          // Upload attachments
           for (let icon = 0; icon < dataAttachment.length; icon++) {
             const element = dataAttachment[icon];
-            const body = {
+            const attachBody = {
               files: element.file,
               refId: id,
               category: element.fileCategoryId,
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              body
+              attachBody,
             );
           }
+
+          // Reset form
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -942,6 +1234,9 @@ const PosForm = ({ type }) => {
           setCurrency();
           setInvoiceDate();
           setDdlFinal("DATE");
+
+          // Navigate back
+          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -956,27 +1251,29 @@ const PosForm = ({ type }) => {
           }
         });
     } else {
-      // console.log(body, "body");
+      // Update logic sama, hanya tambah upload attachment untuk yang baru
       dispatch(updatePOS(body))
         .unwrap()
         .then(async (data) => {
           setLoadingForm(true);
           const id = idUpdate;
           const filterDataAttach = dataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
+
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
-            const body = {
+            const attachBody = {
               files: element.file,
               refId: id,
               category: element.fileCategoryId,
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              body
+              attachBody,
             );
           }
+
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -986,8 +1283,9 @@ const PosForm = ({ type }) => {
           setAccountNumber();
           setCurrency();
           setInvoiceDate();
-          setCurrency();
           setDdlFinal("DATE");
+
+          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1035,6 +1333,26 @@ const PosForm = ({ type }) => {
     handleMandatory(setDataTabs, dataAttachment, errorFields);
   };
 
+  const handleChangeSOR = (selectedSorId) => {
+    // Reset semua field yang depend on SOR
+    form.resetFields([
+      "costCenter",
+      "meterReadingCode",
+      "accountSegment",
+      "accountGroupType",
+    ]);
+  };
+
+  const handleChangeCostCenter = (selectedCostCenterId) => {
+    form.resetFields(["meterReadingCode"]);
+    setIsCostCenterFilled(!!selectedCostCenterId);
+
+    if (selectedCostCenterId) {
+      const body = { ccIds: [{ ccId: selectedCostCenterId }] };
+      dispatch(getMeterReadingCodeList(body));
+    }
+  };
+
   const handleClearOrReset = () => {
     if (type === "update") {
       if (data_detailPos && type === "update") {
@@ -1070,22 +1388,22 @@ const PosForm = ({ type }) => {
             //   };
             // }
             return temp;
-          })
+          }),
         );
         setCurrency(
           data_globalCurrency?.find(
-            (item) => item.text === data_detailPos?.currency
-          )?.Id
+            (item) => item.text === data_detailPos?.currency,
+          )?.Id,
         );
         setAccountNumber(data_detailPos?.accountNumber);
         setInvoiceDate(
-          moment(data_detailPos?.invoiceDate)
+          moment(data_detailPos?.invoiceDate),
           // .format(dateFormatting.dateFormal)
         );
         setDataBillingCycle(
           data_globalBillingCycle?.find(
-            (item) => item.name === data_detailPos?.billingCycle
-          )?.id
+            (item) => item.name === data_detailPos?.billingCycle,
+          )?.id,
         );
         setDataAttachment(
           (data_detailPos?.mattachments || []).map((item) => ({
@@ -1093,16 +1411,18 @@ const PosForm = ({ type }) => {
             // createdDate: moment(item.createdDate).format("DD MMM YYYY"),
             // fileSize: bytesConverter(item.fileSize || 0),
             dataType: "exist",
-          }))
+          })),
         );
         setDataApprovalId(data_detailPos?.appHierId);
         // setDataApproval(data_detailPos?.appHierId);
       }
     } else {
-      setRangeDisableDate({})
+      setRangeDisableDate({});
       form.resetFields();
       setData([]);
       setAccountNumber();
+      setIsCostCenterFilled(false);
+      setIsAccountSegmentFilled(false);
       setCurrency();
       setInvoiceDate();
       form.setFieldsValue({
@@ -1125,15 +1445,23 @@ const PosForm = ({ type }) => {
     <LayoutMenu>
       <Spin spinning={loading || loadingForm || loadingAccount}>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex flex-col"}>
-          <div className={"w-full flex justify-start"}>
-            <RadioTabs
-              data={dataTabs}
-              onChange={changeTabHeader}
-              currentPosition={tabHeader}
-            />
+        {/* Steps Navigation dengan background putih */}
+        <div className="bg-white rounded-lg p-4 mb-6">
+          <div className="flex flex-row justify-center">
+            <div
+              ref={containerRef}
+              className="overflow-x-scroll scrollStepsCstm"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              <Steps
+                current={currentStep}
+                items={items}
+                labelPlacement="vertical"
+              />
+            </div>
           </div>
         </div>
+
         <Form
           id={"form"}
           layout={"vertical"}
@@ -1142,12 +1470,12 @@ const PosForm = ({ type }) => {
           onFinishFailed={handleErrorSubmit}
           scrollToFirstError={true}
         >
-          <div
-            style={{
-              display: tabHeader !== dataTabs[0].value ? "none" : undefined,
-            }}
-          >
+          {/* Step 1: Point of Sales */}
+          <div className={currentStep !== 0 ? "hidden" : ""}>
             <PointOfSalesPage
+              form={form}
+              isCostCenterFilled={isCostCenterFilled}
+              isAccountSegmentFilled={isAccountSegmentFilled}
               data_dynamic={dataDynamic}
               data={data}
               setData={setData}
@@ -1176,13 +1504,24 @@ const PosForm = ({ type }) => {
               idPos={idPos}
               setRangeDisableDate={setRangeDisableDate}
               rangeDisableDate={rangeDisableDate}
+              customerType={customerType}
+              defaultData={defaultData}
+              onSorChange={handleChangeSOR}
+              onCostCenterChange={handleChangeCostCenter}
+              onMeterReadingCodeChange={handleMeterReadingCodeChange}
+              onAccountSegmentChange={handleAccountSegmentChange}
+              data_account_segment={data_account_segment}
+              data_account_group_type={data_account_group_type}
+              data_meter_reading_code_list={data_meter_reading_code}
+              data_sor_list={data_sor_list}
+              data_cost_center_list={data_cost_center_list}
+              data_uom_codes={data_uom_codes}
+              mergedArrayMrc={mergedArrayMrc}
             />
           </div>
-          <div
-            style={{
-              display: tabHeader !== dataTabs[1].value ? "none" : undefined,
-            }}
-          >
+
+          {/* Step 2: Approval */}
+          <div className={currentStep !== 1 ? "hidden" : ""}>
             <BaseContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={dataListDetailApproval}
@@ -1192,11 +1531,9 @@ const PosForm = ({ type }) => {
               />
             </BaseContainer>
           </div>
-          <div
-            style={{
-              display: tabHeader !== dataTabs[2].value ? "none" : undefined,
-            }}
-          >
+
+          {/* Step 3: Attachment */}
+          <div className={currentStep !== 2 ? "hidden" : ""}>
             <PointOfSalesPageAttachment
               dispatch={dispatch}
               dataAttachment={dataAttachment}
@@ -1204,26 +1541,38 @@ const PosForm = ({ type }) => {
               type={type}
             />
           </div>
+
+          {/* Footer Buttons */}
           <div className={"w-full flex justify-between mt-10"}>
-            <div className=" flex">
+            <div className="flex">
               <ButtonComponent
                 type={"submit"}
                 onClick={() => setModalBack(true)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
+                icon={<LeftOutlined style={{ color: "#fff", fontSize: 24 }} />}
               >
                 Back
               </ButtonComponent>
             </div>
 
             <div className={"flex gap-5"}>
+              {/* Previous Button - tampil jika bukan step pertama */}
+              {currentStep > 0 && (
+                <ButtonComponent
+                  onClick={prev}
+                  type={"default"}
+                  icon={
+                    <LeftOutlined style={{ color: "#1890ff", fontSize: 24 }} />
+                  }
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderColor: "#1890ff",
+                    color: "#1890ff",
+                  }}
+                >
+                  Previous
+                </ButtonComponent>
+              )}
+
               <Form.Item>
                 <ButtonComponent
                   icon={
@@ -1238,65 +1587,72 @@ const PosForm = ({ type }) => {
                     />
                   }
                   type="submit"
-                  onClick={() => {
-                    handleClearOrReset();
-                  }}
+                  onClick={handleClearOrReset}
                 >
                   {type === "update" ? "Reset" : "Clear"}
                 </ButtonComponent>
               </Form.Item>
-              <Form.Item>
+
+              {/* Next Button - tampil jika bukan step terakhir */}
+              {currentStep < steps.length - 1 && (
                 <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  form={"form"}
-                  onClick={() => {
-                    setTypeSubmit(false);
-                  }}
+                  onClick={next}
+                  type={"submit"}
+                  icon={
+                    <RightOutlined style={{ color: "#fff", fontSize: 18 }} />
+                  }
                 >
-                  Save As Draft
+                  Next
                 </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  form={"form"}
-                  onClick={() => {
-                    setTypeSubmit(true);
-                  }}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
+              )}
+
+              {/* Save Buttons - tampil jika step terakhir */}
+              {currentStep === steps.length - 1 && (
+                <>
+                  <Form.Item>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      form={"form"}
+                      onClick={() => setTypeSubmit(false)}
+                    >
+                      Save As Draft
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      form={"form"}
+                      onClick={() => setTypeSubmit(true)}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </Form.Item>
+                </>
+              )}
             </div>
           </div>
         </Form>
 
-        {/* modal confirm */}
+        {/* Existing Modals */}
         <ModalCustom
           isOpen={modalConfirm}
           type={"confirmation"}
           header={`Confirmation`}
           width={900}
-          handleCancel={() => {
-            setModalConfirm(false);
-          }}
+          handleCancel={() => setModalConfirm(false)}
           footer={
             <div className="w-full flex justify-end gap-5">
               <ButtonComponent
                 type={"default"}
-                onClick={() => {
-                  setModalConfirm(false);
-                }}
+                onClick={() => setModalConfirm(false)}
               >
                 Cancel
               </ButtonComponent>
               <ButtonComponent
                 type={"submit"}
-                onClick={() => {
-                  handleSendData(dataSend);
-                }}
+                onClick={() => handleSendData(dataSend)}
                 disabled={loading || loadingForm}
               >
                 Confirm
@@ -1329,8 +1685,9 @@ const PosForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${type === "create" ? "Created." : "Updated."
-              } ${bodyError?.message}`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              type === "create" ? "Created." : "Updated."
+            } ${bodyError?.message}`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
@@ -1340,7 +1697,7 @@ const PosForm = ({ type }) => {
           isOpen={modalDailyRate}
           handleOk={() => setModalDailyRate(false)}
           handleCancel={() => setModalDailyRate(false)}
-        // customText={"Try Again"}
+          // customText={"Try Again"}
         >
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">

@@ -89,6 +89,18 @@ const AdjustmentBillingInfoSection = ({
           : data?.adjustmentReasonName}
       </DetailText>
 
+      <DetailText label={"Classification Adjustment"}>
+        {data?.classification}
+      </DetailText>
+
+      <DetailText label={"Post Invoice"}>
+        {data?.postInvoice}
+      </DetailText>
+
+      <DetailText label={"On Demand"}>
+        {data?.onDemand}
+      </DetailText>
+
       <div className="col-span-5">
         <DetailText label={"Remark"}>{data?.remark}</DetailText>
       </div>
