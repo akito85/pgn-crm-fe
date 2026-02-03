@@ -8,12 +8,10 @@ import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/ge
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
 import { deleteGasUtilization, getDetailGasUtilization, getListGasUtilizationHistory, getListGasUtilizationHistoryNew } from '../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice'
-import { ModalConfirm } from '../../../../../../components/Modal/ModalPopUp'
 import NxTable from '../../../../../../components/Nx/NxTable'
 import { useColumnActionPermission } from '../../../../../../components/ColumnActionPermission'
 import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColumns'
 import { WarningOutlined } from '@ant-design/icons'
-import { hasValue, renderDateColumn } from '../../../../../../utils'
 import ModalCustom from '../../../../../../components/Modal/ModalCustom'
 
 const columns = (
