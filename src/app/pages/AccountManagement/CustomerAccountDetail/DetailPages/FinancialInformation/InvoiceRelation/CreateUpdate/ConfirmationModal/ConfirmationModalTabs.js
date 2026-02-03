@@ -1,14 +1,11 @@
-import { Fragment } from "react";
-import RadioTabs from "../../../../../../../../../components/RadioTabs";
+import { useState } from "react";
 import ConfirmationModalInfo from "./ConfirmationModalInfo";
 import ConfirmationModalApproval from "./ConfirmationModalApproval";
 import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
+import { Tabs } from "antd";
 
 const ConfirmationModalTabs = ({
-  section = "",
-  options = [],
-  handleChangeOption = () => {},
   selectedAppHierId,
   selectedApprovalName,
   hierarchyTableData,
@@ -18,65 +15,52 @@ const ConfirmationModalTabs = ({
   service,
   type = "",
   configApplication,
+  activeTab = 0,
+  setActiveTab = () => {},
 }) => {
-  const dataTabs = type === "submit" ? {
-    info: "Invoice Relation Information",
-    apprv: "Approval",
-    attch: "Attachment",
-    rmrk: "Remark",
-  } : type === "draft" ? {
-    info: "Invoice Relation Information",
-    apprv: "Approval",
-    attch: "Attachment",
-  } : {
-    info: "Invoice Relation Information",
-    apprv: "Approval",
-    attch: "Attachment",
-    rmrk: "Remark",
-  };
-
-  const renderSection = () => {
-    switch (section) {
-      case dataTabs.info:
-        return <ConfirmationModalInfo data={data} />;
-      case dataTabs.apprv:
-        return (
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Invoice Relation Information",
+      children: <ConfirmationModalInfo data={data} />
+    },
+    {
+      key: 1,
+      label: "Approval",
+      children: (
         <ConfirmationModalApproval
           dataTable={hierarchyTableData}
           selectedAppHierId={selectedAppHierId}
           selectedApprovalName={selectedApprovalName}
         />
-        )
-      case dataTabs.attch:
-        return <ConfirmationModalAttachment
+      )
+    },
+    {
+      key: 2,
+      label: "Attachment",
+      children: (
+        <ConfirmationModalAttachment
           data={dataAttachment}
           dispatch={dispatch}
           service={service}
           configApplication={configApplication}
-        />;
-      case dataTabs.rmrk:
-        return <ConfirmationModalRemark />
-      default:
-        return null;
-    }
-  };
+        />
+      )
+    },
+    type === "submit" && {
+      key: 3,
+      label: "Remark",
+      children: <ConfirmationModalRemark />
+    },
+  ].filter(Boolean);
 
   return (
-    <Fragment>
-      <div className="flex flex-col gap-4">
-        {/* Wrapper div to ensure proper styling */}
-        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
-          <div className="w-full">
-            <RadioTabs
-              currentPosition={section}
-              data={options}
-              onChange={handleChangeOption}
-            />
-          </div>
-        </div>
-        {renderSection()}
-      </div>
-    </Fragment>
+    <Tabs
+      items={tabOptions}
+      onChange={setActiveTab}
+      activeKey={activeTab}
+      className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-tab]:py-4 [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+    />
   );
 };
 

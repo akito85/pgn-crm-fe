@@ -16,48 +16,25 @@ const ConfirmationModal = ({
   service,
   configApplication,
 }) => {
-  const tabs = type === "submit" ? [
-    { value: "Payment Relation Information" },
-    { value: "Approval" },
-    { value: "Attachment" },
-    { value: "Remark" },
-  ] : type === "draft" ? [
-    { value: "Payment Relation Information" },
-    { value: "Approval" },
-    { value: "Attachment" },
-  ] : [
-    { value: "Payment Relation Information" },
-    { value: "Approval" },
-    { value: "Attachment" },
-    { value: "Remark" },
-  ];
+  const tabLength = type === "submit" ? 4 : 3;
 
-  const [currentTab, setCurrentTab] = useState(0);
-  const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
-
-  const handleDetailSection = (e) => {
-    setTypeDetailSection(e.target.value);
-    setCurrentTab(tabs.findIndex(tab => tab.value === e.target.value))
-  };
+  const [activeTab, setActiveTab] = useState(0);
 
   /**
    * @param {"next" | "prev"} type 
    */
   const handleChangeTab = (type) => {
-    if (type === "next" && currentTab < (tabs.length -1)) {
-      setTypeDetailSection(tabs[currentTab + 1].value);
-      setCurrentTab(currentTab + 1);
+    if (type === "next" && activeTab < tabLength - 1) {
+      setActiveTab((prev) => prev + 1);
     }
-    else if (type === "prev" && currentTab >= 0) {
-      setTypeDetailSection(tabs[currentTab - 1].value);
-      setCurrentTab(currentTab - 1);
+    else if (type === "prev" && activeTab >= 0) {
+      setActiveTab((prev) => prev - 1);
     }
   }
 
   useEffect(() => {
     if (!isOpen) {
-      setTypeDetailSection(tabs[0].value);
-      setCurrentTab(0);
+      setActiveTab(0);
     }
   }, [isOpen])
 
@@ -68,9 +45,12 @@ const ConfirmationModal = ({
       header={"CONFIRMATION PAYMENT RELATION"}
       type={"confirmation"}
       handleCancel={handleCancel}
+      hidePadding={{
+        top: true,
+      }}
       footer={[
         <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
-          {currentTab > 0 ? (
+          {activeTab > 0 ? (
             <ButtonComponent type={"default"} onClick={() => handleChangeTab("prev")}>
               Previous
             </ButtonComponent>
@@ -79,12 +59,12 @@ const ConfirmationModal = ({
               Cancel
             </ButtonComponent>
           )}
-          {currentTab < (tabs.length - 1)  && (
+          {activeTab < (tabLength - 1)  && (
             <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
               Next
             </ButtonComponent>
           )}
-          {currentTab === (tabs.length - 1) && (
+          {activeTab === (tabLength - 1) && (
             <ButtonComponent type={"submit"} form={form} htmlType={"submit"} >
               {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
             </ButtonComponent>
@@ -93,9 +73,6 @@ const ConfirmationModal = ({
       ]}
     >
       <ConfirmationModalTabs
-        options={tabs}
-        handleChangeOption={handleDetailSection}
-        section={typeDetailSection}
         selectedAppHierId={selectedAppHierId}
         selectedApprovalName={selectedApprovalName}
         hierarchyTableData={hierarchyTableData}
@@ -104,6 +81,8 @@ const ConfirmationModal = ({
         service={service}
         type={type}
         configApplication={configApplication}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
     </ModalCustom>
   )

@@ -318,6 +318,44 @@ const notificationApi = {
   },
 
   /**
+   * Get global notification settings
+   * GET /v1/api/notification/settings/global
+   * Returns system-wide defaults, available modules, and notification types
+   */
+  getGlobalSettings: async () => {
+    try {
+      const config = {
+        headers: notificationTokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/settings/global`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('Error fetching global notification settings:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update global notification settings (Admin only)
+   * PUT /v1/api/notification/settings/global
+   * @param {Object} settings - Global settings to update
+   */
+  updateGlobalSettings: async (settings) => {
+    try {
+      const config = {
+        headers: notificationTokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.put(`${NOTIFICATION_API_URL}/settings/global`, settings, config);
+      return response?.data;
+    } catch (error) {
+      console.error('Error updating global notification settings:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Register session for notification authentication
    * POST /v1/api/notification/register
    * Creates HttpSession and returns session cookie

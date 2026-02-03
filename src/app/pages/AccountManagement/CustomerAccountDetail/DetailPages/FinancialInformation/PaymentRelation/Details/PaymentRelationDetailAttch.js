@@ -16,15 +16,13 @@ const PaymentRelationDetailAttch = ({
   idPr = 0,
   dispatch = () => {},
 }) => {
-  const financialInformationState = useSelector(
-    (state) => state.paymentRelation
-  );
-
   const {
     list_prDetailAttachment,
     pagination_prDetailAttachment,
     loading,
-  } = financialInformationState;
+  } = useSelector(
+    (state) => state.paymentRelation
+  );
 
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);

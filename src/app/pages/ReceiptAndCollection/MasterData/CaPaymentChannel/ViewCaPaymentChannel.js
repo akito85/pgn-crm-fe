@@ -1,6 +1,7 @@
 import {
     Spin,
     Tooltip,
+    Checkbox,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CardContainer from "../../../../../components/CardContainer";
@@ -10,6 +11,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
     EyeOutlined,
+    DownloadOutlined,
 } from "@ant-design/icons";
 import {
     renderColumn,
@@ -21,9 +23,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
 import {
     getApprovalHistoryCaPaymentChannel,
-    getDownloadCaPaymentChannel,
     getPaginateCaPaymentChannel,
+    activeInactiveCaPaymentChannel,
+    getDownloadCaPaymentChannel,
+    getAllApprovalListCaPaymentChannel,
+    getListApprovalByIdCaPaymentChannel,
 } from "../../../../../redux/slices/receipt_collection/caPaymentChannel";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
@@ -51,6 +57,10 @@ const ViewCaPaymentChannel = () => {
     const [openModalHistory, setOpenModalHistory] = useState(false);
     const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
     const [body, setBody] = useState({});
+    const [openModalInactivate, setOpenModalInactivate] = useState(false);
+    const [status, setStatus] = useState("");
+    const [id, setId] = useState("");
+    const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
 
     const handleFetch = useCallback(() => {
         dispatch(
@@ -110,16 +120,44 @@ const ViewCaPaymentChannel = () => {
             const temp = {
                 dataApprover: {
                     create: dataApprovalHistory?.dataApprover?.CA_PAYMENT_CHANNEL || [],
+                    inactivate: dataApprovalHistory?.dataApprover?.INACTIVE_CA_PAYMENT_CHANNEL || [],
                 },
                 dataHistory: {
                     create: dataApprovalHistory?.dataHistory?.CA_PAYMENT_CHANNEL || [],
+                    inactivate: dataApprovalHistory?.dataHistory?.INACTIVE_CA_PAYMENT_CHANNEL || [],
                 },
             };
             setDataApprovalHistoryFix(temp);
         } else {
-            setDataApprovalHistoryFix({});
         }
     }, [dataApprovalHistory]);
+
+    const handleInactive = (record) => {
+        setOpenModalInactivate(true);
+        setId(record?.id);
+        setNameModalActiveOrInactivate(record?.caCode);
+        setStatus(record?.status);
+    };
+
+    const handleCancelModalInactivate = () => {
+        setOpenModalInactivate(false);
+    };
+
+    const handleSubmitActiveInactive = (res, handleClear) => {
+        const body = {
+            id: id,
+            appHierId: res.approvalHierarchy,
+            status: status === "Inactive" ? "Active" : "Inactive",
+            remark: res.remark,
+        };
+        dispatch(activeInactiveCaPaymentChannel({ body: body }))
+            .unwrap()
+            .then((res) => {
+                handleClear();
+                handleCancelModalInactivate();
+                handleFetch();
+            });
+    };
 
     const handleApprovalHistory = async (data) => {
         try {
@@ -259,7 +297,7 @@ const ViewCaPaymentChannel = () => {
                 ),
         },
         {
-            title: "EFF START DATE",
+            title: "START DATE",
             sorter: true,
             align: "center",
             dataIndex: "effStartDate",
@@ -283,7 +321,7 @@ const ViewCaPaymentChannel = () => {
                 ),
         },
         {
-            title: "EFF END DATE",
+            title: "END DATE",
             sorter: true,
             align: "center",
             dataIndex: "effEndDate",
@@ -304,6 +342,31 @@ const ViewCaPaymentChannel = () => {
                     v,
                     "date",
                     search
+                ),
+        },
+        {
+            title: "STATUS",
+            dataIndex: "status",
+            key: "status",
+            sorter: true,
+            width: 100,
+            fixed: "right",
+            ...getColumnSearchPropsPaging(
+                "status",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                false
+            ),
+            render: (text) =>
+                renderColumn(
+                    "status",
+                    searchedColumn,
+                    searchText,
+                    text,
+                    false,
+                    "status"
                 ),
         },
         {
@@ -335,7 +398,7 @@ const ViewCaPaymentChannel = () => {
 
     const [fixedColumns, setFixedColumns] = useState(() => ({
         left: ["no"],
-        right: ["statusApproval", "action"],
+        right: ["status", "statusApproval", "action"],
     }));
 
     const onSort = (_, __, sort) => {
@@ -362,6 +425,20 @@ const ViewCaPaymentChannel = () => {
         // toolbar items
 
         {
+            action: "Download",
+            render: (
+                <ButtonComponent
+                    onClick={handleDownload}
+                    type={"submit"}
+                    border={false}
+                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+                >
+                    Download List
+                </ButtonComponent>
+            ),
+        },
+
+        {
             action: "Create",
             render: (
                 <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_CA_PAYMENT_CHANNEL}>
@@ -369,7 +446,7 @@ const ViewCaPaymentChannel = () => {
                         icon={<SVGIcon name="IconButtonCreate" width={24} />}
                         type="submit"
                     >
-                        Create Ca Payment Channel
+                        Create
                     </ButtonComponent>
                 </NavLink>
             ),
@@ -440,6 +517,49 @@ const ViewCaPaymentChannel = () => {
                             </div>
                         </Tooltip>
                     )
+                );
+            },
+        },
+        {
+            action: "Activate",
+            type: "table",
+            render: (record, data_length) => {
+                // const statusLowerCase = record?.status?.toLowerCase()
+
+                return (
+                    data_length > 3 ?
+                        <div className="w-full">
+                            <ButtonComponent
+                                border={false}
+                                className={'gap-5 w-full'}
+                                onClick={() => handleInactive(record)}
+                            // disabled={
+                            //   disabledActionByStatus('activate', record?.status, record?.statusApproval)
+                            // }
+                            >
+                                <Checkbox
+                                    onClick={() => handleInactive(record)}
+                                    checked={record?.status !== "Active"}
+                                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                                />
+                                <span
+                                    className={"text-black ml-6 gap-2 text-xl text-center w-full"}
+                                >
+                                    {record?.status === "Active" ? "Inactivate" : "Activate"}
+                                </span>
+                            </ButtonComponent>
+                        </div>
+                        :
+                        <Tooltip title={record?.status === "Active" ? "Inactivate" : "Activate"}>
+                            <div >
+                                <Checkbox
+                                    border={false}
+                                    onClick={() => handleInactive(record)}
+                                    checked={record?.status !== "Active"}
+                                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                                />
+                            </div>
+                        </Tooltip>
                 );
             },
         },
@@ -522,7 +642,7 @@ const ViewCaPaymentChannel = () => {
                             x: "max-content",
                             y: 525,
                         }}
-                        showExport={true}
+                        showExport={false}
                         handleDownload={handleDownload}
                         fixedColumns={fixedColumns}
                         setFixedColumns={setFixedColumns}
@@ -537,6 +657,16 @@ const ViewCaPaymentChannel = () => {
                     tabOptions={handleOptions()}
                     dataApprover={dataApprovalHistoryFix?.dataApprover}
                     dataHistory={dataApprovalHistoryFix?.dataHistory}
+                />
+                <ModalActiveInactive
+                    dispatch={dispatch}
+                    getAPIOption={getAllApprovalListCaPaymentChannel}
+                    getAPIDetail={getListApprovalByIdCaPaymentChannel}
+                    selector={"caPaymentChannel"}
+                    alertMessage={`Are you sure you want to inactivate this Ca Payment Channel with Ca Code ${nameModalActiveOrInactivate}?`}
+                    openModalInactivate={openModalInactivate}
+                    handleCloseModalInactivate={handleCancelModalInactivate}
+                    onFinish={handleSubmitActiveInactive}
                 />
             </Spin>
             {/* modal try again */}

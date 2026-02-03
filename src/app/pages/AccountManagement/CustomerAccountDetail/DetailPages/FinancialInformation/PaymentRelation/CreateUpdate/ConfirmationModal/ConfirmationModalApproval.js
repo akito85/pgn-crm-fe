@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import ConfirmationModalHierarchy from "./ConfirmationModalHierarchy";
-import CardContainer from "../../../../../../../../../components/CardContainer";
+import BaseContainer from "../../../../../../../../../components/BaseContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalApproval = ({
   dataTable = [],
@@ -17,7 +18,7 @@ const ConfirmationModalApproval = ({
   };
 
   return (
-    <CardContainer header={"APPROVAL"}>
+    <NxBaseContainer border header={"APPROVAL"}>
       <ConfirmationModalHierarchy
         dataTable={dataTable}
         selectedAppHierId={selectedAppHierId}
@@ -27,7 +28,7 @@ const ConfirmationModalApproval = ({
         searchText={searchText}
         handleSearch={handleSearch}
       />
-    </CardContainer>
+    </NxBaseContainer>
   );
 };
 

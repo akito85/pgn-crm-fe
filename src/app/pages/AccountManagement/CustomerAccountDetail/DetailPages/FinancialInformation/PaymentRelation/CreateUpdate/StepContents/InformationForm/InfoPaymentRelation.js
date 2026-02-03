@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CardContainer from "../../../../../../../../../../components/CardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
+import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 
 export default function InfoPaymentRelation({
   accountId,
@@ -23,7 +24,6 @@ export default function InfoPaymentRelation({
 
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
-  const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -143,7 +143,7 @@ export default function InfoPaymentRelation({
 
   return(
     <div className={className}>
-      <CardContainer header={"PAYMENT RELATION INFORMATION"}>
+      <NxCardContainer header={"PAYMENT RELATION INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           <div className="flex gap-2 items-end">
             <Form.Item name={"objectId"} hidden>
@@ -151,35 +151,42 @@ export default function InfoPaymentRelation({
             </Form.Item>
 
             <Form.Item
-              key="accountNumber"
-              name={"accountNumber"}
               label={"Account Number"}
+              required
               className="no-margin-form"
-              rules={[
-                {
-                  message: requiredMessage("Account Number"),
-                  required: true,
-                }
-              ]}
             >
-              <InputComponent disabled />
+              <Input.Group compact>
+                <Form.Item
+                  key="accountNumber"
+                  name={"accountNumber"}
+                  rules={[
+                    {
+                      message: requiredMessage("Account Number"),
+                      required: true,
+                    }
+                  ]}
+                  noStyle
+                >
+                  <InputComponent disabled />
+                </Form.Item>
+                <Button
+                  type="primary"
+                  className="h-9 px-4 justify-center items-center"
+                  style={{
+                    backgroundColor: "#0075bf",
+                    borderColor: "#0075bf",
+                    borderRadius: "5px",
+                    minWidth: "112px",
+                  }}
+                  onClick={() => {
+                    // Add your select logic here
+                    setIsOpen(true)
+                  }}
+                >
+                  Select
+                </Button>
+              </Input.Group>
             </Form.Item>
-            <Button
-              type="primary"
-              className="h-9 px-4 justify-center items-center"
-              style={{
-                backgroundColor: "#0075bf",
-                borderColor: "#0075bf",
-                borderRadius: "5px",
-                minWidth: "112px",
-              }}
-              onClick={() => {
-                // Add your select logic here
-                setIsOpen(true)
-              }}
-            >
-              Select
-            </Button>
           </div>
 
           <Form.Item
@@ -251,7 +258,7 @@ export default function InfoPaymentRelation({
             />
           </Form.Item>
         </div>
-      </CardContainer>
+      </NxCardContainer>
 
       <ModalCustom
         isOpen={isOpen}

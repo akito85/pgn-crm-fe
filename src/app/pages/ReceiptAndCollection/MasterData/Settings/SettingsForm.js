@@ -88,12 +88,12 @@ const SettingsForm = (props) => {
     return false
   };
 
-  
+
 
   return (
     <div>
       <BaseContainer header={"PARTNER"}>
-        <div className="w-full grid grid-cols-2 gap-5">
+        <div className="w-full grid grid-cols-5 gap-5">
           {/* <Form.Item
             label={"Partner Code"}
             name={"partnerCode"}
@@ -141,7 +141,7 @@ const SettingsForm = (props) => {
             <Input allowClear maxLength={10} />
           </Form.Item> */}
 
-          
+
 
           {/* <Form.Item
             label={"Payment Channel Code"}
@@ -162,6 +162,20 @@ const SettingsForm = (props) => {
               {dataPaymentChannelList?.data?.map((data) => (
                 <Select.Option key={data.ciCode} value={data.ciCode}>
                   {data.ciCode} - {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            label={"Type"}
+            name={"type"}
+            rules={formMessageRequired("Type")}
+          >
+            <SelectComponent>
+              {dataType?.data?.map((data) => (
+                <Select.Option key={data.name} value={data.name}>
+                  {data.name}
                 </Select.Option>
               ))}
             </SelectComponent>
@@ -247,19 +261,7 @@ const SettingsForm = (props) => {
             />
           </Form.Item>
 
-          <Form.Item
-            label={"Type"}
-            name={"type"}
-            rules={formMessageRequired("Type")}
-          >
-            <SelectComponent>
-              {dataType?.data?.map((data) => (
-                <Select.Option key={data.name} value={data.name}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
+
         </div>
 
       </BaseContainer>

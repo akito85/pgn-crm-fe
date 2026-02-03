@@ -1,5 +1,4 @@
 import { Modal } from "antd";
-import React from "react";
 
 const ModalCustom = (props) => {
   const {
@@ -16,6 +15,7 @@ const ModalCustom = (props) => {
     closable = true, // ← FIX: Default true
     title,
     maxHeight,
+    hidePadding = false,
   } = props;
 
   const typeModal = (type) => {
@@ -43,7 +43,7 @@ const ModalCustom = (props) => {
             </div>
 
             {/* content section */}
-            <div className={"flex flex-col w-full p-5"}>{children}</div>
+            <div className={`flex flex-col w-full ${hidePadding ? "" : "p-4"} ${hidePadding?.top ? "pt-0" : ""} ${hidePadding?.bottom ? "pb-0" : ""} ${hidePadding?.right ? "pr-0" : ""} ${hidePadding?.left ? "pl-0" : ""}`}>{children}</div>
           </div>
         );
       case "detail":

@@ -485,13 +485,19 @@ const paymentRelationSlice = createSlice({
       state.loading = false;
       const { result, page, isLoadMore } = action.payload;
 
-      if (isLoadMore)
-        state.list_prAccountStandard = [
-          ...state.list_prAccountStandard,
-          ...result,
-        ];
-      else
-        state.list_prAccountStandard = result;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
+
+          state.list_prAccountStandard = [
+            ...state.list_prAccountStandard,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_prAccountStandard = result;
+      }
 
       state.pagination_prAccountStandard = {
         totalPages: page?.totalPages || 0,
@@ -524,13 +530,19 @@ const paymentRelationSlice = createSlice({
       state.loading = false;
       const { result, page, isLoadMore } = action.payload;
 
-      if (isLoadMore)
-        state.list_prDetailAttachment = [
-          ...state.list_paymentRelation,
-          ...result,
-        ];
-      else
-        state.list_prDetailAttachment = result;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_paymentRelation.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          
+          state.list_prDetailAttachment = [
+            ...state.list_paymentRelation,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_prDetailAttachment = result;
+      }
 
       state.pagination_prDetailAttachment = {
         totalPages: page?.totalPages || 0,
