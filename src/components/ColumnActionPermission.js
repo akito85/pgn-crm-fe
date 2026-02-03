@@ -15,7 +15,7 @@ export const RenderContentActions = (
 ) => {
   if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center gap-4">
+      <div className="w-full flex justify-center items-center py-1 gap-4">
         <Popover
           trigger={"click"}
           placement="bottomRight"
@@ -33,7 +33,7 @@ export const RenderContentActions = (
             </Space>
           }
         >
-          <div className="pt-0">
+          <div>
             <MoreOutlined
               style={{
                 fontSize: "20px",
@@ -43,7 +43,7 @@ export const RenderContentActions = (
             />
           </div>
         </Popover>
-        <div className="pt-1">
+        <div>
           {itemRender
             ?.filter((item) => item?.action === sliceColumn?.toLowerCase())
             ?.map((item, index) => {
