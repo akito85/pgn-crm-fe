@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Form, Button, Input } from "antd";
 
 import InputComponent from "../../../../../../../../../../components/InputComponent";
-import ModalCustom from "../../../../../../../../../../components/Modal/ModalCustom";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
 
 import moment from "moment";
