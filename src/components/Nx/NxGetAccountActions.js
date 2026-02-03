@@ -60,21 +60,25 @@ const nxGetAccountActions = ({
   {
     action: 'View',
     type: 'table',
-    render: (r, actionLength, index) => {
+    render: (record, actionLength, index) => {
       return (
-        <Link
-          to={detailRoute}
-          state={{
-            id: r.id,
-            idAccount,
-            idCustomer,
-          }}
+        <Tooltip
+          title="Detail"
+          onClick={
+            () => navigate(detailRoute, {
+              state: {
+                id: record.id,
+                idAccount,
+                idCustomer,
+              }
+            })
+          }
           key={`table-action-${index}`}
         >
-          <Tooltip title="Detail">
+          <div className="flex items-center h-full">
             <SVGIcon name="IconDetail" width={20} />
-          </Tooltip>
-        </Link>
+          </div>
+        </Tooltip>
       )
     }
   },
@@ -89,7 +93,7 @@ const nxGetAccountActions = ({
       const content = actionLength > 3 ?
         (
           <ButtonComponent
-            icon={<SVGIcon name="IconEdit" color={!isEditable ? "#8D91A0" : "#ACC424"} width={20} />}
+            icon={<SVGIcon name="IconEdit" color={!isEditable ? "#BDBDBD" : "#0075BF"} width={20} />}
             border={false}
             disabled={!isEditable}
             onClick={() => navigate(updateRoute, {
@@ -99,28 +103,32 @@ const nxGetAccountActions = ({
                 idCustomer,
               }
             })}
+            type={"action"}
           >
             <span className={"text-black ml-3"}>Update</span>
           </ButtonComponent>
         ) : (
           <Tooltip title="Update">
-            <SVGIcon
-              name="IconEdit"
-              width={20}
-              color={!isEditable ? "#8D91A0" : "#ACC424"}
-              className={!isEditable ? "cursor-not-allowed" : undefined}
-              onClick={
-                isEditable ?
-                  () => navigate(updateRoute, {
-                    state: {
-                      id: record.id,
-                      idAccount,
-                      idCustomer,
-                    }
-                  }) :
-                  () => {}
-              }
-            />
+            <div className="flex items-center h-full">
+
+              <SVGIcon
+                name="IconEdit"
+                width={20}
+                color={!isEditable ? "#8D91A0" : "#ACC424"}
+                className={!isEditable ? "cursor-not-allowed" : undefined}
+                onClick={
+                  isEditable ?
+                    () => navigate(updateRoute, {
+                      state: {
+                        id: record.id,
+                        idAccount,
+                        idCustomer,
+                      }
+                    }) :
+                    () => {}
+                }
+              />
+            </div>
           </Tooltip>
         );
 
@@ -133,6 +141,7 @@ const nxGetAccountActions = ({
     action: 'Inactivate',
     type: 'table',
     render: (record, actionLength, index) => {
+      const isInactive = record.status === "INACTIVE";
       const isActive = record.status === "ACTIVE";
 
       const content = actionLength > 3 ?
@@ -140,15 +149,16 @@ const nxGetAccountActions = ({
           <ButtonComponent
             icon={
               <Checkbox
-                className="inactive-check"
-                disabled={isActive ? false : true}
-                checked={isActive ? false : true}
+                disabled={!isActive}
+                checked={isInactive}
                 style={{ transform: "scale(0.9)" }}
+                className="action-checkbox"
               />
             }
             border={false}
             disabled={!isActive}
             onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+            type={"action"}
           >
             <span className={"text-black ml-3"}>Inactivate</span>
           </ButtonComponent>
@@ -156,13 +166,15 @@ const nxGetAccountActions = ({
           <Tooltip
             title="Inactivate"
           >
-            <Checkbox
-              className="inactive-check"
-              disabled={isActive ? false : true}
-              checked={isActive ? false : true}
-              onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
-              style={{ transform: "scale(0.9)" }}
-            />
+            <div className="flex items-center h-full">
+              <Checkbox
+                className="action-checkbox"
+                disabled={isActive ? false : true}
+                checked={isActive ? false : true}
+                onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+                style={{ transform: "scale(0.9)" }}
+              />
+            </div>
           </Tooltip>
         );
 
@@ -181,6 +193,7 @@ const nxGetAccountActions = ({
             }
             border={false}
             onClick={() => handleApprovalHistory(true, record?.id)}
+            type={"action"}
           >
             <span className={"text-black ml-3"}>Approval History</span>
           </ButtonComponent>
