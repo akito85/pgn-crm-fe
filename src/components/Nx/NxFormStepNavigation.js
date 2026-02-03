@@ -5,7 +5,7 @@ import SVGIcon from "../../assets/Icon/index";
 
 export const NxFormStepper = ({ steps, current, onPrev, onNext }) => {
   return (
-    <div className="bg-white rounded-lg border border-[#D6E1F0] p-3">
+    <div className="bg-white rounded-lg border border-[#D6E1F0] p-4">
       <div className="flex flex-row items-center justify-between w-full">
         <div
           style={{
