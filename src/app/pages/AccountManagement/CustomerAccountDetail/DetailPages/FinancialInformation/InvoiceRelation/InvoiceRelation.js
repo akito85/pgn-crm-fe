@@ -4,9 +4,9 @@ import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
-import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
-import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
+import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 const InvoiceRelation = ({
   id = 0,
@@ -148,7 +148,9 @@ const InvoiceRelation = ({
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
 
@@ -268,7 +270,7 @@ const InvoiceRelation = ({
       />
 
       {/* Inactivate Modal */}
-      <ModalApproveOrReject
+      <NxApproveOrRejectModal
         isOpen={showInactiveModal}
         header={"INACTIVATE"}
         handleCloseModal={() => handleInactivateModal(false)}
@@ -277,7 +279,7 @@ const InvoiceRelation = ({
       />
 
       {/* Approval History Modal */}
-      <ModalHistory
+      <NxHistoryModal
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
