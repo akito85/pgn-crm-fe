@@ -19,6 +19,10 @@ export const receipt_and_collection = [
     path: RECEIPT_AND_COLLECTION_ROUTES.UPDATE_RECEIPT,
     element: RECEIPT_AND_COLLECTION_ELEMENTS.UPDATE_RECEIPT,
   },
+  {
+    path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNTING,
+    element: RECEIPT_AND_COLLECTION_ELEMENTS.CREATE_ACCOUNTING,
+  },
 
   // Receipt Reconciliation
 
