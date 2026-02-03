@@ -6,6 +6,8 @@ const initialState = {
   loading: false,
   data: null,
   data_reconcile: null,
+  accountingAllocation: null, // For Create Accounting feature
+  submitResult: null, // For Create Accounting submit
   //   data_detail: null,
   //   data_allocation: null,
 };
@@ -71,6 +73,55 @@ export const downloadReconcileReceiptHistories = createAsyncThunk(
         validateError({
           error: error,
           action: "RECEIPT_RECONCILE_HISTORY_DOWNLOAD",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+/**
+ * Get accounting allocation data for Create Accounting
+ * Calls: GET /v1/dbs/api/receipt/accounting/{receiptId}?payPeriod=YYYYMM
+ */
+export const getAccountingAllocation = createAsyncThunk(
+  "GET_ACCOUNTING_ALLOCATION",
+  async ({ receiptId, payPeriod }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/accounting/${receiptId}?payPeriod=${payPeriod}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ACCOUNTING_ALLOCATION",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+/**
+ * Submit accounting allocation for Create Accounting
+ * Calls: POST /v1/dbs/api/receipt/accounting/submit
+ */
+export const submitAccountingAllocation = createAsyncThunk(
+  "SUBMIT_ACCOUNTING_ALLOCATION",
+  async ({ receiptId, payPeriod }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/accounting/submit`;
+      const body = { receiptId, payPeriod };
+      const response = await receiptCollectionHttpService.createData(url, body);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "SUBMIT_ACCOUNTING_ALLOCATION",
           back: false,
         })
       );
@@ -162,6 +213,34 @@ const receiptHistoriesReducer = createSlice({
     [downloadReceiptHistories.rejected]: (state, action) => {
       state.isFailed = true;
       state.data_download = action.payload;
+      state.loading = false;
+    },
+
+    // Get Accounting Allocation
+    [getAccountingAllocation.pending]: (state, action) => {
+      state.loading = true;
+      state.accountingAllocation = null;
+    },
+    [getAccountingAllocation.fulfilled]: (state, action) => {
+      state.accountingAllocation = action.payload;
+      state.loading = false;
+    },
+    [getAccountingAllocation.rejected]: (state, action) => {
+      state.accountingAllocation = null;
+      state.loading = false;
+    },
+
+    // Submit Accounting Allocation
+    [submitAccountingAllocation.pending]: (state, action) => {
+      state.loading = true;
+      state.submitResult = null;
+    },
+    [submitAccountingAllocation.fulfilled]: (state, action) => {
+      state.submitResult = action.payload;
+      state.loading = false;
+    },
+    [submitAccountingAllocation.rejected]: (state, action) => {
+      state.submitResult = null;
       state.loading = false;
     },
   },

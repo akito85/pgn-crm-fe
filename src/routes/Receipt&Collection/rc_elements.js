@@ -1,5 +1,6 @@
 import ViewReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ViewReceipt";
 import ListDetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ListDetailReceipt";
+import CreateAccounting from "../../app/pages/ReceiptAndCollection/Receipt/CreateAccounting";
 import ViewSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/ViewSynchronizeReceipt";
 import DetailSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/DetailSynchronizeReceipt";
 import ViewReconcileReceiptHistories from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/ReconcileReceiptHistories/ViewReconcileReceiptHistories";
@@ -86,6 +87,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_RECEIPT_PAGE: <ListDetailReceipt />,
   CREATE_RECEIPT: <ListRececiptForm type="create" />,
   UPDATE_RECEIPT: <ListRececiptForm type="update" />,
+  CREATE_ACCOUNTING: <CreateAccounting />,
 
   // Receipt Reconciliation
 

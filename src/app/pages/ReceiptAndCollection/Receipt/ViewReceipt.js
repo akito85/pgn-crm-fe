@@ -16,7 +16,7 @@ import {
 } from "../../../../redux/slices/receipt_collection/receipt";
 import { columnsReceipt } from "./ColumnReceiptView";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
   ModalConfirm,
@@ -39,6 +39,7 @@ const ViewReceipt = () => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
+  const navigate = useNavigate();
   const dataSource = data?.result?.map((item) => ({
     ...item,
     key: item.id,
@@ -151,6 +152,13 @@ const ViewReceipt = () => {
         setSelectedData([]);
         handleFetch(); // Refresh list
       }
+    });
+  };
+
+  const handleCreateAccounting = (record) => {
+    // Navigate to Create Accounting page with receipt data
+    navigate(RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNTING, {
+      state: record || recordSelected,
     });
   };
 
@@ -366,7 +374,10 @@ const ViewReceipt = () => {
           <span>Refund</span>
         </div>
       </Menu.Item>
-      <Menu.Item key="CreateAccounting">
+      <Menu.Item
+        key="CreateAccounting"
+        onClick={() => handleCreateAccounting(record)}
+      >
         <div className="flex items-center gap-2">
           <SVGIcon name="IconActionCreate" color={"#000000"} width={16} />
           <span>Create Accounting</span>
