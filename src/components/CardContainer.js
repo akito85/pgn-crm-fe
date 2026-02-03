@@ -14,8 +14,20 @@ const CardContainer = ({ header, subHeader, children, type, element }) => {
           <div className="text-primary text-sm">{subHeader}</div>
         </div>
       )}
-      {type === "tabs" && <div className="p-3">{element}</div>}
-      <div style={{ padding: "16px" }}>{children}</div>
+      {type === "tabs" && (
+        <div style={{ padding: "12px 16px 0 16px" }}>{element}</div>
+      )}
+      <div style={{ padding: "16px" }}>
+        <div
+          style={{
+            border: "1px solid #C8CDD4",
+            borderRadius: "8px",
+            padding: "16px",
+          }}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 };
