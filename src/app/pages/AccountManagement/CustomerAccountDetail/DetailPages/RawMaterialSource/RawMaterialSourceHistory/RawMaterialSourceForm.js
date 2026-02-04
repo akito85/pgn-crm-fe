@@ -28,6 +28,8 @@ import {
   updateRMS,
 } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const RawMaterialSourceForm = ({ type }) => {
   // Selector
@@ -301,79 +303,120 @@ const RawMaterialSourceForm = ({ type }) => {
         />
 
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <BaseContainer header={"Raw Material Source Information"}>
-            <div className="w-full grid grid-cols-3 gap-3">
-              <Form.Item
-                label={"Effective Date"}
-                name={"effectiveDate"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Effective Date!",
-                  },
-                ]}
-              >
-                <DateComponent
-                  disabled={type !== "create" ? true : false}
-                  onChange={(e) => handleStartDate(e)}
-                  dateDisable={disabledDate}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label={"Local (%)"}
-                name={"value1"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Local (%)!",
-                  },
-                ]}
-              >
-                <InputComponent type={"number"} />
-              </Form.Item>
-
-              <Form.Item
-                label={"Import (%)"}
-                name={"value2"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Import (%)!",
-                  },
-                ]}
-              >
-                <InputComponent type={"number"} />
-              </Form.Item>
-
-              <div className="col-span-3">
+          <div className="flex flex-col gap-y-4 mt-4">
+            <NxCardContainer header={"RAW MATERIAL SOURCE INFORMATION"}>
+              <div className="w-full grid grid-cols-3 gap-3">
                 <Form.Item
-                  label={"Description"}
-                  name={"description"}
-                  className={"w-full"}
+                  label={"Effective Date"}
+                  name={"effectiveDate"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Effective Date!",
+                    },
+                  ]}
                 >
-                  <InputComponent
-                    type="textarea"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                  <DateComponent
+                    disabled={type !== "create" ? true : false}
+                    onChange={(e) => handleStartDate(e)}
+                    dateDisable={disabledDate}
                   />
                 </Form.Item>
+
+                <Form.Item
+                  label={"Local (%)"}
+                  name={"value1"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Local (%)!",
+                    },
+                  ]}
+                >
+                  <InputComponent type={"number"} />
+                </Form.Item>
+
+                <Form.Item
+                  label={"Import (%)"}
+                  name={"value2"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Import (%)!",
+                    },
+                  ]}
+                >
+                  <InputComponent type={"number"} />
+                </Form.Item>
+
+                <div className="col-span-3">
+                  <Form.Item
+                    label={"Description"}
+                    name={"description"}
+                    className={"w-full"}
+                  >
+                    <InputComponent
+                      type="textarea"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </Form.Item>
+                </div>
               </div>
-            </div>
-          </BaseContainer>
+            </NxCardContainer>
 
-          <BaseContainer header={"Raw Material Source Import Detail"}>
-            <FunctionalRMSDetail
-              type={type}
-              data={listDataDetail}
-              updateData={setListDataDetail}
-              setStoredData={setStoredDataInline}
-              storedData={storedDataInline}
-              required={{ required: true, message: "Please input your" }}
-            />
-          </BaseContainer>
+            <NxCardContainer header={"Raw Material Source Import Detail"}>
+              <FunctionalRMSDetail
+                type={type}
+                data={listDataDetail}
+                updateData={setListDataDetail}
+                setStoredData={setStoredDataInline}
+                storedData={storedDataInline}
+                required={{ required: true, message: "Please input your" }}
+              />
+            </NxCardContainer>
+            
+            {/* TODO: style navigasi masih belum benar */}
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <ButtonComponent
+                  type={"menu"}
+                  onClick={()=>{navigate(-1)}}
+                >
+                  Cancel
+                </ButtonComponent>
+                <div className="flex w-full justify-end gap-x-4">
+                  <Form.Item>
+                    <ButtonComponent
+                      disabled={storedDataInline ? true : false}
+                      icon={
+                        <SVGIcon
+                          name={
+                            type === "update"
+                              ? `IconButtonReset`
+                              : `IconButtonClear`
+                          }
+                          width={24}
+                        />
+                      }
+                      type="submit"
+                      onClick={() => {
+                        handleClear();
+                      }}
+                    >
+                      {type === "update" ? "Reset" : "Clear"}
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item>
+                    <ButtonComponent type="submit" htmlType={"submit"}>
+                      Save
+                    </ButtonComponent>
+                  </Form.Item>
+                </div>
+              </div>
+            </NxBaseContainer>
 
-          <div className="flex mt-[30px]">
+          {/* <div className="flex mt-[30px]">
             <ButtonComponent
               type={"submit"}
               onClick={() => setModalBack(true)}
@@ -417,7 +460,7 @@ const RawMaterialSourceForm = ({ type }) => {
                   Save
                 </ButtonComponent>
               </Form.Item>
-            </div>
+            </div> */}
           </div>
         </Form>
 
