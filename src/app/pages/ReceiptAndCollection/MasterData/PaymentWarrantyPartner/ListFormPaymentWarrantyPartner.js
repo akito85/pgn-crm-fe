@@ -108,11 +108,29 @@ const ListFormPaymentWarrantyPartner = (props) => {
 
   useEffect(() => {
     if (id && data_detail) {
-      form.setFieldsValue({
-        ...data_detail,
-        appHierId: data_detail?.appHierId,
-      });
-      setSelectedHierarchy(data_detail?.appHierId);
+      const partner = data_detail?.partner || {};
+      const formattedData = {
+        ...partner,
+        apphierId: partner.appHierId,
+        address: {
+          street: partner.streetName,
+          building: partner.building,
+          addressNum: partner.addressNum,
+          district: partner.district,
+          city: partner.city,
+          province: partner.province,
+          country: partner.country,
+          zipCode: partner.zipCode,
+        },
+        contact: {
+          contactPerson: partner.contactPerson,
+          phoneNum: partner.phoneNum,
+          email: partner.email,
+        }
+      };
+      
+      form.setFieldsValue(formattedData);
+      setSelectedHierarchy(partner?.appHierId);
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
           ...attachData,
@@ -126,9 +144,14 @@ const ListFormPaymentWarrantyPartner = (props) => {
   const [tabData] = useState([
     {
       value: "Partner", 
-      paramValue: ["partnerName", "partnerType", "swiftCode", "npwp", "licenseNum"]
+      paramValue: [
+        "partnerName", "partnerType", "swiftCode", "npwp", "licenseNum", "parentId",
+        ["address", "street"], ["address", "building"], ["address", "addressNum"], ["address", "district"], 
+        ["address", "city"], ["address", "province"], ["address", "country"], ["address", "zipCode"],
+        ["contact", "contactPerson"], ["contact", "phoneNum"], ["contact", "email"]
+      ]
     },
-    { value: "Approval", paramValue: ["appHierId"] },
+    { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
 
@@ -203,7 +226,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
     const successMessage = {
       title: "Successfull",
       description: `Your data has been submitted`,
-      return: true,
+      return: false,
     };
 
     const action = type === "update" ? updatePaymentWarrantyPartner : createPaymentWarrantyPartner;

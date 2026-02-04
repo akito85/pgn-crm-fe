@@ -1,64 +1,45 @@
-import React from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
+import DetailSection from "../../../../../components/DetailSection";
+import DetailText from "../../../../../components/DetailText";
 import TableRBI from "../../../../../components/TableRBI";
 
 const DetailPaymentWarrantyPartner = (props) => {
   const { data } = props;
 
-  const renderInfo = (label, value) => (
-    <div className="flex flex-col gap-1">
-      <span className="text-gray-500 text-xs">{label}</span>
-      <span className="font-semibold text-sm">{value || "-"}</span>
-    </div>
-  );
 
-  const columnsAttachment = [
-    { title: "NO", width: 60, align: "center", render: (text, record, index) => index + 1 },
-    { title: "FILE NAME", dataIndex: "fileName", key: "fileName" },
-    { title: "CATEGORY", dataIndex: "category", key: "category" },
-  ];
 
   return (
-    <div className="flex flex-col gap-5">
-      <BaseContainer header={"PARTNER INFORMATION"}>
+    <div className="flex flex-col gap-2">
+      <DetailSection header={"PARTNER INFORMATION"}>
         <div className="grid grid-cols-5 gap-5">
-          {renderInfo("Partner Name", data?.partnerName)}
-          {renderInfo("Partner Type", data?.partnerType)}
-          {renderInfo("Swift Code", data?.swiftCode)}
-          {renderInfo("NPWP", data?.npwp)}
-          {renderInfo("License Number", data?.licenseNum)}
-          {renderInfo("Parent ID", data?.parentId)}
+          <DetailText label="Partner Name">{data?.partner?.partnerName}</DetailText>
+          <DetailText label="Partner Type">{data?.partner?.partnerType}</DetailText>
+          <DetailText label="Swift Code">{data?.partner?.swiftCode}</DetailText>
+          <DetailText label="NPWP">{data?.partner?.npwp}</DetailText>
+          <DetailText label="License Number">{data?.partner?.licenseNum}</DetailText>
+          <DetailText label="Parent ID">{data?.partner?.parentId}</DetailText>
         </div>
-      </BaseContainer>
+      </DetailSection>
 
-      <BaseContainer header={"ADDRESS INFORMATION"}>
+      <DetailSection header={"ADDRESS INFORMATION"}>
         <div className="grid grid-cols-4 gap-5">
-          {renderInfo("Street", data?.address?.street)}
-          {renderInfo("Building", data?.address?.building)}
-          {renderInfo("Address Number", data?.address?.addressNum)}
-          {renderInfo("District", data?.address?.district)}
-          {renderInfo("City", data?.address?.city)}
-          {renderInfo("Province", data?.address?.province)}
-          {renderInfo("Country", data?.address?.country)}
-          {renderInfo("Zip Code", data?.address?.zipCode)}
+          <DetailText label="Street">{data?.partner?.streetName}</DetailText>
+          <DetailText label="Building">{data?.partner?.building}</DetailText>
+          <DetailText label="Address Number">{data?.partner?.addressNum}</DetailText>
+          <DetailText label="District">{data?.partner?.district}</DetailText>
+          <DetailText label="City">{data?.partner?.city}</DetailText>
+          <DetailText label="Province">{data?.partner?.province}</DetailText>
+          <DetailText label="Country">{data?.partner?.country}</DetailText>
+          <DetailText label="Zip Code">{data?.partner?.zipCode}</DetailText>
         </div>
-      </BaseContainer>
+      </DetailSection>
 
-      <BaseContainer header={"CONTACT INFORMATION"}>
+      <DetailSection header={"CONTACT INFORMATION"}>
         <div className="grid grid-cols-3 gap-5">
-          {renderInfo("Contact Person", data?.contact?.contactPerson)}
-          {renderInfo("Phone Number", data?.contact?.phoneNum)}
-          {renderInfo("Email", data?.contact?.email)}
+          <DetailText label="Contact Person">{data?.partner?.contactPerson}</DetailText>
+          <DetailText label="Phone Number">{data?.partner?.phoneNum}</DetailText>
+          <DetailText label="Email">{data?.partner?.email}</DetailText>
         </div>
-      </BaseContainer>
-
-      <BaseContainer header={"ATTACHMENT INFORMATION"}>
-        <TableRBI
-          dataSource={data?.attachmentDtoList || []}
-          columns={columnsAttachment}
-          pagination={false}
-        />
-      </BaseContainer>
+      </DetailSection>
     </div>
   );
 };

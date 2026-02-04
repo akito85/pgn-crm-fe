@@ -177,7 +177,43 @@ export const approveOrRejectPaymentWarrantyPartner = createAsyncThunk(
       const successMessage = {
         title: "Successfull",
         description: `${message}`,
-        return: true,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const approveOrRejectInactivePaymentWarrantyPartner = createAsyncThunk(
+  "APPROVE_OR_REJECT_FOR_INACTIVE_PAYMENT_WARRANTY_PARTNER",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `${BASE_URL}/approve-inactive`;
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const message = response?.message;
+      const successMessage = {
+        title: "Successfull",
+        description: `${message}`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -525,6 +561,16 @@ const paymentWarrantyPartnerSlice = createSlice({
       state.loading = false;
     },
     [getDownloadPaymentWarrantyPartner.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [approveOrRejectInactivePaymentWarrantyPartner.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactivePaymentWarrantyPartner.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectInactivePaymentWarrantyPartner.rejected]: (state) => {
       state.loading = false;
     },
   },

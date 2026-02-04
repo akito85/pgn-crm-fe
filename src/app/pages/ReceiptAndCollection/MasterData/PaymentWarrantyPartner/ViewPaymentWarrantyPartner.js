@@ -46,6 +46,10 @@ const ViewPaymentWarrantyPartner = () => {
   const [id, setId] = useState("");
   const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "approvalStatus", "action"],
+  }));
 
   const handleFetch = useCallback(() => {
     dispatch(
@@ -164,12 +168,12 @@ const ViewPaymentWarrantyPartner = () => {
     },
     {
       title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      key: "statusApproval",
+      dataIndex: "approvalStatus",
+      key: "approvalStatus",
       sorter: true,
       width: 150,
       fixed: "right",
-      render: (text) => renderColumn("status", searchedColumn, searchText, text, false, "status"),
+      render: (text) => renderColumn("approvalStatus", searchedColumn, searchText, text, false, "status"),
     },
   ];
 
@@ -227,35 +231,93 @@ const ViewPaymentWarrantyPartner = () => {
     {
       action: "Update",
       type: "table",
-      render: (record) => {
-        const isEditable = record.statusApproval === "Draft" || record.statusApproval === "Rejected";
+      render: (record, data_length) => {
+        const isEditable = record.approvalStatus === "Draft" || record.approvalStatus === "Rejected";
         return (
-          <Tooltip title="Update">
-            <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_WARRANTY_PARTNER} state={{ id: record?.id }} className={!isEditable ? "pointer-events-none opacity-50" : ""}>
-               <SVGIcon name="IconEdit" width={24} color={isEditable ? "#ACC424" : "#8D91A0"} />
+          data_length > 3 ? (
+            <Link
+              to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_WARRANTY_PARTNER}
+              state={{ id: record?.id }}
+            >
+              <ButtonComponent
+                className="gap-5 w-full"
+                icon={
+                  <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
+                }
+                border={false}
+                disabled={!isEditable}
+              >
+                <span className={"text-black gap-2 text-xl text-center w-full"}>Update</span>
+              </ButtonComponent>
             </Link>
-          </Tooltip>
+          ) : (
+            <Tooltip title="Update">
+              <div
+                onClick={(e) => {
+                  if (!isEditable) e.preventDefault();
+                }}
+                className={!isEditable ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+              >
+                <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_WARRANTY_PARTNER} state={{ id: record?.id }} className={!isEditable ? "pointer-events-none" : ""}>
+                   <SVGIcon name="IconEdit" width={24} color={isEditable ? "#ACC424" : "#8D91A0"} />
+                </Link>
+              </div>
+            </Tooltip>
+          )
         );
       },
     },
     {
       action: "Activate",
       type: "table",
-      render: (record) => (
-        <Tooltip title={record?.status === "Active" ? "Inactivate" : "Activate"}>
-          <Checkbox checked={record?.status !== "Active"} onClick={() => handleInactive(record)} disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)} />
-        </Tooltip>
+      render: (record, data_length) => (
+        data_length > 3 ? (
+          <div className="w-full">
+            <ButtonComponent
+              border={false}
+              className={'gap-5 w-full'}
+              onClick={() => handleInactive(record)}
+              disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)}
+            >
+              <Checkbox
+                onClick={() => handleInactive(record)}
+                checked={record?.status !== "Active"}
+                disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)}
+              />
+              <span className={"text-black ml-6 gap-2 text-xl text-center w-full"}>
+                {record?.status === "Active" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          </div>
+        ) : (
+          <Tooltip title={record?.status === "Active" ? "Inactivate" : "Activate"}>
+            <div>
+              <Checkbox checked={record?.status !== "Active"} onClick={() => handleInactive(record)} disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)} />
+            </div>
+          </Tooltip>
+        )
       ),
     },
     {
       action: "history",
       type: "table",
-      render: (record) => (
-        <Tooltip title={'Approval History'}>
-          <div onClick={() => handleApprovalHistory(record?.id)} className="cursor-pointer">
-            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-          </div>
-        </Tooltip>
+      render: (record, data_length) => (
+        data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+            border={false}
+            onClick={() => handleApprovalHistory(record?.id)}
+          >
+            <span className={"text-black gap-2 text-xl text-center"}>Approval History</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title={'Approval History'}>
+            <div onClick={() => handleApprovalHistory(record?.id)} className="cursor-pointer">
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            </div>
+          </Tooltip>
+        )
       ),
     },
   ];
@@ -284,9 +346,12 @@ const ViewPaymentWarrantyPartner = () => {
             columns={[...columns, ...useColumnActionPermission(["view", "history", "update", 'activate'], itemActions)]}
             current={page}
             onChange={handleChange}
+            onSizeChanger={handleChange}
             totalData={data?.page?.totalElements}
             onSort={(s) => setSort(s.order ? `${s.field}~${s.order === "ascend" ? "asc" : "desc"}` : "")}
             tableScrolled={{ x: "max-content", y: 525 }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
         </CardContainer>
         <ModalActiveInactive
