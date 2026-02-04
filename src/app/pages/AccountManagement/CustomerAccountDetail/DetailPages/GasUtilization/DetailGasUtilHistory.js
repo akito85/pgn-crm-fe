@@ -178,8 +178,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
           </BaseContainer>
 
           {/* Table */}
-          <div className="mb-6">
-            <div className="text-primary text-xs font-semibold uppercase py-[30px]">CONTACT DETAIL INFORMATION</div>
+          <BaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>
             <NxTable
               idTable="table-detail-gas-util-history"
               dataSource={dataDetail?.gasUtilsDtl}
@@ -203,7 +202,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
               pagination={false}
               scroll={{ y: 400 }}
             />
-          </div>
+          </BaseContainer>
         </div>
       </ModalCustom>
     </>
