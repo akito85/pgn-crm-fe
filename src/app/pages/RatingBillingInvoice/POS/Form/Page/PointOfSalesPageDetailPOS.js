@@ -108,6 +108,7 @@ const PointOfSalesPageDetailPOS = ({
   accountNumber,
   idPos,
   dataUomCodes = [],
+  customerType = "customer",
 }) => {
   const { data_calculate, loading } = useSelector((state) => state.pointOfSales);
 
@@ -150,7 +151,9 @@ const PointOfSalesPageDetailPOS = ({
   useEffect(() => {
     if (type === 2144 && hasValue(item)) {
       const requestData = {
-        account: dataPriority[0]?.data,
+        ...(customerType === "customer" && hasValue(dataPriority[0]?.data)
+          ? { account: dataPriority[0]?.data }
+          : {}),
         itemId: item,
         qty: hasValue(quantity) || quantity > 0 ? parseInt(quantity) : null,
         transactionDate: moment(dataPriority[2]?.data).format(
@@ -173,7 +176,7 @@ const PointOfSalesPageDetailPOS = ({
         "amount",
       ]);
     }
-  }, [dispatch, item, quantity, dataPriority, formCreate, type]);
+  }, [dispatch, item, quantity, dataPriority, formCreate, type, customerType]);
 
   //useEffect for billing
   useEffect(() => {

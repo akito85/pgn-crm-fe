@@ -261,6 +261,9 @@ const PosForm = ({ type }) => {
 
   const handleSetFormUpdate = useCallback(
     (data_detailPos, data_globalCurrency) => {
+      const costCenterValue =
+        data_detailPos?.costcenter || data_detailPos?.costCenter || "";
+
       form.setFieldsValue({
         ...data_detailPos,
         currency: data_globalCurrency?.find(
@@ -269,7 +272,7 @@ const PosForm = ({ type }) => {
         apphierId: data_detailPos?.appHierId,
         transactionDate: moment(data_detailPos?.transactionDate),
         invoiceDate: moment(data_detailPos?.invoiceDate),
-        costcenter: data_detailPos?.costCenter,
+        costcenter: costCenterValue,
       });
     },
     [form],
@@ -445,7 +448,7 @@ const PosForm = ({ type }) => {
     }
   }, [dispatch, type, idUpdate]);
 
-  // Fetch terms of payment data
+  // Fetch terms of payment data (customer)
   useEffect(() => {
     if (customerType === "customer" && hasValue(accountNumber)) {
       const getAccountId = data_globalAccountNumber?.find(
@@ -455,10 +458,15 @@ const PosForm = ({ type }) => {
       if (getAccountId) {
         dispatch(getGlobalTermsOfPaymentData(getAccountId));
       }
-    } else if (customerType === "prospective") {
-      dispatch(getGlobalTermsOfPaymentData(null));
     }
   }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
+
+  // Fetch terms of payment data (prospective) once on type change
+  useEffect(() => {
+    if (customerType === "prospective") {
+      dispatch(getGlobalTermsOfPaymentData(null));
+    }
+  }, [customerType, dispatch]);
 
   // Populate form for UPDATE mode
   useEffect(() => {
@@ -1364,7 +1372,7 @@ const PosForm = ({ type }) => {
 
   const handleChangeSOR = (selectedSorId) => {
     form.resetFields([
-      "costCenter",
+      "costcenter",
       "meterReadingCode",
       "accountSegment",
       "accountGroupType",
@@ -1396,8 +1404,8 @@ const PosForm = ({ type }) => {
             (item) => item.name === data_detailPos?.sor,
           )?.id;
 
-          const costCenterNames = data_detailPos?.costCenter
-            ? data_detailPos.costCenter.split(",").map((name) => name.trim())
+          const costCenterNames = data_detailPos?.costcenter
+            ? data_detailPos.costcenter.split(",").map((name) => name.trim())
             : [];
 
           const costCenterIds =
