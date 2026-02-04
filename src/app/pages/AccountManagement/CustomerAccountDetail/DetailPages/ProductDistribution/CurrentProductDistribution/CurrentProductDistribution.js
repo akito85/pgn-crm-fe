@@ -6,6 +6,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
 import { dateFormatting } from "../../../../../../../utils";
 import { getCurrentPB } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import Toolbar from "../../../../../../../components/Toolbar";
+import { NavLink } from "react-router-dom";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../../../assets/Icon/index";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const columns = (
   page = 1,
@@ -59,6 +66,28 @@ const columns = (
 };
 
 const CurrentProductDistribution = ({ id, idCustomer }) => {
+  const itemGrantAccess = [
+    {
+      action: "Create",
+      render: (
+        <NavLink
+          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PRODUCT_DISTRIBUTION}
+          state={{
+            accountId: id,
+            idCustomer: idCustomer,
+          }}
+        >
+          <ButtonComponent
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            type="submit"
+          >
+            Create
+          </ButtonComponent>
+        </NavLink>
+      ),
+    },
+  ];
+
   // Selector
   const { data_current } = useSelector((state) => state.productDistribution);
 
@@ -118,50 +147,51 @@ const CurrentProductDistribution = ({ id, idCustomer }) => {
     return fa.localeCompare(fb);
   };
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        Product Distribution Information
-      </div>
+    <>
+      <div className="flex flex-col gap-4">
+        <NxBaseContainer border header={"PRODUCT DISTRIBUTION INFORMATION"}>
+          <div className="w-full grid grid-cols-3 gap-x-4">
+            <DetailText label={"Effective Date"}>
+              {data_current?.effectiveDate
+                ? moment(data_current.effectiveDate).format(dateFormatting.date)
+                : ""}
+            </DetailText>
+            <DetailText label={"Local (%)"}>{data_current?.value1}</DetailText>
+            <DetailText label={"Export (%)"}>{data_current?.value2}</DetailText>
+            <div className="col-span-3">
+              <DetailText label={"Description"}>
+                {data_current?.description}
+              </DetailText>
+            </div>
+          </div>
+        </NxBaseContainer>
+        <NxBaseContainer border header={"PRODUCT DISTRIBUTION INFORMATION DETAIL"}>
+          <div className="flex flex-col gap-y-4">
+            <Toolbar items={itemGrantAccess} type="detail" />
+            <NxTable
+              idTable="current-product-distribution"
+              dataSource={dataSource}
+              totalData={dataSource?.srcDistDtl?.length}
+              current={page}
+              tableScrolled={{ y: 400, x: dataSource?.srcDistDtl?.length ? "max-content" : "100%" }}
+              onSort={sorter}
+              columns={columns(
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                onFilter,
+              )}
+              usePagination={false}
+              useInfiniteScroll={true}
+            />
+          </div>
+        </NxBaseContainer>
 
-      <div className="w-full grid grid-cols-3 gap-4 pt-4">
-        <DetailText label={"Effective Date"}>
-          {data_current?.effectiveDate
-            ? moment(data_current.effectiveDate).format(dateFormatting.date)
-            : ""}
-        </DetailText>
-        <DetailText label={"Local (%)"}>{data_current?.value1}</DetailText>
-        <DetailText label={"Export (%)"}>{data_current?.value2}</DetailText>
-        <div className="col-span-3">
-          <DetailText label={"Description"}>
-            {data_current?.description}
-          </DetailText>
-        </div>
       </div>
-
-      <div className="text-primary text-xs font-bold uppercase pt-4">
-        Product Distribution Detail
-      </div>
-
-      <TablePaginationNew
-        type="FE"
-        dataSource={dataSource}
-        totalData={dataSource?.srcDistDtl?.length}
-        current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: "auto" }}
-        onChange={handleChange}
-        columns={columns(
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          onFilter,
-          sorter
-        )}
-      />
-    </Fragment>
+    </>
   );
 };
 

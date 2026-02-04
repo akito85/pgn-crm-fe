@@ -7,6 +7,8 @@ import { dateFormatting } from "../../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const columns = (
   page = 1,
@@ -124,58 +126,63 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
         </ButtonComponent>
       }
     >
-      <CardComponent header={"Raw Material Source Information"} cols={3}>
-        <DetailText label={"Effective Date"}>
-          {data_detail?.effectiveDate
-            ? moment(data_detail.effectiveDate).format(dateFormatting.date)
-            : ""}
-        </DetailText>
-        <DetailText label={"Local (%)"}>{data_detail?.value1}</DetailText>
-        <DetailText label={"Export (%)"}>{data_detail?.value2}</DetailText>
-        <DetailText label={"Description"}>
-          {data_detail?.description}
-        </DetailText>
-      </CardComponent>
+      <div className="flex flex-col gap-4">
 
-      <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-        <DetailText label="Record ID">{data_detail?.id}</DetailText>
-        <DetailText label="Created Date">
-          {data_detail?.createdDate
-            ? moment(data_detail.createdDate).format(dateFormatting.dateTime)
-            : ""}
-        </DetailText>
-        <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
-        <DetailText label="Updated Date">
-          {data_detail?.updatedDate
-            ? moment(data_detail.updatedDate).format(dateFormatting.dateTime)
-            : ""}
-        </DetailText>
-        <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
-      </CardComponent>
+        <NxBaseContainer border header={"PRODUCT DISTRIBUTION INFORMATION"}>
+          <div className="w-full grid grid-cols-3 gap-x-4">
+            <DetailText label={"Effective Date"}>
+              {data_detail?.effectiveDate
+                ? moment(data_detail.effectiveDate).format(dateFormatting.date)
+                : ""}
+            </DetailText>
+            <DetailText label={"Local (%)"}>{data_detail?.value1}</DetailText>
+            <DetailText label={"Export (%)"}>{data_detail?.value2}</DetailText>
+            <DetailText label={"Description"}>
+              {data_detail?.description}
+            </DetailText>
+          </div>
+        </NxBaseContainer>
 
-      <div className="text-primary text-xs font-bold uppercase pt-4">
-        Product Distribution Export Detail
+        <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
+          <div className="w-full grid grid-cols-5 gap-x-4">
+            <DetailText label="Record ID">{data_detail?.id}</DetailText>
+            <DetailText label="Created Date">
+              {data_detail?.createdDate
+                ? moment(data_detail.createdDate).format(dateFormatting.dateTime)
+                : ""}
+            </DetailText>
+            <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
+            <DetailText label="Updated Date">
+              {data_detail?.updatedDate
+                ? moment(data_detail.updatedDate).format(dateFormatting.dateTime)
+                : ""}
+            </DetailText>
+            <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
+          </div>
+        </NxBaseContainer>
+
+        <NxBaseContainer border header={"PRODUCT DISTRIBUTION DETAIL"}>
+          <NxTable
+            idTable="detail-product-distribution"
+            dataSource={data_detail?.srcDistDtl}
+            totalData={data_detail?.srcDistDtl?.length}
+            current={page}
+            tableScrolled={{ y: 525, x: data_detail?.srcDistDtl?.length ? "max-content" : "100%" }}
+            onSort={sorter}
+            columns={columns(
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              onFilter,
+            )}
+            useInfiniteScroll={true}
+            hasMore={false}
+          />
+        </NxBaseContainer>
       </div>
-
-      <TablePaginationNew
-        type="FE"
-        dataSource={data_detail?.srcDistDtl}
-        totalData={data_detail?.srcDistDtl?.length}
-        current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: "auto" }}
-        onChange={handleChange}
-        columns={columns(
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          onFilter,
-          sorter
-        )}
-      />
     </ModalCustom>
   )
 }
