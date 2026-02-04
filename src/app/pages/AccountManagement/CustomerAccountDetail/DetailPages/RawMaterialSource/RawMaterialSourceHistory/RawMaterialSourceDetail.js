@@ -7,6 +7,7 @@ import { dateFormatting } from "../../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const columns = (
   page = 1,
@@ -122,58 +123,64 @@ const RawMaterialSourceDetail = ({ data_detail, openModal, closeModal }) => {
         </ButtonComponent>
       }
     >
-      <CardComponent header={"Raw Material Source Information"} cols={3}>
-        <DetailText label={"Effective Date"}>
-          {data_detail?.effectiveDate
-            ? moment(data_detail.effectiveDate).format(dateFormatting.date)
-            : ""}
-        </DetailText>
-        <DetailText label={"Local (%)"}>{data_detail?.value1}</DetailText>
-        <DetailText label={"Import (%)"}>{data_detail?.value2}</DetailText>
-        <DetailText label={"Description"}>
-          {data_detail?.description}
-        </DetailText>
-      </CardComponent>
+      <div className="flex flex-col gap-4">
 
-      <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-        <DetailText label="Record ID">{data_detail?.id}</DetailText>
-        <DetailText label="Created Date">
-          {data_detail?.createdDate
-            ? moment(data_detail.createdDate).format(dateFormatting.dateTime)
-            : ""}
-        </DetailText>
-        <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
-        <DetailText label="Updated Date">
-          {data_detail?.updatedDate
-            ? moment(data_detail.updatedDate).format(dateFormatting.dateTime)
-            : ""}
-        </DetailText>
-        <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
-      </CardComponent>
+        <NxBaseContainer border header={"RAW MATERIAL SOURCE INFORMATION"}>
+          <div className="w-full grid grid-cols-3 gap-x-4">
+            <DetailText label={"Effective Date"}>
+              {data_detail?.effectiveDate
+                ? moment(data_detail.effectiveDate).format(dateFormatting.date)
+                : ""}
+            </DetailText>
+            <DetailText label={"Local (%)"}>{data_detail?.value1}</DetailText>
+            <DetailText label={"Import (%)"}>{data_detail?.value2}</DetailText>
+            <DetailText label={"Description"}>
+              {data_detail?.description}
+            </DetailText>
 
-      <div className="text-primary text-xs font-bold uppercase pt-4">
-        Raw Material Source Import Detail
+          </div>
+        </NxBaseContainer>
+
+        <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
+          <div className="w-full grid grid-cols-5 gap-x-4">
+            <DetailText label="Record ID">{data_detail?.id}</DetailText>
+            <DetailText label="Created Date">
+              {data_detail?.createdDate
+                ? moment(data_detail.createdDate).format(dateFormatting.dateTime)
+                : ""}
+            </DetailText>
+            <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
+            <DetailText label="Updated Date">
+              {data_detail?.updatedDate
+                ? moment(data_detail.updatedDate).format(dateFormatting.dateTime)
+                : ""}
+            </DetailText>
+            <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
+          </div>
+        </NxBaseContainer>
+
+        <NxBaseContainer border header={"RAW MATERIAL SOURCE IMPORT DETAIL"}>
+          <NxTable
+            idTable="raw-material-source-detail-table"
+            dataSource={data_detail?.srcDistDtl}
+            totalData={data_detail?.srcDistDtl?.length}
+            usePagination={false}
+            useInfiniteScroll={true}
+            hasMore={false}
+            current={page}
+            tableScrolled={{ y: 400, x: data_detail?.srcDistDtl?.length ? "max-content" : "100%" }}
+            onSort={sorter}
+            columns={columns(
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+            )}
+          />
+        </NxBaseContainer>
       </div>
-
-      <NxTable
-        idTable="raw-material-source-detail-table"
-        dataSource={data_detail?.srcDistDtl}
-        totalData={data_detail?.srcDistDtl?.length}
-        usePagination={false}
-        useInfiniteScroll={true}
-        hasMore={false}
-        current={page}
-        tableScrolled={{ y: 400, x: data_detail?.srcDistDtl?.length ? "max-content" : "100%" }}
-        onSort={sorter}
-        columns={columns(
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-        )}
-      />
     </ModalCustom>
   );
 };

@@ -21,6 +21,7 @@ import {
 } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const columns = (
   search,
@@ -303,45 +304,36 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
 
   return (
     <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        Raw Material Source History List
-      </div>
-
-      <div className="w-full flex justify-end gap-[20px]">
-        <ToolbarAccount
-          items={itemGrantAccess}
-          advancedAccess={access_account}
+      <NxBaseContainer border header={"RAW MATERIAL SOURCE HISTORY LIST"}>
+        <NxTable
+          idTable="table-raw-material-source-history"
+          dataSource={dataSource}
+          totalData={data?.page?.totalElements}
+          current={page}
+          tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
+          onSort={onSort}
+          columns={[
+            ...columns(
+              search,
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handleDetail,
+              handleDelete
+            ),
+            ...useColumnActionPermissionAccount(
+              ["View", "Update", "Delete"],
+              itemGrantAccess,
+              access_account
+            ),
+          ]}
+          usePagination={false}
+          useInfiniteScroll={true}
         />
-      </div>
-
-      <NxTable
-        idTable="table-raw-material-source-history"
-        dataSource={dataSource}
-        totalData={data?.page?.totalElements}
-        current={page}
-        tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
-        onSort={onSort}
-        columns={[
-          ...columns(
-            search,
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDetail,
-            handleDelete
-          ),
-          ...useColumnActionPermissionAccount(
-            ["View", "Update", "Delete"],
-            itemGrantAccess,
-            access_account
-          ),
-        ]}
-        usePagination={false}
-        useInfiniteScroll={true}
-      />
+      </NxBaseContainer>
 
       {/* Modal Detail */}
       <RawMaterialSourceDetail
