@@ -198,7 +198,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDetail"
-                width={24}
+                width={20}
                 onClick={() => handleDetail(record)}
               />
             </div>
@@ -217,7 +217,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
           >
             <Tooltip title="Update">
               <div className="pt-1">
-                <SVGIcon name="IconEdit" width={24} />
+                <SVGIcon name="IconEdit" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -233,7 +233,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 onClick={() => handleDelete(record)}
               />
             </div>
