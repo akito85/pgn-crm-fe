@@ -736,7 +736,7 @@ const PromoViewData = ({
         style={{
           backgroundColor: "#FFFFFF",
           marginTop: 0,
-          height: "500px",
+          height: "150",
           overflowY: "auto",
         }}
       >
@@ -768,8 +768,8 @@ const PromoViewData = ({
               }
             }}
             loadMoreThreshold={50}
-            tableScrolled={{ y: 400 }}
-            scrollBodyStyle={{ minHeight: 400 }}
+            tableScrolled={{ y: 110 }}
+            scrollBodyStyle={{ minHeight: 110 }}
           />
         )}
 

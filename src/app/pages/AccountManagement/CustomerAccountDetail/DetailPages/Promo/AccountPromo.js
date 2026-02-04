@@ -7,14 +7,12 @@ import CardContainer from "../../../../../../components/CardContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
-// Import Components yang sudah dipisah
 import PromoViewData from "./components/PromoViewData";
 import PromoHistoryViewData from "./components/PromoHistoryViewData";
 import ModalCustomPromo from "./components/ModalCustomPromo";
 import CriteriaAndCondition from "./CriteriaAndCondition";
 import HistoryLogInformation from "./HistoryLogInformation";
 
-// Helper Components
 const RenderLabelValue = ({ label, value }) => (
   <Space direction="vertical" size="small">
     <strong style={{ color: "#000", fontSize: "14px" }}>{label}</strong>
@@ -198,20 +196,22 @@ const AccountPromo = ({ id }) => {
       {/* Modal untuk Detail Promo (hanya muncul di tab Promo) */}
       {selectedTab === "promo" && isModalPromoVisible && (
         <ModalCustomPromo
-          title={<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span
-            style={{
-              width: 12,
-              height: 12,
-              backgroundColor: "#12B76A",
-              borderRadius: 4,
-              display: "inline-block",
-            }}
-          />
-          <span style={{ color: "#1570EF", fontWeight: 700, fontSize: 16 }}>
-            DETAIL PROMO
-          </span>
-        </div>}
+          title={
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  backgroundColor: "#12B76A",
+                  borderRadius: 4,
+                  display: "inline-block",
+                }}
+              />
+              <span style={{ color: "#1570EF", fontWeight: 700, fontSize: 16 }}>
+                DETAIL PROMO
+              </span>
+            </div>
+          }
           isOpen={isModalPromoVisible}
           setIsOpen={setIsModalPromoVisible}
         >
