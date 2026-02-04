@@ -9,6 +9,7 @@ import { nxGetAccountActions } from '../../../../../../components/Nx/NxGetAccoun
 import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
 import Toolbar from '../../../../../../components/Toolbar'
+import BaseContainer from '../../../../../../components/BaseContainer'
 
 const columns = (
   search,
@@ -135,27 +136,30 @@ const TableGasUtilCurrent = ({idAccount}) => {
 
   return (
     <>
-      <div className="text-primary text-xs font-bold uppercase py-4">GAS UTILIZATION</div>
-      <div className="grid grid-cols-4 w-full">
-        {/* TODO: update detail text dengan format baru */}
-        <DetailText label={"Effective Date"}>{data_current?.effectiveDate}</DetailText>
-        <DetailText label={"Description"}>{data_current?.description}</DetailText>
-      </div>
-      <div className="text-primary text-xs font-bold uppercase py-4">GAS UTILIZATION DETAIL LIST</div>
-      <div className="flex flex-col gap-y-4">
-        <Toolbar items={itemActions} type="detail" />
-        <NxTable
-          idTable="gas-util-current-table"
-          dataSource={data_current?.gasUtilsDtl}
-          totalData={data_current?.gasUtilsDtl?.length}
-          current={page}
-          tableScrolled={{ y: 525, x: 800 }}
-          onSort={onSort}
-          columns={processedColumns}
-          usePagination={false}
-          useInfiniteScroll={true}
-          hasMore={false}
-        />
+      <div className="flex flex-col gap-4">
+        <BaseContainer border header={"GAS UTILIZATION"}>
+          <div className="w-full grid grid-cols-2 gap-4">
+            <DetailText label={"Effective Date"}>{data_current?.effectiveDate}</DetailText>
+            <DetailText label={"Description"}>{data_current?.description}</DetailText>
+          </div>
+        </BaseContainer>
+        <BaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>
+          <div className="flex flex-col gap-y-4">
+            <Toolbar items={itemActions} type="detail" />
+            <NxTable
+              idTable="gas-util-current-table"
+              dataSource={data_current?.gasUtilsDtl}
+              totalData={data_current?.gasUtilsDtl?.length}
+              current={page}
+              tableScrolled={{ y: 525, x: 800 }}
+              onSort={onSort}
+              columns={processedColumns}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hasMore={false}
+            />
+          </div>
+        </BaseContainer>
       </div>
     </>
   )

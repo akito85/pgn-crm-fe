@@ -13,6 +13,8 @@ import { useColumnActionPermission } from '../../../../../../components/ColumnAc
 import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColumns'
 import { WarningOutlined } from '@ant-design/icons'
 import ModalCustom from '../../../../../../components/Modal/ModalCustom'
+import { hasValue, renderDateColumn } from '../../../../../../utils'
+import BaseContainer from '../../../../../../components/BaseContainer'
 
 const columns = (
   search,
@@ -44,7 +46,8 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
+        "date"
       )
     },
     {
@@ -91,7 +94,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
               <SVGIcon
                 name="IconDetail"
                 color={"#0075bf"}
-                width={24}
+                width={20}
                 onClick={() => {
                   handleDetail(record);
                 }}
@@ -120,7 +123,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
               > 
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                 />
               </div>
             </Link>
@@ -137,7 +140,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 onClick={() => handleOpenDelete(record?.id)}
               />
             </div>
@@ -146,27 +149,6 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
       }
     },
   ];
-
-  // const itemActions = nxGetAccountActions({
-  //   idAccount,
-  //   idCustomer,
-  //   updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_UTILIZATION,
-  //   handleDetail: {
-  //     action: "View",
-  //     type: "table",
-  //     render: (record) => {
-  //       return (
-  //         <ButtonComponent
-  //           icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
-  //           type="submit"
-  //           onClick={() => handleDetail(record)}
-  //         >
-  //           Approval
-  //         </ButtonComponent>
-  //       )
-  //     }
-  //   },
-  // })
 
   const [page, setPage] = useState(1);
   const searchInput = useRef(null);
@@ -311,25 +293,26 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
 
   return (
     <>
-      <div className="text-primary text-xs font-bold uppercase py-4">GAS UTILIZATION HISTORY LIST</div>
-      <NxTable
-        idTable="gas-utilization-history-table"
-        dataSource={currentData}
-        totalData={currentPagination?.totalElements}
-        current={page}
-        tableScrolled={{ y: 400, x: currentData.length ? "max-content" : "100%" }}
-        onSort={onSort}
-        columns={processedColumns}
-        usePagination={false}
-        useInfiniteScroll={true}
-        hasMore={hasMore}
-        onLoadMore={handleLoadMore}
-        loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
-        loading={loading}
-      />
+      <BaseContainer border header={"GAS UTILIZATION HISTORY LIST"}>
+        <NxTable
+          idTable="gas-utilization-history-table"
+          dataSource={currentData}
+          totalData={currentPagination?.totalElements}
+          current={page}
+          tableScrolled={{ y: 400, x: currentData.length ? "max-content" : "100%" }}
+          onSort={onSort}
+          columns={processedColumns}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={20}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          columnDefinitions={columnDefinitions}
+          loading={loading}
+        />
+      </BaseContainer>
 
       {/* Modal Detail */}
       <DetailGasUtilHistory isOpen={modalDetail} setIsOpen={setModalDetail} dataDetail={data_detail} />
