@@ -4,13 +4,38 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
-  data_multiDestination: [],
+  list_multiDestination: [],
+  pagination_multiDestination: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
+  list_multiDestinationApproval: [],
+  pagination_multiDestinationApproval: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data_mdApprovalHierarchy: [],
   detail_mdApprovalHierarchy: [],
   data_mdAttachmentCategory: [],
-  data_mdAccountStandard: [],
+  list_mdAccountStandard: [],
+  pagination_mdAccountStandard: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   detail_multiDestination: {},
-  data_multiDestinationAttachment: [],
+  list_mdDetailAttachment: [],
+  pagination_mdDetailAttachment: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data_mdApprovalHistory: {},
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
@@ -19,13 +44,44 @@ const initialState = {
 
 export const getMultiDestination = createAsyncThunk(
   "GET_MULTI_DESTINATION",
-  async ({ id, body }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
+      body = {
+        ...body,
+        listType: "all"
+      }
+
       const url = `/v1/dbs/api/multi-destination/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
         });
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getMultiDestinationApproval = createAsyncThunk(
+  "GET_MULTI_DESTINATION_APPROVAL",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      body = {
+        ...body,
+        listType: "approval"
+      }
+
+      const url = `/v1/dbs/api/multi-destination/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+          headers: { "Accept": "application/json, text/plain, */*" }
+        });
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -202,15 +258,30 @@ export const getMdAttachmentCategory = createAsyncThunk(
 
 export const getMdAccountStandard = createAsyncThunk(
   "GET_MD_ACCOUNT_STANDARD",
-  async ({ page, pageSize, sort, search, id }, thunkAPI) => {
+  async ({ page, size, sort, searchs, id, isLoadMore }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
+      const queryParams = new URLSearchParams;
 
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/multi-destination/list-account/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      if (page)
+        queryParams.append("page", page);
+      if (size)
+        queryParams.append("size", size);
+      if (sort)
+        queryParams.append("sort", sort);
+      if (searchs)
+        queryParams.append("searchs", searchs);
+
+      let url = `/v1/dbs/api/multi-destination/list-account/${id}`;
+
+      
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -458,16 +529,93 @@ const multiDestinationSlice = createSlice({
   initialState,
   extraReducers: {
     /** Get Multi Destination */
-    [getMultiDestination.pending]: (state) => {
-      state.loading = true;
+    [getMultiDestination.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getMultiDestination.fulfilled]: (state, action) => {
-      state.data_multiDestination = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_multiDestination.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_multiDestination = [
+            ...state.list_multiDestination,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_multiDestination = result;
+      }
+
+      state.pagination_multiDestination = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
     },
-    [getMultiDestination.rejected]: (state) => {
-      state.data_multiDestination = [];
+    [getMultiDestination.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_multiDestination = [];
+        state.pagination_multiDestination = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
+    },
+
+    /** Get Multi Destination Approval */
+    [getMultiDestinationApproval.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getMultiDestinationApproval.fulfilled]: (state, action) => {
+      state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_multiDestinationApproval.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_multiDestinationApproval = [
+            ...state.list_multiDestinationApproval,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_multiDestinationApproval = result;
+      }
+
+      state.pagination_multiDestinationApproval = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
+    },
+    [getMultiDestinationApproval.rejected]: (state, action) => {
+      state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_multiDestinationApproval = [];
+        state.pagination_multiDestinationApproval = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
     },
 
     /** Get Detail Multi Destination */
@@ -546,29 +694,93 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Multi Destination Account Standard */
-    [getMdAccountStandard.pending]: (state) => {
-      state.loading = true;
+    [getMdAccountStandard.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getMdAccountStandard.fulfilled]: (state, action) => {
-      state.data_mdAccountStandard = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_mdAccountStandard.map((item) => item.accountId));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
+
+          state.list_mdAccountStandard = [
+            ...state.list_mdAccountStandard,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_mdAccountStandard = result;
+      }
+
+      state.pagination_mdAccountStandard = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
     },
-    [getMdAccountStandard.rejected]: (state) => {
-      state.data_mdAccountStandard = [];
+    [getMdAccountStandard.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_mdAccountStandard = [];
+        state.pagination_mdAccountStandard = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
     },
 
     /** Get Multi Destination Attachment */
-    [getMultiDestinationAttachment.pending]: (state) => {
-      state.loading = true;
+    [getMultiDestinationAttachment.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getMultiDestinationAttachment.fulfilled]: (state, action) => {
-      state.data_multiDestinationAttachment = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_mdDetailAttachment.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_mdDetailAttachment = [
+            ...state.list_mdDetailAttachment,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_mdDetailAttachment = result;
+      }
+
+      state.pagination_mdDetailAttachment = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
     },
-    [getMultiDestinationAttachment.rejected]: (state) => {
-      state.data_multiDestinationAttachment = [];
+    [getMultiDestinationAttachment.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_mdDetailAttachment = [];
+        state.pagination_mdDetailAttachment = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
     },
 
     /** Approve or Reject Multi Destination */
