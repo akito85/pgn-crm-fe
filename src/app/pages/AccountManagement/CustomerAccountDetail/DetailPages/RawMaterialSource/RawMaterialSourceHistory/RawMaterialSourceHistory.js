@@ -8,9 +8,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import { Link, useLocation } from "react-router-dom";
 import RawMaterialSourceDetail from "./RawMaterialSourceDetail";
 import {
   ModalConfirm,
@@ -22,6 +20,8 @@ import {
   getDetailRMSHistory,
 } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const columns = (
   search,
@@ -188,26 +188,6 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "Create",
-      render: (
-        <NavLink
-          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RAW_MATERIAL_SOURCE}
-          state={{
-            accountId: id,
-            idCustomer: idCustomer,
-          }}
-        >
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-
     // Column Action Table
     {
       action: "View",
@@ -218,7 +198,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDetail"
-                width={24}
+                width={20}
                 onClick={() => handleDetail(record)}
               />
             </div>
@@ -237,7 +217,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
           >
             <Tooltip title="Update">
               <div className="pt-1">
-                <SVGIcon name="IconEdit" width={24} />
+                <SVGIcon name="IconEdit" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -253,7 +233,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 onClick={() => handleDelete(record)}
               />
             </div>
@@ -324,44 +304,36 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
 
   return (
     <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        Raw Material Source History List
-      </div>
-
-      <div className="w-full flex justify-end gap-[20px]">
-        <ToolbarAccount
-          items={itemGrantAccess}
-          advancedAccess={access_account}
+      <NxBaseContainer border header={"RAW MATERIAL SOURCE HISTORY LIST"}>
+        <NxTable
+          idTable="table-raw-material-source-history"
+          dataSource={dataSource}
+          totalData={data?.page?.totalElements}
+          current={page}
+          tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
+          onSort={onSort}
+          columns={[
+            ...columns(
+              search,
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handleDetail,
+              handleDelete
+            ),
+            ...useColumnActionPermissionAccount(
+              ["View", "Update", "Delete"],
+              itemGrantAccess,
+              access_account
+            ),
+          ]}
+          usePagination={false}
+          useInfiniteScroll={true}
         />
-      </div>
-
-      <TablePaginationNew
-        dataSource={dataSource}
-        totalData={data?.page?.totalElements}
-        current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: 1000 }}
-        onChange={handleChange}
-        onSort={onSort}
-        columns={[
-          ...columns(
-            search,
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDetail,
-            handleDelete
-          ),
-          ...useColumnActionPermissionAccount(
-            ["View", "Update", "Delete"],
-            itemGrantAccess,
-            access_account
-          ),
-        ]}
-      />
+      </NxBaseContainer>
 
       {/* Modal Detail */}
       <RawMaterialSourceDetail

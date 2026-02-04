@@ -1,50 +1,48 @@
 import React, { useState, Fragment } from "react";
-import BaseContainer from "../../../../../../components/BaseContainer";
-import RadioTabs from "../../../../../../components/RadioTabs";
 import CurrentRawMaterialSource from "./CurrentRawMaterialSource/CurrentRawMaterialSource";
 import RawMaterialSourceHistory from "./RawMaterialSourceHistory/RawMaterialSourceHistory";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import { Tabs } from "antd";
 
 const RawMaterialSource = ({ id, idCustomer }) => {
-  // Selector
+  const tabOptions = [
+    {
+      key: "current",
+      label: "Current Raw Material Source",
+      children: (
+        <CurrentRawMaterialSource
+          id={id}
+          idCustomer={idCustomer}
+        />
+      )
+    },
+    {
+      key: "history",
+      label: "Raw Material Source History",
+      children: (
+        <RawMaterialSourceHistory
+          id={id}
+          idCustomer={idCustomer}
+        />
+      )
+    },
+  ];
 
-  // Declaration
-
-  // State
-  const [valuePage, setValuePage] = useState("Current Raw Material Source");
-  const [listSectionInfo, setListSectionInfo] = useState([
-    { value: "Current Raw Material Source" },
-    { value: "Raw Material Source History" },
-  ]);
-
-  // Use Effect
-
-  const layout = (valuePage) => {
-    switch (valuePage) {
-      case "Current Raw Material Source":
-        return <CurrentRawMaterialSource id={id} idCustomer={idCustomer}/>;
-      case "Raw Material Source History":
-        return <RawMaterialSourceHistory id={id} idCustomer={idCustomer} />;
-      default:
-        return <CurrentRawMaterialSource id={id} idCustomer={idCustomer}/>;
-    }
-  };
+  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
 
   return (
-    <Fragment>
-        <BaseContainer
-          type={"tab"}
-          element={
-            <>
-              <RadioTabs
-                data={listSectionInfo}
-                onChange={(e) => setValuePage(e.target.value)}
-              />
-            </>
-          }
-        >
-          {layout(valuePage)}
-        </BaseContainer>
-    </Fragment>
+    <NxCardContainer
+      header={"RAW MATERIAL SOURCE"}
+      type={"tabs"}
+      element={
+        <Tabs
+          items={tabOptions}
+          onChange={setActiveKey}
+          activeKey={activeKey}
+          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-tab]:py-4 [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+        />
+      }
+    ></NxCardContainer>
   );
 };
 
