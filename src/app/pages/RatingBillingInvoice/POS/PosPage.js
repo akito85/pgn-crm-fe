@@ -127,7 +127,6 @@ const PosPage = () => {
     }
   };
 
-  // TAMBAHAN: Calculate if there's more data
   const hasMore =
     (data_view?.result?.length || 0) < (data_view?.page?.totalElements || 0);
 

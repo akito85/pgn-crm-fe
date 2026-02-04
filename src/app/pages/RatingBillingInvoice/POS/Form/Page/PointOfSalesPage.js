@@ -152,7 +152,6 @@ const PointOfSalesPage = ({
               <InputComponent placeholder="Enter Account Name" />
             </Form.Item>
 
-            {/* ✅ SOR - Disabled jika ada default */}
             <div>
               <Form.Item
                 name="sor"
@@ -177,8 +176,6 @@ const PointOfSalesPage = ({
               )}
             </div>
 
-            {/* Row 2 */}
-            {/* ✅ Cost Center - Disabled hanya jika ada default dan tidak kosong */}
             <div>
               <Form.Item
                 name="costcenter"
@@ -406,6 +403,7 @@ const PointOfSalesPage = ({
             transactionDate={transactionDate}
             idPos={idPos}
             dataUomCodes={data_uom_codes}
+            customerType={customerType}
           />
         );
       case listDetailPage[1].value:
@@ -425,6 +423,7 @@ const PointOfSalesPage = ({
             currency={currency}
             transactionDate={transactionDate}
             dataUomCodes={data_uom_codes}
+            customerType={customerType}
           />
         );
     }

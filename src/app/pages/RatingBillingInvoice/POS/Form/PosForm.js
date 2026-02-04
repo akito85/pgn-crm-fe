@@ -261,6 +261,9 @@ const PosForm = ({ type }) => {
 
   const handleSetFormUpdate = useCallback(
     (data_detailPos, data_globalCurrency) => {
+      const costCenterValue =
+        data_detailPos?.costcenter || data_detailPos?.costCenter || "";
+
       form.setFieldsValue({
         ...data_detailPos,
         currency: data_globalCurrency?.find(
@@ -269,7 +272,7 @@ const PosForm = ({ type }) => {
         apphierId: data_detailPos?.appHierId,
         transactionDate: moment(data_detailPos?.transactionDate),
         invoiceDate: moment(data_detailPos?.invoiceDate),
-        costcenter: data_detailPos?.costCenter,
+        costcenter: costCenterValue,
       });
     },
     [form],
@@ -445,7 +448,7 @@ const PosForm = ({ type }) => {
     }
   }, [dispatch, type, idUpdate]);
 
-  // Fetch terms of payment data
+  // Fetch terms of payment data (customer)
   useEffect(() => {
     if (customerType === "customer" && hasValue(accountNumber)) {
       const getAccountId = data_globalAccountNumber?.find(
@@ -455,10 +458,15 @@ const PosForm = ({ type }) => {
       if (getAccountId) {
         dispatch(getGlobalTermsOfPaymentData(getAccountId));
       }
-    } else if (customerType === "prospective") {
-      dispatch(getGlobalTermsOfPaymentData(null));
     }
   }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
+
+  // Fetch terms of payment data (prospective) once on type change
+  useEffect(() => {
+    if (customerType === "prospective") {
+      dispatch(getGlobalTermsOfPaymentData(null));
+    }
+  }, [customerType, dispatch]);
 
   // Populate form for UPDATE mode
   useEffect(() => {
@@ -479,19 +487,14 @@ const PosForm = ({ type }) => {
       setDataApprovalId(data_detailPos?.appHierId);
 
       if (isProspective) {
-        // ✅ FIX: Cari SOR ID
         const sorId = data_sor_list?.find(
           (item) => item.name === data_detailPos?.sor,
         )?.id;
 
-        // ✅ FIX: Parse costcenter string dari API
-        // Format API: "3100A63B21 - SOR 2 JKT - Niaga"
         const costCenterString = data_detailPos?.costcenter || "";
 
-        // Ambil kode cost center (bagian sebelum " - ")
         const costCenterCode = costCenterString.split(" - ")[0]?.trim();
 
-        // Cari cost center ID berdasarkan code atau name
         const ccId = data_cost_center_list?.find(
           (item) =>
             item.code === costCenterCode ||
@@ -499,7 +502,6 @@ const PosForm = ({ type }) => {
             costCenterString.includes(item.name),
         )?.id;
 
-        // ✅ Support untuk multi cost center (jika ada koma di API response)
         const costCenterNames = costCenterString
           ? costCenterString.split(",").map((name) => name.trim())
           : [];
@@ -520,25 +522,21 @@ const PosForm = ({ type }) => {
                 .map((cc) => cc.id)
             : [];
 
-        // ✅ FIX: Cari Account Segment ID
         const accountSegmentId = data_account_segment?.find(
           (item) => item.name === data_detailPos?.accountSegment,
         )?.id;
 
-        // ✅ FIX: Cari Account Group Type ID
         const accountGroupTypeId = data_account_group_type?.find(
           (item) =>
             (item.glbValue || item.name) === data_detailPos?.accountGroupType,
         )?.glbTypeValId;
 
-        // ✅ Set default data dengan prioritas ccId jika costCenterIds kosong
         setDefaultData({
           sor: sorId,
           costcenter:
             costCenterIds.length > 0 ? costCenterIds : ccId ? [ccId] : [],
         });
 
-        // ✅ Set form values
         form.setFieldsValue({
           customerName: data_detailPos?.customerName,
           registrationNumber: data_detailPos?.registrationNumber,
@@ -557,14 +555,13 @@ const PosForm = ({ type }) => {
           billingPeriod: data_detailPos?.billingPeriod,
           remark: data_detailPos?.remark,
           sor: sorId,
-          costcenter: ccId, // ✅ Set single value untuk form (bukan array)
+          costcenter: ccId,
           accountSegment: accountSegmentId,
           accountGroupType: accountGroupTypeId,
         });
 
         setAccountNumber(data_detailPos?.registrationNumber);
 
-        // ✅ FIX: Dispatch getMeterReadingCodeList jika ada ccId
         if (ccId) {
           const body = {
             ccIds: [{ ccId: ccId }],
@@ -572,7 +569,6 @@ const PosForm = ({ type }) => {
           dispatch(getMeterReadingCodeList(body));
           setIsCostCenterFilled(true);
         } else if (costCenterIds && costCenterIds.length > 0) {
-          // Fallback untuk multi cost center
           const body = {
             ccIds: costCenterIds.map((id) => ({ ccId: id })),
           };
@@ -580,18 +576,14 @@ const PosForm = ({ type }) => {
           setIsCostCenterFilled(true);
         }
 
-        // ✅ Dispatch getAccountGroupTypeList jika ada accountSegmentId
         if (accountSegmentId) {
           setIsAccountSegmentFilled(true);
           dispatch(getAccountGroupTypeList([accountSegmentId]));
         }
       } else {
-        // Regular customer (tidak berubah)
         handleSetFormUpdate(data_detailPos, data_globalCurrency);
         setAccountNumber(data_detailPos?.accountNumber);
       }
-
-      // Set state global (tidak berubah)
       setCurrency(
         data_globalCurrency?.find(
           (item) => item.text === data_detailPos?.currency,
@@ -1364,7 +1356,7 @@ const PosForm = ({ type }) => {
 
   const handleChangeSOR = (selectedSorId) => {
     form.resetFields([
-      "costCenter",
+      "costcenter",
       "meterReadingCode",
       "accountSegment",
       "accountGroupType",
@@ -1396,8 +1388,8 @@ const PosForm = ({ type }) => {
             (item) => item.name === data_detailPos?.sor,
           )?.id;
 
-          const costCenterNames = data_detailPos?.costCenter
-            ? data_detailPos.costCenter.split(",").map((name) => name.trim())
+          const costCenterNames = data_detailPos?.costcenter
+            ? data_detailPos.costcenter.split(",").map((name) => name.trim())
             : [];
 
           const costCenterIds =
