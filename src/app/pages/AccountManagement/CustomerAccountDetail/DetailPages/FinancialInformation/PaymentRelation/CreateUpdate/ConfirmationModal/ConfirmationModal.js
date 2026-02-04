@@ -49,19 +49,13 @@ const ConfirmationModal = ({
       }}
       footer={[
         <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
-          <ButtonComponent type={"default"} onClick={() => handleCancel()}>
+          <ButtonComponent type={"menu"} onClick={() => handleCancel()}>
             Cancel
           </ButtonComponent>
           <div className="flex gap-x-4">
-            {activeTab > 0 ? (
-              <ButtonComponent type={"default"} onClick={() => handleChangeTab("prev")}>
-                Previous
-              </ButtonComponent>
-            ) : (
-              <ButtonComponent type={"default"} onClick={handleCancel}>
-                Cancel
-              </ButtonComponent>
-            )}
+            <ButtonComponent type={"menu"} disabled={activeTab < 1} onClick={() => handleChangeTab("prev")}>
+              Previous
+            </ButtonComponent>
             {activeTab < (tabLength - 1)  && (
               <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
                 Next
