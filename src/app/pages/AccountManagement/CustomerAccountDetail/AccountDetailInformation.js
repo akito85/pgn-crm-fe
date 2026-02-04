@@ -234,7 +234,7 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/multi-destination/details"
+          "/account-management/account-standard/multi-destination/view"
         ) ||
         path.pathname.includes(
           "/account-management/account-standard/multi-destination/create"
