@@ -148,7 +148,7 @@ export default function InfoMultiDestination({
 
   return(
     <div className={className}>
-      <NxCardContainer header={"MULTI DESTINATION INFORMATION"} removeBottomMargin>
+      <NxCardContainer header={"MULTI DESTINATION INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-4 mb-4">
           <div className="flex gap-2 items-end">
             <Form.Item name={"objectId"} hidden>
@@ -396,7 +396,7 @@ export default function InfoMultiDestination({
             ]}
             className="no-margin-form"
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.date) : null
+              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
             })}
           >
             <DateComponent />
@@ -408,7 +408,7 @@ export default function InfoMultiDestination({
             label={"End Date"}
             className="no-margin-form"
             getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.date) : null
+              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
             })}
           >
             <DateComponent />

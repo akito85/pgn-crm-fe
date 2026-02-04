@@ -73,8 +73,6 @@ const sorter = (fieldSort, a, b) => {
 };
 
 const columnAttachmentData = (
-  page,
-  pageSize,
   searchInput,
   searchedColumn,
   searchText,
@@ -309,7 +307,7 @@ const AttachmentSectionForm = ({
     <div className={`${className}`}>
       <NxCardContainer header={"ATTACHMENT"}>
         <Spin spinning={loadingDownload}>
-          <div className="flex flex-col w-full gap-y-4">
+          <div className="flex flex-col gap-y-4">
             {type !== "detail" && type !== "preview" ? (
               <div className="flex flex-col w-full gap-2 items-end">
                 <div className="flex flex-col gap-y-1 justify-start">

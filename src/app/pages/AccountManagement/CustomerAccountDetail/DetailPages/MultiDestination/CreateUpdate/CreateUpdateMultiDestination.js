@@ -688,7 +688,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
   return (
     <LayoutMenu>
-      <div className="flex flex-col gap-y-5">
+      <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
         <HeaderDetail
           data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
