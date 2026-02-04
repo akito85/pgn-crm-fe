@@ -9,7 +9,7 @@ import { nxGetAccountActions } from '../../../../../../components/Nx/NxGetAccoun
 import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
 import Toolbar from '../../../../../../components/Toolbar'
-import BaseContainer from '../../../../../../components/BaseContainer'
+import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
 
 const columns = (
   search,
@@ -137,13 +137,13 @@ const TableGasUtilCurrent = ({idAccount}) => {
   return (
     <>
       <div className="flex flex-col gap-4">
-        <BaseContainer border header={"GAS UTILIZATION"}>
+        <NxBaseContainer border header={"GAS UTILIZATION"}>
           <div className="w-full grid grid-cols-2 gap-4">
             <DetailText label={"Effective Date"}>{data_current?.effectiveDate}</DetailText>
             <DetailText label={"Description"}>{data_current?.description}</DetailText>
           </div>
-        </BaseContainer>
-        <BaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>
+        </NxBaseContainer>
+        <NxBaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>
           <div className="flex flex-col gap-y-4">
             <Toolbar items={itemActions} type="detail" />
             <NxTable
@@ -159,7 +159,7 @@ const TableGasUtilCurrent = ({idAccount}) => {
               hasMore={false}
             />
           </div>
-        </BaseContainer>
+        </NxBaseContainer>
       </div>
     </>
   )

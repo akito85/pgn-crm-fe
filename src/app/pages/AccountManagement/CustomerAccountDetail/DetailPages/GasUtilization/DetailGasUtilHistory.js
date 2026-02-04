@@ -11,6 +11,7 @@ import { dateFormatting } from '../../../../../../utils'
 import NxTable from '../../../../../../components/Nx/NxTable'
 import NxCardContainer from '../../../../../../components/Nx/NxCardContainer'
 import BaseContainer from '../../../../../../components/BaseContainer'
+import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
 
 const columns = (
   search,
@@ -159,15 +160,15 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
         <div className="flex flex-col gap-y-4">
 
           {/* GAS UTILIZATION INFORMATION */}
-          <BaseContainer border header={"GAS UTILIZATION INFORMATION"}>
+          <NxBaseContainer border header={"GAS UTILIZATION INFORMATION"}>
             <div className="w-full grid grid-cols-2 gap-4">
               <DetailText label="Effective Date">{dataDetail?.effectiveDate}</DetailText>
               <DetailText label="Description">{dataDetail?.description}</DetailText>
             </div>
-          </BaseContainer>
+          </NxBaseContainer>
 
           {/* HISTORY LOG INFORMATION */}
-          <BaseContainer border header={"HISTORY LOG INFORMATION"}>
+          <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
             <div className="w-full grid grid-cols-5 gap-4">
               <DetailText label="Record ID">{dataDetail?.id}</DetailText>
               <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail?.createdDate).format(dateFormatting.dateTime) : ''}</DetailText>
@@ -175,10 +176,10 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
               <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ''}</DetailText>
               <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
             </div>
-          </BaseContainer>
+          </NxBaseContainer>
 
           {/* Table */}
-          <BaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>
+          <NxBaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>
             <NxTable
               idTable="table-detail-gas-util-history"
               dataSource={dataDetail?.gasUtilsDtl}
@@ -202,7 +203,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
               pagination={false}
               scroll={{ y: 400 }}
             />
-          </BaseContainer>
+          </NxBaseContainer>
         </div>
       </ModalCustom>
     </>

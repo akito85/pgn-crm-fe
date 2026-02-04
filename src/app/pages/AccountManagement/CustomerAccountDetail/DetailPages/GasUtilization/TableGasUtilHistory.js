@@ -14,7 +14,7 @@ import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColu
 import { WarningOutlined } from '@ant-design/icons'
 import ModalCustom from '../../../../../../components/Modal/ModalCustom'
 import { hasValue, renderDateColumn } from '../../../../../../utils'
-import BaseContainer from '../../../../../../components/BaseContainer'
+import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
 
 const columns = (
   search,
@@ -293,7 +293,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
 
   return (
     <>
-      <BaseContainer border header={"GAS UTILIZATION HISTORY LIST"}>
+      <NxBaseContainer border header={"GAS UTILIZATION HISTORY LIST"}>
         <NxTable
           idTable="gas-utilization-history-table"
           dataSource={currentData}
@@ -312,7 +312,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
           columnDefinitions={columnDefinitions}
           loading={loading}
         />
-      </BaseContainer>
+      </NxBaseContainer>
 
       {/* Modal Detail */}
       <DetailGasUtilHistory isOpen={modalDetail} setIsOpen={setModalDetail} dataDetail={data_detail} />
