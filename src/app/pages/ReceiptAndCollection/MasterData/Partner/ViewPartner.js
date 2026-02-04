@@ -487,7 +487,7 @@ const ViewPartner = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Partner
+            Create
           </ButtonComponent>
         </NavLink>
       ),
