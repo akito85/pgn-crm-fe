@@ -35,7 +35,7 @@ import AttachmentComponent from "../../../../../../components/Attachment/Attachm
 import { columnsReverseTab } from "./ColumnReverseTab";
 
 const DetailRevers = (props) => {
-  const { data, loading, id, isApprover } = props;
+  const { data, loading, id, isApprover, isSubmitter } = props;
 
   // Declaration
   const dispatch = useDispatch();
@@ -670,16 +670,19 @@ const DetailRevers = (props) => {
   return (
     <div className="my-5">
       <div className="w-full flex justify-end my-5 gap-5">
-        <ButtonComponent
-          //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={() => {
-            setModalRequest(true);
-            setShowModal(false);
-          }}
-        >
-          Request
-        </ButtonComponent>
+        {isSubmitter ? (
+          <ButtonComponent
+            //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
+            type="submit"
+            onClick={() => {
+              setModalRequest(true);
+              setShowModal(false);
+            }}
+          >
+            Request
+          </ButtonComponent>
+        ) : null}
+
         {isApprover ? (
           <>
             <ButtonComponent
