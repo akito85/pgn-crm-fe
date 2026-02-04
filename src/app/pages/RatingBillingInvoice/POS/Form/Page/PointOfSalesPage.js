@@ -406,6 +406,7 @@ const PointOfSalesPage = ({
             transactionDate={transactionDate}
             idPos={idPos}
             dataUomCodes={data_uom_codes}
+            customerType={customerType}
           />
         );
       case listDetailPage[1].value:
@@ -425,6 +426,7 @@ const PointOfSalesPage = ({
             currency={currency}
             transactionDate={transactionDate}
             dataUomCodes={data_uom_codes}
+            customerType={customerType}
           />
         );
     }
