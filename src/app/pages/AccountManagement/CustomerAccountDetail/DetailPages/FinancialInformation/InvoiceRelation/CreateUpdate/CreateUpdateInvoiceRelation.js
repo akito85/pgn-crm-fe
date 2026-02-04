@@ -2,8 +2,7 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Form, Spin } from "antd";
-import { RightOutlined } from "@ant-design/icons";
+import { Form, Spin } from "antd";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import StepContents from "./StepContents";
@@ -22,8 +21,6 @@ import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import DetailText from "../../../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
@@ -35,13 +32,14 @@ import {
   getIrAttachmentCategory,
   updateInvoiceRelation,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
-import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
+import { showModalError, validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
+import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 
 const CreateUpdateInvoiceRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -70,7 +68,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const [formCreate] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
-  const idIr = location?.state?.idIr;
+  const idIr = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
 
   //state
@@ -179,11 +177,15 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     },
     {
       path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      breadcrumbName: "Invoice Relation",
+      breadcrumbName: "Detail Account",
+      state: {
+        idAccount,
+        idCustomer,
+      }
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create" : (type === "update") ? "Update" : "",
+      breadcrumbName: (type === "create") ? "Create Invoice Relation" : (type === "update") ? "Update Invoice Relation" : "",
     },
   ];
 
@@ -203,8 +205,15 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     if (show) {
       try {
         if (current === 2) {
-          if (attachmentIsRequired && !dataAttachment.length)
-            throw new Error("At least provide one attachment");
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+            dispatch(showModalError(errorBody));
+
+            throw new Error("There was no file attached");
+          }
         }
         else {
           await formCreate.validateFields(formFields[current]);
@@ -220,6 +229,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           const body = {
             stepNumber: current + 1,
             type: type.toUpperCase(),
+            id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
@@ -227,7 +237,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               startDate,
               endDate,
               appHierId,
-              id: idIr,
             }
           };
 
@@ -362,8 +371,15 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const next = async () => {
     try {
       if (current === 2) {
-        if (attachmentIsRequired && !dataAttachment.length)
-          throw new Error("At least provide one attachment");
+        if (attachmentIsRequired && !dataAttachment.length) {
+          const errorBody = {
+            title: "Failed",
+            description: `Please upload at least one attachment`,
+          };
+          dispatch(showModalError(errorBody));
+
+          throw new Error("There was no file attached");
+        }
       }
       else {
         await formCreate.validateFields(formFields[current]);
@@ -379,6 +395,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         const body = {
           stepNumber: current + 1,
           type: type.toUpperCase(),
+          id: idIr,
           data : {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
@@ -386,7 +403,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             startDate,
             endDate,
             appHierId,
-            id: idIr,
           }
         };
 
@@ -413,8 +429,15 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     for (let i = current; i < newCurrent; i++) {
       try {
         if (i === 2) {
-          if (attachmentIsRequired && !dataAttachment.length)
-            throw new Error("At least provide one attachment");
+          if (attachmentIsRequired && !dataAttachment.length) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please upload at least one attachment`,
+            };
+            dispatch(showModalError(errorBody));
+
+            throw new Error("There was no file attached");
+          }
         }
         else {
           await formCreate.validateFields(formFields[i]);
@@ -430,6 +453,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           const body = {
             stepNumber: i + 1,
             type: type.toUpperCase(),
+            id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
@@ -437,7 +461,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
               startDate,
               endDate,
               appHierId,
-              id: idIr,
             }
           };
 
@@ -467,17 +490,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     await next();
     scrollRightHandler()
   }
-  
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -657,76 +669,56 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             scrollToFirstError={true}
             className="flex flex-col gap-y-4"
           >
-            {/* Step Contents */}
-            <NxBaseContainer border>
-              <div className="flex flex-row justify-center">
-                <div
-                  onScroll={handleScroll}
-                  ref={containerRef}
-                  className="overflow-x-scroll scrollStepsCstm"
-                >
-                  <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
-                </div>
-              </div>
-            </NxBaseContainer>
+          {/* Step Contents */}
+          <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
-            {steps.map((step) => step.content)}
+          {steps.map((step) => step.content)}
 
-            {/* Section Action Steps */}
-            <div className="steps-action flex w-full justify-between gap-x-2">
+          {/* Section Action Steps */}
+          <NxBaseContainer border>
+            <div className="flex justify-between">
               <ButtonComponent
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                type={"menu"}
                 onClick={()=>{navigate(-1)}}
               >
-                Back
+                Cancel
               </ButtonComponent>
               <div className="flex w-full justify-end gap-x-4">
                 <ButtonComponent
                   onClick={handleClear}
-                  type={"submit"}
+                  type={"reject"}
                   icon={<SVGIcon name="IconButtonClear" width={24} />}
                 >
                   { type === "update" ? "Reset" : "Clear" }
                 </ButtonComponent>
-                {current > 0 && current !== (steps.length-1) && (
-                  <ButtonComponent
-                    onClick={() => {
-                      prev();
-                      scrollLeftHandler();
-                    }}
-                    type={"submit"}
-                    icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                  >
-                    Previous
-                  </ButtonComponent>
-                )}
+                <ButtonComponent
+                  onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                  type={"secondary"}
+                  disabled={current !== steps.length - 1}
+                >
+                  Save as Draft
+                </ButtonComponent>
+                <ButtonComponent
+                  onClick={() => {
+                    prev();
+                    scrollLeftHandler();
+                  }}
+                  type={"menu"}
+                  disabled={current < 1}
+                >
+                  Previous
+                </ButtonComponent>
                 {current < steps.length - 1 && (
                   <ButtonComponent
                     onClick={handleButtonNext}
                     type={"submit"}
                     disabled={steps[current].disabled}
                   >
-                    <div className="flex gap-x-2 items-center">
-                      <span>Next</span>
-                      <RightOutlined
-                        style={{
-                          justifyItems: "center",
-                          fontSize: "18px",
-                          color: "#fff",
-                        }}
-                      />
-                    </div>
+                    Next
                   </ButtonComponent>
                 )}
                 {current === steps.length - 1 && (
                   <>
-                    <ButtonComponent
-                      onClick={() => handleSetShowConfirmationModal(true, "draft")}
-                      type={"submit"}
-                    >
-                      Save as Draft
-                    </ButtonComponent>
                     <ButtonComponent
                       onClick={() => handleSetShowConfirmationModal(true, "submit")}
                       type={"submit"}
@@ -737,6 +729,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
                 )}
               </div>
             </div>
+          </NxBaseContainer>
             <ConfirmationModal
               form={"invoiceRelationForm"}
               isOpen={showConfirmationModal}

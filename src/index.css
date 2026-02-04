@@ -304,7 +304,7 @@ button.ant-btn.ant-btn-menu {
 button.ant-btn.ant-btn-menu:disabled {
   background: #E0E0E0;
   color: #BDBDBD;
-  border: none;
+  border: none !important;
 }
 
 button.ant-btn.ant-btn-action {

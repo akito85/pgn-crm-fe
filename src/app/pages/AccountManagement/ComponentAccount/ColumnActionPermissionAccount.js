@@ -72,7 +72,8 @@ export const useColumnActionPermissionAccount = (
   permissionList = [],
   itemsRender = [],
   accessAccount,
-  sliceColumn = "View"
+  sliceColumn = "View",
+  permissionMapping = {} // Optional: map action names to permission names, e.g. { CreateAddon: "Update", CreateAmendment: "Update" }
 ) => {
   const access = accessAccount
   // convert to lower case
@@ -84,6 +85,16 @@ export const useColumnActionPermissionAccount = (
     () => permissionList?.map((item) => item?.toLowerCase()),
     [permissionList]
   );
+
+  // Convert permission mapping to lowercase
+  const lowerCasePermissionMapping = useMemo(() => {
+    const result = {};
+    Object.keys(permissionMapping).forEach(key => {
+      result[key.toLowerCase()] = permissionMapping[key].toLowerCase();
+    });
+    return result;
+  }, [permissionMapping]);
+
   const lowerCaseItemsRender = useMemo(
     () =>
       itemsRender
@@ -97,18 +108,22 @@ export const useColumnActionPermissionAccount = (
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
-    const arrayActions = lowerCaseAccessList?.filter((item) =>
+    // Get actions that user has permission for
+    const grantedPermissions = lowerCaseAccessList?.filter((item) =>
       lowerCasePermissionList?.includes(item)
-    );
+    ) || [];
 
     return lowerCaseItemsRender
       ?.filter((itemRender) => {
-        return arrayActions?.includes(itemRender?.action);
+        const actionName = itemRender?.action;
+        // Check if action has a permission mapping, if so use the mapped permission
+        const requiredPermission = lowerCasePermissionMapping[actionName] || actionName;
+        return grantedPermissions?.includes(requiredPermission);
       })
       ?.map((itemsMap) => {
         return itemsMap?.action;
       });
-  }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
+  }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList, lowerCasePermissionMapping]);
 
   const columns = useMemo(() => {
     if (arrayActions?.length === 0) {

@@ -12,14 +12,13 @@ import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import DetailText from "../../../../../../../../components/DetailText";
 import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
-import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
 
 const PaymentRelationDetails = ({
   type = "standard"
@@ -66,11 +65,11 @@ const PaymentRelationDetails = ({
     },
     {
       path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
-      breadcrumbName: "Payment Relation",
+      breadcrumbName: "Detail Account",
     },
     {
       path: "",
-      breadcrumbName: "Detail",
+      breadcrumbName: "Detail Payment Relation",
     },
   ];
 
@@ -244,42 +243,35 @@ const PaymentRelationDetails = ({
             </NxBaseContainer>
           </NxCardContainer>
 
-          <div className="flex justify-between">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            {isApproval && (
-              <div className={"w-full flex justify-end gap-5"}>
+          {isApproval && (
+            <NxBaseContainer border>
+              <div className="flex justify-between">
                 <ButtonComponent
-                  type="reject"
-                  onClick={() => handleApprovalModal(true, "reject")}
+                  type={"menu"}
+                  onClick={() => navigate(-1)}
                 >
-                  Reject
+                  Cancel
                 </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => handleApprovalModal(true, "approve")}
-                >
-                  Approve
-                </ButtonComponent>
+                <div className={"w-full flex justify-end gap-5"}>
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleApprovalModal(true, "reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleApprovalModal(true, "approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
               </div>
-            )}
-          </div>
+            </NxBaseContainer>
+          )}
         </div>
       </Spin>
-      <ModalApproveOrReject
+      <NxApproveOrRejectModal
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}

@@ -12,20 +12,20 @@ import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { getDetailInvoiceRelation, getInvoiceRelationAttachment, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
-import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
+import { getDetailInvoiceRelation, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
 
 const InvoiceRelationDetails = ({
   type = "standard"
 }) => {
   const dispatch = useDispatch();
 
-  const { detail_invoiceRelation, data_invoiceRelationAttachment } = useSelector(
+  const { detail_invoiceRelation } = useSelector(
     (state) => state.invoiceRelation
   )
 
@@ -69,11 +69,11 @@ const InvoiceRelationDetails = ({
         type == "standard"
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
           : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
-      breadcrumbName: "Invoice Relation",
+      breadcrumbName: "Detail Account",
     },
     {
       path: "",
-      breadcrumbName: "Detail",
+      breadcrumbName: "Detail Invoice Relation",
     },
   ];
 
@@ -157,7 +157,6 @@ const InvoiceRelationDetails = ({
   }, [idCustomer]);
 
   useEffect(() => {
-    console.log({idAccount, idCustomer})
     if (idAccount && idCustomer) {
       dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
     }
@@ -166,7 +165,6 @@ const InvoiceRelationDetails = ({
   useEffect(() => {
     if (idIr) {
       dispatch(getDetailInvoiceRelation(idIr));
-      dispatch(getInvoiceRelationAttachment({ id: idIr }));
     }
   }, [idIr])
 
@@ -231,9 +229,9 @@ const InvoiceRelationDetails = ({
 
           <InvoiceRelationDetailTabs
             dataDetail={detail_invoiceRelation}
-            dataAttachment={data_invoiceRelationAttachment}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
             dispatch={dispatch}
+            idIr={idIr}
           />
 
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
@@ -249,42 +247,35 @@ const InvoiceRelationDetails = ({
             </NxBaseContainer>
           </NxCardContainer>
 
-          <div className="flex justify-between">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            {isApproval && (
-              <div className={"w-full flex justify-end gap-5"}>
+          {isApproval && (
+            <NxBaseContainer border>
+              <div className="flex justify-between">
                 <ButtonComponent
-                  type="reject"
-                  onClick={() => handleApprovalModal(true, "reject")}
+                  type={"menu"}
+                  onClick={() => navigate(-1)}
                 >
-                  Reject
+                  Cancel
                 </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => handleApprovalModal(true, "approve")}
-                >
-                  Approve
-                </ButtonComponent>
+                <div className={"w-full flex justify-end gap-5"}>
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleApprovalModal(true, "reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleApprovalModal(true, "approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
               </div>
-            )}
-          </div>
+            </NxBaseContainer>
+          )}
         </div>
       </Spin>
-      <ModalApproveOrReject
+      <NxApproveOrRejectModal
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
