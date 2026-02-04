@@ -4,7 +4,6 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
-  data_multiDestination: [],
   list_multiDestination: [],
   pagination_multiDestination: {
     totalPages: 0,
@@ -24,7 +23,13 @@ const initialState = {
   data_mdAttachmentCategory: [],
   data_mdAccountStandard: [],
   detail_multiDestination: {},
-  data_multiDestinationAttachment: [],
+  list_mdDetailAttachment: [],
+  pagination_mdDetailAttachment: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data_mdApprovalHistory: {},
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
@@ -512,9 +517,6 @@ const multiDestinationSlice = createSlice({
       state.loading = false;
       const { result, page, isLoadMore } = action.payload;
 
-      // Keep data_multiDestination for backward compatibility
-      state.data_multiDestination = action.payload;
-
       if (Array.isArray(result)) {
         if (isLoadMore) {
           const currentIds = new Set(state.list_multiDestination.map((item) => item.id));
@@ -540,7 +542,6 @@ const multiDestinationSlice = createSlice({
       state.loading = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.data_multiDestination = [];
         state.list_multiDestination = [];
         state.pagination_multiDestination = {
           totalPages: 0,
@@ -685,16 +686,48 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Multi Destination Attachment */
-    [getMultiDestinationAttachment.pending]: (state) => {
-      state.loading = true;
+    [getMultiDestinationAttachment.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getMultiDestinationAttachment.fulfilled]: (state, action) => {
-      state.data_multiDestinationAttachment = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_mdDetailAttachment.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_mdDetailAttachment = [
+            ...state.list_mdDetailAttachment,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_mdDetailAttachment = result;
+      }
+
+      state.pagination_mdDetailAttachment = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
     },
-    [getMultiDestinationAttachment.rejected]: (state) => {
-      state.data_multiDestinationAttachment = [];
+    [getMultiDestinationAttachment.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_mdDetailAttachment = [];
+        state.pagination_mdDetailAttachment = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
     },
 
     /** Approve or Reject Multi Destination */
