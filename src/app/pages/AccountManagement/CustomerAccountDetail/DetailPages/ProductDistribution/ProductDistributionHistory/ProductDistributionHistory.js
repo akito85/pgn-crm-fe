@@ -19,6 +19,7 @@ import {
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
 import ProductDistributionDetail from "./ProductDistributionDetail";
 import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 
 const columns = (
   page = 1,
@@ -220,26 +221,6 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "Create",
-      render: (
-        <NavLink
-          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PRODUCT_DISTRIBUTION}
-          state={{
-            accountId: id,
-            idCustomer: idCustomer,
-          }}
-        >
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-
     // Column Action Table
     {
       action: "View",
@@ -359,22 +340,14 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         Product Distribution History List
       </div>
 
-      <div className="w-full flex justify-end gap-[20px]">
-        <ToolbarAccount
-          items={itemGrantAccess}
-          advancedAccess={access_account}
-        />
-      </div>
-
-      <TablePaginationNew
+      <NxTable
+        idTable="table-product-distribution-history"
         dataSource={dataSource}
         totalData={data?.page?.totalElements}
         current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: 1000 }}
-        onChange={handleChange}
+        tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
         onSort={onSort}
-        columns={[
+          columns={[
           ...columns(
             page,
             pageSize,
@@ -391,6 +364,8 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
             access_account
           ),
         ]}
+        usePagination={false}
+        useInfiniteScroll={true}
       />
 
       {/* Modal Detail */}

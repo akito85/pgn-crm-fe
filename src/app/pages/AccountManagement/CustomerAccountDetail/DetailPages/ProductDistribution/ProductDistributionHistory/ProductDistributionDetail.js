@@ -7,6 +7,7 @@ import { dateFormatting } from "../../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 
 const columns = (
   page = 1,
@@ -157,14 +158,13 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
         Product Distribution Export Detail
       </div>
 
-      <TablePaginationNew
-        type="FE"
+      <NxTable
+        idTable="detail-product-distribution"
         dataSource={data_detail?.srcDistDtl}
         totalData={data_detail?.srcDistDtl?.length}
         current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: "auto" }}
-        onChange={handleChange}
+        tableScrolled={{ y: 525, x: data_detail?.srcDistDtl?.length ? "max-content" : "100%" }}
+        onSort={sorter}
         columns={columns(
           page,
           pageSize,
@@ -173,8 +173,9 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
           searchText,
           handleSearch,
           onFilter,
-          sorter
         )}
+        useInfiniteScroll={true}
+        hasMore={false}
       />
     </ModalCustom>
   )
