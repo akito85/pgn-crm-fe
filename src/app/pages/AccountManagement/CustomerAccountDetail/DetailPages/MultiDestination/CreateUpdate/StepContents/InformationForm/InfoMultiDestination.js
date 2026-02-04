@@ -156,35 +156,42 @@ export default function InfoMultiDestination({
             </Form.Item>
 
             <Form.Item
-              key="account"
-              name={"account"}
               label={"Account"}
+              required
               className="no-margin-form"
-              rules={[
-                {
-                  message: requiredMessage("Account"),
-                  required: true,
-                }
-              ]}
             >
-              <InputComponent disabled />
+              <Input.Group compact>
+                <Form.Item
+                  key="account"
+                  name={"account"}
+                  rules={[
+                    {
+                      message: requiredMessage("Account"),
+                      required: true,
+                    }
+                  ]}
+                  noStyle
+                >
+                  <InputComponent disabled />
+                </Form.Item>
+                <Button
+                  type="primary"
+                  className="h-9 px-4 justify-center items-center"
+                  style={{
+                    backgroundColor: "#0075bf",
+                    borderColor: "#0075bf",
+                    borderRadius: "5px",
+                    minWidth: "112px",
+                  }}
+                  onClick={() => {
+                    // Add your select logic here
+                    setIsOpen(true)
+                  }}
+                >
+                  Select
+                </Button>
+              </Input.Group>
             </Form.Item>
-            <Button
-              type="primary"
-              className="h-9 px-4 justify-center items-center"
-              style={{
-                backgroundColor: "#0075bf",
-                borderColor: "#0075bf",
-                borderRadius: "5px",
-                minWidth: "112px",
-              }}
-              onClick={() => {
-                // Add your select logic here
-                setIsOpen(true)
-              }}
-            >
-              Select
-            </Button>
           </div>
 
           <Form.Item
