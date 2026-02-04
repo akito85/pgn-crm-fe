@@ -82,7 +82,7 @@ const CreateServiceAgreement = ({ saType }) => {
   const [data, setData] = useState([]);
   const [bodyData, setBodyData] = useState({});
   const [saInfoObj, setSaInfoObj] = useState({});
-  const [saDetailObj, setSaDetailObj] = useState();
+  const [saDetailObj, setSaDetailObj] = useState({ createFrom: 1 });
   const [saApprovalObj, setSaApprovalObj] = useState({});
   const [typeSubmit, setTypeSubmit] = useState("");
   const [dataListVersion, setDataListVersion] = useState([]);
@@ -243,7 +243,7 @@ const CreateServiceAgreement = ({ saType }) => {
         .unwrap()
         .then((data) => {
           // Start DDL Product Selected
-          const tempProductDetail = data?.saDetail;
+          const tempProductDetail = data?.saDetail || [];
           const paymentTypeId = 210;
           const chargingMethodId = 214;
           const hasIdpaymentTypeId = tempProductDetail.filter(
@@ -255,12 +255,17 @@ const CreateServiceAgreement = ({ saType }) => {
           // End DDL Product Selected
 
           // Start Ddl Calc Rule - Calc Type
-          const tempCalcRuleDetail = data?.saCalcRule;
+          const tempCalcRuleDetail = data?.saCalcRule || [];
           const calculationTypeId = 687;
           const hasIdCalcTypeId = tempCalcRuleDetail.filter(
             (item) => item.nameId === calculationTypeId
           );
           // End Ddl Calc Rule - Calc Type
+
+          // Safe access for filtered results
+          const paymentTypeItem = hasIdpaymentTypeId?.[0];
+          const chargingMethodItem = haschargingMethodId?.[0];
+          const calcTypeItem = hasIdCalcTypeId?.[0];
 
           //Price Adjustment logic
           let cleanedString = "";
@@ -288,24 +293,24 @@ const CreateServiceAgreement = ({ saType }) => {
             productClass: data?.saInfo?.productClass,
             productVersionId: data?.saInfo?.productVersionId,
             productId: data?.saInfo?.productId,
-            paymentType: hasIdpaymentTypeId[0].unitId,
-            chargingMethod: haschargingMethodId[0].unitId,
-            calculationType: parseInt(hasIdCalcTypeId[0].unitId),
+            paymentType: paymentTypeItem?.unitId ?? null,
+            chargingMethod: chargingMethodItem?.unitId ?? null,
+            calculationType: calcTypeItem?.unitId ? parseInt(calcTypeItem.unitId) : null,
             descriptionProduct: data?.product?.description || null,
-            objPaymentType: {
+            objPaymentType: paymentTypeItem ? {
               name: 210,
-              unit: hasIdpaymentTypeId[0].uom,
+              unit: paymentTypeItem.uom,
               value: null,
               description: null,
-              unitName: hasIdpaymentTypeId[0].unit,
-            },
-            objChargingMethod: {
+              unitName: paymentTypeItem.unit,
+            } : null,
+            objChargingMethod: chargingMethodItem ? {
               name: 214,
-              unit: haschargingMethodId[0].uom,
+              unit: chargingMethodItem.uom,
               value: null,
               description: null,
-              unitName: haschargingMethodId[0].unit,
-            },
+              unitName: chargingMethodItem.unit,
+            } : null,
             priceAdjustmentId: mergeIdAdjustment,
             priceAdjustmentText: cleanedString,
           });
@@ -317,9 +322,9 @@ const CreateServiceAgreement = ({ saType }) => {
             productVersionId: data?.saInfo?.productVersionId,
             pricingRule: data?.saInfo?.pricingRuleId,
             priceCode: data?.saInfo?.idMPricing,
-            paymentType: hasIdpaymentTypeId[0].unitId,
-            chargingMethod: haschargingMethodId[0].unitId,
-            calculationType: parseInt(hasIdCalcTypeId[0].unitId),
+            paymentType: paymentTypeItem?.unitId ?? null,
+            chargingMethod: chargingMethodItem?.unitId ?? null,
+            calculationType: calcTypeItem?.unitId ? parseInt(calcTypeItem.unitId) : null,
             priceAdjustment: cleanedString,
             descriptionProduct: data?.product?.description || null,
           });
@@ -1366,7 +1371,7 @@ const CreateServiceAgreement = ({ saType }) => {
       dispatch(checkValidateCreateSa({ body }))
         .unwrap()
         .then((data) => {
-          if (data?.data?.isCreated === true) {
+          if (data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
             setModalValidateSa(true);
@@ -1401,9 +1406,13 @@ const CreateServiceAgreement = ({ saType }) => {
           if (data?.data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
-            setModalValidateSa(true);
-            setMessageValidateSa(data?.message);
-            setCurrent((current = 0));
+            if(data?.isCreated === true) {
+              setCurrent(current + 1);
+            } else {
+              setModalValidateSa(true);
+              setMessageValidateSa(data?.message);
+              setCurrent((current = 0));
+            }
           }
         })
         .catch((error) => {
