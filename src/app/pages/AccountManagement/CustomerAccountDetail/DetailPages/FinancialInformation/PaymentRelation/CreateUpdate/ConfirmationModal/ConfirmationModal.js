@@ -52,7 +52,7 @@ const ConfirmationModal = ({
           <ButtonComponent type={"menu"} onClick={() => handleCancel()}>
             Cancel
           </ButtonComponent>
-          <div className="flex gap-x-4">
+          <div className="flex gap-x-2">
             <ButtonComponent type={"menu"} disabled={activeTab < 1} onClick={() => handleChangeTab("prev")}>
               Previous
             </ButtonComponent>
