@@ -243,39 +243,32 @@ const PaymentRelationDetails = ({
             </NxBaseContainer>
           </NxCardContainer>
 
-          <div className="flex justify-between">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            {isApproval && (
-              <div className={"w-full flex justify-end gap-5"}>
+          {isApproval && (
+            <NxBaseContainer border>
+              <div className="flex justify-between">
                 <ButtonComponent
-                  type="reject"
-                  onClick={() => handleApprovalModal(true, "reject")}
+                  type={"menu"}
+                  onClick={() => navigate(-1)}
                 >
-                  Reject
+                  Cancel
                 </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => handleApprovalModal(true, "approve")}
-                >
-                  Approve
-                </ButtonComponent>
+                <div className={"w-full flex justify-end gap-5"}>
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleApprovalModal(true, "reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleApprovalModal(true, "approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
               </div>
-            )}
-          </div>
+            </NxBaseContainer>
+          )}
         </div>
       </Spin>
       <NxApproveOrRejectModal
