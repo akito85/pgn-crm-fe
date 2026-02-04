@@ -8,6 +8,9 @@ import { getColumnSearchProps } from '../../../../../../utils/getColumnSearchPro
 import { sorterFunction } from '../../../../../../utils/sorterFunction'
 import moment from 'moment'
 import { dateFormatting } from '../../../../../../utils'
+import NxTable from '../../../../../../components/Nx/NxTable'
+import NxCardContainer from '../../../../../../components/Nx/NxCardContainer'
+import BaseContainer from '../../../../../../components/BaseContainer'
 
 const columns = (
   search,
@@ -102,6 +105,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const hasMore = dataDetail?.gasUtilsDtl ? page * pageSize < dataDetail?.gasUtilsDtl.length : false;
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -122,6 +126,14 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   }, [pageSize]);
+
+  const onSort = (_, __, sort) => {
+    const dataSort =
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
 
   return (
     <>
@@ -144,47 +156,54 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
           </ButtonComponent>
         }
       >
+        <div className="flex flex-col gap-y-4">
 
-        {/* GAS UTILIZATION INFORMATION */}
-        <CardComponent header={"GAS UTILIZATION INFORMATION"} cols={2}>
-          <DetailText label="Effective Date">{dataDetail?.effectiveDate}</DetailText>
-          <DetailText label="Description">{dataDetail?.description}</DetailText>
-        </CardComponent>
+          {/* GAS UTILIZATION INFORMATION */}
+          <BaseContainer border header={"GAS UTILIZATION INFORMATION"}>
+            <div className="w-full grid grid-cols-2 gap-4">
+              <DetailText label="Effective Date">{dataDetail?.effectiveDate}</DetailText>
+              <DetailText label="Description">{dataDetail?.description}</DetailText>
+            </div>
+          </BaseContainer>
 
-        {/* HISTORY LOG INFORMATION */}
-        <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">{dataDetail?.id}</DetailText>
-          <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail?.createdDate).format(dateFormatting.dateTime) : ''}</DetailText>
-          <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-          <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ''}</DetailText>
-          <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
-        </CardComponent>
+          {/* HISTORY LOG INFORMATION */}
+          <BaseContainer border header={"HISTORY LOG INFORMATION"}>
+            <div className="w-full grid grid-cols-5 gap-4">
+              <DetailText label="Record ID">{dataDetail?.id}</DetailText>
+              <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail?.createdDate).format(dateFormatting.dateTime) : ''}</DetailText>
+              <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
+              <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ''}</DetailText>
+              <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
+            </div>
+          </BaseContainer>
 
-        {/* Table */}
-        <div className="mb-6">
-          <div className="text-primary text-xs font-semibold uppercase py-[30px]">CONTACT DETAIL INFORMATION</div>
-          <TablePaginationNew
-            type='FE'
-            useSelect
-            pageSize={pageSize}
-            current={page}
-            dataSource={dataDetail?.gasUtilsDtl}
-            tableScrolled={{y: 625 }}
-            onChange={handleChange}
-            columns={
-              columns(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )
-            }
-          />
+          {/* Table */}
+          <BaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>
+            <NxTable
+              idTable="table-detail-gas-util-history"
+              dataSource={dataDetail?.gasUtilsDtl}
+              totalData={dataDetail?.gasUtilsDtl?.length || 0}
+              current={page}
+              tableScrolled={{ y: 400 }}
+              onSort={onSort}
+              usePagination={false}
+              useInfiniteScroll={true}
+              columns={
+                columns(
+                  search,
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch
+                )
+              }
+              pagination={false}
+              scroll={{ y: 400 }}
+            />
+          </BaseContainer>
         </div>
-        
       </ModalCustom>
     </>
   )

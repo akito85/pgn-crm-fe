@@ -7,6 +7,7 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { getColumnSearchPropsCriteria } from "../../../../../ProductAndPromo/Product/columnTableCriteria";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import InputComponent from "../../../../../../../components/InputComponent";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const tempSearchText = value.toLowerCase();
@@ -631,6 +632,45 @@ const GasUtilizationTableInline = ({
 
         {/* Table */}
         <Form form={formTable} component={false}>
+          {/* TODO: Implementasikan table format baru */}
+          {/* <NxTable
+            idTable="gas-utilization-table-inline"
+            dataSource={filteredData("data")}
+            pageSize={10}
+            rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+            scroll={{
+              x: 800,
+              y: 300,
+            }}
+            components={{
+              body: {
+                cell: EditableCell,
+              },
+            }}
+            columns={filterColumn(
+              columns().map((col) => ({
+                ...col,
+                onCell: (record) => ({
+                  record,
+                  inputType: col.inputType,
+                  dataIndex: col.dataIndex,
+                  title: col.title,
+                  editing: isEditing(record),
+                  dependDataIndex: col.dependDataIndex,
+                  urlIndex: col.url,
+                  options: col.options,
+                  required: col.require,
+                  dataEditRecord: editDataRecord,
+                  handleEditDataRecord: handleEditDataRecord,
+                  dataTableGasUtilization:dataTableGasUtilization,
+                  rules: col.rules,
+                  totalPercentage:totalPercentage,
+                  formTable: formTable,
+                  validationError: validationError
+                }),
+              }))
+            )}
+          /> */}
           <Table
             dataSource={filteredData("data")}
             columns={filterColumn(
