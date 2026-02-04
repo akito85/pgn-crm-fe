@@ -1,8 +1,8 @@
 import InvoiceRelationDetailAttch from "./InvoiceRelationDetailAttch";
 import InvoiceRelationDetailInfo from "./InvoiceRelationDetailInfo";
-import { Tabs } from "antd";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import { useState } from "react";
+import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const InvoiceRelationDetailTabs = ({
   subjectAccountNumber,
@@ -41,15 +41,14 @@ const InvoiceRelationDetailTabs = ({
       header={"DETAIL INFORMATION"}
       type="tabs"
       element={
-        <Tabs
+        <NxTabs
           items={tabOptions}
           onChange={setActiveKey}
           activeKey={activeKey}
-          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-tab]:py-4 [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
         />
       }
       hideChildren
-      withoutTopPadding
+      withoutPadding
     >
     </NxCardContainer>
   );

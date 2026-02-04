@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
-import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
+import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
 const ConfirmationModal = ({
   form,
@@ -39,36 +39,40 @@ const ConfirmationModal = ({
   }, [isOpen])
 
   return (
-    <ModalCustom
+    <NxModal
       isOpen={isOpen}
       width={1000}
       header={"CONFIRMATION PAYMENT RELATION"}
       type={"confirmation"}
-      handleCancel={handleCancel}
       hidePadding={{
         top: true,
       }}
       footer={[
-        <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
-          {activeTab > 0 ? (
-            <ButtonComponent type={"default"} onClick={() => handleChangeTab("prev")}>
-              Previous
-            </ButtonComponent>
-          ) : (
-            <ButtonComponent type={"default"} onClick={handleCancel}>
-              Cancel
-            </ButtonComponent>
-          )}
-          {activeTab < (tabLength - 1)  && (
-            <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
-              Next
-            </ButtonComponent>
-          )}
-          {activeTab === (tabLength - 1) && (
-            <ButtonComponent type={"submit"} form={form} htmlType={"submit"} >
-              {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
-            </ButtonComponent>
-          )}
+        <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
+          <ButtonComponent type={"default"} onClick={() => handleCancel()}>
+            Cancel
+          </ButtonComponent>
+          <div className="flex gap-x-4">
+            {activeTab > 0 ? (
+              <ButtonComponent type={"default"} onClick={() => handleChangeTab("prev")}>
+                Previous
+              </ButtonComponent>
+            ) : (
+              <ButtonComponent type={"default"} onClick={handleCancel}>
+                Cancel
+              </ButtonComponent>
+            )}
+            {activeTab < (tabLength - 1)  && (
+              <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
+                Next
+              </ButtonComponent>
+            )}
+            {activeTab === (tabLength - 1) && (
+              <ButtonComponent type={"submit"} form={form} htmlType={"submit"} >
+                {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
+              </ButtonComponent>
+            )}
+          </div>
         </div>,
       ]}
     >
@@ -84,7 +88,7 @@ const ConfirmationModal = ({
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
-    </ModalCustom>
+    </NxModal>
   )
 }
 

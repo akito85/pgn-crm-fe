@@ -1,44 +1,34 @@
 import { memo, useEffect, useMemo, useRef } from "react";
-import { Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllInvoiceRelation, downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, getIrColumnApi, getIrConditionApi, getIrOperatorApi, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
-import ModalConfirmationApprovalInvoiceRelation from "./ModalConfirmationApprovalInvoiceRelation";
-import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
-import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
+import { downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
+import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 const InvoiceRelation = ({
   id = 0,
   idCustomer = 0,
-  isActive = false,
-  isApproval = false,
-  setIsApproval = () => {},
-  setShowApprovalButton = () => {},
-  submitApprovalCondition = "",
-  setSubmitApprovalCondition = () => {},
 }) => {
   const dispatch = useDispatch();
 
-  const financialInformationState = useSelector(
-    (state) => state.financialInformation,
-  )
-
   const {
     list_invoiceRelation,
+    pagination_invoiceRelation,
     data_irApprovalHistory,
     loading,
-    pagination_invoiceRelation
-  } = financialInformationState;
+  } = useSelector(
+    (state) => state.financialInformation
+  );
 
   //declare
   const searchInput = useRef(null);
 
   //state
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20)
-  const [listType, setListType] = useState("all");
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -54,25 +44,8 @@ const InvoiceRelation = ({
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [tempFilters, setTempFilters] = useState([]);
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys, newSelectedRows) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
-      if (!newSelectedRowKeys.length)
-        setShowApprovalButton(false);
-      else
-        setShowApprovalButton(true);
-    },
-    type: "checkbox",
-    preserveSelectedRowKeys: true,
-  }
-
   const currentData = useMemo(() => list_invoiceRelation, [list_invoiceRelation]);
-  
+
   const currentPagination = pagination_invoiceRelation;
   const hasMore = currentData.length < (currentPagination?.totalElements || 0);
 
@@ -85,55 +58,32 @@ const InvoiceRelation = ({
     }));
   }, [currentData]);
 
-  const handleCancelApprovalModal = () => {
-    setShowApprovalModal(false);
-    setSubmitApprovalCondition("");
-  }
+  const handleRefresh = () => {
+    const body = {
+      inputFields: tempFilters,
+    }
 
-  /**
-   * @param {string} description 
-   * @param {"approve"|"reject"} submitApprovalCondition 
-   * @param {() => {}} handleClear 
-   */
-  const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
-    const action = submitApprovalCondition.toUpperCase();
-
-    const body = selectedRows.filter(row => row.approvalType === "INVOICE_RELATION").map((row) => ({
-      id: row.id,
-      approvalId: row.tappId,
-      action,
-      description,
-    }));
-
-    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_INVOICE_RELATION").map((row) => ({
-      id: row.id,
-      approvalId: row.tappId,
-      action,
-      description,
-    }));
-
-    dispatch(approveOrRejectAllInvoiceRelation({ body, inactiveBody, action }))
-    .unwrap()
-    .then(() => {
-      handleClear();
-      handleIsApproval(false)
-
-      const body = {
-        inputFields: tempFilters,
-      }
-
-      dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body }));
-    })
-    .catch(() => {});
-  }
+    dispatch(
+      getInvoiceRelation({
+        id,
+        body,
+        page: 1,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  };
 
   /**
    * Open or close inactivate modal
-   * @param {boolean} show 
-   * @param {number} prId 
-   * @param {number} prAppHierId 
+   * @param {boolean} show
+   * @param {number} irId
+   * @param {number} irAppHierId
    */
-  const handleInactiveModal = (show, newIrId = 0, newIrAppHierId = 0, newIrAccountNumber) => {
+  const handleInactivateModal = (show, newIrId = 0, newIrAppHierId = 0, newIrAccountNumber = "") => {
     if (show) {
       setInactivateIrId(newIrId);
       setInactivateIrAppHierId(newIrAppHierId);
@@ -142,14 +92,14 @@ const InvoiceRelation = ({
     } else {
       setInactivateIrId(0);
       setInactivateIrAppHierId(0);
-      setInactivateIrAccountNumber("")
+      setInactivateIrAccountNumber("");
       setShowInactiveModal(false);
     }
   }
 
   /**
-   * @param {string} remark 
-   * @param {() => {}} handleClear 
+   * @param {string} remark
+   * @param {() => {}} handleClear
    */
   const handleInactivateIr = (remark, handleClear) => {
     const body = {
@@ -167,7 +117,7 @@ const InvoiceRelation = ({
         inputFields: tempFilters,
       }
 
-      dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body }));
+      dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body, isLoadMore: false }));
       setShowInactiveModal(false);
       handleClear();
     })
@@ -175,9 +125,9 @@ const InvoiceRelation = ({
   }
 
   /**
-   * @param {string[]} selectedKeys 
-   * @param {() => {}} confirm 
-   * @param {string} dataIndex 
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
    */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -193,18 +143,20 @@ const InvoiceRelation = ({
       };
     });
   };
-  
+
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
 
   /**
-   * @param {boolean} show 
-   * @param {number} prId 
+   * @param {boolean} show
+   * @param {number} irId
    */
   const handleApprovalHistoryModal = (show, irId = 0) => {
     if (show) {
@@ -215,37 +167,17 @@ const InvoiceRelation = ({
     }
   }
 
-  /**
-   * @param {boolean} newIsApproval 
-   */
-  const handleIsApproval = (newIsApproval) => {
-    if (newIsApproval) {
-      setPage(1);
-      setListType("approval");
-      setIsApproval(true);
-    } else {
-      setPage(1)
-      setListType("all");
-      setIsApproval(false);
-      setSelectedRowKeys([]);
-      setSelectedRows([]);
-      setSubmitApprovalCondition("");
-      setShowApprovalButton(false);
-      setShowApprovalModal(false);
-    }
-  }
-
   const handleDownload = () => {
     const body = {
       inputFields: tempFilters,
-    } 
+    }
 
     dispatch(downloadInvoiceRelation({ page, size: loadMoreSize, sort, searchs: search, body, id }));
   };
 
   /**
-   * @param {*} _ 
-   * @param {*} __ 
+   * @param {*} _
+   * @param {*} __
    * @param {import("antd/lib/table/interface").SorterResult} sort
    */
   const onSort = (_, __, sort) => {
@@ -267,11 +199,10 @@ const InvoiceRelation = ({
       await dispatch(
         getInvoiceRelation({
           id,
-          page,
+          page: nextPage,
           size: loadMoreSize,
           sort,
           searchs: JSON.stringify(search),
-          listType,
           body,
           isLoadMore: true,
         })
@@ -285,31 +216,8 @@ const InvoiceRelation = ({
       inputFields: tempFilters,
     }
 
-    dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), listType, body }));
-  }, [page, loadMoreSize, sort, search, tempFilters, listType]);
-
-  // Listen, pagination_invoiceRelation to approve or reject button on the parent component
-  useEffect(() => {
-    if (isActive) {
-      if (submitApprovalCondition === "approve") {
-        setShowApprovalModal(true);
-      } else if (submitApprovalCondition === "reject") {
-        setShowApprovalModal(true);
-      }
-    }
-  }, [submitApprovalCondition]);
-
-  // Reset accordian when it's not the current one that's opened
-  useEffect(() => {
-    if (!isActive)
-      handleIsApproval(false);
-  }, [isActive]);
-
-  useEffect(() => {
-    if (!isApproval) {
-      handleIsApproval(false);
-    }
-  }, [isApproval]);
+    dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body, isLoadMore: false }));
+  }, [sort, search, tempFilters]);
 
   useEffect(() => {
     if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
@@ -331,50 +239,47 @@ const InvoiceRelation = ({
   }, [data_irApprovalHistory]);
 
   return (
-    <Spin spinning={loading}>
+    <Fragment>
       <InvoiceRelationTable
         data={dataSourceWithKeys}
         idAccount={id}
         idCustomer={idCustomer}
-        totalElement={list_invoiceRelation.length}
+        totalElement={pagination_invoiceRelation.totalElements}
         page={page}
         onSort={onSort}
-        rowSelection={isApproval ? rowSelection : undefined}
-        isApproval={isApproval}
-        handleInactivateModal={handleInactiveModal}
+        handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
-        handleIsApproval={handleIsApproval}
+        handleApproval={setShowApprovalModal}
         handleDownload={handleDownload}
         tempFilters={tempFilters}
-        setIsApproval={setIsApproval}
         handleLoadMore={handleLoadMore}
         hasMore={hasMore}
         searchText={searchText}
         search={search}
+        searchedColumn={searchedColumn}
         searchInput={searchInput}
         handleSearch={handleSearch}
         loading={loading}
       />
 
-      <ModalConfirmationApprovalInvoiceRelation
-        dataSource={selectedRows}
+      <InvoiceRelationApprovalModal
+        id={id}
         isOpen={showApprovalModal}
-        setIsOpen={setShowApprovalModal}
-        handleCloseModal={handleCancelApprovalModal}
-        onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
+        handleCancel={() => setShowApprovalModal(false)}
+        afterFinish={handleRefresh}
       />
 
       {/* Inactivate Modal */}
-      <ModalApproveOrReject
+      <NxApproveOrRejectModal
         isOpen={showInactiveModal}
         header={"INACTIVATE"}
-        handleCloseModal={() => handleInactiveModal(false)}
+        handleCloseModal={() => handleInactivateModal(false)}
         customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
       />
 
       {/* Approval History Modal */}
-      <ModalHistory
+      <NxHistoryModal
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
@@ -383,7 +288,7 @@ const InvoiceRelation = ({
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
-    </Spin>
+    </Fragment>
   );
 };
 

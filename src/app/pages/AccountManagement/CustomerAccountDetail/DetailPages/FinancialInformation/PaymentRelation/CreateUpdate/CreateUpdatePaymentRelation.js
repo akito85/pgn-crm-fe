@@ -2,11 +2,9 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Form } from "antd";
-import { RightOutlined } from "@ant-design/icons";
+import { Form, Spin } from "antd";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumb from "../../../../../../../../components/BreadCrumb";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
@@ -23,7 +21,6 @@ import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import DetailText from "../../../../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
@@ -38,13 +35,14 @@ import {
 import { showModalError, validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
-import CardContainer from "../../../../../../../../components/CardContainer";
-import BaseContainer from "../../../../../../../../components/BaseContainer";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
+import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
+import { FormStepper } from "../../../../../../../../components/FormStepNavigation";
+import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 
-const CreatePaymentRelation = ({ type }) => {
+const CreateUpdatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -59,6 +57,7 @@ const CreatePaymentRelation = ({ type }) => {
   } = useSelector((state) => state.accountManagement);
 
   const {
+    loading,
     data_prApprovalHierarchy,
     detail_prApprovalHierarchy,
     detail_paymentRelation,
@@ -70,7 +69,7 @@ const CreatePaymentRelation = ({ type }) => {
   const [formCreate] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
-  const idPr = location?.state?.idPr;
+  const idPr = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
 
   //state
@@ -184,11 +183,15 @@ const CreatePaymentRelation = ({ type }) => {
     },
     {
       path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      breadcrumbName: "Payment Relation",
+      breadcrumbName: "Detail Account",
+      state: {
+        idAccount,
+        idCustomer,
+      }
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create" : (type === "update") ? "Update" : "",
+      breadcrumbName: (type === "create") ? "Create Payment Relation" : (type === "update") ? "Update Payment Relation" : "",
     },
   ];
 
@@ -491,17 +494,6 @@ const CreatePaymentRelation = ({ type }) => {
     await next();
     scrollRightHandler()
   }
-  
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -631,137 +623,121 @@ const CreatePaymentRelation = ({ type }) => {
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
         <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
-          <div className="flex flex-col gap-y-4">
-            <BaseContainer border header={"CUSTOMER INFORMATION"}>
-              <div className="w-full grid grid-cols-4 gap-x-5">
-                <DetailText label="Customer Number">{data_customerDetail?.customerNumber}</DetailText>
-                <DetailText label="Identification Type">{data_customerDetail?.identificationType}</DetailText>
-                <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</DetailText>
-                <DetailText label="Customer Name">{data_customerDetail?.customerName}</DetailText>
-                <DetailText label="Customer Type">{data_customerDetail?.customerType}</DetailText>
-                <DetailText label="Description">{data_customerDetail?.description}</DetailText>
-                <DetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate)}</DetailText>
-                <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</DetailText>
-                <DetailText label="Sex">{data_customerDetail?.sex}</DetailText>
-                <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</DetailText>
-                <DetailText label="Search Key">{data_customerDetail?.searchKey}</DetailText>
+          <div className="flex flex-col gap-4">
+            <NxBaseContainer border header={"CUSTOMER INFORMATION"}>
+              <div className="w-full grid grid-cols-4 gap-4">
+                <NxDetailText className="flex flex-col gap-y-2" label="Customer Number">{data_customerDetail?.customerNumber}</NxDetailText>
+                <NxDetailText label="Identification Type">{data_customerDetail?.identificationType}</NxDetailText>
+                <NxDetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</NxDetailText>
+                <NxDetailText label="Customer Name">{data_customerDetail?.customerName}</NxDetailText>
+                <NxDetailText label="Customer Type">{data_customerDetail?.customerType}</NxDetailText>
+                <NxDetailText label="Description">{data_customerDetail?.description}</NxDetailText>
+                <NxDetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate)}</NxDetailText>
+                <NxDetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</NxDetailText>
+                <NxDetailText label="Sex">{data_customerDetail?.sex}</NxDetailText>
+                <NxDetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</NxDetailText>
+                <NxDetailText label="Search Key">{data_customerDetail?.searchKey}</NxDetailText>
               </div>
-            </BaseContainer>
-            <BaseContainer border header={"ACCOUNT INFORMATION"}>
-              <div className="w-full grid grid-cols-4 gap-x-4">
-                <DetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</DetailText>
-                <DetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</DetailText>
-                <DetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</DetailText>
-                <DetailText label="Category">{data_accountDetail?.accountSummary?.category}</DetailText>
-                <DetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</DetailText>
-                <DetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</DetailText>
-                <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.accountSummary?.meterReadingCodes || "")}</DetailText>
-                <DetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</DetailText>
-                <DetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</DetailText>
-                <DetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</DetailText>
-                <DetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</DetailText>
-                <DetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</DetailText>
-                <DetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</DetailText>
-                <DetailText label="District">{data_accountDetail?.accountSummary?.district}</DetailText>
-                <DetailText label="City">{data_accountDetail?.accountSummary?.city}</DetailText>
-                <DetailText label="Country">{data_accountDetail?.accountSummary?.country}</DetailText>
-                <DetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</DetailText>
-                <DetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</DetailText>
-                <DetailText label="Status">{data_accountDetail?.accountSummary?.status}</DetailText>    
+            </NxBaseContainer>
+            <NxBaseContainer border header={"ACCOUNT INFORMATION"}>
+              <div className="w-full grid grid-cols-4 gap-4">
+                <NxDetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</NxDetailText>
+                <NxDetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</NxDetailText>
+                <NxDetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</NxDetailText>
+                <NxDetailText label="Category">{data_accountDetail?.accountSummary?.category}</NxDetailText>
+                <NxDetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</NxDetailText>
+                <NxDetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</NxDetailText>
+                <NxDetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.accountSummary?.meterReadingCodes || "")}</NxDetailText>
+                <NxDetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</NxDetailText>
+                <NxDetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</NxDetailText>
+                <NxDetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</NxDetailText>
+                <NxDetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</NxDetailText>
+                <NxDetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</NxDetailText>
+                <NxDetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</NxDetailText>
+                <NxDetailText label="District">{data_accountDetail?.accountSummary?.district}</NxDetailText>
+                <NxDetailText label="City">{data_accountDetail?.accountSummary?.city}</NxDetailText>
+                <NxDetailText label="Country">{data_accountDetail?.accountSummary?.country}</NxDetailText>
+                <NxDetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</NxDetailText>
+                <NxDetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</NxDetailText>
+                <NxDetailText label="Status">{data_accountDetail?.accountSummary?.status}</NxDetailText>
               </div>
-            </BaseContainer>
+            </NxBaseContainer>
           </div>
         </NxCardContainer>
 
-        <Form
-          id="paymentRelationForm"
-          form={formCreate}
-          layout={"vertical"}
-          onFinish={handleSubmitForm}
-          // onFinishFailed={handleErrorSubmit}
-          scrollToFirstError={true}
-          className="flex flex-col gap-y-4"
+        <Spin
+          spinning={loading}
         >
+          <Form
+            id="paymentRelationForm"
+            form={formCreate}
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            // onFinishFailed={handleErrorSubmit}
+            scrollToFirstError={true}
+            className="flex flex-col gap-y-4"
+          >
           {/* Step Contents */}
-          <NxBaseContainer border>
-            <div className="flex flex-row justify-center">
-              <div
-                onScroll={handleScroll}
-                ref={containerRef}
-                className="overflow-x-scroll scrollStepsCstm"
-              >
-                <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
-              </div>
-            </div>
-          </NxBaseContainer>
+          <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
           {steps.map((step) => step.content)}
 
           {/* Section Action Steps */}
-          <div className="steps-action flex w-full justify-between gap-x-2">
-            <ButtonComponent
-              type={"submit"}
-              icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{navigate(-1)}}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex w-full justify-end gap-x-4">
+          <NxBaseContainer border>
+            <div className="flex justify-between">
               <ButtonComponent
-                onClick={handleClear}
-                type={"submit"}
-                icon={<SVGIcon name="IconButtonClear" width={24} />}
+                type={"menu"}
+                onClick={()=>{navigate(-1)}}
               >
-                { type === "update" ? "Reset" : "Clear" }
+                Cancel
               </ButtonComponent>
-              {current > 0 && current !== (steps.length-1) && (
+              <div className="flex w-full justify-end gap-x-4">
+                <ButtonComponent
+                  onClick={handleClear}
+                  type={"reject"}
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
+                >
+                  { type === "update" ? "Reset" : "Clear" }
+                </ButtonComponent>
+                <ButtonComponent
+                  onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                  type={"secondary"}
+                  disabled={current !== steps.length - 1}
+                >
+                  Save as Draft
+                </ButtonComponent>
                 <ButtonComponent
                   onClick={() => {
                     prev();
                     scrollLeftHandler();
                   }}
-                  type={"submit"}
-                  icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                  type={"menu"}
+                  disabled={current < 1}
                 >
                   Previous
                 </ButtonComponent>
-              )}
-              {current < steps.length - 1 && (
-                <ButtonComponent
-                  onClick={handleButtonNext}
-                  type={"submit"}
-                  disabled={steps[current].disabled}
-                >
-                  <div className="flex gap-x-2 items-center">
-                    <span>Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </div>
-                </ButtonComponent>
-              )}
-              {current === steps.length - 1 && (
-                <>
+                {current < steps.length - 1 && (
                   <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                    onClick={handleButtonNext}
                     type={"submit"}
+                    disabled={steps[current].disabled}
                   >
-                    Save as Draft
+                    Next
                   </ButtonComponent>
-                  <ButtonComponent
-                    onClick={() => handleSetShowConfirmationModal(true, "submit")}
-                    type={"submit"}
-                  >
-                    Save & Submit
-                  </ButtonComponent>
-                </>
-              )}
+                )}
+                {current === steps.length - 1 && (
+                  <>
+                    <ButtonComponent
+                      onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                      type={"submit"}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          </NxBaseContainer>
           <ConfirmationModal
             form={"paymentRelationForm"}
             isOpen={showConfirmationModal}
@@ -782,11 +758,12 @@ const CreatePaymentRelation = ({ type }) => {
             data={formCreate.getFieldsValue()}
             service={accountManagementService}
             configApplication={configApp.ACCOUNT_SERVICE}
-          />
-        </Form>
+            />
+          </Form>
+        </Spin>
       </div>
     </LayoutMenu>
   );
 };
 
-export default CreatePaymentRelation;
+export default CreateUpdatePaymentRelation;

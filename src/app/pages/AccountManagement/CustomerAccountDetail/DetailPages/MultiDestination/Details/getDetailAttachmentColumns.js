@@ -1,6 +1,6 @@
 import { Tooltip } from "antd";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";
-import SVGIcon from "../../../../../../../../assets/Icon/index";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 const getDetailAttachmentColumns = (
   search,

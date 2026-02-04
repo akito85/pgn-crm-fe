@@ -1,26 +1,26 @@
 import { useRef, useState, useEffect, useMemo, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form } from "antd";
-import InputComponent from "../../../../../../../components/InputComponent";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import DetailText from "../../../../../../../components/DetailText";
-import NxTable from "../../../../../../../components/Nx/NxTable";
-import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
-import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
-import { showModalError } from "../../../../../../../redux/slices/general_slice";
-import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
-import NxModal from "../../../../../../../components/Nx/NxModal";
+import InputComponent from "../../../../../../components/InputComponent";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import DetailText from "../../../../../../components/DetailText";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import { getMultiDestinationApproval, approveOrRejectAllMultiDestination } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
+import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
+import { showModalError } from "../../../../../../redux/slices/general_slice";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import NxModal from "../../../../../../components/Nx/NxModal";
 
-const PaymentRelationApprovalModal = ({
+const MultiDestinationApprovalModal = ({
   id = 0,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading } = useSelector(
-    (state) => state.financialInformation
+  const { list_multiDestinationApproval, pagination_multiDestinationApproval, loading } = useSelector(
+    (state) => state.multiDestination
   );
 
   // Declaration
@@ -28,13 +28,13 @@ const PaymentRelationApprovalModal = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = list_paymentRelationApproval;
+  const dataSource = list_multiDestinationApproval;
 
   // State
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); 
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -47,7 +47,7 @@ const PaymentRelationApprovalModal = ({
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
-    right: [] 
+    right: []
   });
 
   // Initial fetch - Load data when modal opens
@@ -62,7 +62,7 @@ const PaymentRelationApprovalModal = ({
       }
 
       dispatch(
-        getPaymentRelationApproval({
+        getMultiDestinationApproval({
           id,
           body,
           isLoadMore: false,
@@ -91,7 +91,7 @@ const PaymentRelationApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_paymentRelationApproval?.totalPages || 0;
+    const totalPages = pagination_multiDestinationApproval?.totalPages || 0;
 
     // Check if there's more data to load
     if (nextPage <= totalPages) {
@@ -104,7 +104,7 @@ const PaymentRelationApprovalModal = ({
       }
 
       dispatch(
-        getPaymentRelationApproval({
+        getMultiDestinationApproval({
           id,
           body,
           isLoadMore: true,
@@ -115,7 +115,7 @@ const PaymentRelationApprovalModal = ({
   };
 
   const hasMore =
-    dataSource.length < (pagination_paymentRelationApproval?.totalElements || 0);
+    dataSource.length < (pagination_multiDestinationApproval?.totalElements || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -139,7 +139,7 @@ const PaymentRelationApprovalModal = ({
   // Step
   const steps = [
     {
-      title: "PAYMENT RELATION",
+      title: "MULTI DESTINATION",
     },
     {
       title: "CONFIRMATION",
@@ -162,7 +162,7 @@ const PaymentRelationApprovalModal = ({
             description: `Please select at least one record`,
           };
           dispatch(showModalError(errorBody));
-          
+
           throw new Error("No record was selected");
         } else {
           await form.validateFields([formFields[current]]);
@@ -172,7 +172,7 @@ const PaymentRelationApprovalModal = ({
         form.validateFields([formFields[current]])
       }
     } catch {
-      
+
     }
   };
 
@@ -228,19 +228,18 @@ const PaymentRelationApprovalModal = ({
     form.resetFields();
   };
 
-
   const handleSave = async (action) => {
     try {
       const values = await form.validateFields();
 
-      const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
+      const body = selectedRows.filter(row => row.approvalType === "MULTI_DESTINATION").map((row) => ({
         id: row.id,
         approvalId: row.tappId,
         action,
         description: values.remark,
       }));
 
-      const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
+      const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_MULTI_DESTINATION").map((row) => ({
         id: row.id,
         approvalId: row.tappId,
         action,
@@ -248,7 +247,7 @@ const PaymentRelationApprovalModal = ({
       }))
 
       dispatch(
-        approveOrRejectAllPaymentRelation({
+        approveOrRejectAllMultiDestination({
           body,
           inactiveBody,
           action: action === "APPROVE" ? "approved" : "rejected",
@@ -276,7 +275,7 @@ const PaymentRelationApprovalModal = ({
 
   const baseColumns = useMemo(
     () =>
-      getPaymentRelationColumns(
+      getMultiDestinationColumns(
         search,
         searchInput,
         searchedColumn,
@@ -318,7 +317,7 @@ const PaymentRelationApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Payment Relation Information"
+        header="Approval Multi Destination Information"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -391,7 +390,7 @@ const PaymentRelationApprovalModal = ({
         </NxBaseContainer>
 
         <div className="p-4">
-          {/* STEP 1: PAYMENT RELATION INFORMATION */}
+          {/* STEP 1: MULTI DESTINATION INFORMATION */}
           <div
             className={`steps-content ${current !== 0 ? "hidden" : ""}`}
           >
@@ -403,14 +402,14 @@ const PaymentRelationApprovalModal = ({
               <div className="w-full grid grid-cols-1 gap-x-4">
                 <NxBaseContainer
                   border
-                  header={"Payment Relation List - Ready to Approve"}
+                  header={"Multi Destination List - Ready to Approve"}
                 >
                   <NxTable
                     className={"[&_.ant-checkbox]:scale-90"}
                     dataSource={dataSourceWithKeys}
                     columns={processedColumns}
-                    totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                    tableScrolled={{ y: 400, x: "max-content" }}
+                    totalData={pagination_multiDestinationApproval?.totalElements || 0}
+                    tableScrolled={{ y: 400, x: dataSourceWithKeys.length ? "max-content" : 5000 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
@@ -457,8 +456,8 @@ const PaymentRelationApprovalModal = ({
                 <NxTable
                   dataSource={selectedRows}
                   columns={processedColumns}
-                  totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                  tableScrolled={{ y: 400, x: "max-content" }}
+                  totalData={pagination_multiDestinationApproval?.totalElements || 0}
+                  tableScrolled={{ y: 400, x: selectedRows.length ? "max-content" : 5000 }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}
@@ -479,4 +478,4 @@ const PaymentRelationApprovalModal = ({
   );
 };
 
-export default PaymentRelationApprovalModal;
+export default MultiDestinationApprovalModal;

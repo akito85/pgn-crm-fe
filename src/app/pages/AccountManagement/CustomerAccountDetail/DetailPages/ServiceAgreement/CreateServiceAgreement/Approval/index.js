@@ -1,10 +1,11 @@
-import React,{useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import TablePagination from '../../../../../../../../components/TablePagination'
 import { Form, Input, Select, Spin } from 'antd';
 import SelectComponent from '../../../../../../../../components/SelectComponent';
 import { FilterOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
+import NxCardContainer from '../../../../../../../../components/Nx/NxCardContainer';
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.employeeDetail
@@ -40,7 +41,7 @@ const Approval = ({
   dataDetailApproval,
   handleDetailApproval,
   setAppHierDataDetail,
-  appHierDataDetail=[],
+  appHierDataDetail = [],
   handleSaApprovalObj,
   saApprovalObj,
   loading,
@@ -87,18 +88,18 @@ const Approval = ({
   const dataSource = []
   for (let i = 0; i < 10; ++i) {
     dataSource.push({
-      key: i+1,
+      key: i + 1,
       hierarchy: "Submiter",
       position: "CM Bogor 1",
       dataDetail: [
         {
-          employee: `Karyawan ${i+1}`
+          employee: `Karyawan ${i + 1}`
         },
         {
-          employee: `Karyawan ${i+2}`
+          employee: `Karyawan ${i + 2}`
         },
         {
-          employee: `Karyawan ${i+3}`
+          employee: `Karyawan ${i + 3}`
         }
       ]
     });
@@ -212,57 +213,55 @@ const Approval = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-  
-  return (
-    <div>
-      <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">APPROVAL</h3></div>
-      <div className="w-full grid grid-cols-1 gap-2">
-        <div className="w-1/3">
-          <Form.Item
-            label={"Approval Hierarchy"}
-            name={"appHierId"}
-            getValueFromEvent={(e) =>handleSaApprovalObj(e, "appHierId")}
-            rules={[
-              {
-                message: "Please input your Approval Hierarchy",
-                required: true,
-              },
-            ]}
-            className='pb-6'
-          >
-            <SelectComponent onChange={(e)=>handleDetailApproval(e)}>
-              {dataApprovalList?.map((data, index) => (
-                <Select.Option key={index} value={data?.appHierId}>
-                  {data?.approvalName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-      </div>
 
-      {/* Table */}
-      <Spin spinning={loading}>
+  return (
+    <NxCardContainer header={"APPROVAL"}>
+      <div className="flex flex-col gap-y-4">
+        {/* APPROVAL HIERARCHY SELECTION */}
+            <Form.Item
+              className="no-margin-form w-1/3"
+              label={"Approval Hierarchy"}
+              name={"appHierId"}
+              getValueFromEvent={(e) => handleSaApprovalObj(e, "appHierId")}
+              rules={[
+                {
+                  message: "Please input your Approval Hierarchy",
+                  required: true,
+                },
+              ]}
+            >
+              <SelectComponent onChange={(e) => handleDetailApproval(e)}>
+                {dataApprovalList?.map((data, index) => (
+                  <Select.Option key={index} value={data?.appHierId}>
+                    {data?.approvalName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+
+        {/* APPROVAL DETAIL TABLE */}
         {isApprovalId && isApprovalId.appHierId !== undefined && (
-          <div className='py-3 mb-6'>
-            <TablePagination
-              useSelect={false}
-              usePagination={false}
-              dataSource={appHierDataDetail}
-              columns={columnApprovalData(
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
-              expandable={{
-                expandedRowRender,
-              }}
-            />
-          </div>
+            <Spin spinning={loading}>
+              <div>
+                <TablePagination
+                  useSelect={false}
+                  usePagination={false}
+                  dataSource={appHierDataDetail}
+                  columns={columnApprovalData(
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch
+                  )}
+                  expandable={{
+                    expandedRowRender,
+                  }}
+                />
+              </div>
+            </Spin>
         )}
-      </Spin>
-    </div>
+      </div>
+    </NxCardContainer>
   )
 }
 

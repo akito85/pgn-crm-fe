@@ -3,17 +3,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Form, Button, Input } from "antd";
 
 import InputComponent from "../../../../../../../../../../components/InputComponent";
-import ModalCustom from "../../../../../../../../../../components/Modal/ModalCustom";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
 
 import moment from "moment";
 import DateComponent from "../../../../../../../../../../components/DateComponent";
 import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
-import CardContainer from "../../../../../../../../../../components/CardContainer";
-import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../../../../../../../components/Nx/NxTable";
+import NxModal from "../../../../../../../../../../components/Nx/NxModal";
+import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
 
 export default function InfoPaymentRelation({
   accountId,
@@ -128,9 +128,12 @@ export default function InfoPaymentRelation({
   }, [allColumns]);
   
   const currentData = useMemo(() => list_prAccountStandard, [list_prAccountStandard]);
-  
-  const currentPagination = pagination_prAccountStandard;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+
+  const hasMore = currentData.length < (pagination_prAccountStandard?.totalElements || 0);
+
+  useEffect(() => {
+    console.log("hasMore", hasMore);
+  }, [hasMore])
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
@@ -260,7 +263,7 @@ export default function InfoPaymentRelation({
         </div>
       </NxCardContainer>
 
-      <ModalCustom
+      <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
@@ -273,22 +276,26 @@ export default function InfoPaymentRelation({
           </Button>,
         ]}
       >
-        <NxTable
-          idTable="payment-relation-account-standard"
-          dataSource={dataSourceWithKeys}
-          totalData={pagination_prAccountStandard.totalElements || 0}
-          current={page}
-          tableScrolled={{ y: 525, x: 3000 }}
-          onSort={onSort}
-          columns={allColumns}
-          usePagination={false}
-          useInfiniteScroll
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          loadMoreThreshold={20}
-          columnDefinitions={columnDefinitions}
-        />
-      </ModalCustom>
+        <div className="p-4">
+          <NxBaseContainer border>
+            <NxTable
+              idTable="payment-relation-account-standard"
+              dataSource={dataSourceWithKeys}
+              totalData={pagination_prAccountStandard.totalElements || 0}
+              current={page}
+              tableScrolled={{ y: 525, x: 3000 }}
+              onSort={onSort}
+              columns={allColumns}
+              usePagination={false}
+              useInfiniteScroll
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
+              columnDefinitions={columnDefinitions}
+            />
+          </NxBaseContainer>
+        </div>
+      </NxModal>
     </div>
   )
 }

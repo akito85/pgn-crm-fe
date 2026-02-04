@@ -7,6 +7,8 @@ import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentR
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
 import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
+import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 const PaymentRelation = ({
   id = 0,
@@ -152,7 +154,9 @@ const PaymentRelation = ({
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
 
@@ -280,7 +284,7 @@ const PaymentRelation = ({
       />
 
       {/* Inactivate Modal */}
-      <ModalApproveOrReject
+      <NxApproveOrRejectModal
         isOpen={showInactiveModal}
         header={"INACTIVATE"}
         handleCloseModal={() => handleInactivateModal(false)}
@@ -289,7 +293,7 @@ const PaymentRelation = ({
       />
 
       {/* Approval History Modal */}
-      <ModalHistory
+      <NxHistoryModal
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}

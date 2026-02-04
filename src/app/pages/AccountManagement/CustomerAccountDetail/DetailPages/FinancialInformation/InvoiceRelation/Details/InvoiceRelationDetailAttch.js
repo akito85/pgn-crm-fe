@@ -3,13 +3,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import axios from "axios";
 import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
-import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import { getBase64 } from "../../../../../../../../utils/getBase64";
+import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import { configApp } from "../../../../../../../../constants/configApp";
 import NxTable from "../../../../../../../../components/Nx/NxTable";
-import { getDetailAttachmentColumns } from "../../PaymentRelation/Details/getDetailAttachmentColumns";
+import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
 import { getInvoiceRelationAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useSelector } from "react-redux";
+import { nxApplyFixedColumns } from "../../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const InvoiceRelationDetailAttch = ({
   idIr = 0,
@@ -33,6 +34,11 @@ const InvoiceRelationDetailAttch = ({
   const [tempFilters, setTempFilters] = useState([]);
 
   const [loadingDownload, setLoadingDownload] = useState(false);
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
 
   const searchInput = useRef(null);
 
@@ -110,6 +116,10 @@ const InvoiceRelationDetailAttch = ({
     return columnsWithKeys;
   }, [baseColumns]);
 
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
@@ -170,12 +180,14 @@ const InvoiceRelationDetailAttch = ({
         current={page}
         tableScrolled={{ y: 400, x: "max-content" }}
         onSort={onSort}
-        columns={allColumns}
+        columns={processedColumns}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
         showAdvanceSearch={false}
