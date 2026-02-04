@@ -202,8 +202,6 @@ const PointOfSalesPageDetailPOS = ({
       ]);
     }
   }, [dispatch, amount, item, dataPriority, formCreate, type]);
-
-  console.log(data, "data");
   
   useEffect(() => {
     if (data_calculate) {

@@ -152,7 +152,7 @@ const PointOfSalesPage = ({
               <InputComponent placeholder="Enter Account Name" />
             </Form.Item>
 
-            {/* ✅ SOR dengan Hidden Field untuk disabled state */}
+            {/* ✅ SOR - Disabled jika ada default */}
             <div>
               <Form.Item
                 name="sor"
@@ -170,7 +170,6 @@ const PointOfSalesPage = ({
                   }))}
                 />
               </Form.Item>
-              {/* Hidden field agar value tetap terkirim saat disabled */}
               {!!defaultData?.sor && (
                 <Form.Item name="sor" hidden>
                   <Input />
@@ -179,6 +178,7 @@ const PointOfSalesPage = ({
             </div>
 
             {/* Row 2 */}
+            {/* ✅ Cost Center - Disabled hanya jika ada default dan tidak kosong */}
             <div>
               <Form.Item
                 name="costcenter"
@@ -195,7 +195,10 @@ const PointOfSalesPage = ({
                     }
                     onCostCenterChange(value);
                   }}
-                  disabled={!!defaultData?.costcenter}
+                  disabled={
+                    !!defaultData?.costcenter &&
+                    defaultData.costcenter.length > 0
+                  }
                   placeholder="Select Cost Center"
                   options={(data_cost_center_list || []).map((item) => ({
                     label: item?.name,
@@ -203,11 +206,12 @@ const PointOfSalesPage = ({
                   }))}
                 />
               </Form.Item>
-              {!!defaultData?.costcenter && (
-                <Form.Item name="costcenter" hidden>
-                  <Input />
-                </Form.Item>
-              )}
+              {!!defaultData?.costcenter &&
+                defaultData.costcenter.length > 0 && (
+                  <Form.Item name="costcenter" hidden>
+                    <Input />
+                  </Form.Item>
+                )}
             </div>
 
             <Form.Item
