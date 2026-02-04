@@ -4,14 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import ToolbarAccount from "../../../../ComponentAccount/ToolbarAccount";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
 import { dateFormatting } from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import { Link, useLocation } from "react-router-dom";
 import {
   ModalConfirm,
   ModalError,
@@ -20,6 +17,7 @@ import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/C
 import ProductDistributionDetail from "./ProductDistributionDetail";
 import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const columns = (
   page = 1,
@@ -231,7 +229,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDetail"
-                width={24}
+                width={20}
                 onClick={() => handleDetail(record)}
               />
             </div>
@@ -250,7 +248,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
           >
             <Tooltip title="Update">
               <div className="pt-1">
-                <SVGIcon name="IconEdit" width={24} />
+                <SVGIcon name="IconEdit" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -266,7 +264,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 onClick={() => handleDelete(record)}
               />
             </div>
@@ -336,37 +334,35 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   };
   return (
     <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        Product Distribution History List
-      </div>
-
-      <NxTable
-        idTable="table-product-distribution-history"
-        dataSource={dataSource}
-        totalData={data?.page?.totalElements}
-        current={page}
-        tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
-        onSort={onSort}
-          columns={[
-          ...columns(
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDetail,
-            handleDelete
-          ),
-          ...useColumnActionPermissionAccount(
-            ["View", "Update", "Delete"],
-            itemGrantAccess,
-            access_account
-          ),
-        ]}
-        usePagination={false}
-        useInfiniteScroll={true}
-      />
+      <NxBaseContainer border header={"PRODUCT DISTRIBUTION HISTORY LIST"}>
+        <NxTable
+          idTable="table-product-distribution-history"
+          dataSource={dataSource}
+          totalData={data?.page?.totalElements}
+          current={page}
+          tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
+          onSort={onSort}
+            columns={[
+            ...columns(
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handleDetail,
+              handleDelete
+            ),
+            ...useColumnActionPermissionAccount(
+              ["View", "Update", "Delete"],
+              itemGrantAccess,
+              access_account
+            ),
+          ]}
+          usePagination={false}
+          useInfiniteScroll={true}
+        />
+      </NxBaseContainer>
 
       {/* Modal Detail */}
       <ProductDistributionDetail
