@@ -6,12 +6,12 @@ import SVGIcon from "../../assets/Icon/index";
 
 export const FormStepper = ({ steps, current, onPrev, onNext }) => {
     return (
-        <div className="bg-white rounded-lg border border-[#D6E1F0] p-6 mb-6">
+        <div className="bg-white rounded-lg border border-[#D6E1F0] p-3 mb-4">
             <div className="flex flex-row items-center justify-between w-full">
                 <div
                     style={{
-                        width: "36px",
-                        height: "36px",
+                        width: "28px",
+                        height: "28px",
                         borderRadius: "50%",
                         backgroundColor: current > 0 ? "transparent" : "#E0E0E0",
                         border: current > 0 ? "1px solid #0075BF" : "none",
@@ -22,21 +22,22 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
                     }}
                     onClick={() => current > 0 && onPrev && onPrev()}
                 >
-                    <LeftOutlined style={{ fontSize: "14px", color: current > 0 ? "#0075BF" : "#BDBDBD" }} />
+                    <LeftOutlined style={{ fontSize: "12px", color: current > 0 ? "#0075BF" : "#BDBDBD" }} />
                 </div>
-                <div className="flex-1 px-10">
+                <div className="flex-1 px-4">
                     <Row justify="center">
-                        <Col xs={24} md={18} lg={16}>
+                        <Col xs={24} md={20} lg={18}>
                             <Steps
                                 current={current}
                                 labelPlacement="vertical"
+                                size="small"
                                 items={steps.map((s, i) => ({
-                                    title: s.title,
+                                    title: <span style={{ whiteSpace: "nowrap", fontSize: "12px" }}>{s.title}</span>,
                                     icon: (
                                         <div
                                             style={{
-                                                width: 30,
-                                                height: 30,
+                                                width: 24,
+                                                height: 24,
                                                 borderRadius: "50%",
                                                 background: i <= current ? "#0075BF" : "#9E9E9E",
                                                 color: "white",
@@ -44,7 +45,7 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
                                                 alignItems: "center",
                                                 justifyContent: "center",
                                                 fontWeight: 600,
-                                                fontSize: "12px",
+                                                fontSize: "11px",
                                                 zIndex: 2,
                                                 position: "relative",
                                             }}
@@ -59,8 +60,8 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
                 </div>
                 <div
                     style={{
-                        width: "36px",
-                        height: "36px",
+                        width: "28px",
+                        height: "28px",
                         borderRadius: "50%",
                         backgroundColor: current < steps.length - 1 ? "transparent" : "#E0E0E0",
                         border: current < steps.length - 1 ? "1px solid #0075BF" : "none",
@@ -71,7 +72,7 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
                     }}
                     onClick={() => current < steps.length - 1 && onNext && onNext()}
                 >
-                    <RightOutlined style={{ fontSize: "14px", color: current < steps.length - 1 ? "#0075BF" : "#BDBDBD" }} />
+                    <RightOutlined style={{ fontSize: "12px", color: current < steps.length - 1 ? "#0075BF" : "#BDBDBD" }} />
                 </div>
             </div>
         </div>
@@ -87,6 +88,7 @@ export const FormFooter = ({
     onClear,
     onSaveDraft,
     type,
+    onSubmit,
 }) => {
     return (
         <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
@@ -167,7 +169,8 @@ export const FormFooter = ({
                     ) : (
                         <Button
                             key="btn-submit"
-                            htmlType="submit"
+                            htmlType="button"
+                            onClick={onSubmit}
                             type="primary"
                             style={{
                                 backgroundColor: "#388E3C",

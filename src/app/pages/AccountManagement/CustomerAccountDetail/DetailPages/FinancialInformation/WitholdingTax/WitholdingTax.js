@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef, memo } from "react";
 import { FilterOutlined } from "@ant-design/icons";
 import { DatePicker, Form, Input, Spin, Switch } from "antd";
 import { useState } from "react";
@@ -509,4 +509,4 @@ const WitholdingTax = ({access, id = 0 }) => {
   );
 };
 
-export default WitholdingTax;
+export default memo(WitholdingTax);

@@ -2,13 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin, Form } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import RadioTabs from "../../../../components/RadioTabs";
-import ButtonComponent from "../../../../components/ButtonComponent";
+import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
 import SVGIcon from "../../../../assets/Icon/index";
 import AdjustmentBillingSectionForm from "./Form/AdjustmentBillingSectionForm";
 import {
@@ -62,10 +60,10 @@ const AdjustmentBillingForm = ({ type }) => {
   const [billingPeriodId, setBillingPeriodId] = useState();
   const [flag, setFlag] = useState(1);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
-  const [valuePage, setValuePage] = useState("Adjustment Billing");
-  const [tabPages, setTabPages] = useState([
+  const [currentStep, setCurrentStep] = useState(0);
+  const steps = [
     {
-      value: "Adjustment Billing",
+      title: "Adjustment Billing",
       paramValue: [
         "accountNumber",
         "adjustmentType",
@@ -85,9 +83,9 @@ const AdjustmentBillingForm = ({ type }) => {
         "remark",
       ],
     },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
+    { title: "Approval", paramValue: ["apphierId"] },
+    { title: "Attachment" },
+  ];
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -262,9 +260,13 @@ const AdjustmentBillingForm = ({ type }) => {
     },
   ];
 
-  // Handle Change Radio Tabs
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  // Handle Step Navigation
+  const handlePrevStep = () => {
+    setCurrentStep((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextStep = () => {
+    setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
   };
 
   // Handle Clear
@@ -303,47 +305,21 @@ const AdjustmentBillingForm = ({ type }) => {
   const handleSave = (formValue) => {
     let errorBody = {};
     if (listDataAttachment.length === 0) {
-      handleMandatory(setTabPages, listDataAttachment);
-    } else {
-      handleMandatory(setTabPages, listDataAttachment);
+      setCurrentStep(2); // Go to Attachment step
+      return;
+    }
 
-      if (listDataABI.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: "Adjustment Billing Item Mandatory. Please insert data.",
-        };
-        dispatch(showModalError(errorBody));
-      } else {
-        setBodyData({
-          ...formValue,
-        });
-        setModalConfirm(true);
-        setTabPages([
-          {
-            value: "Adjustment Billing",
-            paramValue: [
-              "accountNumber",
-              "adjustmentType",
-              "classificationAdjustment",
-              "postInvoice",
-              "onDemand",
-              "billingCycle",
-              "billingPeriod",
-              "referenceInvoiceNumber",
-              "currency",
-              "documentDate",
-              "transactionDate",
-              "accountingDate",
-              "adjustmentReason",
-              "rateType",
-              "rateDate",
-              "remark",
-            ],
-          },
-          { value: "Approval", paramValue: ["apphierId"] },
-          { value: "Attachment" },
-        ]);
-      }
+    if (listDataABI.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: "Adjustment Billing Item Mandatory. Please insert data.",
+      };
+      dispatch(showModalError(errorBody));
+    } else {
+      setBodyData({
+        ...formValue,
+      });
+      setModalConfirm(true);
     }
   };
 
@@ -519,48 +495,32 @@ const AdjustmentBillingForm = ({ type }) => {
     }
   };
 
-  const handleMandatory = (
-    setListSectionInfo = () => {},
-    listDataAttachment,
-    errorFields
-  ) => {
-    setListSectionInfo((prevState) => {
-      const res = prevState.map((item) => {
-        const errorBadge =
-          item.value !== "Attachment"
-            ? (errorFields || []).reduce(
-                (current, next) =>
-                  item.paramValue.includes(next.name[0])
-                    ? current + 1
-                    : current,
-                0
-              )
-            : listDataAttachment.length < 1
-            ? 1
-            : 0;
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
-  };
-
-  // Handle Error Tab Form
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    handleMandatory(setTabPages, listDataAttachment, errorFields);
+  // Handle Error Tab Form - navigate to first step with error
+  const handleError = ({ errorFields }) => {
+    if (errorFields && errorFields.length > 0) {
+      // Find which step has the first error
+      for (let i = 0; i < steps.length; i++) {
+        const stepParamValues = steps[i].paramValue || [];
+        const hasError = errorFields.some((field) =>
+          stepParamValues.includes(field.name[0])
+        );
+        if (hasError) {
+          setCurrentStep(i);
+          break;
+        }
+      }
+    }
   };
 
   return (
     <LayoutMenu>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={tabPages}
-          onChange={onChange}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={steps}
+          current={currentStep}
+          onPrev={handlePrevStep}
+          onNext={handleNextStep}
         />
 
         <Form
@@ -569,9 +529,7 @@ const AdjustmentBillingForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          <div
-            className={`${valuePage !== "Adjustment Billing" ? "hidden" : ""}`}
-          >
+          <div className={`${currentStep !== 0 ? "hidden" : ""}`}>
             <AdjustmentBillingSectionForm
               type={type}
               form={form}
@@ -598,7 +556,7 @@ const AdjustmentBillingForm = ({ type }) => {
             />
           </div>
 
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
+          <div className={`${currentStep !== 1 ? "hidden" : ""}`}>
             <CardContainer subHeader={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
@@ -610,7 +568,7 @@ const AdjustmentBillingForm = ({ type }) => {
             </CardContainer>
           </div>
 
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
+          <div className={`${currentStep !== 2 ? "hidden" : ""}`}>
             <CardContainer subHeader={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
@@ -628,52 +586,23 @@ const AdjustmentBillingForm = ({ type }) => {
             </CardContainer>
           </div>
 
-          <div className="mt-[10px] flex">
-            <ButtonComponent type={"submit"} onClick={() => setModalBack(true)}>
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-1"}>
-              <Form.Item>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={20}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(1)}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(2)}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+          <FormFooter
+            current={currentStep}
+            totalSteps={steps.length}
+            onPrev={handlePrevStep}
+            onNext={handleNextStep}
+            onCancel={() => setModalBack(true)}
+            onClear={handleClear}
+            onSaveDraft={() => {
+              setFlag(1);
+              form.submit();
+            }}
+            type={type}
+            onSubmit={() => {
+              setFlag(2);
+              form.submit();
+            }}
+          />
         </Form>
 
         {/* Modal Confirmation */}

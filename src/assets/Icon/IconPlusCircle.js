@@ -7,16 +7,16 @@ const IconPlusCircle = ({
     stroke = "#0075BF",
     strokeWidth = "1.75",
     fill = "none",
-    ...props
+    ...otherProps
 }) => {
     return (
         <svg
+            {...otherProps}
             width={width}
             height={height}
             viewBox="0 0 24 24"
             fill={fill}
             xmlns="http://www.w3.org/2000/svg"
-            {...props}
         >
             <circle
                 cx="12"

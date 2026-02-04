@@ -1,17 +1,13 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import { Form, Spin, Steps } from "antd";
+import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { useState } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import PointOfSalesPage from "./Page/PointOfSalesPage";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import {
-  LeftOutlined,
-  WarningOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -51,10 +47,14 @@ import {
   ModalError,
 } from "../../../../../components/Modal/ModalPopUp";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import { handleMandatory, isDateString, renderDate } from "../Utils";
+import { handleMandatory, isDateString } from "../Utils";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import BaseContainer from "../../../../../components/BaseContainer";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../components/FormStepNavigation";
 
 const PosForm = ({ type }) => {
   const {
@@ -74,7 +74,6 @@ const PosForm = ({ type }) => {
     loading,
     loadingAccount,
     data_rate_tax,
-    data_materai,
     data_account_segment,
     data_account_group_type,
     data_meter_reading_code,
@@ -84,24 +83,19 @@ const PosForm = ({ type }) => {
     data_uom_codes,
   } = useSelector((state) => state.pointOfSales);
 
-  //declare
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const [form] = Form.useForm();
+
   const idUpdate = type === "create" ? undefined : location?.state?.id;
   const idPos = type === "create" ? undefined : location?.state?.idPos;
   const customerTypeFromNav = location?.state?.customerType;
+
   const [customerType, setCustomerType] = useState(customerTypeFromNav || null);
-  const getCustomerTypeNumber = (type) => {
-    return type === "prospective" ? 2 : 1;
-  };
   const [defaultData, setDefaultData] = useState({});
   const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
-
-  //state
-  const containerRef = useRef(null);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [current, setCurrent] = useState(0);
   const [data, setData] = useState([]);
   const [dataDynamic, setDataDynamic] = useState({});
   const [dataApproval, setDataApproval] = useState([]);
@@ -114,71 +108,17 @@ const PosForm = ({ type }) => {
   const [dataSend, setDataSend] = useState({});
   const [accountNumber, setAccountNumber] = useState("");
   const [dataAccount, setDataAccount] = useState();
-  const [valueDdl, setValueDdl] = useState({
-    action: "changes",
-    value: null,
-  });
+  const [valueDdl, setValueDdl] = useState({ action: "changes", value: null });
   const [ddlFinal, setDdlFinal] = useState("");
-
   const [modalBack, setModalBack] = useState(false);
   const [typeSubmit, setTypeSubmit] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [modalDailyRate, setModalDailyRate] = useState(false);
   const [bodyError, setBodyError] = useState({});
-
-  // state approval
   const [dataApprovalId, setDataApprovalId] = useState();
   const [invoiceDate, setInvoiceDate] = useState();
   const [dataMissing, setDataMissing] = useState([]);
   const [dataPriority, setDataPriority] = useState([]);
-
-  const handleAccountSegmentChange = (selectedSegmentId) => {
-    form.resetFields(["accountGroupType"]);
-    setIsAccountSegmentFilled(!!selectedSegmentId);
-
-    if (selectedSegmentId) {
-      dispatch(getAccountGroupTypeList([selectedSegmentId]));
-    }
-  };
-
-  const handleMeterReadingCodeChange = (selectedMrcIds) => {};
-
-  const steps = [
-    { title: "POINT OF SALES" },
-    { title: "APPROVAL" },
-    { title: "ATTACHMENT" },
-  ];
-
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
-  // Scroll handlers
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Navigation handlers
-  const next = () => {
-    setCurrentStep(currentStep + 1);
-    scrollRightHandler();
-  };
-
-  const prev = () => {
-    setCurrentStep(currentStep - 1);
-    scrollLeftHandler();
-  };
-
-  //state dynamic
   const [dataBillingCycle, setDataBillingCycle] = useState();
   const [currency, setCurrency] = useState();
   const [dataTabs, setDataTabs] = useState([
@@ -199,589 +139,69 @@ const PosForm = ({ type }) => {
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
-
-  const [tabHeader, setTabHeader] = useState(dataTabs[0].value);
+  const [valuePage, setValuePage] = useState("Point of Sales");
   const [rangeDisableDate, setRangeDisableDate] = useState({});
 
-  useEffect(() => {
-    if (type === "create") {
-      dispatch(getUserDetailForPOS());
-      dispatch(getSorList());
-      dispatch(getCostCenterList());
-      dispatch(getAccountSegmentList());
-    }
-  }, [dispatch, type]);
+  const getCustomerTypeNumber = (type) => {
+    return type === "prospective" ? 2 : 1;
+  };
 
-  useEffect(() => {
-    if (
-      type === "create" &&
-      customerType === "prospective" &&
-      data_user_detail
-    ) {
-      const defaultSor = data_user_detail?.sorId || null;
-      const defaultCostCenter = data_user_detail?.ccId || null;
+  const getCustomerTypeString = (typeNumber) => {
+    return typeNumber === 2 ? "prospective" : "customer";
+  };
 
-      const tempDefaultData = {
-        sor: defaultSor,
-        costCenter:
-          defaultCostCenter && defaultCostCenter !== null
-            ? typeof defaultCostCenter === "number"
-              ? [defaultCostCenter]
-              : defaultCostCenter
-            : [],
-      };
+  const steps = [
+    { title: "POINT OF SALES", value: "Point of Sales" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
 
-      setDefaultData(tempDefaultData);
-
-      form.setFieldsValue({
-        sor: defaultSor,
-        costCenter: tempDefaultData.costCenter,
-      });
-
-      if (tempDefaultData.costCenter && tempDefaultData.costCenter.length > 0) {
-        const body = {
-          ccIds: tempDefaultData.costCenter.map((id) => ({ ccId: id })),
-        };
-        dispatch(getMeterReadingCodeList(body));
-      }
-    }
-  }, [type, customerType, data_user_detail, form, dispatch]);
-
-  useEffect(() => {
-    let dataMrc = data_meter_reading_code?.reduce(
-      (result, current) => result?.concat(current?.dtoList),
-      [],
-    );
-    setMergedArrayMrc(dataMrc);
-  }, [data_meter_reading_code]);
-
-  //useEffect
-  useEffect(() => {
-    if (data_rate === null || data_rate?.success === false) {
-      setInvoiceDate(null);
-      form.resetFields(["invoiceDate"]);
-      setModalDailyRate(true);
-    } else {
-      setModalDailyRate(false);
-    }
-  }, [data_rate]);
-
-  useEffect(() => {
-    if (data && invoiceDate && currency && data.length < 1) {
-      // console.log(`invoice date ${moment(invoiceDate).format(dateFormatting.dateFormal)} currency ${currency}}`)
-      dispatch(
-        getRateTax({
-          invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
-          currency,
-        }),
-      );
-      dispatch(
-        getRate({
-          invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
-          currency,
-        }),
-      );
-    }
-  }, [dispatch, invoiceDate, currency]);
-
-  useEffect(() => {
-    dispatch(getGlobalType());
-    dispatch(getGlobalBillingCycle());
-    dispatch(getGlobalCurrency());
-    dispatch(getApprovalList());
-    dispatch(getGlobalTermsOfPayment());
-    dispatch(getGlobalAccountNumber());
-    // dispatch(getGlobalTermsOfPaymentData());
-    dispatch(getGlobalProductItem());
-    dispatch(getGlobalBillingItem());
-    dispatch(getUomCodes());
-    // setDataApproval([]);
-  }, [dispatch]);
-
-  useEffect(() => {
-    const newData = [
-      {
-        name: "Account Number",
-        data: accountNumber,
-      },
-      {
-        name: "Currency",
-        data: currency,
-      },
-      {
-        name: "Invoice Date",
-        data: invoiceDate,
-      },
-    ];
-
-    // Filter out data with undefined or empty values
-    const missingData = newData.filter((data) => !data.data);
-
-    // Set the state
-    setDataMissing(missingData);
-    setDataPriority(newData);
-  }, [currency, accountNumber, invoiceDate]);
-
-  useEffect(() => {
-    if (type === "update") {
-      //code
-      dispatch(getDetailPOS(idUpdate));
-    } else {
-      setDataDynamic({
-        totalAmountIdr: 0,
-        totalAmountUsd: 0,
-        amountIdr: 0,
-        amountUsd: 0,
-        discountAmountIdr: 0,
-        discountAmountUsd: 0,
-        // taxBasis: 0, // TODO delete
-        taxBasisIdr: 0, //new
-        taxBasisUsd: 0, //new
-        taxBasisEqvIdr: 0,
-        // vat: 0, //TODO delete
-        vatIdr: 0, //new
-        vatUsd: 0, //new
-        vatEqvIdr: 0,
-        withholdingTax: 0,
-      });
-    }
-  }, [dispatch, type]);
-
-  useEffect(() => {
-    if (customerType === "customer" && hasValue(accountNumber)) {
-      const getAccountId = data_globalAccountNumber?.find(
-        (item) => item?.accountNumber === accountNumber,
-      )?.accountId;
-
-      if (getAccountId) {
-        dispatch(getGlobalTermsOfPaymentData(getAccountId));
-      }
-    } else if (customerType === "prospective") {
-      dispatch(getGlobalTermsOfPaymentData(null));
-    }
-  }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
-
-  const handleSetFormUpdate = useCallback(
-    (data_detailPos, data_globalCurrency) => {
-      form.setFieldsValue({
-        // termType: {
-        //   termValueDdl: isDateString(data_detailPos?.termsOfPayment)
-        //     ? "DATE"
-        //     : "TOP",
-        // },
-        ...data_detailPos,
-        currency: data_globalCurrency?.find(
-          (item) => item.text === data_detailPos?.currency,
-        )?.Id,
-        apphierId: data_detailPos?.appHierId,
-        transactionDate: moment(data_detailPos?.transactionDate),
-        invoiceDate: moment(data_detailPos?.invoiceDate),
-        costCenter: data_detailPos?.costCenter,
-        // termType: {
-        //   termValue: isDateString(data_detailPos?.termsOfPayment)
-        //     ? moment(data_detailPos?.termsOfPayment || "")
-        //     : data_detailPos?.termsOfPayment,
-        // },
-      });
+  const routes = [
+    { path: "", breadcrumbName: "Rating & Billing" },
+    { path: RBI_ROUTES.POS_VIEW, breadcrumbName: "Point of Sales" },
+    {
+      path: "",
+      breadcrumbName: `${type === "create" ? "Create" : "Update"} Point of Sales`,
     },
-    [form],
-  );
+  ];
 
-  useEffect(() => {
-    if (
-      type === "update" &&
-      data_detailPos &&
-      data_detailPos.id === idUpdate &&
-      data_globalProduct &&
-      data_globalCurrency &&
-      data_globalBillingCycle
-    ) {
-      setValueDdl({
-        action: "setData",
-        value: isDateString(data_detailPos?.termsOfPayment) ? "DATE" : "TOP",
-      });
-      setDataApprovalId(data_detailPos?.appHierId);
-      handleSetFormUpdate(data_detailPos, data_globalCurrency);
-      setCurrency(
-        data_globalCurrency?.find(
-          (item) => item.text === data_detailPos?.currency,
-        )?.Id,
-      );
-      setAccountNumber(data_detailPos?.accountNumber);
-      setInvoiceDate(
-        moment(data_detailPos?.invoiceDate),
-        // .format(dateFormatting.dateFormal)
-      );
-      setDataBillingCycle(
-        data_globalBillingCycle?.find(
-          (item) => item.name === data_detailPos?.billingCycle,
-        )?.id,
-      );
-      setDataDynamic({
-        ...dataDynamic,
-        rateType: data_detailPos.rateType || "",
-        rate: data_detailPos.rate || "",
-        rateDate: data_detailPos.taxRateDate || "",
-        // rateValue: data_detailPos.rateValue,
-        taxRate: data_detailPos.taxRateValue || "",
-        taxRateDate: data_detailPos.taxRateDate || "",
-        taxRateType: data_detailPos.taxRateType || "",
-      });
-      setData(
-        data_detailPos?.mrbiPosDetails?.map((item, index) => {
-          let temp = {
-            ...item,
-            // referenceName: item.referenceName,
-            // referenceId: item?.reference,
-            price: item?.price || 0,
-            amount: item?.amount || 0,
-            amountEqvUsd: Number(item?.amountEqvUsd.toFixed(2)) || 0,
-            amountEqvIdr: item?.amountEqvIdr || 0,
-            eqvIdr: item?.eqvIdr || 0,
-            totalEqvIdr: item?.totalEqvIdr || 0,
-            totalEqvUsd: Number(item?.totalEqvUsd.toFixed(2)) || 0,
-            // lineNumber: index + 1,
-          };
-          // if (
-          //   item?.item === "PPN" &&
-          //   item?.item === "PPH" &&
-          //   item?.item === "Meterai" &&
-          //   item?.item === null || undefined
-          // ) {
-          //   temp = {
-          //     ...temp,
-          //     dataType: "exist",
-          //   };
-          // }
-          return temp;
-        }),
-      );
-      setDataAttachment(
-        (data_detailPos?.mattachments || []).map((item) => ({
-          ...item,
-          dataType: "exist",
-        })),
-      );
-    }
-  }, [
-    data_detailPos,
-    data_globalProduct,
-    type,
-    data_globalCurrency,
-    data_globalBillingCycle,
-    handleSetFormUpdate,
-  ]);
-
-  useEffect(() => {
-    if (data_rate && data_rate_tax) {
-      setDataDynamic({
-        ...dataDynamic,
-        rateType: data_rate?.rateType,
-        rate: data_rate?.rate,
-        rateDate: data_rate.rateDate
-          ? moment(data_rate?.rateDate).format(dateFormatting.date)
-          : "",
-        // rateValue: data_rate?.rateValue,
-        taxRateType: data_rate_tax?.rateType,
-        taxRate: data_rate_tax?.rate,
-        taxRateDate: data_rate_tax?.rateDate
-          ? moment(data_rate?.rateDate).format(dateFormatting.date)
-          : "",
-      });
-    }
-  }, [data_rate, data_rate_tax]);
-
-  // console.log(data, "data");
-
-  //calculating POS info
-  useEffect(() => {
-    if (data) {
-      let dataMaterai =
-        data.filter(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
-        )[0] || {};
-      const newDataDynamic = data
-        .filter(
-          (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297,
-        )
-        .reduce(
-          (sums, item) => {
-            let tempSum = { ...sums };
-            if (
-              /* yang punya tax ( dari product )*/
-              item.typeId === 2144 &&
-              data.some(
-                (dataItem) => dataItem.reference === parseInt(item.itemId),
-              )
-            ) {
-              // tempSum.taxBasis += item.total || 0;
-              tempSum.taxBasisEqvIdr += item.eqvIdr || 0;
-              if (item.currency === "USD") {
-                tempSum.taxBasisUsd += item.total || 0;
-              } else if (item.currency === "IDR") {
-                tempSum.taxBasisIdr += item.total || 0;
-              }
-            }
-            if (
-              item.typeId === 2342 ||
-              item?.typeValueName?.toLowerCase()?.includes("ppn")
-            ) {
-              /* Tax PPN saja type Id*/
-              // tempSum.vat += item.total || 0;
-              tempSum.vatEqvIdr += item.eqvIdr || 0;
-              if (item.currency === "USD") {
-                tempSum.vatUsd += item.total || 0;
-              } else if (item.currency === "IDR") {
-                tempSum.vatIdr += item.total || 0;
-              }
-            }
-            if (
-              item.typeId === 2343 ||
-              item?.typeValueName?.toLowerCase()?.includes("pph")
-            ) {
-              /*tax pph saja*/
-              tempSum.withholdingTax += item.totalEqvIdr || 0;
-            }
-            //All others by currency
-            // console.log(typeof item.total ,"type data total")
-            // console.log(item, "item")
-            if (item.currency === "USD") {
-              tempSum.totalAmountUsd +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.total || 0
-                  : 0;
-              tempSum.amountUsd +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.amount || 0
-                  : 0;
-              tempSum.discountAmountUsd += item.discount || 0;
-              //new Vat USD , tax basis USD
-            } else if (item.currency === "IDR") {
-              tempSum.totalAmountIdr +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.total || 0
-                  : 0;
-              tempSum.amountIdr +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.amount || 0
-                  : 0;
-              tempSum.discountAmountIdr += item.discount || 0;
-              //new Vat IDR , tax basis IDR
-            }
-            //netral ( except pph )
-            tempSum.totalEqvIdr +=
-              item.typeId !== 2343 ||
-              !item?.typeValueName?.toLowerCase()?.includes("pph")
-                ? item.totalEqvIdr || 0
-                : 0;
-            tempSum.totalEqvUsd +=
-              item.typeId !== 2343 ||
-              !item?.typeValueName?.toLowerCase()?.includes("pph")
-                ? item.totalEqvUsd || 0
-                : 0;
-            return tempSum;
-          },
-          {
-            totalAmountIdr: 0,
-            totalAmountUsd: 0,
-            amountIdr: 0,
-            amountUsd: 0,
-            discountAmountIdr: 0,
-            discountAmountUsd: 0,
-            // taxBasis: 0, // TODO delete
-            taxBasisIdr: 0, //new
-            taxBasisUsd: 0, //new
-            taxBasisEqvIdr: 0,
-            // vat: 0, //TODO delete
-            vatIdr: 0, //new
-            vatUsd: 0, //new
-            vatEqvIdr: 0,
-            withholdingTax: 0,
-            totalEqvIdr: 0, //for materai
-            totalEqvUsd: 0,
-          },
-        );
-      if (
-        newDataDynamic.totalEqvIdr >= 5000000 &&
-        !data.some(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
-        )
-      ) {
-        // console.log(newDataDynamic.totalEqvIdr, "totalEqvIdr");
-        // console.log(data,"data")
-        dispatch(
-          getMaterai({
-            transactionDate: moment(invoiceDate).format(
-              dateFormatting.dateFormal,
-            ),
-          }),
-        )
-          .unwrap()
-          .then((dataRes) => {
-            // console.log(dataRes, "dataRes")
-            dataMaterai = {
-              typeId: dataRes?.type,
-              type: dataRes?.typeName,
-              itemId: parseInt(dataRes?.item),
-              item: dataRes?.itemName,
-              price: dataRes?.price,
-              // referenceId: dataRes?.reference,
-              // referenceName: dataRes?.referenceName,
-              quantity: dataRes?.quantity,
-              uom: dataRes?.uom,
-              currency: dataRes?.currency,
-              amount: dataRes?.amount,
-              discount: dataRes?.discount || 0,
-              amountEqvIdr: dataRes?.amountEqvIdr,
-              amountEqvUsd: Number(dataRes?.amountEqvUsd.toFixed(2)),
-              total: dataRes.total,
-              eqvIdr: dataRes?.eqvIdr || 0,
-              totalEqvUsd: Number(dataRes?.totalEqvUsd.toFixed(2)),
-              totalEqvIdr: dataRes?.totalEqvIdr,
-              remark: dataRes?.remark || "",
-              // dataTypeExist: "exist",
-            };
-            const temp = [...data, dataMaterai || {}];
-            setData(
-              temp.map((items, index) => {
-                return {
-                  ...items,
-                  lineNumber: index + 1,
-                };
-              }),
-            );
-          });
-      } else if (
-        newDataDynamic.totalEqvIdr < 5000000 &&
-        data.some((item) => item.item === "Meterai" || item.itemId === 297)
-      ) {
-        // console.log(data,"data un materai")
-        // console.log(newDataDynamic.totalEqvIdr, "totalEqvIdr");
-        setData(
-          data
-            .filter(
-              (item) =>
-                item.item !== "Meterai" || parseInt(item.itemId) !== 297,
-            )
-            .map((items, index) => {
-              return {
-                ...items,
-                lineNumber: index + 1,
-              };
-            }),
-        );
-      } else {
-        // console.log(data,"data akhir")
-        // console.log(dataMaterai, "dataMaterai")
-        // console.log(newDataDynamic, "newDataDynamic")
-        const dataCalculate = {
-          totalAmountIdr:
-            newDataDynamic.totalAmountIdr +
-            (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
-          totalAmountUsd:
-            newDataDynamic.totalAmountUsd +
-            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqvUsd) : 0),
-          amountIdr:
-            newDataDynamic.amountIdr +
-            (dataMaterai.currency === "IDR" ? parseInt(dataMaterai.amount) : 0),
-          amountUsd:
-            newDataDynamic.amountUsd +
-            (dataMaterai.currency === "USD" ? parseInt(dataMaterai.amount) : 0),
-          discountAmountIdr:
-            newDataDynamic.discountAmountIdr +
-            (dataMaterai.currency === "IDR"
-              ? parseInt(dataMaterai.discount)
-              : 0),
-          discountAmountUsd:
-            newDataDynamic.discountAmountUsd +
-            (dataMaterai.currency === "USD"
-              ? parseInt(dataMaterai.discount)
-              : 0),
-          // taxBasis: newDataDynamic.taxBasis,
-          taxBasisUsd: newDataDynamic.taxBasisUsd,
-          taxBasisIdr: newDataDynamic.taxBasisIdr,
-          taxBasisEqvIdr: newDataDynamic.taxBasisEqvIdr,
-          // +
-          // (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
-          // vat: newDataDynamic.vat,
-          vatUsd: newDataDynamic.vatUsd,
-          vatIdr: newDataDynamic.vatIdr,
-          vatEqvIdr: newDataDynamic.vatEqvIdr,
-          withholdingTax: newDataDynamic.withholdingTax,
-          totalEqvIdr:
-            newDataDynamic.totalEqvIdr +
-            (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
-          totalEqvUsd:
-            newDataDynamic.totalEqvUsd +
-            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqUsd) : 0),
-          // Add other properties as needed
-        };
-        // console.log(dataCalculate, "dataCalculate")
-        setDataDynamic({ ...dataDynamic, ...dataCalculate });
+  // Navigation handlers
+  const next = () => {
+    const fieldsToValidate = dataTabs[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
       }
     }
-  }, [data]);
+  };
 
-  useEffect(() => {
-    if (dataBillingCycle && dataBillingCycle !== undefined) {
-      dispatch(getGlobalBillingPeriod(dataBillingCycle));
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
     }
-  }, [dispatch, dataBillingCycle]);
+  };
 
-  useEffect(() => {
-    if (dataApprovalId && dataApprovalId !== undefined) {
-      dispatch(getApprovalListDetail(dataApprovalId));
+  const handleAccountSegmentChange = (selectedSegmentId) => {
+    form.resetFields(["accountGroupType"]);
+    setIsAccountSegmentFilled(!!selectedSegmentId);
+
+    if (selectedSegmentId) {
+      dispatch(getAccountGroupTypeList([selectedSegmentId]));
     }
-  }, [dispatch, dataApprovalId]);
+  };
 
-  useEffect(() => {
-    if (data_approvalList) {
-      const tempAppHier = (data_approvalList || []).map((appHier) => ({
-        name: appHier.approvalName,
-        value: appHier.appHierId,
-      }));
-
-      setDataApproval(tempAppHier);
-    }
-  }, [data_approvalList]);
-
-  useEffect(() => {
-    if (data_approvalListDetail && data_approvalListDetail.length > 0) {
-      const data = data_approvalListDetail.map((a, index) => ({
-        ...a,
-        key: index + 1,
-        employeeDetail: a.employeeDetail.map((b, index) => ({
-          ...b,
-          key: index + 1,
-        })),
-      }));
-      setDataListDetailApproval(data);
-    } else {
-      setDataListDetailApproval([]);
-    }
-  }, [data_approvalListDetail]);
-
-  useEffect(() => {
-    if (accountNumber) {
-      setDataAccount(
-        data_globalAccountNumber?.find(
-          (item) => item.accountNumber === accountNumber,
-        ),
-      );
-    }
-  }, [accountNumber]);
-
-  useEffect(() => {
-    if (dataAccount) {
-      form.setFieldsValue({
-        ...dataAccount,
-      });
-    }
-  }, [dataAccount]);
+  const handleMeterReadingCodeChange = () => {};
 
   const handleValueDdlSet = (value) => {
     if (!hasValue(value)) {
@@ -813,13 +233,11 @@ const PosForm = ({ type }) => {
   );
 
   const handleValue = (e) => {
-    //handling non moment to moment date ( error date.clone )
     return isDateString(e) ? moment(e) : e;
   };
 
   const handleSetFormTypeTOP = useCallback(
     (value, data_detailPos) => {
-      // console.log(value, "value set TOP");
       if (value.action === "setData") {
         form.setFieldsValue({
           ...(value?.action === "setData"
@@ -841,82 +259,715 @@ const PosForm = ({ type }) => {
     [form],
   );
 
-  //handling non moment to moment date ( error date.clone )
+  const handleSetFormUpdate = useCallback(
+    (data_detailPos, data_globalCurrency) => {
+      const costCenterValue =
+        data_detailPos?.costcenter || data_detailPos?.costCenter || "";
+
+      form.setFieldsValue({
+        ...data_detailPos,
+        currency: data_globalCurrency?.find(
+          (item) => item.text === data_detailPos?.currency,
+        )?.Id,
+        apphierId: data_detailPos?.appHierId,
+        transactionDate: moment(data_detailPos?.transactionDate),
+        invoiceDate: moment(data_detailPos?.invoiceDate),
+        costcenter: costCenterValue,
+      });
+    },
+    [form],
+  );
+
+  // Detect customer type from API response
   useEffect(() => {
-    // console.log(valueDdl, "valueDdl");
+    if (type === "update" && data_detailPos && data_detailPos.id === idUpdate) {
+      if (!customerTypeFromNav && !customerType) {
+        const detectedCustomerType = getCustomerTypeString(
+          data_detailPos.customerType,
+        );
+        setCustomerType(detectedCustomerType);
+      }
+    }
+  }, [data_detailPos, type, idUpdate, customerTypeFromNav, customerType]);
+
+  // Load prospective customer data
+  useEffect(() => {
+    if (customerType === "prospective") {
+      dispatch(getSorList());
+      dispatch(getCostCenterList());
+      dispatch(getAccountSegmentList());
+
+      if (type === "create") {
+        dispatch(getUserDetailForPOS());
+      }
+    }
+  }, [dispatch, type, customerType]);
+
+  // Set default data for prospective customer (CREATE)
+  useEffect(() => {
+    if (
+      type === "create" &&
+      customerType === "prospective" &&
+      data_user_detail
+    ) {
+      const defaultSor = data_user_detail?.sorId || null;
+      const defaultCostCenter = data_user_detail?.ccId || null;
+
+      const tempDefaultData = {
+        sor: defaultSor,
+        costcenter:
+          defaultCostCenter && defaultCostCenter !== null
+            ? typeof defaultCostCenter === "number"
+              ? [defaultCostCenter]
+              : defaultCostCenter
+            : [],
+      };
+
+      setDefaultData(tempDefaultData);
+
+      form.setFieldsValue({
+        sor: defaultSor,
+        costcenter: tempDefaultData.costcenter,
+      });
+
+      if (tempDefaultData.costcenter && tempDefaultData.costcenter.length > 0) {
+        const body = {
+          ccIds: tempDefaultData.costcenter.map((id) => ({ ccId: id })),
+        };
+        dispatch(getMeterReadingCodeList(body));
+      }
+    }
+  }, [type, customerType, data_user_detail, form, dispatch]);
+
+  // Merge meter reading code data
+  useEffect(() => {
+    let dataMrc = data_meter_reading_code?.reduce(
+      (result, current) => result?.concat(current?.dtoList),
+      [],
+    );
+    setMergedArrayMrc(dataMrc);
+  }, [data_meter_reading_code]);
+
+  // Convert MRC name to ID for UPDATE prospective
+  useEffect(() => {
+    if (
+      type === "update" &&
+      customerType === "prospective" &&
+      data_detailPos &&
+      mergedArrayMrc &&
+      mergedArrayMrc.length > 0 &&
+      data_detailPos.id === idUpdate
+    ) {
+      const mrcId = mergedArrayMrc?.find(
+        (item) => item.name === data_detailPos?.meterReadingCode,
+      )?.id;
+
+      if (mrcId) {
+        form.setFieldsValue({
+          meterReadingCode: mrcId,
+        });
+      }
+    }
+  }, [type, customerType, data_detailPos, mergedArrayMrc, form, idUpdate]);
+
+  // Handle daily rate validation
+  useEffect(() => {
+    if (data_rate === null || data_rate?.success === false) {
+      setInvoiceDate(null);
+      form.resetFields(["invoiceDate"]);
+      setModalDailyRate(true);
+    } else {
+      setModalDailyRate(false);
+    }
+  }, [data_rate, form]);
+
+  // Fetch rates when invoice date and currency are set
+  useEffect(() => {
+    if (data && invoiceDate && currency && data.length < 1) {
+      dispatch(
+        getRateTax({
+          invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
+          currency,
+        }),
+      );
+      dispatch(
+        getRate({
+          invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
+          currency,
+        }),
+      );
+    }
+  }, [dispatch, invoiceDate, currency, data]);
+
+  // Load global data
+  useEffect(() => {
+    dispatch(getGlobalType());
+    dispatch(getGlobalBillingCycle());
+    dispatch(getGlobalCurrency());
+    dispatch(getApprovalList());
+    dispatch(getGlobalTermsOfPayment());
+    dispatch(getGlobalAccountNumber());
+    dispatch(getGlobalProductItem());
+    dispatch(getGlobalBillingItem());
+    dispatch(getUomCodes());
+  }, [dispatch]);
+
+  // Track missing priority data
+  useEffect(() => {
+    const newData = [
+      { name: "Account Number", data: accountNumber },
+      { name: "Currency", data: currency },
+      { name: "Invoice Date", data: invoiceDate },
+    ];
+
+    const missingData = newData.filter((data) => !data.data);
+    setDataMissing(missingData);
+    setDataPriority(newData);
+  }, [currency, accountNumber, invoiceDate]);
+
+  // Initialize data for create/update
+  useEffect(() => {
+    if (type === "update") {
+      dispatch(getDetailPOS(idUpdate));
+    } else {
+      setDataDynamic({
+        totalAmountIdr: 0,
+        totalAmountUsd: 0,
+        amountIdr: 0,
+        amountUsd: 0,
+        discountAmountIdr: 0,
+        discountAmountUsd: 0,
+        taxBasisIdr: 0,
+        taxBasisUsd: 0,
+        taxBasisEqvIdr: 0,
+        vatIdr: 0,
+        vatUsd: 0,
+        vatEqvIdr: 0,
+        withholdingTax: 0,
+      });
+    }
+  }, [dispatch, type, idUpdate]);
+
+  // Fetch terms of payment data (customer)
+  useEffect(() => {
+    if (customerType === "customer" && hasValue(accountNumber)) {
+      const getAccountId = data_globalAccountNumber?.find(
+        (item) => item?.accountNumber === accountNumber,
+      )?.accountId;
+
+      if (getAccountId) {
+        dispatch(getGlobalTermsOfPaymentData(getAccountId));
+      }
+    }
+  }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
+
+  // Fetch terms of payment data (prospective) once on type change
+  useEffect(() => {
+    if (customerType === "prospective") {
+      dispatch(getGlobalTermsOfPaymentData(null));
+    }
+  }, [customerType, dispatch]);
+
+  // Populate form for UPDATE mode
+  useEffect(() => {
+    if (
+      type === "update" &&
+      data_detailPos &&
+      data_detailPos.id === idUpdate &&
+      data_globalProduct &&
+      data_globalCurrency &&
+      data_globalBillingCycle
+    ) {
+      const isProspective = data_detailPos.customerType === 2;
+
+      setValueDdl({
+        action: "setData",
+        value: isDateString(data_detailPos?.termsOfPayment) ? "DATE" : "TOP",
+      });
+      setDataApprovalId(data_detailPos?.appHierId);
+
+      if (isProspective) {
+        const sorId = data_sor_list?.find(
+          (item) => item.name === data_detailPos?.sor,
+        )?.id;
+
+        const costCenterString = data_detailPos?.costcenter || "";
+
+        const costCenterCode = costCenterString.split(" - ")[0]?.trim();
+
+        const ccId = data_cost_center_list?.find(
+          (item) =>
+            item.code === costCenterCode ||
+            item.name === costCenterCode ||
+            costCenterString.includes(item.name),
+        )?.id;
+
+        const costCenterNames = costCenterString
+          ? costCenterString.split(",").map((name) => name.trim())
+          : [];
+
+        const costCenterIds =
+          costCenterNames.length > 0
+            ? data_cost_center_list
+                ?.filter((cc) => {
+                  return costCenterNames.some((name) => {
+                    const code = name.split(" - ")[0]?.trim();
+                    return (
+                      cc.code === code ||
+                      cc.name === code ||
+                      name.includes(cc.name)
+                    );
+                  });
+                })
+                .map((cc) => cc.id)
+            : [];
+
+        const accountSegmentId = data_account_segment?.find(
+          (item) => item.name === data_detailPos?.accountSegment,
+        )?.id;
+
+        const accountGroupTypeId = data_account_group_type?.find(
+          (item) =>
+            (item.glbValue || item.name) === data_detailPos?.accountGroupType,
+        )?.glbTypeValId;
+
+        setDefaultData({
+          sor: sorId,
+          costcenter:
+            costCenterIds.length > 0 ? costCenterIds : ccId ? [ccId] : [],
+        });
+
+        form.setFieldsValue({
+          customerName: data_detailPos?.customerName,
+          registrationNumber: data_detailPos?.registrationNumber,
+          accountName: data_detailPos?.accountName,
+          currency: data_globalCurrency?.find(
+            (item) => item.text === data_detailPos?.currency,
+          )?.Id,
+          apphierId: data_detailPos?.appHierId,
+          transactionDate: moment(data_detailPos?.transactionDate),
+          invoiceDate: moment(data_detailPos?.invoiceDate),
+          email: data_detailPos?.email,
+          address: data_detailPos?.address,
+          billingCycle: data_globalBillingCycle?.find(
+            (item) => item.name === data_detailPos?.billingCycle,
+          )?.id,
+          billingPeriod: data_detailPos?.billingPeriod,
+          remark: data_detailPos?.remark,
+          sor: sorId,
+          costcenter: ccId,
+          accountSegment: accountSegmentId,
+          accountGroupType: accountGroupTypeId,
+        });
+
+        setAccountNumber(data_detailPos?.registrationNumber);
+
+        if (ccId) {
+          const body = {
+            ccIds: [{ ccId: ccId }],
+          };
+          dispatch(getMeterReadingCodeList(body));
+          setIsCostCenterFilled(true);
+        } else if (costCenterIds && costCenterIds.length > 0) {
+          const body = {
+            ccIds: costCenterIds.map((id) => ({ ccId: id })),
+          };
+          dispatch(getMeterReadingCodeList(body));
+          setIsCostCenterFilled(true);
+        }
+
+        if (accountSegmentId) {
+          setIsAccountSegmentFilled(true);
+          dispatch(getAccountGroupTypeList([accountSegmentId]));
+        }
+      } else {
+        handleSetFormUpdate(data_detailPos, data_globalCurrency);
+        setAccountNumber(data_detailPos?.accountNumber);
+      }
+      setCurrency(
+        data_globalCurrency?.find(
+          (item) => item.text === data_detailPos?.currency,
+        )?.Id,
+      );
+      setInvoiceDate(moment(data_detailPos?.invoiceDate));
+      setDataBillingCycle(
+        data_globalBillingCycle?.find(
+          (item) => item.name === data_detailPos?.billingCycle,
+        )?.id,
+      );
+      setDataDynamic({
+        ...dataDynamic,
+        rateType: data_detailPos.rateType || "",
+        rate: data_detailPos.rate || "",
+        rateDate: data_detailPos.taxRateDate || "",
+        taxRate: data_detailPos.taxRateValue || "",
+        taxRateDate: data_detailPos.taxRateDate || "",
+        taxRateType: data_detailPos.taxRateType || "",
+      });
+      setData(
+        data_detailPos?.mrbiPosDetails?.map((item) => {
+          let temp = {
+            ...item,
+            price: item?.price || 0,
+            amount: item?.amount || 0,
+            amountEqvUsd: Number(item?.amountEqvUsd.toFixed(2)) || 0,
+            amountEqvIdr: item?.amountEqvIdr || 0,
+            eqvIdr: item?.eqvIdr || 0,
+            totalEqvIdr: item?.totalEqvIdr || 0,
+            totalEqvUsd: Number(item?.totalEqvUsd.toFixed(2)) || 0,
+          };
+          return temp;
+        }),
+      );
+      setDataAttachment(
+        (data_detailPos?.mattachments || []).map((item) => ({
+          ...item,
+          dataType: "exist",
+        })),
+      );
+    }
+  }, [
+    data_detailPos,
+    data_globalProduct,
+    type,
+    data_globalCurrency,
+    data_globalBillingCycle,
+    handleSetFormUpdate,
+    idUpdate,
+    data_sor_list,
+    data_cost_center_list,
+    data_account_segment,
+    data_account_group_type,
+    form,
+    dispatch,
+  ]);
+
+  // Set rate data from API
+  useEffect(() => {
+    if (data_rate && data_rate_tax) {
+      setDataDynamic({
+        ...dataDynamic,
+        rateType: data_rate?.rateType,
+        rate: data_rate?.rate,
+        rateDate: data_rate.rateDate
+          ? moment(data_rate?.rateDate).format(dateFormatting.date)
+          : "",
+        taxRateType: data_rate_tax?.rateType,
+        taxRate: data_rate_tax?.rate,
+        taxRateDate: data_rate_tax?.rateDate
+          ? moment(data_rate?.rateDate).format(dateFormatting.date)
+          : "",
+      });
+    }
+  }, [data_rate, data_rate_tax]);
+
+  // Calculate POS totals and materai
+  useEffect(() => {
+    if (data) {
+      let dataMaterai =
+        data.filter(
+          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+        )[0] || {};
+      const newDataDynamic = data
+        .filter(
+          (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297,
+        )
+        .reduce(
+          (sums, item) => {
+            let tempSum = { ...sums };
+            if (
+              item.typeId === 2144 &&
+              data.some(
+                (dataItem) => dataItem.reference === parseInt(item.itemId),
+              )
+            ) {
+              tempSum.taxBasisEqvIdr += item.eqvIdr || 0;
+              if (item.currency === "USD") {
+                tempSum.taxBasisUsd += item.total || 0;
+              } else if (item.currency === "IDR") {
+                tempSum.taxBasisIdr += item.total || 0;
+              }
+            }
+            if (
+              item.typeId === 2342 ||
+              item?.typeValueName?.toLowerCase()?.includes("ppn")
+            ) {
+              tempSum.vatEqvIdr += item.eqvIdr || 0;
+              if (item.currency === "USD") {
+                tempSum.vatUsd += item.total || 0;
+              } else if (item.currency === "IDR") {
+                tempSum.vatIdr += item.total || 0;
+              }
+            }
+            if (
+              item.typeId === 2343 ||
+              item?.typeValueName?.toLowerCase()?.includes("pph")
+            ) {
+              tempSum.withholdingTax += item.totalEqvIdr || 0;
+            }
+            if (item.currency === "USD") {
+              tempSum.totalAmountUsd +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.total || 0
+                  : 0;
+              tempSum.amountUsd +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.amount || 0
+                  : 0;
+              tempSum.discountAmountUsd += item.discount || 0;
+            } else if (item.currency === "IDR") {
+              tempSum.totalAmountIdr +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.total || 0
+                  : 0;
+              tempSum.amountIdr +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.amount || 0
+                  : 0;
+              tempSum.discountAmountIdr += item.discount || 0;
+            }
+            tempSum.totalEqvIdr +=
+              item.typeId !== 2343 ||
+              !item?.typeValueName?.toLowerCase()?.includes("pph")
+                ? item.totalEqvIdr || 0
+                : 0;
+            tempSum.totalEqvUsd +=
+              item.typeId !== 2343 ||
+              !item?.typeValueName?.toLowerCase()?.includes("pph")
+                ? item.totalEqvUsd || 0
+                : 0;
+            return tempSum;
+          },
+          {
+            totalAmountIdr: 0,
+            totalAmountUsd: 0,
+            amountIdr: 0,
+            amountUsd: 0,
+            discountAmountIdr: 0,
+            discountAmountUsd: 0,
+            taxBasisIdr: 0,
+            taxBasisUsd: 0,
+            taxBasisEqvIdr: 0,
+            vatIdr: 0,
+            vatUsd: 0,
+            vatEqvIdr: 0,
+            withholdingTax: 0,
+            totalEqvIdr: 0,
+            totalEqvUsd: 0,
+          },
+        );
+      if (
+        newDataDynamic.totalEqvIdr >= 5000000 &&
+        !data.some(
+          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+        )
+      ) {
+        dispatch(
+          getMaterai({
+            transactionDate: moment(invoiceDate).format(
+              dateFormatting.dateFormal,
+            ),
+          }),
+        )
+          .unwrap()
+          .then((dataRes) => {
+            dataMaterai = {
+              typeId: dataRes?.type,
+              type: dataRes?.typeName,
+              itemId: parseInt(dataRes?.item),
+              item: dataRes?.itemName,
+              price: dataRes?.price,
+              quantity: dataRes?.quantity,
+              uom: dataRes?.uom,
+              currency: dataRes?.currency,
+              amount: dataRes?.amount,
+              discount: dataRes?.discount || 0,
+              amountEqvIdr: dataRes?.amountEqvIdr,
+              amountEqvUsd: Number(dataRes?.amountEqvUsd.toFixed(2)),
+              total: dataRes.total,
+              eqvIdr: dataRes?.eqvIdr || 0,
+              totalEqvUsd: Number(dataRes?.totalEqvUsd.toFixed(2)),
+              totalEqvIdr: dataRes?.totalEqvIdr,
+              remark: dataRes?.remark || "",
+            };
+            const temp = [...data, dataMaterai || {}];
+            setData(
+              temp.map((items, index) => {
+                return {
+                  ...items,
+                  lineNumber: index + 1,
+                };
+              }),
+            );
+          });
+      } else if (
+        newDataDynamic.totalEqvIdr < 5000000 &&
+        data.some((item) => item.item === "Meterai" || item.itemId === 297)
+      ) {
+        setData(
+          data
+            .filter(
+              (item) =>
+                item.item !== "Meterai" || parseInt(item.itemId) !== 297,
+            )
+            .map((items, index) => {
+              return {
+                ...items,
+                lineNumber: index + 1,
+              };
+            }),
+        );
+      } else {
+        const dataCalculate = {
+          totalAmountIdr:
+            newDataDynamic.totalAmountIdr +
+            (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
+          totalAmountUsd:
+            newDataDynamic.totalAmountUsd +
+            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqvUsd) : 0),
+          amountIdr:
+            newDataDynamic.amountIdr +
+            (dataMaterai.currency === "IDR" ? parseInt(dataMaterai.amount) : 0),
+          amountUsd:
+            newDataDynamic.amountUsd +
+            (dataMaterai.currency === "USD" ? parseInt(dataMaterai.amount) : 0),
+          discountAmountIdr:
+            newDataDynamic.discountAmountIdr +
+            (dataMaterai.currency === "IDR"
+              ? parseInt(dataMaterai.discount)
+              : 0),
+          discountAmountUsd:
+            newDataDynamic.discountAmountUsd +
+            (dataMaterai.currency === "USD"
+              ? parseInt(dataMaterai.discount)
+              : 0),
+          taxBasisUsd: newDataDynamic.taxBasisUsd,
+          taxBasisIdr: newDataDynamic.taxBasisIdr,
+          taxBasisEqvIdr: newDataDynamic.taxBasisEqvIdr,
+          vatUsd: newDataDynamic.vatUsd,
+          vatIdr: newDataDynamic.vatIdr,
+          vatEqvIdr: newDataDynamic.vatEqvIdr,
+          withholdingTax: newDataDynamic.withholdingTax,
+          totalEqvIdr:
+            newDataDynamic.totalEqvIdr +
+            (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
+          totalEqvUsd:
+            newDataDynamic.totalEqvUsd +
+            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqvUsd) : 0),
+        };
+        setDataDynamic({ ...dataDynamic, ...dataCalculate });
+      }
+    }
+  }, [data, dispatch, invoiceDate]);
+
+  // Fetch billing period data
+  useEffect(() => {
+    if (dataBillingCycle && dataBillingCycle !== undefined) {
+      dispatch(getGlobalBillingPeriod(dataBillingCycle));
+    }
+  }, [dispatch, dataBillingCycle]);
+
+  // Fetch approval detail
+  useEffect(() => {
+    if (dataApprovalId && dataApprovalId !== undefined) {
+      dispatch(getApprovalListDetail(dataApprovalId));
+    }
+  }, [dispatch, dataApprovalId]);
+
+  // Transform approval list data
+  useEffect(() => {
+    if (data_approvalList) {
+      const tempAppHier = (data_approvalList || []).map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+
+      setDataApproval(tempAppHier);
+    }
+  }, [data_approvalList]);
+
+  // Transform approval detail data
+  useEffect(() => {
+    if (data_approvalListDetail && data_approvalListDetail.length > 0) {
+      const data = data_approvalListDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setDataListDetailApproval(data);
+    } else {
+      setDataListDetailApproval([]);
+    }
+  }, [data_approvalListDetail]);
+
+  // Set account data for customer
+  useEffect(() => {
+    if (accountNumber && customerType === "customer") {
+      setDataAccount(
+        data_globalAccountNumber?.find(
+          (item) => item.accountNumber === accountNumber,
+        ),
+      );
+    }
+  }, [accountNumber, customerType, data_globalAccountNumber]);
+
+  // Populate form with account data
+  useEffect(() => {
+    if (dataAccount && customerType === "customer") {
+      form.setFieldsValue({
+        ...dataAccount,
+      });
+    }
+  }, [dataAccount, customerType, form]);
+
+  // Handle terms of payment DDL changes
+  useEffect(() => {
     if (valueDdl) {
       form.resetFields(["termType", "termValue"]);
       handleSetFormTypeValueDdl(valueDdl, data_detailPos);
       setDdlFinal(valueDdl);
     }
-  }, [valueDdl, handleSetFormTypeValueDdl]);
+  }, [valueDdl, handleSetFormTypeValueDdl, data_detailPos, form]);
 
+  // Set terms of payment value
   useEffect(() => {
-    // console.log(ddlFinal, "ddlFinal");
     if (hasValue(ddlFinal?.value)) {
       handleSetFormTypeTOP(ddlFinal, data_detailPos);
     }
-    // form.setFieldsValue({
-    //   termType: {
-    //     termValueDdl: ddlFinal === "TOP" ? "TOP" : "DATE",
-    //   },
-    // });
-  }, [ddlFinal, handleSetFormTypeTOP]);
+  }, [ddlFinal, handleSetFormTypeTOP, data_detailPos]);
 
-  // useEffect(() => {
-  //   form.resetFields(["billingPeriod"]);
-  // }, [dataBillingCycle]);
+  // Update value page based on current step
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
 
-  // change tabs
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
+  const handleSubmit = () => {
+    setTypeSubmit(true);
+    setTimeout(() => {
+      form.submit();
+    }, 0);
   };
 
-  // routes
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "Rating & Billing",
-    },
-    {
-      path: RBI_ROUTES.POS_VIEW,
-      breadcrumbName: "Point of Sales",
-    },
-    {
-      path: "",
-      breadcrumbName: `${
-        type === "create" ? "Create" : "Update"
-      } Point of Sales`,
-    },
-  ];
+  const handleSaveDraft = () => {
+    setTypeSubmit(false);
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
 
-  // check has overlapping data
-  const checkOverlappingData = useCallback((formHeader, dataTable) => {
-    const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
-      ) {
-        dataOverlap?.push(item);
-      }
-    });
-
-    if (dataOverlap?.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }, []);
-
-  //handleAction
   const onFinish = (e) => {
     let errorBody = {};
     if (dataAttachment.length === 0) {
-      handleMandatory(setDataTabs, dataAttachment); // attachment mandatory onFinish
+      handleMandatory(setDataTabs, dataAttachment);
     } else {
-      handleMandatory(setDataTabs, dataAttachment); // clearing all badge
+      handleMandatory(setDataTabs, dataAttachment);
       if (data.length === 0 && dataAttachment.length === 0) {
         errorBody = {
           title: "Failed",
@@ -991,104 +1042,129 @@ const PosForm = ({ type }) => {
     }
   };
 
-  // console.log(dataDynamic, "dataDynamic");
   const handleSendData = (e) => {
     setModalConfirm(false);
 
-    // Summary Amount
     const calculateAmount = data.map((a) => a.amount);
     const sumAmount = calculateAmount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
       0,
     );
 
-    // Summary Discount
     const calculateDiscount = data.map((a) => a.discount);
     const sumDiscount = calculateDiscount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
       0,
     );
 
-    // Find topDataType
     const dataTypeTOP = data_globalTermsOfPaymentValue?.find(
       (item) => item.Id === e.termType.termValue,
     );
 
-    // Check Date String
-    const isDateString = moment(
-      e?.termsOfPayment,
-      dateFormatting.date,
-      true,
-    ).isValid();
+    const billingCycleId =
+      typeof e?.billingCycle === "number"
+        ? e?.billingCycle
+        : data_globalBillingCycle?.find((item) => item.name === e?.billingCycle)
+            ?.id;
 
-    // Get SOR name for prospective customer
+    // Helper functions to convert ID to NAME or return existing NAME
     const getSorName = () => {
       if (customerType === "prospective" && e?.sor) {
-        const sorItem = data_sor_list?.find((item) => item.id === e.sor);
-        return sorItem ? sorItem.name : "";
+        if (typeof e.sor === "string") {
+          return e.sor;
+        } else {
+          const sorItem = data_sor_list?.find((item) => item.id === e.sor);
+          return sorItem ? sorItem.name : "";
+        }
       }
       return e?.sor || "";
     };
 
-    // Get MRC name for prospective customer
     const getMrcName = () => {
       if (customerType === "prospective" && e?.meterReadingCode) {
-        const mrcIds = Array.isArray(e.meterReadingCode)
-          ? e.meterReadingCode
-          : [e.meterReadingCode];
-        const mrcNames = mrcIds
-          .map((mrcId) => {
-            const mrc = mergedArrayMrc?.find((item) => item.id === mrcId);
-            return mrc ? mrc.name : "";
-          })
-          .filter(Boolean);
-        return mrcNames.join(", ");
+        if (typeof e.meterReadingCode === "string") {
+          return e.meterReadingCode;
+        } else {
+          const mrc = mergedArrayMrc?.find(
+            (item) => item.id === e.meterReadingCode,
+          );
+          return mrc ? mrc.name : "";
+        }
       }
       return e?.meterReadingCode || "";
     };
 
-    // Get Account Segment name
     const getAccountSegmentName = () => {
       if (customerType === "prospective" && e?.accountSegment) {
-        const segment = data_account_segment?.find(
-          (item) => item.id === e.accountSegment,
-        );
-        return segment ? segment.name : "";
+        if (typeof e.accountSegment === "string") {
+          return e.accountSegment;
+        } else {
+          const segment = data_account_segment?.find(
+            (item) => item.id === e.accountSegment,
+          );
+          return segment ? segment.name : "";
+        }
       }
       return e?.accountSegment || "";
     };
 
-    // Get Account Group Type name
     const getAccountGroupTypeName = () => {
       if (customerType === "prospective" && e?.accountGroupType) {
-        const groupType = data_account_group_type?.find(
-          (item) => item.glbTypeValId === e.accountGroupType,
-        );
-        return groupType ? groupType.glbValue || groupType.name : "";
+        if (typeof e.accountGroupType === "string") {
+          return e.accountGroupType;
+        } else {
+          const groupType = data_account_group_type?.find(
+            (item) => item.glbTypeValId === e.accountGroupType,
+          );
+          return groupType ? groupType.glbValue || groupType.name : "";
+        }
       }
       return e?.accountGroupType || "";
     };
 
-    // Prepare base body
+    const getCostCenterName = () => {
+      if (customerType === "prospective" && e?.costcenter) {
+        if (typeof e.costcenter === "string") {
+          return e.costcenter;
+        } else {
+          const cc = data_cost_center_list?.find(
+            (item) => item.id === e.costcenter,
+          );
+          return cc ? cc.name : "";
+        }
+      }
+      return e?.costcenter || e?.costCenter || "";
+    };
+
     let body = {
       id: type === "create" ? undefined : idUpdate,
       posNumber: type === "create" ? undefined : idPos,
-
-      // Customer Type (1 = customer, 2 = prospective)
       customerType: getCustomerTypeNumber(customerType),
-
-      // Customer Information
-      ...(customerType === "customer" && { customerNumber: e?.customerNumber }),
       customerName: e?.customerName,
       accountName: e?.accountName,
 
-      // SOR & Cost Center
+      ...(customerType === "customer" && {
+        customerNumber: e?.customerNumber,
+        accountNumber: e?.accountNumber,
+        registrationNumber: null,
+        email: null,
+        address: null,
+      }),
+
+      ...(customerType === "prospective" && {
+        registrationNumber: e?.registrationNumber,
+        accountNumber: null,
+        email: e?.email || "",
+        address: e?.address || "",
+        customerNumber: null,
+      }),
+
       sor: getSorName(),
+      costcenter: getCostCenterName(),
       meterReadingCode: getMrcName(),
       accountSegment: getAccountSegmentName(),
       accountGroupType: getAccountGroupTypeName(),
-
-      // Billing Information
+      billingCycleId: billingCycleId,
       billingCycle:
         data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
           ?.name || e?.billingCycle,
@@ -1107,13 +1183,11 @@ const PosForm = ({ type }) => {
           )?.text || e?.termType?.termValue,
       remark: e?.remark,
 
-      // Approval
       appHierId: dataApprovalId,
       submit: typeSubmit,
       topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
       topId: e.termType.termValueDdl,
 
-      // Rate & Tax Information
       rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
       rateDate: dataDynamic?.rateDate
         ? moment(dataDynamic.rateDate, dateFormatting.date).format(
@@ -1129,7 +1203,6 @@ const PosForm = ({ type }) => {
         : null,
       taxRateType: dataDynamic?.taxRateType || null,
 
-      // Amount Calculations
       amount: sumAmount,
       discountAmount: sumDiscount,
       totalAmountIdr: dataDynamic?.totalAmountIdr || 0,
@@ -1148,7 +1221,6 @@ const PosForm = ({ type }) => {
       totalEqvIdr: dataDynamic?.totalEqvIdr || 0,
       totalEqvUsd: dataDynamic?.totalEqvUsd || 0,
 
-      // POS Details
       mrbiPosDetails: data?.map((item) => ({
         posDetailId: item?.posDetailId,
         posNumber: item?.posNumber,
@@ -1172,36 +1244,10 @@ const PosForm = ({ type }) => {
       })),
     };
 
-    // Handle field berdasarkan customer type
-    if (customerType === "prospective") {
-      if (Array.isArray(e?.costCenter) && e.costCenter.length > 0) {
-        const costCenterNames = e.costCenter
-          .map((ccId) => {
-            const cc = data_cost_center_list?.find((item) => item.id === ccId);
-            return cc ? cc.name : ""; 
-          })
-          .filter(Boolean)
-          .join(", ");
-
-        body.costcenter = costCenterNames;
-      }
-      body.registrationNumber = e?.accountNumber;
-
-      // Field tambahan untuk prospective
-      body.email = e?.email || "";
-      body.address = e?.address || "";
-    } else {
-      body.accountNumber = e?.accountNumber;
-      body.costcenter = e?.costCenter || "";
-    }
-
-    // Clean up fields yang tidak diperlukan
-    delete body.costCenter;
     delete body.termType;
     delete body.apphierId;
     delete body.taxBasis;
 
-    // Dispatch create or update
     if (type === "create") {
       dispatch(createPOS(body))
         .unwrap()
@@ -1209,7 +1255,6 @@ const PosForm = ({ type }) => {
           const id = data?.id;
           setLoadingForm(true);
 
-          // Upload attachments
           for (let icon = 0; icon < dataAttachment.length; icon++) {
             const element = dataAttachment[icon];
             const attachBody = {
@@ -1223,7 +1268,8 @@ const PosForm = ({ type }) => {
             );
           }
 
-          // Reset form
+          navigate(RBI_ROUTES.POS_VIEW, { replace: true });
+
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1234,9 +1280,6 @@ const PosForm = ({ type }) => {
           setCurrency();
           setInvoiceDate();
           setDdlFinal("DATE");
-
-          // Navigate back
-          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1251,7 +1294,6 @@ const PosForm = ({ type }) => {
           }
         });
     } else {
-      // Update logic sama, hanya tambah upload attachment untuk yang baru
       dispatch(updatePOS(body))
         .unwrap()
         .then(async (data) => {
@@ -1274,6 +1316,8 @@ const PosForm = ({ type }) => {
             );
           }
 
+          navigate(RBI_ROUTES.POS_VIEW, { replace: true });
+
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1284,8 +1328,6 @@ const PosForm = ({ type }) => {
           setCurrency();
           setInvoiceDate();
           setDdlFinal("DATE");
-
-          navigate(RBI_ROUTES.POS_VIEW);
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1309,34 +1351,12 @@ const PosForm = ({ type }) => {
   };
 
   const handleErrorSubmit = ({ values, errorFields, outOfDate }) => {
-    // setDataTabs((prevState) => {
-    //   const res = prevState.map((item) => {
-    //     if (!item.paramValue || item.paramValue.length < 0) {
-    //       return {
-    //         value: item.value,
-    //         paramValue: item.paramValue,
-    //       };
-    //     }
-    //     const errorBadge = errorFields.reduce(
-    //       (current, next) =>
-    //         item.paramValue.includes(next.name[0]) ? current + 1 : current,
-    //       0
-    //     );
-    //     return {
-    //       value: item.value,
-    //       paramValue: item.paramValue,
-    //       errorBadge,
-    //     };
-    //   });
-    //   return res;
-    // });
     handleMandatory(setDataTabs, dataAttachment, errorFields);
   };
 
   const handleChangeSOR = (selectedSorId) => {
-    // Reset semua field yang depend on SOR
     form.resetFields([
-      "costCenter",
+      "costcenter",
       "meterReadingCode",
       "accountSegment",
       "accountGroupType",
@@ -1356,17 +1376,71 @@ const PosForm = ({ type }) => {
   const handleClearOrReset = () => {
     if (type === "update") {
       if (data_detailPos && type === "update") {
+        const isProspective = data_detailPos.customerType === 2;
+
         setValueDdl({
           action: "setData",
           value: isDateString(data_detailPos?.termsOfPayment) ? "DATE" : "TOP",
         });
-        handleSetFormUpdate(data_detailPos, data_globalCurrency);
+
+        if (isProspective) {
+          const sorId = data_sor_list?.find(
+            (item) => item.name === data_detailPos?.sor,
+          )?.id;
+
+          const costCenterNames = data_detailPos?.costcenter
+            ? data_detailPos.costcenter.split(",").map((name) => name.trim())
+            : [];
+
+          const costCenterIds =
+            costCenterNames.length > 0
+              ? data_cost_center_list
+                  ?.filter((cc) => costCenterNames.includes(cc.name))
+                  .map((cc) => cc.id)
+              : [];
+
+          const accountSegmentId = data_account_segment?.find(
+            (item) => item.name === data_detailPos?.accountSegment,
+          )?.id;
+
+          const accountGroupTypeId = data_account_group_type?.find(
+            (item) =>
+              (item.glbValue || item.name) === data_detailPos?.accountGroupType,
+          )?.glbTypeValId;
+
+          form.setFieldsValue({
+            customerName: data_detailPos?.customerName,
+            registrationNumber: data_detailPos?.registrationNumber,
+            accountName: data_detailPos?.accountName,
+            currency: data_globalCurrency?.find(
+              (item) => item.text === data_detailPos?.currency,
+            )?.Id,
+            apphierId: data_detailPos?.appHierId,
+            transactionDate: moment(data_detailPos?.transactionDate),
+            invoiceDate: moment(data_detailPos?.invoiceDate),
+            email: data_detailPos?.email,
+            address: data_detailPos?.address,
+            billingCycle: data_globalBillingCycle?.find(
+              (item) => item.name === data_detailPos?.billingCycle,
+            )?.id,
+            billingPeriod: data_detailPos?.billingPeriod,
+            remark: data_detailPos?.remark,
+            sor: sorId,
+            costcenter: costCenterIds.length > 0 ? costCenterIds[0] : undefined,
+            accountSegment: accountSegmentId,
+            accountGroupType: accountGroupTypeId,
+          });
+
+          setAccountNumber(data_detailPos?.registrationNumber);
+        } else {
+          handleSetFormUpdate(data_detailPos, data_globalCurrency);
+          setAccountNumber(data_detailPos?.accountNumber);
+        }
+
         setData(
-          data_detailPos?.mrbiPosDetails?.map((item, index) => {
+          data_detailPos?.mrbiPosDetails?.map((item) => {
             let temp = {
               ...item,
-              // referenceName: item.referenceName,
-              // referenceId: item?.reference,
               price: item?.price || 0,
               amount: item?.amount || 0,
               amountEqvUsd: Number(item?.amountEqvUsd.toFixed(2)) || 0,
@@ -1374,19 +1448,7 @@ const PosForm = ({ type }) => {
               eqvIdr: item?.eqvIdr || 0,
               totalEqvIdr: item?.totalEqvIdr || 0,
               totalEqvUsd: Number(item?.totalEqvUsd.toFixed(2)) || 0,
-              // lineNumber: index + 1,
             };
-            // if (
-            //   item?.item === "PPN" &&
-            //   item?.item === "PPH" &&
-            //   item?.item === "Meterai" &&
-            //   item?.item === null || undefined
-            // ) {
-            //   temp = {
-            //     ...temp,
-            //     dataType: "exist",
-            //   };
-            // }
             return temp;
           }),
         );
@@ -1395,11 +1457,7 @@ const PosForm = ({ type }) => {
             (item) => item.text === data_detailPos?.currency,
           )?.Id,
         );
-        setAccountNumber(data_detailPos?.accountNumber);
-        setInvoiceDate(
-          moment(data_detailPos?.invoiceDate),
-          // .format(dateFormatting.dateFormal)
-        );
+        setInvoiceDate(moment(data_detailPos?.invoiceDate));
         setDataBillingCycle(
           data_globalBillingCycle?.find(
             (item) => item.name === data_detailPos?.billingCycle,
@@ -1408,13 +1466,10 @@ const PosForm = ({ type }) => {
         setDataAttachment(
           (data_detailPos?.mattachments || []).map((item) => ({
             ...item,
-            // createdDate: moment(item.createdDate).format("DD MMM YYYY"),
-            // fileSize: bytesConverter(item.fileSize || 0),
             dataType: "exist",
           })),
         );
         setDataApprovalId(data_detailPos?.appHierId);
-        // setDataApproval(data_detailPos?.appHierId);
       }
     } else {
       setRangeDisableDate({});
@@ -1441,26 +1496,21 @@ const PosForm = ({ type }) => {
     }
   };
 
+  const handleBack = () => {
+    setModalBack(true);
+  };
+
   return (
     <LayoutMenu>
       <Spin spinning={loading || loadingForm || loadingAccount}>
         <BreadCrumb routes={routes} />
-        {/* Steps Navigation dengan background putih */}
-        <div className="bg-white rounded-lg p-4 mb-6">
-          <div className="flex flex-row justify-center">
-            <div
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              <Steps
-                current={currentStep}
-                items={items}
-                labelPlacement="vertical"
-              />
-            </div>
-          </div>
-        </div>
+
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
+        />
 
         <Form
           id={"form"}
@@ -1470,8 +1520,11 @@ const PosForm = ({ type }) => {
           onFinishFailed={handleErrorSubmit}
           scrollToFirstError={true}
         >
-          {/* Step 1: Point of Sales */}
-          <div className={currentStep !== 0 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== dataTabs[0].value ? "none" : undefined,
+            }}
+          >
             <PointOfSalesPage
               form={form}
               isCostCenterFilled={isCostCenterFilled}
@@ -1520,8 +1573,11 @@ const PosForm = ({ type }) => {
             />
           </div>
 
-          {/* Step 2: Approval */}
-          <div className={currentStep !== 1 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== dataTabs[1].value ? "none" : undefined,
+            }}
+          >
             <BaseContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={dataListDetailApproval}
@@ -1532,8 +1588,11 @@ const PosForm = ({ type }) => {
             </BaseContainer>
           </div>
 
-          {/* Step 3: Attachment */}
-          <div className={currentStep !== 2 ? "hidden" : ""}>
+          <div
+            style={{
+              display: valuePage !== dataTabs[2].value ? "none" : undefined,
+            }}
+          >
             <PointOfSalesPageAttachment
               dispatch={dispatch}
               dataAttachment={dataAttachment}
@@ -1542,100 +1601,19 @@ const PosForm = ({ type }) => {
             />
           </div>
 
-          {/* Footer Buttons */}
-          <div className={"w-full flex justify-between mt-10"}>
-            <div className="flex">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setModalBack(true)}
-                icon={<LeftOutlined style={{ color: "#fff", fontSize: 24 }} />}
-              >
-                Back
-              </ButtonComponent>
-            </div>
-
-            <div className={"flex gap-5"}>
-              {/* Previous Button - tampil jika bukan step pertama */}
-              {currentStep > 0 && (
-                <ButtonComponent
-                  onClick={prev}
-                  type={"default"}
-                  icon={
-                    <LeftOutlined style={{ color: "#1890ff", fontSize: 24 }} />
-                  }
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    borderColor: "#1890ff",
-                    color: "#1890ff",
-                  }}
-                >
-                  Previous
-                </ButtonComponent>
-              )}
-
-              <Form.Item>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                      color={"#FFFFFF"}
-                    />
-                  }
-                  type="submit"
-                  onClick={handleClearOrReset}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-
-              {/* Next Button - tampil jika bukan step terakhir */}
-              {currentStep < steps.length - 1 && (
-                <ButtonComponent
-                  onClick={next}
-                  type={"submit"}
-                  icon={
-                    <RightOutlined style={{ color: "#fff", fontSize: 18 }} />
-                  }
-                >
-                  Next
-                </ButtonComponent>
-              )}
-
-              {/* Save Buttons - tampil jika step terakhir */}
-              {currentStep === steps.length - 1 && (
-                <>
-                  <Form.Item>
-                    <ButtonComponent
-                      type="submit"
-                      htmlType={"submit"}
-                      form={"form"}
-                      onClick={() => setTypeSubmit(false)}
-                    >
-                      Save As Draft
-                    </ButtonComponent>
-                  </Form.Item>
-                  <Form.Item>
-                    <ButtonComponent
-                      type="submit"
-                      htmlType={"submit"}
-                      form={"form"}
-                      onClick={() => setTypeSubmit(true)}
-                    >
-                      Save & Submit
-                    </ButtonComponent>
-                  </Form.Item>
-                </>
-              )}
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClearOrReset}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+          />
         </Form>
 
-        {/* Existing Modals */}
         <ModalCustom
           isOpen={modalConfirm}
           type={"confirmation"}
@@ -1671,7 +1649,6 @@ const PosForm = ({ type }) => {
           />
         </ModalCustom>
 
-        {/* Modal Retry */}
         <ModalError
           isOpen={modalError}
           handleOk={handleRetry}
@@ -1692,12 +1669,10 @@ const PosForm = ({ type }) => {
           </div>
         </ModalError>
 
-        {/* Modal Daily Rate is Null or Undefined */}
         <ModalError
           isOpen={modalDailyRate}
           handleOk={() => setModalDailyRate(false)}
           handleCancel={() => setModalDailyRate(false)}
-          // customText={"Try Again"}
         >
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
@@ -1708,7 +1683,6 @@ const PosForm = ({ type }) => {
           </div>
         </ModalError>
 
-        {/* Modal Back*/}
         <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
