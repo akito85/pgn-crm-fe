@@ -9,6 +9,11 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import DocViewer from "react-doc-viewer";
+import ReactDOM from "react-dom";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 import ApprovalPointOfSales from "./Modal/ApprovalPointOfSales";
 import PosDetail from "./PosDetail";
 import PosTableView from "./Table/PosTableView";
@@ -63,6 +68,53 @@ const PosPage = () => {
   const [modalDelete, setModalDelete] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
+
+  const handlePreviewInvoice = async (record) => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/pos/download-latest/${record.posNumber}`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        },
+      );
+
+      const responseBlob = await response.data;
+      const blobText =
+        responseBlob instanceof Blob ? await responseBlob.text() : responseBlob;
+      const contentType = response.headers["content-type"];
+
+      const blob = new Blob([blobText], {
+        type: contentType ? "application/pdf" : "application/rtf",
+      });
+
+      const blobUrl = URL.createObjectURL(blob);
+      const newTab = window.open(blobUrl, "_blank");
+
+      if (newTab) {
+        newTab.document.title = `Invoice Preview - ${record.posNumber}`;
+
+        // TAMBAHAN: Gunakan DocViewer seperti di ViewInvoice.js
+        const viewerContainer = document.createElement("div");
+        newTab.document.body.appendChild(viewerContainer);
+
+        ReactDOM.render(
+          <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
+          viewerContainer,
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to preview invoice";
+
+      setBodyError({ message });
+      setModalError(true);
+    }
+  };
 
   const handleOpenCustomerTypeModal = () => {
     setSelectedCustomerType(null);
@@ -350,13 +402,25 @@ const PosPage = () => {
               icon={<SVGIcon name="IconEye" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isAvailable}
+              onClick={() => isAvailable && handlePreviewInvoice(record)}
             >
               <span className={"text-black ml-3"}>Preview Invoice</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Detail">
-              <div className="">
-                <SVGIcon name="IconEye" width={20} />
+            <Tooltip title="Preview Invoice">
+              <div
+                onClick={() => isAvailable && handlePreviewInvoice(record)}
+                style={{
+                  cursor: isAvailable ? "pointer" : "not-allowed",
+                  display: "inline-block",
+                  lineHeight: 0,
+                }}
+              >
+                <SVGIcon
+                  name="IconEye"
+                  width={20}
+                  color={isAvailable ? "#0075bf" : "#8D91A0"}
+                />
               </div>
             </Tooltip>
           );
@@ -364,6 +428,7 @@ const PosPage = () => {
         return content;
       },
     },
+
     {
       action: "Update",
       type: "table",
