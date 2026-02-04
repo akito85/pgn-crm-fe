@@ -867,13 +867,80 @@ const NotificationDropdown = () => {
           }
         }
 
-        @keyframes badgePulse {
+        @keyframes bellPulse {
           0%, 100% {
             transform: scale(1);
             opacity: 1;
           }
           50% {
+            transform: scale(1.15);
+            opacity: 0.9;
+          }
+        }
+
+        @keyframes bellHeartbeat {
+          0% {
+            transform: scale(1);
+          }
+          25% {
+            transform: scale(1.2);
+          }
+          50% {
+            transform: scale(1);
+          }
+          75% {
+            transform: scale(1.15);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        @keyframes bellFadeInOut {
+          0%, 100% {
+            opacity: 0.7;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+
+        @keyframes bellCombinedAnimation {
+          0% {
+            transform: scale(1);
+            opacity: 0.8;
+          }
+          10% {
+            transform: scale(1.05);
+          }
+          20% {
+            transform: scale(1);
+          }
+          30% {
             transform: scale(1.1);
+            opacity: 1;
+          }
+          40% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+          60% {
+            transform: scale(1);
+            opacity: 0.85;
+          }
+          70% {
+            transform: scale(1.12);
+          }
+          80% {
+            transform: scale(1);
+          }
+          90% {
+            transform: scale(1.08);
+          }
+          100% {
+            transform: scale(1);
             opacity: 0.8;
           }
         }
@@ -893,8 +960,67 @@ const NotificationDropdown = () => {
           animation: tabClick 0.2s ease-in-out;
         }
 
-        .badge-pulse {
-          animation: badgePulse 2s ease-in-out infinite;
+        .notification-indicator {
+          position: absolute;
+          top: 7px;
+          right: 1px;
+          width: 12px;
+          height: 12px;
+          background-color: #FF4D4F;
+          border-radius: 50%;
+          box-shadow: 0 0 6px #FF4D4F;
+          animation: indicatorPulse 2s infinite;
+        }
+
+        @keyframes indicatorPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 0.7;
+          }
+        }
+
+        @keyframes indicatorHeartbeat {
+          0% {
+            transform: scale(1);
+          }
+          25% {
+            transform: scale(1.3);
+          }
+          50% {
+            transform: scale(1);
+          }
+          75% {
+            transform: scale(1.2);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        @keyframes indicatorFadeInOut {
+          0%, 100% {
+            opacity: 0.7;
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.1);
+          }
+        }
+
+        .indicator-pulse {
+          animation: indicatorPulse 2s ease-in-out infinite;
+        }
+
+        .indicator-heartbeat {
+          animation: indicatorHeartbeat 2s ease-in-out infinite;
+        }
+
+        .indicator-fade-in-out {
+          animation: indicatorFadeInOut 2s ease-in-out infinite;
         }
 
         .notification-slide-out {
@@ -931,33 +1057,28 @@ const NotificationDropdown = () => {
         />
       )}
       <div style={{ position: 'relative', display: 'flex' }}>
-        <Badge
-          count={safeUnreadCount}
-          offset={[-5, 10]}
-          overflowCount={99}
-          style={{ boxShadow: '0 0 0 2px #fff' }}
-          className={safeUnreadCount > 0 ? 'badge-pulse' : ''}
+        <a
+          onClick={(e) => {
+            e.preventDefault();
+            toggleDropdown();
+          }}
+          className="pt-2.5"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
-          <a
-            onClick={(e) => {
-              e.preventDefault();
-              toggleDropdown();
-            }}
-            className="pt-2.5"
+          <BellOutlined
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              fontSize: "24px",
+              color: "#FFFFFF",
             }}
-          >
-            <BellOutlined
-              style={{
-                fontSize: "24px",
-                color: "#FFFFFF",
-              }}
-            />
-          </a>
-        </Badge>
+          />
+          {safeUnreadCount > 0 && (
+            <span className="notification-indicator"></span>
+          )}
+        </a>
         {isDropdownOpen && (
           <div
             style={{
