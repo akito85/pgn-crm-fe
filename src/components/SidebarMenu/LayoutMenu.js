@@ -402,7 +402,7 @@ const LayoutMenu = ({ children }) => {
           </div>
           <SideMenu isCollapsed={collapsed} />
         </Sider>
-        <Layout className="site-layout2">
+        <Layout className="site-layout2 p-4">
           <Header
             className="site-layout-background2"
             style={{
@@ -460,8 +460,6 @@ const LayoutMenu = ({ children }) => {
           </Header>
           <Content
             style={{
-              marginLeft: "20px",
-              marginRight: "20px",
               overflow: "initial",
             }}
           >

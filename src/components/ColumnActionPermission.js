@@ -15,7 +15,7 @@ export const RenderContentActions = (
 ) => {
   if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center gap-4">
+      <div className="w-full flex justify-center items-center py-1 gap-4">
         <Popover
           trigger={"click"}
           placement="bottomRight"
@@ -23,9 +23,9 @@ export const RenderContentActions = (
             <Space direction="vertical">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
-                ?.map((item) => {
+                ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
-                    return item?.render(record, totalLength);
+                    return item?.render(record, totalLength, index);
                   } else {
                     return null;
                   }
@@ -33,25 +33,25 @@ export const RenderContentActions = (
             </Space>
           }
         >
-          <div className="pt-0">
+          <div>
             <MoreOutlined
               style={{
-                fontSize: "24px",
+                fontSize: "20px",
                 color: "#0075bf",
                 cursor: "pointer",
               }}
             />
           </div>
         </Popover>
-        <div className="pt-1">
+        <div>
           {itemRender
             ?.filter((item) => item?.action === sliceColumn?.toLowerCase())
-            ?.map((item) => {
+            ?.map((item, index) => {
               if (
                 permissions?.includes(sliceColumn?.toLowerCase()) === true &&
                 item?.action === sliceColumn?.toLowerCase()
               ) {
-                return item?.render(record, totalLength);
+                return item?.render(record, totalLength, index);
               } else {
                 return null;
               }
@@ -61,10 +61,10 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 mt-1 items-start">
-        {itemRender?.map((item) => {
+      <div className="w-full flex justify-center gap-4 py-1 items-center">
+        {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
-            return item?.render(record, totalLength);
+            return item?.render(record, totalLength, index);
           } else {
             return null;
           }

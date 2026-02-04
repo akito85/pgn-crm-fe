@@ -194,12 +194,6 @@ const NotificationHistory = () => {
   const handleConfirmFilters = () => {
     // Filters are applied automatically via state changes
     // This could be used to log analytics or trigger other actions
-    console.log("Filters applied:", {
-      search,
-      startDate,
-      endDate,
-      notificationType: selectedNotificationType
-    });
   };
 
   /**
@@ -365,37 +359,26 @@ const NotificationHistory = () => {
    * Handle notification click - State-based navigation
    */
   const handleNotificationClick = (notification) => {
-    console.log('=== Notification Click Debug ===');
-    console.log('Full notification object:', notification);
-
     // Mark as read if not already read
     const notificationId = notification.id || notification.ID;
     const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
 
-    console.log('Notification ID:', notificationId);
-    console.log('Is Read:', isRead);
-
     if (!isRead && notificationId) {
-      console.log('Marking notification as read:', notificationId);
       dispatch(markAsRead(notificationId));
     }
 
     // Navigate using state-based routing pattern
     const link = notification.link || notification.LINK;
-    console.log('Navigation link:', link);
 
     if (link) {
       // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
       let parsedNavigationState = {};
       const navState = notification.navigationState || notification.NAVIGATION_STATE;
-      console.log('Raw NAVIGATION_STATE:', navState);
 
       if (navState) {
         try {
           parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
-          console.log('Parsed NAVIGATION_STATE:', parsedNavigationState);
         } catch (e) {
-          console.error('Failed to parse NAVIGATION_STATE:', e);
           parsedNavigationState = {};
         }
       }
@@ -420,25 +403,17 @@ const NotificationHistory = () => {
         routeState.approvalLevel = approvalLevel;
       }
 
-      console.log('Final route state:', routeState);
-      console.log('Navigating to:', link);
-
       // Navigate based on presence of entity_id
       if (notification.entityId || notification.ENTITY_ID) {
-        console.log('Navigation with entity state');
         navigate(link, { state: routeState });
       } else {
-        console.log('Navigation without entity');
         navigate(link, {
           state: Object.keys(parsedNavigationState).length > 0
             ? parsedNavigationState
             : undefined
         });
       }
-    } else {
-      console.log('No link found - skipping navigation');
     }
-    console.log('=== End Notification Click Debug ===');
   };
 
   /**
@@ -811,6 +786,22 @@ const NotificationHistory = () => {
                                       {getPriorityString(notification.priority || notification.PRIORITY).toUpperCase()}
                                     </div>
                                   )}
+                                {/* Broadcast Badge */}
+                                {notification.direction === "broadcast" && (
+                                  <div
+                                    style={{
+                                      fontSize: 9,
+                                      fontWeight: 600,
+                                      color: '#722ed1',
+                                      verticalAlign: 'super',
+                                      lineHeight: 1,
+                                      margin: 0,
+                                      padding: 0
+                                    }}
+                                  >
+                                    BROADCAST
+                                  </div>
+                                )}
                                 {/* New Badge */}
                                 {(() => {
                                   const notificationTime = notification.receivedAt || notification.RECEIVED_AT || notification.createdAt || notification.CREATED_AT;
@@ -849,11 +840,6 @@ const NotificationHistory = () => {
                                       getNotificationTimestamp(notification)
                                     )}
                                   </Text>
-                                  {notification.direction === "broadcast" && (
-                                    <Tag color="purple" style={{ fontSize: 10 }}>
-                                      BROADCAST
-                                    </Tag>
-                                  )}
                                 </div>
                               </div>
                             }

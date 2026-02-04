@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import { Spin } from "antd";
 import { Fragment } from "react";
 import TaxIdentifier from "./TaxIdentifierHeader/TaxIdentifier";
@@ -20,4 +20,4 @@ const TaxIdentifierAndRelation = ({ access, id = 0 }) => {
   );
 };
 
-export default TaxIdentifierAndRelation;
+export default memo(TaxIdentifierAndRelation);

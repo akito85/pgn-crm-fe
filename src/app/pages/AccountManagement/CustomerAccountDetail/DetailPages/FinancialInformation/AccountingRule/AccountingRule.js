@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { memo, useEffect } from "react";
 
 
 import { Form, Spin } from "antd";
@@ -88,4 +88,4 @@ const AccountingRule = ({ id = 0 }) => {
   );
 };
 
-export default AccountingRule;
+export default memo(AccountingRule);

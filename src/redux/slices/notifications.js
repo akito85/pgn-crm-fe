@@ -61,6 +61,24 @@ const initialState = {
     soundEnabled: true,
     desktopNotificationsEnabled: false,
     maxNotifications: 100, // Maximum notifications to keep in state
+    displayType: "standard",
+    modulePreferences: {},
+    typePreferences: {},
+  },
+
+  // Settings loading state
+  settingsLoading: false,
+  settingsError: null,
+
+  // Global settings (available modules and types)
+  globalSettings: {
+    defaultDisplayType: "standard",
+    defaultMaxNotifications: 50,
+    defaultSoundEnabled: true,
+    defaultDesktopNotificationsEnabled: true,
+    displayTypeOptions: ["standard", "toast", "popup", "inline"],
+    availableModules: [],
+    availableTypes: [],
   },
 };
 
@@ -83,7 +101,6 @@ export const connectNotifications = createAsyncThunk(
             dispatch(addNotification(notification));
           },
           onError: (error) => {
-            console.error("[Notifications Slice] Connection error:", error);
             dispatch(setConnectionError(error));
           },
           onConnect: (data) => {
@@ -98,7 +115,6 @@ export const connectNotifications = createAsyncThunk(
         dispatch(setConnectionStatus("connecting"));
       });
     } catch (error) {
-      console.error("[Notifications Slice] Connect error:", error);
       return rejectWithValue({
         message: error.message || "Failed to connect to notification stream",
         error,
@@ -117,7 +133,6 @@ export const fetchUserNotifications = createAsyncThunk(
       const response = await notificationApi.getUserNotifications(params);
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching user notifications:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch notifications",
         error,
@@ -136,7 +151,6 @@ export const fetchAllUserNotifications = createAsyncThunk(
       const response = await notificationApi.getAllUserNotifications(userId, params);
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching all user notifications:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch all notifications",
         error,
@@ -155,7 +169,6 @@ export const fetchUnreadCount = createAsyncThunk(
       const response = await notificationApi.getUnreadNotificationsCount();
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching unread count:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch unread count",
         error,
@@ -174,7 +187,6 @@ export const fetchUnreadNotifications = createAsyncThunk(
       const response = await notificationApi.getUnreadNotifications(params);
       return response;
     } catch (error) {
-      console.error("[Notifications Slice] Error fetching unread notifications:", error);
       return rejectWithValue({
         message: error.message || "Failed to fetch unread notifications",
         error,
@@ -196,7 +208,6 @@ export const markNotificationAsReadApi = createAsyncThunk(
       // Return a simple success indicator instead of the full response to avoid rendering issues
       return { success: true };
     } catch (error) {
-      console.error("[Notifications Slice] Error marking notification as read:", error);
       return rejectWithValue({
         message: error.message || "Failed to mark notification as read",
         error,
@@ -218,7 +229,6 @@ export const markAllNotificationsAsReadApi = createAsyncThunk(
       // Return a simple success indicator instead of the full response to avoid rendering issues
       return { success: true };
     } catch (error) {
-      console.error("[Notifications Slice] Error marking all notifications as read:", error);
       return rejectWithValue({
         message: error.message || "Failed to mark all notifications as read",
         error,
@@ -240,7 +250,6 @@ export const deleteNotificationApi = createAsyncThunk(
       // Return a simple success indicator instead of the full response to avoid rendering issues
       return { success: true };
     } catch (error) {
-      console.error("[Notifications Slice] Error deleting notification:", error);
       return rejectWithValue({
         message: error.message || "Failed to delete notification",
         error,
@@ -258,6 +267,63 @@ export const disconnectNotifications = createAsyncThunk(
     notificationService.disconnect();
     dispatch(setConnectionStatus("disconnected"));
     return { disconnected: true };
+  }
+);
+
+/**
+ * Fetch user notification settings from API
+ */
+export const fetchUserSettings = createAsyncThunk(
+  "notifications/fetchUserSettings",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await notificationApi.getNotificationSettings();
+      return response;
+    } catch (error) {
+      return rejectWithValue({
+        message: error.message || "Failed to fetch notification settings",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Update user notification settings via API
+ */
+export const updateUserSettingsApi = createAsyncThunk(
+  "notifications/updateUserSettings",
+  async (settings, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await notificationApi.updateNotificationSettings(settings);
+      // Update local state as well
+      dispatch(updateSettings(settings));
+      return response;
+    } catch (error) {
+      return rejectWithValue({
+        message: error.message || "Failed to update notification settings",
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Fetch global notification settings from API
+ * Returns available modules, types, and default settings
+ */
+export const fetchGlobalSettings = createAsyncThunk(
+  "notifications/fetchGlobalSettings",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await notificationApi.getGlobalSettings();
+      return response;
+    } catch (error) {
+      return rejectWithValue({
+        message: error.message || "Failed to fetch global notification settings",
+        error,
+      });
+    }
   }
 );
 
@@ -442,8 +508,6 @@ const notificationsSlice = createSlice({
       state.connectionError = action.payload;
       state.connectionStatus = "error";
       state.reconnectAttempts += 1;
-
-      console.error("[Notifications Slice] Connection error:", action.payload);
     },
 
     /**
@@ -494,8 +558,6 @@ const notificationsSlice = createSlice({
 
       })
       .addCase(connectNotifications.rejected, (state, action) => {
-        console.error("[Notifications Slice - Reducer] connectNotifications.rejected triggered");
-        console.error("[Notifications Slice - Reducer] Action payload:", action.payload);
         state.isLoading = false;
         state.connectionStatus = "error";
         state.error = action.payload?.message || "Failed to connect";
@@ -627,8 +689,82 @@ const notificationsSlice = createSlice({
       .addCase(disconnectNotifications.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload?.message || "Failed to disconnect";
+      });
 
-        console.error("[Notifications Slice] Disconnect failed:", action.payload);
+    // Fetch user settings
+    builder
+      .addCase(fetchUserSettings.pending, (state) => {
+        state.settingsLoading = true;
+        state.settingsError = null;
+      })
+      .addCase(fetchUserSettings.fulfilled, (state, action) => {
+        state.settingsLoading = false;
+        const data = action.payload?.data;
+        if (data) {
+          state.settings = {
+            soundEnabled: data.soundEnabled ?? true,
+            desktopNotificationsEnabled: data.desktopNotificationsEnabled ?? false,
+            maxNotifications: data.maxNotifications ?? 100,
+            displayType: data.displayType ?? "standard",
+            modulePreferences: data.modulePreferences ?? {},
+            typePreferences: data.typePreferences ?? {},
+          };
+        }
+      })
+      .addCase(fetchUserSettings.rejected, (state, action) => {
+        state.settingsLoading = false;
+        state.settingsError = action.payload?.message || "Failed to fetch settings";
+      });
+
+    // Update user settings
+    builder
+      .addCase(updateUserSettingsApi.pending, (state) => {
+        state.settingsLoading = true;
+        state.settingsError = null;
+      })
+      .addCase(updateUserSettingsApi.fulfilled, (state, action) => {
+        state.settingsLoading = false;
+        const data = action.payload?.data;
+        if (data) {
+          state.settings = {
+            soundEnabled: data.soundEnabled ?? state.settings.soundEnabled,
+            desktopNotificationsEnabled: data.desktopNotificationsEnabled ?? state.settings.desktopNotificationsEnabled,
+            maxNotifications: data.maxNotifications ?? state.settings.maxNotifications,
+            displayType: data.displayType ?? state.settings.displayType,
+            modulePreferences: data.modulePreferences ?? state.settings.modulePreferences,
+            typePreferences: data.typePreferences ?? state.settings.typePreferences,
+          };
+        }
+      })
+      .addCase(updateUserSettingsApi.rejected, (state, action) => {
+        state.settingsLoading = false;
+        state.settingsError = action.payload?.message || "Failed to update settings";
+      });
+
+    // Fetch global settings
+    builder
+      .addCase(fetchGlobalSettings.pending, (state) => {
+        state.settingsLoading = true;
+        state.settingsError = null;
+      })
+      .addCase(fetchGlobalSettings.fulfilled, (state, action) => {
+        state.settingsLoading = false;
+        const data = action.payload?.data;
+        if (data) {
+          state.globalSettings = {
+            defaultDisplayType: data.defaultDisplayType ?? "standard",
+            defaultMaxNotifications: data.defaultMaxNotifications ?? 50,
+            defaultSoundEnabled: data.defaultSoundEnabled ?? true,
+            defaultDesktopNotificationsEnabled: data.defaultDesktopNotificationsEnabled ?? true,
+            displayTypeOptions: data.displayTypeOptions ?? ["standard", "toast", "popup", "inline"],
+            availableModules: data.availableModules ?? [],
+            availableTypes: data.availableTypes ?? [],
+          };
+        }
+      })
+      .addCase(fetchGlobalSettings.rejected, (state, action) => {
+        state.settingsLoading = false;
+        state.settingsError = action.payload?.message || "Failed to fetch global settings";
       });
   },
 });
@@ -742,6 +878,27 @@ export const selectIsConnected = (state) =>
 // Get latest notification
 export const selectLatestNotification = (state) =>
   state.notifications.notifications[0] || null;
+
+// Get settings loading state
+export const selectSettingsLoading = (state) => state.notifications.settingsLoading;
+
+// Get settings error
+export const selectSettingsError = (state) => state.notifications.settingsError;
+
+// Get global settings
+export const selectGlobalSettings = (state) => state.notifications.globalSettings;
+
+// Get available modules from global settings
+export const selectAvailableModules = (state) =>
+  state.notifications.globalSettings?.availableModules || [];
+
+// Get available types from global settings
+export const selectAvailableTypes = (state) =>
+  state.notifications.globalSettings?.availableTypes || [];
+
+// Get display type options from global settings
+export const selectDisplayTypeOptions = (state) =>
+  state.notifications.globalSettings?.displayTypeOptions || ["standard", "toast", "popup", "inline"];
 
 /**
  * Export reducer
