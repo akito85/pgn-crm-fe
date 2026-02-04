@@ -28,6 +28,8 @@ import {
   getDetailPDHistory,
   updatePD,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const ProductDistributionForm = ({ type }) => {
   // Selector
@@ -300,123 +302,164 @@ const ProductDistributionForm = ({ type }) => {
         />
 
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <BaseContainer header={"Raw Material Source Information"}>
-            <div className="w-full grid grid-cols-3 gap-3">
-              <Form.Item
-                label={"Effective Date"}
-                name={"effectiveDate"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Effective Date!",
-                  },
-                ]}
-              >
-                <DateComponent
-                  disabled={type !== "create" ? true : false}
-                  onChange={(e) => handleStartDate(e)}
-                  dateDisable={disabledDate}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label={"Local (%)"}
-                name={"value1"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Local (%)!",
-                  },
-                ]}
-              >
-                <InputComponent type={"number"} />
-              </Form.Item>
-
-              <Form.Item
-                label={"Export (%)"}
-                name={"value2"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Export (%)!",
-                  },
-                ]}
-              >
-                <InputComponent type={"number"} />
-              </Form.Item>
-
-              <div className="col-span-3">
+          <div className="flex flex-col gap-y-4 mt-4">
+            <NxCardContainer header={"RAW MATERIAL SOURCE INFORMATION"}>
+              <div className="w-full grid grid-cols-3 gap-3">
                 <Form.Item
-                  label={"Description"}
-                  name={"description"}
-                  className={"w-full"}
+                  label={"Effective Date"}
+                  name={"effectiveDate"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Effective Date!",
+                    },
+                  ]}
                 >
-                  <InputComponent
-                    type="textarea"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                  <DateComponent
+                    disabled={type !== "create" ? true : false}
+                    onChange={(e) => handleStartDate(e)}
+                    dateDisable={disabledDate}
                   />
                 </Form.Item>
-              </div>
-            </div>
-          </BaseContainer>
 
-          <BaseContainer header={"Raw Material Source Import Detail"}>
-            <FunctionalPDDetail
-              type={type}
-              data={listDataDetail}
-              updateData={setListDataDetail}
-              setStoredData={setStoredDataInline}
-              storedData={storedDataInline}
-              required={{ required: true, message: "Please input your" }}
-            />
-          </BaseContainer>
-
-          <div className="flex mt-[30px]">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
+                <Form.Item
+                  label={"Local (%)"}
+                  name={"value1"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Local (%)!",
+                    },
+                  ]}
                 >
-                  {type === "update" ? "Reset" : "Clear"}
+                  <InputComponent type={"number"} />
+                </Form.Item>
+
+                <Form.Item
+                  label={"Export (%)"}
+                  name={"value2"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Export (%)!",
+                    },
+                  ]}
+                >
+                  <InputComponent type={"number"} />
+                </Form.Item>
+
+                <div className="col-span-3">
+                  <Form.Item
+                    label={"Description"}
+                    name={"description"}
+                    className={"w-full"}
+                  >
+                    <InputComponent
+                      type="textarea"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+            </NxCardContainer>
+
+            <NxCardContainer header={"RAW MATERIAL SOURCE IMPORT DETAIL"}>
+              <FunctionalPDDetail
+                type={type}
+                data={listDataDetail}
+                updateData={setListDataDetail}
+                setStoredData={setStoredDataInline}
+                storedData={storedDataInline}
+                required={{ required: true, message: "Please input your" }}
+              />
+            </NxCardContainer>
+
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <ButtonComponent
+                  type={"menu"}
+                  onClick={()=>{navigate(-1)}}
+                >
+                  Cancel
                 </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
-            </div>
+                <div className="flex w-full justify-end gap-x-4">
+                  <Form.Item>
+                    <ButtonComponent
+                      disabled={storedDataInline ? true : false}
+                      icon={
+                        <SVGIcon
+                          name={
+                            type === "update"
+                              ? `IconButtonReset`
+                              : `IconButtonClear`
+                          }
+                          width={24}
+                        />
+                      }
+                      type="submit"
+                      onClick={() => {
+                        handleClear();
+                      }}
+                    >
+                      {type === "update" ? "Reset" : "Clear"}
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item>
+                    <ButtonComponent type="submit" htmlType={"submit"}>
+                      Save
+                    </ButtonComponent>
+                  </Form.Item>
+                </div>
+              </div>
+            </NxBaseContainer>
+
+            {/* <div className="flex mt-[30px]">
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => setModalBack(true)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
+                  />
+                }
+              >
+                Back
+              </ButtonComponent>
+
+              <div className={"w-full flex justify-end gap-5"}>
+                <Form.Item>
+                  <ButtonComponent
+                    disabled={storedDataInline ? true : false}
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update"
+                            ? `IconButtonReset`
+                            : `IconButtonClear`
+                        }
+                        width={24}
+                      />
+                    }
+                    type="submit"
+                    onClick={() => {
+                      handleClear();
+                    }}
+                  >
+                    {type === "update" ? "Reset" : "Clear"}
+                  </ButtonComponent>
+                </Form.Item>
+                <Form.Item>
+                  <ButtonComponent type="submit" htmlType={"submit"}>
+                    Save
+                  </ButtonComponent>
+                </Form.Item>
+              </div>
+            </div> */}
           </div>
         </Form>
 
