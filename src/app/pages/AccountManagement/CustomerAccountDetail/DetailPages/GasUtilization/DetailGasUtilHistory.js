@@ -8,6 +8,7 @@ import { getColumnSearchProps } from '../../../../../../utils/getColumnSearchPro
 import { sorterFunction } from '../../../../../../utils/sorterFunction'
 import moment from 'moment'
 import { dateFormatting } from '../../../../../../utils'
+import NxTable from '../../../../../../components/Nx/NxTable'
 
 const columns = (
   search,
@@ -102,6 +103,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const hasMore = dataDetail?.gasUtilsDtl ? page * pageSize < dataDetail?.gasUtilsDtl.length : false;
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -122,6 +124,14 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   }, [pageSize]);
+
+  const onSort = (_, __, sort) => {
+    const dataSort =
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
 
   return (
     <>
@@ -163,14 +173,15 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
         {/* Table */}
         <div className="mb-6">
           <div className="text-primary text-xs font-semibold uppercase py-[30px]">CONTACT DETAIL INFORMATION</div>
-          <TablePaginationNew
-            type='FE'
-            useSelect
-            pageSize={pageSize}
-            current={page}
+          <NxTable
+            idTable="table-detail-gas-util-history"
             dataSource={dataDetail?.gasUtilsDtl}
-            tableScrolled={{y: 625 }}
-            onChange={handleChange}
+            totalData={dataDetail?.gasUtilsDtl?.length || 0}
+            current={page}
+            tableScrolled={{ y: 400 }}
+            onSort={onSort}
+            usePagination={false}
+            useInfiniteScroll={true}
             columns={
               columns(
                 search,
@@ -182,6 +193,8 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
                 handleSearch
               )
             }
+            pagination={false}
+            scroll={{ y: 400 }}
           />
         </div>
         

@@ -342,7 +342,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
           setOpenModalDelete(false)
         }}
         handleOk={handleConfirmModalDelete}
-        header={"Delete Gas Utilization"}
+        header={"DELETE GAS UTILIZATION"}
         width={500}
         type={"confirmation"}
         footer={[
