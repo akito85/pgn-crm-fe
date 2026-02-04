@@ -5,8 +5,8 @@ import DetailText from "../../../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 
 const columns = (
   page = 1,
@@ -155,14 +155,16 @@ const RawMaterialSourceDetail = ({ data_detail, openModal, closeModal }) => {
         Raw Material Source Import Detail
       </div>
 
-      <TablePaginationNew
-        type="FE"
+      <NxTable
+        idTable="raw-material-source-detail-table"
         dataSource={data_detail?.srcDistDtl}
         totalData={data_detail?.srcDistDtl?.length}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={false}
         current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: "auto" }}
-        onChange={handleChange}
+        tableScrolled={{ y: 400, x: data_detail?.srcDistDtl?.length ? "max-content" : "100%" }}
+        onSort={sorter}
         columns={columns(
           page,
           pageSize,
@@ -170,8 +172,6 @@ const RawMaterialSourceDetail = ({ data_detail, openModal, closeModal }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          onFilter,
-          sorter
         )}
       />
     </ModalCustom>

@@ -1,11 +1,16 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import DetailText from "../../../../../../../components/DetailText";
 import { useDispatch, useSelector } from "react-redux";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
 import { getCurrentRaw } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import { dateFormatting, hasValue, renderColumn } from "../../../../../../../utils";
 import moment from "moment";
+import NxTable from '../../../../../../../components/Nx/NxTable'
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import { NavLink } from "react-router-dom";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../../../assets/Icon/index";
+import Toolbar from "../../../../../../../components/Toolbar";
 
 const columns = (
   search,
@@ -14,9 +19,9 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  onFilter = () => {},
-  sorter = () => {}
+  handleSearch = () => { },
+  onFilter = () => { },
+  sorter = () => { }
 ) => {
   return [
     {
@@ -62,6 +67,28 @@ const columns = (
 };
 
 const CurrentRawMaterialSource = ({ id, idCustomer }) => {
+  const itemGrantAccess = [
+    {
+      action: "Create",
+      render: (
+        <NavLink
+          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RAW_MATERIAL_SOURCE}
+          state={{
+            accountId: id,
+            idCustomer: idCustomer,
+          }}
+        >
+          <ButtonComponent
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            type="submit"
+          >
+            Create
+          </ButtonComponent>
+        </NavLink>
+      ),
+    }
+  ];
+  
   // Selector
   const { data_current } = useSelector((state) => state.rawMaterialSource);
 
@@ -151,26 +178,31 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
         Raw Material Source Detail
       </div>
 
-      <TablePaginationNew
-        type="FE"
-        dataSource={dataSource}
-        totalData={dataSource?.srcDistDtl?.length}
-        current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: "auto" }}
-        onChange={handleChange}
-        columns={columns(
-          search,
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          onFilter,
-          sorter
-        )}
-      />
+      <div className="flex flex-col gap-y-4">
+        <Toolbar items={itemGrantAccess} type="detail" />
+
+        <NxTable
+          idTable="table-current-raw-material-source"
+          dataSource={dataSource}
+          totalData={dataSource?.srcDistDtl?.length}
+          current={page}
+          tableScrolled={{ y: 400, x: dataSource?.srcDistDtl?.length ? "max-content" : "100%" }}
+          onSort={sorter}
+          columns={columns(
+            search,
+            page,
+            pageSize,
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            onFilter,
+            sorter
+          )}
+          usePagination={false}
+          useInfiniteScroll={true}
+        />
+      </div>
     </Fragment>
   );
 };

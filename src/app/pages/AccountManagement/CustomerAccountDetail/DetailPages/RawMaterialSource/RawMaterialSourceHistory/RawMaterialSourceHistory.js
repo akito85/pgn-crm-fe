@@ -8,9 +8,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import { Link, useLocation } from "react-router-dom";
 import RawMaterialSourceDetail from "./RawMaterialSourceDetail";
 import {
   ModalConfirm,
@@ -22,6 +20,7 @@ import {
   getDetailRMSHistory,
 } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 
 const columns = (
   search,
@@ -188,26 +187,6 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "Create",
-      render: (
-        <NavLink
-          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RAW_MATERIAL_SOURCE}
-          state={{
-            accountId: id,
-            idCustomer: idCustomer,
-          }}
-        >
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-
     // Column Action Table
     {
       action: "View",
@@ -335,13 +314,12 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
         />
       </div>
 
-      <TablePaginationNew
+      <NxTable
+        idTable="table-raw-material-source-history"
         dataSource={dataSource}
         totalData={data?.page?.totalElements}
         current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: 1000 }}
-        onChange={handleChange}
+        tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
         onSort={onSort}
         columns={[
           ...columns(
@@ -361,6 +339,8 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
             access_account
           ),
         ]}
+        usePagination={false}
+        useInfiniteScroll={true}
       />
 
       {/* Modal Detail */}
