@@ -294,6 +294,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
+                mandatory={true}
               />
             </BaseContainer>
           </div>
