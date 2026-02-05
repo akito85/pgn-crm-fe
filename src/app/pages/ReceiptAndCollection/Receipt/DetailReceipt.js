@@ -897,16 +897,16 @@ const DetailReceipt = ({
             </DetailText>
           </div>
         </BaseContainer>
-        <BaseContainer header={"Approval Receipt"}>
+        <BaseContainer header={"Persetujuan Tanda Terima"}>
           <div className="w-full grid grid-cols-3 gap-3">
-            <DetailText label="Approval Group">{data_detail?.approvalReceipt?.group}</DetailText>
-            <DetailText label="Approver">{data_detail?.approvalReceipt?.approver}</DetailText>
+            <DetailText label="Grup Persetujuan">{data_detail?.approvalReceipt?.group}</DetailText>
+            <DetailText label="Penyetuju">{data_detail?.approvalReceipt?.approver}</DetailText>
           </div>
         </BaseContainer>
-        <BaseContainer header={"Approval Allocation"}>
+        <BaseContainer header={"Persetujuan Alokasi"}>
           <div className="w-full grid grid-cols-3 gap-3">
-            <DetailText label="Approval Group">{data_detail?.approvalAllocation?.group}</DetailText>
-            <DetailText label="Approver">{data_detail?.approvalAllocation?.approver}</DetailText>
+            <DetailText label="Grup Persetujuan">{data_detail?.approvalAllocation?.group}</DetailText>
+            <DetailText label="Penyetuju">{data_detail?.approvalAllocation?.approver}</DetailText>
           </div>
         </BaseContainer>
 

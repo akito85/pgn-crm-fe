@@ -1,3 +1,5 @@
+// PERUBAHAN PADA CALCULATIONSUMMARY COMPONENT
+
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "antd";
@@ -36,11 +38,11 @@ const CalculationSummary = ({ ratingCode, saType }) => {
     right: [],
   }));
 
-  // Data source untuk tabel utama
+  // Data source untuk tabel utama - PERUBAHAN: gunakan id sebagai key
   const dataSource = useMemo(() => {
     return (data_calculationSummary?.result || []).map((item, index) => ({
       ...item,
-      key: `${item.transactionDate}-${item.saType}`,
+      key: item.id || `${item.transactionDate}-${item.saType}`, // Gunakan id
     }));
   }, [data_calculationSummary]);
 
@@ -59,20 +61,18 @@ const CalculationSummary = ({ ratingCode, saType }) => {
     }
   }, [ratingCode, search, page, pageSize, sort, dispatch]);
 
-  // Handle expand row - fetch data untuk row yang di-expand
+  // PERUBAHAN UTAMA: Handle expand row - fetch data menggunakan id
   const handleExpand = (expanded, record) => {
-    const rowKey = `${record.transactionDate}-${record.saType}`;
+    const rowKey = record.id; // Gunakan id sebagai key
     
     if (expanded) {
       // Add to expanded keys
       setExpandedRowKeys([...expandedRowKeys, rowKey]);
       
-      // Fetch data untuk expanded row
+      // Fetch data untuk expanded row menggunakan id
       dispatch(
         getAllCalculationSummaryExpandPaginate({
-          ratingCode,
-          transactionDate: record.transactionDate,
-          saType: record.saType,
+          id: record.id, // Kirim id
           page: 1,
           pageSize: 100, // Ambil semua data expand sekaligus
           search: "",
@@ -171,7 +171,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
             data_calculationSummaryExpand,
             loadingExpand
           ),
-          rowExpandable: () => true, // Semua row bisa di-expand
+          rowExpandable: () => true,
           columnWidth: 32,
           expandIcon: ({ expanded, onExpand, record }) => (
             <Button

@@ -1,51 +1,40 @@
-import { Fragment } from "react";
-import DetailText from "../../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../../components/BaseContainer";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const MultiDestinationDetailInfo = ({
+  subjectAccountNumber,
   dataDetail = {},
 }) => {
   return (
-    <Fragment>
-      <BaseContainer header={"MULTI DESTINATION INFORMATION"}>
+    <NxBaseContainer border>
+      <div className="flex flex-col gap-y-4">
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Multi Destination Information */}
-          <DetailText label="Account">{`${dataDetail.accountNumber}-${dataDetail.accountName}`}</DetailText>
-          <DetailText label="Account SOR">{dataDetail.sor}</DetailText>
-          <DetailText label="Account Cost Center">{dataDetail.costCenter}</DetailText>
-          <DetailText label="Metering Reading Code">{dataDetail.meterReadingCodes}</DetailText>
-          <DetailText label="Account Segment">{dataDetail.segment}</DetailText>
-          <DetailText label="Account Group Type">{dataDetail.accountGroupType}</DetailText>
-          <DetailText label="Account Type">{dataDetail.accountType}</DetailText>
-          <DetailText label="Premise Address">{dataDetail.premiseAddress}</DetailText>
-          <DetailText label="Subdistrict">{dataDetail.subDistrict}</DetailText>
-          <DetailText label="District">{dataDetail.district}</DetailText>
-          <DetailText label="City">{dataDetail.city}</DetailText>
-          <DetailText label="Country">{dataDetail.country}</DetailText>
-          <DetailText label="Longitude">{dataDetail.longitude}</DetailText>
-          <DetailText label="Latitude">{dataDetail.latitude}</DetailText>
-          <DetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
-          <DetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
-          <DetailText label="Status">{dataDetail?.status}</DetailText>
+          <NxDetailText label="Account">{`${dataDetail.accountNumber}-${dataDetail.accountName}`}</NxDetailText>
+          <NxDetailText label="Account SOR">{dataDetail.sor}</NxDetailText>
+          <NxDetailText label="Account Cost Center">{dataDetail.costCenter}</NxDetailText>
+          <NxDetailText label="Metering Reading Code">{dataDetail.meterReadingCodes}</NxDetailText>
+          <NxDetailText label="Account Segment">{dataDetail.segment}</NxDetailText>
+          <NxDetailText label="Account Group Type">{dataDetail.accountGroupType}</NxDetailText>
+          <NxDetailText label="Account Type">{dataDetail.accountType}</NxDetailText>
+          <NxDetailText label="Premise Address">{dataDetail.premiseAddress}</NxDetailText>
+          <NxDetailText label="Subdistrict">{dataDetail.subDistrict}</NxDetailText>
+          <NxDetailText label="District">{dataDetail.district}</NxDetailText>
+          <NxDetailText label="City">{dataDetail.city}</NxDetailText>
+          <NxDetailText label="Country">{dataDetail.country}</NxDetailText>
+          <NxDetailText label="Longitude">{dataDetail.longitude}</NxDetailText>
+          <NxDetailText label="Latitude">{dataDetail.latitude}</NxDetailText>
+          <NxDetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+          <NxDetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+          <NxDetailText label="Status">{dataDetail?.status}</NxDetailText>
         </div>
         <div className="w-full">
-          <DetailText label="Description">{dataDetail?.description}</DetailText>
+          <NxDetailText label="Description">{dataDetail?.description}</NxDetailText>
         </div>
-      </BaseContainer>
-
-      <BaseContainer header={"HISTORY LOG INFORMATION"}>
-        <div className="w-full grid grid-cols-5 gap-4">
-          {/* History Log Information */}
-          <DetailText label="Record Id">{dataDetail?.id}</DetailText>
-          <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
-          <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-          <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
-          <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
-        </div>
-      </BaseContainer>
-    </Fragment>
+      </div>
+    </NxBaseContainer>
   );
 };
 

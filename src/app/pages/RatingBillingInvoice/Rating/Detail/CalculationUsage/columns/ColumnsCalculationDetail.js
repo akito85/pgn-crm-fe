@@ -197,7 +197,7 @@ export const columnsCalculationDetail = (
         search,
       ),
   },
-  // GROUP: CALCULATED USAGE PARTITION
+  // CALCULATED USAGE PARTITION
   {
     title: "CALCULATED USAGE PARTITION",
     children: [
@@ -239,7 +239,7 @@ export const columnsCalculationDetail = (
       },
     ],
   },
-  // GROUP: CONVERTED CALCULATED USAGE PARTITION
+  //CONVERTED CALCULATED USAGE PARTITION
   {
     title: "CONVERTED CALCULATED USAGE PARTITION",
     children: [
@@ -281,7 +281,7 @@ export const columnsCalculationDetail = (
       },
     ],
   },
-  // GROUP: PRICE
+  // PRICE
   {
     title: "PRICE",
     children: [
@@ -342,7 +342,7 @@ export const columnsCalculationDetail = (
       },
     ],
   },
-  // GROUP: AMOUNT PARTITION
+  // AMOUNT PARTITION
   {
     title: "AMOUNT PARTITION",
     children: [

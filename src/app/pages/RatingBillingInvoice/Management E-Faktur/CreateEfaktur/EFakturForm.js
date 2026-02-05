@@ -17,7 +17,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import { configApp } from "../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import CardContainer from "../../../../../components/CardContainer";
-import { FormStepper } from "../../../../../components/FormStepNavigation"; // ✅ Import FormStepper
+import { FormStepper } from "../../../../../components/FormStepNavigation"; 
 import {
   createEFakturManual,
   getAllApprovalList,
@@ -42,7 +42,7 @@ const EFakturForm = ({ type }) => {
   const location = useLocation();
 
   // State
-  const [current, setCurrent] = useState(0); // ✅ Ubah dari currentStep ke current
+  const [current, setCurrent] = useState(0);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -80,7 +80,6 @@ const EFakturForm = ({ type }) => {
 
   const isLoading = loading || loadingForm;
 
-  // ✅ Steps configuration - update untuk FormStepper
   const steps = [
     { title: "CREATE E-FAKTUR", value: "Create-Faktur" },
     { title: "APPROVAL", value: "Approval" },
@@ -93,7 +92,6 @@ const EFakturForm = ({ type }) => {
     setValuePage(steps[current].value);
   }, [current]);
 
-  // ✅ Navigation handlers - update untuk compatibility dengan FormStepper
   const next = () => {
     const fieldsToValidate = tabPages[current]?.paramValue;
     if (fieldsToValidate) {
@@ -411,7 +409,6 @@ const EFakturForm = ({ type }) => {
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         
-        {/* ✅ Gunakan FormStepper component */}
         <FormStepper
           steps={steps}
           current={current}
