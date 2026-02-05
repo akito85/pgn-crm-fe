@@ -1,5 +1,3 @@
-// PERUBAHAN PADA COLUMNSCALCULATIONSUMMARY
-
 import React from "react";
 import { Spin } from "antd";
 import TableRBI from "../../../../../../../components/TableRBI";
@@ -15,7 +13,6 @@ import {
 } from "../../../../../../../utils/formatCurrency";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
-// Kolom untuk tabel utama tetap sama, tidak ada perubahan
 export const columnsCalculationSummary = (
   search = {},
   page,
@@ -56,6 +53,33 @@ export const columnsCalculationSummary = (
         text,
         "date",
         search,
+      ),
+  },
+  {
+    title: "USAGE",
+    dataIndex: "usage",
+    key: "usage",
+    width: 180,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "usage",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date",
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "usage",
+        hasValue(search["usage"]),
+        searchText,
+        text,
+        "date",
+        search,
+        "usage"
       ),
   },
   {
@@ -154,7 +178,7 @@ export const columnsCalculationSummary = (
   },
 ];
 
-// PERUBAHAN: Update kolom expanded sesuai response API
+// data expand column
 export const getExpandedColumns = () => [
   {
     key: "no",
@@ -162,14 +186,6 @@ export const getExpandedColumns = () => [
     isClassification: true,
     width: 60,
     render: (text, object, index) => index + 1,
-  },
-  {
-    title: "LINE NO",
-    dataIndex: "lineNo",
-    key: "lineNo",
-    width: 100,
-    align: "center",
-    render: (text) => text || "-",
   },
   {
     title: "UOM",
@@ -180,7 +196,7 @@ export const getExpandedColumns = () => [
     render: (text) => text || "-",
   },
   {
-    title: "USAGE PARTITION",
+    title: "CALCULATED USAGE PARTITION",
     children: [
       {
         title: "MIN",
@@ -297,15 +313,6 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
         <Spin tip="Loading expanded data..." />
-      </div>
-    );
-  }
-  
-  // Show empty state
-  if (!expandedData || expandedData.length === 0) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
-        No data available
       </div>
     );
   }
