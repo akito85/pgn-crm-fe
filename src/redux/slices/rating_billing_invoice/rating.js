@@ -425,13 +425,14 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
   async ({ ratingCode, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
-      
+      const sortParams =
+        sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+
       // Endpoint untuk tabel utama (summary)
       const url = `/v1/dbs/api/rating/summary-rating?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      
+
       const response = await ratingBillingHttpService.getPagination(url);
-      
+
       // Langsung return response data tanpa grouping
       return response.data;
     } catch (error) {
@@ -457,21 +458,18 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
 // Calculation Summary Expand - Tabel yang di-expand
 export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_EXPAND_PAGINATE",
-  async ({ ratingCode, transactionDate, saType, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
-      
-      // Endpoint untuk detail expanded
-      const url = `/v1/dbs/api/rating/summary-rating-expand?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      
+      const sortParams =
+        sort === undefined || sort === "" ? "ratingLineId~asc" : sort;
+
+      const url = `/v1/dbs/api/rating/summary-rating-expand/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
       const response = await ratingBillingHttpService.getPagination(url);
-      
-      // Return dengan identifier untuk row yang di-expand
       return {
         ...response.data,
-        transactionDate,
-        saType,
+        id,
       };
     } catch (error) {
       const message =
@@ -499,11 +497,12 @@ export const getAllCalculationDetailPaginate = createAsyncThunk(
   async ({ calculationCode, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "transactionDate~desc" : sort;
-      
+      const sortParams =
+        sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+
       // API endpoint menggunakan calculationCode, bukan id
       const url = `/v1/dbs/api/rating/detail-rating?calculationCode=${calculationCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(url);    
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
       const message =
@@ -541,8 +540,7 @@ export const getAllAdjustmentPaginate = createAsyncThunk(
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const dummyData = {
-        result: [
-        ],
+        result: [],
         page: {
           totalElements: 0,
           totalPages: 0,
@@ -871,10 +869,10 @@ const ratingSlice = createSlice({
 
       if (isLoadMore) {
         const existingIds = new Set(
-          (state.data?.result || []).map((item) => item.ratingId)
+          (state.data?.result || []).map((item) => item.ratingId),
         );
         const uniqueNewData = newResult.filter(
-          (item) => !existingIds.has(item.ratingId)
+          (item) => !existingIds.has(item.ratingId),
         );
         state.data = {
           ...action.payload,
@@ -991,7 +989,6 @@ const ratingSlice = createSlice({
     [getAllCalculationRuleServiceAgreementPaginate.rejected]: (state) => {
       state.loading = false;
     },
-    
 
     // Get All Rating Non Gas Pagination
     [getListRatingNonGasPaginate.pending]: (state) => {
@@ -1055,21 +1052,18 @@ const ratingSlice = createSlice({
 
     // Get All Calculation Summary Expand (Data di dalam expand)
     [getAllCalculationSummaryExpandPaginate.pending]: (state, action) => {
-      const { transactionDate, saType } = action.meta.arg;
-      const key = `${transactionDate}-${saType}`;
-      state.loadingExpand[key] = true;
+      const { id } = action.meta.arg;
+      state.loadingExpand[id] = true;
     },
     [getAllCalculationSummaryExpandPaginate.fulfilled]: (state, action) => {
-      const { transactionDate, saType } = action.payload;
-      const key = `${transactionDate}-${saType}`;
-      state.loadingExpand[key] = false;
-      state.data_calculationSummaryExpand[key] = action.payload;
+      const { id } = action.payload;
+      state.loadingExpand[id] = false;
+      state.data_calculationSummaryExpand[id] = action.payload;
     },
     [getAllCalculationSummaryExpandPaginate.rejected]: (state, action) => {
-      const { transactionDate, saType } = action.meta.arg;
-      const key = `${transactionDate}-${saType}`;
-      state.loadingExpand[key] = false;
-      state.data_calculationSummaryExpand[key] = null;
+      const { id } = action.meta.arg;
+      state.loadingExpand[id] = false;
+      state.data_calculationSummaryExpand[id] = null;
     },
 
     // Get All Calculation Detail Pagination

@@ -1,4 +1,8 @@
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsUsage = (
@@ -8,12 +12,12 @@ export const columnsUsage = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     key: "no",
     title: "NO",
-    isClassification:true,
+    isClassification: true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -22,7 +26,7 @@ export const columnsUsage = (
     title: "Billing Period",
     width: 150,
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     dataIndex: "billingPeriod",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -32,7 +36,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       renderDateColumn(
@@ -41,7 +45,7 @@ export const columnsUsage = (
         searchText,
         text,
         "datePeriod",
-        search
+        search,
       ),
   },
   {
@@ -50,7 +54,7 @@ export const columnsUsage = (
     dataIndex: "assetSerialNumber",
     width: 190,
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "assetSerialNumber",
@@ -59,7 +63,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -69,7 +73,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -78,7 +82,7 @@ export const columnsUsage = (
     dataIndex: "assetType",
     width: 130,
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "assetType",
@@ -87,7 +91,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -97,14 +101,14 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     key: "measDate",
     title: "READING DATE",
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     dataIndex: "measDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -114,7 +118,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "datetime"
+      "datetime",
     ),
     render: (text) =>
       renderDateColumn(
@@ -123,7 +127,7 @@ export const columnsUsage = (
         searchText,
         text,
         "datetime",
-        search
+        search,
       ),
   },
   {
@@ -131,7 +135,7 @@ export const columnsUsage = (
     title: "DATE",
     width: 120,
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     dataIndex: "fdate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -141,7 +145,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -150,7 +154,7 @@ export const columnsUsage = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -159,7 +163,7 @@ export const columnsUsage = (
     dataIndex: "fhour",
     width: 100,
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fhour",
@@ -168,9 +172,18 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "hour"
+      "hour",
     ),
-    render: (creationDate) => renderColumn('fhour', hasValue(search['fhour']), searchText, creationDate, false, 'input', search)
+    render: (creationDate) =>
+      renderColumn(
+        "fhour",
+        hasValue(search["fhour"]),
+        searchText,
+        creationDate,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "streamId",
@@ -178,7 +191,7 @@ export const columnsUsage = (
     dataIndex: "streamId",
     width: 120,
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "streamId",
@@ -187,7 +200,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -197,7 +210,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -205,7 +218,7 @@ export const columnsUsage = (
     title: "TEMPERATURE",
     dataIndex: "temperature",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "temperature",
@@ -214,7 +227,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -224,7 +237,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -232,7 +245,7 @@ export const columnsUsage = (
     title: "PRESSURE",
     dataIndex: "pressure",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "pressure",
@@ -241,7 +254,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -251,7 +264,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -259,7 +272,7 @@ export const columnsUsage = (
     title: "CORRECTION FACTOR",
     dataIndex: "correctionFactor",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "correctionFactor",
@@ -268,7 +281,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -278,7 +291,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -287,7 +300,7 @@ export const columnsUsage = (
     dataIndex: "calorie",
     width: 150,
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calorie",
@@ -305,7 +318,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -313,7 +326,7 @@ export const columnsUsage = (
     title: "BEGIN STAND",
     dataIndex: "beginStand",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "beginStand",
@@ -331,7 +344,8 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
+        "usage",
       ),
   },
   {
@@ -339,7 +353,7 @@ export const columnsUsage = (
     title: "END STAND",
     dataIndex: "endStand",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endStand",
@@ -357,7 +371,8 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
+        "usage",
       ),
   },
   {
@@ -365,7 +380,7 @@ export const columnsUsage = (
     title: "VOLUME 27",
     dataIndex: "volMeasured27",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "volMeasured27",
@@ -383,7 +398,8 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
+        "usage",
       ),
   },
   {
@@ -391,7 +407,7 @@ export const columnsUsage = (
     title: "VOLUME 60",
     dataIndex: "volMeasured60",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "volMeasured60",
@@ -409,7 +425,8 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
+        "usage",
       ),
   },
   {
@@ -417,7 +434,7 @@ export const columnsUsage = (
     title: "MMBTU",
     dataIndex: "engMeasured",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "engMeasured",
@@ -427,14 +444,30 @@ export const columnsUsage = (
       handleSearch,
       true,
     ),
-    render: (text) => renderColumn('engMeasured', hasValue(search['engMeasured']), searchText, text, false, 'input', search)
+    render: (text) => {
+      const fixed =
+        text && typeof text === "string" && text.startsWith(".")
+          ? `0${text}`
+          : text;
+
+      return renderColumn(
+        "engMeasured",
+        hasValue(search["engMeasured"]),
+        searchText,
+        fixed,
+        false,
+        "input",
+        search,
+        "usage",
+      );
+    },
   },
   {
     key: "ghv",
     title: "GHV",
     dataIndex: "ghv",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "ghv",
@@ -444,13 +477,22 @@ export const columnsUsage = (
       handleSearch,
       true,
     ),
-    render: (text) => renderColumn('ghv', hasValue(search['ghv']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "ghv",
+        hasValue(search["ghv"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "fileSource",
     sorter: true,
     title: "SOURCE",
-    isClassification:true,
+    isClassification: true,
     dataIndex: "fileSource",
     ellipsis: {
       showTitle: false,
@@ -462,9 +504,18 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('fileSource', hasValue(search['fileSource']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "fileSource",
+        hasValue(search["fileSource"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "taxationRowId",
@@ -472,7 +523,7 @@ export const columnsUsage = (
     dataIndex: "taxationRowId",
     width: 180,
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxationRowId",
@@ -480,15 +531,24 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('taxationRowId', hasValue(search['taxationRowId']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "taxationRowId",
+        hasValue(search["taxationRowId"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "createdDate",
     title: "CREATION DATE",
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     dataIndex: "createdDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -498,15 +558,23 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      'date'
+      "date",
     ),
-    render: (creationDate) => renderDateColumn('createdDate', hasValue(search['createdDate']), searchText, creationDate, 'date', search)
+    render: (creationDate) =>
+      renderDateColumn(
+        "createdDate",
+        hasValue(search["createdDate"]),
+        searchText,
+        creationDate,
+        "date",
+        search,
+      ),
   },
   {
     key: "approvedBy",
     title: "APPROVED BY",
     dataIndex: "approvedBy",
-    isClassification:true,
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -515,16 +583,25 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('approvedBy', hasValue(search['approvedBy']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "approvedBy",
+        hasValue(search["approvedBy"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "volMscf",
     title: "VOLUME MSCF",
     dataIndex: "volMscf",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "volMscf",
@@ -532,16 +609,25 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('volMscf', hasValue(search['volMscf']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "volMscf",
+        hasValue(search["volMscf"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "uncorrectedValue",
     title: "UNCORRECTED VOL",
     dataIndex: "uncorrectedValue",
     sorter: true,
-    isNumber:true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "uncorrectedValue",
@@ -551,13 +637,22 @@ export const columnsUsage = (
       handleSearch,
       true,
     ),
-    render: (text) => renderColumn('uncorrectedValue', hasValue(search['uncorrectedValue']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "uncorrectedValue",
+        hasValue(search["uncorrectedValue"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "lastUpdatedDate",
     title: "LAST UPDATE DATE",
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     dataIndex: "lastUpdatedDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -567,29 +662,37 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      'date'
+      "date",
     ),
-    render: (text) => renderDateColumn('lastUpdatedDate', hasValue(search['lastUpdatedDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "lastUpdatedDate",
+        hasValue(search["lastUpdatedDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     key: "source",
     title: "SOURCE",
     dataIndex: "source",
     sorter: true,
-    isClassification:true,
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       "source",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
     key: "description",
     sorter: true,
     title: "DESCRIPTION",
-    isClassification:true,
+    isClassification: true,
     dataIndex: "description",
     ellipsis: {
       showTitle: false,
@@ -602,7 +705,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -612,7 +715,7 @@ export const columnsUsage = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
 ];
