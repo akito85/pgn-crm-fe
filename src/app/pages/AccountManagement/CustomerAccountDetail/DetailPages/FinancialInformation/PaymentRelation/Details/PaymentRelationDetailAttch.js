@@ -11,6 +11,7 @@ import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
 import { getPaymentRelationAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useSelector } from "react-redux";
 import { applyFixedColumns } from "../../../../../../../../utils/applyFixedColumns";
+import { nxApplyFixedColumns } from "../../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const PaymentRelationDetailAttch = ({
   idPr = 0,
@@ -36,9 +37,8 @@ const PaymentRelationDetailAttch = ({
   const [loadingDownload, setLoadingDownload] = useState(false);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    statusApproval: "right",
-    status: "right",
-    action: "right",
+    right: ["action"],
+    left: [],
   }));
 
   const searchInput = useRef(null);
@@ -118,7 +118,7 @@ const PaymentRelationDetailAttch = ({
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
+    return nxApplyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
@@ -186,6 +186,7 @@ const PaymentRelationDetailAttch = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
+        fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}

@@ -153,6 +153,18 @@ const CreateCustomerServiceRequest = (props) => {
   } = StepContents;
   const [dropdownsLoaded, setDropdownsLoaded] = useState(false);
 
+  // Timeout fallback - if dropdowns don't load within 10 seconds, allow form to render anyway
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!dropdownsLoaded) {
+        console.warn("Dropdown loading timeout - proceeding without full dropdown data");
+        setDropdownsLoaded(true);
+      }
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [dropdownsLoaded]);
+
   const routes = [
     {
       path: "",
@@ -223,16 +235,28 @@ const CreateCustomerServiceRequest = (props) => {
   }, [dispatch]);
 
   useEffect(() => {
+    // Check if dropdowns are loaded - handle both response structures:
+    // 1. Direct array: dropdowns.serviceRequestTypes = [...]
+    // 2. Response object: dropdowns.serviceRequestTypes = { data: [...] }
+    const isLoaded = (dropdown) => {
+      if (!dropdown) return false;
+      // If it's an array with items, it's loaded
+      if (Array.isArray(dropdown) && dropdown.length > 0) return true;
+      // If it's a response object with data array, it's loaded
+      if (dropdown?.data && Array.isArray(dropdown.data)) return true;
+      return false;
+    };
+
     if (
       dropdowns &&
-      dropdowns.serviceRequestTypes?.data &&
-      dropdowns.serviceRequestCategories?.data &&
-      dropdowns.serviceRequestSubcategories?.data &&
-      dropdowns.serviceRequestChannels?.data &&
-      dropdowns.serviceRequestPriorities?.data &&
-      dropdowns.serviceRequestSources?.data &&
-      dropdowns.serviceRequestPrerequisites?.data &&
-      dropdowns.serviceRequestDataRequirements?.data
+      isLoaded(dropdowns.serviceRequestTypes) &&
+      isLoaded(dropdowns.serviceRequestCategories) &&
+      isLoaded(dropdowns.serviceRequestSubcategories) &&
+      isLoaded(dropdowns.serviceRequestChannels) &&
+      isLoaded(dropdowns.serviceRequestPriorities) &&
+      isLoaded(dropdowns.serviceRequestSources) &&
+      isLoaded(dropdowns.serviceRequestPrerequisites) &&
+      isLoaded(dropdowns.serviceRequestDataRequirements)
     ) {
       setDropdownsLoaded(true);
     }

@@ -9,7 +9,7 @@ const ConfirmationModalAttachment = ({
   configApplication,
 }) => {
   return (
-    <NxBaseContainer border header={"ATTACHMENT"}>
+    <NxBaseContainer border header={"ATTACHMENT INFORMATION"}>
       <ConfirmationModalAttachmentTable
         type={type}
         data={data}

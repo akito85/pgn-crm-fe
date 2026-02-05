@@ -35,6 +35,7 @@ const getDetailAttachmentColumns = (
     ),
   },
   {
+    key: "filename",
     title: "FILE NAME",
     dataIndex: "fileName",
     width: 300,
@@ -51,6 +52,7 @@ const getDetailAttachmentColumns = (
     ),
   },
   {
+    key: "fileSize",
     title: "FILE SIZE",
     dataIndex: "fileSize",
     width: 100,
@@ -82,7 +84,7 @@ const getDetailAttachmentColumns = (
               color={"#0075bf"}
               width={20}
               onClick={() => {
-                handleShow(handleShow);
+                handleShow(record);
               }}
             />
           </Tooltip>
