@@ -300,7 +300,6 @@ export const getExpandedColumns = () => [
   },
 ];
 
-// PERUBAHAN UTAMA: Update renderExpandedRow untuk menggunakan id
 export const renderExpandedRow = (record, expandData, loadingExpand) => {
   const rowKey = record.id; // Gunakan id sebagai key
   const isLoading = loadingExpand[rowKey];
