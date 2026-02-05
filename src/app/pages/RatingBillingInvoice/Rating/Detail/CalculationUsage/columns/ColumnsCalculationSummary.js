@@ -66,81 +66,78 @@ export const columnsCalculationSummary = (
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
+      "usage",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "usage",
+        hasValue(search["usage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "usage",
+      ),
+  },
+  {
+    title: "saType",
+    dataIndex: "saType",
+    key: "saType",
+    width: 180,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
       "saType",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       true,
-      "date",
     ),
     render: (text) =>
-      renderDateColumn(
+      renderColumn(
+        "saType",
+        hasValue(search["saType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
+    title: "Calculated Total",
+    dataIndex: "calculatedTotal",
+    key: "calculatedTotal",
+    width: 150,
+    align: "right",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "calculatedTotal",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "calculatedTotal",
+        hasValue(search["calculatedTotal"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
         "usage",
-        hasValue(search["usage"]),
-        searchText,
-        text,
-        "date",
-        search,
-        "usage"
-      ),
-  },
-  {
-    title: "Calculated Total",
-    dataIndex: "calculatedTotal",
-    key: "calculatedTotal",
-    width: 150,
-    align: "right",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "calculatedTotal",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "calculatedTotal",
-        hasValue(search["calculatedTotal"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-        "calculatedTotal",
-      ),
-  },
-  {
-    title: "Calculated Total",
-    dataIndex: "calculatedTotal",
-    key: "calculatedTotal",
-    width: 150,
-    align: "right",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "calculatedTotal",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "calculatedTotal",
-        hasValue(search["calculatedTotal"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-        "calculatedTotal",
       ),
   },
   {
@@ -326,31 +323,28 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     const expandedContainer = e.currentTarget;
     const expandedTableWrapper =
       expandedContainer.querySelector(".ant-table-body");
-    if (expandedTableWrapper) {
-      const { scrollLeft, scrollWidth, clientWidth } = expandedTableWrapper;
-      const hasHorizontalScroll = scrollWidth > clientWidth;
-      const isHorizontalScrolling = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+    if (!expandedTableWrapper) {
+      return;
+    }
 
-      if (isHorizontalScrolling && hasHorizontalScroll) {
-        return;
-      }
-      if (hasHorizontalScroll) {
-        const isAtLeftEdge = scrollLeft === 0 && e.deltaX < 0;
-        const isAtRightEdge =
-          scrollLeft + clientWidth >= scrollWidth - 1 && e.deltaX > 0;
-        if (!isAtLeftEdge && !isAtRightEdge) {
-          e.stopPropagation();
-        }
-      } else {
-        e.stopPropagation();
-      }
+    const { scrollWidth, clientWidth } = expandedTableWrapper;
+    const hasHorizontalScroll = scrollWidth > clientWidth;
+    const isHorizontalScrolling = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+
+    // Stop scroll chaining to parent table on horizontal scroll,
+    // even when at left/right edge.
+    if (hasHorizontalScroll && isHorizontalScrolling) {
+      e.stopPropagation();
     }
   };
 
   return (
     <div
       className="bg-white"
-      style={{ marginLeft: "28px" }}
+      style={{
+        marginLeft: "28px",
+        overscrollBehaviorX: "contain",
+      }}
       onWheel={handleWheel}
     >
       <TableRBI
