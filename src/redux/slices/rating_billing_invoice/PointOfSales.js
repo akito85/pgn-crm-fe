@@ -71,6 +71,25 @@ export const getListPointOfSales = createAsyncThunk(
   },
 );
 
+export const previewInvoicePOS = createAsyncThunk(
+  "PREVIEW_INVOICE_POS",
+  async (posNumber, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/download-latest/${posNumber}`;
+      // Gunakan method yang sama seperti preview invoice
+      const response = await ratingBillingHttpService.getAll(url, {
+        responseType: "arraybuffer",
+      });
+      return { data: response.data, posNumber };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "PREVIEW_INVOICE_POS", back: false }),
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 export const getDetailListPointOfSales = createAsyncThunk(
   "GET_DETAIL_LIST_POINT_OF_SALES",
   async ({ id, search, page, pageSize, sort }, thunkAPI) => {

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -7,9 +7,7 @@ import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import PointOfSalesPage from "./Page/PointOfSalesPage";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import {
-  WarningOutlined,
-} from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -49,11 +47,14 @@ import {
   ModalError,
 } from "../../../../../components/Modal/ModalPopUp";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import { handleMandatory, isDateString, renderDate } from "../Utils";
+import { handleMandatory, isDateString } from "../Utils";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import BaseContainer from "../../../../../components/BaseContainer";
-import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../components/FormStepNavigation";
 
 const PosForm = ({ type }) => {
   const {
@@ -73,7 +74,6 @@ const PosForm = ({ type }) => {
     loading,
     loadingAccount,
     data_rate_tax,
-    data_materai,
     data_account_segment,
     data_account_group_type,
     data_meter_reading_code,
@@ -83,22 +83,18 @@ const PosForm = ({ type }) => {
     data_uom_codes,
   } = useSelector((state) => state.pointOfSales);
 
-  //declare
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const [form] = Form.useForm();
+
   const idUpdate = type === "create" ? undefined : location?.state?.id;
   const idPos = type === "create" ? undefined : location?.state?.idPos;
   const customerTypeFromNav = location?.state?.customerType;
+
   const [customerType, setCustomerType] = useState(customerTypeFromNav || null);
-  const getCustomerTypeNumber = (type) => {
-    return type === "prospective" ? 2 : 1;
-  };
   const [defaultData, setDefaultData] = useState({});
   const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
-
-  //state
   const [current, setCurrent] = useState(0);
   const [data, setData] = useState([]);
   const [dataDynamic, setDataDynamic] = useState({});
@@ -112,39 +108,61 @@ const PosForm = ({ type }) => {
   const [dataSend, setDataSend] = useState({});
   const [accountNumber, setAccountNumber] = useState("");
   const [dataAccount, setDataAccount] = useState();
-  const [valueDdl, setValueDdl] = useState({
-    action: "changes",
-    value: null,
-  });
+  const [valueDdl, setValueDdl] = useState({ action: "changes", value: null });
   const [ddlFinal, setDdlFinal] = useState("");
-
   const [modalBack, setModalBack] = useState(false);
   const [typeSubmit, setTypeSubmit] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [modalDailyRate, setModalDailyRate] = useState(false);
   const [bodyError, setBodyError] = useState({});
-
-  // state approval
   const [dataApprovalId, setDataApprovalId] = useState();
   const [invoiceDate, setInvoiceDate] = useState();
   const [dataMissing, setDataMissing] = useState([]);
   const [dataPriority, setDataPriority] = useState([]);
+  const [dataBillingCycle, setDataBillingCycle] = useState();
+  const [currency, setCurrency] = useState();
+  const [dataTabs, setDataTabs] = useState([
+    {
+      value: "Point of Sales",
+      paramValue: [
+        "accountNumber",
+        "billingCycle",
+        "billingPeriod",
+        "currency",
+        "transactionDate",
+        "invoiceDate",
+        "termType",
+        "termValue",
+        "remark",
+      ],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
+  const [valuePage, setValuePage] = useState("Point of Sales");
+  const [rangeDisableDate, setRangeDisableDate] = useState({});
 
-  const handleAccountSegmentChange = (selectedSegmentId) => {
-    form.resetFields(["accountGroupType"]);
-    setIsAccountSegmentFilled(!!selectedSegmentId);
-
-    if (selectedSegmentId) {
-      dispatch(getAccountGroupTypeList([selectedSegmentId]));
-    }
+  const getCustomerTypeNumber = (type) => {
+    return type === "prospective" ? 2 : 1;
   };
 
-  const handleMeterReadingCodeChange = (selectedMrcIds) => {};
+  const getCustomerTypeString = (typeNumber) => {
+    return typeNumber === 2 ? "prospective" : "customer";
+  };
 
   const steps = [
     { title: "POINT OF SALES", value: "Point of Sales" },
     { title: "APPROVAL", value: "Approval" },
     { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  const routes = [
+    { path: "", breadcrumbName: "Rating & Billing" },
+    { path: RBI_ROUTES.POS_VIEW, breadcrumbName: "Point of Sales" },
+    {
+      path: "",
+      breadcrumbName: `${type === "create" ? "Create" : "Update"} Point of Sales`,
+    },
   ];
 
   // Navigation handlers
@@ -174,44 +192,118 @@ const PosForm = ({ type }) => {
     }
   };
 
-  //state dynamic
-  const [dataBillingCycle, setDataBillingCycle] = useState();
-  const [currency, setCurrency] = useState();
-  const [dataTabs, setDataTabs] = useState([
-    {
-      value: "Point of Sales",
-      paramValue: [
-        "accountNumber",
-        "billingCycle",
-        "billingPeriod",
-        "currency",
-        "transactionDate",
-        "invoiceDate",
-        "termType",
-        "termValue",
-        "remark",
-      ],
+  const handleAccountSegmentChange = (selectedSegmentId) => {
+    form.resetFields(["accountGroupType"]);
+    setIsAccountSegmentFilled(!!selectedSegmentId);
+
+    if (selectedSegmentId) {
+      dispatch(getAccountGroupTypeList([selectedSegmentId]));
+    }
+  };
+
+  const handleMeterReadingCodeChange = () => {};
+
+  const handleValueDdlSet = (value) => {
+    if (!hasValue(value)) {
+      return null;
+    } else if (isDateString(value) || value === "DATE") {
+      return "DATE";
+    } else {
+      return "TOP";
+    }
+  };
+
+  const handleSetFormTypeValueDdl = useCallback(
+    (value, data_detailPos) => {
+      form.setFieldsValue({
+        ...(value?.action === "setData"
+          ? {
+              termType: {
+                termValueDdl: handleValueDdlSet(data_detailPos?.termsOfPayment),
+              },
+            }
+          : {
+              termType: {
+                termValueDdl: handleValueDdlSet(value.value),
+              },
+            }),
+      });
     },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
+    [form],
+  );
 
-  const [valuePage, setValuePage] = useState(steps[0].value);
-  const [rangeDisableDate, setRangeDisableDate] = useState({});
+  const handleValue = (e) => {
+    return isDateString(e) ? moment(e) : e;
+  };
 
+  const handleSetFormTypeTOP = useCallback(
+    (value, data_detailPos) => {
+      if (value.action === "setData") {
+        form.setFieldsValue({
+          ...(value?.action === "setData"
+            ? {
+                termType: {
+                  termValue: handleValue(data_detailPos?.termsOfPayment),
+                },
+              }
+            : {
+                termType: {
+                  termValue: isDateString(value?.value)
+                    ? moment(value?.value)
+                    : value?.value,
+                },
+              }),
+        });
+      }
+    },
+    [form],
+  );
+
+  const handleSetFormUpdate = useCallback(
+    (data_detailPos, data_globalCurrency) => {
+      const costCenterValue =
+        data_detailPos?.costcenter || data_detailPos?.costCenter || "";
+
+      form.setFieldsValue({
+        ...data_detailPos,
+        currency: data_globalCurrency?.find(
+          (item) => item.text === data_detailPos?.currency,
+        )?.Id,
+        apphierId: data_detailPos?.appHierId,
+        transactionDate: moment(data_detailPos?.transactionDate),
+        invoiceDate: moment(data_detailPos?.invoiceDate),
+        costcenter: costCenterValue,
+      });
+    },
+    [form],
+  );
+
+  // Detect customer type from API response
   useEffect(() => {
-    setValuePage(steps[current].value);
-  }, [current]);
+    if (type === "update" && data_detailPos && data_detailPos.id === idUpdate) {
+      if (!customerTypeFromNav && !customerType) {
+        const detectedCustomerType = getCustomerTypeString(
+          data_detailPos.customerType,
+        );
+        setCustomerType(detectedCustomerType);
+      }
+    }
+  }, [data_detailPos, type, idUpdate, customerTypeFromNav, customerType]);
 
+  // Load prospective customer data
   useEffect(() => {
-    if (type === "create") {
-      dispatch(getUserDetailForPOS());
+    if (customerType === "prospective") {
       dispatch(getSorList());
       dispatch(getCostCenterList());
       dispatch(getAccountSegmentList());
-    }
-  }, [dispatch, type]);
 
+      if (type === "create") {
+        dispatch(getUserDetailForPOS());
+      }
+    }
+  }, [dispatch, type, customerType]);
+
+  // Set default data for prospective customer (CREATE)
   useEffect(() => {
     if (
       type === "create" &&
@@ -223,7 +315,7 @@ const PosForm = ({ type }) => {
 
       const tempDefaultData = {
         sor: defaultSor,
-        costCenter:
+        costcenter:
           defaultCostCenter && defaultCostCenter !== null
             ? typeof defaultCostCenter === "number"
               ? [defaultCostCenter]
@@ -235,18 +327,19 @@ const PosForm = ({ type }) => {
 
       form.setFieldsValue({
         sor: defaultSor,
-        costCenter: tempDefaultData.costCenter,
+        costcenter: tempDefaultData.costcenter,
       });
 
-      if (tempDefaultData.costCenter && tempDefaultData.costCenter.length > 0) {
+      if (tempDefaultData.costcenter && tempDefaultData.costcenter.length > 0) {
         const body = {
-          ccIds: tempDefaultData.costCenter.map((id) => ({ ccId: id })),
+          ccIds: tempDefaultData.costcenter.map((id) => ({ ccId: id })),
         };
         dispatch(getMeterReadingCodeList(body));
       }
     }
   }, [type, customerType, data_user_detail, form, dispatch]);
 
+  // Merge meter reading code data
   useEffect(() => {
     let dataMrc = data_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
@@ -255,7 +348,29 @@ const PosForm = ({ type }) => {
     setMergedArrayMrc(dataMrc);
   }, [data_meter_reading_code]);
 
-  //useEffect
+  // Convert MRC name to ID for UPDATE prospective
+  useEffect(() => {
+    if (
+      type === "update" &&
+      customerType === "prospective" &&
+      data_detailPos &&
+      mergedArrayMrc &&
+      mergedArrayMrc.length > 0 &&
+      data_detailPos.id === idUpdate
+    ) {
+      const mrcId = mergedArrayMrc?.find(
+        (item) => item.name === data_detailPos?.meterReadingCode,
+      )?.id;
+
+      if (mrcId) {
+        form.setFieldsValue({
+          meterReadingCode: mrcId,
+        });
+      }
+    }
+  }, [type, customerType, data_detailPos, mergedArrayMrc, form, idUpdate]);
+
+  // Handle daily rate validation
   useEffect(() => {
     if (data_rate === null || data_rate?.success === false) {
       setInvoiceDate(null);
@@ -264,8 +379,9 @@ const PosForm = ({ type }) => {
     } else {
       setModalDailyRate(false);
     }
-  }, [data_rate]);
+  }, [data_rate, form]);
 
+  // Fetch rates when invoice date and currency are set
   useEffect(() => {
     if (data && invoiceDate && currency && data.length < 1) {
       dispatch(
@@ -281,8 +397,9 @@ const PosForm = ({ type }) => {
         }),
       );
     }
-  }, [dispatch, invoiceDate, currency]);
+  }, [dispatch, invoiceDate, currency, data]);
 
+  // Load global data
   useEffect(() => {
     dispatch(getGlobalType());
     dispatch(getGlobalBillingCycle());
@@ -295,20 +412,12 @@ const PosForm = ({ type }) => {
     dispatch(getUomCodes());
   }, [dispatch]);
 
+  // Track missing priority data
   useEffect(() => {
     const newData = [
-      {
-        name: "Account Number",
-        data: accountNumber,
-      },
-      {
-        name: "Currency",
-        data: currency,
-      },
-      {
-        name: "Invoice Date",
-        data: invoiceDate,
-      },
+      { name: "Account Number", data: accountNumber },
+      { name: "Currency", data: currency },
+      { name: "Invoice Date", data: invoiceDate },
     ];
 
     const missingData = newData.filter((data) => !data.data);
@@ -316,6 +425,7 @@ const PosForm = ({ type }) => {
     setDataPriority(newData);
   }, [currency, accountNumber, invoiceDate]);
 
+  // Initialize data for create/update
   useEffect(() => {
     if (type === "update") {
       dispatch(getDetailPOS(idUpdate));
@@ -336,8 +446,9 @@ const PosForm = ({ type }) => {
         withholdingTax: 0,
       });
     }
-  }, [dispatch, type]);
+  }, [dispatch, type, idUpdate]);
 
+  // Fetch terms of payment data (customer)
   useEffect(() => {
     if (customerType === "customer" && hasValue(accountNumber)) {
       const getAccountId = data_globalAccountNumber?.find(
@@ -347,27 +458,17 @@ const PosForm = ({ type }) => {
       if (getAccountId) {
         dispatch(getGlobalTermsOfPaymentData(getAccountId));
       }
-    } else if (customerType === "prospective") {
-      dispatch(getGlobalTermsOfPaymentData(null));
     }
   }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
 
-  const handleSetFormUpdate = useCallback(
-    (data_detailPos, data_globalCurrency) => {
-      form.setFieldsValue({
-        ...data_detailPos,
-        currency: data_globalCurrency?.find(
-          (item) => item.text === data_detailPos?.currency,
-        )?.Id,
-        apphierId: data_detailPos?.appHierId,
-        transactionDate: moment(data_detailPos?.transactionDate),
-        invoiceDate: moment(data_detailPos?.invoiceDate),
-        costCenter: data_detailPos?.costCenter,
-      });
-    },
-    [form],
-  );
+  // Fetch terms of payment data (prospective) once on type change
+  useEffect(() => {
+    if (customerType === "prospective") {
+      dispatch(getGlobalTermsOfPaymentData(null));
+    }
+  }, [customerType, dispatch]);
 
+  // Populate form for UPDATE mode
   useEffect(() => {
     if (
       type === "update" &&
@@ -377,18 +478,117 @@ const PosForm = ({ type }) => {
       data_globalCurrency &&
       data_globalBillingCycle
     ) {
+      const isProspective = data_detailPos.customerType === 2;
+
       setValueDdl({
         action: "setData",
         value: isDateString(data_detailPos?.termsOfPayment) ? "DATE" : "TOP",
       });
       setDataApprovalId(data_detailPos?.appHierId);
-      handleSetFormUpdate(data_detailPos, data_globalCurrency);
+
+      if (isProspective) {
+        const sorId = data_sor_list?.find(
+          (item) => item.name === data_detailPos?.sor,
+        )?.id;
+
+        const costCenterString = data_detailPos?.costcenter || "";
+
+        const costCenterCode = costCenterString.split(" - ")[0]?.trim();
+
+        const ccId = data_cost_center_list?.find(
+          (item) =>
+            item.code === costCenterCode ||
+            item.name === costCenterCode ||
+            costCenterString.includes(item.name),
+        )?.id;
+
+        const costCenterNames = costCenterString
+          ? costCenterString.split(",").map((name) => name.trim())
+          : [];
+
+        const costCenterIds =
+          costCenterNames.length > 0
+            ? data_cost_center_list
+                ?.filter((cc) => {
+                  return costCenterNames.some((name) => {
+                    const code = name.split(" - ")[0]?.trim();
+                    return (
+                      cc.code === code ||
+                      cc.name === code ||
+                      name.includes(cc.name)
+                    );
+                  });
+                })
+                .map((cc) => cc.id)
+            : [];
+
+        const accountSegmentId = data_account_segment?.find(
+          (item) => item.name === data_detailPos?.accountSegment,
+        )?.id;
+
+        const accountGroupTypeId = data_account_group_type?.find(
+          (item) =>
+            (item.glbValue || item.name) === data_detailPos?.accountGroupType,
+        )?.glbTypeValId;
+
+        setDefaultData({
+          sor: sorId,
+          costcenter:
+            costCenterIds.length > 0 ? costCenterIds : ccId ? [ccId] : [],
+        });
+
+        form.setFieldsValue({
+          customerName: data_detailPos?.customerName,
+          registrationNumber: data_detailPos?.registrationNumber,
+          accountName: data_detailPos?.accountName,
+          currency: data_globalCurrency?.find(
+            (item) => item.text === data_detailPos?.currency,
+          )?.Id,
+          apphierId: data_detailPos?.appHierId,
+          transactionDate: moment(data_detailPos?.transactionDate),
+          invoiceDate: moment(data_detailPos?.invoiceDate),
+          email: data_detailPos?.email,
+          address: data_detailPos?.address,
+          billingCycle: data_globalBillingCycle?.find(
+            (item) => item.name === data_detailPos?.billingCycle,
+          )?.id,
+          billingPeriod: data_detailPos?.billingPeriod,
+          remark: data_detailPos?.remark,
+          sor: sorId,
+          costcenter: ccId,
+          accountSegment: accountSegmentId,
+          accountGroupType: accountGroupTypeId,
+        });
+
+        setAccountNumber(data_detailPos?.registrationNumber);
+
+        if (ccId) {
+          const body = {
+            ccIds: [{ ccId: ccId }],
+          };
+          dispatch(getMeterReadingCodeList(body));
+          setIsCostCenterFilled(true);
+        } else if (costCenterIds && costCenterIds.length > 0) {
+          const body = {
+            ccIds: costCenterIds.map((id) => ({ ccId: id })),
+          };
+          dispatch(getMeterReadingCodeList(body));
+          setIsCostCenterFilled(true);
+        }
+
+        if (accountSegmentId) {
+          setIsAccountSegmentFilled(true);
+          dispatch(getAccountGroupTypeList([accountSegmentId]));
+        }
+      } else {
+        handleSetFormUpdate(data_detailPos, data_globalCurrency);
+        setAccountNumber(data_detailPos?.accountNumber);
+      }
       setCurrency(
         data_globalCurrency?.find(
           (item) => item.text === data_detailPos?.currency,
         )?.Id,
       );
-      setAccountNumber(data_detailPos?.accountNumber);
       setInvoiceDate(moment(data_detailPos?.invoiceDate));
       setDataBillingCycle(
         data_globalBillingCycle?.find(
@@ -405,7 +605,7 @@ const PosForm = ({ type }) => {
         taxRateType: data_detailPos.taxRateType || "",
       });
       setData(
-        data_detailPos?.mrbiPosDetails?.map((item, index) => {
+        data_detailPos?.mrbiPosDetails?.map((item) => {
           let temp = {
             ...item,
             price: item?.price || 0,
@@ -433,8 +633,16 @@ const PosForm = ({ type }) => {
     data_globalCurrency,
     data_globalBillingCycle,
     handleSetFormUpdate,
+    idUpdate,
+    data_sor_list,
+    data_cost_center_list,
+    data_account_segment,
+    data_account_group_type,
+    form,
+    dispatch,
   ]);
 
+  // Set rate data from API
   useEffect(() => {
     if (data_rate && data_rate_tax) {
       setDataDynamic({
@@ -453,7 +661,7 @@ const PosForm = ({ type }) => {
     }
   }, [data_rate, data_rate_tax]);
 
-  //calculating POS info
+  // Calculate POS totals and materai
   useEffect(() => {
     if (data) {
       let dataMaterai =
@@ -654,20 +862,23 @@ const PosForm = ({ type }) => {
         setDataDynamic({ ...dataDynamic, ...dataCalculate });
       }
     }
-  }, [data]);
+  }, [data, dispatch, invoiceDate]);
 
+  // Fetch billing period data
   useEffect(() => {
     if (dataBillingCycle && dataBillingCycle !== undefined) {
       dispatch(getGlobalBillingPeriod(dataBillingCycle));
     }
   }, [dispatch, dataBillingCycle]);
 
+  // Fetch approval detail
   useEffect(() => {
     if (dataApprovalId && dataApprovalId !== undefined) {
       dispatch(getApprovalListDetail(dataApprovalId));
     }
   }, [dispatch, dataApprovalId]);
 
+  // Transform approval list data
   useEffect(() => {
     if (data_approvalList) {
       const tempAppHier = (data_approvalList || []).map((appHier) => ({
@@ -679,6 +890,7 @@ const PosForm = ({ type }) => {
     }
   }, [data_approvalList]);
 
+  // Transform approval detail data
   useEffect(() => {
     if (data_approvalListDetail && data_approvalListDetail.length > 0) {
       const data = data_approvalListDetail.map((a, index) => ({
@@ -695,127 +907,61 @@ const PosForm = ({ type }) => {
     }
   }, [data_approvalListDetail]);
 
+  // Set account data for customer
   useEffect(() => {
-    if (accountNumber) {
+    if (accountNumber && customerType === "customer") {
       setDataAccount(
         data_globalAccountNumber?.find(
           (item) => item.accountNumber === accountNumber,
         ),
       );
     }
-  }, [accountNumber]);
+  }, [accountNumber, customerType, data_globalAccountNumber]);
 
+  // Populate form with account data
   useEffect(() => {
-    if (dataAccount) {
+    if (dataAccount && customerType === "customer") {
       form.setFieldsValue({
         ...dataAccount,
       });
     }
-  }, [dataAccount]);
+  }, [dataAccount, customerType, form]);
 
-  const handleValueDdlSet = (value) => {
-    if (!hasValue(value)) {
-      return null;
-    } else if (isDateString(value) || value === "DATE") {
-      return "DATE";
-    } else {
-      return "TOP";
-    }
-  };
-
-  const handleSetFormTypeValueDdl = useCallback(
-    (value, data_detailPos) => {
-      form.setFieldsValue({
-        ...(value?.action === "setData"
-          ? {
-              termType: {
-                termValueDdl: handleValueDdlSet(data_detailPos?.termsOfPayment),
-              },
-            }
-          : {
-              termType: {
-                termValueDdl: handleValueDdlSet(value.value),
-              },
-            }),
-      });
-    },
-    [form],
-  );
-
-  const handleSubmit = () => {
-    setTypeSubmit(true);
-    setTimeout(() => {
-        form.submit();
-    }, 0);
-};
-
-  const handleSaveDraft = () => {
-    setTypeSubmit(false);
-    setTimeout(() => {
-        form.submit();
-    }, 0);
-};
-
-  const handleValue = (e) => {
-    return isDateString(e) ? moment(e) : e;
-  };
-
-  const handleSetFormTypeTOP = useCallback(
-    (value, data_detailPos) => {
-      if (value.action === "setData") {
-        form.setFieldsValue({
-          ...(value?.action === "setData"
-            ? {
-                termType: {
-                  termValue: handleValue(data_detailPos?.termsOfPayment),
-                },
-              }
-            : {
-                termType: {
-                  termValue: isDateString(value?.value)
-                    ? moment(value?.value)
-                    : value?.value,
-                },
-              }),
-        });
-      }
-    },
-    [form],
-  );
-
+  // Handle terms of payment DDL changes
   useEffect(() => {
     if (valueDdl) {
       form.resetFields(["termType", "termValue"]);
       handleSetFormTypeValueDdl(valueDdl, data_detailPos);
       setDdlFinal(valueDdl);
     }
-  }, [valueDdl, handleSetFormTypeValueDdl]);
+  }, [valueDdl, handleSetFormTypeValueDdl, data_detailPos, form]);
 
+  // Set terms of payment value
   useEffect(() => {
     if (hasValue(ddlFinal?.value)) {
       handleSetFormTypeTOP(ddlFinal, data_detailPos);
     }
-  }, [ddlFinal, handleSetFormTypeTOP]);
+  }, [ddlFinal, handleSetFormTypeTOP, data_detailPos]);
 
-  // routes
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "Rating & Billing",
-    },
-    {
-      path: RBI_ROUTES.POS_VIEW,
-      breadcrumbName: "Point of Sales",
-    },
-    {
-      path: "",
-      breadcrumbName: `${
-        type === "create" ? "Create" : "Update"
-      } Point of Sales`,
-    },
-  ];
+  // Update value page based on current step
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
 
-  //handleAction
+  const handleSubmit = () => {
+    setTypeSubmit(true);
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleSaveDraft = () => {
+    setTypeSubmit(false);
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
   const onFinish = (e) => {
     let errorBody = {};
     if (dataAttachment.length === 0) {
@@ -915,67 +1061,110 @@ const PosForm = ({ type }) => {
       (item) => item.Id === e.termType.termValue,
     );
 
-    const isDateString = moment(
-      e?.termsOfPayment,
-      dateFormatting.date,
-      true,
-    ).isValid();
+    const billingCycleId =
+      typeof e?.billingCycle === "number"
+        ? e?.billingCycle
+        : data_globalBillingCycle?.find((item) => item.name === e?.billingCycle)
+            ?.id;
 
+    // Helper functions to convert ID to NAME or return existing NAME
     const getSorName = () => {
       if (customerType === "prospective" && e?.sor) {
-        const sorItem = data_sor_list?.find((item) => item.id === e.sor);
-        return sorItem ? sorItem.name : "";
+        if (typeof e.sor === "string") {
+          return e.sor;
+        } else {
+          const sorItem = data_sor_list?.find((item) => item.id === e.sor);
+          return sorItem ? sorItem.name : "";
+        }
       }
       return e?.sor || "";
     };
 
     const getMrcName = () => {
       if (customerType === "prospective" && e?.meterReadingCode) {
-        const mrcIds = Array.isArray(e.meterReadingCode)
-          ? e.meterReadingCode
-          : [e.meterReadingCode];
-        const mrcNames = mrcIds
-          .map((mrcId) => {
-            const mrc = mergedArrayMrc?.find((item) => item.id === mrcId);
-            return mrc ? mrc.name : "";
-          })
-          .filter(Boolean);
-        return mrcNames.join(", ");
+        if (typeof e.meterReadingCode === "string") {
+          return e.meterReadingCode;
+        } else {
+          const mrc = mergedArrayMrc?.find(
+            (item) => item.id === e.meterReadingCode,
+          );
+          return mrc ? mrc.name : "";
+        }
       }
       return e?.meterReadingCode || "";
     };
 
     const getAccountSegmentName = () => {
       if (customerType === "prospective" && e?.accountSegment) {
-        const segment = data_account_segment?.find(
-          (item) => item.id === e.accountSegment,
-        );
-        return segment ? segment.name : "";
+        if (typeof e.accountSegment === "string") {
+          return e.accountSegment;
+        } else {
+          const segment = data_account_segment?.find(
+            (item) => item.id === e.accountSegment,
+          );
+          return segment ? segment.name : "";
+        }
       }
       return e?.accountSegment || "";
     };
 
     const getAccountGroupTypeName = () => {
       if (customerType === "prospective" && e?.accountGroupType) {
-        const groupType = data_account_group_type?.find(
-          (item) => item.glbTypeValId === e.accountGroupType,
-        );
-        return groupType ? groupType.glbValue || groupType.name : "";
+        if (typeof e.accountGroupType === "string") {
+          return e.accountGroupType;
+        } else {
+          const groupType = data_account_group_type?.find(
+            (item) => item.glbTypeValId === e.accountGroupType,
+          );
+          return groupType ? groupType.glbValue || groupType.name : "";
+        }
       }
       return e?.accountGroupType || "";
+    };
+
+    const getCostCenterName = () => {
+      if (customerType === "prospective" && e?.costcenter) {
+        if (typeof e.costcenter === "string") {
+          return e.costcenter;
+        } else {
+          const cc = data_cost_center_list?.find(
+            (item) => item.id === e.costcenter,
+          );
+          return cc ? cc.name : "";
+        }
+      }
+      return e?.costcenter || e?.costCenter || "";
     };
 
     let body = {
       id: type === "create" ? undefined : idUpdate,
       posNumber: type === "create" ? undefined : idPos,
       customerType: getCustomerTypeNumber(customerType),
-      ...(customerType === "customer" && { customerNumber: e?.customerNumber }),
       customerName: e?.customerName,
       accountName: e?.accountName,
+
+      ...(customerType === "customer" && {
+        customerNumber: e?.customerNumber,
+        accountNumber: e?.accountNumber,
+        registrationNumber: null,
+        email: null,
+        address: null,
+      }),
+
+      ...(customerType === "prospective" && {
+        registrationNumber: e?.registrationNumber,
+        accountNumber: null,
+        email: e?.email || "",
+        address: e?.address || "",
+        customerNumber: null,
+      }),
+
       sor: getSorName(),
+      costcenter: getCostCenterName(),
       meterReadingCode: getMrcName(),
       accountSegment: getAccountSegmentName(),
       accountGroupType: getAccountGroupTypeName(),
+      billingCycleId: billingCycleId,
       billingCycle:
         data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
           ?.name || e?.billingCycle,
@@ -993,10 +1182,12 @@ const PosForm = ({ type }) => {
             (item) => item.Id === e?.termType?.termValue,
           )?.text || e?.termType?.termValue,
       remark: e?.remark,
+
       appHierId: dataApprovalId,
       submit: typeSubmit,
       topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
       topId: e.termType.termValueDdl,
+
       rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
       rateDate: dataDynamic?.rateDate
         ? moment(dataDynamic.rateDate, dateFormatting.date).format(
@@ -1011,6 +1202,7 @@ const PosForm = ({ type }) => {
           )
         : null,
       taxRateType: dataDynamic?.taxRateType || null,
+
       amount: sumAmount,
       discountAmount: sumDiscount,
       totalAmountIdr: dataDynamic?.totalAmountIdr || 0,
@@ -1028,6 +1220,7 @@ const PosForm = ({ type }) => {
       withholdingTax: dataDynamic?.withholdingTax || 0,
       totalEqvIdr: dataDynamic?.totalEqvIdr || 0,
       totalEqvUsd: dataDynamic?.totalEqvUsd || 0,
+
       mrbiPosDetails: data?.map((item) => ({
         posDetailId: item?.posDetailId,
         posNumber: item?.posNumber,
@@ -1051,27 +1244,6 @@ const PosForm = ({ type }) => {
       })),
     };
 
-    if (customerType === "prospective") {
-      if (Array.isArray(e?.costCenter) && e.costCenter.length > 0) {
-        const costCenterNames = e.costCenter
-          .map((ccId) => {
-            const cc = data_cost_center_list?.find((item) => item.id === ccId);
-            return cc ? cc.name : "";
-          })
-          .filter(Boolean)
-          .join(", ");
-
-        body.costcenter = costCenterNames;
-      }
-      body.registrationNumber = e?.accountNumber;
-      body.email = e?.email || "";
-      body.address = e?.address || "";
-    } else {
-      body.accountNumber = e?.accountNumber;
-      body.costcenter = e?.costCenter || "";
-    }
-
-    delete body.costCenter;
     delete body.termType;
     delete body.apphierId;
     delete body.taxBasis;
@@ -1184,7 +1356,7 @@ const PosForm = ({ type }) => {
 
   const handleChangeSOR = (selectedSorId) => {
     form.resetFields([
-      "costCenter",
+      "costcenter",
       "meterReadingCode",
       "accountSegment",
       "accountGroupType",
@@ -1204,13 +1376,69 @@ const PosForm = ({ type }) => {
   const handleClearOrReset = () => {
     if (type === "update") {
       if (data_detailPos && type === "update") {
+        const isProspective = data_detailPos.customerType === 2;
+
         setValueDdl({
           action: "setData",
           value: isDateString(data_detailPos?.termsOfPayment) ? "DATE" : "TOP",
         });
-        handleSetFormUpdate(data_detailPos, data_globalCurrency);
+
+        if (isProspective) {
+          const sorId = data_sor_list?.find(
+            (item) => item.name === data_detailPos?.sor,
+          )?.id;
+
+          const costCenterNames = data_detailPos?.costcenter
+            ? data_detailPos.costcenter.split(",").map((name) => name.trim())
+            : [];
+
+          const costCenterIds =
+            costCenterNames.length > 0
+              ? data_cost_center_list
+                  ?.filter((cc) => costCenterNames.includes(cc.name))
+                  .map((cc) => cc.id)
+              : [];
+
+          const accountSegmentId = data_account_segment?.find(
+            (item) => item.name === data_detailPos?.accountSegment,
+          )?.id;
+
+          const accountGroupTypeId = data_account_group_type?.find(
+            (item) =>
+              (item.glbValue || item.name) === data_detailPos?.accountGroupType,
+          )?.glbTypeValId;
+
+          form.setFieldsValue({
+            customerName: data_detailPos?.customerName,
+            registrationNumber: data_detailPos?.registrationNumber,
+            accountName: data_detailPos?.accountName,
+            currency: data_globalCurrency?.find(
+              (item) => item.text === data_detailPos?.currency,
+            )?.Id,
+            apphierId: data_detailPos?.appHierId,
+            transactionDate: moment(data_detailPos?.transactionDate),
+            invoiceDate: moment(data_detailPos?.invoiceDate),
+            email: data_detailPos?.email,
+            address: data_detailPos?.address,
+            billingCycle: data_globalBillingCycle?.find(
+              (item) => item.name === data_detailPos?.billingCycle,
+            )?.id,
+            billingPeriod: data_detailPos?.billingPeriod,
+            remark: data_detailPos?.remark,
+            sor: sorId,
+            costcenter: costCenterIds.length > 0 ? costCenterIds[0] : undefined,
+            accountSegment: accountSegmentId,
+            accountGroupType: accountGroupTypeId,
+          });
+
+          setAccountNumber(data_detailPos?.registrationNumber);
+        } else {
+          handleSetFormUpdate(data_detailPos, data_globalCurrency);
+          setAccountNumber(data_detailPos?.accountNumber);
+        }
+
         setData(
-          data_detailPos?.mrbiPosDetails?.map((item, index) => {
+          data_detailPos?.mrbiPosDetails?.map((item) => {
             let temp = {
               ...item,
               price: item?.price || 0,
@@ -1229,7 +1457,6 @@ const PosForm = ({ type }) => {
             (item) => item.text === data_detailPos?.currency,
           )?.Id,
         );
-        setAccountNumber(data_detailPos?.accountNumber);
         setInvoiceDate(moment(data_detailPos?.invoiceDate));
         setDataBillingCycle(
           data_globalBillingCycle?.find(
@@ -1277,8 +1504,7 @@ const PosForm = ({ type }) => {
     <LayoutMenu>
       <Spin spinning={loading || loadingForm || loadingAccount}>
         <BreadCrumb routes={routes} />
-        
-        {/* FormStepper menggantikan Steps manual */}
+
         <FormStepper
           steps={steps}
           current={current}
@@ -1294,7 +1520,6 @@ const PosForm = ({ type }) => {
           onFinishFailed={handleErrorSubmit}
           scrollToFirstError={true}
         >
-          {/* Step 1: Point of Sales */}
           <div
             style={{
               display: valuePage !== dataTabs[0].value ? "none" : undefined,
@@ -1348,7 +1573,6 @@ const PosForm = ({ type }) => {
             />
           </div>
 
-          {/* Step 2: Approval */}
           <div
             style={{
               display: valuePage !== dataTabs[1].value ? "none" : undefined,
@@ -1364,7 +1588,6 @@ const PosForm = ({ type }) => {
             </BaseContainer>
           </div>
 
-          {/* Step 3: Attachment */}
           <div
             style={{
               display: valuePage !== dataTabs[2].value ? "none" : undefined,
@@ -1378,7 +1601,6 @@ const PosForm = ({ type }) => {
             />
           </div>
 
-          {/* FormFooter menggantikan footer buttons manual */}
           <FormFooter
             current={current}
             totalSteps={steps.length}
@@ -1392,7 +1614,6 @@ const PosForm = ({ type }) => {
           />
         </Form>
 
-        {/* Existing Modals */}
         <ModalCustom
           isOpen={modalConfirm}
           type={"confirmation"}
@@ -1428,7 +1649,6 @@ const PosForm = ({ type }) => {
           />
         </ModalCustom>
 
-        {/* Modal Retry */}
         <ModalError
           isOpen={modalError}
           handleOk={handleRetry}
@@ -1449,7 +1669,6 @@ const PosForm = ({ type }) => {
           </div>
         </ModalError>
 
-        {/* Modal Daily Rate is Null or Undefined */}
         <ModalError
           isOpen={modalDailyRate}
           handleOk={() => setModalDailyRate(false)}
@@ -1464,7 +1683,6 @@ const PosForm = ({ type }) => {
           </div>
         </ModalError>
 
-        {/* Modal Back*/}
         <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}

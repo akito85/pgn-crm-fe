@@ -410,7 +410,7 @@ const CreateReceiptForm = ({
               formatter={(value) =>
                 value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
               }
-              parser={(value) => value?.toString().replace(/\./g, "")}
+              parser={(value) => value?.toString()?.replace(/\./g, "")}
               decimalSeparator=","
               precision={2}
               onChange={handleChangeAmount}
