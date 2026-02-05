@@ -184,6 +184,14 @@ const ListFormPaymentWarrantyPartner = (props) => {
   };
 
   const handleSubmitForm = (formValue) => {
+    if (listDataAttachment.length === 0) {
+      dispatch(showModalError({
+        title: "Warning",
+        description: "Attachment is mandatory. Please upload at least one file.",
+        return: false
+      }));
+      return;
+    }
     const dataValue = {
       ...formValue,
       appHierId: selectedHierarchy,
@@ -306,6 +314,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
             onCancel={handleBack}
             onClear={handleClear}
             onSaveDraft={handleSaveDraft}
+            onSubmit={() => form.submit()}
             type={type}
           />
         </Form>
