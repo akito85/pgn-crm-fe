@@ -9,6 +9,8 @@ import {
 import { renderDate } from "../../RatingBillingInvoice/POS/Utils";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import BaseContainer from "../../../../components/BaseContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../components/Nx/NxDetailText";
 
 const HeaderDetail = ({
   data_header = [],
@@ -37,42 +39,42 @@ const HeaderDetail = ({
     return (
       <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
         <div className="flex flex-col gap-y-4">
-          <BaseContainer border header={"CUSTOMER INFORMATION"}>
-            <div className="w-full grid grid-cols-4 gap-x-5">
-              <DetailText label="Customer Number">
+          <NxBaseContainer border header={"CUSTOMER INFORMATION"}>
+            <div className="w-full grid grid-cols-4 gap-4">
+              <NxDetailText label="Customer Number">
                 {data_accountDetail?.accountSummary?.customerNumber}
-              </DetailText>
-              <DetailText label="Identification Type">
+              </NxDetailText>
+              <NxDetailText label="Identification Type">
                 {data_accountDetail?.accountSummary?.customerIdentificationType}
-              </DetailText>
-              <DetailText label="Customer Identification Number">
+              </NxDetailText>
+              <NxDetailText label="Customer Identification Number">
                 {data_accountDetail?.accountSummary?.customerIdentificationNumber}
-              </DetailText>
-              <DetailText label="Customer Name">
+              </NxDetailText>
+              <NxDetailText label="Customer Name">
                 {data_accountDetail?.accountSummary?.customerName}
-              </DetailText>
-              <DetailText label="Customer Type">
+              </NxDetailText>
+              <NxDetailText label="Customer Type">
                 {data_accountDetail?.accountSummary?.customerType}
-              </DetailText>
-              <DetailText label="Birth/Founded Date">
+              </NxDetailText>
+              <NxDetailText label="Birth/Founded Date">
                 {renderDate(
                   data_accountDetail?.accountSummary?.birthFoundedDate,
                   "date"
                 )}
-              </DetailText>
-              <DetailText label="Birth/Founded Place">
+              </NxDetailText>
+              <NxDetailText label="Birth/Founded Place">
                 {data_accountDetail?.accountSummary?.birthFoundedPlace}
-              </DetailText>
-              <DetailText label="Sex">
+              </NxDetailText>
+              <NxDetailText label="Sex">
                 {data_accountDetail?.accountSummary?.sex}
-              </DetailText>
-              <DetailText label="Marital Status">
+              </NxDetailText>
+              <NxDetailText label="Marital Status">
                 {data_accountDetail?.accountSummary?.maritalStatus}
-              </DetailText>
-              <DetailText label="Search Key">
+              </NxDetailText>
+              <NxDetailText label="Search Key">
                 {data_accountDetail?.accountSummary?.searchKey}
-              </DetailText>
-              <DetailText label="Status">
+              </NxDetailText>
+              <NxDetailText label="Status">
                 {data_accountDetail?.accountSummary?.customerStatus
                   ? data_accountDetail?.accountSummary?.customerStatus
                     .charAt(0)
@@ -81,70 +83,70 @@ const HeaderDetail = ({
                     .slice(1)
                     .toLowerCase()
                   : ""}
-              </DetailText>
-              <DetailText label="Description">
+              </NxDetailText>
+              <NxDetailText label="Description">
                 {data_accountDetail?.accountSummary?.description}
-              </DetailText>
+              </NxDetailText>
             </div>
-          </BaseContainer>
-          <BaseContainer border header={"ACCOUNT INFORMATION"}>
-            <div className="w-full grid grid-cols-4 gap-x-4">
-              <DetailText label="Account Number">
+          </NxBaseContainer>
+          <NxBaseContainer border header={"ACCOUNT INFORMATION"}>
+            <div className="w-full grid grid-cols-4 gap-4">
+              <NxDetailText label="Account Number">
                 {data_accountDetail?.accountSummary?.accountNumber}
-              </DetailText>
-              <DetailText label="Registration Number">
+              </NxDetailText>
+              <NxDetailText label="Registration Number">
                 {data_accountDetail?.accountSummary?.registrationNumber}
-              </DetailText>
-              <DetailText label="Account Name">
+              </NxDetailText>
+              <NxDetailText label="Account Name">
                 {data_accountDetail?.accountSummary?.accountName}
-              </DetailText>
-              <DetailText label="Category">
+              </NxDetailText>
+              <NxDetailText label="Category">
                 {data_accountDetail?.accountSummary?.accountCategory}
-              </DetailText>
-              <DetailText label="SOR">
+              </NxDetailText>
+              <NxDetailText label="SOR">
                 {data_accountDetail?.accountSummary?.sor}
-              </DetailText>
-              <DetailText label="Cost Center">
+              </NxDetailText>
+              <NxDetailText label="Cost Center">
                 {data_accountDetail?.accountSummary?.costCenter}
-              </DetailText>
-              <DetailText label="Meter Reading Codes">
+              </NxDetailText>
+              <NxDetailText label="Meter Reading Codes">
                 {data_accountDetail?.accountSummary?.meterReadingCodes}
-              </DetailText>
-              <DetailText label="Customer Management">
+              </NxDetailText>
+              <NxDetailText label="Customer Management">
                 {data_accountDetail?.accountSummary?.customerManagement}
-              </DetailText>
-              <DetailText label="Classification Type">
+              </NxDetailText>
+              <NxDetailText label="Classification Type">
                 {data_accountDetail?.accountSummary?.classificationType}
-              </DetailText>
-              <DetailText label="Segment">
+              </NxDetailText>
+              <NxDetailText label="Segment">
                 {data_accountDetail?.accountSummary?.segment}
-              </DetailText>
-              <DetailText label="Account Group Type">
+              </NxDetailText>
+              <NxDetailText label="Account Group Type">
                 {data_accountDetail?.accountSummary?.accountGroupType}
-              </DetailText>
-              <DetailText label="Premise Address">
+              </NxDetailText>
+              <NxDetailText label="Premise Address">
                 {data_accountDetail?.accountSummary?.premiseAddress}
-              </DetailText>
-              <DetailText label="Subdistrict">
+              </NxDetailText>
+              <NxDetailText label="Subdistrict">
                 {data_accountDetail?.accountSummary?.subdistrict}
-              </DetailText>
-              <DetailText label="District">
+              </NxDetailText>
+              <NxDetailText label="District">
                 {data_accountDetail?.accountSummary?.district}
-              </DetailText>
-              <DetailText label="City">
+              </NxDetailText>
+              <NxDetailText label="City">
                 {data_accountDetail?.accountSummary?.city}
-              </DetailText>
-              <DetailText label="Country">
+              </NxDetailText>
+              <NxDetailText label="Country">
                 {data_accountDetail?.accountSummary?.country}
-              </DetailText>
-              <DetailText label="Longitude">
+              </NxDetailText>
+              <NxDetailText label="Longitude">
                 {data_accountDetail?.accountSummary?.longitude}
-              </DetailText>
-              <DetailText label="Latitude">
+              </NxDetailText>
+              <NxDetailText label="Latitude">
                 {data_accountDetail?.accountSummary?.latitude}
-              </DetailText>
+              </NxDetailText>
             </div>
-          </BaseContainer>
+          </NxBaseContainer>
         </div>
       </NxCardContainer>
     );

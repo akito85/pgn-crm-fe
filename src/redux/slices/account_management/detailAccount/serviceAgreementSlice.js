@@ -584,7 +584,7 @@ export const checkValidateCreateSa = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/sa/checkValidateCreateSa`;
       const response = await accountManagementService.createData(url, body);
-      return response;
+      return response?.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
