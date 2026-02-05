@@ -263,7 +263,7 @@ const ListRececiptForm = ({ type }) => {
 
   const convertToFloat = (amount) => {
     if (!amount) return 0;
-    return parseFloat(amount?.toString().replace(/\./g, "").replace(",", "."));
+    return parseFloat(amount?.toString()?.replace(/\./g, "").replace(",", "."));
   };
 
 
@@ -477,7 +477,7 @@ const ListRececiptForm = ({ type }) => {
     if (typeof value === 'number') return value;
     if (!value) return 0;
     // Remove dots (thousands separator) and replace comma with dot (decimal separator)
-    const cleaned = value.toString().replace(/\./g, "").replace(",", ".");
+    const cleaned = value?.toString()?.replace(/\./g, "").replace(",", ".");
     return parseFloat(cleaned);
   };
 
@@ -845,7 +845,7 @@ const ListRececiptForm = ({ type }) => {
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">
-            {bodyError?.response?.data?.message?.toString()}
+            {bodyError?.response?.data?.message?.toString ? bodyError?.response?.data?.message?.toString() : ""}
           </p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
