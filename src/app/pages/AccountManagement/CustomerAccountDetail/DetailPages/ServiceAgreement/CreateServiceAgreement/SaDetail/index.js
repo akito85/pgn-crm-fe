@@ -757,61 +757,6 @@ const SaDetail = ({
                       />
                     </div>
 
-                    <div className={"grid grid-cols-1 w-full gap-x-6"}>
-                      {/* DDL PRICE RULE */}
-                      <div>
-                        <p className="text-primary text-xs font-bold uppercase py-b">
-                          PRICING RULE
-                        </p>
-                        <Form.Item
-                          name={"pricingRule"}
-                          label={"Pricing Rule"}
-                          // rules={[
-                          //   {
-                          //     message: "Please input your",
-                          //     required: true,
-                          //   },
-                          // ]}
-                          getValueFromEvent={(e) =>
-                            handleSaDetailObj(e, "pricingRule")
-                          }
-                        >
-                          <SelectComponent
-                            onChange={(e) => {
-                              if (e !== undefined) {
-                                handleGetDetailPricing(e);
-                                setIsCustomTiering(e === -1 ? true : false);
-                              } else {
-                                setDataPricing([]);
-                              }
-                            }}
-                          >
-                            {ddlPriceRule?.map((item) => (
-                              <Select.Option
-                                key={item.pricingRuleId}
-                                value={item.pricingRuleId}
-                              >
-                                {item.name}
-                              </Select.Option>
-                            ))}
-                          </SelectComponent>
-                        </Form.Item>
-                      </div>
-                    </div>
-
-                    <TablePricing
-                      setData={setDataPricing}
-                      data={dataPricing}
-                      setValueOrUnlimited={setValueOrUnlimited}
-                      valueOrUnlimited={valueOrUnlimited}
-                      type={type}
-                      isProduct={saDetailObj?.createFrom}
-                      dataFromApi={dataPricingTable}
-                      ddlPriceCode={ddlPriceCode}
-                      // dataMapPricing={dataDetailPricing}
-                      isCustomTiering={isCustomTiering}
-                      idCreateFrom={idCreateFrom}
-                    />
                   </div>
                 </div>
               </div>

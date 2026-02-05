@@ -327,6 +327,7 @@ const CreateServiceAgreement = ({ saType }) => {
             calculationType: calcTypeItem?.unitId ? parseInt(calcTypeItem.unitId) : null,
             priceAdjustment: cleanedString,
             descriptionProduct: data?.product?.description || null,
+            chooseProduct: data?.saInfo?.productName,
           });
           handleDetailApproval(data?.saInfo?.appHierId);
 
@@ -1406,7 +1407,7 @@ const CreateServiceAgreement = ({ saType }) => {
           if (data?.data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
-            if(data?.isCreated === true) {
+            if (data?.isCreated === true) {
               setCurrent(current + 1);
             } else {
               setModalValidateSa(true);
@@ -1556,7 +1557,7 @@ const CreateServiceAgreement = ({ saType }) => {
       .validateFields(saDetailFields)
       .then((values) => {
         handleMandatory(setTabPagesSaDetail, listDataAttachment);
-        console.log(saDetailObj?.pricingRule);
+        // console.log(saDetailObj?.pricingRule);
 
         if (dataPricing?.length < 2 && hasValue(saDetailObj?.pricingRule)) {
           setModalSaDetail(true);
@@ -1616,10 +1617,6 @@ const CreateServiceAgreement = ({ saType }) => {
       // Cannot skip steps when moving forward
       return;
     }
-
-    console.log("newCurrent", newCurrent);
-    console.log("current", current);
-    console.log("steps[current]?.title", steps[current]?.title);
 
     // Forward navigation - use existing step-specific validation
     switch (steps[current]?.title) {
@@ -1919,7 +1916,6 @@ const CreateServiceAgreement = ({ saType }) => {
     setBodyError({});
   };
 
-  // console.log(hasValue(saInfoObj?.alreadyGasIn));
 
   return (
     <LayoutMenu>

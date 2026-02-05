@@ -40,14 +40,14 @@ const initialState = {
 // Get list pagination SA
 export const getListServiceAgreement = createAsyncThunk(
   "GET_LIST_SERVICE_AGREEMENT",
-  async ({ search, id, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, id, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/sa/view/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getDetail(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -692,13 +692,22 @@ const accountServiceAgreementSlice = createSlice({
       state.isFailed = false;
       state.isSuccess = false;
       state.loading = true;
-      state.data = action.payload;
+      // Don't reset state.data here - it clears accumulated data for infinite scroll
     },
     [getListServiceAgreement.fulfilled]: (state, action) => {
       state.isFailed = false;
       state.isSuccess = false;
-      state.data = action.payload;
       state.loading = false;
+
+      // Handle infinite scroll - append data when isLoadMore is true
+      if (action.payload?.isLoadMore && state.data?.result) {
+        state.data = {
+          ...action.payload,
+          result: [...state.data.result, ...(action.payload.result || [])],
+        };
+      } else {
+        state.data = action.payload;
+      }
     },
     [getListServiceAgreement.rejected]: (state, action) => {
       state.data = action.payload;

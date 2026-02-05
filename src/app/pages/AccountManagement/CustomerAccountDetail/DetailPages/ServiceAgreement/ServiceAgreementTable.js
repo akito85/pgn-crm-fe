@@ -389,7 +389,6 @@ const ServiceAgreementTable = ({
         [idAccount, idCustomer, type, handleOpenDeleteDraft, handleOpenInactivate, handleApprovalHistory]
     );
 
-    console.log("FilteredArray = ", filteredArray)
     const actionCols = useColumnActionPermissionAccount(
         ["Delete", "View", "CreateAddon", "CreateAmendment", "Update", "Activate", "History"],
         itemActions,
@@ -446,7 +445,7 @@ const ServiceAgreementTable = ({
             useInfiniteScroll={true}
             hasMore={hasMore}
             onLoadMore={handleLoadMore}
-            loadMoreThreshold={20}
+            loadMoreThreshold={2}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             columnDefinitions={columnDefinitions}
