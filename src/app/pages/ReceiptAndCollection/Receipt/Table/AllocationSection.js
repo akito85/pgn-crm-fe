@@ -148,7 +148,7 @@ const AllocationSection = ({
   const parseAmount = (val) => {
     if (typeof val === 'number') return val;
     // Remove dots (thousand separators) and replace comma with dot (decimal)
-    const normalized = val.toString().replace(/\./g, "").replace(/,/g, ".");
+    const normalized = val?.toString()?.replace(/\./g, "").replace(/,/g, ".");
     return parseFloat(normalized);
   };
 
