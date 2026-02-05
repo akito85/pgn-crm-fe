@@ -138,4 +138,9 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   VIEW_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management",
   DETAIL_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management/view",
 
+  // Payment Warranty Partner
+  VIEW_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner",
+  DETAIL_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/view",
+  CREATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/create",
+  UPDATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/update",
 };

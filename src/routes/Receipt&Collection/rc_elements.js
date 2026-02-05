@@ -80,6 +80,10 @@ import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/Pay
 import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
 import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
 
+import ViewPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ViewPaymentWarrantyPartner";
+import ListDetailPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListDetailPaymentWarrantyPartner";
+import ListFormPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListFormPaymentWarrantyPartner";
+
 
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
@@ -220,4 +224,10 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Gapura Management
   VIEW_GAPURA_MANAGEMENT_PAGE: <ViewGapuraManagement />,
   DETAIL_GAPURA_MANAGEMENT_PAGE: <ListDetailGapuraManagement />,
+
+  // Payment Warranty Partner
+  VIEW_PAYMENT_WARRANTY_PARTNER: <ViewPaymentWarrantyPartner />,
+  DETAIL_PAYMENT_WARRANTY_PARTNER: <ListDetailPaymentWarrantyPartner />,
+  CREATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"create"} />,
+  UPDATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"update"} />,
 };

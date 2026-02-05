@@ -1,3 +1,5 @@
+// PERUBAHAN PADA COLUMNSCALCULATIONSUMMARY
+
 import React from "react";
 import { Spin } from "antd";
 import TableRBI from "../../../../../../../components/TableRBI";
@@ -13,6 +15,7 @@ import {
 } from "../../../../../../../utils/formatCurrency";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
+// Kolom untuk tabel utama tetap sama, tidak ada perubahan
 export const columnsCalculationSummary = (
   search = {},
   page,
@@ -63,7 +66,7 @@ export const columnsCalculationSummary = (
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "usage",
+      "saType",
       searchInput,
       searchedColumn,
       searchText,
@@ -83,14 +86,16 @@ export const columnsCalculationSummary = (
       ),
   },
   {
-    title: "SA TYPE",
-    dataIndex: "saType",
-    key: "saType",
+    title: "Calculated Total",
+    dataIndex: "calculatedTotal",
+    key: "calculatedTotal",
     width: 150,
+    align: "right",
     sorter: true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "saType",
+      "calculatedTotal",
       searchInput,
       searchedColumn,
       searchText,
@@ -99,13 +104,14 @@ export const columnsCalculationSummary = (
     ),
     render: (text) =>
       renderColumn(
-        "saType",
-        hasValue(search["saType"]),
+        "calculatedTotal",
+        hasValue(search["calculatedTotal"]),
         searchText,
         text,
         false,
         "input",
         search,
+        "calculatedTotal",
       ),
   },
   {
