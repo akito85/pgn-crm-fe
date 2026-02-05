@@ -134,6 +134,7 @@ import writeOffReducer from "../slices/receipt_collection/writeOff";
 import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
 import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
 import globalPropReducer from "../slices/globalPropSlice";
+import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentWarrantyPartner";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 
 const reducer = combineReducers({
@@ -275,6 +276,7 @@ const reducer = combineReducers({
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
   offset: offsetReducer,
+  paymentWarrantyPartner: paymentWarrantyPartnerReducer,
 
   // Attachment
   attachment: attachmentReducer,
