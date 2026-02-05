@@ -6,7 +6,7 @@ import promoConditionRepository from "./repository/promoConditionRepository";
 import PopupDetailCriteria from "./Detail/PopupDetailCriteria";
 import PopupDetailCondition from "./Detail/PopupDetailCondition";
 
-const USE_DUMMY = true;
+const USE_DUMMY = false;
 
 // Helper function untuk normalisasi nilai
 const normalize = (val = "") => String(val).toLowerCase().trim();

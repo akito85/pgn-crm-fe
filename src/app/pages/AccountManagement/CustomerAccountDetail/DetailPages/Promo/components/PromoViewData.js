@@ -96,7 +96,7 @@ const PromoViewData = ({
 
   const pageSize = 20;
   const containerRef = useRef(null);
-  const USE_DUMMY = true; // Ubah ke false untuk API real
+  const USE_DUMMY = false; // Ubah ke false untuk API real
 
   // Destructure validPromoList state
   const {
@@ -208,79 +208,35 @@ const PromoViewData = ({
 
   const handleDownload = useCallback(async () => {
     try {
-      if (USE_DUMMY) {
-        downloadDummyPromo(dataSource);
-        return;
-      }
+      if (!accountId) return;
 
-      if (!accountId) {
-        console.error("Account ID is required for download");
-        return;
-      }
-
-      const params = {
+      const payload = {
         page: 0,
         size: totalElements || 1000,
-        accountId,
         sort: "id~desc",
+        filters: [...activeFilters],
+        filterRules: [],
       };
 
-      // Gabungkan activeFilters dengan searchKeyword untuk download
-      let allFilters = [...activeFilters];
+      // optional search keyword
       if (searchKeyword) {
-        allFilters.push({
-          condition: "OR",
+        payload.filters.push({
           column: "name",
           operator: "Contains",
           value: searchKeyword,
+          logic: "OR",
         });
       }
 
-      const advancedSearch = {
-        inputFields:
-          allFilters.length > 0
-            ? allFilters
-            : [{ condition: "", column: "", operator: "", value: "" }],
-      };
-
-      await downloadValidPromo(params, advancedSearch);
+      await downloadValidPromo(accountId, payload);
     } catch (err) {
       console.error("Download promo failed:", err);
-      // Fallback: Download dari data yang sudah dimuat
-      if (dataSource.length > 0) {
-        const formattedData = dataSource.map((promo, index) => ({
-          NO: index + 1,
-          NAME: promo.name,
-          "PROMOTION TYPE": promo.promotionType,
-          "TYPE NAME": promo.typeName,
-          "CATEGORY NAME": promo.categoryName,
-          CRITERIA: promo.criteria,
-          "START DATE": formatDate(promo.startDate),
-          "END DATE": formatDate(promo.endDate),
-          DESCRIPTION: promo.description,
-          STATUS: promo.status,
-        }));
-
-        const worksheet = XLSX.utils.json_to_sheet(formattedData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "PROMO");
-
-        const timestamp = new Date()
-          .toISOString()
-          .replace(/[-:T.Z]/g, "")
-          .slice(0, 14);
-        const fileName = `PROMO_UNDER_ACCOUNT_${timestamp}.xlsx`;
-
-        XLSX.writeFile(workbook, fileName);
-      }
     }
   }, [
-    USE_DUMMY,
-    dataSource,
     accountId,
-    activeFilters,
-    searchKeyword,
     totalElements,
+    searchKeyword,
+    activeFilters,
     downloadValidPromo,
   ]);
 
@@ -507,61 +463,36 @@ const PromoViewData = ({
   );
 
   const loadMoreData = useCallback(
-    async (reset = false) => {
-      if (USE_DUMMY) return;
-      if (!accountId) {
-        console.warn("Account ID is required for loading data");
-        return;
-      }
+    async (pageNumber = 0) => {
+      if (!accountId) return;
 
-      const currentPage = reset ? 0 : page;
+      const validatedPage =
+        typeof pageNumber === "number"
+          ? pageNumber
+          : pageNumber === true
+            ? 1
+            : 0; // Handle boolean true
 
-      const params = {
-        page: currentPage,
+      const payload = {
+        page: validatedPage,
         size: pageSize,
-        accountId,
         sort: "id~desc",
+        filters: [...activeFilters],
+        filterRules: [],
       };
 
-      let allFilters = [...activeFilters];
       if (searchKeyword) {
-        allFilters.push({
-          condition: "OR",
+        payload.filters.push({
           column: "name",
           operator: "Contains",
           value: searchKeyword,
+          logic: "OR",
         });
       }
 
-      const advancedSearch = {
-        inputFields:
-          allFilters.length > 0
-            ? allFilters
-            : [{ condition: "", column: "", operator: "", value: "" }],
-      };
-
-      console.log("Loading data with params:", { params, advancedSearch });
-
-      try {
-        await loadValidPromoList(params, advancedSearch);
-
-        if (reset) {
-          setPage(0);
-        }
-      } catch (err) {
-        console.error("Error in loadMoreData:", err);
-        setError(err.message || "Failed to load data");
-      }
+      await loadValidPromoList(accountId, payload);
     },
-    [
-      page,
-      accountId,
-      activeFilters,
-      searchKeyword,
-      loadValidPromoList,
-      USE_DUMMY,
-      pageSize,
-    ],
+    [accountId, activeFilters, searchKeyword, loadValidPromoList],
   );
 
   // Effect untuk load data saat searchKeyword atau accountId berubah
@@ -574,7 +505,6 @@ const PromoViewData = ({
       return () => clearTimeout(timer);
     }
   }, [searchKeyword, accountId, USE_DUMMY]);
-
 
   const loadDataWithFilter = useCallback(
     async (filters = [], reset = true) => {
@@ -592,7 +522,7 @@ const PromoViewData = ({
           setTotalElements(0);
           setError(null);
           setTimeout(() => {
-            loadMoreData(true);
+            loadMoreData(0);
           }, 0);
         }
       }
@@ -700,66 +630,34 @@ const PromoViewData = ({
     }));
   }, [allColumns]);
 
-  // Cek dataSource sebelum render
-  // console.log("Current dataSource:", dataSource);
-  // console.log("Has error:", error);
-  // console.log("Loading:", loadingInitial);
-
   return (
-    <div
-      ref={containerRef}
-      className="infinite-scroll-container"
-    >
-      {!error && (
-        <NxTable
-          idTable="account-promo-table"
-          dataSource={dataSource}
-          columns={processedColumns}
-          loading={loadingInitial}
-          columnDefinitions={columnDefinitions}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          showSearchBar
-          onSearch={handleSearch}
-          showAdvanceSearch
-          onAdvanceSearch={handleAdvanceSearch}
-          usePagination={false}
-          useInfiniteScroll
-          hasMore={hasMore}
-          onLoadMore={() => {
-            if (!loadingInitial && hasMore) {
-              setPage((prev) => {
-                const nextPage = prev + 1;
-                loadMoreData();
-                return nextPage;
-              });
-            }
-          }}
-          loadMoreThreshold={50}
-          tableScrolled={{ y: 110 }}
-          scrollBodyStyle={{ minHeight: 110 }}
-        />
-      )}
-
-      {loadingInitial && page > 0 && (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <LoadingIndicator size="small" />
-        </div>
-      )}
-
-      {loadingInitial && page === 0 && !error && (
-        <LoadingIndicator size="large" />
-      )}
-
-      {error && (
-        <ErrorMessage
-          error={error}
-          onRetry={() => {
-            setError(null);
-            loadMoreData(true);
-          }}
-        />
-      )}
+    <div ref={containerRef} className="infinite-scroll-container">
+      <NxTable
+        idTable="account-promo-table"
+        dataSource={dataSource}
+        columns={processedColumns}
+        loading={loadingInitial}
+        columnDefinitions={columnDefinitions}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        showSearchBar
+        onSearch={handleSearch}
+        showAdvanceSearch
+        onAdvanceSearch={handleAdvanceSearch}
+        usePagination={false}
+        useInfiniteScroll
+        hasMore={hasMore}
+        onLoadMore={() => {
+          if (!loadingInitial && hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            loadMoreData(nextPage);
+          }
+        }}
+        loadMoreThreshold={50}
+        tableScrolled={{ y: 115 }}
+        scrollBodyStyle={{ minHeight: 115 }}
+      />
     </div>
   );
 };

@@ -256,7 +256,7 @@ const PromoHistoryViewData = ({
   const { promoHistoryList, loadPromoHistoryList, downloadPromoHistory } =
     usePromo();
   const containerRef = useRef(null);
-  const USE_DUMMY = true;
+  const USE_DUMMY = false;
   const pageSize = 10;
   const childPageSize = 5;
 
