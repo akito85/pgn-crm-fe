@@ -59,10 +59,10 @@ export const columnsCalculationSummary = (
       ),
   },
   {
-    title: "SA TYPE",
-    dataIndex: "saType",
-    key: "saType",
-    width: 150,
+    title: "USAGE",
+    dataIndex: "usage",
+    key: "usage",
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -72,16 +72,46 @@ export const columnsCalculationSummary = (
       searchText,
       handleSearch,
       true,
+      "date",
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "usage",
+        hasValue(search["usage"]),
+        searchText,
+        text,
+        "date",
+        search,
+        "usage"
+      ),
+  },
+  {
+    title: "Calculated Total",
+    dataIndex: "calculatedTotal",
+    key: "calculatedTotal",
+    width: 150,
+    align: "right",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "calculatedTotal",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
     ),
     render: (text) =>
       renderColumn(
-        "saType",
-        hasValue(search["saType"]),
+        "calculatedTotal",
+        hasValue(search["calculatedTotal"]),
         searchText,
         text,
         false,
         "input",
         search,
+        "calculatedTotal",
       ),
   },
   {
@@ -154,7 +184,7 @@ export const columnsCalculationSummary = (
   },
 ];
 
-// PERUBAHAN: Update kolom expanded sesuai response API
+// data expand column
 export const getExpandedColumns = () => [
   {
     key: "no",
@@ -162,14 +192,6 @@ export const getExpandedColumns = () => [
     isClassification: true,
     width: 60,
     render: (text, object, index) => index + 1,
-  },
-  {
-    title: "LINE NO",
-    dataIndex: "lineNo",
-    key: "lineNo",
-    width: 100,
-    align: "center",
-    render: (text) => text || "-",
   },
   {
     title: "UOM",
@@ -180,7 +202,7 @@ export const getExpandedColumns = () => [
     render: (text) => text || "-",
   },
   {
-    title: "USAGE PARTITION",
+    title: "CALCULATED USAGE PARTITION",
     children: [
       {
         title: "MIN",
@@ -284,7 +306,6 @@ export const getExpandedColumns = () => [
   },
 ];
 
-// PERUBAHAN UTAMA: Update renderExpandedRow untuk menggunakan id
 export const renderExpandedRow = (record, expandData, loadingExpand) => {
   const rowKey = record.id; // Gunakan id sebagai key
   const isLoading = loadingExpand[rowKey];
@@ -297,15 +318,6 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
         <Spin tip="Loading expanded data..." />
-      </div>
-    );
-  }
-  
-  // Show empty state
-  if (!expandedData || expandedData.length === 0) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
-        No data available
       </div>
     );
   }
