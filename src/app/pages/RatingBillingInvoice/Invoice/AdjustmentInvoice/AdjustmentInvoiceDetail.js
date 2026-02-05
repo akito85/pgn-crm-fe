@@ -114,7 +114,7 @@ const AdjustmentInvoiceDetail = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Rating & Billing",
+      breadcrumbName: "Invoice",
     },
     {
       path: INVOICE_ROUTES.ADJUSTMENT_INVOICE_VIEW,
@@ -138,7 +138,6 @@ const AdjustmentInvoiceDetail = () => {
     return moment(dateString).format("DD MMM YYYY HH:mm:ss");
   };
 
-  console.log("dataInvoiceDetail", dataInvoiceDetail);
   const layout = (valuePage) => {
     switch (valuePage) {
       case "Adjustment Invoice":

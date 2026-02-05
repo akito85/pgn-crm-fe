@@ -42,6 +42,7 @@ import {
   hideModalSuccess,
   showModalError,
 } from "../../redux/slices/general_slice";
+import { getGlobalFormatConfig } from "../../redux/slices/globalPropSlice";
 import NotFound from "../../app/NotFound";
 import { IconModal } from "../../utils/Icon";
 import InputComponent from "../InputComponent";
@@ -56,7 +57,7 @@ const LayoutMenu = ({ children }) => {
 
   const publicPaths = ["/invoice/generate-invoice", "/relationship", "/notifications/view", "/notifications/settings/view"];
   const isPublicPath = publicPaths.some((path) =>
-    location.pathname.includes(path)
+    location.pathname.includes(path),
   );
 
   const { user, remember, data_switch } = useSelector((state) => state.auth);
@@ -71,9 +72,10 @@ const LayoutMenu = ({ children }) => {
   const [form] = Form.useForm();
   const [collapsed, setCollapsed] = useState(false);
   const [modalConfirmation, setModalConfirmation] = useState(false);
-  const isIdleTimerEnabled = process.env.REACT_APP_IDLE_TIMER_ENABLED === 'true';
+  const isIdleTimerEnabled =
+    process.env.REACT_APP_IDLE_TIMER_ENABLED === "true";
   const tokenJSON = JSON.parse(
-    localStorage.getItem("token") || window.sessionStorage.getItem("token")
+    localStorage.getItem("token") || window.sessionStorage.getItem("token"),
   );
   // const config =
   //   localStorage.getItem("config") || window.sessionStorage.getItem("config");
@@ -92,6 +94,10 @@ const LayoutMenu = ({ children }) => {
     dispatch(checkGrantedAccess(location?.pathname));
     dispatch(getProfile());
   }, [dispatch, location, data_switch]);
+
+  useEffect(() => {
+    dispatch(getGlobalFormatConfig());
+  }, [dispatch]);
 
   // use effect kick user
   useEffect(() => {
@@ -154,7 +160,7 @@ const LayoutMenu = ({ children }) => {
       bodyError?.code === 501 ||
       bodyError?.code === 419 ||
       bodyError?.description ===
-        "Oops, login failed Username or Password is incorrect"
+      "Oops, login failed Username or Password is incorrect"
     ) {
       form.setFieldsValue({
         username: tokenJSON?.username,
@@ -235,18 +241,16 @@ const LayoutMenu = ({ children }) => {
                 </Tooltip>
                 <Tooltip
                   placement="topLeft"
-                  title={`${data_profile?.data?.entity} ${
-                    data_profile?.data?.currentPosition === undefined
+                  title={`${data_profile?.data?.entity} ${data_profile?.data?.currentPosition === undefined
                       ? ""
                       : ` - ${data_profile?.data?.currentPosition}`
-                  }`}
+                    }`}
                 >
                   <div className="truncate">
-                    {`${data_profile?.data?.entity} ${
-                      data_profile?.data?.currentPosition === undefined
+                    {`${data_profile?.data?.entity} ${data_profile?.data?.currentPosition === undefined
                         ? ""
                         : ` - ${data_profile?.data?.currentPosition}`
-                    }`}
+                      }`}
                   </div>
                 </Tooltip>
               </div>
@@ -271,21 +275,21 @@ const LayoutMenu = ({ children }) => {
         {
           label: (tokenJSON?.userType === "Employee" ||
             tokenJSON?.userLevel === "Super User") && (
-            <div
-              onClick={() =>
-                navigate(
-                  tokenJSON?.userLevel === "Super User"
-                    ? "/switch-entity"
-                    : "/switch-position"
-                )
-              }
-            >
-              <SwitcherOutlined className="mr-4" />{" "}
-              {tokenJSON?.userLevel === "Super User"
-                ? "Switch Entity"
-                : "Switch Position"}
-            </div>
-          ),
+              <div
+                onClick={() =>
+                  navigate(
+                    tokenJSON?.userLevel === "Super User"
+                      ? "/switch-entity"
+                      : "/switch-position",
+                  )
+                }
+              >
+                <SwitcherOutlined className="mr-4" />{" "}
+                {tokenJSON?.userLevel === "Super User"
+                  ? "Switch Entity"
+                  : "Switch Position"}
+              </div>
+            ),
           key: "3",
         },
         {
@@ -356,9 +360,8 @@ const LayoutMenu = ({ children }) => {
           trigger={null}
           collapsible
           collapsed={collapsed}
-          className={`site-layout-background ${
-            collapsed === true ? "width-collapsed" : "width-not-collapsed"
-          }`}
+          className={`site-layout-background ${collapsed === true ? "width-collapsed" : "width-not-collapsed"
+            }`}
           style={{
             overflow: "auto",
             height: "auto",
@@ -369,11 +372,10 @@ const LayoutMenu = ({ children }) => {
           }}
         >
           <div
-            className={`grid grid-cols-3 gap-1 logo ${
-              collapsed
+            className={`grid grid-cols-3 gap-1 logo ${collapsed
                 ? "my-6 mx-4 justify-center"
                 : "my-6 mx-4 justify-center"
-            }`}
+              }`}
           >
             <div className="col-span-2">
               <Image
@@ -394,13 +396,13 @@ const LayoutMenu = ({ children }) => {
                       color: "#4B465C",
                       width: "24px",
                     },
-                  }
+                  },
                 )}
             </div>
           </div>
           <SideMenu isCollapsed={collapsed} />
         </Sider>
-        <Layout className="site-layout2">
+        <Layout className="site-layout2 p-4">
           <Header
             className="site-layout-background2"
             style={{
@@ -420,32 +422,32 @@ const LayoutMenu = ({ children }) => {
                         color: "#FFFFFF",
                         width: "24px",
                       },
-                    }
+                    },
                   )}
               </div>
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
                 <NotificationDropdown />
                 <Dropdown overlay={menu} trigger={["click"]}>
-                    <a onClick={(e) => e.preventDefault()}>
-                      {data_profile?.data?.urlImage2 === null ? (
-                        data_profile?.data?.username === "" ? (
-                          <Avatar size={"middle"} icon={<UserOutlined />} />
-                        ) : (
-                          <Avatar size={"middle"}>
-                            <span className={"text-[1rem]"}>
-                              {initialAvatar(data_profile?.data?.username)}
-                            </span>
-                          </Avatar>
-                        )
+                  <a onClick={(e) => e.preventDefault()}>
+                    {data_profile?.data?.urlImage2 === null ? (
+                      data_profile?.data?.username === "" ? (
+                        <Avatar size={"middle"} icon={<UserOutlined />} />
                       ) : (
-                        <Avatar
-                          size={"middle"}
-                          src={data_profile?.data?.urlImage2}
-                        />
-                      )}
-                    </a>
-                  </Dropdown>
-                  {/* <IconArrowNarrowLeft
+                        <Avatar size={"middle"}>
+                          <span className={"text-[1rem]"}>
+                            {initialAvatar(data_profile?.data?.username)}
+                          </span>
+                        </Avatar>
+                      )
+                    ) : (
+                      <Avatar
+                        size={"middle"}
+                        src={data_profile?.data?.urlImage2}
+                      />
+                    )}
+                  </a>
+                </Dropdown>
+                {/* <IconArrowNarrowLeft
                   name={"IconArrowNarrowLeft"}
                   style={{ fontSize: "24px" }}
                   className="flex items-center text-white hover:text-white"
@@ -458,8 +460,6 @@ const LayoutMenu = ({ children }) => {
           </Header>
           <Content
             style={{
-              marginLeft: "20px",
-              marginRight: "20px",
               overflow: "initial",
             }}
           >
@@ -550,7 +550,7 @@ const LayoutMenu = ({ children }) => {
               </ModalError>
             ) : null}
             {data_grant_access?.response?.data?.data?.isGranted === false &&
-            !isPublicPath ? (
+              !isPublicPath ? (
               <NotFound type={"unauthorized"} />
             ) : (
               <div className="mt-[15px]">{children}</div>

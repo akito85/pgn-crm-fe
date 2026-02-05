@@ -320,10 +320,14 @@ const ModalReleaseReceipt = ({
         );
     };
 
+    // Add unique key to prevent selection issues
     const filteredDataSource = dataSource?.filter(item =>
         item.status?.toUpperCase() === "HOLD" &&
         item.statusApproval === "Approved"
-    );
+    ).map(item => ({
+        ...item,
+        key: item.id
+    })) || [];
 
     return (
         <ModalCustom

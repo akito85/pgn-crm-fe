@@ -2,21 +2,28 @@ import React, { useState, useEffect } from "react";
 import { Tabs } from "antd";
 import ServiceAgreementSection from "./Detail/ServiceAgreementSection";
 import PromoSection from "./Detail/PromoSection";
+import PeriodicSection from "./Detail/PeriodicSection";
 import CalculationUsageSection from "./Detail/CalculationUsageSection";
 import MuldestSection from "./Detail/MuldestSection";
 import UsageSection from "./Detail/UsageSection";
 import CardContainer from "../../../../components/CardContainer";
 
-const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
+const RatingDetail = ({ 
+  ratingCode,
+  calculationCode, 
+  accountNumber,
+  saType,
+  onClose 
+}) => {
   // State
   const [tabSection, setTabSection] = useState("Calculation Usage");
 
   // Use Effect
   useEffect(() => {
-    if (ratingCodeId) {
+    if (calculationCode) {
       setTabSection("Calculation Usage");
     }
-  }, [ratingCodeId]);
+  }, [calculationCode]);
 
   // Value Tab
   const tabItems = [
@@ -25,8 +32,8 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
       label: "Calculation Usage",
     },
     {
-      key: "Service Agreement",
-      label: "Service Agreement",
+      key: "Usage",
+      label: "Usage",
     },
     {
       key: "Promo",
@@ -34,8 +41,9 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
       disabled: true,
     },
     {
-      key: "Usage",
-      label: "Usage",
+      key: "Periodic",
+      label: "Periodic",
+      disabled: true,
     },
     {
       key: "Multi Destination",
@@ -49,12 +57,12 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
     switch (tabSection) {
       case "Calculation Usage":
         return "CALCULATION USAGE INFORMATION";
-      case "Service Agreement":
-        return "SERVICE AGREEMENT INFORMATION";
-      case "Promo":
-        return "PROMO INFORMATION";
       case "Usage":
         return "USAGE INFORMATION";
+      case "Promo":
+        return "PROMO INFORMATION";
+      case "Periodic":
+        return "PERIODIC INFORMATION";
       case "Multi Destination":
         return "MULTI DESTINATION INFORMATION";
       default:
@@ -69,32 +77,46 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
         return (
           <CalculationUsageSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
+            ratingCode={ratingCode}
+            accountNumber={accountNumber}
+            saType={saType}
           />
         );
-      case "Service Agreement":
-        return (
-          <ServiceAgreementSection
-            calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
-          />
-        );
-      case "Promo":
-        return <PromoSection />;
       case "Usage":
         return (
           <UsageSection
+            ratingCode={ratingCode}
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
+          />
+        );
+      case "Promo":
+        return (
+          <PromoSection
+            calculationCode={calculationCode}
+            ratingCode={ratingCode}
+          />
+        );
+      case "Periodic":
+        return (
+          <PeriodicSection
+            calculationCode={calculationCode}
+            ratingCode={ratingCode}
           />
         );
       case "Multi Destination":
-        return <MuldestSection />;
+        return (
+          <MuldestSection
+            calculationCode={calculationCode}
+            ratingCode={ratingCode}
+          />
+        );
       default:
         return (
           <CalculationUsageSection
             calculationCode={calculationCode}
-            ratingCodeId={ratingCodeId}
+            ratingCode={ratingCode}
+            accountNumber={accountNumber}
+            saType={saType}
           />
         );
     }
@@ -120,14 +142,8 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
         </div>
       }
     >
-      <Tabs
-        items={tabItems}
-        onChange={onChangeTab}
-        activeKey={tabSection}
-      />
-      <div className="mt-4">
-        {renderSection()}
-      </div>
+      <Tabs items={tabItems} onChange={onChangeTab} activeKey={tabSection} />
+      <div className="mt-4">{renderSection()}</div>
     </CardContainer>
   );
 };

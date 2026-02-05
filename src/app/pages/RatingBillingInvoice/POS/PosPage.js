@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Alert, Spin, Tooltip } from "antd";
+import { useNavigate } from "react-router-dom";
 import { WarningOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -8,9 +9,15 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import DocViewer from "react-doc-viewer";
+import ReactDOM from "react-dom";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 import ApprovalPointOfSales from "./Modal/ApprovalPointOfSales";
 import PosDetail from "./PosDetail";
 import PosTableView from "./Table/PosTableView";
+import ModalCustomerType from "./Modal/ModalCustomerType";
 import {
   deletePOS,
   downloadPOS,
@@ -30,8 +37,12 @@ import TableRBI from "../../../../components/TableRBI";
 const PosPage = () => {
   // Selector
   const { data_view, data_approvalHistory, loading } = useSelector(
-    (state) => state.pointOfSales
+    (state) => state.pointOfSales,
   );
+
+  const navigate = useNavigate();
+  const [modalCustomerType, setModalCustomerType] = useState(false);
+  const [selectedCustomerType, setSelectedCustomerType] = useState(null);
 
   // Declaration
   const searchInput = useRef(null);
@@ -58,6 +69,71 @@ const PosPage = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
+  const handlePreviewInvoice = async (record) => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/pos/download-latest/${record.posNumber}`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        },
+      );
+
+      const responseBlob = await response.data;
+      const blobText =
+        responseBlob instanceof Blob ? await responseBlob.text() : responseBlob;
+      const contentType = response.headers["content-type"];
+
+      const blob = new Blob([blobText], {
+        type: contentType ? "application/pdf" : "application/rtf",
+      });
+
+      const blobUrl = URL.createObjectURL(blob);
+      const newTab = window.open(blobUrl, "_blank");
+
+      if (newTab) {
+        newTab.document.title = `Invoice Preview - ${record.posNumber}`;
+
+        // TAMBAHAN: Gunakan DocViewer seperti di ViewInvoice.js
+        const viewerContainer = document.createElement("div");
+        newTab.document.body.appendChild(viewerContainer);
+
+        ReactDOM.render(
+          <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
+          viewerContainer,
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to preview invoice";
+
+      setBodyError({ message });
+      setModalError(true);
+    }
+  };
+
+  const handleOpenCustomerTypeModal = () => {
+    setSelectedCustomerType(null);
+    setModalCustomerType(true);
+  };
+
+  const handleConfirmCustomerType = (type) => {
+    setModalCustomerType(false);
+    // Navigate dengan state customer type
+    navigate(RBI_ROUTES.POS_CREATE, {
+      state: { customerType: type },
+    });
+  };
+
+  const handleCancelCustomerType = () => {
+    setModalCustomerType(false);
+    setSelectedCustomerType(null);
+  };
+
   // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
     dispatch(
@@ -67,7 +143,7 @@ const PosPage = () => {
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false, // Flag untuk initial load
-      })
+      }),
     );
     setPage(0);
   }, [dispatch, sort, search]);
@@ -79,7 +155,7 @@ const PosPage = () => {
         pageSize: loadMoreSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   };
 
@@ -97,13 +173,12 @@ const PosPage = () => {
           pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true, // Flag untuk load more
-        })
+        }),
       );
       setPage(nextPage);
     }
   };
 
-  // TAMBAHAN: Calculate if there's more data
   const hasMore =
     (data_view?.result?.length || 0) < (data_view?.page?.totalElements || 0);
 
@@ -153,7 +228,7 @@ const PosPage = () => {
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
             isLoadMore: false,
-          })
+          }),
         );
         setPage(0);
       })
@@ -224,7 +299,7 @@ const PosPage = () => {
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false,
-      })
+      }),
     );
     setPage(0);
   };
@@ -276,15 +351,14 @@ const PosPage = () => {
     {
       action: "Create",
       render: (
-        <Link to={RBI_ROUTES.POS_CREATE}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={20} />}
-            type={"submit"}
-            border={false}
-          >
-            Create Point Of Sales
-          </ButtonComponent>
-        </Link>
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonCreate" width={20} />}
+          type={"submit"}
+          border={false}
+          onClick={handleOpenCustomerTypeModal}
+        >
+          Create Point Of Sales
+        </ButtonComponent>
       ),
     },
 
@@ -328,13 +402,25 @@ const PosPage = () => {
               icon={<SVGIcon name="IconEye" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isAvailable}
+              onClick={() => isAvailable && handlePreviewInvoice(record)}
             >
               <span className={"text-black ml-3"}>Preview Invoice</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Detail">
-              <div className="">
-                <SVGIcon name="IconEye" width={20} />
+            <Tooltip title="Preview Invoice">
+              <div
+                onClick={() => isAvailable && handlePreviewInvoice(record)}
+                style={{
+                  cursor: isAvailable ? "pointer" : "not-allowed",
+                  display: "inline-block",
+                  lineHeight: 0,
+                }}
+              >
+                <SVGIcon
+                  name="IconEye"
+                  width={20}
+                  color={isAvailable ? "#0075bf" : "#8D91A0"}
+                />
               </div>
             </Tooltip>
           );
@@ -342,6 +428,7 @@ const PosPage = () => {
         return content;
       },
     },
+
     {
       action: "Update",
       type: "table",
@@ -349,6 +436,9 @@ const PosPage = () => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
+
+        const customerTypeForNav =
+          record.customerType === 2 ? "prospective" : "customer";
 
         const content =
           data > 3 ? (
@@ -378,6 +468,7 @@ const PosPage = () => {
             state={{
               id: record.id,
               idPos: record.posNumber,
+              customerType: customerTypeForNav,
             }}
           >
             {content}
@@ -466,12 +557,12 @@ const PosPage = () => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                 ),
                 ...useColumnActionPermission(
                   ["view", "update", "delete", "preview", "history"],
                   itemGrantAccess,
-                  "Delete"
+                  "Delete",
                 ),
               ]}
               totalData={data_view?.page?.totalElements || 0}
@@ -528,6 +619,15 @@ const PosPage = () => {
             type={"error"}
           />
         </ModalConfirm>
+
+        {/* Modal Customer Type */}
+        <ModalCustomerType
+          isOpen={modalCustomerType}
+          onCancel={handleCancelCustomerType}
+          onConfirm={handleConfirmCustomerType}
+          selectedType={selectedCustomerType}
+          setSelectedType={setSelectedCustomerType}
+        />
 
         {/** Modal Retry */}
         <ModalError

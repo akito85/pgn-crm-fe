@@ -194,6 +194,7 @@ const ViewTransactionCalender = () => {
       width: 60,
       dataIndex: "key",
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -464,6 +465,19 @@ const ViewTransactionCalender = () => {
   const itemActions = [
     // toolbar items
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Create",
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_TRANSACTION_CALENDER}>
@@ -686,7 +700,7 @@ const ViewTransactionCalender = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 1800,
+              x: "max-content",
               y: 525,
             }}
           />

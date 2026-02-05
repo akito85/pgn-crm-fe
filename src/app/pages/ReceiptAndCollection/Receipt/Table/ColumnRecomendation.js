@@ -10,8 +10,8 @@ export const columnRecommendation = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleInactive = () => {}
+  handleSearch = () => { },
+  handleInactive = () => { }
 ) => {
   const columns = [
     {
@@ -19,11 +19,13 @@ export const columnRecommendation = (
       width: 60,
       align: "center",
       dataIndex: "no",
+      key: "no",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "ITEM",
       dataIndex: "billingItem",
+      key: "billingItem",
       // sorter:true,
       sorter: (a, b) => sorterFunction("billingItem", a, b),
       ...getColumnSearchPropsPaging(
@@ -38,6 +40,7 @@ export const columnRecommendation = (
     {
       title: "INVOICE NO",
       dataIndex: "invoiceNumber",
+      key: "invoiceNumber",
       // sorter:true,
       sorter: (a, b) => sorterFunction("invoiceNumber", a, b),
       ...getColumnSearchPropsPaging(
@@ -51,6 +54,7 @@ export const columnRecommendation = (
     {
       title: "INVOICE CURRENCY",
       dataIndex: "invoiceCurrency",
+      key: "invoiceCurrency",
       // sorter:true,
       sorter: (a, b) => sorterFunction("invoiceCurrency", a, b),
       align: "center",
@@ -63,22 +67,9 @@ export const columnRecommendation = (
       ),
     },
     {
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycle",
-      // sorter:true,
-      sorter: (a, b) => sorterFunction("billingCycle", a, b, "date"),
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "billingCycle",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
       title: "BILLING PERIOD",
       dataIndex: "billingPeriod",
+      key: "billingPeriod",
       // sorter:true,
       sorter: (a, b) => sorterFunction("billingPeriod", a, b, "date"),
       align: "center",
@@ -98,6 +89,7 @@ export const columnRecommendation = (
     {
       title: "BILLING ITEM AMOUNT",
       dataIndex: "billingItemAmount",
+      key: "billingItemAmount",
       // sorter:true,
       sorter: (a, b) => sorterFunction("billingItemAmount", a, b, "number"),
       align: "right",
@@ -117,6 +109,7 @@ export const columnRecommendation = (
     {
       title: "TYPE",
       dataIndex: "type",
+      key: "type",
       // sorter:true,
       sorter: (a, b) => sorterFunction("type", a, b),
       ...getColumnSearchPropsPaging(
@@ -130,6 +123,7 @@ export const columnRecommendation = (
     {
       title: "ALLOCATION AMOUNT",
       dataIndex: "allocationAmount",
+      key: "allocationAmount",
       // sorter:true,
       sorter: (a, b) => sorterFunction("allocationAmount", a, b, "number"),
       align: "right",
@@ -151,6 +145,7 @@ export const columnRecommendation = (
     {
       title: "BILLING ITEM BALANCE",
       dataIndex: "billingItemBalance",
+      key: "billingItemBalance",
       // sorter:true,
       sorter: (a, b) => sorterFunction("billingItemBalance", a, b, "number"),
       align: "right",
@@ -170,6 +165,7 @@ export const columnRecommendation = (
     {
       title: "ALLOCATION STATUS",
       dataIndex: "allocationStatus",
+      key: "allocationStatus",
       // sorter:true,
       sorter: (a, b) => sorterFunction("allocationStatus", a, b),
       ...getColumnSearchPropsPaging(
@@ -195,6 +191,7 @@ export const columnRecommendation = (
     {
       title: "CONVERTED CURRENCY",
       dataIndex: "convertedCurrency",
+      key: "convertedCurrency",
       // sorter:true,
       sorter: (a, b) => sorterFunction("convertedCurrency", a, b),
       align: "center",
@@ -209,6 +206,7 @@ export const columnRecommendation = (
     {
       title: "EQUIVALENT AMOUNT",
       dataIndex: "equivalentAmount",
+      key: "equivalentAmount",
       // sorter:true,
       sorter: (a, b) => sorterFunction("equivalentAmount", a, b, "number"),
       align: "right",

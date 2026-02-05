@@ -1,5 +1,5 @@
-import { Fragment } from "react";
 import ConfirmationModalAttachmentTable from "./ConfirmationModalAttachmentTable";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalAttachment = ({
   data = [],
@@ -9,10 +9,7 @@ const ConfirmationModalAttachment = ({
   configApplication,
 }) => {
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        ATTACHMENT
-      </div>
+    <NxBaseContainer border header={"ATTACHMENT"}>
       <ConfirmationModalAttachmentTable
         type={type}
         data={data}
@@ -20,7 +17,7 @@ const ConfirmationModalAttachment = ({
         service={service}
         configApplication={configApplication}
       />
-    </Fragment>
+    </NxBaseContainer>
   );
 };
 

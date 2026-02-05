@@ -35,6 +35,14 @@ const initialState = {
   data_materai: {},
   data_rate_tax: {},
   data_attachment: [],
+  data_account_segment: [],
+  data_account_group_type: [],
+  data_meter_reading_code: [],
+  data_user_detail: {},
+  data_sor_list: [],
+  data_cost_center_list: [],
+  data_uom_codes: [],
+  loading_prospective: false,
 };
 
 export const getListPointOfSales = createAsyncThunk(
@@ -54,13 +62,32 @@ export const getListPointOfSales = createAsyncThunk(
       };
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_LIST_POINT_OF_SALES" })
+        validateError({ error, action: "GET_LIST_POINT_OF_SALES" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
+);
+
+export const previewInvoicePOS = createAsyncThunk(
+  "PREVIEW_INVOICE_POS",
+  async (posNumber, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/download-latest/${posNumber}`;
+      // Gunakan method yang sama seperti preview invoice
+      const response = await ratingBillingHttpService.getAll(url, {
+        responseType: "arraybuffer",
+      });
+      return { data: response.data, posNumber };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "PREVIEW_INVOICE_POS", back: false }),
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
 );
 
 export const getDetailListPointOfSales = createAsyncThunk(
@@ -75,13 +102,13 @@ export const getDetailListPointOfSales = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_DETAIL_LIST_POINT_OF_SALES" })
+        validateError({ error, action: "GET_DETAIL_LIST_POINT_OF_SALES" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const downloadPOS = createAsyncThunk(
@@ -96,11 +123,11 @@ export const downloadPOS = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_POS", back: false })
+        validateError({ error: error, action: "DOWNLOAD_POS", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const approvePOS = createAsyncThunk(
@@ -139,7 +166,7 @@ export const approvePOS = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const rejectPOS = createAsyncThunk(
@@ -177,7 +204,7 @@ export const rejectPOS = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createPOS = createAsyncThunk(
@@ -216,7 +243,7 @@ export const createPOS = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updatePOS = createAsyncThunk(
@@ -255,7 +282,7 @@ export const updatePOS = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const deletePOS = createAsyncThunk(
@@ -295,7 +322,7 @@ export const deletePOS = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getMaterai = createAsyncThunk(
@@ -305,16 +332,16 @@ export const getMaterai = createAsyncThunk(
       const url = `/v1/dbs/api/pos/meterai`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        transactionDate
+        transactionDate,
       );
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_MATERIA" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getRate = createAsyncThunk(
@@ -328,10 +355,10 @@ export const getRate = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_RATE" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 export const getRateTax = createAsyncThunk(
   "GET_RATE_TAX",
@@ -343,10 +370,10 @@ export const getRateTax = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_RATE_TAX" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -358,33 +385,34 @@ export const getApprovalHistory = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_APPROVAL_HISTORY" })
+        validateError({ error, action: "GET_APPROVAL_HISTORY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalTermsOfPaymentData = createAsyncThunk(
   "GET_GLOBAL_TERMS_OF_PAYMENT_DATA",
   async (accountId, thunkAPI) => {
     try {
-      if (hasValue(accountId)) {
-        const url = `/v1/dbs/api/pos/term-of-payment-data/${accountId}`;
-        const response = await ratingBillingHttpService.getAll(url);
-        return response.data;
-      }
+      const url = hasValue(accountId)
+        ? `/v1/dbs/api/pos/term-of-payment-data/${accountId}`
+        : `/v1/dbs/api/pos/term-of-payment-data`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_GLOBAL_TERMS_OF_PAYMENT_DATA" })
+        validateError({ error, action: "GET_GLOBAL_TERMS_OF_PAYMENT_DATA" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalProductItem = createAsyncThunk(
@@ -397,10 +425,10 @@ export const getGlobalProductItem = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_GLOBAL_PRODUCT" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalBillingItem = createAsyncThunk(
@@ -413,10 +441,10 @@ export const getGlobalBillingItem = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_GLOBAL_BILLING" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getApprovalList = createAsyncThunk(
@@ -429,10 +457,10 @@ export const getApprovalList = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_APPROVAL_LIST" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getListApprovalPage = createAsyncThunk(
@@ -447,13 +475,13 @@ export const getListApprovalPage = createAsyncThunk(
         thunkAPI.dispatch(setBodyError(error));
       }
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_LIST_APPROVAL_PAGE" })
+        validateError({ error, action: "GET_LIST_APPROVAL_PAGE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getDetailPOS = createAsyncThunk(
@@ -469,10 +497,10 @@ export const getDetailPOS = createAsyncThunk(
       }
       thunkAPI.dispatch(validateError({ error, action: "GET_DETAIL_POS" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getApprovalListDetail = createAsyncThunk(
@@ -484,13 +512,13 @@ export const getApprovalListDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_APPROVAL_LIST_DETAIL" })
+        validateError({ error, action: "GET_APPROVAL_LIST_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 //global type
@@ -503,13 +531,13 @@ export const getGlobalType = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_GLOBAL_LIST_TYPE" })
+        validateError({ error, action: "GET_GLOBAL_LIST_TYPE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalBillingCycle = createAsyncThunk(
@@ -521,13 +549,13 @@ export const getGlobalBillingCycle = createAsyncThunk(
       return response.data.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_GLOBAL_LIST_BILLING_CYCLE" })
+        validateError({ error, action: "GET_GLOBAL_LIST_BILLING_CYCLE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalBillingPeriod = createAsyncThunk(
@@ -539,13 +567,13 @@ export const getGlobalBillingPeriod = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_GLOBAL_LIST_BILLING_PERIOD" })
+        validateError({ error, action: "GET_GLOBAL_LIST_BILLING_PERIOD" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalCurrency = createAsyncThunk(
@@ -557,13 +585,13 @@ export const getGlobalCurrency = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_GLOBAL_LIST_CURRENCY" })
+        validateError({ error, action: "GET_GLOBAL_LIST_CURRENCY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalAccountNumber = createAsyncThunk(
@@ -575,13 +603,13 @@ export const getGlobalAccountNumber = createAsyncThunk(
       return response.data.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_GLOBAL_ACCOUNT_NUMBER" })
+        validateError({ error, action: "GET_GLOBAL_ACCOUNT_NUMBER" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGlobalTermsOfPayment = createAsyncThunk(
@@ -593,13 +621,13 @@ export const getGlobalTermsOfPayment = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_GLOBAL_TERMS_OF_PAYMENT" })
+        validateError({ error, action: "GET_GLOBAL_TERMS_OF_PAYMENT" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getCalculate = createAsyncThunk(
@@ -609,16 +637,16 @@ export const getCalculate = createAsyncThunk(
       const url = `/v1/dbs/api/pos/calculate-pos`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_CALCULATE" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getCalculateBilling = createAsyncThunk(
@@ -628,18 +656,18 @@ export const getCalculateBilling = createAsyncThunk(
       const url = `/v1/dbs/api/pos/calculate-pos-billing`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_CALCULATE_BILLING" })
+        validateError({ error, action: "GET_CALCULATE_BILLING" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 //file
@@ -652,13 +680,13 @@ export const getListCategoryFile = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_LIST_CATEGORY_FILE" })
+        validateError({ error, action: "GET_LIST_CATEGORY_FILE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAttachmentDetailPOS = createAsyncThunk(
@@ -670,13 +698,217 @@ export const getAttachmentDetailPOS = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_LIST_ATTACHMENT_FILE_POS_DETAIL" })
+        validateError({ error, action: "GET_LIST_ATTACHMENT_FILE_POS_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : []
+        error.response.data.code === 419 ? null : [],
       );
     }
-  }
+  },
+);
+
+// Thunks untuk Prospective Customer
+export const getAccountSegmentList = createAsyncThunk(
+  "GET_ACCOUNT_SEGMENT_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/accountsegment`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getAccountGroupTypeList = createAsyncThunk(
+  "GET_ACCOUNT_GROUP_TYPE_LIST",
+  async (segmentIds, thunkAPI) => {
+    try {
+      let queryParams = "";
+      if (segmentIds && Array.isArray(segmentIds) && segmentIds.length > 0) {
+        queryParams = segmentIds.map((id) => `idSegment=${id}`).join("&");
+      }
+
+      const url = `/v1/dbs/api/account-group-type/list${queryParams ? `?${queryParams}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+
+      const accountGroups = Array.isArray(response)
+        ? response
+        : Array.isArray(response.data)
+          ? response.data
+          : [];
+      return accountGroups;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getMeterReadingCodeList = createAsyncThunk(
+  "GET_METER_READING_CODE_LIST",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/meterreadingcode`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getUserDetailForPOS = createAsyncThunk(
+  "GET_USER_DETAIL_FOR_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/user-detail`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getSorList = createAsyncThunk(
+  "GET_SOR_LIST_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/sor?ccType=SOR`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getCostCenterList = createAsyncThunk(
+  "GET_COST_CENTER_LIST_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/costcenter`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getUomCodes = createAsyncThunk(
+  "GET_UOM_CODES_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/uom-codes`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
 );
 
 const pointOfSalesSlice = createSlice({
@@ -1025,6 +1257,96 @@ const pointOfSalesSlice = createSlice({
     [getAttachmentDetailPOS.rejected]: (state, action) => {
       state.loading = false;
       state.data_attachment = action.payload;
+    },
+    // Account Segment
+    [getAccountSegmentList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getAccountSegmentList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_account_segment = action.payload?.Data || [];
+    },
+    [getAccountSegmentList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_account_segment = [];
+    },
+
+    // Account Group Type
+    [getAccountGroupTypeList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getAccountGroupTypeList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_account_group_type = action.payload || [];
+    },
+    [getAccountGroupTypeList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_account_group_type = [];
+    },
+
+    // Meter Reading Code
+    [getMeterReadingCodeList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getMeterReadingCodeList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_meter_reading_code = action.payload || [];
+    },
+    [getMeterReadingCodeList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_meter_reading_code = [];
+    },
+
+    // User Detail
+    [getUserDetailForPOS.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getUserDetailForPOS.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_user_detail = action.payload || {};
+    },
+    [getUserDetailForPOS.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_user_detail = {};
+    },
+
+    // SOR List
+    [getSorList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getSorList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_sor_list = action.payload?.data || [];
+    },
+    [getSorList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_sor_list = [];
+    },
+
+    // Cost Center List
+    [getCostCenterList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getCostCenterList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_cost_center_list = action.payload?.data || [];
+    },
+    [getCostCenterList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_cost_center_list = [];
+    },
+
+    // UOM Codes
+    [getUomCodes.pending]: (state) => {
+      state.loading = true;
+    },
+    [getUomCodes.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_uom_codes = action.payload?.data || action.payload || [];
+    },
+    [getUomCodes.rejected]: (state) => {
+      state.loading = false;
+      state.data_uom_codes = [];
     },
   },
 });

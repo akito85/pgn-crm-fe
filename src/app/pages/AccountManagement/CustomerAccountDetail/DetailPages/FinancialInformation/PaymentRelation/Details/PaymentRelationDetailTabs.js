@@ -1,72 +1,57 @@
-import { Fragment } from "react";
-import RadioTabs from "../../../../../../../../components/RadioTabs";
 import PaymentRelationDetailAttch from "./PaymentRelationDetailAttch";
 import PaymentRelationDetailInfo from "./PaymentRelationDetailInfo";
-
-const dataTabs = {
-  pri: "Payment Relation Information",
-  attch: "Attachment",
-};
+import { Tabs } from "antd";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import { useState } from "react";
+import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const PaymentRelationDetailTabs = ({
   subjectAccountNumber,
+  idPr = 0,
   dataDetail = {},
-  dataAttachment = [],
-  section = "",
-  options = [],
-  handleChangeOption = () => {},
+  dispatch = () => {},
 }) => {
   // Use provided options or fall back to default tabs
-  const tabOptions = options.length > 0 ? options : [
-    { value: "pri", label: "Payment Relation Information" },
-    { value: "attch", label: "Attachment" },
+  const tabOptions = [
+    {
+      key: "pri",
+      label: "Payment Relation Information",
+      children: (
+        <PaymentRelationDetailInfo
+          subjectAccountNumber={subjectAccountNumber}
+          dataDetail={dataDetail}
+        />
+      )
+    },
+    {
+      key: "attch",
+      label: "Attachment",
+      children: (
+        <PaymentRelationDetailAttch
+          dispatch={dispatch}
+          idPr={idPr}
+        />
+      )
+    },
   ];
 
-  const AccountType = () => {
-    // Path form URL
-    const path = window.location.pathname
-
-    // Strict whitelist (prevents XSS, traversal, unicode injections)
-    const allowed = /^[a-zA-Z0-9-_]+$/;
-
-    // Match only your known route structure:
-    // /account-management/<dynamic>/view
-    const match = path.match(/^\/account-management\/([a-zA-Z0-9-_]+)\/view\/?$/);
-
-    if (!match) return null;
-
-    const dynamicPart = match[1];
-
-    return allowed.test(dynamicPart) ? dynamicPart : null;
-  }
-
-  const renderSection = () => {
-    switch (section) {
-      case dataTabs.pri:
-        return <PaymentRelationDetailInfo subjectAccountNumber={subjectAccountNumber} dataDetail={dataDetail} type={AccountType}/>;
-      case dataTabs.attch:
-        return <PaymentRelationDetailAttch dataAttachment={dataAttachment} />;
-      default:
-        return <PaymentRelationDetailInfo />;
-    }
-  };
+  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
 
   return (
-    <Fragment>
-      <div className="flex flex-col gap-4">
-        {/* Wrapper div to ensure proper styling */}
-        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
-          <div className="w-full">
-            <RadioTabs
-              currentPosition={section}
-              data={tabOptions}
-              onChange={handleChangeOption}
-            />
-          </div>
-        </div>
-        {renderSection()}
-      </div>
-    </Fragment>
+    <NxCardContainer
+      header={"DETAIL INFORMATION"}
+      type="tabs"
+      element={
+        <NxTabs
+          items={tabOptions}
+          onChange={setActiveKey}
+          activeKey={activeKey}
+        />
+      }
+      hideChildren
+      withoutPadding
+    >
+    </NxCardContainer>
   );
 };
 

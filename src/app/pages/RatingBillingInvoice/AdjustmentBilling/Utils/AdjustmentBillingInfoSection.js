@@ -42,7 +42,7 @@ const AdjustmentBillingInfoSection = ({
   };
 
   return (
-    <div className="w-full grid grid-cols-4 gap-4">
+    <div className="w-full grid grid-cols-5 gap-4">
       <DetailText label={"Type"}>
         {labelType ? labelType : data?.adjustmentTypeName}
       </DetailText>
@@ -75,22 +75,33 @@ const AdjustmentBillingInfoSection = ({
           ? moment(data?.accountingDate).format(dateFormatting.date)
           : ""}
       </DetailText>
-      <div className="col-span-2">
-        <DetailText label={"Terms Of Payment"}>
-          {moment.isMoment(data?.termsOfPayment) === true &&
-          isValidDate(data?.termsOfPayment) === true
-            ? moment(data?.termsOfPayment).format(dateFormatting.date)
-            : data?.termsOfPayment}
-        </DetailText>
-      </div>
-      <div className="col-span-2">
-        <DetailText label={"Adjustment Reason"}>
-          {labelAdjustmentReason
-            ? labelAdjustmentReason
-            : data?.adjustmentReasonName}
-        </DetailText>
-      </div>
-      <div className="col-span-4">
+
+      <DetailText label={"Terms Of Payment"}>
+        {moment.isMoment(data?.termsOfPayment) === true &&
+        isValidDate(data?.termsOfPayment) === true
+          ? moment(data?.termsOfPayment).format(dateFormatting.date)
+          : data?.termsOfPayment}
+      </DetailText>
+
+      <DetailText label={"Adjustment Reason"}>
+        {labelAdjustmentReason
+          ? labelAdjustmentReason
+          : data?.adjustmentReasonName}
+      </DetailText>
+
+      <DetailText label={"Classification Adjustment"}>
+        {data?.classification}
+      </DetailText>
+
+      <DetailText label={"Post Invoice"}>
+        {data?.postInvoice}
+      </DetailText>
+
+      <DetailText label={"On Demand"}>
+        {data?.onDemand}
+      </DetailText>
+
+      <div className="col-span-5">
         <DetailText label={"Remark"}>{data?.remark}</DetailText>
       </div>
     </div>

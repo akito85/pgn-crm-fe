@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
     createCaPaymentChannel,
@@ -22,7 +22,9 @@ import {
     getCollectionAgentList,
     getPaymentChannelList,
     getPartnerList,
+
     getType,
+    saveDraftCaPaymentChannel,
 } from "../../../../../redux/slices/receipt_collection/caPaymentChannel";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -160,9 +162,13 @@ const ListFormCaPaymentChannel = (props) => {
         }
     }, [data_detail, id]);
 
-    // Define tabData before using it in useState
-    const [tabData, setTabData] = useState([
+    const [loadingSave, setLoadingSave] = useState(false);
+    const [current, setCurrent] = useState(0);
+    const [sendBody, setSendBody] = useState({});
+
+    const [steps, setSteps] = useState([
         {
+            title: "Ca Payment Channel",
             value: "Ca Payment Channel",
             paramValue: [
                 "caCode",
@@ -174,14 +180,82 @@ const ListFormCaPaymentChannel = (props) => {
                 "effEndDate",
             ],
         },
-        { value: "Approval", paramValue: ["apphierId"] },
-        { value: "Attachment" },
+        { title: "Approval", value: "Approval", paramValue: ["apphierId"] },
+        { title: "Attachment", value: "Attachment" },
     ]);
 
-    const [valuePage, setValuePage] = useState(tabData[0].value);
-    const [sendBody, setSendBody] = useState();
-    const onChange = (e) => {
-        setValuePage(e.target.value);
+    const next = () => {
+        const fieldsToValidate = steps[current]?.paramValue;
+        if (fieldsToValidate) {
+            form
+                .validateFields(fieldsToValidate)
+                .then(() => {
+                    if (current < steps.length - 1) {
+                        setCurrent(current + 1);
+                    }
+                })
+                .catch((error) => {
+                    handleError({
+                        values: form.getFieldsValue(),
+                        errorFields: error.errorFields,
+                    });
+                });
+        } else {
+            if (current < steps.length - 1) {
+                setCurrent(current + 1);
+            }
+        }
+    };
+
+    const prev = () => {
+        setCurrent(current - 1);
+    };
+
+    const handleSaveDraft = async () => {
+        setLoadingSave(true);
+        const formValue = form.getFieldsValue();
+        const body = {
+            caCode: formValue.caCode,
+            ciCode: formValue.ciCode,
+            name: formValue.name,
+            partnerCode: formValue.partnerCode,
+            type: formValue.type,
+            effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
+            effEndDate: formValue.effEndDate
+                ? moment(formValue.effEndDate).format(dateFormatting.date)
+                : null,
+            apphierId: formValue.apphierId,
+        };
+
+        dispatch(saveDraftCaPaymentChannel(body))
+            .unwrap()
+            .then(async (data) => {
+                let id = data.id;
+                for (let icon = 0; icon < listDataAttachment.length; icon++) {
+                    const element = listDataAttachment[icon];
+                    const body = {
+                        files: element.file,
+                        fileCategoryId: element.fileCategoryId,
+                        referensiId: id,
+                        category: "CA_PAYMENT_CHANNEL",
+                    };
+                    await receiptCollectionHttpService.uploadImage(
+                        `/v1/dbs/api/attachment/upload/v1`,
+                        body
+                    );
+                }
+                setLoadingSave(false);
+                dispatch(
+                    showModalSuccess({
+                        title: "Successfull",
+                        description: `Your data has been saved as draft`,
+                        return: true,
+                    })
+                );
+            })
+            .catch((error) => {
+                setLoadingSave(false);
+            });
     };
 
     useEffect(() => {
@@ -265,12 +339,11 @@ const ListFormCaPaymentChannel = (props) => {
 
     //handle Error
     const handleError = ({ values, errorFields, outOfDate }) => {
-        setTabData((prevState) => {
+        setSteps((prevState) => {
             const res = prevState.map((item) => {
                 if (!item.paramValue || item.paramValue.length < 0) {
                     return {
-                        value: item.value,
-                        paramValue: item.paramValue,
+                        ...item,
                     };
                 }
                 const errorBadge = errorFields.reduce(
@@ -279,8 +352,7 @@ const ListFormCaPaymentChannel = (props) => {
                     0
                 );
                 return {
-                    value: item.value,
-                    paramValue: item.paramValue,
+                    ...item,
                     errorBadge,
                 };
             });
@@ -306,7 +378,7 @@ const ListFormCaPaymentChannel = (props) => {
 
     //kirim body
     const handleSave = async () => {
-        setModalConfirm(false);
+        setLoadingSave(true);
         const successMessageCreate = {
             title: "Successfull",
             description: `Your data has been submited`,
@@ -341,6 +413,7 @@ const ListFormCaPaymentChannel = (props) => {
                         );
                     }
                     setLoadingForm(false);
+                    setLoadingSave(false);
                     handleCancelModalConfirm();
                     form.resetFields();
                     setSelectedHierarchy("");
@@ -349,6 +422,8 @@ const ListFormCaPaymentChannel = (props) => {
                     handleClear();
                 })
                 .catch((error) => {
+                    setLoadingSave(false);
+                    setModalConfirm(false);
                     if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
                         const message =
                             (error.response &&
@@ -380,11 +455,14 @@ const ListFormCaPaymentChannel = (props) => {
                         );
                     }
                     setLoadingForm(false);
+                    setLoadingSave(false);
                     handleCancelModalConfirm();
                     handleClear();
                     dispatch(showModalSuccess(successMessageCreate));
                 })
                 .catch((error) => {
+                    setLoadingSave(false);
+                    setModalConfirm(false);
                     if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
                         const message =
                             (error.response &&
@@ -402,11 +480,7 @@ const ListFormCaPaymentChannel = (props) => {
         <LayoutMenu>
             <BreadCrumb routes={routes} />
             <Spin spinning={loadingForm}>
-                <RadioTabs
-                    data={tabData}
-                    onChange={onChange}
-                    currentPosition={valuePage}
-                />
+                <FormStepper steps={steps} current={current} />
                 <Form
                     layout="vertical"
                     form={form}
@@ -415,14 +489,20 @@ const ListFormCaPaymentChannel = (props) => {
                 >
                     <div
                         style={{
-                            display: valuePage !== tabData[0].value ? "none" : undefined,
+                            display: current !== 0 ? "none" : undefined,
                         }}
                     >
-                        <CaPaymentChannelForm form={form} dataCollectionAgentList={dataCollectionAgentList} dataPaymentChannelList={dataPaymentChannelList} dataPartnerList={dataPartnerList} dataTypeList={dataTypeList} />
+                        <CaPaymentChannelForm
+                            form={form}
+                            dataCollectionAgentList={dataCollectionAgentList}
+                            dataPaymentChannelList={dataPaymentChannelList}
+                            dataPartnerList={dataPartnerList}
+                            dataTypeList={dataTypeList}
+                        />
                     </div>
                     <div
                         style={{
-                            display: valuePage !== tabData[1].value ? "none" : undefined,
+                            display: current !== 1 ? "none" : undefined,
                         }}
                     >
                         <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -436,7 +516,7 @@ const ListFormCaPaymentChannel = (props) => {
                     </div>
                     <div
                         style={{
-                            display: valuePage !== tabData[2].value ? "none" : undefined,
+                            display: current !== 2 ? "none" : undefined,
                         }}
                     >
                         <BaseContainer header={"ATTACHMENT INFORMATION"}>
@@ -453,42 +533,17 @@ const ListFormCaPaymentChannel = (props) => {
                             />
                         </BaseContainer>
                     </div>
-                    <div className="flex w-full justify-between align-middle my-3">
-                        <ButtonComponent
-                            type={"submit"}
-                            onClick={() => handleBack()}
-                            icon={
-                                <LeftOutlined
-                                    style={{
-                                        color: "#fff",
-                                        fontSize: 24,
-                                        justifyItems: "center",
-                                    }}
-                                />
-                            }
-                        >
-                            Back
-                        </ButtonComponent>
-                        <div className="flex align-middle gap-3">
-                            <ButtonComponent
-                                icon={
-                                    <SVGIcon
-                                        name={
-                                            type === "update" ? `IconButtonReset` : `IconButtonClear`
-                                        }
-                                        width={24}
-                                    />
-                                }
-                                type="submit"
-                                onClick={handleClear}
-                            >
-                                {type === "update" ? "Reset" : "Clear"}
-                            </ButtonComponent>
-                            <ButtonComponent htmlType="submit" type="submit">
-                                Save & Submit
-                            </ButtonComponent>
-                        </div>
-                    </div>
+                    <FormFooter
+                        current={current}
+                        totalSteps={steps.length}
+                        onPrev={prev}
+                        onNext={next}
+                        onCancel={handleBack}
+                        onClear={handleClear}
+                        onSaveDraft={handleSaveDraft}
+                        onSubmit={() => form.submit()}
+                        type={type}
+                    />
                 </Form>
             </Spin>
             <ModalCustom
@@ -498,11 +553,20 @@ const ListFormCaPaymentChannel = (props) => {
                 width={1000}
                 type={"confirmation"}
                 footer={
-                    <div className="w-full flex justify-end gap-5 p-4">
-                        <ButtonComponent onClick={handleCancelModalConfirm} type="default">
+                    <div className="w-full flex justify-between gap-5 p-4 items-center">
+                        <ButtonComponent
+                            onClick={handleCancelModalConfirm}
+                            type="default"
+                            label="Cancel"
+                        >
                             Cancel
                         </ButtonComponent>
-                        <ButtonComponent type="submit" onClick={handleSave}>
+                        <ButtonComponent
+                            type="submit"
+                            onClick={handleSave}
+                            loading={loadingSave}
+                            label="Confirm"
+                        >
                             Confirm
                         </ButtonComponent>
                     </div>
@@ -510,7 +574,7 @@ const ListFormCaPaymentChannel = (props) => {
             >
                 <ContentModalConfirm
                     data={sendBody}
-                    tabData={tabData}
+                    tabData={steps}
                     listDataAttachment={listDataAttachment}
                     listDataAppHierDetail={appHierDataDetail}
                     dataOption={appHierOptions}
@@ -535,5 +599,6 @@ const ListFormCaPaymentChannel = (props) => {
         </LayoutMenu>
     );
 };
+
 
 export default ListFormCaPaymentChannel;

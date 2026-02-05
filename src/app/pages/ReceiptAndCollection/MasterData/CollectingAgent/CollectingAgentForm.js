@@ -47,8 +47,8 @@ const CollectingAgentForm = (props) => {
 
     return (
         <div>
-            <BaseContainer header={"Collecting Agent"}>
-                <div className="w-full grid grid-cols-2 gap-5">
+            <BaseContainer header={"COLLECTING AGENT INFORMATION"}>
+                <div className="w-full grid grid-cols-5 gap-5">
                     <Form.Item
                         label={"Collection Agent Code"}
                         name={"caCode"}
@@ -73,6 +73,7 @@ const CollectingAgentForm = (props) => {
                             placeholder="Select Type"
                         />
                     </Form.Item>
+
                     <Form.Item
                         label={"Start Date"}
                         name={"effStartDate"}
@@ -91,6 +92,12 @@ const CollectingAgentForm = (props) => {
                     <Form.Item
                         label={"End Date"}
                         name={"effEndDate"}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please input your End Date!",
+                            },
+                        ]}
                     >
                         <DateComponent dateDisable={disabledDate} />
                     </Form.Item>

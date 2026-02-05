@@ -22,7 +22,7 @@ import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
   const { data, loading, list_billing_period } = useSelector(
-    (state) => state.rating
+    (state) => state.rating,
   );
 
   const dispatch = useDispatch();
@@ -41,6 +41,8 @@ const RatingPage = () => {
   const [ratingCode, setRatingCode] = useState("");
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
+  const [saType, setSaType] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
@@ -67,18 +69,17 @@ const RatingPage = () => {
       const currentPeriodName = `${currentMonth} ${currentYear}`;
 
       const currentPeriod = list_billing_period.find(
-        (item) => item.name === currentPeriodName
+        (item) => item.name === currentPeriodName,
       );
 
       if (currentPeriod) {
-        setSelectedBillingPeriod(currentPeriod.id);
+        setSelectedBillingPeriod(currentPeriod.name);
       } else {
-        const latestPeriod =
-          list_billing_period[list_billing_period.length - 1];
-        setSelectedBillingPeriod(latestPeriod.id);
+        const latestPeriod = list_billing_period[0];
+        setSelectedBillingPeriod(latestPeriod.name);
       }
     }
-  }, [list_billing_period]);
+  }, [list_billing_period, selectedBillingPeriod]);
 
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
@@ -100,9 +101,9 @@ const RatingPage = () => {
           page: 1,
           pageSize: 100,
           sort,
-          billPeriodId: selectedBillingPeriod,
+          period: selectedBillingPeriod,
           isLoadMore: false,
-        })
+        }),
       );
       setPage(1);
     }
@@ -148,20 +149,28 @@ const RatingPage = () => {
     });
   };
 
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data?.page?.totalPages || 0;
+  const initialPageSize = 100;
 
-    if (nextPage <= totalPages && selectedBillingPeriod) {
+  const handleLoadMore = async () => {
+    const totalElements = data?.page?.totalElements || 0;
+    const currentDataLength = dataSource?.length || 0;
+
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    if (selectedBillingPeriod) {
       await dispatch(
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
           pageSize: loadMoreSize,
           sort,
-          billPeriodId: selectedBillingPeriod,
+          period: selectedBillingPeriod,
           isLoadMore: true,
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -173,11 +182,11 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: page * loadMoreSize || 100,
+          pageSize: initialPageSize,
           sort,
-          billPeriodId: selectedBillingPeriod,
+          period: selectedBillingPeriod,
           isLoadMore: false,
-        })
+        }),
       );
       setPage(1);
     }
@@ -212,10 +221,14 @@ const RatingPage = () => {
       setRatingCode("");
       setCalculationCode("");
       setSANumberId("");
+      setSaType("");
+      setAccountNumber("");
     } else {
       setRatingCode(record.ratingCode);
       setCalculationCode(record.calculationCode);
       setSANumberId(record.saNumber);
+      setSaType(record.saType);
+      setAccountNumber(record.accountNumber);
       setActiveRowKey(recordKey);
       setPageDetail(true);
     }
@@ -229,8 +242,8 @@ const RatingPage = () => {
           page,
           pageSize: loadMoreSize,
           sort,
-          billPeriodId: selectedBillingPeriod,
-        })
+          billPeriodName: selectedBillingPeriod,
+        }),
       );
     }
   };
@@ -273,9 +286,9 @@ const RatingPage = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [search, searchedColumn, searchText]
+    [search, searchedColumn, searchText],
   );
 
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
@@ -327,7 +340,7 @@ const RatingPage = () => {
             dataSource={dataSourceWithKeys}
             columns={processedColumns}
             totalData={data?.page?.totalElements || 0}
-            tableScrolled={{ y: 525, x: 10000 }}
+            tableScrolled={{ y: 525 }}
             onSort={onSortApi}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
@@ -350,10 +363,10 @@ const RatingPage = () => {
                   value={selectedBillingPeriod}
                   onChange={handleBillingPeriodChange}
                   placeholder="Select Period"
-                  style={{ width: '120px' }}
+                  style={{ width: "120px" }}
                   options={(list_billing_period || []).map((item) => ({
                     label: item?.name,
-                    value: item?.id,
+                    value: item?.name,
                   }))}
                 />
               </div>
@@ -370,13 +383,17 @@ const RatingPage = () => {
           <RatingDetail
             calculationCode={calculationCode}
             SAId={saNumberId}
-            ratingCodeId={ratingCode}
+            ratingCode={ratingCode}
+            saType={saType}
+            accountNumber={accountNumber}
             onClose={() => {
               setPageDetail(false);
               setActiveRowKey(null);
               setRatingCode("");
               setCalculationCode("");
               setSANumberId("");
+              setSaType("");
+              setAccountNumber("");
             }}
           />
         </div>

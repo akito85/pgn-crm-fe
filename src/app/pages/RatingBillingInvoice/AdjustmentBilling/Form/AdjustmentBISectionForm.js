@@ -11,10 +11,9 @@ import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import {
   getListDetailType,
   getListItem,
-  getInvoiceInformation,
   getInvoiceBillingItemList,
+  getInvoiceInformation,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
@@ -34,8 +33,8 @@ const AdjustmentBISectionForm = ({
   onCreateClick,
 }) => {
   // Selector
-  const { dataListItem, dataDetailType, dataInvoiceInfo, dataBillingItemList } = useSelector(
-    (state) => state.adjustmentBilling
+  const { dataDetailType, dataInvoiceInfo, dataBillingItemList } = useSelector(
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -67,9 +66,9 @@ const AdjustmentBISectionForm = ({
 
   useEffect(() => {
     if (dataInvoice?.billingCode) {
-      dispatch(getListItem(dataInvoice?.billingCode));
+      dispatch(getInvoiceBillingItemList(dataInvoice?.billingCode));
     }
-  }, [dispatch, dataInvoice?.billingCode]);
+  }, [dispatch, dataInvoice, dataInvoice?.billingCode]);
 
   // Fetch invoice information when invoiceNumber changes
   useEffect(() => {
@@ -80,15 +79,24 @@ const AdjustmentBISectionForm = ({
 
   // Fetch billing item list when billingNumber is available
   useEffect(() => {
-    if (dataInvoiceInfo?.billingNumber && type !== "detail" && type !== "show") {
-      dispatch(getInvoiceBillingItemList(dataInvoiceInfo?.billingNumber));
+    const billingNumber =
+      dataInvoiceInfo?.billingNumber || dataInvoiceInfo?.billingCode;
+
+    if (billingNumber && type !== "detail" && type !== "show") {
+      dispatch(getInvoiceBillingItemList(billingNumber));
     }
-  }, [dispatch, dataInvoiceInfo?.billingNumber, type]);
+  }, [
+    dispatch,
+    dataInvoiceInfo,
+    dataInvoiceInfo?.billingNumber,
+    dataInvoiceInfo?.billingCode,
+    type,
+  ]);
 
   useEffect(() => {
     if (dataItem) {
-      const dataListItemDetail = dataListItem?.data?.find(
-        (a) => a.billingItem === dataItem
+      const dataListItemDetail = dataBillingItemList?.find(
+        (a) => (a.item || a.billingItem) === dataItem,
       );
 
       formDetail.setFieldsValue({
@@ -111,14 +119,14 @@ const AdjustmentBISectionForm = ({
         "totalAmountEqvUsd",
       ]);
     }
-  }, [dataItem, formDetail]);
+  }, [dataItem, formDetail, dataBillingItemList]);
 
   // Calculation Total Amount
   useEffect(() => {
     let newTotalAmount = formDetail.getFieldValue().amount;
     let currency = formDetail.getFieldValue().currency;
-    const dataListItemDetail = dataListItem?.data?.find(
-      (a) => a.billingItem === dataItem
+    const dataListItemDetail = dataBillingItemList?.find(
+      (a) => (a.item || a.billingItem) === dataItem,
     );
 
     if (adjustmentAmount) {
@@ -147,7 +155,7 @@ const AdjustmentBISectionForm = ({
     formDetail.setFieldsValue({
       totalAmount: newTotalAmount,
     });
-  }, [adjustmentAmount, typeBI, formDetail, dataListItem?.data, dataItem]);
+  }, [adjustmentAmount, typeBI, formDetail, dataBillingItemList, dataItem]);
 
   // Set Value Form Update
   useEffect(() => {
@@ -248,7 +256,7 @@ const AdjustmentBISectionForm = ({
             tempValue.length > 0
               ? tempValue[0].replace(
                   /\B(?=(\d{3})+(?!\d))/g,
-                  thousandSeparator
+                  thousandSeparator,
                 ) + descimal
               : "";
           return format.toLowerCase();
@@ -283,7 +291,7 @@ const AdjustmentBISectionForm = ({
     (r) => {
       setListDataABI((prevState) => prevState.filter((e) => e.key !== r.key));
     },
-    [listDataABI]
+    [listDataABI],
   );
 
   // Handle Cancel Modal
@@ -308,20 +316,22 @@ const AdjustmentBISectionForm = ({
   const dataBillingItem =
     listDataABI?.length > 0 ? listDataABI?.map((item) => item?.item) : [];
 
-  // console.log(dataBillingItem);
-
   const filterBillingItem = () => {
-    return dataBillingItem.length > 0
-      ? dataListItem?.data?.filter(
-          (a) => !dataBillingItem?.includes(a.billingItem)
-        )
-      : dataListItem?.data;
+    const result =
+      dataBillingItem.length > 0
+        ? dataBillingItemList?.filter((a) => {
+            const itemName = a.item || a.billingItem;
+            return !dataBillingItem?.includes(itemName);
+          })
+        : dataBillingItemList;
+
+    return result;
   };
 
   // Handle Add Value to Array
   const handleAdd = (formValue) => {
-    const findDataItem = dataListItem?.data?.find(
-      (item) => item.billingItem === formValue?.item
+    const findDataItem = dataBillingItemList?.find(
+      (item) => (item.item || item.billingItem) === formValue?.item,
     )?.billingItemCode;
 
     if (typeModal === "create") {
@@ -392,45 +402,20 @@ const AdjustmentBISectionForm = ({
   };
 
   const handleCreateClick = useCallback(() => {
-    if (invoiceNumber === undefined) {
+    // Check if invoice number is selected and has a value
+    if (
+      !invoiceNumber ||
+      invoiceNumber === undefined ||
+      invoiceNumber === null
+    ) {
       setModalValidation(true);
       return;
     }
 
-    // Check if billing item list is available
-    if (!dataBillingItemList || dataBillingItemList.length === 0) {
-      setModalValidation(true);
-      return;
-    }
-
-    // Get the first billing item from the API response
-    const firstBillingItem = dataBillingItemList[0];
-
-    // Create new row with data from first billing item
-    const newRow = {
-      key: listDataABI.length + 1,
-      adjustmentId: type === "update" ? adjustmentId : null,
-      itemCode: firstBillingItem?.billingItemCode || firstBillingItem?.itemCode,
-      item: firstBillingItem?.billingItem || firstBillingItem?.item,
-      quantity: firstBillingItem?.quantity || 0,
-      price: firstBillingItem?.price || 0,
-      uom: firstBillingItem?.uom || "",
-      currency: firstBillingItem?.currency || "",
-      priceCode: firstBillingItem?.priceCode || "Value",
-      amount: firstBillingItem?.amount || 0,
-      adjustmentAmount: 0,
-      totalAmount: firstBillingItem?.amount || 0,
-      totalAmountEqvIdr: firstBillingItem?.totalAmountEqvIdr || 0,
-      totalAmountEqvUsd: firstBillingItem?.totalAmountEqvUsd || 0,
-      type: null,
-      remark: "",
-      typeBasis: firstBillingItem?.typeBasis || "Debit",
-      discountAmount: firstBillingItem?.discountAmount || 0,
-    };
-
-    // Add the new row to the table
-    setListDataABI((prevData) => [...prevData, newRow]);
-  }, [invoiceNumber, dataBillingItemList, listDataABI, type, adjustmentId, setListDataABI]);
+    // Open modal for creating new billing item
+    setTypeModal("create");
+    setOpenModal(true);
+  }, [invoiceNumber]);
 
   // Expose handleCreateClick to parent via onCreateClick callback
   useEffect(() => {
@@ -482,8 +467,8 @@ const AdjustmentBISectionForm = ({
               onFilter,
               sorter,
               handleDetail,
-              showAction
-            )
+              showAction,
+            ),
           )}
         />
       </div>
@@ -532,13 +517,23 @@ const AdjustmentBISectionForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={onChangeItem}>
-                {dataListItem?.data &&
-                  filterBillingItem()?.map((data, index) => (
-                    <Select.Option key={index} value={data.billingItem}>
-                      {data.billingItem}
+              <SelectComponent
+                placeholder={"Choose Item"}
+                onChange={onChangeItem}
+              >
+                {(() => {
+                  const filtered = filterBillingItem();
+
+                  if (!filtered || filtered.length === 0) {
+                    return null;
+                  }
+
+                  return filtered.map((data, index) => (
+                    <Select.Option key={index} value={data.item}>
+                      {data.item}
                     </Select.Option>
-                  ))}
+                  ));
+                })()}
               </SelectComponent>
             </Form.Item>
 
@@ -554,6 +549,7 @@ const AdjustmentBISectionForm = ({
             >
               <InputNumber
                 type="number"
+                placeholder="Input Quantity"
                 controls={false}
                 style={{
                   width: "100%",
@@ -576,6 +572,7 @@ const AdjustmentBISectionForm = ({
             >
               <InputComponent
                 decimalScale={2}
+                placeholder="Input Price"
                 thousandSeparator={","}
                 decimalSeparator={"."}
                 type="numeric"
@@ -584,11 +581,11 @@ const AdjustmentBISectionForm = ({
             </Form.Item>
 
             <Form.Item label="UOM" name="uom">
-              <InputComponent disabled={true} />
+              <InputComponent placeholder={"Auto Filled"} disabled={true} />
             </Form.Item>
 
             <Form.Item label="Currency" name="currency">
-              <InputComponent disabled={true} />
+              <InputComponent placeholder={"Auto Filled"} disabled={true} />
             </Form.Item>
 
             <Form.Item
@@ -601,7 +598,10 @@ const AdjustmentBISectionForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={onChangeType}>
+              <SelectComponent
+                placeholder={"Choose Type"}
+                onChange={onChangeType}
+              >
                 {dataDetailType &&
                   dataDetailType?.map((data, index) => (
                     <Select.Option key={index} value={data.id}>
@@ -624,6 +624,7 @@ const AdjustmentBISectionForm = ({
                 decimalSeparator={"."}
                 type="numeric"
                 disabled={true}
+                placeholder={"0"}
                 fixedDecimalScale={true}
               />
             </Form.Item>
@@ -645,6 +646,7 @@ const AdjustmentBISectionForm = ({
                 decimalSeparator={"."}
                 type="numeric"
                 onChange={onChangeAdjustmentAmount}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -663,6 +665,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -681,6 +684,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -699,6 +703,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -707,6 +712,7 @@ const AdjustmentBISectionForm = ({
             <div className="col-span-4">
               <Form.Item name={"remark"} className="w-full" label={"Remark"}>
                 <InputComponent
+                  placeholder={"Input Remark"}
                   type="textarea"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -728,7 +734,13 @@ const AdjustmentBISectionForm = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`You can't create Adjustment Billing Item. Please fill out the Invoice Number.`}</p>
+          <p className="pl-[70px]">
+            {!invoiceNumber ||
+            invoiceNumber === undefined ||
+            invoiceNumber === null
+              ? `You can't create Adjustment Billing Item. Please fill out the Invoice Number.`
+              : `You can't create Adjustment Billing Item. Billing item data is not available. Please wait or select a different invoice.`}
+          </p>
         </div>
       </ModalError>
 

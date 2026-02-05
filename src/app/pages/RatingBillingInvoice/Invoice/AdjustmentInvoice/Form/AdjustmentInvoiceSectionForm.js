@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Select, Form } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
@@ -20,6 +20,7 @@ import {
   clearInvoiceDetail,
 } from "../../../../../../redux/slices/rating_billing_invoice/adjustmentInvoice";
 import { currencyFormatting } from "../../../../../../utils/formatCurrency";
+import { hasValue } from "../../../../../../utils";
 import moment from "moment";
 
 const AdjustmentInvoiceSectionForm = ({ type, form }) => {
@@ -44,6 +45,11 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const [searchAccount, setSearchAccount] = useState("");
   const [documentDate, setDocumentDate] = useState(null);
   const [selectedTermsOfPayment, setSelectedTermsOfPayment] = useState(null);
+  const [isTypeDueDateDisabled, setIsTypeDueDateDisabled] = useState(false);
+  const [rangeDisableDate, setRangeDisableDate] = useState({});
+  const [defaultPicker, setDefaultPicker] = useState("");
+  const [keyPicker, setKeyPicker] = useState(0);
+  const [transactionDate, setTransactionDate] = useState(null);
   const searchTimeoutRef = useRef(null);
 
   // Get initial values from form for update mode
@@ -57,6 +63,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       const typeDueDate = form.getFieldValue("typeDueDate");
       const docDate = form.getFieldValue("documentDate");
       const termsOfPayment = form.getFieldValue("termsOfPayment");
+      const txnDate = form.getFieldValue("transactionDate");
 
       if (accountNumber) setSelectedAccount(accountNumber);
       if (billingCycleId) setSelectedBillingCycle(billingCycleId);
@@ -64,11 +71,12 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       if (invoiceNumber) setSelectedInvoice(invoiceNumber);
       if (typeDueDate) setSelectedTypeDueDate(typeDueDate);
       if (docDate) setDocumentDate(docDate);
+      if (txnDate) setTransactionDate(txnDate);
 
       // Set selected terms of payment object if exists
       if (termsOfPayment && dataListTermOfPayment) {
         const termsObj = dataListTermOfPayment.find(
-          (term) => term.description === termsOfPayment
+          (term) => term.description === termsOfPayment,
         );
         if (termsObj) setSelectedTermsOfPayment(termsObj);
       }
@@ -94,6 +102,8 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       setSelectedInvoice(null);
       setSelectedTypeDueDate("Date");
       setSelectedTermsOfPayment(null);
+      setIsTypeDueDateDisabled(false);
+      setTransactionDate(null);
     }
   }, [type]);
 
@@ -122,6 +132,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     const invoiceNumber = form.getFieldValue("invoiceNumber");
     const typeDueDate = form.getFieldValue("typeDueDate");
     const docDate = form.getFieldValue("documentDate");
+    const txnDate = form.getFieldValue("transactionDate");
 
     if (accountNumber && !selectedAccount) {
       setSelectedAccount(accountNumber);
@@ -141,6 +152,9 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     if (docDate && !documentDate) {
       setDocumentDate(docDate);
     }
+    if (txnDate && !transactionDate) {
+      setTransactionDate(txnDate);
+    }
   }, [
     dataAccountDetail,
     dataListBillingPeriod,
@@ -153,6 +167,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     selectedInvoice,
     selectedTypeDueDate,
     documentDate,
+    transactionDate,
   ]);
 
   // Handle account search with debounce (2 seconds)
@@ -168,7 +183,22 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     searchTimeoutRef.current = setTimeout(() => {
       // Fetch account list with search parameter
       dispatch(getListAccountInvoiceAdjustment({ search: value || "" }));
-    }, 2000);
+    }, 500);
+  };
+
+  // Handle account dropdown close - reset to initial list
+  const handleAccountDropdownVisibleChange = (open) => {
+    if (!open && searchAccount) {
+      // When dropdown closes and there was a search, reset the list
+      setSearchAccount("");
+      dispatch(getListAccountInvoiceAdjustment({ search: "" }));
+    }
+  };
+
+  // Handle account clear - reset to initial list
+  const handleAccountClear = () => {
+    setSearchAccount("");
+    dispatch(getListAccountInvoiceAdjustment({ search: "" }));
   };
 
   // Cleanup timeout on unmount
@@ -180,6 +210,29 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     };
   }, []);
 
+  // Set range disable date based on billing period
+  useEffect(() => {
+    if (hasValue(selectedBillingPeriod)) {
+      const findPeriod = dataListBillingPeriod?.find(
+        (item) => item?.period === selectedBillingPeriod,
+      );
+      setRangeDisableDate({
+        startDate: findPeriod?.startDate,
+        endDate: findPeriod?.endDate,
+      });
+    } else {
+      setRangeDisableDate({});
+      setDefaultPicker("");
+    }
+  }, [selectedBillingPeriod, dataListBillingPeriod]);
+
+  // Set default picker value when range is available
+  useEffect(() => {
+    if (hasValue(rangeDisableDate?.startDate)) {
+      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone());
+      setKeyPicker((prev) => prev + 1);
+    }
+  }, [rangeDisableDate?.startDate]);
 
   // Handle account change
   const handleAccountChange = (value) => {
@@ -227,7 +280,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const handleBillingCycleChange = (value) => {
     // value here is the id, we need to find the period
     const selectedCycle = dataListBillingCycle?.find(
-      (cycle) => cycle.id === value
+      (cycle) => cycle.id === value,
     );
     const billingCyclePeriod = selectedCycle?.period;
 
@@ -255,14 +308,21 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
           accountNumber: selectedAccount,
           billingCycle: selectedBillingCycle,
           billingPeriod: value,
-        })
+        }),
       );
     }
 
     // Clear dependent fields
     setSelectedInvoice(null);
+    setIsTypeDueDateDisabled(false);
+    setSelectedTypeDueDate("Date");
     form.setFieldsValue({
       invoiceNumber: undefined,
+      typeDueDate: "Date",
+      dueDate: undefined,
+      termsOfPayment: undefined,
+      transactionDate: undefined,
+      documentDate: undefined,
     });
     dispatch(clearInvoiceDetail());
   };
@@ -270,8 +330,82 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   // Handle invoice change
   const handleInvoiceChange = (value) => {
     setSelectedInvoice(value);
-    dispatch(getInvoiceDetailInvoiceAdjustment(value));
+    if (value) {
+      dispatch(getInvoiceDetailInvoiceAdjustment(value));
+    }
   };
+
+  // Effect to handle invoice detail changes and set New Due Date based on termOfPayment
+  useEffect(() => {
+    if (dataInvoiceDetail) {
+      const invoiceTermOfPayment = dataInvoiceDetail.termOfPayment;
+      const invoiceDueDate = dataInvoiceDetail.dueDate;
+
+      if (invoiceTermOfPayment && invoiceTermOfPayment.trim() !== "") {
+        // If termOfPayment exists in invoice detail, set to Terms of Payment and disable
+        setSelectedTypeDueDate("Terms of Payment");
+        setIsTypeDueDateDisabled(true);
+
+        // Find matching terms of payment object
+        const termsObj = dataListTermOfPayment?.find(
+          (term) =>
+            term.description === invoiceTermOfPayment ||
+            term.name === invoiceTermOfPayment,
+        );
+
+        if (termsObj) {
+          setSelectedTermsOfPayment(termsObj);
+          form.setFieldsValue({
+            typeDueDate: "Terms of Payment",
+            termsOfPayment: termsObj.description,
+          });
+
+          // Calculate due date based on document date and terms of payment
+          const currentDocDate = form.getFieldValue("documentDate");
+          if (currentDocDate) {
+            const calculatedDueDate = calculateDueDate(
+              currentDocDate,
+              termsObj,
+            );
+            form.setFieldsValue({
+              dueDate: calculatedDueDate,
+            });
+          }
+        } else {
+          // If no matching term found, just set the value
+          form.setFieldsValue({
+            typeDueDate: "Terms of Payment",
+            termsOfPayment: invoiceTermOfPayment,
+          });
+        }
+      } else {
+        // If termOfPayment is empty, set to Date and enable selection
+        setSelectedTypeDueDate("Date");
+        setIsTypeDueDateDisabled(false);
+
+        // Set due date from invoice detail if available
+        if (invoiceDueDate) {
+          const dueDateMoment = moment(invoiceDueDate, [
+            "DD MMM YYYY",
+            "YYYY-MM-DD",
+            "D MMMM YYYY",
+          ]);
+          form.setFieldsValue({
+            typeDueDate: "Date",
+            dueDate: dueDateMoment.isValid() ? dueDateMoment : null,
+            termsOfPayment: undefined,
+          });
+        } else {
+          form.setFieldsValue({
+            typeDueDate: "Date",
+            dueDate: null,
+            termsOfPayment: undefined,
+          });
+        }
+        setSelectedTermsOfPayment(null);
+      }
+    }
+  }, [dataInvoiceDetail, dataListTermOfPayment, form]);
 
   // Handle document date change
   const handleDocumentDateChange = (date) => {
@@ -279,6 +413,9 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     form.setFieldsValue({
       documentDate: date,
     });
+
+    // Validate document date against transaction date
+    form.validateFields(["documentDate"]);
 
     // If terms of payment is selected, recalculate due date
     if (
@@ -335,7 +472,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
     }
 
     const formattedOption = `${term.name} (${calculatedDate.format(
-      "DD MMMM YYYY"
+      "DD MMMM YYYY",
     )})`;
     return formattedOption;
   };
@@ -364,7 +501,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
   const handleTermsOfPaymentChange = (value) => {
     // Find the selected terms of payment object
     const termsObj = dataListTermOfPayment?.find(
-      (term) => term.description === value
+      (term) => term.description === value,
     );
 
     setSelectedTermsOfPayment(termsObj);
@@ -381,6 +518,45 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       });
     }
   };
+
+  // Handle transaction date change
+  const handleTransactionDateChange = (date) => {
+    setTransactionDate(date);
+    // Re-validate document date when transaction date changes
+    const currentDocDate = form.getFieldValue("documentDate");
+    if (currentDocDate) {
+      form.validateFields(["documentDate"]);
+    }
+  };
+
+  // Disable dates outside of billing period range
+  const disabledRangeDate = useCallback(
+    (current) => {
+      return (
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days")
+      );
+    },
+    [rangeDisableDate],
+  );
+
+  // Disable dates for document date: must be within billing period AND not after transaction date
+  const disabledDocumentDate = useCallback(
+    (current) => {
+      // First check billing period range
+      const outsideBillingPeriod =
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days");
+
+      // Then check if after transaction date
+      const afterTransactionDate = transactionDate
+        ? current > moment(transactionDate).endOf("day")
+        : false;
+
+      return outsideBillingPeriod || afterTransactionDate;
+    },
+    [rangeDisableDate, transactionDate],
+  );
 
   return (
     <>
@@ -400,8 +576,11 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
             <SelectComponent
               placeholder="Select Account Number"
               showSearch
+              allowClear
               onChange={handleAccountChange}
               onSearch={handleAccountSearch}
+              onClear={handleAccountClear}
+              onDropdownVisibleChange={handleAccountDropdownVisibleChange}
               disabled={type === "update"}
               filterOption={false}
             >
@@ -537,22 +716,48 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
               },
             ]}
           >
-            <DateComponent placeholder="Select Transaction Date" />
+            <DateComponent
+              placeholder="Select Transaction Date"
+              dateDisable={disabledRangeDate}
+              defaultPickerValue={defaultPicker}
+              key={`transaction-${keyPicker}`}
+              onChange={handleTransactionDateChange}
+            />
           </Form.Item>
 
           <Form.Item
             label="Document Date"
             name="documentDate"
+            dependencies={["transactionDate"]}
             rules={[
               {
                 required: true,
                 message: "Please select Document Date!",
               },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const transactionDate = getFieldValue("transactionDate");
+                  if (!value || !transactionDate) {
+                    return Promise.resolve();
+                  }
+                  if (moment(value).isAfter(moment(transactionDate), "day")) {
+                    return Promise.reject(
+                      new Error(
+                        "Document Date cannot be later than Transaction Date!",
+                      ),
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              }),
             ]}
           >
             <DateComponent
               placeholder="Select Document Date"
               onChange={handleDocumentDateChange}
+              dateDisable={disabledDocumentDate}
+              defaultPickerValue={defaultPicker}
+              key={`document-${keyPicker}-${transactionDate}`}
             />
           </Form.Item>
 
@@ -569,6 +774,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
             <SelectComponent
               placeholder="Select Type"
               onChange={handleTypeDueDateChange}
+              disabled={isTypeDueDateDisabled}
             >
               <Select.Option value="Date">Date</Select.Option>
               <Select.Option value="Terms of Payment">
@@ -589,7 +795,13 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
                   },
                 ]}
               >
-                <DateComponent placeholder="Select Due Date" />
+                <DateComponent
+                  placeholder="Select Due Date"
+                  disabled={isTypeDueDateDisabled}
+                  dateDisable={disabledRangeDate}
+                  defaultPickerValue={defaultPicker}
+                  key={`duedate-${keyPicker}`}
+                />
               </Form.Item>
             ) : (
               <>
@@ -606,6 +818,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
                   <SelectComponent
                     placeholder="Select Terms of Payment"
                     onChange={handleTermsOfPaymentChange}
+                    disabled={isTypeDueDateDisabled}
                   >
                     {dataListTermOfPayment?.map((term) => (
                       <Select.Option key={term.id} value={term.description}>
@@ -650,7 +863,16 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
           </Form.Item>
         </div>
 
-        <Form.Item label="Remark" name="remark">
+        <Form.Item
+          label="Remark"
+          name="remark"
+          rules={[
+            {
+              required: true,
+              message: "Please enter Remark!",
+            },
+          ]}
+        >
           <InputComponent
             type="textarea"
             rows={3}
@@ -663,7 +885,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
       {/* Invoice Information Section */}
       {dataInvoiceDetail && (
         <CardContainer subHeader={"INVOICE INFORMATION"}>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-5 gap-2">
             <div>
               <p className="text-gray-500 text-xs">Invoice Number</p>
               <p className="font-medium text-sm">

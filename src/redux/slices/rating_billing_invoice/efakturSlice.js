@@ -45,7 +45,7 @@ const buildSearchParams = (filters) => {
 const handleApiError = (
   error,
   thunkAPI,
-  defaultMessage = "Terjadi kesalahan"
+  defaultMessage = "Terjadi kesalahan",
 ) => {
   const message =
     error?.response?.data?.message || error?.message || error?.toString();
@@ -115,6 +115,17 @@ const initialState = {
     size: 10,
     number: 0,
   },
+  dataListProductType: [],
+  dataListUOM: [],
+  dataListAppHierId: [],
+  dataListAppHierDetail: [],
+  dataListFakturType: [],
+  dataListTaxPeriod: [],
+  dataListCountry: [],
+  dataListFakturCode: [],
+  dataListTaxYears: [],
+  dataListProductCode: [],
+  dataDetail: null,
 };
 
 // GET - List Operations
@@ -122,7 +133,7 @@ export const getListEFaktur = createAsyncThunk(
   "EFAKTUR/GET_LIST_EFAKTUR",
   async (
     { page = 1, pageSize = 10, sort = "invoiceDate~desc", filters = {} },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParam = buildSearchParams(filters);
@@ -135,7 +146,7 @@ export const getListEFaktur = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil list E-Faktur");
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -152,7 +163,7 @@ export const getListCategory = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil list kategori");
     }
-  }
+  },
 );
 
 export const getAllApprovalList = createAsyncThunk(
@@ -168,7 +179,7 @@ export const getAllApprovalList = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil approval list");
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -181,7 +192,7 @@ export const getListApprovalById = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil detail approval");
     }
-  }
+  },
 );
 
 export const getAllBillingItemPaginate = createAsyncThunk(
@@ -195,7 +206,7 @@ export const getAllBillingItemPaginate = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil billing items");
     }
-  }
+  },
 );
 
 export const getDetailEFaktur = createAsyncThunk(
@@ -209,7 +220,7 @@ export const getDetailEFaktur = createAsyncThunk(
       if (error?.response?.status === 404) return null;
       return handleApiError(error, thunkAPI, "Gagal mengambil detail E-Faktur");
     }
-  }
+  },
 );
 
 export const getLogActivity = createAsyncThunk(
@@ -230,7 +241,7 @@ export const getLogActivity = createAsyncThunk(
       }
       return handleApiError(error, thunkAPI, "Gagal mengambil log aktivitas");
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -247,10 +258,10 @@ export const getApprovalHistory = createAsyncThunk(
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal mengambil approval history"
+        "Gagal mengambil approval history",
       );
     }
-  }
+  },
 );
 
 // ========================================
@@ -268,7 +279,7 @@ export const getAvailableRequestedList = createAsyncThunk(
       efakturDateTo = "",
       search = "",
     },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       let url = `/v1/dbs/api/rbi/e-invoice/available-requested-list?page=${page}&size=${pageSize}`;
@@ -285,10 +296,10 @@ export const getAvailableRequestedList = createAsyncThunk(
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal mengambil list E-Faktur available for request"
+        "Gagal mengambil list E-Faktur available for request",
       );
     }
-  }
+  },
 );
 
 // ========================================
@@ -307,7 +318,7 @@ export const createRequestApprovalEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       if (response.success) {
@@ -316,7 +327,7 @@ export const createRequestApprovalEFaktur = createAsyncThunk(
             title: "Success",
             description: response.message || "Request approval berhasil dibuat",
             return: false,
-          })
+          }),
         );
 
         return {
@@ -332,10 +343,10 @@ export const createRequestApprovalEFaktur = createAsyncThunk(
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal membuat request approval E-Faktur"
+        "Gagal membuat request approval E-Faktur",
       );
     }
-  }
+  },
 );
 
 // ========================================
@@ -354,7 +365,7 @@ export const createRequestReplacementEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       if (response.success) {
@@ -365,7 +376,7 @@ export const createRequestReplacementEFaktur = createAsyncThunk(
               response.message ||
               "Success request replacement faktur, please wait for approval",
             return: false,
-          })
+          }),
         );
 
         return {
@@ -376,17 +387,17 @@ export const createRequestReplacementEFaktur = createAsyncThunk(
         };
       } else {
         throw new Error(
-          response.message || "Gagal membuat request replacement"
+          response.message || "Gagal membuat request replacement",
         );
       }
     } catch (error) {
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal membuat request replacement E-Faktur"
+        "Gagal membuat request replacement E-Faktur",
       );
     }
-  }
+  },
 );
 
 // ========================================
@@ -405,7 +416,7 @@ export const createRequestCancellationEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       if (response.success) {
@@ -415,7 +426,7 @@ export const createRequestCancellationEFaktur = createAsyncThunk(
             description:
               response.message || "Success submit request cancellation efaktur",
             return: false,
-          })
+          }),
         );
 
         return {
@@ -426,17 +437,17 @@ export const createRequestCancellationEFaktur = createAsyncThunk(
         };
       } else {
         throw new Error(
-          response.message || "Gagal membuat request cancellation"
+          response.message || "Gagal membuat request cancellation",
         );
       }
     } catch (error) {
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal membuat request cancellation E-Faktur"
+        "Gagal membuat request cancellation E-Faktur",
       );
     }
-  }
+  },
 );
 
 // POST - Create/Update Operations
@@ -454,7 +465,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
 
       const createResponse = await ratingBillingHttpService.createData(
         createUrl,
-        requestBody
+        requestBody,
       );
 
       if (!createResponse.success) {
@@ -470,7 +481,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
 
       const uploadResults = [];
       const newAttachments = attachments.filter(
-        (item) => item.dataType !== "exist"
+        (item) => item.dataType !== "exist",
       );
 
       if (newAttachments.length > 0) {
@@ -483,7 +494,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
             }
             if (!attachment.fileCategoryId) {
               throw new Error(
-                `Category tidak dipilih untuk attachment ${i + 1}`
+                `Category tidak dipilih untuk attachment ${i + 1}`,
               );
             }
 
@@ -503,10 +514,10 @@ export const generateEFakturWithAttachments = createAsyncThunk(
                     (30 / newAttachments.length) * (i + progressPercent / 100);
                   thunkAPI.dispatch(
                     updateUploadProgress(
-                      Math.min(baseProgress + uploadProgress, 100)
-                    )
+                      Math.min(baseProgress + uploadProgress, 100),
+                    ),
                   );
-                }
+                },
               );
 
             uploadResults.push({
@@ -549,7 +560,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
           title: "Success",
           description: successMessage,
           return: false,
-        })
+        }),
       );
 
       return {
@@ -564,7 +575,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal generate E-Faktur");
     }
-  }
+  },
 );
 
 export const uploadAttachment = createAsyncThunk(
@@ -580,7 +591,7 @@ export const uploadAttachment = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        onProgress || (() => {})
+        onProgress || (() => {}),
       );
 
       return {
@@ -595,7 +606,7 @@ export const uploadAttachment = createAsyncThunk(
           error?.response?.data?.message || error?.message || "Upload failed",
       });
     }
-  }
+  },
 );
 
 export const getAllEFakturApprovePaginate = createAsyncThunk(
@@ -613,10 +624,10 @@ export const getAllEFakturApprovePaginate = createAsyncThunk(
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal mengambil list E-Faktur approval"
+        "Gagal mengambil list E-Faktur approval",
       );
     }
-  }
+  },
 );
 
 export const approvedEfaktur = createAsyncThunk(
@@ -638,7 +649,7 @@ export const approvedEfaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       if (response.success) {
@@ -648,7 +659,7 @@ export const approvedEfaktur = createAsyncThunk(
             description:
               response.message || `E-Faktur berhasil di-${actionType}`,
             return: false,
-          })
+          }),
         );
 
         return {
@@ -671,7 +682,7 @@ export const approvedEfaktur = createAsyncThunk(
           showModalError({
             title: "Failed",
             description: `Gagal ${actionType} E-Faktur: ${message}`,
-          })
+          }),
         );
       }
 
@@ -680,7 +691,7 @@ export const approvedEfaktur = createAsyncThunk(
         detailApproves: body.detailApproves,
       });
     }
-  }
+  },
 );
 
 export const cancelEFaktur = createAsyncThunk(
@@ -695,7 +706,7 @@ export const cancelEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       if (response.success) {
@@ -704,7 +715,7 @@ export const cancelEFaktur = createAsyncThunk(
             title: "Success",
             description: response.message || "E-Faktur berhasil dibatalkan",
             return: false,
-          })
+          }),
         );
 
         return { efakturId };
@@ -727,12 +738,12 @@ export const cancelEFaktur = createAsyncThunk(
         showModalError({
           title: "Failed",
           description: `Gagal membatalkan E-Faktur: ${errorMessage}`,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue({ message: errorMessage, efakturId });
     }
-  }
+  },
 );
 
 export const replaceEFaktur = createAsyncThunk(
@@ -748,7 +759,7 @@ export const replaceEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       if (response.success) {
@@ -759,7 +770,7 @@ export const replaceEFaktur = createAsyncThunk(
               response.message ||
               "Faktur pengganti berhasil dibuat, silakan tunggu proses selesai",
             return: false,
-          })
+          }),
         );
 
         return { efakturId };
@@ -769,7 +780,7 @@ export const replaceEFaktur = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal membuat faktur pengganti");
     }
-  }
+  },
 );
 
 export const generateXMLEFaktur = createAsyncThunk(
@@ -783,7 +794,7 @@ export const generateXMLEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       // Extract XML content from response
@@ -812,7 +823,7 @@ export const generateXMLEFaktur = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal generate bulk XML");
     }
-  }
+  },
 );
 
 export const uploadManualEFaktur = createAsyncThunk(
@@ -828,7 +839,7 @@ export const uploadManualEFaktur = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        () => {}
+        () => {},
       );
 
       thunkAPI.dispatch(
@@ -836,21 +847,21 @@ export const uploadManualEFaktur = createAsyncThunk(
           title: "Success",
           description: response.message || "E-Faktur manual berhasil diupload",
           return: false,
-        })
+        }),
       );
 
       return response.data;
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal upload manual E-Faktur");
     }
-  }
+  },
 );
 
 export const downloadEFakturList = createAsyncThunk(
   "EFAKTUR/DOWNLOAD_LIST",
   async (
     { filters = {}, page = 1, pageSize = 10, sort = "invoiceDate~desc" },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParam = buildSearchParams(filters);
@@ -865,7 +876,7 @@ export const downloadEFakturList = createAsyncThunk(
     } catch (error) {
       return handleApiError(error, thunkAPI, "Download gagal");
     }
-  }
+  },
 );
 
 export const batchManualUploadEFaktur = createAsyncThunk(
@@ -887,7 +898,7 @@ export const batchManualUploadEFaktur = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        () => {}
+        () => {},
       );
 
       if (response.success) {
@@ -896,7 +907,7 @@ export const batchManualUploadEFaktur = createAsyncThunk(
             title: "Success",
             description: response.message || "All items uploaded successfully",
             return: false,
-          })
+          }),
         );
 
         return {
@@ -911,10 +922,10 @@ export const batchManualUploadEFaktur = createAsyncThunk(
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal upload manual E-Faktur bulk"
+        "Gagal upload manual E-Faktur bulk",
       );
     }
-  }
+  },
 );
 
 /**
@@ -924,7 +935,7 @@ export const getEligibleEFakturForRequest = createAsyncThunk(
   "EFAKTUR/GET_ELIGIBLE_FOR_REQUEST",
   async (
     { page = 1, pageSize = 10, sort = "invoiceDate~desc", filters = {} },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParam = buildSearchParams(filters);
@@ -938,10 +949,10 @@ export const getEligibleEFakturForRequest = createAsyncThunk(
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal mengambil list E-Faktur eligible"
+        "Gagal mengambil list E-Faktur eligible",
       );
     }
-  }
+  },
 );
 
 /**
@@ -963,12 +974,12 @@ export const bulkRequestApprovalEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody
+        requestBody,
       );
 
       if (!response.success) {
         throw new Error(
-          response.message || "Gagal submit bulk request approval"
+          response.message || "Gagal submit bulk request approval",
         );
       }
 
@@ -984,7 +995,7 @@ export const bulkRequestApprovalEFaktur = createAsyncThunk(
       // Step 2: Upload attachments if any
       const uploadResults = [];
       const newAttachments = attachments.filter(
-        (item) => item.dataType !== "exist"
+        (item) => item.dataType !== "exist",
       );
 
       if (newAttachments.length > 0) {
@@ -999,7 +1010,7 @@ export const bulkRequestApprovalEFaktur = createAsyncThunk(
             }
             if (!attachment.fileCategoryId) {
               throw new Error(
-                `Category tidak dipilih untuk attachment ${i + 1}`
+                `Category tidak dipilih untuk attachment ${i + 1}`,
               );
             }
 
@@ -1020,10 +1031,10 @@ export const bulkRequestApprovalEFaktur = createAsyncThunk(
                     (40 / totalFiles) * (i + progressPercent / 100);
                   thunkAPI.dispatch(
                     updateUploadProgress(
-                      Math.min(baseProgress + uploadProgress, 100)
-                    )
+                      Math.min(baseProgress + uploadProgress, 100),
+                    ),
                   );
-                }
+                },
               );
 
             uploadResults.push({
@@ -1072,7 +1083,7 @@ export const bulkRequestApprovalEFaktur = createAsyncThunk(
           title: "Success",
           description: successMessage,
           return: false,
-        })
+        }),
       );
 
       return {
@@ -1093,10 +1104,265 @@ export const bulkRequestApprovalEFaktur = createAsyncThunk(
       return handleApiError(
         error,
         thunkAPI,
-        "Gagal submit bulk request approval"
+        "Gagal submit bulk request approval",
       );
     }
-  }
+  },
+);
+
+// ========================================
+// GET LIST PRODUCT TYPE (DUMMY)
+// ========================================
+export const getListProductType = createAsyncThunk(
+  "EFAKTUR/GET_LIST_PRODUCT_TYPE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-product-types";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list product type",
+      );
+    }
+  },
+);
+
+//  get list product code
+export const getListProductCode = createAsyncThunk(
+  "EFAKTUR/GET_LIST_PRODUCT_CODE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-product-codes";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list product code",
+      );
+    }
+  },
+);
+
+// ========================================
+// GET LIST UOM (DUMMY)
+// ========================================
+export const getListUOM = createAsyncThunk(
+  "EFAKTUR/GET_LIST_UOM",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-uom-codes";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal mengambil list UOM");
+    }
+  },
+);
+
+// ========================================
+// GET LIST APPROVAL HIERARCHY (DUMMY)
+// ========================================
+// export const getListApprovalHierarchy = createAsyncThunk(
+//   "EFAKTUR/GET_LIST_APPROVAL_HIERARCHY",
+//   async (_, thunkAPI) => {
+//     try {
+//       // TODO: Ganti dengan API call yang sebenarnya
+//       // const url = "/v1/dbs/api/rbi/e-invoice/approval-hierarchy-list";
+//       // const response = await ratingBillingHttpService.getAll(url);
+
+//       // Data dummy
+//       const dummyData = [
+//         { appHierId: 1, approvalName: "Standard Approval" },
+//         { appHierId: 2, approvalName: "Express Approval" },
+//         { appHierId: 3, approvalName: "Special Approval" },
+//       ];
+
+//       return dummyData;
+//     } catch (error) {
+//       return handleApiError(
+//         error,
+//         thunkAPI,
+//         "Gagal mengambil list approval hierarchy",
+//       );
+//     }
+//   },
+// );
+
+// ========================================
+// GET LIST APPROVAL HIERARCHY DETAIL (DUMMY)
+// ========================================
+// export const getListApprovalHierarchyDetail = createAsyncThunk(
+//   "EFAKTUR/GET_LIST_APPROVAL_HIERARCHY_DETAIL",
+//   async ({ id }, thunkAPI) => {
+//     try {
+//       // TODO: Ganti dengan API call yang sebenarnya
+//       // const url = `/v1/dbs/api/rbi/e-invoice/approval-hierarchy-detail/${id}`;
+//       // const response = await ratingBillingHttpService.getDetail(url);
+
+//       // Data dummy
+//       const dummyData = [
+//         {
+//           level: 1,
+//           approvalName: "Supervisor",
+//           employeeDetail: [
+//             { employeeId: 1, employeeName: "John Doe", position: "Supervisor" },
+//             {
+//               employeeId: 2,
+//               employeeName: "Jane Smith",
+//               position: "Supervisor",
+//             },
+//           ],
+//         },
+//         {
+//           level: 2,
+//           approvalName: "Manager",
+//           employeeDetail: [
+//             { employeeId: 3, employeeName: "Bob Johnson", position: "Manager" },
+//           ],
+//         },
+//       ];
+
+//       return dummyData;
+//     } catch (error) {
+//       return handleApiError(
+//         error,
+//         thunkAPI,
+//         "Gagal mengambil detail approval hierarchy",
+//       );
+//     }
+//   },
+// );
+
+// ========================================
+// GET LIST FAKTUR TYPE (DUMMY)
+// ========================================
+export const getListFakturType = createAsyncThunk(
+  "EFAKTUR/GET_LIST_FAKTUR_TYPE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-faktur-types";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list faktur type",
+      );
+    }
+  },
+);
+
+// faktur code
+export const getListFakturCode = createAsyncThunk(
+  "EFAKTUR/GET_LIST_FAKTUR_CODE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-faktur-codes";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list faktur code",
+      );
+    }
+  },
+);
+
+// ========================================
+// GET LIST TAX PERIOD (DUMMY)
+// ========================================
+export const getListTaxPeriod = createAsyncThunk(
+  "EFAKTUR/GET_LIST_TAX_PERIOD",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-tax-periods";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal mengambil list tax period");
+    }
+  },
+);
+
+export const getListTaxYears = createAsyncThunk(
+  "EFAKTUR/GET_LIST_TAX_YEARS",
+  async (taxPeriod, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/e-invoice/create/get-tax-years/${taxPeriod}`;
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal mengambil list tax years");
+    }
+  },
+);
+
+// ========================================
+// GET LIST COUNTRY (DUMMY)
+// ========================================
+export const getListCountry = createAsyncThunk(
+  "EFAKTUR/GET_LIST_COUNTRY",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/get-countries";
+      const response = await ratingBillingHttpService.getAll(url);
+
+      return response.data || [];
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal mengambil list country");
+    }
+  },
+);
+
+// ========================================
+// CREATE E-FAKTUR (DUMMY)
+// ========================================
+export const createEFakturManual = createAsyncThunk(
+  "EFAKTUR/CREATE_MANUAL",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create/manual";
+
+      const response = await ratingBillingHttpService.createData(
+        url,
+        body 
+      );
+
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: response.message || "E-Faktur berhasil dibuat",
+            return: false,
+          }),
+        );
+
+        return {
+          ...response.data,
+          efakturId: response.data.created_id,
+        };
+      } else {
+        throw new Error(response.message || "Gagal membuat E-Faktur");
+      }
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal membuat E-Faktur");
+    }
+  },
 );
 
 const efakturSlice = createSlice({
@@ -1108,6 +1374,9 @@ const efakturSlice = createSlice({
     },
     clearBillingItems: (state) => {
       state.data_billingItem = [];
+    },
+    clearTaxYears: (state) => {
+      state.dataListTaxYears = [];
     },
     updateUploadProgress: (state, action) => {
       state.upload_progress = action.payload;
@@ -1145,14 +1414,14 @@ const efakturSlice = createSlice({
       state.list_efaktur = state.list_efaktur.map((item) =>
         successIds.includes(String(item.efakturId))
           ? { ...item, efakturStatus: "AWAITING_APPROVAL" }
-          : item
+          : item,
       );
 
       state.data_available_requested = state.data_available_requested.map(
         (item) =>
           successIds.includes(String(item.efakturId))
             ? { ...item, status: "AWAITING_APPROVAL" }
-            : item
+            : item,
       );
     },
     [batchManualUploadEFaktur.rejected]: (state) => {
@@ -1214,7 +1483,7 @@ const efakturSlice = createSlice({
         (item) =>
           requestedIds.includes(item.efakturId)
             ? { ...item, statusApproval: "AWAITING_APPROVAL" }
-            : item
+            : item,
       );
     },
     [createRequestReplacementEFaktur.rejected]: (state) => {
@@ -1234,7 +1503,7 @@ const efakturSlice = createSlice({
         (item) =>
           requestedIds.includes(item.efakturId)
             ? { ...item, statusApproval: "AWAITING_APPROVAL" }
-            : item
+            : item,
       );
     },
     [createRequestCancellationEFaktur.rejected]: (state) => {
@@ -1328,7 +1597,7 @@ const efakturSlice = createSlice({
               efakturStatus: efakturResult.status,
               invoiceNumber: efakturResult.invoiceNumber,
             }
-          : item
+          : item,
       );
     },
     [generateEFakturWithAttachments.rejected]: (state) => {
@@ -1351,7 +1620,7 @@ const efakturSlice = createSlice({
       state.list_efaktur_approval = state.list_efaktur_approval.map((item) =>
         approvedIds.includes(String(item.efakturId))
           ? { ...item, statusApproval: newStatus }
-          : item
+          : item,
       );
     },
     [approvedEfaktur.rejected]: (state) => {
@@ -1367,7 +1636,7 @@ const efakturSlice = createSlice({
       state.list_efaktur = state.list_efaktur.map((item) =>
         item.efakturId === action.payload.efakturId
           ? { ...item, efakturStatus: "CANCELLED" }
-          : item
+          : item,
       );
     },
     [cancelEFaktur.rejected]: (state) => {
@@ -1397,7 +1666,7 @@ const efakturSlice = createSlice({
       state.list_efaktur = state.list_efaktur.map((item) =>
         processedIds.includes(String(item.efakturId))
           ? { ...item, lastXmlGenerated: new Date().toISOString() }
-          : item
+          : item,
       );
     },
     [generateXMLEFaktur.rejected]: (state) => {
@@ -1455,6 +1724,122 @@ const efakturSlice = createSlice({
       state.data_eligible_efaktur = [];
     },
 
+    // GET LIST PRODUCT TYPE
+    [getListProductType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListProductType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListProductType = action.payload || [];
+    },
+    [getListProductType.rejected]: (state) => {
+      state.loading = false;
+      state.dataListProductType = [];
+    },
+
+    // GET LIST UOM
+    [getListUOM.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListUOM.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListUOM = action.payload || [];
+    },
+    [getListUOM.rejected]: (state) => {
+      state.loading = false;
+      state.dataListUOM = [];
+    },
+
+    // GET LIST FAKTUR TYPE
+    [getListFakturType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListFakturType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListFakturType = action.payload || [];
+    },
+    [getListFakturType.rejected]: (state) => {
+      state.loading = false;
+      state.dataListFakturType = [];
+    },
+
+    // GET LIST TAX PERIOD
+    [getListTaxPeriod.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListTaxPeriod.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListTaxPeriod = action.payload || [];
+    },
+    [getListTaxPeriod.rejected]: (state) => {
+      state.loading = false;
+      state.dataListTaxPeriod = [];
+    },
+
+    // GET LIST COUNTRY
+    [getListCountry.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListCountry.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListCountry = action.payload || [];
+    },
+    [getListCountry.rejected]: (state) => {
+      state.loading = false;
+      state.dataListCountry = [];
+    },
+
+    // GET LIST FAKTUR CODE
+    [getListFakturCode.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListFakturCode.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListFakturCode = action.payload || [];
+    },
+    [getListFakturCode.rejected]: (state) => {
+      state.loading = false;
+      state.dataListFakturCode = [];
+    },
+
+    // GET LIST TAX YEARS
+    [getListTaxYears.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListTaxYears.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListTaxYears = action.payload || [];
+    },
+    [getListTaxYears.rejected]: (state) => {
+      state.loading = false;
+      state.dataListTaxYears = [];
+    },
+
+    // GET LIST PRODUCT CODE
+    [getListProductCode.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListProductCode.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataListProductCode = action.payload || [];
+    },
+    [getListProductCode.rejected]: (state) => {
+      state.loading = false;
+      state.dataListProductCode = [];
+    },
+
+    // CREATE E-FAKTUR MANUAL
+    [createEFakturManual.pending]: (state) => {
+      state.loading_modal = true;
+    },
+    [createEFakturManual.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+      state.dataDetail = action.payload;
+    },
+    [createEFakturManual.rejected]: (state) => {
+      state.loading_modal = false;
+    },
+
     // GET AVAILABLE REQUESTED LIST
     [getAvailableRequestedList.pending]: (state) => {
       state.loading_available_requested = true;
@@ -1485,7 +1870,7 @@ const efakturSlice = createSlice({
         (item) =>
           requestedIds.includes(item.efakturId)
             ? { ...item, statusApproval: "AWAITING_APPROVAL" }
-            : item
+            : item,
       );
     },
     [createRequestApprovalEFaktur.rejected]: (state) => {
@@ -1510,7 +1895,7 @@ const efakturSlice = createSlice({
             state.list_efaktur = state.list_efaktur.map((item) =>
               item.efakturId === req.efakturId
                 ? { ...item, efakturStatus: "AWAITING_APPROVAL" }
-                : item
+                : item,
             );
           }
         });
@@ -1529,6 +1914,7 @@ export const {
   clearBillingItems,
   updateUploadProgress,
   resetUploadProgress,
+  clearTaxYears,
 } = efakturSlice.actions;
 
 export default efakturSlice.reducer;

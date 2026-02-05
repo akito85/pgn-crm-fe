@@ -54,6 +54,7 @@ export const columnsBank = (
       title: "NO",
       width: 60,
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -473,6 +474,19 @@ const ViewBank = () => {
   const itemActions = [
     // toolbar items
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Create",
       type: "table",
 
@@ -702,7 +716,7 @@ const ViewBank = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 3800,
+              x: "max-content",
               y: 525,
             }}
           />

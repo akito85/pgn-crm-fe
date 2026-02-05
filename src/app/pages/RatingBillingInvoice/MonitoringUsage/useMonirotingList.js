@@ -10,6 +10,7 @@ import {
   getListUsagePaginate,
   getDetailBatch,
   getDownloadList,
+  getDownloadBatchList,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import {
   hasValue,
@@ -26,7 +27,7 @@ const separatorCurrency = (text, decimal) => {
   const decimalSeparator = ".";
   const descimal = tempValue[1]
     ? `${decimalSeparator}${tempValue[1]}${"0"?.repeat(
-        decimal - tempValue[1].length > 0 ? decimal - tempValue[1].length : 0
+        decimal - tempValue[1].length > 0 ? decimal - tempValue[1].length : 0,
       )}`
     : `${decimalSeparator}${"0"?.repeat(decimal)}`;
 
@@ -114,7 +115,6 @@ export const useMonitoringList = (tabs, batchId) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
 
-  // use effect - Initial fetch only
   useEffect(() => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -135,7 +135,7 @@ export const useMonitoringList = (tabs, batchId) => {
           pageSize: 100,
           search: tempSearch,
           sort,
-        })
+        }),
       );
     } else if (tabs === "Usage List") {
       dispatch(
@@ -145,7 +145,7 @@ export const useMonitoringList = (tabs, batchId) => {
           pageSize: 100,
           sort,
           isLoadMore: false,
-        })
+        }),
       );
     } else if (tabs === "Batch List") {
       dispatch(
@@ -155,13 +155,12 @@ export const useMonitoringList = (tabs, batchId) => {
           pageSize: 100,
           sort,
           isLoadMore: false,
-        })
+        }),
       );
     }
     setPage(1);
   }, [dispatch, search, sort, tabs, batchId]);
 
-  // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -177,50 +176,57 @@ export const useMonitoringList = (tabs, batchId) => {
     });
   };
 
-  // Load more handler
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
     const searchRequest = encodeURIComponent(JSON.stringify(search));
 
-    let totalPages = 0;
     if (tabs === "Usage List") {
-      totalPages = dataUsage?.page?.totalPages || 0;
-      if (nextPage <= totalPages) {
-        await dispatch(
-          getListUsagePaginate({
-            search: searchRequest,
-            page: nextPage,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: true,
-          })
-        );
-        setPage(nextPage);
+      const totalElements = dataUsage?.page?.totalElements || 0;
+      const currentDataLength = dataUsage?.result?.length || 0;
+
+      if (currentDataLength >= totalElements) {
+        return;
       }
+
+      const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+      await dispatch(
+        getListUsagePaginate({
+          search: searchRequest,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        }),
+      );
+      setPage(nextPage);
     } else if (tabs === "Batch List") {
-      totalPages = dataBatch?.page?.totalPages || 0;
-      if (nextPage <= totalPages) {
-        await dispatch(
-          getListBatchPaginate({
-            search: searchRequest,
-            page: nextPage,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: true,
-          })
-        );
-        setPage(nextPage);
+      const totalElements = dataBatch?.page?.totalElements || 0;
+      const currentDataLength = dataBatch?.result?.length || 0;
+
+      if (currentDataLength >= totalElements) {
+        return;
       }
+
+      const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+      await dispatch(
+        getListBatchPaginate({
+          search: searchRequest,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        }),
+      );
+      setPage(nextPage);
     }
   };
 
-  // Calculate if there's more data
   const hasMoreUsage =
     (dataUsage?.result?.length || 0) < (dataUsage?.page?.totalElements || 0);
   const hasMoreBatch =
     (dataBatch?.result?.length || 0) < (dataBatch?.page?.totalElements || 0);
 
-  // onSort
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -238,7 +244,25 @@ export const useMonitoringList = (tabs, batchId) => {
           sort,
           page: 1,
           pageSize: 1000,
-        })
+        }),
+      );
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
+
+  const handleDownloadBatch = () => {
+    try {
+      const searchRequest = encodeURIComponent(JSON.stringify(search));
+      const totalData = dataBatch?.page?.totalElements || 10000;
+
+      dispatch(
+        getDownloadBatchList({
+          search: searchRequest,
+          sort,
+          page: 1,
+          pageSize: totalData,
+        }),
       );
     } catch (error) {
       console.log("Error", error);
@@ -271,7 +295,7 @@ export const useMonitoringList = (tabs, batchId) => {
         hasValue(search["recordId"]),
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -281,7 +305,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -298,7 +322,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -308,7 +332,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -327,7 +351,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -337,7 +361,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -356,7 +380,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -379,7 +403,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -389,7 +413,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -410,7 +434,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -420,7 +444,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     // {
@@ -531,7 +555,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -541,7 +565,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -559,7 +583,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -569,7 +593,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -590,7 +614,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -600,7 +624,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -622,7 +646,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -632,7 +656,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -654,7 +678,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -664,7 +688,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -685,7 +709,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -695,7 +719,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -714,7 +738,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -724,7 +748,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
 
@@ -743,7 +767,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -753,7 +777,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
 
@@ -774,7 +798,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "datetime"
+        "datetime",
       ),
       render: (text) =>
         renderDateColumn(
@@ -783,7 +807,7 @@ export const useMonitoringList = (tabs, batchId) => {
           searchText,
           text,
           "datetime",
-          search
+          search,
         ),
     },
     {
@@ -803,7 +827,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -812,7 +836,7 @@ export const useMonitoringList = (tabs, batchId) => {
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -831,7 +855,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "hour"
+        "hour",
       ),
       render: (text) =>
         renderColumn(
@@ -841,7 +865,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -858,7 +882,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -868,7 +892,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -888,7 +912,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "decimal,4"
+        "decimal,4",
       ),
       render: (text) =>
         renderColumn(
@@ -898,7 +922,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 4),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -917,7 +941,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "decimal,4"
+        "decimal,4",
       ),
       render: (text) =>
         renderColumn(
@@ -927,7 +951,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 4),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -947,7 +971,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -957,7 +981,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 2),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -974,7 +998,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -984,7 +1008,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1001,7 +1025,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1011,7 +1035,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1031,7 +1055,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1041,7 +1065,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
 
@@ -1063,7 +1087,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "decimal,4"
+        "decimal,4",
       ),
       render: (text) =>
         renderColumn(
@@ -1073,7 +1097,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 4),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1094,7 +1118,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "decimal,4"
+        "decimal,4",
       ),
       render: (text) =>
         renderColumn(
@@ -1104,7 +1128,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 4),
           false,
           "input",
-          search
+          search,
         ),
     },
 
@@ -1123,7 +1147,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1133,7 +1157,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1152,7 +1176,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "decimal,7"
+        "decimal,7",
       ),
       render: (text) =>
         renderColumn(
@@ -1162,7 +1186,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 7),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1181,7 +1205,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "decimal,4"
+        "decimal,4",
       ),
       render: (text) =>
         renderColumn(
@@ -1191,7 +1215,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 4),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1210,7 +1234,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "decimal,4"
+        "decimal,4",
       ),
       render: (text) =>
         renderColumn(
@@ -1220,7 +1244,7 @@ export const useMonitoringList = (tabs, batchId) => {
           separatorCurrency(text, 4),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1241,7 +1265,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1251,7 +1275,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1271,7 +1295,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1281,7 +1305,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1300,7 +1324,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "datetime"
+        "datetime",
       ),
       render: (creationDate) =>
         renderDateColumn(
@@ -1309,7 +1333,7 @@ export const useMonitoringList = (tabs, batchId) => {
           searchText,
           creationDate,
           "datetime",
-          search
+          search,
         ),
     },
     {
@@ -1328,7 +1352,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1338,7 +1362,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1356,7 +1380,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -1370,10 +1394,10 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
-     {
+    {
       title: "Message",
       dataIndex: "logError",
       align: "left",
@@ -1388,7 +1412,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -1402,7 +1426,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1421,7 +1445,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1431,7 +1455,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "status",
-          search
+          search,
         ),
     },
   ];
@@ -1456,7 +1480,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1465,7 +1489,7 @@ export const useMonitoringList = (tabs, batchId) => {
           searchText,
           text,
           false,
-          search
+          search,
         ),
     },
     {
@@ -1481,7 +1505,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1490,7 +1514,7 @@ export const useMonitoringList = (tabs, batchId) => {
           searchText,
           text,
           false,
-          search
+          search,
         ),
     },
     {
@@ -1506,7 +1530,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1516,7 +1540,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1532,7 +1556,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1542,7 +1566,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1558,7 +1582,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1568,7 +1592,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text?.toString(),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1584,7 +1608,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1594,7 +1618,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text?.toString(),
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1610,7 +1634,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1620,7 +1644,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -1637,7 +1661,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -1647,7 +1671,7 @@ export const useMonitoringList = (tabs, batchId) => {
           text,
           false,
           "status",
-          search
+          search,
         ),
     },
   ];
@@ -1670,7 +1694,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -1682,7 +1706,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -1694,7 +1718,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -1707,7 +1731,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (billingPeriod) => moment(billingPeriod).format("MMM YYYY"),
     },
@@ -1721,7 +1745,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) => (
         <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>
@@ -1742,6 +1766,7 @@ export const useMonitoringList = (tabs, batchId) => {
     onClickApproval,
     data_approval,
     handleDownload,
+    handleDownloadBatch,
     setSearch,
     handleSearch,
     searchInput,

@@ -1,5 +1,6 @@
 import {
   Spin,
+  Checkbox,
   Tooltip,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -10,6 +11,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
   EyeOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import {
   renderColumn,
@@ -23,7 +25,11 @@ import {
   getApprovalHistory,
   getDownloadPartner,
   getPaginatePartner,
+  inactivePartnerCa,
+  getAllApprovalList,
+  getListApprovalById,
 } from "../../../../../redux/slices/receipt_collection/partnerCa";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
@@ -52,6 +58,10 @@ const ViewPartnerCa = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [status, setStatus] = useState("");
+  const [id, setId] = useState("");
+  const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
+  const [openModalInactivate, setOpenModalInactivate] = useState(false);
 
   const handleFetch = useCallback(() => {
     dispatch(
@@ -112,13 +122,13 @@ const ViewPartnerCa = () => {
       const temp = {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PARTNER_CA || [],
-          // inactive:
-          //   dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_METHOD || [],
+          inactive:
+            dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER_CA || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PARTNER_CA || [],
-          // inactive:
-          //   dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_METHOD || [],
+          inactive:
+            dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER_CA || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -139,12 +149,53 @@ const ViewPartnerCa = () => {
     }
   };
 
+  const handleInactive = (r) => {
+    setOpenModalInactivate(true);
+    setId(r?.id);
+    setNameModalActiveOrInactivate(
+      r?.partnerCode
+    );
+    setStatus(r?.status);
+  };
+
+  const handleCancelModalInactivate = () => {
+    setOpenModalInactivate(false);
+  };
+
+  const handleSubmitModalInactivate = (res, handleClear) => {
+    const body = {
+      id: id,
+      appHierId: res.approvalHierarchy,
+      status: status === "Inactive" ? "Active" : "Inactive",
+      remark: res.remark,
+    };
+    setBody({ body });
+    dispatch(inactivePartnerCa({ body }))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancelModalInactivate();
+        let tempSearch = "";
+        for (const dataIndex in search) {
+          if (Object.hasOwnProperty.call(search, dataIndex)) {
+            const tempSearchText = search[dataIndex];
+            if (tempSearchText) {
+              tempSearch += `${dataIndex}~${tempSearchText},`;
+            }
+          }
+        }
+        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+        dispatch(getPaginatePartner({ search: tempSearch, page, pageSize, sort }));
+      });
+  };
+
   const columns = [
     {
       title: "NO",
       width: 60,
       key: "no",
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -163,6 +214,30 @@ const ViewPartnerCa = () => {
       render: (text) =>
         renderColumn(
           "partnerCode",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "PARTNER Name",
+      dataIndex: ["partner", "partnerName"],
+      sorter: true,
+      key: "partnerName",
+      ...getColumnSearchPropsPaging(
+        "partner.partnerName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "partner.partnerName",
           searchedColumn,
           searchText,
           text,
@@ -197,52 +272,27 @@ const ViewPartnerCa = () => {
         ),
     },
     {
-      title: "EFF START DATE",
+      title: "Ca Name",
+      dataIndex: ["ca", "name"],
+      key: "caName",
+      align: "",
       sorter: true,
-      align: "center",
-      key: "effStartDate",
-      dataIndex: "effStartDate",
       ...getColumnSearchPropsPaging(
-        "effStartDate",
+        "ca.name",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false,
-        "date"
+        true
       ),
-      render: (v) =>
-        renderDateColumn(
-          "effStartDate",
+      render: (text) =>
+        renderColumn(
+          "ca.name",
           searchedColumn,
           searchText,
-          v,
-          "date",
-          search
-        ),
-    },
-    {
-      title: "EFF END DATE",
-      sorter: true,
-      align: "center",
-      key: "effEndDate",
-      dataIndex: "effEndDate",
-      ...getColumnSearchPropsPaging(
-        "effEndDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false,
-        "date"
-      ),
-      render: (v) =>
-        renderDateColumn(
-          "effEndDate",
-          searchedColumn,
-          searchText,
-          v,
-          "date",
+          text,
+          true,
+          "input",
           search
         ),
     },
@@ -274,6 +324,81 @@ const ViewPartnerCa = () => {
         ),
     },
     {
+      title: "START DATE",
+      sorter: true,
+      align: "center",
+      key: "effStartDate",
+      dataIndex: "effStartDate",
+      ...getColumnSearchPropsPaging(
+        "effStartDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false,
+        "date"
+      ),
+      render: (v) =>
+        renderDateColumn(
+          "effStartDate",
+          searchedColumn,
+          searchText,
+          v,
+          "date",
+          search
+        ),
+    },
+    {
+      title: "END DATE",
+      sorter: true,
+      align: "center",
+      key: "effEndDate",
+      dataIndex: "effEndDate",
+      ...getColumnSearchPropsPaging(
+        "effEndDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false,
+        "date"
+      ),
+      render: (v) =>
+        renderDateColumn(
+          "effEndDate",
+          searchedColumn,
+          searchText,
+          v,
+          "date",
+          search
+        ),
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      sorter: true,
+      width: 100,
+      fixed: "right",
+      ...getColumnSearchPropsPaging(
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false
+      ),
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status"
+        ),
+    },
+    {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
       key: "statusApproval",
@@ -302,13 +427,17 @@ const ViewPartnerCa = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["statusApproval", "action"],
+    right: ["status", "statusApproval", "action"],
   }));
 
   const onSort = (_, __, sort) => {
+    const field = Array.isArray(sort.field)
+      ? sort.field.join(".")
+      : sort.field;
+
     const dataSort =
       sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        ? `${field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -333,6 +462,19 @@ const ViewPartnerCa = () => {
   const itemActions = [
     // toolbar items
     {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Create",
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER_CA}>
@@ -340,7 +482,7 @@ const ViewPartnerCa = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Partner
+            Create
           </ButtonComponent>
         </NavLink>
       ),
@@ -423,6 +565,49 @@ const ViewPartnerCa = () => {
       },
     },
     {
+      action: "Activate",
+      type: "table",
+      render: (record, data_length) => {
+        // const statusLowerCase = record?.status?.toLowerCase()
+
+        return (
+          data_length > 3 ?
+            <div className="w-full">
+              <ButtonComponent
+                border={false}
+                className={'gap-5 w-full'}
+                onClick={() => handleInactive(record)}
+              // disabled={
+              //   disabledActionByStatus('activate', record?.status, record?.statusApproval)
+              // }
+              >
+                <Checkbox
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+                <span
+                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
+                >
+                  {record?.status === "Active" ? "Inactivate" : "Activate"}
+                </span>
+              </ButtonComponent>
+            </div>
+            :
+            <Tooltip title={record?.status === "Active" ? "Inactivate" : "Activate"}>
+              <div >
+                <Checkbox
+                  border={false}
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+              </div>
+            </Tooltip>
+        );
+      }
+    },
+    {
       action: "history",
       type: "table",
       render: (record, data_length) => {
@@ -461,6 +646,8 @@ const ViewPartnerCa = () => {
         dispatch(getApprovalHistory(body));
       } else if (bodyError?.action === "DOWNLOAD_PARTNER_CA") {
         handleDownload();
+      } else if (bodyError?.action === "INACTIVE_PARTNER_CA") {
+        dispatch(inactivePartnerCa(body));
       }
       handleFetch();
     } catch (error) {
@@ -500,7 +687,7 @@ const ViewPartnerCa = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 2500,
+              x: "max-content",
               y: 525,
             }}
             showExport={true}
@@ -520,6 +707,17 @@ const ViewPartnerCa = () => {
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
+        />
+
+        <ModalActiveInactive
+          dispatch={dispatch}
+          getAPIOption={getAllApprovalList}
+          getAPIDetail={getListApprovalById}
+          selector={"partnerCa"}
+          alertMessage={`Are you sure you want to inactivate this Partner CA with Partner Code ${nameModalActiveOrInactivate}?`}
+          openModalInactivate={openModalInactivate}
+          handleCloseModalInactivate={handleCancelModalInactivate}
+          onFinish={handleSubmitModalInactivate}
         />
       </Spin>
       {/* modal try again */}

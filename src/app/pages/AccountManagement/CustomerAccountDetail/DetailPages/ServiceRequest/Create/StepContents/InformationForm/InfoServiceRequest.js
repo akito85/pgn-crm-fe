@@ -1,0 +1,701 @@
+import { useState, useEffect, Fragment } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { Form, Select, Button, Tooltip, Spin, Tag, Input } from "antd"; // Added Input import
+import SVGIcon from "../../../../../../../../../assets/Icon/index";
+
+import InputComponent from "../../../../../../../../../components/InputComponent";
+import StatusComponent from "../../../../../../../../../components/StatusComponent";
+import DateComponent from "../../../../../../../../../components/DateComponent";
+
+import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
+import NxModal from "../../../../../../../../../components/Nx/NxModal";
+
+import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
+
+import moment from "moment";
+
+export default function InfoServiceRequest({
+  account,
+  customer,
+  dropdowns,
+  form,
+  totalElement = 0,
+  page = 1,
+  pageSize = 10,
+  searchText = "",
+  searchedColumn = "",
+  onSort = () => {},
+  getColumnSearchProps = () => {},
+  searchInput,
+  handleSearch
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRowKey, setSelectedRowKey] = useState(null);
+  const [serviceRequestRef, setServiceRequestRef] = useState("");
+  const navigate = useNavigate();
+
+  // Debug: Log form values when they change
+  useEffect(() => {
+    const values = form?.getFieldsValue();
+    console.log("InfoServiceRequest - Current form values:", values);
+  }, [form]);
+
+  // Create safe accessor functions
+  const getDropdownOptions = (dropdownKey) => {
+    if (!dropdowns || !dropdowns[dropdownKey] || !dropdowns[dropdownKey].data) {
+      return [];
+    }
+    return dropdowns[dropdownKey].data.map(item => ({
+      value: item.glbTypeValId?.toString() || item.id?.toString(),
+      label: item.name || item.glbTypeValName
+    }));
+  };
+
+  // Or use destructuring with defaults
+  const {
+    serviceRequestTypes = { data: [] },
+    serviceRequestCategories = { data: [] },
+    serviceRequestSubcategories = { data: [] },
+    serviceRequestChannels = { data: [] },
+    serviceRequestPriorities = { data: [] },
+    serviceRequestSources = { data: [] }
+  } = dropdowns || {};
+
+  // Update handleOk to use the selected row
+  const handleOk = () => {
+    form.setFieldsValue({
+      srr: selectedRow.serviceRequestReference,
+    });
+
+    setIsOpen(false);
+    // Reset selection when modal closes
+    setSelectedRow(null);
+    setSelectedRowKey(null);
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    // Reset selection when modal closes
+    setSelectedRow(null);
+    setSelectedRowKey(null);
+  }
+
+  const handleClose = () => {
+    setIsOpen(false);
+    // Reset selection when modal closes
+    setSelectedRow(null);
+    setSelectedRowKey(null);
+  }
+
+  const handleDateChange = () => {
+
+  }
+
+  const renderDate = (date) => {
+    if (date) {
+      return moment(date).format("DD MMM YYYY HH:mm:ss");
+    }
+    return "";
+  };
+
+  const columnMain = [
+    {
+      title: "NO",
+      width: 80,
+      align: "center",
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: "SERVICE REQUEST NUMBER",
+      dataIndex: "serviceRequestNumber",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("serviceRequestNumber"),
+      render: (reference, record) => (
+        <div 
+          className="flex items-center gap-2"
+        >
+          <span 
+            className="underline cursor-pointer text-blue-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRowClick(record);
+            }}
+          >
+            {reference || "-"}
+          </span>
+          {/*
+          {selectedRowKey === record.key && (
+            <Tag color="blue">Selected</Tag>
+          )}
+          */}
+        </div>
+      ),
+    },
+    {
+      title: "SERVICE REQUEST REFERENCE",
+      dataIndex: "serviceRequestReference",
+      width: 220,
+      sorter: true,
+      ...getColumnSearchProps("serviceRequestReference"),
+      render: (reference, record) => (
+        <span 
+          className="underline cursor-pointer text-blue-600"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowClick(record);
+          }}
+        >
+          {reference || "-"}
+        </span>
+      ),
+    },
+    {
+      title: "TYPE",
+      dataIndex: "type",
+      width: 150,
+      sorter: true,
+      ...getColumnSearchProps("type"),
+    },
+    {
+      title: "CATEGORY",
+      dataIndex: "category",
+      width: 160,
+      sorter: true,
+      ...getColumnSearchProps("category"),
+    },
+    {
+      title: "SUB CATEGORY",
+      dataIndex: "subCategory",
+      width: 160,
+      sorter: true,
+      ...getColumnSearchProps("subCategory"),
+    },
+    {
+      title: "CHANNEL",
+      dataIndex: "channel",
+      width: 140,
+      sorter: true,
+      ...getColumnSearchProps("channel"),
+    },
+    {
+      title: "REQUEST SOURCE",
+      dataIndex: "requestSource",
+      width: 150,
+      sorter: true,
+      ...getColumnSearchProps("requestSource"),
+    },
+    {
+      title: "REQUEST DATE",
+      dataIndex: "requestDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("requestDate"),
+      render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "OPEN DATE",
+      dataIndex: "openDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("openDate"),
+      render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "RESOLVED DATE",
+      dataIndex: "resolvedDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("resolvedDate"),
+      render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "CLOSED DATE",
+      dataIndex: "closedDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("closedDate"),
+      render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "AGE (HOUR)",
+      dataIndex: "age",
+      width: 120,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchProps("age"),
+      render: (age) => age || "0",
+    },
+    {
+      title: "DESCRIPTION",
+      dataIndex: "description",
+      width: 250,
+      sorter: true,
+      ...getColumnSearchProps("description"),
+    },
+    {
+      title: "STATUS APPROVAL",
+      dataIndex: "statusApproval",
+      width: 160,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchProps("statusApproval"),
+      render: (status) => {
+        const colorMap = {
+          "approved": "green",
+          "waitingApproval": "orange",
+          "pending": "orange",
+          "rejected": "red"
+        };
+        const displayText = {
+          "approved": "Approved",
+          "waitingApproval": "Waiting Approval",
+          "pending": "Pending",
+          "rejected": "Rejected"
+        };
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={colorMap[status] || "gray"}>
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
+    {
+      title: "STATUS PRE-REQUISITE",
+      dataIndex: "statusPrerequisite",
+      width: 180,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchProps("statusPrerequisite"),
+      render: (status) => {
+        const colorMap = {
+          "completed": "green",
+          "pending": "red",
+          "none": "blue"
+        };
+        const displayText = {
+          "completed": "Completed",
+          "pending": "Pending",
+          "none": "None"
+        };
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={colorMap[status] || "gray"}>
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      width: 140,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchProps("status"),
+      render: (status) => {
+        const colorMap = {
+          "inProgress": "blue",
+          "onHold": "orange",
+          "closed": "red",
+          "canceled": "gray",
+          "open": "green",
+          "active": "green",
+          "pending": "orange"
+        };
+        const displayText = {
+          "inProgress": "In Progress",
+          "onHold": "On Hold",
+          "closed": "Closed",
+          "canceled": "Canceled",
+          "open": "Open"
+        };
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={colorMap[status] || "gray"}>
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
+    {
+      title: "ACTION",
+      align: "center",
+      width: 120,
+      fixed: "right",
+      render: (v, r, i) => {
+        return (
+          <div className="flex w-full justify-center gap-4">
+            <Tooltip title="Detail">
+              <div className="pt-1 cursor-pointer">
+                <SVGIcon
+                  name="IconDetail"
+                  color={"#0075bf"}
+                  width={20}
+                  onClick={() => {
+                    navigate("/account-management/account-standard/service-requests/details");
+                  }}
+                />
+              </div>
+            </Tooltip>
+            <Tooltip title="Update">
+              <div className="pt-1 cursor-pointer">
+                <SVGIcon
+                  name="IconEdit"
+                  color={"#0075bf"}
+                  width={20}
+                  onClick={() => {
+                    // Handle update action
+                  }}
+                />
+              </div>
+            </Tooltip>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const ServiceRequestData = [
+    {
+      "key": 1,
+      "serviceRequestNumber": "SR-2023-001",
+      "serviceRequestReference": "REF-2023-001",
+      "type": "Installation",
+      "category": "Hardware",
+      "subCategory": "Server",
+      "channel": "Email",
+      "requestSource": "Customer",
+      "requestDate": "2023-10-15T10:30:00",
+      "openDate": "2023-10-15T11:00:00",
+      "resolvedDate": "2023-10-16T15:45:00",
+      "closedDate": "2023-10-17T09:20:00",
+      "age": 48,
+      "description": "Install new server rack in data center",
+      "statusApproval": "approved",
+      "statusPrerequisite": "completed",
+      "status": "closed"
+    },
+    {
+      "key": 2,
+      "serviceRequestNumber": "SR-2023-002",
+      "serviceRequestReference": "REF-2023-002",
+      "type": "Maintenance",
+      "category": "Software",
+      "subCategory": "Application",
+      "channel": "Phone",
+      "requestSource": "Internal",
+      "requestDate": "2023-10-16T09:15:00",
+      "openDate": "2023-10-16T09:30:00",
+      "resolvedDate": "2023-10-16T14:20:00",
+      "closedDate": "2023-10-16T16:00:00",
+      "age": 24,
+      "description": "Update application to latest version",
+      "statusApproval": "approved",
+      "statusPrerequisite": "completed",
+      "status": "closed"
+    }
+  ];
+
+  // Handle row click
+  const handleRowClick = (record) => {
+    console.log('Row clicked:', record);
+    setSelectedRow(record);
+    setSelectedRowKey(record.key);
+  };
+
+  const handleTableRowClick = (record, rowIndex, event) => {
+    // Prevent click on action buttons
+    const target = event.target;
+    const shouldPrevent = ['button', 'a', 'svg', 'path', '.ant-btn', '.ant-btn-link', '.ant-btn-icon-only', '.action-button', '.ant-dropdown-trigger', '.anticon', '.ant-popconfirm', '.ant-popover', 'input', 'select', '.ant-select', '.ant-input', '.ant-checkbox', '.ant-radio', '.ant-switch']
+      .some((selector) => {
+        if (selector.startsWith('.')) {
+          return target.closest(selector) !== null;
+        } else {
+          return target.tagName.toLowerCase() === selector.toLowerCase() ||
+                 target.closest(selector) !== null;
+        }
+      });
+
+    if (!shouldPrevent) {
+      handleRowClick(record);
+    }
+  };
+
+  return(
+    <Fragment>
+      <NxPanel title={"SERVICE INFORMATION"}>
+        {/* Remove the wrapper Form component since form is passed as prop */}
+        <div className="w-full grid grid-cols-2 gap-4">
+          {/* Left Column */}
+          <div className="space-y-4">
+            <div class="w-full gap-4 flex flex-row items-end">
+              <Form.Item
+                key="serviceRequestReference"
+                name="srr"
+                label="Service Request Reference"
+                className="no-margin-form w-full"
+              >
+                  <InputComponent 
+                    className="flex-1"
+                  />
+              </Form.Item>
+              <Button
+                type="primary"
+                className="h-9 px-4 justify-center items-center"
+                style={{
+                  backgroundColor: "#0075bf",
+                  borderColor: "#0075bf",
+                  borderRadius: "5px",
+                  minWidth: "112px",
+                }}
+                onClick={() => {
+                  setIsOpen(true);
+                }}
+              >
+                Select
+              </Button>
+            </div>
+            <Form.Item
+              key="category"
+              name="category"
+              label="Category"
+              rules={[
+                {
+                  message: requiredMessage("Category"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Category"
+                loading={!dropdowns?.serviceRequestCategories?.data}
+                options={getDropdownOptions('serviceRequestCategories')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="priority"
+              name="priority"
+              label="Priority"
+              rules={[
+                {
+                  message: requiredMessage("Priority"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Priorities"
+                loading={!dropdowns?.serviceRequestPriorities?.data}
+                options={getDropdownOptions('serviceRequestPriorities')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="srFormAccountCostCenter"
+              name="srFormAccountCostCenter"
+              label="Cost Center"
+              rules={[
+                {
+                  message: requiredMessage("Cost Center"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <InputComponent disabled={true} />
+            </Form.Item>
+
+            <Form.Item
+              key="subCategory"
+              name="subCategory"
+              label="Sub Category"
+              rules={[
+                {
+                  message: requiredMessage("Sub Category"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Sub Category"
+                loading={!dropdowns?.serviceRequestSubcategories?.data}
+                options={getDropdownOptions('serviceRequestSubcategories')}
+              />
+            </Form.Item>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-4">
+            <Form.Item
+              key="requestSource"
+              name="requestSource"
+              label="Request Source"
+              rules={[
+                {
+                  message: requiredMessage("Request Source"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Sources"
+                loading={!dropdowns?.serviceRequestSources?.data}
+                options={getDropdownOptions('serviceRequestSources')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="type"
+              name="type"
+              label="Type"
+              rules={[
+                {
+                  message: requiredMessage("Type"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Types"
+                loading={!dropdowns?.serviceRequestTypes?.data}
+                options={getDropdownOptions('serviceRequestTypes')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="channel"
+              name="channel"
+              label="Channel"
+              rules={[
+                {
+                  message: requiredMessage("Channel"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Channels"
+                loading={!dropdowns?.serviceRequestChannels?.data}
+                options={getDropdownOptions('serviceRequestChannels')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="requestDate"
+              name="requestDate"
+              label="Request Date"
+              rules={[
+                {
+                  message: requiredMessage("Request Date"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <DateComponent />
+            </Form.Item>
+          </div>
+        </div>
+
+        {/* Description - Full Width */}
+        <div className="w-full my-5">
+          <Form.Item
+            key="description"
+            name="description"
+            label="Description"
+            className="no-margin-form"
+          >
+            <InputComponent
+              type="textarea"
+              rows={4}
+              placeholder="Asset meter baru PGN"
+              maxLength={255}
+            />
+          </Form.Item>
+        </div>
+      </NxPanel>
+
+      <NxModal
+        isOpen={isOpen}
+        handleCancel={handleCancel}
+        handleOk={handleOk}
+        title="CHOOSE SERVICE REQUEST REFERENCE"
+        width={1100}
+        type="custom"
+        footer={[
+          <div className="flex justify-end items-end w-full">
+            <div className="flex flex-row gap-2">
+              <Button onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                className="h-9 px-5 justify-center items-center"
+                style={{
+                  backgroundColor: "#0075bf",
+                  borderColor: "#0075bf",
+                  borderRadius: "5px",
+                  minWidth: "112px",
+                  color: "#ffffff"
+                }}
+                onClick={handleOk}
+                disabled={!selectedRow}
+              >
+                Select
+              </Button>
+            </div>
+          </div>
+        ]}
+      >
+        <div className="mb-4">
+          {selectedRow ? (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+              <span className="font-medium">Selected Service Request:</span> 
+              <span className="ml-2 font-bold">{selectedRow.serviceRequestNumber}</span>
+              <span className="ml-2">({selectedRow.serviceRequestReference})</span>
+            </div>
+          ) : (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded text-gray-500">
+              Click on a Service Request Number or Reference to select
+            </div>
+          )}
+        </div>
+        
+        <NxTable
+          className="border-[0.5px] border-[#c8cdd4] border-solid"
+          usePagination={true}
+          useSelect={true}
+          dataMain={ServiceRequestData}
+          columnMain={columnMain}
+          tablePadding="small"
+          fontSize="small"
+          onRowClicked={handleTableRowClick}
+          rowSelection={{
+            type: 'radio',
+            selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
+            onChange: (selectedRowKeys, selectedRows) => {
+              if (selectedRows.length > 0) {
+                handleRowClick(selectedRows[0]);
+              }
+            },
+          }}
+        />
+      </NxModal>
+    </Fragment>
+  )
+}

@@ -13,11 +13,12 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
 import TableRBI from "../../../../../components/TableRBI";
 import {
-  EyeOutlined,
+  EyeOutlined, DownloadOutlined
 } from "@ant-design/icons";
 import {
   renderColumn,
   renderDateColumn,
+  disabledActionByStatus,
 } from "../../../../../utils";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -27,8 +28,11 @@ import {
   getApprovalHistory,
   getDownloadPaymentChannel,
   getPaginatePaymentChannel,
+  inactivePaymentChannel,
+  getAllApprovalList,
+  getListApprovalById,
 } from "../../../../../redux/slices/receipt_collection/paymentChannel";
-import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
@@ -57,6 +61,14 @@ const ViewPaymentChannel = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [status, setStatus] = useState("");
+  const [id, setId] = useState("");
+  const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
+  const [openModalInactivate, setOpenModalInactivate] = useState(false);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "statusApproval", "action"],
+  }));
 
   const handleFetch = useCallback(() => {
     dispatch(
@@ -117,13 +129,13 @@ const ViewPaymentChannel = () => {
       const temp = {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PAYMENT_CHANNEL || [],
-          // inactive:
-          //   dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_METHOD || [],
+          inactive:
+            dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_CHANNEL || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PAYMENT_CHANNEL || [],
-          // inactive:
-          //   dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_METHOD || [],
+          inactive:
+            dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_CHANNEL || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -132,16 +144,41 @@ const ViewPaymentChannel = () => {
     }
   }, [dataApprovalHistory]);
 
-  const handleApprovalHistory = async (data) => {
+  const handleApprovalHistory = async (id) => {
     try {
-      setBody(data);
-      await dispatch(getApprovalHistory(data))?.unwrap();
+      setBody(id);
+      await dispatch(getApprovalHistory(id))?.unwrap();
       setOpenModalHistory(true);
-
     } catch (error) {
       setOpenModalHistory(false);
-
     }
+  };
+  const handleInactive = (r) => {
+    setOpenModalInactivate(true);
+    setId(r?.id);
+    setNameModalActiveOrInactivate(r?.ciCode + " - " + r?.name);
+    setStatus(r?.status);
+  };
+
+  const handleCancelModalInactivate = () => {
+    setOpenModalInactivate(false);
+  };
+
+  const handleSubmitModalInactivate = (res, handleClear) => {
+    const body = {
+      id: id,
+      appHierId: res.approvalHierarchy,
+      status: status === "Inactive" ? "Active" : "Inactive",
+      remark: res.remark,
+    };
+    setBody({ body });
+    dispatch(inactivePaymentChannel({ body }))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancelModalInactivate();
+        handleFetch();
+      });
   };
 
   const columns = [
@@ -149,6 +186,7 @@ const ViewPaymentChannel = () => {
       title: "NO",
       width: 60,
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -196,54 +234,6 @@ const ViewPaymentChannel = () => {
           text,
           true,
           "input",
-          search
-        ),
-    },
-    {
-      title: "EFF START DATE",
-      sorter: true,
-      align: "center",
-      dataIndex: "effStartDate",
-      ...getColumnSearchPropsPaging(
-        "effStartDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false,
-        "date"
-      ),
-      render: (v) =>
-        renderDateColumn(
-          "effStartDate",
-          searchedColumn,
-          searchText,
-          v,
-          "date",
-          search
-        ),
-    },
-    {
-      title: "EFF END DATE",
-      sorter: true,
-      align: "center",
-      dataIndex: "effEndDate",
-      ...getColumnSearchPropsPaging(
-        "effEndDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false,
-        "date"
-      ),
-      render: (v) =>
-        renderDateColumn(
-          "effEndDate",
-          searchedColumn,
-          searchText,
-          v,
-          "date",
           search
         ),
     },
@@ -302,11 +292,84 @@ const ViewPaymentChannel = () => {
         ),
     },
     {
+      title: "START DATE",
+      sorter: true,
+      align: "center",
+      dataIndex: "effStartDate",
+      ...getColumnSearchPropsPaging(
+        "effStartDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false,
+        "date"
+      ),
+      render: (v) =>
+        renderDateColumn(
+          "effStartDate",
+          searchedColumn,
+          searchText,
+          v,
+          "date",
+          search
+        ),
+    },
+    {
+      title: "END DATE",
+      sorter: true,
+      align: "center",
+      dataIndex: "effEndDate",
+      ...getColumnSearchPropsPaging(
+        "effEndDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false,
+        "date"
+      ),
+      render: (v) =>
+        renderDateColumn(
+          "effEndDate",
+          searchedColumn,
+          searchText,
+          v,
+          "date",
+          search
+        ),
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      sorter: true,
+      width: 100,
+      fixed: "right",
+      ...getColumnSearchPropsPaging(
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        false
+      ),
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status"
+        ),
+    },
+    {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
       key: "statusApproval",
       sorter: true,
-      width: 200,
+      width: 150,
       fixed: "right",
       ...getColumnSearchPropsPaging(
         "statusApproval",
@@ -353,6 +416,16 @@ const ViewPaymentChannel = () => {
     // toolbar items
     {
       action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
     },
     {
       action: "Create",
@@ -362,7 +435,7 @@ const ViewPaymentChannel = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Payment Channel
+            Create
           </ButtonComponent>
         </NavLink>
       ),
@@ -448,6 +521,49 @@ const ViewPaymentChannel = () => {
       },
     },
     {
+      action: "Activate",
+      type: "table",
+      render: (record, data_length) => {
+        const statusLowerCase = record?.status?.toLowerCase()
+
+        return (
+          data_length > 3 ?
+            <div className="w-full">
+              <ButtonComponent
+                border={false}
+                className={'gap-5 w-full'}
+                onClick={() => handleInactive(record)}
+              // disabled={
+              //   disabledActionByStatus('activate', record?.status, record?.statusApproval)
+              // }
+              >
+                <Checkbox
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+                <span
+                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
+                >
+                  {record?.status === "Active" ? "Inactivate" : "Activate"}
+                </span>
+              </ButtonComponent>
+            </div>
+            :
+            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
+              <div >
+                <Checkbox
+                  border={false}
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                />
+              </div>
+            </Tooltip>
+        );
+      }
+    },
+    {
       action: "history",
       type: "table",
       render: (record, data_length) => {
@@ -517,7 +633,7 @@ const ViewPaymentChannel = () => {
             columns={[
               ...columns,
               ...useColumnActionPermission(
-                ["view", "update", "history"],
+                ["view", "update", "history", "activate"],
                 itemActions
               ),
             ]}
@@ -527,9 +643,11 @@ const ViewPaymentChannel = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 2500,
+              x: "max-content",
               y: 525,
             }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
         </CardContainer>
 
@@ -541,6 +659,16 @@ const ViewPaymentChannel = () => {
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
+        />
+        <ModalActiveInactive
+          dispatch={dispatch}
+          getAPIOption={getAllApprovalList}
+          getAPIDetail={getListApprovalById}
+          selector={"paymentChannel"}
+          alertMessage={`Are you sure you want to inactivate this Payment Channel with Payment Channel Code ${nameModalActiveOrInactivate}?`}
+          openModalInactivate={openModalInactivate}
+          handleCloseModalInactivate={handleCancelModalInactivate}
+          onFinish={handleSubmitModalInactivate}
         />
       </Spin>
       {/* modal try again */}

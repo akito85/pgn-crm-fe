@@ -21,7 +21,7 @@ import BaseContainer from "../../../../components/BaseContainer";
 
 const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const { detail_prabilling_result, loading } = useSelector(
-    (state) => state.rbi_prabilling
+    (state) => state.rbi_prabilling,
   );
 
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           sort,
           search: Object.keys(search).length > 0 ? search : {},
           isLoadMore: false,
-        })
+        }),
       );
       setPage(0);
     }
@@ -102,7 +102,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           sort,
           search: Object.keys(search).length > 0 ? search : {},
           isLoadMore: true,
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -116,7 +116,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     dispatch(
       downloadPrabillingResult({
         initCode: prabillData.initCode,
-      })
+      }),
     );
   };
 
@@ -144,7 +144,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -154,7 +154,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             text || "",
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -171,7 +171,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -181,7 +181,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             text || "",
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -198,7 +198,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -208,7 +208,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             text || "",
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -225,7 +225,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -235,7 +235,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             text || "",
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -306,7 +306,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -316,7 +316,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             text || "",
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -401,7 +401,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ),
       },
     ],
-    [search, searchText, searchedColumn, prabillData]
+    [search, searchText, searchedColumn, prabillData],
   );
 
   const allColumns = useMemo(() => {
@@ -463,77 +463,73 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           }
         >
           <div className="-m-1">
-            <BaseContainer border>
-              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
-                <DetailText label={"Init Code"}>
-                  {prabillData?.initCode || ""}
-                </DetailText>
-                <DetailText label={"Process Name"}>
-                  {prabillData?.processName || ""}
-                </DetailText>
-                <DetailText label={"Billing Cycle"}>
-                  {prabillData?.billingCycle || ""}
-                </DetailText>
-                <DetailText label={"Billing Period"}>
-                  {prabillData?.billPeriod || ""}
-                </DetailText>
-                <DetailText label={"SOR"}>{prabillData?.sor || ""}</DetailText>
-                <DetailText label={"Schedule Type"}>
-                  {prabillData?.shceduleType || ""}
-                </DetailText>
-                <DetailText label={"Total Customer"}>
-                  {prabillData?.totalCustomer || 0}
-                </DetailText>
-                <DetailText label={"Status"}>
-                  {renderStatus(prabillData?.status)}
-                </DetailText>
-                <DetailText label={"Message"}>
-                  {prabillData?.message || ""}
-                </DetailText>
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
+              <DetailText label={"Init Code"}>
+                {prabillData?.initCode || ""}
+              </DetailText>
+              <DetailText label={"Process Name"}>
+                {prabillData?.processName || ""}
+              </DetailText>
+              <DetailText label={"Billing Cycle"}>
+                {prabillData?.billingCycle || ""}
+              </DetailText>
+              <DetailText label={"Billing Period"}>
+                {prabillData?.billPeriod || ""}
+              </DetailText>
+              <DetailText label={"SOR"}>{prabillData?.sor || ""}</DetailText>
+              <DetailText label={"Schedule Type"}>
+                {prabillData?.shceduleType || ""}
+              </DetailText>
+              <DetailText label={"Total Customer"}>
+                {prabillData?.totalCustomer || 0}
+              </DetailText>
+              <DetailText label={"Status"}>
+                {renderStatus(prabillData?.status)}
+              </DetailText>
+              <DetailText label={"Message"}>
+                {prabillData?.message || ""}
+              </DetailText>
 
-                {/* Filter Details dari details array */}
-                {detailsData &&
-                  detailsData.length > 0 &&
-                  detailsData.map((detail, index) => (
-                    <React.Fragment key={index}>
-                      <DetailText label={"Cost Center"}>
-                        {detail.costCenterName || detail.costCenter || ""}
-                      </DetailText>
-                      <DetailText label={"Meter Reading Code"}>
-                        {detail.meterReadingCodeName ||
-                          detail.meterReadingCode ||
-                          ""}
-                      </DetailText>
-                      <DetailText label={"Account Segment"}>
-                        {detail.accountSegmentName ||
-                          detail.accountSegment ||
-                          ""}
-                      </DetailText>
-                      <DetailText label={"Account Group Type"}>
-                        {detail.accountGroupTypeName ||
-                          detail.accountGroupType ||
-                          ""}
-                      </DetailText>
-                      <DetailText
-                        label={"Specific Customer Account"}
-                        className=""
-                      >
-                        {detail.accounts}
-                      </DetailText>
-                      <DetailText label={"Completion Date"}>
-                        {prabillData?.updateDtm
-                          ? moment(prabillData.updateDtm).format(
-                              "DD MMM YYYY HH:mm:ss"
-                            )
-                          : ""}
-                      </DetailText>
-                    </React.Fragment>
-                  ))}
-                <DetailText label={"Remark"} className="col-span-5">
-                  {prabillData?.remark || ""}
-                </DetailText>
-              </div>
-            </BaseContainer>
+              {/* Filter Details dari details array */}
+              {detailsData &&
+                detailsData.length > 0 &&
+                detailsData.map((detail, index) => (
+                  <React.Fragment key={index}>
+                    <DetailText label={"Cost Center"}>
+                      {detail.costCenterName || detail.costCenter || ""}
+                    </DetailText>
+                    <DetailText label={"Meter Reading Code"}>
+                      {detail.meterReadingCodeName ||
+                        detail.meterReadingCode ||
+                        ""}
+                    </DetailText>
+                    <DetailText label={"Account Segment"}>
+                      {detail.accountSegmentName || detail.accountSegment || ""}
+                    </DetailText>
+                    <DetailText label={"Account Group Type"}>
+                      {detail.accountGroupTypeName ||
+                        detail.accountGroupType ||
+                        ""}
+                    </DetailText>
+                    <DetailText
+                      label={"Specific Customer Account"}
+                      className=""
+                    >
+                      {detail.accounts}
+                    </DetailText>
+                    <DetailText label={"Completion Date"}>
+                      {prabillData?.updateDtm
+                        ? moment(prabillData.updateDtm).format(
+                            "DD MMM YYYY HH:mm:ss",
+                          )
+                        : ""}
+                    </DetailText>
+                  </React.Fragment>
+                ))}
+              <DetailText label={"Remark"} className="col-span-5">
+                {prabillData?.remark || ""}
+              </DetailText>
+            </div>
           </div>
         </CardContainer>
 

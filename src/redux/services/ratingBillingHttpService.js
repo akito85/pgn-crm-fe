@@ -120,9 +120,6 @@ const downloadData = async (url, customBaseUrl) => {
       // Remove quotes and trailing underscore
       const filename = rawFilename.replace(/['"]/g, "").replace(/_+$/, "");
 
-      console.log("📥 [downloadData] Raw filename:", rawFilename);
-      console.log("📥 [downloadData] Cleaned filename:", filename);
-
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
