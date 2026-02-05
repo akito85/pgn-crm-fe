@@ -143,7 +143,7 @@ const AllocationSection = ({
     if (typeof val === 'number') return val;
     if (!val) return 0;
     // Remove dots (thousand separators) and replace comma with dot (decimal)
-    const normalized = val.toString().replace(/\./g, "").replace(/,/g, ".");
+    const normalized = val?.toString()?.replace(/\./g, "").replace(/,/g, ".");
     return parseFloat(normalized);
   };
 
