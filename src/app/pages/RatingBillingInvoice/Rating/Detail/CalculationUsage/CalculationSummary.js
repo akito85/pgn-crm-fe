@@ -194,7 +194,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
         dataSource={dataSource}
         columns={processedColumns}
         totalData={currentPagination?.totalElements || 0}
-        tableScrolled={{ x: 1000, y: 525 }}
+        tableScrolled={{ x: 1000, }}
         onSort={onSortApi}
         showExport={true}
         columnDefinitions={columnDefinitions}
