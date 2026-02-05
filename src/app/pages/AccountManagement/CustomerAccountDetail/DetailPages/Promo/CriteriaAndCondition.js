@@ -175,7 +175,6 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
         }
       } catch (error) {
         console.error("Failed to load criteria & condition data", error);
-        // ... error handling ...
       }
     };
 
@@ -393,6 +392,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
           showAdvanceSearch
           onAdvanceSearch={handleCriteriaAdvanceSearch}
           usePagination={false}
+          useInfiniteScroll
           tableScrolled={{ y: 250 }}
         />
       );
@@ -408,6 +408,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
         loading={false}
         showSearchBar
         showAdvanceSearch
+        useInfiniteScroll
         onAdvanceSearch={handleConditionAdvanceSearch}
         usePagination={false}
         tableScrolled={{ y: 250 }}

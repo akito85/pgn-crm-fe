@@ -255,7 +255,7 @@ const PromoHistoryViewData = ({
 }) => {
   const { promoHistoryList, loadPromoHistoryList, downloadPromoHistory } =
     usePromo();
-
+  const containerRef = useRef(null);
   const USE_DUMMY = true;
   const pageSize = 10;
   const childPageSize = 5;
@@ -333,11 +333,14 @@ const PromoHistoryViewData = ({
       setActiveFilters(mappedFilters);
 
       if (USE_DUMMY) {
-        const filteredData = applyDummyFilter(originalDataSource, mappedFilters);
+        const filteredData = applyDummyFilter(
+          originalDataSource,
+          mappedFilters,
+        );
         setDataSource(filteredData);
         setHasMore(true);
         setPage(1);
-        setExpandedRows([]); 
+        setExpandedRows([]);
       } else {
         setPage(1);
         setHasMore(true);
@@ -345,7 +348,7 @@ const PromoHistoryViewData = ({
         setExpandedRows([]);
       }
     },
-    [USE_DUMMY, originalDataSource]
+    [USE_DUMMY, originalDataSource],
   );
 
   /* =========================
@@ -360,7 +363,7 @@ const PromoHistoryViewData = ({
     try {
       if (USE_DUMMY) {
         const mock = promoHistoryRepository.getMockPromoHistoryList();
-        
+
         // Simpan data original jika belum ada
         if (originalDataSource.length === 0 || reset) {
           setOriginalDataSource(mock);
@@ -390,16 +393,17 @@ const PromoHistoryViewData = ({
       };
 
       // Tambahkan advanced search jika ada filter aktif
-      const advancedSearch = activeFilters.length > 0
-        ? {
-            inputFields: activeFilters.map((q) => ({
-              condition: q.condition || "",
-              column: q.column || "",
-              operator: q.operator || "",
-              value: q.value || "",
-            })),
-          }
-        : undefined;
+      const advancedSearch =
+        activeFilters.length > 0
+          ? {
+              inputFields: activeFilters.map((q) => ({
+                condition: q.condition || "",
+                column: q.column || "",
+                operator: q.operator || "",
+                value: q.value || "",
+              })),
+            }
+          : undefined;
 
       await loadPromoHistoryList(params, advancedSearch);
     } catch (e) {
@@ -501,53 +505,58 @@ const PromoHistoryViewData = ({
 
   return (
     <Fragment>
-      <NxTable
-        idTable="promo-history-parent"
-        rowKey="key"
-        dataSource={dataSource}
-        columns={parentColumns}
-        usePagination={false}
-        useInfiniteScroll
-        hasMore={hasMore}
-        onLoadMore={loadMoreData}
-        showSearchBar
-        showAdvanceSearch
-        onAdvanceSearch={handleAdvanceSearch}
-        tableScrolled={{ y: 250 }}
-        scrollBodyStyle={{ minHeight: 250 }}
-        expandable={{
-          expandedRowKeys: expandedRows,
-          onExpand: handleExpand,
-          expandedRowRender: (record) => (
-            <ChildTableWithInfiniteScroll
-              record={record}
-              childColumns={childColumns}
-              childState={childState}
-              loadMoreChildData={loadMoreChildData}
-            />
-          ),
-        }}
-      />
+      <div
+        ref={containerRef}
+        className="infinite-scroll-container"
+      >
+        <NxTable
+          idTable="promo-history-parent"
+          rowKey="key"
+          dataSource={dataSource}
+          columns={parentColumns}
+          usePagination={false}
+          useInfiniteScroll
+          hasMore={hasMore}
+          onLoadMore={loadMoreData}
+          showSearchBar
+          showAdvanceSearch
+          onAdvanceSearch={handleAdvanceSearch}
+          tableScrolled={{ y: 255 }}
+          scrollBodyStyle={{ minHeight: 255 }}
+          expandable={{
+            expandedRowKeys: expandedRows,
+            onExpand: handleExpand,
+            expandedRowRender: (record) => (
+              <ChildTableWithInfiniteScroll
+                record={record}
+                childColumns={childColumns}
+                childState={childState}
+                loadMoreChildData={loadMoreChildData}
+              />
+            ),
+          }}
+        />
 
-      {loadingInitial && dataSource.length === 0 && (
-        <LoadingIndicator size="large" />
-      )}
+        {loadingInitial && dataSource.length === 0 && (
+          <LoadingIndicator size="large" />
+        )}
 
-      {error && (
-        <ErrorMessage error={error} onRetry={() => loadMoreData(true)} />
-      )}
+        {error && (
+          <ErrorMessage error={error} onRetry={() => loadMoreData(true)} />
+        )}
 
-      <PopupDetailPromoHistory
-        open={popupDetailHistoryVisible}
-        onClose={() => setPopupDetailHistoryVisible(false)}
-        data={selectedHistoryData}
-      />
+        <PopupDetailPromoHistory
+          open={popupDetailHistoryVisible}
+          onClose={() => setPopupDetailHistoryVisible(false)}
+          data={selectedHistoryData}
+        />
 
-      <PopupDetailPromoHistoryDetail
-        open={popupDetailHistoryDetailVisible}
-        onClose={() => setPopupDetailHistoryDetailVisible(false)}
-        data={selectedHistoryDetailData}
-      />
+        <PopupDetailPromoHistoryDetail
+          open={popupDetailHistoryDetailVisible}
+          onClose={() => setPopupDetailHistoryDetailVisible(false)}
+          data={selectedHistoryDetailData}
+        />
+      </div>
     </Fragment>
   );
 };

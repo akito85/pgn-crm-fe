@@ -6,25 +6,13 @@ const formatDate = (date) => (date ? moment(date).format("DD MMM YYYY") : "-");
 
 const PopupDetailPromoHistoryDetail = ({ open, onClose, data }) => {
   const getDetailInfo = () => [
-    { label: "Billing No", value: data?.billingCode || "-" },
     { label: "Billing Date", value: formatDate(data?.billingDate) },
-    { label: "Billing Period", value: data?.billingPeriod || "-" },
     { label: "Name", value: data?.name || "-" },
     { label: "Promotion Type", value: data?.promotionType || "-" },
     { label: "Type", value: data?.type || "-" },
     { label: "Category", value: data?.category || "-" },
     { label: "Criteria", value: data?.criteria || "-" },
     { label: "Description", value: data?.description || "-" },
-    {
-      label: "Discount Amount",
-      value: data?.discountAmount
-        ? `Rp ${data.discountAmount.toLocaleString()}`
-        : "-",
-    },
-    {
-      label: "Discount Percentage",
-      value: data?.discountPercentage ? `${data.discountPercentage}%` : "-",
-    },
   ];
 
   return (

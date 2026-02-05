@@ -215,7 +215,7 @@ const promoHistoryRepository = {
   },
 
   getMockPromoHistoryList: () => {
-    return Array.from({ length: 50 }).map((_, index) => {
+    return Array.from({ length: 25 }).map((_, index) => {
       const createdDate = new Date(2026, 0, 30, 8, 55 + index).toISOString();
       const updatedDate = new Date(2026, 0, 30, 9, 10 + index).toISOString();
 

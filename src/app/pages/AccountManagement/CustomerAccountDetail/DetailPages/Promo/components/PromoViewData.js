@@ -575,24 +575,6 @@ const PromoViewData = ({
     }
   }, [searchKeyword, accountId, USE_DUMMY]);
 
-  const handleRefresh = useCallback(() => {
-    if (USE_DUMMY) {
-      setDataSource(dummyPromoData);
-      setSearchKeyword("");
-      setActiveFilters([]);
-      setHasMore(false);
-    } else {
-      // Reset semua state dan load ulang data
-      setSearchKeyword("");
-      setActiveFilters([]);
-      setPage(0);
-      setHasMore(true);
-      setDataSource([]);
-      setTotalElements(0);
-      setError(null);
-      loadMoreData(true);
-    }
-  }, [USE_DUMMY, loadMoreData]);
 
   const loadDataWithFilter = useCallback(
     async (filters = [], reset = true) => {
@@ -609,8 +591,6 @@ const PromoViewData = ({
           setDataSource([]);
           setTotalElements(0);
           setError(null);
-
-          // Load data dengan filter baru
           setTimeout(() => {
             loadMoreData(true);
           }, 0);
@@ -683,7 +663,6 @@ const PromoViewData = ({
     };
   }, [clearValidPromo, setDetailPromoData, USE_DUMMY]);
 
-  // Table Columns - FIX untuk menghindari render object
   const baseColumns = useMemo(
     () => promoRepository.getColumns(handleViewDetail),
     [handleViewDetail],
@@ -693,11 +672,9 @@ const PromoViewData = ({
     return baseColumns.map((col, index) => ({
       ...col,
       key: col.key || col.dataIndex || `col-${index}`,
-      // Pastikan render function tidak mengembalikan object
       render: col.render
         ? (text, record, index) => {
             const result = col.render(text, record, index);
-            // Pastikan result bukan object React child yang tidak valid
             if (
               result &&
               typeof result === "object" &&
@@ -724,76 +701,66 @@ const PromoViewData = ({
   }, [allColumns]);
 
   // Cek dataSource sebelum render
-  console.log("Current dataSource:", dataSource);
-  console.log("Has error:", error);
-  console.log("Loading:", loadingInitial);
+  // console.log("Current dataSource:", dataSource);
+  // console.log("Has error:", error);
+  // console.log("Loading:", loadingInitial);
 
   return (
-    <Fragment>
-      <div
-        ref={containerRef}
-        className="infinite-scroll-container"
-        style={{
-          backgroundColor: "#FFFFFF",
-          marginTop: 0,
-          height: "150",
-          overflowY: "auto",
-        }}
-      >
-        {!error && (
-          <NxTable
-            idTable="account-promo-table"
-            dataSource={dataSource}
-            columns={processedColumns}
-            loading={loadingInitial}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            showSearchBar
-            onSearch={handleSearch}
-            showAdvanceSearch
-            onAdvanceSearch={handleAdvanceSearch}
-            showRefresh={true}
-            onRefresh={handleRefresh}
-            usePagination={false}
-            useInfiniteScroll
-            hasMore={hasMore}
-            onLoadMore={() => {
-              if (!loadingInitial && hasMore) {
-                setPage((prev) => {
-                  const nextPage = prev + 1;
-                  loadMoreData();
-                  return nextPage;
-                });
-              }
-            }}
-            loadMoreThreshold={50}
-            tableScrolled={{ y: 110 }}
-            scrollBodyStyle={{ minHeight: 110 }}
-          />
-        )}
+    <div
+      ref={containerRef}
+      className="infinite-scroll-container"
+    >
+      {!error && (
+        <NxTable
+          idTable="account-promo-table"
+          dataSource={dataSource}
+          columns={processedColumns}
+          loading={loadingInitial}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          showSearchBar
+          onSearch={handleSearch}
+          showAdvanceSearch
+          onAdvanceSearch={handleAdvanceSearch}
+          usePagination={false}
+          useInfiniteScroll
+          hasMore={hasMore}
+          onLoadMore={() => {
+            if (!loadingInitial && hasMore) {
+              setPage((prev) => {
+                const nextPage = prev + 1;
+                loadMoreData();
+                return nextPage;
+              });
+            }
+          }}
+          loadMoreThreshold={50}
+          tableScrolled={{ y: 110 }}
+          scrollBodyStyle={{ minHeight: 110 }}
+        />
+      )}
 
-        {loadingInitial && page > 0 && (
-          <div style={{ textAlign: "center", padding: "20px" }}>
-            <LoadingIndicator size="small" />
-          </div>
-        )}
+      {loadingInitial && page > 0 && (
+        <div style={{ textAlign: "center", padding: "20px" }}>
+          <LoadingIndicator size="small" />
+        </div>
+      )}
 
-        {loadingInitial && page === 0 && !error && (
-          <LoadingIndicator size="large" />
-        )}
+      {loadingInitial && page === 0 && !error && (
+        <LoadingIndicator size="large" />
+      )}
 
-        {error && (
-          <ErrorMessage
-            error={error}
-            onRetry={() => {
-              setError(null);
-              loadMoreData(true);
-            }}
-          />
-        )}
-      </div>
-    </Fragment>
+      {error && (
+        <ErrorMessage
+          error={error}
+          onRetry={() => {
+            setError(null);
+            loadMoreData(true);
+          }}
+        />
+      )}
+    </div>
   );
 };
 

@@ -113,3 +113,16 @@
   margin: 20px 0;
   font-size: 16px;
 }
+
+#account-promo-table .ant-table-container {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#account-promo-table .ant-table {
+  background: transparent !important;
+}
+
+#account-promo-table .ant-table-content {
+  border-radius: 0 !important;
+}
