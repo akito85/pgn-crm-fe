@@ -174,7 +174,16 @@ const PaymentWarrantyPartnerForm = (props) => {
           <Form.Item label={"Phone Number"} name={["contact", "phoneNum"]}>
             <InputComponent placeholder="Input Phone Number" />
           </Form.Item>
-          <Form.Item label={"Email"} name={["contact", "email"]}>
+          <Form.Item 
+            label={"Email"} 
+            name={["contact", "email"]}
+            rules={[
+              {
+                type: "email",
+                message: "Please input a valid email address",
+              },
+            ]}
+          >
             <InputComponent placeholder="Input Email" />
           </Form.Item>
         </div>
