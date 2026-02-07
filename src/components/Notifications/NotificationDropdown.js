@@ -180,6 +180,9 @@ const NotificationDropdown = () => {
     { id: 'unread', label: 'Unread', count: unreadCountForTab, badgeVariant: 'soft' }
   ];
 
+  // Get auth token from Redux (to detect token changes)
+  const authToken = useSelector((state) => state.auth?.token);
+
   // Connect to notification stream on mount (only once)
   useEffect(() => {
     // Check if notifications are enabled via config
@@ -231,6 +234,57 @@ const NotificationDropdown = () => {
       }
     };
   }, [dispatch]); // Only depend on dispatch, not userId - connect once on mount
+
+  // Refresh notifications when token changes (e.g., after position switch)
+  useEffect(() => {
+    if (!NOTIFICATION_CONFIG.ENABLED) {
+      return;
+    }
+
+    // Skip on initial mount (handled by previous useEffect)
+    if (!authToken) {
+      return;
+    }
+
+    // Get user ID from token
+    const tokenJSON = JSON.parse(authToken || "{}");
+    const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+
+    if (userId) {
+      // Refresh notification data after token change (e.g., position switch)
+      const refreshNotifications = async () => {
+        try {
+          console.log("[NotificationDropdown] Token changed - refreshing notifications for userId:", userId);
+
+          // Step 1: Disconnect from current SSE connection
+          dispatch(disconnectNotifications());
+
+          // Step 2: Wait briefly for cleanup
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Step 3: Re-register session with new token context
+          await notificationApi.registerSession(userId);
+
+          // Step 4: Reconnect to SSE with new user context
+          dispatch(connectNotifications({ userId }));
+
+          // Step 5: Fetch updated unread count
+          dispatch(fetchUnreadCount());
+
+          // Step 6: Fetch fresh notification list for new position
+          dispatch(fetchAllUserNotifications({ userId }));
+        } catch (error) {
+          console.error("[NotificationDropdown] Error refreshing notifications after token change:", error);
+          // Continue anyway - reconnect with basic setup
+          dispatch(connectNotifications({ userId }));
+          dispatch(fetchUnreadCount());
+          dispatch(fetchAllUserNotifications({ userId }));
+        }
+      };
+
+      refreshNotifications();
+    }
+  }, [authToken, dispatch]); // Re-run when authToken changes
 
   /**
    * Get icon based on notification type

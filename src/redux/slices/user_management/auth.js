@@ -1036,7 +1036,13 @@ const authSlice = createSlice({
     },
     [changePosition.fulfilled]: (state, action) => {
       state.loading = false;
+      state.isFailed = false;
       state.data_switch = action.payload;
+      state.token =
+        localStorage.getItem("token") || window.sessionStorage.getItem("token");
+      state.side_bar =
+        localStorage.getItem("side_bar") ||
+        window.sessionStorage.getItem("side_bar");
     },
     [changePosition.rejected]: (state) => {
       state.loading = false;
