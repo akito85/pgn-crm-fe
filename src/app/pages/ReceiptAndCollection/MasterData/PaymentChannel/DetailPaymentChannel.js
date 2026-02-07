@@ -25,9 +25,9 @@ const DetailPaymentChannel = ({ data_detail, data_req }) => {
           </div>
         </DetailSection>
       ) : null}
-      <DetailSection header={"PAYMENT CHANNEL INFORMATION"}>
+      <DetailSection header={"DELIVERY CHANNEL INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-4">
-          <DetailText label="Payment Channel Code">
+          <DetailText label="Delivery Channel Code">
             {data_detail?.ciCode}
           </DetailText>
           <DetailText label="Name">
