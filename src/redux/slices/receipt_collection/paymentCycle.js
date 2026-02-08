@@ -38,10 +38,7 @@ export const getPaginateCycle = createAsyncThunk(
             const sortParams =
                 sort === undefined || sort === "" ? "createdDate~desc" : sort;
             const url = `/v1/dbs/api/payment-cycle/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-            console.log('[DEBUG] getPaginateCycle params:', { search, page, pageSize, sort });
-            console.log('[DEBUG] getPaginateCycle URL:', url);
             const response = await receiptCollectionHttpService.getAll(url);
-            console.log('[DEBUG] getPaginateCycle response:', response.data);
             return response.data;
         } catch (error) {
             if (!error.success) {
