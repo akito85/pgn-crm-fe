@@ -132,6 +132,7 @@ import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty
 import offsetReducer from "../slices/receipt_collection/offset";
 import writeOffReducer from "../slices/receipt_collection/writeOff";
 import globalPropReducer from "../slices/globalPropSlice";
+import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -269,6 +270,7 @@ const reducer = combineReducers({
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
   offset: offsetReducer,
+  paymentCycle: paymentCycleReducer,
 
   // Attachment
   attachment: attachmentReducer,
