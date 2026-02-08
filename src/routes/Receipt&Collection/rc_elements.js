@@ -1,5 +1,6 @@
 import ViewReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ViewReceipt";
 import ListDetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ListDetailReceipt";
+import DetailReceiptApproval from "../../app/pages/ReceiptAndCollection/Receipt/DetailReceiptApproval";
 import CreateAccounting from "../../app/pages/ReceiptAndCollection/Receipt/CreateAccounting";
 import ViewSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/ViewSynchronizeReceipt";
 import DetailSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/DetailSynchronizeReceipt";
@@ -88,7 +89,11 @@ import ListFormPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
-  DETAIL_RECEIPT_PAGE: <ListDetailReceipt />,
+  DETAIL_RECEIPT_PAGE: <DetailReceiptApproval />,
+  APPROVAL_RECEIPT_HOLD: <DetailReceiptApproval type="hold" />,
+  APPROVAL_RECEIPT_RELEASE: <DetailReceiptApproval type="release" />,
+  APPROVAL_RECEIPT_REFUND: <DetailReceiptApproval type="refund" />,
+  APPROVAL_RECEIPT_REVERSE: <DetailReceiptApproval type="reverse" />,
   CREATE_RECEIPT: <ListRececiptForm type="create" />,
   UPDATE_RECEIPT: <ListRececiptForm type="update" />,
   CREATE_ACCOUNTING: <CreateAccounting />,
