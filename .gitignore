@@ -29,6 +29,7 @@ node_modules
 build/
 build.zip
 logs/
+docs/
 
 .cla*
 *.md

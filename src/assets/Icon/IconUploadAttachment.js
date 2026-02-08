@@ -1,5 +1,6 @@
-const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
+const SVG = ({ style = {}, className = "", onClick = () => {}, ...otherProps }) => (
   <svg
+    {...otherProps}
     width={218}
     style={style}
     height={160}

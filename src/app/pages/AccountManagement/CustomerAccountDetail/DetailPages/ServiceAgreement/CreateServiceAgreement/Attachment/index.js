@@ -13,7 +13,7 @@ import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import ModalAttachment from "./ModalAttachment";
-import TablePagination from "../../../../../../../../components/TablePagination";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 // import { getSelectCategory } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import SVGIcon from "../.././../../../../../../assets/Icon/index";
 import {
@@ -23,16 +23,17 @@ import {
 import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 import { configApp } from "../../../../../../../../constants/configApp";
 import accountPromoHttpService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import NxTable from "../../../../../../../../components/Nx/NxTable";
 
 const columnAttachment = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleDelete = () => {},
-  previewFileAttachment = () => {},
-  previewFile = () => {},
-  handleShow = () => {},
+  handleSearch = () => { },
+  handleDelete = () => { },
+  previewFileAttachment = () => { },
+  previewFile = () => { },
+  handleShow = () => { },
   type
 ) => {
   const res = [
@@ -153,13 +154,13 @@ const columnAttachment = (
   ];
   return type !== "detail"
     ? res.filter(
-        (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
-      )
+      (column) =>
+        column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+    )
     : res;
 };
 
-const Attachment = ({ data = [], updateData = () => {}, type }) => {
+const Attachment = ({ data = [], updateData = () => { }, type }) => {
   // Declaration
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -277,44 +278,38 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     }
   };
   return (
-    // <BaseContainer header={"Attachment Information"}>
-    <div>
-      <div className="pt-8 pb-4">
-        <h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3>
-      </div>
-      <div className="flex flex-col w-full gap-2">
-        <div>
-          <p className="text-[13px] mb-0 text-dg-grey-dark">
-            Attach File:
-            {
-              <span className={"pl-1"} style={{ color: "red" }}>
-                *
-              </span>
-            }
-          </p>
-          <div className="flex flex-row gap-2 items-center">
-            <ButtonComponent
-              fontSizeClassname="text-[11px]"
-              size="small"
-              type="default"
-              onClick={() => setModalUpload(true)}
-            >
-              Choose File
-            </ButtonComponent>
-            <p className="text-[11px] text-dg-grey-dark mb-0">
-              No file choosen
+    <NxCardContainer header={"ATTACHMENT"}>
+      <div className="flex flex-col gap-y-4">
+        {/* UPLOAD ATTACHMENT SECTION */}
+        <div className="flex flex-col w-full gap-2 items-end">
+          <div className="flex flex-col gap-y-1 justify-start">
+            <p className="text-[13px] mb-0 text-dg-grey-dark">
+              Attach File:
+              {
+                <span className={"pl-1"} style={{ color: "red" }}>
+                  *
+                </span>
+              }
             </p>
+            <div className="flex flex-row gap-2 items-center">
+              <ButtonComponent
+                fontSizeClassname="text-[11px]"
+                size="small"
+                type="default"
+                onClick={() => setModalUpload(true)}
+              >
+                Choose File
+              </ButtonComponent>
+              <p className="text-[11px] text-dg-grey-dark mb-0">
+                No file choosen
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="pt-[30px]">
-          <TablePagination
-            dataSource={filterDataByPage()}
-            totalData={data?.length}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeAttachment}
-            onSizeChanger={handleChangeAttachment}
+        {/* ATTACHMENT LIST TABLE */}
+        <div className="pt-2">
+          <NxTable
             columns={columnAttachment(
               searchInput,
               searchedColumn,
@@ -326,7 +321,18 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
               handleShow,
               type
             )}
-            onSort={onSort}
+            dataSource={filterDataByPage()}
+            totalData={data?.length}
+            tableScrolled={{
+              y: 300,
+              x: 1500,
+            }}
+            // current={page}
+            // pageSize={pageSize}
+            // onChange={handleChangeAttachment}
+            // onSizeChanger={handleChangeAttachment}
+            // onSort={onSort}
+            usePagination={false}
           />
         </div>
       </div>
@@ -343,7 +349,7 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
         }
         withLink
       />
-    </div>
+    </NxCardContainer>
   );
 };
 

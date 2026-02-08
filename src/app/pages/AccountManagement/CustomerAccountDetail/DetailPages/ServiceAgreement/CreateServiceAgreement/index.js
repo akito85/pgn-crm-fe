@@ -13,6 +13,8 @@ import moment from "moment";
 import { IconModal } from "../../../../../../../utils/Icon";
 import accountManagementPromoHttpService from "../../../../../../../redux/services/account_management/accountManagementService";
 import BaseContainer from "../../../../../../../components/BaseContainer";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
@@ -80,7 +82,7 @@ const CreateServiceAgreement = ({ saType }) => {
   const [data, setData] = useState([]);
   const [bodyData, setBodyData] = useState({});
   const [saInfoObj, setSaInfoObj] = useState({});
-  const [saDetailObj, setSaDetailObj] = useState();
+  const [saDetailObj, setSaDetailObj] = useState({ createFrom: 1 });
   const [saApprovalObj, setSaApprovalObj] = useState({});
   const [typeSubmit, setTypeSubmit] = useState("");
   const [dataListVersion, setDataListVersion] = useState([]);
@@ -241,7 +243,7 @@ const CreateServiceAgreement = ({ saType }) => {
         .unwrap()
         .then((data) => {
           // Start DDL Product Selected
-          const tempProductDetail = data?.saDetail;
+          const tempProductDetail = data?.saDetail || [];
           const paymentTypeId = 210;
           const chargingMethodId = 214;
           const hasIdpaymentTypeId = tempProductDetail.filter(
@@ -253,20 +255,24 @@ const CreateServiceAgreement = ({ saType }) => {
           // End DDL Product Selected
 
           // Start Ddl Calc Rule - Calc Type
-          const tempCalcRuleDetail = data?.saCalcRule;
+          const tempCalcRuleDetail = data?.saCalcRule || [];
           const calculationTypeId = 687;
           const hasIdCalcTypeId = tempCalcRuleDetail.filter(
             (item) => item.nameId === calculationTypeId
           );
           // End Ddl Calc Rule - Calc Type
 
+          // Safe access for filtered results
+          const paymentTypeItem = hasIdpaymentTypeId?.[0];
+          const chargingMethodItem = haschargingMethodId?.[0];
+          const calcTypeItem = hasIdCalcTypeId?.[0];
+
           //Price Adjustment logic
           let cleanedString = "";
           const priceAdjustmentOne = data?.saInfo?.idrAdjustment ?? null;
           const priceAdjustmentTwo = data?.saInfo?.usdAdjustment ?? null;
-          const mergeTextAdjustment = `${
-            priceAdjustmentOne?.adjustmentText || ""
-          } - ${priceAdjustmentTwo?.adjustmentText || ""}`.trim();
+          const mergeTextAdjustment = `${priceAdjustmentOne?.adjustmentText || ""
+            } - ${priceAdjustmentTwo?.adjustmentText || ""}`.trim();
           cleanedString = mergeTextAdjustment.replace(/-+$/, "");
 
           const mergeIdAdjustment = [
@@ -287,24 +293,24 @@ const CreateServiceAgreement = ({ saType }) => {
             productClass: data?.saInfo?.productClass,
             productVersionId: data?.saInfo?.productVersionId,
             productId: data?.saInfo?.productId,
-            paymentType: hasIdpaymentTypeId[0].unitId,
-            chargingMethod: haschargingMethodId[0].unitId,
-            calculationType: parseInt(hasIdCalcTypeId[0].unitId),
+            paymentType: paymentTypeItem?.unitId ?? null,
+            chargingMethod: chargingMethodItem?.unitId ?? null,
+            calculationType: calcTypeItem?.unitId ? parseInt(calcTypeItem.unitId) : null,
             descriptionProduct: data?.product?.description || null,
-            objPaymentType: {
+            objPaymentType: paymentTypeItem ? {
               name: 210,
-              unit: hasIdpaymentTypeId[0].uom,
+              unit: paymentTypeItem.uom,
               value: null,
               description: null,
-              unitName: hasIdpaymentTypeId[0].unit,
-            },
-            objChargingMethod: {
+              unitName: paymentTypeItem.unit,
+            } : null,
+            objChargingMethod: chargingMethodItem ? {
               name: 214,
-              unit: haschargingMethodId[0].uom,
+              unit: chargingMethodItem.uom,
               value: null,
               description: null,
-              unitName: haschargingMethodId[0].unit,
-            },
+              unitName: chargingMethodItem.unit,
+            } : null,
             priceAdjustmentId: mergeIdAdjustment,
             priceAdjustmentText: cleanedString,
           });
@@ -316,9 +322,9 @@ const CreateServiceAgreement = ({ saType }) => {
             productVersionId: data?.saInfo?.productVersionId,
             pricingRule: data?.saInfo?.pricingRuleId,
             priceCode: data?.saInfo?.idMPricing,
-            paymentType: hasIdpaymentTypeId[0].unitId,
-            chargingMethod: haschargingMethodId[0].unitId,
-            calculationType: parseInt(hasIdCalcTypeId[0].unitId),
+            paymentType: paymentTypeItem?.unitId ?? null,
+            chargingMethod: chargingMethodItem?.unitId ?? null,
+            calculationType: calcTypeItem?.unitId ? parseInt(calcTypeItem.unitId) : null,
             priceAdjustment: cleanedString,
             descriptionProduct: data?.product?.description || null,
           });
@@ -759,9 +765,8 @@ const CreateServiceAgreement = ({ saType }) => {
           ].filter(Boolean);
           let cleanedString = "";
           if (priceAdjustmentTemp) {
-            const mergedAdjustmentText = `${
-              adjustmentOne?.adjustmentText || ""
-            } - ${adjustmentTwo?.adjustmentText || ""}`.trim();
+            const mergedAdjustmentText = `${adjustmentOne?.adjustmentText || ""
+              } - ${adjustmentTwo?.adjustmentText || ""}`.trim();
             cleanedString = mergedAdjustmentText.replace(/-+$/, "");
             setPriceAdjustmentSelect(cleanedString);
             setPriceAdjustmentSelectId(
@@ -1010,9 +1015,8 @@ const CreateServiceAgreement = ({ saType }) => {
           ].filter(Boolean);
           let cleanedString = "";
           if (priceAdjustmentTemp) {
-            const mergedAdjustmentText = `${
-              adjustmentOne?.adjustmentText || ""
-            } - ${adjustmentTwo?.adjustmentText || ""}`.trim();
+            const mergedAdjustmentText = `${adjustmentOne?.adjustmentText || ""
+              } - ${adjustmentTwo?.adjustmentText || ""}`.trim();
             cleanedString = mergedAdjustmentText.replace(/-+$/, "");
             setPriceAdjustmentSelect(cleanedString);
             setPriceAdjustmentSelectId(
@@ -1206,6 +1210,7 @@ const CreateServiceAgreement = ({ saType }) => {
   // }
   const checkArrayTiering = (arr) => {
     if (
+      !saDetailObj ||
       saDetailObj.pricingRule === null ||
       (saDetailObj.pricingRule === undefined && arr.length === 0)
     ) {
@@ -1366,7 +1371,7 @@ const CreateServiceAgreement = ({ saType }) => {
       dispatch(checkValidateCreateSa({ body }))
         .unwrap()
         .then((data) => {
-          if (data?.data?.isCreated === true) {
+          if (data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
             setModalValidateSa(true);
@@ -1401,9 +1406,13 @@ const CreateServiceAgreement = ({ saType }) => {
           if (data?.data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
-            setModalValidateSa(true);
-            setMessageValidateSa(data?.message);
-            setCurrent((current = 0));
+            if(data?.isCreated === true) {
+              setCurrent(current + 1);
+            } else {
+              setModalValidateSa(true);
+              setMessageValidateSa(data?.message);
+              setCurrent((current = 0));
+            }
           }
         })
         .catch((error) => {
@@ -1462,7 +1471,7 @@ const CreateServiceAgreement = ({ saType }) => {
   };
 
   const handleMandatory = (
-    setTabPagesSaDetail = () => {},
+    setTabPagesSaDetail = () => { },
     listDataAttachment,
     errorFields
   ) => {
@@ -1471,12 +1480,12 @@ const CreateServiceAgreement = ({ saType }) => {
         const errorBadge =
           item.value === "Calculation Rule" || item?.value === "Pricing"
             ? (errorFields || []).reduce(
-                (current, next) =>
-                  item?.paramValue?.includes(next.name[0])
-                    ? current + 1
-                    : current,
-                0
-              )
+              (current, next) =>
+                item?.paramValue?.includes(next.name[0])
+                  ? current + 1
+                  : current,
+              0
+            )
             : 0;
         return {
           value: item.value,
@@ -1488,9 +1497,24 @@ const CreateServiceAgreement = ({ saType }) => {
     });
   };
 
+  // Fields for SA Information step
+  const saInformationFields = [
+    'serviceType',
+    'saType',
+    'saReferenceNumber',
+    'pjbgNumber',
+    'saStartDate',
+    'saEndDate',
+    'gasInPlanDate',
+    'commitmentDate',
+    'termOfPayment',
+    'billingCycle',
+    'invoiceTemplate',
+  ];
+
   const functionCheckSaInformation = () => {
     form
-      .validateFields()
+      .validateFields(saInformationFields)
       .then((values) => {
         next();
         scrollRightHandler();
@@ -1500,10 +1524,13 @@ const CreateServiceAgreement = ({ saType }) => {
         // Handle the rejected result here
       });
   };
+
+  // Fields for Approval step
+  const approvalFields = ['appHierId'];
 
   const functionCheckApproval = () => {
     form
-      .validateFields()
+      .validateFields(approvalFields)
       .then((values) => {
         next();
         scrollRightHandler();
@@ -1514,9 +1541,19 @@ const CreateServiceAgreement = ({ saType }) => {
       });
   };
 
+  // Fields for SA Detail step
+  const saDetailFields = [
+    'createFrom',
+    'chooseProduct',
+    'productVersionId',
+    'priceCode',
+    'pricingRule',
+    'calculationType',
+  ];
+
   const funtionCheckSaDetail = () => {
     form
-      .validateFields()
+      .validateFields(saDetailFields)
       .then((values) => {
         handleMandatory(setTabPagesSaDetail, listDataAttachment);
         console.log(saDetailObj?.pricingRule);
@@ -1561,6 +1598,52 @@ const CreateServiceAgreement = ({ saType }) => {
     key: item.title,
     title: item.title,
   }));
+
+  /**
+   * Handle clicking on stepper to navigate between steps
+   * - Backward: can jump freely without validation
+   * - Forward: can only go to next step (no skipping), with validation
+   */
+  const handleSetCurrent = (newCurrent) => {
+    // Backward navigation - can jump freely
+    if (newCurrent < current) {
+      setCurrent(newCurrent);
+      return;
+    }
+
+    // Forward navigation - can only go to next step (no skipping)
+    if (newCurrent > current + 1) {
+      // Cannot skip steps when moving forward
+      return;
+    }
+
+    console.log("newCurrent", newCurrent);
+    console.log("current", current);
+    console.log("steps[current]?.title", steps[current]?.title);
+
+    // Forward navigation - use existing step-specific validation
+    switch (steps[current]?.title) {
+      case "Service Agreement Information":
+        functionCheckSaInformation();
+        break;
+      case "Service Agreement Detail":
+        funtionCheckSaDetail();
+        break;
+      case "Approval":
+        functionCheckApproval();
+        break;
+      case "Attachment":
+        // Last step, no validation needed for next
+        setCurrent(newCurrent);
+        scrollRightHandler();
+        break;
+      default:
+        setCurrent(newCurrent);
+        scrollRightHandler();
+        break;
+    }
+  };
+
 
   const handleScroll = () => {
     if (containerRef.current) {
@@ -1706,25 +1789,25 @@ const CreateServiceAgreement = ({ saType }) => {
               tosDetail:
                 item.tosDetail !== undefined
                   ? item.tosDetail.map((itemDetail) => {
-                      return {
-                        attribute:
-                          itemDetail.attribute !== undefined
-                            ? parseInt(itemDetail.attribute)
-                            : null,
-                        unit:
-                          itemDetail.unit !== undefined
-                            ? itemDetail.unit
-                            : null,
-                        value:
-                          itemDetail.value !== undefined
-                            ? itemDetail.value
-                            : null,
-                        fromItem:
-                          itemDetail.fromItem !== undefined
-                            ? itemDetail.fromItem
-                            : null,
-                      };
-                    })
+                    return {
+                      attribute:
+                        itemDetail.attribute !== undefined
+                          ? parseInt(itemDetail.attribute)
+                          : null,
+                      unit:
+                        itemDetail.unit !== undefined
+                          ? itemDetail.unit
+                          : null,
+                      value:
+                        itemDetail.value !== undefined
+                          ? itemDetail.value
+                          : null,
+                      fromItem:
+                        itemDetail.fromItem !== undefined
+                          ? itemDetail.fromItem
+                          : null,
+                    };
+                  })
                   : null,
             };
           }),
@@ -1839,10 +1922,10 @@ const CreateServiceAgreement = ({ saType }) => {
   // console.log(hasValue(saInfoObj?.alreadyGasIn));
 
   return (
-    <div>
-      <LayoutMenu>
-        <Spin spinning={isLoading}>
-          <BreadCrumbAdvanced routes={routes(stateSave)} />
+    <LayoutMenu>
+      <Spin spinning={isLoading}>
+        <div className="flex flex-col gap-y-4">
+          <NxBreadCrumb routes={routes(stateSave)} />
           <div ref={headerRef}>
             <HeaderDetail
               data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
@@ -1859,9 +1942,10 @@ const CreateServiceAgreement = ({ saType }) => {
             onFinish={handleSubmitForm}
             // onFinishFailed={handleErrorSubmit}
             scrollToFirstError={true}
+            className="flex flex-col gap-y-4"
           >
-            {/* s Contents */}
-            <BaseContainer>
+            {/* Stepper Container - Separate & Clickable */}
+            <NxBaseContainer border>
               <div className="flex flex-row gap-x-6 justify-center">
                 <span className="mt-[10px]">
                   <LeftCircleOutlined
@@ -1876,6 +1960,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 >
                   <Steps
                     current={current}
+                    onChange={handleSetCurrent}
                     items={items}
                     labelPlacement="vertical"
                   />
@@ -1887,8 +1972,14 @@ const CreateServiceAgreement = ({ saType }) => {
                   />
                 </span>
               </div>
-              <div className="steps-content my-6">{steps[current].content}</div>
-            </BaseContainer>
+            </NxBaseContainer>
+
+            {/* Step Contents - Rendered with visibility control */}
+            {steps.map((step, index) => (
+              <div key={`step-content-${index}`} className={current !== index ? "hidden" : ""}>
+                {step.content}
+              </div>
+            ))}
 
             {/* Section Action Steps */}
             <div className="steps-action my-8 flex w-full justify-between gap-x-2">
@@ -1962,7 +2053,7 @@ const CreateServiceAgreement = ({ saType }) => {
                       htmlType="submit"
                       type="submit"
                       onClick={() => setTypeSubmit("submit")}
-                      // disabled={listDataAttachment.length === 0 && true}
+                    // disabled={listDataAttachment.length === 0 && true}
                     >
                       Save & Submit
                     </ButtonComponent>
@@ -1971,8 +2062,8 @@ const CreateServiceAgreement = ({ saType }) => {
               </div>
             </div>
           </Form>
-        </Spin>
-      </LayoutMenu>
+        </div>
+      </Spin>
 
       {/* Modal Back */}
       <Modal
@@ -2001,7 +2092,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 idAccount: idAccount,
                 idCustomer: idCustomer,
               }}
-              // replace
+            // replace
             >
               <ButtonComponent type={"submit"}>Confirm</ButtonComponent>
             </Link>
@@ -2017,46 +2108,50 @@ const CreateServiceAgreement = ({ saType }) => {
       </Modal>
 
       {/* Modal COnfirmation SA */}
-      {modalConfirm ? (
-        <ConfirmationSa
-          isOpen={modalConfirm}
-          setModalConfirm={setModalConfirm}
-          dataFinal={dataFinal}
-          handleConfirm={handleConfirm}
-          listDataAttachment={listDataAttachment}
-          saInfoObj={saInfoObj}
-          saDetailObj={saDetailObj}
-          saApprovalObj={saApprovalObj}
-          dataTableApproval={dataTableApproval}
-          appHierDataDetail={appHierDataDetail}
-          dataTableProduct={dataTableProduct}
-          dataPricing={dataPricing}
-          dataTableCalcRule={dataTableCalcRule}
-          dataTermOfService={dataTermOfService}
-          dataTableLateCharge={dataTableLateCharge}
-          dataTaxImplication={dataTaxImplication}
-          dataListVersion={dataListVersion}
-        />
-      ) : null}
+      {
+        modalConfirm ? (
+          <ConfirmationSa
+            isOpen={modalConfirm}
+            setModalConfirm={setModalConfirm}
+            dataFinal={dataFinal}
+            handleConfirm={handleConfirm}
+            listDataAttachment={listDataAttachment}
+            saInfoObj={saInfoObj}
+            saDetailObj={saDetailObj}
+            saApprovalObj={saApprovalObj}
+            dataTableApproval={dataTableApproval}
+            appHierDataDetail={appHierDataDetail}
+            dataTableProduct={dataTableProduct}
+            dataPricing={dataPricing}
+            dataTableCalcRule={dataTableCalcRule}
+            dataTermOfService={dataTermOfService}
+            dataTableLateCharge={dataTableLateCharge}
+            dataTaxImplication={dataTaxImplication}
+            dataListVersion={dataListVersion}
+          />
+        ) : null
+      }
 
       {/** Modal Retry */}
-      {modalError ? (
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+      {
+        modalError ? (
+          <ModalError
+            isOpen={modalError}
+            handleOk={handleRetry}
+            handleCancel={handleCloseModalError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{`Your data was not upload ${bodyError.message}.`}</p>
+              <p className="pl-[70px]">Please try again.</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not upload ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
-          </div>
-        </ModalError>
-      ) : null}
+          </ModalError>
+        ) : null
+      }
 
       {/** Modal Validate Sa Create */}
       <ModalError
@@ -2075,23 +2170,25 @@ const CreateServiceAgreement = ({ saType }) => {
       </ModalError>
 
       {/* modal validate table at SA detail */}
-      {modalSaDetail ? (
-        <ModalError
-          isOpen={modalSaDetail}
-          handleOk={() => setModalSaDetail(false)}
-          handleCancel={() => setModalSaDetail(false)}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              {IconModal["icon_error_default"]}
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+      {
+        modalSaDetail ? (
+          <ModalError
+            isOpen={modalSaDetail}
+            handleOk={() => setModalSaDetail(false)}
+            handleCancel={() => setModalSaDetail(false)}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                {IconModal["icon_error_default"]}
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">
+                {`Please Input Pricing Rule, it must contain at least two tier!.`}
+              </p>
             </div>
-            <p className="pl-[70px]">
-              {`Please Input Pricing Rule, it must contain at least two tier!.`}
-            </p>
-          </div>
-        </ModalError>
-      ) : null}
+          </ModalError>
+        ) : null
+      }
       {/* modal validate attachment */}
       <ModalError
         isOpen={modalValidateAttachment}
@@ -2110,7 +2207,7 @@ const CreateServiceAgreement = ({ saType }) => {
           </p>
         </div>
       </ModalError>
-    </div>
+    </LayoutMenu>
   );
 };
 

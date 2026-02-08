@@ -1,0 +1,177 @@
+import moment from "moment";
+import { dateFormatting, toTitleCase } from "../../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
+import StatusComponent from "../../../../../../../components/StatusComponent";
+
+const getPaymentRelationColumns = (
+  search,
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch,
+  includeStatus = true,
+) => [
+  {
+    key: "no",
+    title: "NO",
+    align: "center",  
+    dataIndex: "no",
+    width: 40,
+    render: (_, __, index) => index + 1,
+  },
+  {
+    key: "relatedAccountName",
+    title: "ACCOUNT NAME",
+    dataIndex: "relatedAccountName",
+    width: 200,
+    sorter: true,
+    filteredValue: [search?.relatedAccountName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "relatedAccountName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+  },
+  {
+    key: "relatedAccountNumber",
+    title: "ACCOUNT NUMBER",
+    dataIndex: "relatedAccountNumber",
+    width: 200,
+    sorter: true,
+    filteredValue: [search?.relatedAccountNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "relatedAccountNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+  },
+  {
+    key: "priority",
+    title: "PRIORITY",
+    dataIndex: "priority",
+    width: 150,
+    align: "center",
+    sorter: true,
+    filteredValue: [search?.relatedAccountNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "priority",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+  },
+  {
+    key: "startDate",
+    title: "START DATE",
+    dataIndex: "startDate",
+    width: 140,
+    align: "center",
+    filteredValue: [search?.relatedAccountNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "startDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (startDate) => startDate ? moment(startDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
+  },
+  {
+    key: "endDate",
+    title: "END DATE",
+    dataIndex: "endDate",
+    width: 140,
+    align: "center",
+    filteredValue: [search?.relatedAccountNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "endDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
+  },
+  includeStatus && {
+    key: "statusApproval",
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
+    width: 170,
+    sorter: true,
+    align: "center",
+    filteredValue: [search?.statusApproval] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "statusApproval",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (status) => {
+      const displayText = {
+        "approved": "Approved",
+        "waitingApproval": "Waiting Approval",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "WAITING_APPROVAL": "Waiting Approval"
+      };
+      return (
+        <div className="flex justify-center">
+          <StatusComponent colour={status}>
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </StatusComponent>
+        </div>
+      );
+    },
+  },
+  includeStatus && {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 120,
+    sorter: true,
+    filteredValue: [search?.status] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "statusApproval",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (status) => {
+      const displayText = {
+        "active": "Active",
+        "inactive": "Inactive",
+      };
+
+      return (
+        <div className={" flex justify-center"}>
+          <StatusComponent colour={status}>
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </StatusComponent>
+        </div>
+      )
+    },
+  },
+].filter(Boolean);
+
+export { getPaymentRelationColumns };

@@ -51,13 +51,13 @@ const PrabillingPage = () => {
   const [sort, setSort] = useState(filters[currentTabKey]?.sort || "");
   const [search, setSearch] = useState(filters[currentTabKey]?.search || {});
   const [searchedColumn, setSearchedColumn] = useState(
-    filters[currentTabKey]?.searchedColumn || ""
+    filters[currentTabKey]?.searchedColumn || "",
   );
   const [searchText, setSearchText] = useState(
-    filters[currentTabKey]?.searchText || ""
+    filters[currentTabKey]?.searchText || "",
   );
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(
-    filters[currentTabKey]?.selectedBillingPeriod || null
+    filters[currentTabKey]?.selectedBillingPeriod || null,
   );
 
   const [pageDetail, setPageDetail] = useState(false);
@@ -81,7 +81,7 @@ const PrabillingPage = () => {
           page,
           selectedBillingPeriod,
         },
-      })
+      }),
     );
   }, [
     search,
@@ -124,7 +124,7 @@ const PrabillingPage = () => {
       const currentPeriodName = `${currentMonth} ${currentYear}`;
 
       const currentPeriod = list_period_summary.find(
-        (item) => item.name === currentPeriodName
+        (item) => item.name === currentPeriodName,
       );
 
       if (currentPeriod) {
@@ -168,12 +168,12 @@ const PrabillingPage = () => {
           sort,
           billPeriodId: selectedBillingPeriod,
           isLoadMore: false,
-        })
+        }),
       );
       setPage(1);
     } else if (valueTab === "Summary" && selectedBillingPeriod) {
       const selectedPeriod = list_period_summary.find(
-        (item) => item.id === selectedBillingPeriod
+        (item) => item.id === selectedBillingPeriod,
       );
       if (selectedPeriod) {
         dispatch(
@@ -184,7 +184,7 @@ const PrabillingPage = () => {
             pageSize: initialPageSize,
             sort,
             isLoadMore: false,
-          })
+          }),
         );
       }
       setPage(1);
@@ -235,11 +235,11 @@ const PrabillingPage = () => {
             sort,
             billPeriodId: selectedBillingPeriod,
             isLoadMore: true,
-          })
+          }),
         );
       } else {
         const selectedPeriod = list_period_summary.find(
-          (item) => item.id === selectedBillingPeriod
+          (item) => item.id === selectedBillingPeriod,
         );
         if (selectedPeriod) {
           await dispatch(
@@ -250,7 +250,7 @@ const PrabillingPage = () => {
               pageSize: loadMoreSize,
               sort,
               isLoadMore: true,
-            })
+            }),
           );
         }
       }
@@ -269,11 +269,11 @@ const PrabillingPage = () => {
             sort,
             billPeriodId: selectedBillingPeriod,
             isLoadMore: false,
-          })
+          }),
         );
       } else {
         const selectedPeriod = list_period_summary.find(
-          (item) => item.id === selectedBillingPeriod
+          (item) => item.id === selectedBillingPeriod,
         );
         if (selectedPeriod) {
           dispatch(
@@ -284,7 +284,7 @@ const PrabillingPage = () => {
               pageSize: initialPageSize,
               sort,
               isLoadMore: false,
-            })
+            }),
           );
         }
       }
@@ -292,21 +292,21 @@ const PrabillingPage = () => {
     }
   };
 
-const handleDetail = (record, rowKey) => {
-  if (valueTab !== "Summary") return;
+  const handleDetail = (record, rowKey) => {
+    if (valueTab !== "Summary") return;
 
-  const recordKey = rowKey || record.customerNumber;
+    const recordKey = rowKey || record.customerNumber;
 
-  if (activeRowKey === recordKey && pageDetail) {
-    setPageDetail(false);
-    setActiveRowKey(null);
-    setSelectedRecord(null);
-  } else {
-    setSelectedRecord(record);
-    setActiveRowKey(recordKey);
-    setPageDetail(true);
-  }
-};
+    if (activeRowKey === recordKey && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setSelectedRecord(null);
+    } else {
+      setSelectedRecord(record);
+      setActiveRowKey(recordKey);
+      setPageDetail(true);
+    }
+  };
 
   const currentData = useMemo(() => {
     if (valueTab === "All") {
@@ -336,9 +336,9 @@ const handleDetail = (record, rowKey) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   const summaryTabColumns = useMemo(
@@ -348,9 +348,9 @@ const handleDetail = (record, rowKey) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   const routes = [
@@ -374,7 +374,7 @@ const handleDetail = (record, rowKey) => {
       const currentPeriodName = `${currentMonth} ${currentYear}`;
 
       const currentPeriod = list_period_summary.find(
-        (item) => item.name === currentPeriodName
+        (item) => item.name === currentPeriodName,
       );
 
       if (currentPeriod) {
@@ -453,7 +453,7 @@ const handleDetail = (record, rowKey) => {
           page: 1,
           selectedBillingPeriod: value,
         },
-      })
+      }),
     );
   };
 
@@ -480,7 +480,7 @@ const handleDetail = (record, rowKey) => {
       ...col,
       width: 50,
       align: "center",
-    })
+    }),
   );
 
   const baseColumns = useMemo(() => {
@@ -535,7 +535,7 @@ const handleDetail = (record, rowKey) => {
           items={tabItems}
           onChange={onChangeTab}
           activeKey={valueTab}
-          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:my-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
         />
 
         <div className="my-0">

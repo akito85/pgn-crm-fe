@@ -2,7 +2,6 @@ import React from "react";
 import { hasValue, renderColumn, separatorNumber } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
-// Helper function untuk render number dengan decimal
 const renderNumber = (value, decimal = 3) => {
   if (value === null || value === undefined) return "-";
   return separatorNumber(value, decimal);

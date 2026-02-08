@@ -1,27 +1,24 @@
-import { Fragment } from "react";
-import DetailText from "../../../../../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../../../utils";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 
 const ConfirmationModalInfo = ({
   data = {},
 }) => {
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        PAYMENT RELATION INFORMATION
-      </div>
-      <div className="w-full grid grid-cols-3 gap-x-5">
-        <DetailText label="Account Number">{data.accountNumber}</DetailText>
-        <DetailText label="Account Name">{data.accountName}</DetailText>
-        <DetailText label="Priority">{data.priority}</DetailText>
-        <DetailText label="Start Date">{moment(data.startDate, dateFormatting.f_date).format(dateFormatting.date)}</DetailText>
-        <DetailText label="End Date">{data.endDate ? moment(data.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
+    <NxBaseContainer border header={"PAYMENT RELATION INFORMATION"}>
+      <div className="w-full grid grid-cols-3 gap-4">
+        <NxDetailText label="Account Number">{data.accountNumber}</NxDetailText>
+        <NxDetailText label="Account Name">{data.accountName}</NxDetailText>
+        <NxDetailText label="Priority">{data.priority}</NxDetailText>
+        <NxDetailText label="Start Date">{moment(data.startDate, dateFormatting.f_date).format(dateFormatting.date)}</NxDetailText>
+        <NxDetailText label="End Date">{data.endDate ? moment(data.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
       </div>
       <div className="w-full">
-        <DetailText label="Description">{data.description}</DetailText>
+        <NxDetailText label="Description">{data.description}</NxDetailText>
       </div>
-    </Fragment>
+    </NxBaseContainer>
   );
 };
 

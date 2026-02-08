@@ -11,7 +11,7 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../redux/slices/product_promo/product";
-import TablePaginationNew from "../../../../../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -30,7 +30,7 @@ const onFilter = (dataIndex, value, record) => {
 };
 
 
-// extracting size 
+// extracting size
 const extractSize = (fileSize) => {
   if (fileSize.includes('KB')) {
     return parseFloat(fileSize.replace(' KB', '')) * 1024;
@@ -67,8 +67,6 @@ const sorter = (fieldSort, a, b) => {
 };
 
 const columnAttachmentData = (
-  page,
-  pageSize,
   searchInput,
   searchedColumn,
   searchText,
@@ -78,12 +76,14 @@ const columnAttachmentData = (
 ) => {
   const res = [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "fileCategoryName",
       title: "CATEGORY",
       width: 240,
       dataIndex: "fileCategoryName",
@@ -94,10 +94,11 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
+      key: "fileName",
       title: "FILE NAME",
       width: 240,
       dataIndex: "fileName",
@@ -112,6 +113,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "createdBy",
       title: "UPLOADED BY",
       width: 240,
       dataIndex: "createdBy",
@@ -126,6 +128,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "createdDate",
       title: "UPLOADED DATE",
       align: "center",
       width: 240,
@@ -141,6 +144,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "fileSize",
       title: "FILE SIZE",
       align: "center",
       width: 240,
@@ -156,6 +160,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "action",
       title: "ACTION",
       align: "center",
       width: 180,
@@ -166,7 +171,7 @@ const columnAttachmentData = (
             <Tooltip title="Preview">
               <span className="flex justify-center">
                 <EyeOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
+                  style={{ fontSize: "20px", color: "#0075bf" }}
                   onClick={() => handleShow(r)}
                 />
               </span>
@@ -174,7 +179,6 @@ const columnAttachmentData = (
           </div>
         );
       },
-      key: "action",
     },
   ];
   if (type === "preview") {
@@ -201,8 +205,6 @@ const ConfirmationModalAttachmentTable = ({
   getAPIGuard = getGlobalPropertiesAttachment,
 }) => {
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [loadingDownload, setLoadingDownload] = useState(false);
@@ -216,14 +218,7 @@ const ConfirmationModalAttachmentTable = ({
     confirm();
     setSearchText(selectedKeys[0]);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
     setSearchedColumn(tempSearchColumn);
-  };
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
   };
 
   const handleShow = async (r) => {
@@ -244,7 +239,7 @@ const ConfirmationModalAttachmentTable = ({
             responseType: "blob",
           });
           const base64 = await getBase64(response.data);
-          previewFileAttachment(base64);  
+          previewFileAttachment(base64);
         } catch (error) {
           console.error("Failed to download file", error);
         } finally {
@@ -257,17 +252,11 @@ const ConfirmationModalAttachmentTable = ({
   return (
     <Spin spinning={loadingDownload}>
       <div className="flex flex-col w-full gap-3">
-        <TablePaginationNew
-          type="FE"
+        <NxTable
           dataSource={data}
           totalData={data.length}
-          current={page}
-          pageSize={pageSize}
           tableScrolled={{ y: 300, x: 1500 }}
-          onChange={handleChangeSize}
           columns={columnAttachmentData(
-            page,
-            pageSize,
             searchInput,
             searchedColumn,
             searchText,
@@ -275,6 +264,8 @@ const ConfirmationModalAttachmentTable = ({
             type,
             handleShow
           )}
+          usePagination={false}
+          showAdvanceSearch={false}
         />
       </div>
     </Spin>

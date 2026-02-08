@@ -131,7 +131,11 @@ import gapuraManagementReducer from "../slices/receipt_collection/gapuraManageme
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
 import offsetReducer from "../slices/receipt_collection/offset";
 import writeOffReducer from "../slices/receipt_collection/writeOff";
+import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
+import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
 import globalPropReducer from "../slices/globalPropSlice";
+import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentWarrantyPartner";
+import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 
 const reducer = combineReducers({
@@ -184,6 +188,9 @@ const reducer = combineReducers({
   accountGasSource: accountGasSourceReducer,
   account: accountReducer,
   financialInformation: financialInformationReducer,
+  paymentRelation: paymentRelationReducer,
+  invoiceRelation: invoiceRelationReducer,
+  serviceRequest: serviceRequestReducer,
   premise: premiseReducer,
   servicePoint: servicePointReducer,
   distributionMedia: distributionMediaReducer,
@@ -270,6 +277,7 @@ const reducer = combineReducers({
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
   offset: offsetReducer,
+  paymentWarrantyPartner: paymentWarrantyPartnerReducer,
   paymentCycle: paymentCycleReducer,
 
   // Attachment

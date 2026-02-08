@@ -1,15 +1,17 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import { Checkbox, Form, Select } from 'antd'
 import SelectComponent from '../../../../../../../../components/SelectComponent'
 import DateComponent from '../../../../../../../../components/DateComponent'
 import InputComponent from '../../../../../../../../components/InputComponent'
+import BaseContainer from '../../../../../../../../components/BaseContainer'
+import NxCardContainer from '../../../../../../../../components/Nx/NxCardContainer'
 import moment from "moment";
 import { hasValue } from '../../../../../../../../utils'
 import { getTaxImplication } from '../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice'
 
 const SaInformation = ({
-  saType, 
-  handleSaInformationObj = ()=>{},
+  saType,
+  handleSaInformationObj = () => { },
   setStartDate,
   setServiceAgreementDate,
   setEndDate,
@@ -36,52 +38,52 @@ const SaInformation = ({
 
 
   useEffect(() => {
-    if(saInfoObj.serviceType){
+    if (saInfoObj.serviceType) {
       const body = {
         accountId: idAccount,
         serviceType: saInfoObj.serviceType
       }
-      dispatch(getTaxImplication({body}))
-      .unwrap()
-      .then((data) => {
-        const dataArray = Object.keys(data).map(key => data[key]);
-        if(data){
-          setDataTaxImplication(dataArray)
-        }
-      })
-      .catch(() => {
-        console.log("error");
-      });
+      dispatch(getTaxImplication({ body }))
+        .unwrap()
+        .then((data) => {
+          const dataArray = Object.keys(data).map(key => data[key]);
+          if (data) {
+            setDataTaxImplication(dataArray)
+          }
+        })
+        .catch(() => {
+          console.log("error");
+        });
     }
   }, [saInfoObj.serviceType])
-  
+
 
   // For validation all date
   const handleDateValidation = (value, type) => {
-    if(type === "serviceAgreementDate"){
+    if (type === "serviceAgreementDate") {
       form.resetFields(["startDate", "endDate", "gasInPlanDate", "commitmentDate"])
       setServiceAgreementDate(value);
       return value;
-    }else if(type === "startDate"){
+    } else if (type === "startDate") {
       form.resetFields(["endDate", "gasInPlanDate", "commitmentDate"])
       setStartDate(value);
       return value;
-    }else if(type === "endDate"){
+    } else if (type === "endDate") {
       form.resetFields(["gasInPlanDate", "commitmentDate"])
       setEndDate(value);
       return value;
-    }else if(type === "gasInPlanDate"){
+    } else if (type === "gasInPlanDate") {
       setGasInPlanDate(value);
       return value;
-    }else{
+    } else {
       setCommitmentDate(value);
       return value;
     }
   };
-  const handlePjbgTypeValidate = (value) => { 
+  const handlePjbgTypeValidate = (value) => {
     form.resetFields(["pjbgType"])
   }
-  const handleSaTypeValidate = (value) => { 
+  const handleSaTypeValidate = (value) => {
     form.resetFields(["serviceAgreementType"])
     handlePjbgTypeValidate(value);
   }
@@ -95,45 +97,45 @@ const SaInformation = ({
       accountId: idAccount,
       serviceType: id
     }
-    dispatch(getTaxImplication({body}))
-    .unwrap()
-    .then((data) => {
-      const dataArray = Object.keys(data).map(key => data[key]);
-      if(data){
-        setDataTaxImplication(dataArray)
-      }
-    })
-    .catch(() => {
-      console.log("error");
-    });
+    dispatch(getTaxImplication({ body }))
+      .unwrap()
+      .then((data) => {
+        const dataArray = Object.keys(data).map(key => data[key]);
+        if (data) {
+          setDataTaxImplication(dataArray)
+        }
+      })
+      .catch(() => {
+        console.log("error");
+      });
   }
 
   const validateEndDate = (rule, value, callback) => {
   }
 
   const handleDisableSaDate = (current) => {
-    if(saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen'){
+    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
       return current &&
-      (current.isBefore(moment(saRecordData.saDate), 'day') || 
-      current.isAfter(moment(saRecordData.endDate), 'day'))
+        (current.isBefore(moment(saRecordData.saDate), 'day') ||
+          current.isAfter(moment(saRecordData.endDate), 'day'))
     }
-    else{
+    else {
       return moment().endOf("day") < current;
     }
   };
   const handleValidateMoreSaDate = (current) => {
-    if(saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
       // if(moment(saRecordData.startDate).diff(moment(), 'days') < 30){
-        
+
       //   return current && (current < moment(saRecordData.startDate) || current > moment(saRecordData.endDate));
       // }else{
       //   return current && (current <= moment().subtract(1, "months") || current > moment(saRecordData.endDate))    
       // }
       return current &&
-        (current.isBefore(moment(saInfoObj?.serviceAgreementDate), 'day') || 
-        current.isAfter(moment(saRecordData.endDate), 'day'))
+        (current.isBefore(moment(saInfoObj?.serviceAgreementDate), 'day') ||
+          current.isAfter(moment(saRecordData.endDate), 'day'))
 
-    }else{
+    } else {
       if (saInfoObj.serviceAgreementDate !== null) {
         // return moment(saInfoObj.serviceAgreementDate).add(1, "days") >= current;
         return current && (current < moment(saInfoObj.serviceAgreementDate));
@@ -141,9 +143,9 @@ const SaInformation = ({
     }
   };
   const handleValidateMore = (current) => {
-    if(saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
       return current && (current < moment(saInfoObj.startDate) || current > moment(saRecordData.endDate).add(1, "days"));
-    }else {
+    } else {
       if (saInfoObj.startDate !== null) {
         return moment(saInfoObj.startDate).add(0, "days") >= current;
       }
@@ -151,11 +153,11 @@ const SaInformation = ({
   };
 
   const handleRangeStartEnd = (current) => {
-    if(saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen'){
+    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
       return current &&
-      (current.isBefore(moment(saInfoObj?.startDate), 'day') || 
-      current.isAfter(moment(saRecordData.endDate), 'day'))
-    }else{
+        (current.isBefore(moment(saInfoObj?.startDate), 'day') ||
+          current.isAfter(moment(saRecordData.endDate), 'day'))
+    } else {
       if (saInfoObj.startDate !== null && saInfoObj.endDate !== null) {
         return current && (current <= moment(saInfoObj.startDate) || current >= moment(saInfoObj.endDate));
       }
@@ -181,31 +183,28 @@ const SaInformation = ({
     })
     form.resetFields(["gasInPlanDate"])
   };
-  
-  return (
-    <div>
 
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            SERVICE TYPE         
-          </h3>
-        </div>
-        <div className={"grid grid-cols-3 w-full gap-x-6"}>
-          <Form.Item
-            name={"serviceType"}
-            label={"Service Type"}
-            getValueFromEvent={(e) =>handleSaInformationObj(e, "serviceType")}
-            rules={[
-              {
-                message: "Please input your Service Type",
-                required: true,
-              },
-            ]}
-          >
-              <SelectComponent 
+  return (
+    <NxCardContainer header={"SERVICE AGREEMENT INFORMATION"}>
+      <div className="flex flex-col gap-y-4">
+        {/* SERVICE AGREEMENT INFORMATION SECTION */}
+        <BaseContainer border header={"SERVICE AGREEMENT INFORMATION"}>
+          {/* Check If Not SA Main  */}
+            <div className={"grid grid-cols-3 w-full gap-x-6"}>
+              <Form.Item
+              name={"serviceType"}
+              label={"Service Type"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "serviceType")}
+              rules={[
+                {
+                  message: "Please input your Service Type",
+                  required: true,
+                },
+              ]}
+            >
+              <SelectComponent
                 disabled={saRecordData?.typeSa !== "main" ? true : false}
-                onChange={(e)=>{
+                onChange={(e) => {
                   handleMandatory(e)
                   handleGetTaxImplication(e)
                   handleSaTypeValidate(e)
@@ -216,285 +215,261 @@ const SaInformation = ({
                     <Select.Option value={item.id} key={index}>
                       {item.value}
                     </Select.Option>
-                ))}
+                  ))}
               </SelectComponent>
-          </Form.Item>
-        </div>
-      </div>
-
-      {/* SECTION SERVICE AGREEMENT INFORMATION   */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            SERVICE AGREEMENT INFORMATION          
-          </h3>
-        </div>
-        {/* Check If Not SA Main  */}
-        {saType !== "main" && (
+            </Form.Item>
+            {saType !== "main" && (
+                <Form.Item
+                  name={"serviceAgreementReferenceNumber"}
+                  label={"Service Agreement Reference Number"}
+                  getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
+                  rules={[
+                    {
+                      message: " Please input your Service Agreement Reference Number",
+                      required: true,
+                    },
+                  ]}
+                >
+                  <InputComponent disabled={true} />
+                </Form.Item>
+            )
+            }
+            </div>
           <div className={"grid grid-cols-3 w-full gap-x-6"}>
             <Form.Item
-              name={"serviceAgreementReferenceNumber"}
-              label={"Service Agreement Reference Number"}
-              getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
+              name={"serviceAgreementNumber"}
+              label={"Service Agreement Number"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementNumber")}
               rules={[
                 {
-                  message: " Please input your Service Agreement Reference Number",
+                  message: "Please input your Service Agreement Number",
+                  required: true,
+                },
+                {
+                  pattern: /^[a-zA-Z0-9\-/\.]+$/,
+                  message: "Invalid input. Only numbers, letters, (-), (/), and (.)",
+                },
+              ]}
+            >
+              <InputComponent maxLength={50} />
+            </Form.Item>
+            <Form.Item
+              name={"serviceAgreementType"}
+              label={"Service Agreement Type"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementType")}
+              rules={[
+                {
+                  message: "Please input your Service Agreement Type",
                   required: true,
                 },
               ]}
             >
-              <InputComponent disabled={true} />
+              <SelectComponent
+                disabled={saRecordData?.typeSa !== "main" || !hasValue(saInfoObj?.serviceType) ? true : false}
+                onChange={(e) => {
+                  handlePjbgTypeValidate(e)
+                }}
+              >
+                {dataSaType &&
+                  dataSaType?.map((item, index) => (
+                    <Select.Option value={item.id} key={index}>
+                      {item.value}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+            <Form.Item
+              name={"pjbgType"}
+              label={"PJBG Type"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "pjbgType")}
+              rules={[
+                {
+                  message: "Please input your PJBG Type",
+                  required: saInfoObj?.serviceAgreementType === 1170 ? true : false,
+                },
+              ]}
+            >
+              <SelectComponent disabled={(saInfoObj?.serviceAgreementType === 1170 || saRecordData?.typeSa !== "main") ? false : true}>
+                {dataPjbg &&
+                  dataPjbg?.map((item, index) => (
+                    <Select.Option value={item.id} key={index}>
+                      {item.text}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+            <Form.Item
+              name={"serviceAgreementDate"}
+              label={"Service Agreement Date"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementDate")}
+              rules={[
+                {
+                  message: "Please input your Service Agreement Date",
+                  required: true,
+                },
+              ]}
+            >
+              <DateComponent dateDisable={handleDisableSaDate} onChange={(e) => handleDateValidation(e, "serviceAgreementDate")} />
+            </Form.Item>
+            <Form.Item
+              name={"startDate"}
+              label={"Start Date"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "startDate")}
+              rules={[
+                {
+                  message: "Please input your Start Date",
+                  required: true,
+                },
+              ]}
+            >
+              <DateComponent dateDisable={handleValidateMoreSaDate} onChange={(e) => handleDateValidation(e, "startDate")} />
+            </Form.Item>
+            <Form.Item
+              name={"endDate"}
+              label={"End Date"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "endDate")}
+              rules={[
+                {
+                  message: "Please input your End Date",
+                  required: true,
+                },
+              ]}
+            >
+              <DateComponent dateDisable={handleValidateMore} onChange={(e) => handleDateValidation(e, "endDate")} />
             </Form.Item>
           </div>
-        )
-        }
-        <div className={"grid grid-cols-3 w-full gap-x-6"}>
-          <Form.Item
-            name={"serviceAgreementNumber"}
-            label={"Service Agreement Number"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementNumber")}
-            rules={[
-              {
-                message: "Please input your Service Agreement Number",
-                required: true,
-              },
-              {
-                pattern: /^[a-zA-Z0-9\-/\.]+$/,
-                message: "Invalid input. Only numbers, letters, (-), (/), and (.)",
-              },
-            ]}
-          >
-            <InputComponent maxLength={50} />
-          </Form.Item>
-          <Form.Item
-            name={"serviceAgreementType"}
-            label={"Service Agreement Type"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementType")}
-            rules={[
-              {
-                message: "Please input your Service Agreement Type",
-                required: true,
-              },
-            ]}
-          >
-            <SelectComponent
-              disabled={saRecordData?.typeSa !== "main" || !hasValue(saInfoObj?.serviceType) ? true : false}
-              onChange={(e) => {
-                handlePjbgTypeValidate(e)
-              }}
-            >
-            {dataSaType &&
-                dataSaType?.map((item, index) => (
-                  <Select.Option value={item.id} key={index}>
-                    {item.value}
-                  </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            name={"pjbgType"}
-            label={"PJBG Type"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "pjbgType")}
-            rules={[
-              {
-                message: "Please input your PJBG Type",
-                required: saInfoObj?.serviceAgreementType === 1170 ? true : false,
-              },
-            ]}
-          >
-            <SelectComponent disabled={(saInfoObj?.serviceAgreementType === 1170 || saRecordData?.typeSa !== "main") ? false : true}>
-              {dataPjbg &&
-                dataPjbg?.map((item, index) => (
-                  <Select.Option value={item.id} key={index}>
-                    {item.text}
-                  </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            name={"serviceAgreementDate"}
-            label={"Service Agreement Date"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementDate")}
-            rules={[
-              {
-                message: "Please input your Service Agreement Date",
-                required: true,
-              },
-            ]}
-          >
-            <DateComponent dateDisable={handleDisableSaDate} onChange={(e)=>handleDateValidation(e, "serviceAgreementDate")}/>
-          </Form.Item>
-          <Form.Item
-            name={"startDate"}
-            label={"Start Date"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "startDate")}
+        </BaseContainer>
+
+        {/* BILLING & PAYMENT INFORMATION SECTION */}
+        <BaseContainer border header={"BILLING & PAYMENT INFORMATION"}>
+          <div className={"grid grid-cols-3 w-full gap-x-6"}>
+            <Form.Item
+              name={"billingCycle"}
+              label={"Billing Cycle"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "billingCycle")}
+
               rules={[
-              {
-                message: "Please input your Start Date",
-                required: true,
-              },
-            ]}
-          >
-            <DateComponent dateDisable={handleValidateMoreSaDate} onChange={(e)=>handleDateValidation(e, "startDate")}/>
-          </Form.Item>
-          <Form.Item
-            name={"endDate"}
-            label={"End Date"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "endDate")}
-            rules={[
-              {
-                message: "Please input your End Date",
-                required: true,
-              },
-            ]}
-          >
-            <DateComponent dateDisable={handleValidateMore} onChange={(e)=>handleDateValidation(e, "endDate")}/>
-          </Form.Item>
-        </div>
-      </div>
-
-      {/* SECTION SERVICE AGREEMENT INFORMATION   */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            BILLING & PAYMENT INFORMATION          
-          </h3>
-        </div>
-        <div className={"grid grid-cols-3 w-full gap-x-6"}>
-          <Form.Item
-            name={"billingCycle"}
-            label={"Billing Cycle"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "billingCycle")}
-          
-            rules={[
-              {
-                message: "Please input your Billing Cycle",
-                required: true,
-              },
-            ]}
-          >
-            <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
-              {dataBillingCycle &&
-                dataBillingCycle?.map((item, index) => (
-                  <Select.Option value={item.id} key={index}>
-                    {item.value}
-                  </Select.Option>
-              ))}
-            </SelectComponent>
-          {/* {saRecordData?.typeSa !== "main" && <span className='text-[11px]'>*Refer to referenced service agreement main</span>} */}
-          </Form.Item>
-          <Form.Item
-            name={"termOfPayment"}
-            label={"Term Of Payment"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "termOfPayment")}
-            rules={[
-              {
-                message: "Please input your Term Of Payment",
-                required: true,
-              },
-            ]}
-          >
-            <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
-              {dataTermOfPayment &&
-                dataTermOfPayment?.map((item, index) => (
-                  <Select.Option value={item.termsOfPaymentId} key={index}>
-                    {item.termsOfPaymentName}
-                  </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          {/* {saRecordData?.typeSa !== "main" && <span className='text-[11px]'>*Refer to referenced service agreement main</span>} */}
-          <Form.Item
-            name={"invoiceTemplate"}
-            label={"Invoice Template"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "invoiceTemplate")}
-            rules={[
-              {
-                message: "Please input your Invoice Template",
-                required: true,
-              },
-            ]}
-          >
+                {
+                  message: "Please input your Billing Cycle",
+                  required: true,
+                },
+              ]}
+            >
               <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
-              {dataInvoiceTemplate &&
-                dataInvoiceTemplate?.map((item, index) => (
-                  <Select.Option value={item.id} key={index}>
-                    {item.invoiceName}
-                  </Select.Option>
-              ))}
+                {dataBillingCycle &&
+                  dataBillingCycle?.map((item, index) => (
+                    <Select.Option value={item.id} key={index}>
+                      {item.value}
+                    </Select.Option>
+                  ))}
               </SelectComponent>
-            {/* {saRecordData?.typeSa !== "main" && <span className='text-[11px]'>*Refer to referenced service agreement main</span>} */}
-          </Form.Item>
-        </div>    
-      </div>
+            </Form.Item>
+            <Form.Item
+              name={"termOfPayment"}
+              label={"Term Of Payment"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "termOfPayment")}
+              rules={[
+                {
+                  message: "Please input your Term Of Payment",
+                  required: true,
+                },
+              ]}
+            >
+              <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
+                {dataTermOfPayment &&
+                  dataTermOfPayment?.map((item, index) => (
+                    <Select.Option value={item.termsOfPaymentId} key={index}>
+                      {item.termsOfPaymentName}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+            <Form.Item
+              name={"invoiceTemplate"}
+              label={"Invoice Template"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "invoiceTemplate")}
+              rules={[
+                {
+                  message: "Please input your Invoice Template",
+                  required: true,
+                },
+              ]}
+            >
+              <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
+                {dataInvoiceTemplate &&
+                  dataInvoiceTemplate?.map((item, index) => (
+                    <Select.Option value={item.id} key={index}>
+                      {item.invoiceName}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+          </div>
+        </BaseContainer>
 
-      {/* SECTION ADDITIONAL INFORMATION   */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            ADDITIONAL INFORMATION          
-          </h3>
-        </div>
-        <div className={"grid grid-cols-3 w-full gap-x-6"}>
-          <Form.Item 
-            name="alreadyGasIn" 
-            label={"Already Gas In"} 
-            valuePropName="checked" 
-            noStyle
-            getValueFromEvent={(e)=>handleSaInformationObj(e, "alreadyGasIn")}
-          >
-            <div className='flex flex-col'>
-              <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked}>Already Gas In</Checkbox>
-              <span className='pl-[26px] text-[10px]'>Check if the service agreement is gas in or not</span>
-            </div>
-          </Form.Item>
-          <Form.Item
-            name={"gasInPlanDate"}
-            label={"Gas In Plan Date"}
-            getValueFromEvent={(e)=>handleSaInformationObj(e, "gasInPlanDate")}
-            rules={[
-              {
-                message: "Please input your ",
-                // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? !saInfoObj?.alreadyGasIn: true,
-                required: (saInfoObj?.serviceType === 608 ) ? !saInfoObj?.alreadyGasIn: true,
-              },
-            ]}
-          >
-            <DateComponent 
-              dateDisable={handleRangeStartEnd} 
-              onChange={(e)=>handleDateValidation(e, "gasInPlanDate")} 
-              // disabled={(saInfoObj?.serviceType !== 608 || saRecordData?.typeSa !== "main" || saInfoObj?.alreadyGasIn === true) && true} 
-              disabled={(saInfoObj?.serviceType !== 608 || saInfoObj?.alreadyGasIn === true) && true} 
-            />
+        {/* ADDITIONAL INFORMATION SECTION */}
+        <BaseContainer border header={"ADDITIONAL INFORMATION"}>
+          <div className={"grid grid-cols-3 w-full gap-x-6"}>
+            <Form.Item
+              name="alreadyGasIn"
+              label={"Already Gas In"}
+              valuePropName="checked"
+              noStyle
+              getValueFromEvent={(e) => handleSaInformationObj(e, "alreadyGasIn")}
+            >
+              <div className='flex flex-col'>
+                <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked}>Already Gas In</Checkbox>
+                <span className='pl-[26px] text-[10px]'>Check if the service agreement is gas in or not</span>
+              </div>
             </Form.Item>
-          <Form.Item
-            name={"commitmentDate"}
-            label={"Commitment Date"}
-            getValueFromEvent={(e)=>handleSaInformationObj(e, "commitmentDate")}
-            rules={[
-              {
-                message: "Please input your Commitment Date",
-                required: (segment === "KI" && saRecordData?.typeSa === "main") ? true : false,
-              },
-            ]}
-          >
-            <DateComponent dateDisable={handleValidateMoreSaDate} onChange={(e)=>handleDateValidation(e, "commitmentDate")} disabled={saRecordData?.typeSa !== "main" ? true : false}/>
+            <Form.Item
+              name={"gasInPlanDate"}
+              label={"Gas In Plan Date"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "gasInPlanDate")}
+              rules={[
+                {
+                  message: "Please input Gas In Plan Date",
+                  // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? !saInfoObj?.alreadyGasIn: true,
+                  required: (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true,
+                },
+              ]}
+            >
+              <DateComponent
+                dateDisable={handleRangeStartEnd}
+                onChange={(e) => handleDateValidation(e, "gasInPlanDate")}
+                // disabled={(saInfoObj?.serviceType !== 608 || saRecordData?.typeSa !== "main" || saInfoObj?.alreadyGasIn === true) && true} 
+                disabled={(saInfoObj?.serviceType !== 608 || saInfoObj?.alreadyGasIn === true) && true}
+              />
             </Form.Item>
-        </div> 
-        <div className={"grid grid-cols-1 w-full gap-x-6"}>
-          <Form.Item
-            label={"Description"}
-            name={"description"}
-            className={"w-full"}
-            getValueFromEvent={(e) => handleSaInformationObj(e, "description")}
-          >
-            <InputComponent
-              type="textarea"
-            />
-          </Form.Item>
-        </div>   
+            <Form.Item
+              name={"commitmentDate"}
+              label={"Commitment Date"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "commitmentDate")}
+              rules={[
+                {
+                  message: "Please input your Commitment Date",
+                  required: (segment === "KI" && saRecordData?.typeSa === "main") ? true : false,
+                },
+              ]}
+            >
+              <DateComponent dateDisable={handleValidateMoreSaDate} onChange={(e) => handleDateValidation(e, "commitmentDate")} disabled={saRecordData?.typeSa !== "main" ? true : false} />
+            </Form.Item>
+          </div>
+          <div className={"grid grid-cols-1 w-full gap-x-6"}>
+            <Form.Item
+              label={"Description"}
+              name={"description"}
+              className={"w-full"}
+              getValueFromEvent={(e) => handleSaInformationObj(e, "description")}
+            >
+              <InputComponent
+                type="textarea"
+              />
+            </Form.Item>
+          </div>
+        </BaseContainer>
       </div>
-    </div>
+    </NxCardContainer>
   )
 }
 

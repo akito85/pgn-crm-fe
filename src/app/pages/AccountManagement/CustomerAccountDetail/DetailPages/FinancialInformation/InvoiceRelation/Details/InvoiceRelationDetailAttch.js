@@ -1,23 +1,60 @@
-import { Spin, Tooltip } from "antd";
-import SVGIcon from "../../../../../../../../assets/Icon/index";
-import { useState } from "react";
-import BaseContainer from "../../../../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
+import { Spin } from "antd";
+import { useEffect, useMemo, useRef, useState } from "react";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import axios from "axios";
 import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
-import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import { getBase64 } from "../../../../../../../../utils/getBase64";
+import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import { configApp } from "../../../../../../../../constants/configApp";
+import NxTable from "../../../../../../../../components/Nx/NxTable";
+import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
+import { getInvoiceRelationAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
+import { useSelector } from "react-redux";
+import { nxApplyFixedColumns } from "../../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const InvoiceRelationDetailAttch = ({
-  dataAttachment = [],
-  getColumnSearchProps = () => {},
+  idIr = 0,
+  dispatch = () => {},
 }) => {
+  const {
+    list_irDetailAttachment,
+    pagination_irDetailAttachment,
+    loading,
+  } = useSelector(
+    (state) => state.invoiceRelation
+  );
+
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
+
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [tempFilters, setTempFilters] = useState([]);
 
   const [loadingDownload, setLoadingDownload] = useState(false);
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+
+  const searchInput = useRef(null);
+
+  const currentData = useMemo(() => list_irDetailAttachment, [list_irDetailAttachment]);
+  
+  const currentPagination = pagination_irDetailAttachment;
+  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!currentData || currentData.length === 0) return [];
+
+    return currentData.map((item, index) => ({
+      ...item,
+      key: `${item.id}-${index}`,
+    }));
+  }, [currentData]);
   
   const handleShow = async (r) => {
     if ((r.fileType || r.type).includes("application/vnd")) {
@@ -39,77 +76,122 @@ const InvoiceRelationDetailAttch = ({
     }
   };
 
-  const columns = [
-    {
-      title: "NO",
-      width: 80,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "TYPE",
-      dataIndex: "type",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("type"),
-    },
-    {
-      title: "FILE NAME",
-      dataIndex: "fileName",
-      width: 300,
-      sorter: true,
-      ...getColumnSearchProps("fileName"),
-    },
-    {
-      title: "FILE SIZE",
-      dataIndex: "fileSize",
-      width: 150,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("fileSize"),
-    },
-    {
-      title: "ACTION",
-      align: "center",
-      width: 100,
-      fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex w-full justify-center gap-6">
-            <Tooltip title="View">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEye"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => {
-                    handleShow(r);
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ];
+  /**
+   * @param {string[]} selectedKeys 
+   * @param {() => {}} confirm 
+   * @param {string} dataIndex 
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
+  const baseColumns = useMemo(() =>
+    getDetailAttachmentColumns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      handleShow,
+    ),
+    [search, searchText, searchedColumn]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  /**
+   * @param {*} _ 
+   * @param {*} __ 
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination_irDetailAttachment?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getInvoiceRelationAttachment({
+          id: idIr,
+          searchs: JSON.stringify(search),
+          page: nextPage,
+          size: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+    }
+    setPage(nextPage);
+  };
+
+  useEffect(() => {
+    if (idIr)
+      dispatch(getInvoiceRelationAttachment({
+        id: idIr,
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        isLoadMore: false
+      }));
+  }, [sort, search, tempFilters]);
+
 
   return (
     <Spin spinning={loadingDownload}>
-      <BaseContainer header={"ATTACHMENTS"}>
-        <TablePaginationNew
-          dataSource={dataAttachment.map((item, idx) => ({
-            ...item,
-            key: item.id || idx,
-          }))}
-          tableScrolled={{ y: 525, x: 1500 }}
-          columns={columns}
-          current={page}
-          onChange={setPage}
-          onSizeChanger={setPageSize}
-          type="FE"
-        />
-      </BaseContainer>
+      <NxTable
+        idTable="invoice-relation-detail-attachment-table"
+        dataSource={dataSourceWithKeys}
+        totalData={pagination_irDetailAttachment.totalElements}
+        current={page}
+        tableScrolled={{ y: 400, x: "max-content" }}
+        onSort={onSort}
+        columns={processedColumns}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={20}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columnDefinitions}
+        loading={loading}
+        showAdvanceSearch={false}
+      />
     </Spin>
   );
 };

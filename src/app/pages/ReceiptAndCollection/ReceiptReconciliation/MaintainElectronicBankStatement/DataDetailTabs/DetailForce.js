@@ -43,7 +43,7 @@ import AttachmentComponent from "../../../../../../components/Attachment/Attachm
 import { columnsAwalForce } from "./columnForce";
 
 const DetailForce = (props) => {
-  const { data, loading, id, isApprover } = props;
+  const { data, loading, id, isApprover, isSubmitter } = props;
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -73,7 +73,7 @@ const DetailForce = (props) => {
   const [tableForceSelected, setTableForceSelected] = useState([]);
   const [forceObj, setForceObj] = useState({});
   const [keyTableForceSelected, setKeyTableForceSelected] = useState([]);
-  const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingForm, setLoadingForm] = useState(false);
   const [modalApproval, setModalApproval] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -646,19 +646,21 @@ const DetailForce = (props) => {
   };
 
   return (
-    <Spin spinning={loadingForm}>
+    <Spin spinning={loading || loadingForm}>
       <div className="my-5">
         <div className="w-full flex justify-end my-5 gap-5">
-          <ButtonComponent
-            //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
-            type="submit"
-            onClick={() => {
-              setModalRequest(true);
-              setShowModal(false);
-            }}
-          >
-            Request
-          </ButtonComponent>
+          {isSubmitter ? (
+            <ButtonComponent
+              //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
+              type="submit"
+              onClick={() => {
+                setModalRequest(true);
+                setShowModal(false);
+              }}
+            >
+              Request
+            </ButtonComponent>
+          ) : null}
 
           {isApprover ? (
             <>
@@ -899,7 +901,7 @@ const DetailForce = (props) => {
           </div>
         </ModalCustom>
       </div>
-    </Spin>
+    </Spin >
   );
 };
 

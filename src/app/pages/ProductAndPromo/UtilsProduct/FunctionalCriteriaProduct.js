@@ -260,6 +260,7 @@ const FunctionalCriteriaProduct = ({
   // Selector
   const {
     data_budget,
+    data_country,
     data_province,
     data_city,
     data_industrial_sector,
@@ -278,6 +279,7 @@ const FunctionalCriteriaProduct = ({
     data_from_item,
     data_tiering,
     data_product,
+    data_product_version,
   } = useSelector((state) => state[selector]);
 
   // Declaration
@@ -312,6 +314,7 @@ const FunctionalCriteriaProduct = ({
   // Declare data list option
   const listOption = {
     data_budget,
+    data_country,
     data_province,
     data_city,
     data_industrial_sector,
@@ -330,6 +333,7 @@ const FunctionalCriteriaProduct = ({
     data_from_item,
     data_tiering,
     data_product,
+    data_product_version,
     ...{ dataListExternal },
   };
 
@@ -383,6 +387,33 @@ const FunctionalCriteriaProduct = ({
         [keyName]: value,
       };
     });
+    if (index === "product") {
+      if (dataCriteria.includes(38)) {
+        dispatch(getApi?.getProductVersionList(data?.value));
+      }
+      formTableCriteria.resetFields(["productVersion"]);
+      setEditDataRecord((prevState) => {
+        return {
+          ...prevState,
+          [key + "productVersion"]: undefined,
+        };
+      });
+    }
+    if (index === "country") {
+      if (dataCriteria.includes(3118)) {
+        dispatch(getApi?.getProvinceList(data?.value));
+      }
+      formTableCriteria.resetFields(["province", "city", "district", "subDistrict"]);
+      setEditDataRecord((prevState) => {
+        return {
+          ...prevState,
+          [key + "province"]: undefined,
+          [key + "city"]: undefined,
+          [key + "district"]: undefined,
+          [key + "subDistrict"]: undefined,
+        };
+      });
+    }
     if (index === `province`) {
       if (dataCriteria.includes(39) || (dataCriteria.includes(28))) {
         dispatch(getApi?.getCityList(data?.value));

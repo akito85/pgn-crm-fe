@@ -1,3 +1,5 @@
+// PERUBAHAN PADA COLUMNSCALCULATIONSUMMARY
+
 import React from "react";
 import { Spin } from "antd";
 import TableRBI from "../../../../../../../components/TableRBI";
@@ -13,6 +15,7 @@ import {
 } from "../../../../../../../utils/formatCurrency";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
+// Kolom untuk tabel utama tetap sama, tidak ada perubahan
 export const columnsCalculationSummary = (
   search = {},
   page,
@@ -59,10 +62,8 @@ export const columnsCalculationSummary = (
     title: "USAGE",
     dataIndex: "usage",
     key: "usage",
-    width: 150,
-    align: "right",
+    width: 180,
     sorter: true,
-    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "usage",
@@ -85,10 +86,10 @@ export const columnsCalculationSummary = (
       ),
   },
   {
-    title: "SA TYPE",
+    title: "saType",
     dataIndex: "saType",
     key: "saType",
-    width: 150,
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -111,16 +112,16 @@ export const columnsCalculationSummary = (
       ),
   },
   {
-    title: "AMOUNT",
-    dataIndex: "amount",
-    key: "amount",
-    width: 180,
+    title: "Calculated Total",
+    dataIndex: "calculatedTotal",
+    key: "calculatedTotal",
+    width: 150,
     align: "right",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "amount",
+      "calculatedTotal",
       searchInput,
       searchedColumn,
       searchText,
@@ -129,14 +130,43 @@ export const columnsCalculationSummary = (
     ),
     render: (text) =>
       renderColumn(
-        "amount",
-        hasValue(search["amount"]),
+        "calculatedTotal",
+        hasValue(search["calculatedTotal"]),
         searchText,
         text,
         false,
         "input",
         search,
-        "currency-idr",
+        "usage",
+      ),
+  },
+  {
+    title: "Converted Calculated Total",
+    dataIndex: "convertedCalculatedTotal",
+    key: "convertedCalculatedTotal",
+    width: 180,
+    align: "right",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "convertedCalculatedTotal",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "convertedCalculatedTotal",
+        hasValue(search["convertedCalculatedTotal"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "usage",
       ),
   },
   {
@@ -151,6 +181,7 @@ export const columnsCalculationSummary = (
   },
 ];
 
+// data expand column
 export const getExpandedColumns = () => [
   {
     key: "no",
@@ -160,73 +191,36 @@ export const getExpandedColumns = () => [
     render: (text, object, index) => index + 1,
   },
   {
+    title: "UOM",
+    dataIndex: "uom",
+    key: "uom",
+    width: 100,
+    align: "center",
+    render: (text) => text || "-",
+  },
+  {
     title: "CALCULATED USAGE PARTITION",
     children: [
       {
-        title: "UOM",
-        dataIndex: "calculatedUsageUom",
-        key: "calculatedUsageUom",
-        width: 120,
-        align: "center",
-        render: (text) => text || "-",
-      },
-      {
         title: "MIN",
-        dataIndex: "calculatedUsageMin",
-        key: "calculatedUsageMin",
+        dataIndex: "usagePartitionMin",
+        key: "usagePartitionMin",
         width: 150,
         align: "right",
         render: (text) => usageFormatting(text),
       },
       {
         title: "NORMAL",
-        dataIndex: "calculatedUsageNormal",
-        key: "calculatedUsageNormal",
+        dataIndex: "usagePartitionNormal",
+        key: "usagePartitionNormal",
         width: 150,
         align: "right",
         render: (text) => usageFormatting(text),
       },
       {
         title: "OUP",
-        dataIndex: "calculatedUsageUop",
-        key: "calculatedUsageUop",
-        width: 150,
-        align: "right",
-        render: (text) => usageFormatting(text),
-      },
-    ],
-  },
-  {
-    title: "CONVERTED CALCULATED",
-    children: [
-      {
-        title: "UOM",
-        dataIndex: "convertedCalculatedUom",
-        key: "convertedCalculatedUom",
-        width: 120,
-        align: "center",
-        render: (text) => text || "-",
-      },
-      {
-        title: "MIN",
-        dataIndex: "convertedCalculatedMin",
-        key: "convertedCalculatedMin",
-        width: 150,
-        align: "right",
-        render: (text) => usageFormatting(text),
-      },
-      {
-        title: "NORMAL",
-        dataIndex: "convertedCalculatedNormal",
-        key: "convertedCalculatedNormal",
-        width: 150,
-        align: "right",
-        render: (text) => usageFormatting(text),
-      },
-      {
-        title: "OUP",
-        dataIndex: "convertedCalculatedOup",
-        key: "convertedCalculatedOup",
+        dataIndex: "usagePartitionOup",
+        key: "usagePartitionOup",
         width: 150,
         align: "right",
         render: (text) => usageFormatting(text),
@@ -238,14 +232,14 @@ export const getExpandedColumns = () => [
     children: [
       {
         title: "CURRENCY",
-        dataIndex: "currency",
-        key: "currency",
+        dataIndex: "priceCurrency",
+        key: "priceCurrency",
         width: 120,
         align: "center",
         render: (text) => text || "-",
       },
       {
-        title: "PRICE CODE",
+        title: "CODE",
         dataIndex: "priceCode",
         key: "priceCode",
         width: 150,
@@ -282,14 +276,6 @@ export const getExpandedColumns = () => [
     title: "AMOUNT PARTITION",
     children: [
       {
-        title: "CURRENCY",
-        dataIndex: "amountPartitionCurrency",
-        key: "amountPartitionCurrency",
-        width: 120,
-        align: "center",
-        render: (text) => text || "-",
-      },
-      {
         title: "MIN",
         dataIndex: "amountPartitionMin",
         key: "amountPartitionMin",
@@ -317,10 +303,8 @@ export const getExpandedColumns = () => [
   },
 ];
 
-// Render expanded row
-// Render expanded row
 export const renderExpandedRow = (record, expandData, loadingExpand) => {
-  const rowKey = `${record.transactionDate}-${record.saType}`;
+  const rowKey = record.id; // Gunakan id sebagai key
   const isLoading = loadingExpand[rowKey];
   const expandedData = expandData[rowKey]?.result || [];
 
@@ -334,44 +318,33 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
       </div>
     );
   }
-  // Show empty state
-  if (!expandedData || expandedData.length === 0) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
-        No data available
-      </div>
-    );
-  }
 
   const handleWheel = (e) => {
     const expandedContainer = e.currentTarget;
     const expandedTableWrapper =
       expandedContainer.querySelector(".ant-table-body");
-    if (expandedTableWrapper) {
-      const { scrollLeft, scrollWidth, clientWidth } = expandedTableWrapper;
-      const hasHorizontalScroll = scrollWidth > clientWidth;
-      const isHorizontalScrolling = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+    if (!expandedTableWrapper) {
+      return;
+    }
 
-      if (isHorizontalScrolling && hasHorizontalScroll) {
-        return;
-      }
-      if (hasHorizontalScroll) {
-        const isAtLeftEdge = scrollLeft === 0 && e.deltaX < 0;
-        const isAtRightEdge =
-          scrollLeft + clientWidth >= scrollWidth - 1 && e.deltaX > 0;
-        if (!isAtLeftEdge && !isAtRightEdge) {
-          e.stopPropagation();
-        }
-      } else {
-        e.stopPropagation();
-      }
+    const { scrollWidth, clientWidth } = expandedTableWrapper;
+    const hasHorizontalScroll = scrollWidth > clientWidth;
+    const isHorizontalScrolling = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+
+    // Stop scroll chaining to parent table on horizontal scroll,
+    // even when at left/right edge.
+    if (hasHorizontalScroll && isHorizontalScrolling) {
+      e.stopPropagation();
     }
   };
 
   return (
     <div
       className="bg-white"
-      style={{ marginLeft: "28px" }}
+      style={{
+        marginLeft: "28px",
+        overscrollBehaviorX: "contain",
+      }}
       onWheel={handleWheel}
     >
       <TableRBI
@@ -379,7 +352,7 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
         columns={expandedColumns}
         dataSource={expandedData}
         size="small"
-        tableScrolled={{ x: 2000, y:200}}
+        tableScrolled={{ x: 2000, y: 200 }}
         showExport={false}
         showAdvanceSearch={false}
         showSearchBar={false}

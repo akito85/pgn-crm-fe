@@ -10,6 +10,8 @@ import {
 import SelectComponent from "../../../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../../../components/InputComponent";
 import { hasValue } from "../../../../../../../../utils";
+import BaseContainer from "../../../../../../../../components/BaseContainer";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 
 import RadioTabs from "../../../../../../../../components/RadioTabs";
 import TableLateCharge from "./TableLateCharge";
@@ -129,10 +131,12 @@ const SaDetail = ({
   const [modalChooseTos, setModalChooseTos] = useState(false);
   const priceAdjustmentData = priceAdjustment;
   useEffect(() => {
-    saDetailObj.pricingRule === -1
-      ? setIsCustomTiering(true)
-      : setIsCustomTiering(false);
-  }, [saDetailObj.pricingRule]);
+    if (saDetailObj) {
+      saDetailObj.pricingRule === -1
+        ? setIsCustomTiering(true)
+        : setIsCustomTiering(false);
+    }
+  }, [saDetailObj?.pricingRule]);
 
   useEffect(() => {
     // if (saDetailObj.createFrom === 2) {
@@ -145,11 +149,10 @@ const SaDetail = ({
 
     setSaDetailObj((prevState) => ({
       ...prevState,
-      priceCodeText: `${
-        selectedPriceCode?.priceCode
-      }${selectedPriceCode?.mpricingDetail
-        ?.map((item) => `/${item.currency}/${item.value}/${item.uomName}`)
-        .join("")}`.replace(/\n/g, ""),
+      priceCodeText: `${selectedPriceCode?.priceCode
+        }${selectedPriceCode?.mpricingDetail
+          ?.map((item) => `/${item.currency}/${item.value}/${item.uomName}`)
+          .join("")}`.replace(/\n/g, ""),
       pricingRuleText: hasValue(selectedPriceRule)
         ? selectedPriceRule?.name
         : "Custom Tiering",
@@ -158,7 +161,7 @@ const SaDetail = ({
   }, [
     data_price_code,
     data_price_rule,
-    saDetailObj.createFrom,
+    saDetailObj?.createFrom,
     saDetailObj?.priceCode,
     saDetailObj?.pricingRule,
     setSaDetailObj,
@@ -250,9 +253,9 @@ const SaDetail = ({
   };
 
   // Show Hide Section Detial By Create From Id (1 or 2)
-  const isCreateFromTwo = saDetailObj.createFrom === 2;
+  const isCreateFromTwo = saDetailObj?.createFrom === 2;
   const isCreateFromOneWithData =
-    saDetailObj.createFrom === 1 && Object.keys(dataDetailProduct).length !== 0;
+    saDetailObj?.createFrom === 1 && Object.keys(dataDetailProduct).length !== 0;
   const isDataAddon = saRecordData?.typeSa === "Amendment";
 
   const getLateCharge = (priceCodeId) => {
@@ -260,7 +263,7 @@ const SaDetail = ({
       accountId: idAccount,
       productVersionId:
         Object.keys(dataDetailProduct).length > 0
-          ? saDetailObj.productVersionId
+          ? saDetailObj?.productVersionId
           : null,
       priceCode: [priceCodeId],
     };
@@ -344,7 +347,7 @@ const SaDetail = ({
               accountId: idAccount,
               productVersionId:
                 Object.keys(dataDetailProduct).length > 0
-                  ? saDetailObj.productVersionId
+                  ? saDetailObj?.productVersionId
                   : null,
               priceCode: arrPriceId,
             };
@@ -386,9 +389,8 @@ const SaDetail = ({
     if (findPriceDetail) {
       const adjustmentOne = findPriceDetail[0]?.adjustment;
       const adjustmentTwo = findPriceDetail[1]?.adjustment;
-      const mergedAdjustmentText = `${adjustmentOne?.adjustmentText || ""} - ${
-        adjustmentTwo?.adjustmentText || ""
-      }`.trim();
+      const mergedAdjustmentText = `${adjustmentOne?.adjustmentText || ""} - ${adjustmentTwo?.adjustmentText || ""
+        }`.trim();
       const cleanedString = mergedAdjustmentText.replace(/-+$/, "");
       setPriceAdjustmentSelect(cleanedString);
 
@@ -404,410 +406,466 @@ const SaDetail = ({
     setPriceAdjustment(e);
   };
   return (
-    <div>
-      {/* Start Section Create Form & Choose Product */}
-      <div className="pt-8 pb-4">
-        <h3 className="text-primary text-xs font-bold uppercase">
-          SERVICE AGREEMENT DETAIL
-        </h3>
-      </div>
-      <div className={"grid grid-cols-2 w-full gap-x-6"}>
-        <Form.Item
-          name={"createFrom"}
-          label={"Create From"}
-          getValueFromEvent={(e) => {
-            handleSaDetailObj(e, "createFrom");
-            handleLabelAdjustment(e);
-          }}
-          rules={[
-            {
-              message: "Please input your Create From",
-              required: true,
-            },
-          ]}
-        >
-          <SelectComponent
-            onChange={(e) => {
-              handleShowHideTable(e);
-              setSaDetailObj({ createFrom: e });
-              form.setFieldsValue({ createFrom: e });
-            }}
-            disabled={saRecordData.typeSa === "Amendment"}
-          >
-            <Select.Option key={1} value={1}>
-              PRODUCT
-            </Select.Option>
-            <Select.Option key={2} value={2}>
-              CUSTOM
-            </Select.Option>
-          </SelectComponent>
-        </Form.Item>
-        {saDetailObj.createFrom === 1 && (
-          <Form.Item
-            label={
-              <>
-                Choose Product{" "}
-                <span className={"pl-1"} style={{ color: "red" }}>
-                  *
-                </span>
-              </>
-            }
-          >
-            <div className="flex flex-row">
-              <Input.Group compact>
-                <Form.Item
-                  name={"chooseProduct"}
-                  rules={[
-                    {
-                      message: "Please input your Choose Product",
-                      required: true,
-                    },
-                  ]}
-                  noStyle
-                  getValueFromEvent={() =>
-                    handleSaDetailObj(idProduct, "chooseProduct")
-                  }
-                >
-                  <Input value={saDetailObj.productName} disabled={true} />
-                </Form.Item>
-                {saRecordData.typeSa !== "Amendment" && (
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      setModalChooseProduct(true);
-                    }}
-                  >
-                    Choose
-                  </Button>
-                )}
-              </Input.Group>
-            </div>
-          </Form.Item>
-        )}
-      </div>
-
-      {/* Start Section Product Type */}
-      {saDetailObj.createFrom === 1 && (
-        <div>
-          <div className={"grid grid-cols-4 w-full gap-x-6"}>
+    <NxCardContainer header={"SERVICE AGREEMENT DETAIL"}>
+      <div className="flex flex-col gap-y-4">
+        {/* Start Section Create Form & Choose Product */}
+        <BaseContainer border header={"CREATE FROM"}>
+          <div className={"grid grid-cols-2 w-full gap-x-6"}>
             <Form.Item
-              name={"productType"}
-              label={"Product Type"}
-              getValueFromEvent={(e) => handleSaDetailObj(e, "productType")}
-            >
-              <InputComponent disabled={true} />
-            </Form.Item>
-            <Form.Item
-              name={"serviceTypeProduct"}
-              label={"Service Type"}
-              getValueFromEvent={(e) =>
-                handleSaDetailObj(e, "serviceTypeProduct")
-              }
-            >
-              <InputComponent disabled={true} />
-            </Form.Item>
-            <Form.Item
-              name={"productClass"}
-              label={"Product Class"}
-              getValueFromEvent={(e) => handleSaDetailObj(e, "productClass")}
-            >
-              <InputComponent disabled={true} />
-            </Form.Item>
-            <Form.Item
-              name={"productVersionId"}
-              label={"Product Version"}
-              getValueFromEvent={(e) =>
-                handleSaDetailObj(e, "productVersionId")
-              }
+              name={"createFrom"}
+              label={"Create From"}
+              getValueFromEvent={(e) => {
+                handleSaDetailObj(e, "createFrom");
+                handleLabelAdjustment(e);
+              }}
               rules={[
                 {
-                  message: "Please input your Product Version",
+                  message: "Please input your Create From",
                   required: true,
                 },
               ]}
             >
               <SelectComponent
-                onChange={(e) => getDetailProductByVersionId(e)}
-                disabled={saRecordData.typeSa === "Amendment"}
+                onChange={(e) => {
+                  handleShowHideTable(e);
+                  setSaDetailObj({ createFrom: e });
+                  form.setFieldsValue({ createFrom: e });
+                }}
+                disabled={false}
               >
-                {dataListVersion?.map((item) => (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item?.name}
-                  </Select.Option>
-                ))}
+                <Select.Option key={1} value={1}>
+                  PRODUCT
+                </Select.Option>
+                <Select.Option key={2} value={2}>
+                  CUSTOM
+                </Select.Option>
               </SelectComponent>
             </Form.Item>
-            {/* Description      */}
-            {/* {dataTableDetailProduct?.product?.description && ( */}
-            {/* )} */}
+            {saDetailObj?.createFrom === 1 && (
+              <Form.Item
+                label={
+                  <>
+                    Choose Product{" "}
+                    <span className={"pl-1"} style={{ color: "red" }}>
+                      *
+                    </span>
+                  </>
+                }
+              >
+                <div className="flex flex-row">
+                  <Input.Group compact>
+                    <Form.Item
+                      name={"chooseProduct"}
+                      rules={[
+                        {
+                          message: "Please input your Choose Product",
+                          required: true,
+                        },
+                      ]}
+                      noStyle
+                      getValueFromEvent={() =>
+                        handleSaDetailObj(idProduct, "chooseProduct")
+                      }
+                    >
+                      <Input value={saDetailObj?.productName} disabled={true} />
+                    </Form.Item>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        setModalChooseProduct(true);
+                      }}
+                    >
+                      Choose
+                    </Button>
+                  </Input.Group>
+                </div>
+              </Form.Item>
+            )}
           </div>
-          <div className={"grid grid-cols-1 w-full gap-x-6"}>
-            {/* <p>Description</p>
+        </BaseContainer>
+
+        {/* Start Section Product Type */}
+        {saDetailObj?.createFrom === 1 && (
+          <BaseContainer border header={"PRODUCT INFORMATION"}>
+            <div className={"grid grid-cols-4 w-full gap-x-6"}>
+              <Form.Item
+                name={"productType"}
+                label={"Product Type"}
+                getValueFromEvent={(e) => handleSaDetailObj(e, "productType")}
+              >
+                <InputComponent disabled={true} />
+              </Form.Item>
+              <Form.Item
+                name={"serviceTypeProduct"}
+                label={"Service Type"}
+                getValueFromEvent={(e) =>
+                  handleSaDetailObj(e, "serviceTypeProduct")
+                }
+              >
+                <InputComponent disabled={true} />
+              </Form.Item>
+              <Form.Item
+                name={"productClass"}
+                label={"Product Class"}
+                getValueFromEvent={(e) => handleSaDetailObj(e, "productClass")}
+              >
+                <InputComponent disabled={true} />
+              </Form.Item>
+              <Form.Item
+                name={"productVersionId"}
+                label={"Product Version"}
+                getValueFromEvent={(e) =>
+                  handleSaDetailObj(e, "productVersionId")
+                }
+                rules={[
+                  {
+                    message: "Please input your Product Version",
+                    required: true,
+                  },
+                ]}
+              >
+                <SelectComponent
+                  onChange={(e) => getDetailProductByVersionId(e)}
+                  disabled={false}
+                >
+                  {dataListVersion?.map((item) => (
+                    <Select.Option key={item.id} value={item.id}>
+                      {item?.name}
+                    </Select.Option>
+                  ))}
+                </SelectComponent>
+              </Form.Item>
+              {/* Description      */}
+              {/* {dataTableDetailProduct?.product?.description && ( */}
+              {/* )} */}
+            </div>
+            <div className={"grid grid-cols-1 w-full gap-x-6"}>
+              {/* <p>Description</p>
             <p>{dataTableDetailProduct?.product?.description}</p> */}
-            <Form.Item
-              name={"descriptionProduct"}
-              label={"Description"}
-              getValueFromEvent={(e) =>
-                handleSaDetailObj(e, "descriptionProduct")
-              }
-            >
-              <InputComponent type="textarea" disabled={true} />
-            </Form.Item>
-          </div>
-        </div>
-      )}
+              <Form.Item
+                name={"descriptionProduct"}
+                label={"Description"}
+                getValueFromEvent={(e) =>
+                  handleSaDetailObj(e, "descriptionProduct")
+                }
+              >
+                <InputComponent type="textarea" disabled={true} />
+              </Form.Item>
+            </div>
+          </BaseContainer>
+        )}
 
-      {(isCreateFromTwo || isCreateFromOneWithData || isDataAddon) && (
-        <>
-          {/* Table Product Detail */}
-          <TableProduct
-            dispatch={dispatch}
-            dataTableProduct={dataTableProduct}
-            setDataTableProduct={setDataTableProduct}
-            isProduct={saDetailObj.createFrom}
-            // dataFromProductVersion={productDetail}
-            dataTableDetailProduct={dataTableDetailProduct}
-            handleSaDetailObj={handleSaDetailObj}
-            setSaDetailObj={setSaDetailObj}
-            saDetailObj={saDetailObj}
-          />
+        {(isCreateFromTwo || isCreateFromOneWithData || isDataAddon) && (
+          <>
+            <BaseContainer border>
 
-          {/* Section Table Service Agreement Detail */}
-          <div className="pt-8 pb-4">
-            {/* ==== Tabs ==== */}
-            <div>
-              <RadioTabs data={tabPagesSaDetail} onChange={onChange} currentPosition={valuePage}/>
+              {/* Table Product Detail */}
+              <TableProduct
+                dispatch={dispatch}
+                dataTableProduct={dataTableProduct}
+                setDataTableProduct={setDataTableProduct}
+                isProduct={saDetailObj?.createFrom}
+                // dataFromProductVersion={productDetail}
+                dataTableDetailProduct={dataTableDetailProduct}
+                handleSaDetailObj={handleSaDetailObj}
+                setSaDetailObj={setSaDetailObj}
+                saDetailObj={saDetailObj}
+              />
 
-              <div className="py-8">
-                {/* Tab Pricing */}
-                <div className={`${valuePage !== "Pricing" ? "hidden" : ""}`}>
-                  <div className={"grid grid-cols-2 w-full gap-x-6"}>
-                    {/* DDL PRICE CODE */}
-                    <div>
-                      <p className="text-primary text-xs font-bold uppercase py-b">
-                        PRICE CODE
-                      </p>
-                      <Form.Item
-                        name={"priceCode"}
-                        label={"Price Code"}
-                        rules={[
-                          {
-                            message: "Please input your Price Code",
-                            required: true,
-                          },
-                        ]}
-                        getValueFromEvent={(e) =>
-                          handleSaDetailObj(e, "priceCode")
-                        }
-                      >
-                        <SelectComponent
-                          onChange={(e) => {
-                            {
-                              e !== undefined && getLateCharge(e);
+            </BaseContainer>
+            <BaseContainer border>
+              {/* Section Table Service Agreement Detail */}
+              <div className="pt-8 pb-4">
+                {/* ==== Tabs ==== */}
+                <div>
+                  <RadioTabs data={tabPagesSaDetail} onChange={onChange} currentPosition={valuePage} />
+
+                  <div className="py-8">
+                    {/* Tab Pricing */}
+                    <div className={`${valuePage !== "Pricing" ? "hidden" : ""}`}>
+                      <div className={"grid grid-cols-2 w-full gap-x-6"}>
+                        {/* DDL PRICE CODE */}
+                        <div>
+                          <p className="text-primary text-xs font-bold uppercase py-b">
+                            PRICE CODE
+                          </p>
+                          <Form.Item
+                            name={"priceCode"}
+                            label={"Price Code"}
+                            rules={[
+                              {
+                                message: "Please input your Price Code",
+                                required: true,
+                              },
+                            ]}
+                            getValueFromEvent={(e) =>
+                              handleSaDetailObj(e, "priceCode")
                             }
-                            handleLabelAdjustment(e);
-                          }}
-                        >
-                          {ddlPriceCode?.map((item) => (
-                            <Select.Option key={item.id} value={item.id}>
-                              {item.priceCode}
-                              {item?.mpricingDetail?.map((val) => (
-                                <>
-                                  <span>
-                                    /{val.currency}/{val.value}/{val.uomName}
-                                  </span>
-                                </>
+                          >
+                            <SelectComponent
+                              onChange={(e) => {
+                                {
+                                  e !== undefined && getLateCharge(e);
+                                }
+                                handleLabelAdjustment(e);
+                              }}
+                            >
+                              {ddlPriceCode?.map((item) => (
+                                <Select.Option key={item.id} value={item.id}>
+                                  {item.priceCode}
+                                  {item?.mpricingDetail?.map((val) => (
+                                    <>
+                                      <span>
+                                        /{val.currency}/{val.value}/{val.uomName}
+                                      </span>
+                                    </>
+                                  ))}
+                                </Select.Option>
                               ))}
-                            </Select.Option>
-                          ))}
-                        </SelectComponent>
-                      </Form.Item>
-                    </div>
+                            </SelectComponent>
+                          </Form.Item>
+                        </div>
 
-                    {/* LABEL PRICE ADJUSTMENT */}
-                    <div>
-                      <p className="text-primary text-xs font-bold uppercase py-b">
-                        PRICE ADJUSTMENT
-                      </p>
-                      {/* <span>
+                        {/* LABEL PRICE ADJUSTMENT */}
+                        <div>
+                          <p className="text-primary text-xs font-bold uppercase py-b">
+                            PRICE ADJUSTMENT
+                          </p>
+                          {/* <span>
                         {priceAdjustmentSelect}
                       </span> */}
-                      <Form.Item
-                        name={"priceAdjustment"}
-                        label={"Price Adjustment"}
-                        getValueFromEvent={(e) =>
-                          handleSaDetailObj(e, "priceAdjustment")
-                        }
-                      >
-                        <InputComponent disabled={true} />
-                      </Form.Item>
-                    </div>
-                  </div>
-
-                  <div className={"grid grid-cols-1 w-full gap-x-6"}>
-                    {/* DDL PRICE RULE */}
-                    <div>
-                      <p className="text-primary text-xs font-bold uppercase py-b">
-                        PRICING RULE
-                      </p>
-                      <Form.Item
-                        name={"pricingRule"}
-                        label={"Pricing Rule"}
-                        // rules={[
-                        //   {
-                        //     message: "Please input your",
-                        //     required: true,
-                        //   },
-                        // ]}
-                        getValueFromEvent={(e) =>
-                          handleSaDetailObj(e, "pricingRule")
-                        }
-                      >
-                        <SelectComponent
-                          onChange={(e) => {
-                            if (e !== undefined) {
-                              handleGetDetailPricing(e);
-                              setIsCustomTiering(e === -1 ? true : false);
-                            } else {
-                              setDataPricing([]);
+                          <Form.Item
+                            name={"priceAdjustment"}
+                            label={"Price Adjustment"}
+                            getValueFromEvent={(e) =>
+                              handleSaDetailObj(e, "priceAdjustment")
                             }
-                          }}
-                        >
-                          {ddlPriceRule?.map((item) => (
-                            <Select.Option
-                              key={item.pricingRuleId}
-                              value={item.pricingRuleId}
+                          >
+                            <InputComponent disabled={true} />
+                          </Form.Item>
+                        </div>
+                      </div>
+
+                      <div className={"grid grid-cols-1 w-full gap-x-6"}>
+                        {/* DDL PRICE RULE */}
+                        <div>
+                          <p className="text-primary text-xs font-bold uppercase py-b">
+                            PRICING RULE
+                          </p>
+                          <Form.Item
+                            name={"pricingRule"}
+                            label={"Pricing Rule"}
+                            // rules={[
+                            //   {
+                            //     message: "Please input your",
+                            //     required: true,
+                            //   },
+                            // ]}
+                            getValueFromEvent={(e) =>
+                              handleSaDetailObj(e, "pricingRule")
+                            }
+                          >
+                            <SelectComponent
+                              onChange={(e) => {
+                                if (e !== undefined) {
+                                  handleGetDetailPricing(e);
+                                  setIsCustomTiering(e === -1 ? true : false);
+                                } else {
+                                  setDataPricing([]);
+                                }
+                              }}
                             >
-                              {item.name}
-                            </Select.Option>
-                          ))}
-                        </SelectComponent>
-                      </Form.Item>
+                              {ddlPriceRule?.map((item) => (
+                                <Select.Option
+                                  key={item.pricingRuleId}
+                                  value={item.pricingRuleId}
+                                >
+                                  {item.name}
+                                </Select.Option>
+                              ))}
+                            </SelectComponent>
+                          </Form.Item>
+                        </div>
+                      </div>
+
+                      <TablePricing
+                        setData={setDataPricing}
+                        data={dataPricing}
+                        setValueOrUnlimited={setValueOrUnlimited}
+                        valueOrUnlimited={valueOrUnlimited}
+                        type={type}
+                        isProduct={saDetailObj?.createFrom}
+                        dataFromApi={dataPricingTable}
+                        ddlPriceCode={ddlPriceCode}
+                        // dataMapPricing={dataDetailPricing}
+                        isCustomTiering={isCustomTiering}
+                        idCreateFrom={idCreateFrom}
+                      />
                     </div>
+
+                    {/* Calculation Rule */}
+                    <div
+                      className={`${valuePage !== "Calculation Rule" ? "hidden" : ""
+                        }`}
+                    >
+                      <TableCalcRule
+                        dispatch={dispatch}
+                        dataTable={dataTableCalcRule}
+                        updateTable={setDataTableCalcRule}
+                        isProduct={saDetailObj?.createFrom}
+                        handleSaDetailObj={handleSaDetailObj}
+                        setSaDetailObj={setSaDetailObj}
+                        saDetailObj={saDetailObj}
+                      // data={calculationRule}
+                      />
+                    </div>
+
+                    {/* Term Of Service */}
+                    <div
+                      className={`${valuePage !== "Term of Service" ? "hidden" : ""
+                        }`}
+                    >
+                      <TableTos
+                        isProduct={saDetailObj?.createFrom}
+                        dataTermOfService={dataTermOfService}
+                        setDataTermOfService={setDataTermOfService}
+                        setModalFormTos={setModalFormTos}
+                        openModalFormTos={openModalFormTos}
+                        setModalChooseTos={setModalChooseTos}
+                        dataTableDetailProduct={dataTableDetailProduct}
+                      />
+                    </div>
+
+                    {/* Late Charge */}
+                    <div
+                      className={`${valuePage !== "Late Charge" ? "hidden" : ""}`}
+                    >
+                      <TableLateCharge
+                        dataTableLateCharge={dataTableLateCharge}
+                        setDataTableLateCharge={setDataTableLateCharge}
+                      />
+                    </div>
+
+                    {/* Tax Implication */}
+                    <div
+                      className={`${valuePage !== "Tax Implication" ? "hidden" : ""
+                        }`}
+                    >
+                      <TableTaxImplication
+                        dataTaxImplication={dataTaxImplication}
+                        setDataTaxImplication={setDataTaxImplication}
+                      />
+                    </div>
+
+                    <div className={"grid grid-cols-1 w-full gap-x-6"}>
+                      {/* DDL PRICE RULE */}
+                      <div>
+                        <p className="text-primary text-xs font-bold uppercase py-b">
+                          PRICING RULE
+                        </p>
+                        <Form.Item
+                          name={"pricingRule"}
+                          label={"Pricing Rule"}
+                          // rules={[
+                          //   {
+                          //     message: "Please input your",
+                          //     required: true,
+                          //   },
+                          // ]}
+                          getValueFromEvent={(e) =>
+                            handleSaDetailObj(e, "pricingRule")
+                          }
+                        >
+                          <SelectComponent
+                            onChange={(e) => {
+                              if (e !== undefined) {
+                                handleGetDetailPricing(e);
+                                setIsCustomTiering(e === -1 ? true : false);
+                              } else {
+                                setDataPricing([]);
+                              }
+                            }}
+                          >
+                            {ddlPriceRule?.map((item) => (
+                              <Select.Option
+                                key={item.pricingRuleId}
+                                value={item.pricingRuleId}
+                              >
+                                {item.name}
+                              </Select.Option>
+                            ))}
+                          </SelectComponent>
+                        </Form.Item>
+                      </div>
+                    </div>
+
+                    <TablePricing
+                      setData={setDataPricing}
+                      data={dataPricing}
+                      setValueOrUnlimited={setValueOrUnlimited}
+                      valueOrUnlimited={valueOrUnlimited}
+                      type={type}
+                      isProduct={saDetailObj?.createFrom}
+                      dataFromApi={dataPricingTable}
+                      ddlPriceCode={ddlPriceCode}
+                      // dataMapPricing={dataDetailPricing}
+                      isCustomTiering={isCustomTiering}
+                      idCreateFrom={idCreateFrom}
+                    />
                   </div>
-
-                  <TablePricing
-                    setData={setDataPricing}
-                    data={dataPricing}
-                    setValueOrUnlimited={setValueOrUnlimited}
-                    valueOrUnlimited={valueOrUnlimited}
-                    type={type}
-                    isProduct={saDetailObj.createFrom}
-                    dataFromApi={dataPricingTable}
-                    ddlPriceCode={ddlPriceCode}
-                    // dataMapPricing={dataDetailPricing}
-                    isCustomTiering={isCustomTiering}
-                    idCreateFrom={idCreateFrom}
-                  />
-                </div>
-
-                {/* Calculation Rule */}
-                <div
-                  className={`${
-                    valuePage !== "Calculation Rule" ? "hidden" : ""
-                  }`}
-                >
-                  <TableCalcRule
-                    dispatch={dispatch}
-                    dataTable={dataTableCalcRule}
-                    updateTable={setDataTableCalcRule}
-                    isProduct={saDetailObj.createFrom}
-                    handleSaDetailObj={handleSaDetailObj}
-                    setSaDetailObj={setSaDetailObj}
-                    saDetailObj={saDetailObj}
-                    // data={calculationRule}
-                  />
-                </div>
-
-                {/* Term Of Service */}
-                <div
-                  className={`${
-                    valuePage !== "Term of Service" ? "hidden" : ""
-                  }`}
-                >
-                  <TableTos
-                    isProduct={saDetailObj.createFrom}
-                    dataTermOfService={dataTermOfService}
-                    setDataTermOfService={setDataTermOfService}
-                    setModalFormTos={setModalFormTos}
-                    openModalFormTos={openModalFormTos}
-                    setModalChooseTos={setModalChooseTos}
-                    dataTableDetailProduct={dataTableDetailProduct}
-                  />
-                </div>
-
-                {/* Late Charge */}
-                <div
-                  className={`${valuePage !== "Late Charge" ? "hidden" : ""}`}
-                >
-                  <TableLateCharge
-                    dataTableLateCharge={dataTableLateCharge}
-                    setDataTableLateCharge={setDataTableLateCharge}
-                  />
-                </div>
-
-                {/* Tax Implication */}
-                <div
-                  className={`${
-                    valuePage !== "Tax Implication" ? "hidden" : ""
-                  }`}
-                >
-                  <TableTaxImplication
-                    dataTaxImplication={dataTaxImplication}
-                    setDataTaxImplication={setDataTaxImplication}
-                  />
                 </div>
               </div>
-            </div>
-          </div>
-        </>
-      )}
 
-      {/* Modal Choose Product */}
-      {modalChooseProduct ? (
-        <ModalChooseProduct
-          modalChooseProduct={modalChooseProduct}
-          setModalChooseProduct={setModalChooseProduct}
-          dataProduct={data_product}
-          getProductDetailById={getProductDetailById}
-          getListProduct={getListProduct}
-          idAccount={idAccount}
-          serviceType={saInfoObj.serviceType}
-          dispatch={dispatch}
-          isMain={isMain}
-          saRecordData={saRecordData}
-        />
-      ) : null}
+            </BaseContainer>
+          </>
+        )}
 
-      {/* Modal TOS Form */}
-      {modalFormTos ? (
-        <ModalForm
-          modalFormTos={modalFormTos}
-          closeModalFormTos={closeModalFormTos}
-          dataFormTosModal={dataFormTosModal}
-          dataTermOfService={dataTermOfService}
-          setDataTermOfService={setDataTermOfService}
-          tempDataUpdateTos={tempDataUpdateTos}
-          resetTableTosUpdate={resetTableTosUpdate}
-          dataTableTos={dataTableTos}
-          setDataTableTos={setDataTableTos}
-          setModalFormTos={setModalFormTos}
-        />
-      ) : null}
+        {/* Modal Choose Product */}
+        {modalChooseProduct ? (
+          <ModalChooseProduct
+            modalChooseProduct={modalChooseProduct}
+            setModalChooseProduct={setModalChooseProduct}
+            dataProduct={data_product}
+            getProductDetailById={getProductDetailById}
+            getListProduct={getListProduct}
+            idAccount={idAccount}
+            serviceType={saInfoObj.serviceType}
+            dispatch={dispatch}
+            isMain={isMain}
+            saRecordData={saRecordData}
+          />
+        ) : null}
 
-      {modalChooseTos ? (
-        <ModalChooseTos
-          idAccount={idAccount}
-          isOpen={modalChooseTos}
-          setModalChooseTos={setModalChooseTos}
-          getListChooseTos={getListChooseTos}
-          dispatch={dispatch}
-          dataListChooseTos={dataListChooseTos}
-          handleSelectTos={handleSelectTos}
-          isIdChoose={isIdChoose}
-        />
-      ) : null}
-    </div>
+        {/* Modal TOS Form */}
+        {modalFormTos ? (
+          <ModalForm
+            modalFormTos={modalFormTos}
+            closeModalFormTos={closeModalFormTos}
+            dataFormTosModal={dataFormTosModal}
+            dataTermOfService={dataTermOfService}
+            setDataTermOfService={setDataTermOfService}
+            tempDataUpdateTos={tempDataUpdateTos}
+            resetTableTosUpdate={resetTableTosUpdate}
+            dataTableTos={dataTableTos}
+            setDataTableTos={setDataTableTos}
+            setModalFormTos={setModalFormTos}
+          />
+        ) : null}
+
+        {modalChooseTos ? (
+          <ModalChooseTos
+            idAccount={idAccount}
+            isOpen={modalChooseTos}
+            setModalChooseTos={setModalChooseTos}
+            getListChooseTos={getListChooseTos}
+            dispatch={dispatch}
+            dataListChooseTos={dataListChooseTos}
+            handleSelectTos={handleSelectTos}
+            isIdChoose={isIdChoose}
+          />
+        ) : null}
+      </div>
+    </NxCardContainer>
   );
 };
 

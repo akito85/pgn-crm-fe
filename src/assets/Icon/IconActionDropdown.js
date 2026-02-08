@@ -6,8 +6,10 @@ const SVG = ({
   className = "",
   color = "#4B465C",
   onClick = () => {},
+  ...otherProps
 }) => (
   <svg
+    {...otherProps}
     width={width}
     style={style}
     height={width}

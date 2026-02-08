@@ -27,6 +27,8 @@ const initialState = {
   dataApprovalHistory: {},
   dataListAppHierDetail: [],
   dataListAppHierId: [],
+  list_saApproval: [],
+  pagination_saApproval: {},
   loading: false,
   isFailed: false,
   isSuccess: false,
@@ -153,9 +155,8 @@ export const createServiceAgreement = createAsyncThunk(
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body?.isDraft ? "created" : "submitted"
-        }.`,
+        description: `Your data has been ${body?.isDraft ? "created" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -169,9 +170,8 @@ export const createServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body?.isDraft ? "created" : "submitted"
-          }. ${message}.`,
+          description: `Your data was not ${body?.isDraft ? "created" : "submitted"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -194,9 +194,8 @@ export const updateServiceAgreement = createAsyncThunk(
       );
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body?.isSubmit ? "submitted" : "updated"
-        }.`,
+        description: `Your data has been ${body?.isSubmit ? "submitted" : "updated"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -210,9 +209,8 @@ export const updateServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body?.isSubmit ? "submitted" : "updated"
-          }. ${message}.`,
+          description: `Your data was not ${body?.isSubmit ? "submitted" : "updated"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -284,9 +282,8 @@ export const approveOrRejectInactiveServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -317,9 +314,8 @@ export const approveOrRejectServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -588,9 +584,95 @@ export const checkValidateCreateSa = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/sa/checkValidateCreateSa`;
       const response = await accountManagementService.createData(url, body);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Export Excel
+export const downloadServiceAgreement = createAsyncThunk(
+  "DOWNLOAD_SERVICE_AGREEMENT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/download`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
       return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Service Agreement Approval List (TODO: Update URL when backend is ready)
+export const getServiceAgreementApproval = createAsyncThunk(
+  "GET_SERVICE_AGREEMENT_APPROVAL",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      // TODO: Replace with actual API endpoint when backend is ready
+      // const url = `/v1/dbs/api/sa/get-list-approval/${id}`;
+      // const response = await accountManagementService.createData(url, body);
+      // return { ...response.data, isLoadMore };
+
+      // Placeholder: return empty result until API is ready
+      return {
+        result: [],
+        page: {
+          totalElements: 0,
+          totalPages: 0,
+        },
+        isLoadMore,
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Bulk Approve or Reject Service Agreement (TODO: Update when backend is ready)
+export const approveOrRejectAllServiceAgreement = createAsyncThunk(
+  "APPROVE_OR_REJECT_ALL_SERVICE_AGREEMENT",
+  async ({ body, inactiveBody, action }, thunkAPI) => {
+    try {
+      // TODO: Replace with actual bulk API endpoint when backend is ready
+      // Process SERVICE_AGREEMENT approvals
+      const approvePromises = body.map((item) => {
+        const url = "/v1/dbs/api/sa/approve";
+        return accountManagementService.activationWithRemark(url, item);
+      });
+
+      // Process INACTIVE_SERVICE_AGREEMENT approvals
+      const inactivePromises = inactiveBody.map((item) => {
+        const url = "/v1/dbs/api/sa/approveInactive";
+        return accountManagementService.activationWithRemark(url, item);
+      });
+
+      await Promise.all([...approvePromises, ...inactivePromises]);
+
+      const successBody = {
+        title: "Successful",
+        description: `Your data has been ${action}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return { success: true };
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${action}. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
@@ -1107,6 +1189,37 @@ const accountServiceAgreementSlice = createSlice({
     [getGlobalPropertiesAttachment.rejected]: (state, action) => {
       state.dataGlobalPropAttachment = action.payload;
       state.loadingProduct = false;
+    },
+
+    // Get Service Agreement Approval
+    [getServiceAgreementApproval.pending]: (state) => {
+      state.loading = true;
+    },
+    [getServiceAgreementApproval.fulfilled]: (state, action) => {
+      if (action.payload?.isLoadMore) {
+        state.list_saApproval = [
+          ...state.list_saApproval,
+          ...(action.payload?.result || []),
+        ];
+      } else {
+        state.list_saApproval = action.payload?.result || [];
+      }
+      state.pagination_saApproval = action.payload?.page || {};
+      state.loading = false;
+    },
+    [getServiceAgreementApproval.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // Approve or Reject All Service Agreement
+    [approveOrRejectAllServiceAgreement.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectAllServiceAgreement.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectAllServiceAgreement.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });

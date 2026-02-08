@@ -280,7 +280,7 @@ const ListFormPaymentChannel = (props) => {
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL,
-      breadcrumbName: "Payment Channel",
+      breadcrumbName: "Delivery Channel",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PAYMENT_CHANNEL,
@@ -478,6 +478,7 @@ const ListFormPaymentChannel = (props) => {
             onCancel={handleBack}
             onClear={handleClear}
             onSaveDraft={handleSaveDraft}
+            onSubmit={() => form.submit()}
             type={type}
           />
         </Form>
