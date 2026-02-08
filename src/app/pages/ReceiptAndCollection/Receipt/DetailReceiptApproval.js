@@ -281,7 +281,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     expandIcon={({ isActive }) => (
                         <DownOutlined rotate={isActive ? 180 : 0} />
                     )}
-                    className="mb-5"
+                    style={{ marginBottom: '24px' }}
                 >
                     <Panel header="RECEIPT DETAIL" key="receipt">
                         <div className="w-full grid grid-cols-3 gap-3 mb-5">
@@ -328,7 +328,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     expandIcon={({ isActive }) => (
                         <DownOutlined rotate={isActive ? 180 : 0} />
                     )}
-                    className="mb-5"
+                    style={{ marginBottom: '24px' }}
                 >
                     <Panel header="ALLOCATION DETAIL" key="allocation">
                         <TableRBI
@@ -357,7 +357,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     expandIcon={({ isActive }) => (
                         <DownOutlined rotate={isActive ? 180 : 0} />
                     )}
-                    className="mb-5"
+                    style={{ marginBottom: '24px' }}
                 >
                     <Panel header={`${actualType.toUpperCase()} DETAIL`} key={actualType}>
                         <RadioTabs
@@ -414,7 +414,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     expandIcon={({ isActive }) => (
                         <DownOutlined rotate={isActive ? 180 : 0} />
                     )}
-                    className="mb-5"
+                    style={{ marginBottom: '24px' }}
                 >
                     <Panel header="HISTORY LOG INFORMATION" key="history">
                         <div className="w-full grid grid-cols-4 gap-3">
