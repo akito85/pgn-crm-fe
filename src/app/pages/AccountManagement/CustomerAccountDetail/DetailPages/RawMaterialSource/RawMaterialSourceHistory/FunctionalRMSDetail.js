@@ -32,6 +32,7 @@ const EditableCell = ({
   required,
   formRMS,
   validateBoolean,
+  importVal,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -111,7 +112,7 @@ const EditableCell = ({
           }
           help={
             validateBoolean && inputType === "number"
-              ? "Please adjust value. Total Percentage must be 100%"
+              ? `Please adjust value. Total Percentage must be ${importVal}%`
               : undefined
           }
           rules={
@@ -122,12 +123,12 @@ const EditableCell = ({
                   {
                     validator: (_, value) => {
                       const percentage = formRMS.getFieldValue().percentage;
-                      if (percentage >= 0 && percentage <= 100) {
+                      if (percentage >= 0 && percentage <= importVal) {
                         return Promise.resolve();
                       } else {
                         return Promise.reject(
                           new Error(
-                            "Please adjust value. Total Percentage must be 100%"
+                            `Please adjust value. Total Percentage must be ${importVal}%`
                           )
                         );
                       }
@@ -240,6 +241,8 @@ const FunctionalRMSDetail = ({
   updateData = [],
   storedData = false,
   setStoredData = () => {},
+  localVal,
+  importVal,
 }) => {
   // Selector
   const { data_country } = useSelector((state) => state.rawMaterialSource);
@@ -375,7 +378,7 @@ const FunctionalRMSDetail = ({
         }, 0);
 
         // Check if the total percentage exceeds 100%
-        if (totalPercentage > 100) {
+        if (totalPercentage > importVal) {
           return setValidateBoolean(true);
         }
 
@@ -396,10 +399,10 @@ const FunctionalRMSDetail = ({
   // Function Add Row Data
   const addRow = () => {
     let errorBody = {};
-    if (totalPercentage === 100) {
+    if (totalPercentage === importVal) {
       errorBody = {
         title: "Failed",
-        description: "Total percentage is 100%, you cannot add data again.",
+        description: `Total percentage is ${importVal}%, you cannot add data again.`,
       };
       dispatch(showModalError(errorBody));
     } else {
@@ -593,7 +596,7 @@ const FunctionalRMSDetail = ({
 
   return (
     <div className="flex flex-col w-full gap-4">
-      {type !== "detail" && type !== "preview" ? (
+      {type !== "detail" && type !== "preview" && localVal + importVal === 100 ? (
         <div className="flex w-full justify-end">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -658,6 +661,7 @@ const FunctionalRMSDetail = ({
                   required: col.required,
                   validateBoolean: validateBoolean,
                   formRMS: formRMS,
+                  importVal: importVal,
                 }),
               }))
             )}
@@ -686,7 +690,7 @@ const FunctionalRMSDetail = ({
         {type !== "detail" && type !== "preview" ? (
           <div className={"w-full flex flex-col mt-5 gap-2 justify-start"}>
             <span className="font-bold">Total Percentage</span>
-            <span>{`${totalPercentage} / 100 %`}</span>
+            <span>{`${totalPercentage} / ${importVal} %`}</span>
           </div>
         ) : null}
       </div>

@@ -49,6 +49,8 @@ const RawMaterialSourceForm = ({ type }) => {
 
   // State
   const [description, setDescription] = useState("");
+  const [localVal, setLocalVal] = useState(0);
+  const [importVal, setImportVal] = useState(0);
   const [storedDataInline, setStoredDataInline] = useState(false);
   const [listDataDetail, setListDataDetail] = useState([]);
   const [startDate, setStartDate] = useState();
@@ -67,7 +69,9 @@ const RawMaterialSourceForm = ({ type }) => {
 
   useEffect(() => {
     if (idRMS && data_detail_history?.id === idRMS) {
-      const dataDetail = (data_detail_history?.srcDistDtl || []).map(
+      const dataDetail = (data_detail_history?.srcDistDtl || [])
+      .filter((item) => item.country !== "INDONESIA")
+      .map(
         (item, index) => {
           return {
             key: index + 1,
@@ -92,6 +96,7 @@ const RawMaterialSourceForm = ({ type }) => {
       setStartDate(moment(data_detail_history?.effectiveDate));
       setListDataDetail(dataDetail);
       setDescription(data_detail_history?.description);
+      setImportVal(data_detail_history?.value2 || 0);
     }
   }, [dispatch, id, type, data_detail_history]);
 
@@ -289,6 +294,20 @@ const RawMaterialSourceForm = ({ type }) => {
     setBodyError({});
   };
 
+  const validatePercentage = (_, value) => {
+    const local = Number(form.getFieldValue("value1") || 0);
+    const importVal = Number(form.getFieldValue("value2") || 0);
+    const total = local + importVal;
+
+    if (total !== 100) {
+      return Promise.reject(
+        new Error("Total Local + Import must be exactly 100%")
+      );
+    }
+
+    return Promise.resolve();
+  };
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -326,27 +345,45 @@ const RawMaterialSourceForm = ({ type }) => {
                 <Form.Item
                   label={"Local (%)"}
                   name={"value1"}
+                  dependencies={["value2"]}
                   rules={[
                     {
                       required: true,
                       message: "Please input your Local (%)!",
                     },
+                    { validator: validatePercentage }
                   ]}
                 >
-                  <InputComponent type={"number"} />
+                  <InputComponent
+                    type={"number"}
+                    onChange={(e) => {
+                      const val = Number(e.target.value || 0);
+                      setLocalVal(val);
+                      form.setFieldValue("value1", val);
+                    }}
+                  />
                 </Form.Item>
 
                 <Form.Item
                   label={"Import (%)"}
                   name={"value2"}
+                  dependencies={["value1"]}
                   rules={[
                     {
                       required: true,
                       message: "Please input your Import (%)!",
                     },
+                    { validator: validatePercentage }
                   ]}
                 >
-                  <InputComponent type={"number"} />
+                  <InputComponent
+                    type={"number"}
+                    onChange={(e) => {
+                      const val = Number(e.target.value || 0);
+                      setImportVal(val);
+                      form.setFieldValue("value2", val);
+                    }}
+                  />
                 </Form.Item>
 
                 <div className="col-span-3">
@@ -373,6 +410,8 @@ const RawMaterialSourceForm = ({ type }) => {
                 setStoredData={setStoredDataInline}
                 storedData={storedDataInline}
                 required={{ required: true, message: "Please input your" }}
+                localVal={localVal}
+                importVal={importVal}
               />
             </NxCardContainer>
             
