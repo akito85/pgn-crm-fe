@@ -32,6 +32,7 @@ const EditableCell = ({
   required,
   formRMS,
   validateBoolean,
+  importVal,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -111,7 +112,7 @@ const EditableCell = ({
           }
           help={
             validateBoolean && inputType === "number"
-              ? "Please adjust value. Total Percentage must be 100%"
+              ? `Please adjust value. Total Percentage must be ${importVal}%`
               : undefined
           }
           rules={
@@ -122,12 +123,12 @@ const EditableCell = ({
                   {
                     validator: (_, value) => {
                       const percentage = formRMS.getFieldValue().percentage;
-                      if (percentage >= 0 && percentage <= 100) {
+                      if (percentage >= 0 && percentage <= importVal) {
                         return Promise.resolve();
                       } else {
                         return Promise.reject(
                           new Error(
-                            "Please adjust value. Total Percentage must be 100%"
+                            `Please adjust value. Total Percentage must be ${importVal}%`
                           )
                         );
                       }
@@ -377,7 +378,7 @@ const FunctionalRMSDetail = ({
         }, 0);
 
         // Check if the total percentage exceeds 100%
-        if (totalPercentage > 100) {
+        if (totalPercentage > importVal) {
           return setValidateBoolean(true);
         }
 
@@ -660,6 +661,7 @@ const FunctionalRMSDetail = ({
                   required: col.required,
                   validateBoolean: validateBoolean,
                   formRMS: formRMS,
+                  importVal: importVal,
                 }),
               }))
             )}
