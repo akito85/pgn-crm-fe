@@ -217,7 +217,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
             loadingExpand
           ),
           rowExpandable: () => true,
-          columnWidth: 32,
+          // columnWidth: 32,
           expandIcon: ({ expanded, onExpand, record }) => (
             <Button
               type="link"

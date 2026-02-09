@@ -27,7 +27,7 @@ export const columnsCalculationSummary = (
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 60,
+    width: 48,
     render: (text, object, index) => index + 1,
   },
   {
@@ -340,7 +340,7 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     <div
       className="bg-white"
       style={{
-        marginLeft: "28px",
+        marginLeft: "45px",
         overscrollBehaviorX: "contain",
       }}
       onWheel={handleWheel}
