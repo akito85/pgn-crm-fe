@@ -88,20 +88,6 @@ const AdjustmentBillingForm = ({ type }) => {
     },
     { title: "Approval", paramValue: ["apphierId"] },
     { title: "Attachment" },
-    { title: "Attachment1" },
-    { title: "Attachment2" },
-    { title: "Attachment3" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
-    { title: "Attachment4" },
   ];
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
