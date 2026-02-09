@@ -167,8 +167,9 @@ const ModalReverseReceipt = ({
         },
         {
             title: "Amount",
-            dataIndex: "receiptAmount",
-            key: "receiptAmount",
+            dataIndex: "amount",
+            key: "amount",
+            render: (value) => value ? value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'
         }
     ];
 
