@@ -187,7 +187,7 @@ const PointOfSalesPage = ({
               >
                 <SelectComponent
                   onChange={(value) => {
-                    if (!value) {
+                    if (!value || value.length === 0) {
                       form.resetFields(["meterReadingCode"]);
                     }
                     onCostCenterChange(value);
@@ -212,23 +212,39 @@ const PointOfSalesPage = ({
             </div>
 
             <Form.Item
-              name="meterReadingCode"
-              label="Meter Reading Code"
-              style={{ marginBottom: 0 }}
+              noStyle
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.costcenter !== currentValues.costcenter
+              }
             >
-              <SelectComponent
-                onChange={onMeterReadingCodeChange}
-                disabled={
-                  !mergedArrayMrc ||
-                  mergedArrayMrc.length === 0 ||
-                  !isCostCenterFilled
-                }
-                placeholder="Select Meter Reading Code"
-                options={(mergedArrayMrc || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
-                }))}
-              />
+              {({ getFieldValue }) => {
+                const costCenter = getFieldValue("costcenter");
+                const isCostCenterFilled =
+                  costCenter &&
+                  (Array.isArray(costCenter) ? costCenter.length > 0 : true);
+
+                return (
+                  <Form.Item
+                    name="meterReadingCode"
+                    label="Meter Reading Code"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <SelectComponent
+                      onChange={onMeterReadingCodeChange}
+                      disabled={
+                        !mergedArrayMrc ||
+                        mergedArrayMrc.length === 0 ||
+                        !isCostCenterFilled
+                      }
+                      placeholder="Select Meter Reading Code"
+                      options={(mergedArrayMrc || []).map((item) => ({
+                        label: item?.name,
+                        value: item?.id,
+                      }))}
+                    />
+                  </Form.Item>
+                );
+              }}
             </Form.Item>
 
             <Form.Item
