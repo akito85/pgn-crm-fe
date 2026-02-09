@@ -169,7 +169,22 @@ const ModalReverseReceipt = ({
             title: "Amount",
             dataIndex: "amount",
             key: "amount",
+            align: "right",
             render: (value) => value ? value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'
+        },
+        {
+            title: "Applied Amount",
+            dataIndex: "appliedAmount",
+            key: "appliedAmount",
+            align: "right",
+            render: (value) => {
+                const amount = parseFloat(value || 0);
+                return (
+                    <span className={amount > 0 ? 'text-orange-600 font-semibold' : ''}>
+                        {amount > 0 ? amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+                    </span>
+                );
+            }
         }
     ];
 
@@ -252,6 +267,33 @@ const ModalReverseReceipt = ({
                     {currentStep === 1 && (
                         <div className="w-full">
                             <p className="text-primary text-xl font-bold uppercase py-4">REVERSE INFORMATION</p>
+
+                            {/* Warning if any receipt has allocation */}
+                            {localSelectedData.some(item => parseFloat(item?.appliedAmount || 0) > 0) && (
+                                <Alert
+                                    message="Warning: Allocation Detected"
+                                    description={
+                                        <div>
+                                            <p>One or more selected receipts have existing allocations (Applied Amount &gt; 0).</p>
+                                            <p className="mt-2 font-semibold">Receipts with allocation:</p>
+                                            <ul className="list-disc ml-5 mt-1">
+                                                {localSelectedData
+                                                    .filter(item => parseFloat(item?.appliedAmount || 0) > 0)
+                                                    .map(item => (
+                                                        <li key={item.id}>
+                                                            {item.receiptCode} - Applied Amount: {parseFloat(item.appliedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </li>
+                                                    ))
+                                                }
+                                            </ul>
+                                            <p className="mt-2 text-orange-600">Please ensure allocations are reversed before reversing the receipt.</p>
+                                        </div>
+                                    }
+                                    type="warning"
+                                    showIcon
+                                    className="mb-4"
+                                />
+                            )}
 
                             <div className="mb-4">
                                 <TableRBI
