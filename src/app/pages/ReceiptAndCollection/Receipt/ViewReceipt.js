@@ -74,7 +74,7 @@ const ViewReceipt = () => {
     const body = {
       receipts: data.receipts?.map((item) => ({
         id: item.id,
-        amount: item.holdAmount,
+        amount: typeof item.holdAmount === 'string' ? parseFloat(item.holdAmount.replace(/,/g, '')) : item.holdAmount,
       })),
       action: "HOLD",
       appHierId: data.appHierId,
@@ -108,7 +108,7 @@ const ViewReceipt = () => {
     const body = {
       receipts: data.receipts?.map((item) => ({
         id: item.id,
-        amount: item.releaseAmount,
+        amount: typeof item.releaseAmount === 'string' ? parseFloat(item.releaseAmount.replace(/,/g, '')) : item.releaseAmount,
       })),
       action: "RELEASE",
       appHierId: data.appHierId,
@@ -135,10 +135,13 @@ const ViewReceipt = () => {
 
   const handleSubmitReverse = (data) => {
     const body = {
-      receipts: data.receipts?.map((item) => ({
-        id: item.id,
-        amount: item.receiptAmount || item.amount,
-      })),
+      receipts: data.receipts?.map((item) => {
+        const amountValue = item.receiptAmount || item.amount;
+        return {
+          id: item.id,
+          amount: typeof amountValue === 'string' ? parseFloat(amountValue.replace(/,/g, '')) : amountValue,
+        };
+      }),
       action: "REVERSE",
       appHierId: data.appHierId,
       reason: data.reason,
