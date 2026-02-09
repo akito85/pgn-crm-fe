@@ -35,6 +35,9 @@ import ListJob from "../../app/pages/SystemSetup/JobManagement/ListJob";
 import FormJob from "../../app/pages/SystemSetup/JobManagement/FormJob";
 import JobControlPage from "../../app/pages/SystemSetup/JobControl/JobControlPage";
 import LoggingPage from "../../app/pages/SystemSetup/Logging/LoggingPage";
+import ListPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ListPaymentCycle";
+import PaymentCycleForm from "../../app/pages/SystemSetup/MasterData/PaymentCycle/PaymentCycleForm";
+import ViewPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ViewPaymentCycle";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // logging
@@ -122,4 +125,10 @@ export const SYSTEM_SETUP_ELEMENTS = {
 
   // Maintenance Mode
   VIEW_MAINTENANCE_MODE: <MaintenanceModePage />,
+
+  // Payment Cycle
+  VIEW_PAYMENT_CYCLE: <ListPaymentCycle />,
+  DETAIL_PAYMENT_CYCLE: <ViewPaymentCycle />,
+  CREATE_PAYMENT_CYCLE: <PaymentCycleForm type="create" />,
+  UPDATE_PAYMENT_CYCLE: <PaymentCycleForm type="update" />,
 };

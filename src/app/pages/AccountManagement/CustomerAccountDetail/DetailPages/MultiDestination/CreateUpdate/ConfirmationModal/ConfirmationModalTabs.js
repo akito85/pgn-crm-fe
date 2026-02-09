@@ -1,14 +1,10 @@
-import React, { Fragment } from "react";
-import RadioTabs from "../../../../../../../../components/RadioTabs";
 import ConfirmationModalInfo from "./ConfirmationModalInfo";
 import ConfirmationModalApproval from "./ConfirmationModalApproval";
 import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
+import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const ConfirmationModalTabs = ({
-  section = "",
-  options = [],
-  handleChangeOption = () => {},
   selectedAppHierId,
   selectedApprovalName,
   hierarchyTableData,
@@ -16,67 +12,53 @@ const ConfirmationModalTabs = ({
   dataAttachment,
   data = {},
   service,
-  type,
+  type = "",
   configApplication,
+  activeTab = 0,
+  setActiveTab = () => {},
 }) => {
-  const dataTabs = type === "submit" ? {
-    info: "Multi Destination Information",
-    apprv: "Approval",
-    attch: "Attachment",
-    rmrk: "Remark",
-  } : type === "draft" ? {
-    info: "Multi Destination Information",
-    apprv: "Approval",
-    attch: "Attachment",
-  } : {
-    info: "Multi Destination Information",
-    apprv: "Approval",
-    attch: "Attachment",
-    rmrk: "Remark",
-  };
-
-  const renderSection = () => {
-    switch (section) {
-      case dataTabs.info:
-        return <ConfirmationModalInfo data={data} />;
-      case dataTabs.apprv:
-        return (
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Multi Destination Information",
+      children: <ConfirmationModalInfo data={data} />
+    },
+    {
+      key: 1,
+      label: "Approval",
+      children: (
         <ConfirmationModalApproval
           dataTable={hierarchyTableData}
           selectedAppHierId={selectedAppHierId}
           selectedApprovalName={selectedApprovalName}
         />
-        )
-      case dataTabs.attch:
-        return <ConfirmationModalAttachment
+      )
+    },
+    {
+      key: 2,
+      label: "Attachment",
+      children: (
+        <ConfirmationModalAttachment
           data={dataAttachment}
           dispatch={dispatch}
           service={service}
           configApplication={configApplication}
-        />;
-      case dataTabs.rmrk:
-        return <ConfirmationModalRemark />
-      default:
-        return "Multi Destination Information";
-    }
-  };
+        />
+      )
+    },
+    type === "submit" && {
+      key: 3,
+      label: "Remark",
+      children: <ConfirmationModalRemark />
+    },
+  ].filter(Boolean);
 
   return (
-    <Fragment>
-      <div className="flex flex-col gap-4">
-        {/* Wrapper div to ensure proper styling */}
-        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
-          <div className="w-full">
-            <RadioTabs
-              currentPosition={section}
-              data={options}
-              onChange={handleChangeOption}
-            />
-          </div>
-        </div>
-        {renderSection()}
-      </div>
-    </Fragment>
+    <NxTabs
+      items={tabOptions}
+      onChange={setActiveTab}
+      activeKey={activeTab}
+    />
   );
 };
 
