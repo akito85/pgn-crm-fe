@@ -96,7 +96,8 @@ const TableForceFE = ({
       onSort={onSort}
       rowSelection={type === 1 ? rowSelection : undefined}
       tableScrolled={{
-        x: 3500,
+        // x: 3500,
+        x: "max-content",
         y: 525,
       }}
       showExport={false}
