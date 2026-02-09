@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Steps, Input, Form, Alert, Spin, InputNumber } from "antd";
+import { useState, useEffect } from "react";
+import { Input, Form, Alert, Spin, InputNumber, Button } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { LeftOutlined } from "@ant-design/icons";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { useDispatch } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
@@ -25,7 +25,6 @@ const ModalHoldReceipt = ({
     isOpen,
     handleCancel,
     selectedData, // Initial selected item (single)
-    dataSource,   // Full list
     onSubmit,
 }) => {
     const dispatch = useDispatch();
@@ -195,7 +194,7 @@ const ModalHoldReceipt = ({
             title: "No",
             dataIndex: "no",
             key: "no",
-            render: (text, record, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "Receipt Code",
@@ -268,7 +267,7 @@ const ModalHoldReceipt = ({
             title: "Hold Amount",
             dataIndex: "holdAmount",
             key: "holdAmount",
-            render: (text, record) => {
+            render: (_, record) => {
                 // Parse balance dengan benar dari unAppliedAmountReal
                 const maxBalance = parseFloat(record.unAppliedAmountReal) || parseFloat(record.unAppliedAmount) || 0;
                 
@@ -285,15 +284,15 @@ const ModalHoldReceipt = ({
                         onChange={(value) => handleHoldAmountChange(value, record.key || record.id)}
                         onKeyDown={(e) => {
                             // Allow: backspace, delete, tab, escape, enter
-                            if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                            if (['Delete', 'Backspace', 'Tab', 'Escape', 'Enter'].includes(e.key) ||
                                 // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
                                 (e.ctrlKey === true || e.metaKey === true) ||
-                                // Allow: home, end, left, right
-                                (e.keyCode >= 35 && e.keyCode <= 39)) {
+                                // Allow: home, end, left, right, arrow keys
+                                ['Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
                                 return;
                             }
                             // Ensure that it is a number and stop the keypress
-                            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            if (e.shiftKey || !/^[0-9]$/.test(e.key)) {
                                 e.preventDefault();
                             }
                         }}
@@ -310,22 +309,27 @@ const ModalHoldReceipt = ({
             title: "Hold Amount",
             dataIndex: "holdAmount",
             key: "holdAmount",
-            render: (text, record) => {
+            render: (_, record) => {
                 const amount = record.holdAmount;
                 return amount ? `${amount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
             }
         }
     ];
 
-    const nextParams = [
-        { label: "Receipt Information" },
-        { label: "Hold Information" },
-        { label: "Approval Information" },
-        { label: "Attachment Information" },
-        { label: "Confirmation" },
+    const steps = [
+        { title: "Receipt Information" },
+        { title: "Hold Information" },
+        { title: "Approval Information" },
+        { title: "Attachment Information" },
+        { title: "Confirmation" },
     ];
 
     const handleNext = () => {
+        // Validasi sebelum next
+        if (currentStep === 0 && localSelectedData.length === 0) return;
+        if (currentStep === 1 && !holdReason) return;
+        if (currentStep === 2 && !selectedAppHierId) return;
+        
         setCurrentStep(currentStep + 1);
     };
 
@@ -337,50 +341,13 @@ const ModalHoldReceipt = ({
         setConfirmationTab(e.target.value);
     };
 
-
-    const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-5">
-                <ButtonComponent type="default" onClick={handleCancel}>
-                    Cancel
-                </ButtonComponent>
-                {currentStep > 0 && (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handlePrev}
-                        icon={
-                            <LeftOutlined
-                                style={{ color: "#fff", fontSize: 15, marginRight: 10 }}
-                            />
-                        }
-                    >
-                        Previous
-                    </ButtonComponent>
-                )}
-                {currentStep < 4 ? (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handleNext}
-                        disabled={
-                            (currentStep === 0 && localSelectedData.length === 0) ||
-                            (currentStep === 1 && !holdReason) ||
-                            (currentStep === 2 && !selectedAppHierId)
-                        }
-                    >
-                        Next
-                    </ButtonComponent>
-                ) : (
-                    <ButtonComponent type="submit" onClick={() => onSubmit({
-                        receipts: localSelectedData,
-                        reason: holdReason,
-                        appHierId: selectedAppHierId,
-                        attachments: listDataAttachment
-                    })}>
-                        Confirm
-                    </ButtonComponent>
-                )}
-            </div>
-        );
+    const handleSubmit = () => {
+        onSubmit({
+            receipts: localSelectedData,
+            reason: holdReason,
+            appHierId: selectedAppHierId,
+            attachments: listDataAttachment
+        });
     };
 
     // Use fetched data instead of passed dataSource
@@ -396,15 +363,14 @@ const ModalHoldReceipt = ({
             handleCancel={handleCancel}
             header="RECEIPT HOLD"
             width={1200}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="overflow-x-scroll scrollStepsCstm gap-5 mb-5 p-2">
-                <Steps
-                    current={currentStep}
-                    items={nextParams.map(item => ({ title: item.label }))}
-                    labelPlacement="vertical"
-                />
-            </div>
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
 
             <Spin spinning={loadingReceipt}>
                 <div className="mt-4">
@@ -573,6 +539,70 @@ const ModalHoldReceipt = ({
                     )}
                 </div>
             </Spin>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                key="btn-next"
+                                htmlType="button"
+                                onClick={handleNext}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#0075BF",
+                                    borderColor: "#0075BF",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                key="btn-submit"
+                                htmlType="button"
+                                onClick={handleSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
         </ModalCustom>
     );
 };
