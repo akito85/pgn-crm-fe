@@ -1,6 +1,7 @@
 import { NumericFormat } from "react-number-format";
 import { useSelector } from "react-redux";
 
+// ngambil state dari data yang di dispatch di layoutMenu
 const useFormatConfig = () => {
   return useSelector((state) => state.globalProp.globalProp);
 };
