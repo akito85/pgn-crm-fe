@@ -240,6 +240,8 @@ const FunctionalRMSDetail = ({
   updateData = [],
   storedData = false,
   setStoredData = () => {},
+  value1,
+  value2,
 }) => {
   // Selector
   const { data_country } = useSelector((state) => state.rawMaterialSource);
@@ -396,10 +398,10 @@ const FunctionalRMSDetail = ({
   // Function Add Row Data
   const addRow = () => {
     let errorBody = {};
-    if (totalPercentage === 100) {
+    if (totalPercentage === value2) {
       errorBody = {
         title: "Failed",
-        description: "Total percentage is 100%, you cannot add data again.",
+        description: `Total percentage is ${value2}%, you cannot add data again.`,
       };
       dispatch(showModalError(errorBody));
     } else {
@@ -593,7 +595,7 @@ const FunctionalRMSDetail = ({
 
   return (
     <div className="flex flex-col w-full gap-4">
-      {type !== "detail" && type !== "preview" ? (
+      {type !== "detail" && type !== "preview" && value1 + value2 === 100 ? (
         <div className="flex w-full justify-end">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -686,7 +688,7 @@ const FunctionalRMSDetail = ({
         {type !== "detail" && type !== "preview" ? (
           <div className={"w-full flex flex-col mt-5 gap-2 justify-start"}>
             <span className="font-bold">Total Percentage</span>
-            <span>{`${totalPercentage} / 100 %`}</span>
+            <span>{`${totalPercentage} / ${value2} %`}</span>
           </div>
         ) : null}
       </div>
