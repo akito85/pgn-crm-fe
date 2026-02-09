@@ -596,7 +596,8 @@ const TableSundryFE = ({
       current={page}
       pageSize={pageSize}
       tableScrolled={{
-        x: 3500,
+        // x: 3500,
+        x: "max-content",
         y: 525,
       }}
       onChange={handleChangeSize}
