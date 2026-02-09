@@ -407,8 +407,8 @@ const RawMaterialSourceForm = ({ type }) => {
                 setStoredData={setStoredDataInline}
                 storedData={storedDataInline}
                 required={{ required: true, message: "Please input your" }}
-                value1={localVal}
-                value2={importVal}
+                localVal={localVal}
+                importVal={importVal}
               />
             </NxCardContainer>
             
