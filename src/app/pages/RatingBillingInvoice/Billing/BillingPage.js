@@ -311,7 +311,7 @@ const BillingPage = () => {
   const baseColumns = useMemo(() => {
     if (valueTab === "All") {
       return columnsAllBilling(
-        0, // Tidak digunakan untuk infinite scroll
+        0,
         0,
         searchInput,
         searchedColumn,

@@ -869,7 +869,7 @@ const AdjustmentInvoiceSectionForm = ({ type, form }) => {
           rules={[
             {
               required: true,
-              message: "Please enter Remark!",
+              message: "Please input your Remark!!",
             },
           ]}
         >

@@ -83,7 +83,11 @@ export const previewInvoicePOS = createAsyncThunk(
       return { data: response.data, posNumber };
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "PREVIEW_INVOICE_POS", back: false }),
+        validateError({
+          error: error,
+          action: "PREVIEW_INVOICE_POS",
+          back: false,
+        }),
       );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
@@ -911,6 +915,49 @@ export const getUomCodes = createAsyncThunk(
   },
 );
 
+export const generateProformaInvoice = createAsyncThunk(
+  "GENERATE_PROFORMA_INVOICE",
+  async (posNumber, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/generate-invoice-proforma`;
+      // PERBAIKAN: Payload dengan array posNumberList
+      const body = {
+        posNumberList: [posNumber],
+      };
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successMessage = {
+        title: "Successful",
+        description: "Proforma invoice has been generated successfully.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(
+            validateError({ error, action: "GENERATE_PROFORMA_INVOICE" }),
+          );
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Failed to generate proforma invoice. ${message}`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+
 const pointOfSalesSlice = createSlice({
   name: "pointOfSales",
   initialState,
@@ -958,6 +1005,16 @@ const pointOfSalesSlice = createSlice({
     [getCalculate.rejected]: (state, action) => {
       state.loading = false;
       state.data_calculate = action.payload;
+    },
+
+    [generateProformaInvoice.pending]: (state) => {
+      state.loading = true;
+    },
+    [generateProformaInvoice.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [generateProformaInvoice.rejected]: (state) => {
+      state.loading = false;
     },
 
     [getCalculateBilling.pending]: (state, action) => {

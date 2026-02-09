@@ -1,5 +1,3 @@
-// PERUBAHAN PADA COLUMNSCALCULATIONSUMMARY
-
 import React from "react";
 import { Spin } from "antd";
 import TableRBI from "../../../../../../../components/TableRBI";
@@ -196,7 +194,7 @@ export const getExpandedColumns = () => [
     key: "uom",
     width: 100,
     align: "center",
-    render: (text) => text || "-",
+    render: (text) => text || "",
   },
   {
     title: "CALCULATED USAGE PARTITION",
@@ -236,7 +234,7 @@ export const getExpandedColumns = () => [
         key: "priceCurrency",
         width: 120,
         align: "center",
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         title: "CODE",
@@ -244,7 +242,7 @@ export const getExpandedColumns = () => [
         key: "priceCode",
         width: 150,
         align: "center",
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         title: "MIN",
