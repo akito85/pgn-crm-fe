@@ -23,6 +23,7 @@ import {
   downloadPOS,
   getApprovalHistory,
   getListPointOfSales,
+  generateProformaInvoice,
 } from "../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
@@ -113,6 +114,72 @@ const PosPage = () => {
 
       setBodyError({ message });
       setModalError(true);
+    }
+  };
+
+  const handleProformaInvoice = async (record) => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/pos/download-latest-proforma/${record.posNumber}`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        },
+      );
+
+      const responseBlob = await response.data;
+      const blobText =
+        responseBlob instanceof Blob ? await responseBlob.text() : responseBlob;
+      const contentType = response.headers["content-type"];
+
+      const blob = new Blob([blobText], {
+        type: contentType ? "application/pdf" : "application/rtf",
+      });
+
+      const blobUrl = URL.createObjectURL(blob);
+      const newTab = window.open(blobUrl, "_blank");
+
+      if (newTab) {
+        newTab.document.title = `Invoice Preview - ${record.posNumber}`;
+
+        // TAMBAHAN: Gunakan DocViewer seperti di ViewInvoice.js
+        const viewerContainer = document.createElement("div");
+        newTab.document.body.appendChild(viewerContainer);
+
+        ReactDOM.render(
+          <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
+          viewerContainer,
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to preview invoice";
+
+      setBodyError({ message });
+      setModalError(true);
+    }
+  };
+
+  const handleGenerateProforma = async (record) => {
+    try {
+      await dispatch(generateProformaInvoice(record.posNumber)).unwrap();
+      // Refresh data setelah generate
+      dispatch(
+        getListPointOfSales({
+          page: 0,
+          pageSize: 100,
+          sort,
+          search: encodeURIComponent(JSON.stringify(search)),
+          isLoadMore: false,
+        }),
+      );
+      setPage(0);
+    } catch (error) {
+      console.error("Error generating proforma invoice:", error);
     }
   };
 
@@ -399,7 +466,7 @@ const PosPage = () => {
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEye" color={"#0075bf"} width={20} />}
+              icon={<SVGIcon name="IconDownload" color={"#0075bf"} width={20} />}
               border={false}
               disabled={!isAvailable}
               onClick={() => isAvailable && handlePreviewInvoice(record)}
@@ -417,9 +484,84 @@ const PosPage = () => {
                 }}
               >
                 <SVGIcon
-                  name="IconEye"
+                  name="IconDownload"
                   width={20}
                   color={isAvailable ? "#0075bf" : "#8D91A0"}
+                />
+              </div>
+            </Tooltip>
+          );
+
+        return content;
+      },
+    },
+    {
+      action: "Preview",
+      type: "table",
+      render: (record, data) => {
+        const isAvailable = record.statusApproval === "APPROVED";
+        const content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconDownload" color={"#0075bf"} width={20} />}
+              border={false}
+              disabled={!isAvailable}
+              onClick={() => isAvailable && handleProformaInvoice(record)}
+            >
+              <span className={"text-black ml-3"}>Download Proforma</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Download Proforma">
+              <div
+                onClick={() => isAvailable && handleProformaInvoice(record)}
+                style={{
+                  cursor: isAvailable ? "pointer" : "not-allowed",
+                  display: "inline-block",
+                  lineHeight: 0,
+                }}
+              >
+                <SVGIcon
+                  name="IconDownload"
+                  width={20}
+                  color={isAvailable ? "#0075bf" : "#8D91A0"}
+                />
+              </div>
+            </Tooltip>
+          );
+
+        return content;
+      },
+    },
+
+    {
+      action: "Preview",
+      type: "table",
+      render: (record, data) => {
+        const isAvailable = record.statusApproval === "APPROVED";
+        const content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconReGenerate" width={20} />}
+              border={false}
+              disabled={!isAvailable}
+              onClick={() => isAvailable && handleGenerateProforma(record)}
+            >
+              <span className={"text-black ml-3"}>Generate Proforma</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Generate Proforma Invoice">
+              <div
+                onClick={() => isAvailable && handleGenerateProforma(record)}
+                style={{
+                  cursor: isAvailable ? "pointer" : "not-allowed",
+                  display: "inline-block",
+                  lineHeight: 0,
+                }}
+              >
+                <SVGIcon
+                  name="IconReGenerate"
+                  width={20}
+                  color={isAvailable ? "#ACC424" : "#8D91A0"}
                 />
               </div>
             </Tooltip>
@@ -560,7 +702,7 @@ const PosPage = () => {
                   search,
                 ),
                 ...useColumnActionPermission(
-                  ["view", "update", "delete", "preview", "history"],
+                  ["view", "update", "delete", "preview", "history", "generate"],
                   itemGrantAccess,
                   "Delete",
                 ),

@@ -419,22 +419,26 @@ export const getDetailRatingGas = createAsyncThunk(
   },
 );
 
-// Calculation Summary - Tabel Utama
+// Calculation Summary
 export const getAllCalculationSummaryPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_PAGINATE",
-  async ({ ratingCode, page, pageSize, search, sort }, thunkAPI) => {
+  async (
+    { ratingCode, page, pageSize, search, sort, isLoadMore = false },
+    thunkAPI,
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "transactionDate~desc" : sort;
 
-      // Endpoint untuk tabel utama (summary)
       const url = `/v1/dbs/api/rating/summary-rating?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
 
-      // Langsung return response data tanpa grouping
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -1037,17 +1041,40 @@ const ratingSlice = createSlice({
     [getDetailRatingGas.rejected]: (state) => {
       state.loading = false;
     },
-    // Get All Calculation Summary Pagination (Tabel Utama)
-    [getAllCalculationSummaryPaginate.pending]: (state) => {
-      state.loading = true;
+    // Get All Calculation Summary
+    [getAllCalculationSummaryPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllCalculationSummaryPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_calculationSummary = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data_calculationSummary?.result || []).map((item) => item.id),
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.id),
+        );
+        state.data_calculationSummary = {
+          ...action.payload,
+          result: [
+            ...(state.data_calculationSummary?.result || []),
+            ...uniqueNewData,
+          ],
+        };
+      } else {
+        state.data_calculationSummary = action.payload;
+      }
     },
-    [getAllCalculationSummaryPaginate.rejected]: (state) => {
+    [getAllCalculationSummaryPaginate.rejected]: (state, action) => {
       state.loading = false;
-      state.data_calculationSummary = [];
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_calculationSummary = [];
+      }
     },
 
     // Get All Calculation Summary Expand (Data di dalam expand)
