@@ -11,7 +11,7 @@ import {
 } from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
-import { Spin, Steps, Form, Input, Alert } from "antd";
+import { Spin, Form, Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
@@ -29,8 +29,8 @@ import {
 } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import InputComponent from "../../../../../components/InputComponent";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 
 const AllocationSection = ({
   dataTable,
@@ -466,12 +466,19 @@ const AllocationSection = ({
   };
 
   // handle sort
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
+  const steps = [
+    { title: "Allocation Information" },
+    { title: "Approval Information" },
+    { title: "Attachment Information" },
+    { title: "Confirmation" },
+  ];
+
+  const handleNext = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handlePrev = () => {
+    setCurrentStep(currentStep - 1);
   };
 
   return (
@@ -559,77 +566,15 @@ const AllocationSection = ({
         type={"confirmation"}
         header={"Choose Allocation"}
         width={1200}
-        footer={
-          <div className="flex justify-end gap-5">
-            <ButtonComponent type={"default"} onClick={handleCancel}>
-              Back
-            </ButtonComponent>
-            {currentStep > 0 ? (
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setCurrentStep(currentStep - 1)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
-                      marginRight: 10,
-                    }}
-                  />
-                }
-              >
-                Previous
-              </ButtonComponent>
-            ) : null}
-
-            {currentStep < 3 && ( // 3 is index of Confirmation step
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setCurrentStep(currentStep + 1)}
-                disabled={
-                  (currentStep === 0 &&
-                    (selectDataTable.length === 0 || !forceObj.remark)) || // Step 1: Selection + Remark
-                  (currentStep === 1 && !forceObj.approvalHierarchy) // Step 2: Approval
-                  // Step 3 (Attachment) is optional? Usually yes, or check listDataAttachment.length === 0
-                }
-              >
-                <div style={{ textAlign: "center" }}>
-                  <span>Next</span>
-                  <RightOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
-                      marginLeft: 10,
-                    }}
-                  />
-                </div>
-              </ButtonComponent>
-            )}
-            {currentStep === 3 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                onClick={handleSaveDataTable}
-              >
-                Confirm
-              </ButtonComponent>
-            )}
-          </div>
-        }
+        footer={null}
       >
         <div className="w-full gap-5">
-          <div className="overflow-x-scroll scrollStepsCstm gap-5">
-            <Steps
-              current={currentStep}
-              items={[
-                { title: "Allocation Information" },
-                { title: "Approval Information" },
-                { title: "Attachment Information" },
-                { title: "Confirmation" },
-              ]}
-              labelPlacement="vertical"
-            />
-          </div>
+          <FormStepper
+            steps={steps}
+            current={currentStep}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
 
           <Form layout="vertical" className="mt-3" form={modalForm}>
             <Spin spinning={loading}>
@@ -799,6 +744,75 @@ const AllocationSection = ({
               </div>
             </Spin>
           </Form>
+        </div>
+
+        {/* Custom Footer without Clear Data and Save as Draft */}
+        <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+          <div className="flex w-full justify-between items-center">
+            <ButtonComponent
+              onClick={handleCancel}
+              className="!border-[#0075BF] !text-[#0075BF]"
+            >
+              Cancel
+            </ButtonComponent>
+            <div className="flex items-center gap-3">
+              <Button
+                disabled={currentStep === 0}
+                onClick={handlePrev}
+                style={{
+                  backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                  borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                  color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                  borderRadius: "6px",
+                  height: "32px",
+                  fontSize: "12px",
+                  border: "1px solid #DADDE5",
+                }}
+              >
+                Previous
+              </Button>
+              {currentStep < steps.length - 1 ? (
+                <Button
+                  key="btn-next"
+                  htmlType="button"
+                  onClick={handleNext}
+                  type="primary"
+                  disabled={
+                    (currentStep === 0 &&
+                      (selectDataTable.length === 0 || !forceObj.remark)) ||
+                    (currentStep === 1 && !forceObj.approvalHierarchy)
+                  }
+                  style={{
+                    backgroundColor: "#0075BF",
+                    borderColor: "#0075BF",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  key="btn-submit"
+                  htmlType="button"
+                  onClick={handleSaveDataTable}
+                  type="primary"
+                  style={{
+                    backgroundColor: "#388E3C",
+                    borderColor: "#388E3C",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Submit
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </ModalCustom>
     </div>
