@@ -135,6 +135,8 @@ import paymentRelationReducer from "../slices/account_management/detailAccount/P
 import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
 import globalPropReducer from "../slices/globalPropSlice";
 import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentWarrantyPartner";
+import rateSourceReducer from "../slices/receipt_collection/rateSource";
+import rateIndexReducer from "../slices/receipt_collection/rateIndex";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 
 const reducer = combineReducers({
@@ -277,6 +279,8 @@ const reducer = combineReducers({
   historyWarranty: historyWarrantyReducer,
   offset: offsetReducer,
   paymentWarrantyPartner: paymentWarrantyPartnerReducer,
+  rateSource: rateSourceReducer,
+  rateIndex: rateIndexReducer,
 
   // Attachment
   attachment: attachmentReducer,
