@@ -93,13 +93,21 @@ const ModalHoldReceipt = ({
                         const eligible = content.filter(item =>
                             item.statusApproval === "Approved" &&
                             item.status?.toUpperCase() === "UNAPPLIED"
-                        );
+                        ).map(item => ({
+                            ...item,
+                            key: item.id,
+                            // Ensure unAppliedAmountReal is available
+                            unAppliedAmountReal: item.unAppliedAmountReal || item.unAppliedAmount || 0,
+                            // Initialize holdAmount to 0
+                            holdAmount: 0
+                        }));
 
                         setAllReceiptsData(eligible);
                     } else {
                         setAllReceiptsData([]);
                     }
                 } catch (error) {
+                    console.error('Error fetching receipts:', error);
                     setAllReceiptsData([]);
                 }
             };
@@ -223,19 +231,30 @@ const ModalHoldReceipt = ({
             render: (value) => value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0"
         },
         {
-            title: "Balance",
-            dataIndex: "balance",
-            key: "balance",
-            render: (value) => value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0"
+            title: "Balance (Unapplied)",
+            dataIndex: "unAppliedAmountReal",
+            key: "unAppliedAmountReal",
+            render: (value) => {
+                const numValue = typeof value === 'number' ? value : parseFloat(value) || 0;
+                return numValue.toLocaleString('id-ID');
+            }
         },
     ];
 
     const handleHoldAmountChange = (value, key) => {
         const newData = localSelectedData.map(item => {
             if ((item.key || item.id) === key) {
-                // Validate: Hold Amount cannot exceed Balance
-                const balance = item.balance || 0;
-                const validatedValue = value > balance ? balance : (value < 0 ? 0 : value);
+                // Validate: Hold Amount cannot exceed Balance (unAppliedAmountReal)
+                const balance = parseFloat(item.unAppliedAmountReal) || parseFloat(item.unAppliedAmount) || 0;
+                
+                // Validasi: Hold Amount tidak boleh melebihi Balance
+                let validatedValue = value;
+                if (value > balance) {
+                    validatedValue = balance;
+                } else if (value < 0) {
+                    validatedValue = 0;
+                }
+                
                 return { ...item, holdAmount: validatedValue };
             }
             return item;
@@ -249,35 +268,40 @@ const ModalHoldReceipt = ({
             title: "Hold Amount",
             dataIndex: "holdAmount",
             key: "holdAmount",
-            render: (text, record) => (
-                <InputNumber
-                    style={{ width: "100%" }}
-                    value={record.holdAmount}
-                    max={record.balance || 0}
-                    min={0}
-                    formatter={(value) =>
-                        value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
-                    }
-                    parser={(value) => value?.replace(/\./g, "")}
-                    onChange={(value) => handleHoldAmountChange(value, record.key || record.id)}
-                    onKeyDown={(e) => {
-                        // Allow: backspace, delete, tab, escape, enter
-                        if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
-                            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
-                            (e.ctrlKey === true || e.metaKey === true) ||
-                            // Allow: home, end, left, right
-                            (e.keyCode >= 35 && e.keyCode <= 39)) {
-                            return;
+            render: (text, record) => {
+                // Parse balance dengan benar dari unAppliedAmountReal
+                const maxBalance = parseFloat(record.unAppliedAmountReal) || parseFloat(record.unAppliedAmount) || 0;
+                
+                return (
+                    <InputNumber
+                        style={{ width: "100%" }}
+                        value={record.holdAmount}
+                        max={maxBalance}
+                        min={0}
+                        formatter={(value) =>
+                            value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
                         }
-                        // Ensure that it is a number and stop the keypress
-                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                            e.preventDefault();
-                        }
-                    }}
-                    placeholder="Input Amount"
-                    controls={false}
-                />
-            )
+                        parser={(value) => value?.replace(/\./g, "")}
+                        onChange={(value) => handleHoldAmountChange(value, record.key || record.id)}
+                        onKeyDown={(e) => {
+                            // Allow: backspace, delete, tab, escape, enter
+                            if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
+                                (e.ctrlKey === true || e.metaKey === true) ||
+                                // Allow: home, end, left, right
+                                (e.keyCode >= 35 && e.keyCode <= 39)) {
+                                return;
+                            }
+                            // Ensure that it is a number and stop the keypress
+                            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                                e.preventDefault();
+                            }
+                        }}
+                        placeholder="Input Amount"
+                        controls={false}
+                    />
+                );
+            }
         }
     ];
     const columnsStep4 = [
