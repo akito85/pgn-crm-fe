@@ -152,7 +152,7 @@ const ModalReleaseReceipt = ({
             title: "No",
             dataIndex: "no",
             key: "no",
-            render: (text, record, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "Receipt Code",
@@ -193,33 +193,37 @@ const ModalReleaseReceipt = ({
             title: "Release Amount",
             dataIndex: "releaseAmount",
             key: "releaseAmount",
-            render: (text, record) => (
-                <InputNumber
-                    style={{ width: "100%" }}
-                    value={releaseAmountData[record.key || record.id]}
-                    formatter={(value) =>
-                        value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
-                    }
-                    parser={(value) => value?.replace(/\./g, "")}
-                    onChange={(value) => handleReleaseAmountChange(value, record.key || record.id)}
-                    onKeyDown={(e) => {
-                        // Allow: backspace, delete, tab, escape, enter
-                        if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
-                            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
-                            (e.ctrlKey === true || e.metaKey === true) ||
-                            // Allow: home, end, left, right
-                            (e.keyCode >= 35 && e.keyCode <= 39)) {
-                            return;
+            render: (_, record) => {
+                const maxReleaseAmount = parseFloat(record.holdAmount) || parseFloat(record.holdAmountReal) || 0;
+                return (
+                    <InputNumber
+                        style={{ width: "100%" }}
+                        value={releaseAmountData[record.key || record.id]}
+                        max={maxReleaseAmount}
+                        formatter={(value) =>
+                            value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
                         }
-                        // Ensure that it is a number and stop the keypress
-                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                            e.preventDefault();
-                        }
-                    }}
-                    placeholder="Input Amount"
-                    controls={false}
-                />
-            )
+                        parser={(value) => value?.replace(/\./g, "")}
+                        onChange={(value) => handleReleaseAmountChange(value, record.key || record.id)}
+                        onKeyDown={(e) => {
+                            // Allow: backspace, delete, tab, escape, enter
+                            if (['Delete', 'Backspace', 'Tab', 'Escape', 'Enter'].includes(e.key) ||
+                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
+                                (e.ctrlKey === true || e.metaKey === true) ||
+                                // Allow: home, end, left, right, arrow keys
+                                ['Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                                return;
+                            }
+                            // Ensure that it is a number and stop the keypress
+                            if (e.shiftKey || !/^[0-9]$/.test(e.key)) {
+                                e.preventDefault();
+                            }
+                        }}
+                        placeholder="Input Amount"
+                        controls={false}
+                    />
+                );
+            }
         }
     ];
 
@@ -229,7 +233,7 @@ const ModalReleaseReceipt = ({
             title: "Release Amount",
             dataIndex: "releaseAmount",
             key: "releaseAmount",
-            render: (text, record) => {
+            render: (_, record) => {
                 const amount = releaseAmountData[record.key || record.id];
                 return amount ? `${amount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
             }

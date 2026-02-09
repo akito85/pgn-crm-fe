@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, message, Input, InputNumber, DatePicker } from "antd";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,7 +9,7 @@ import { columnsReceipt } from "../ColumnReceiptView";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import { getReceiptCustomerList, getListCategoryReceipt, getPaginateReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getReceiptCustomerList, getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { FormStepper } from "../../../../../components/FormStepNavigation";
@@ -17,11 +17,10 @@ import { FormStepper } from "../../../../../components/FormStepNavigation";
 const ModalRefundReceipt = ({
     isOpen,
     handleCancel,
-    dataSource,
     onSubmit,
 }) => {
     const dispatch = useDispatch();
-    const { data_customer_list, data, loading } = useSelector((state) => state.receipt);
+    const { data_customer_list, loading } = useSelector((state) => state.receipt);
 
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -30,10 +29,6 @@ const ModalRefundReceipt = ({
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-
-    // Filter/Search State (Placeholder for now)
-    const [searchText, setSearchText] = useState("");
-    const [searchedColumn, setSearchedColumn] = useState("");
 
     // Step 2 Selection State (Receipts)
     const [eligibleReceipts, setEligibleReceipts] = useState([]); // Filtered receipts
@@ -128,23 +123,23 @@ const ModalRefundReceipt = ({
 
     const steps = [
         {
-            title: "Customer Information",
+            title: "Customer Info",
             key: "customerInfo",
         },
         {
-            title: "Receipt Information",
+            title: "Receipt Info",
             key: "receiptInfo",
         },
         {
-            title: "Refund Customer Information",
+            title: "Refund Customer",
             key: "refundCustomerInfo",
         },
         {
-            title: "Refund Receipt Information",
+            title: "Refund Receipt",
             key: "refundReceiptInfo",
         },
         {
-            title: "Attachment Information",
+            title: "Attachment",
             key: "attachmentInfo",
         },
         {
@@ -158,6 +153,32 @@ const ModalRefundReceipt = ({
             message.warning("Please select at least one record.");
             return;
         }
+        
+        // Validate refund date in Step 3 (Refund Customer Information)
+        if (currentStep === 2) {
+            if (!refundDate) {
+                message.error("Refund date is required");
+                return;
+            }
+            
+            // Check if refund date is in the future
+            if (refundDate.isAfter(moment(), 'day')) {
+                message.error("Refund date cannot be in the future");
+                return;
+            }
+            
+            // Check if refund date is before any receipt date
+            const earliestReceiptDate = selectedReceipts.reduce((earliest, receipt) => {
+                const receiptDate = moment(receipt.receiptDate);
+                return !earliest || receiptDate.isBefore(earliest) ? receiptDate : earliest;
+            }, null);
+            
+            if (earliestReceiptDate && refundDate.isBefore(earliestReceiptDate, 'day')) {
+                message.error(`Refund date cannot be before receipt date (${earliestReceiptDate.format('DD MMM YYYY')})`);
+                return;
+            }
+        }
+        
         setCurrentStep(currentStep + 1);
     };
 
@@ -166,6 +187,15 @@ const ModalRefundReceipt = ({
     };
 
     const handleSubmit = () => {
+        // Validate refund amounts match
+        const totalCustomerRefund = Object.values(refundAmountData).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+        const totalReceiptRefund = Object.values(refundReceiptAmountData).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+
+        if (Math.abs(totalCustomerRefund - totalReceiptRefund) > 0.01) {
+            message.error(`Refund amounts mismatch! Customer refund: ${totalCustomerRefund.toLocaleString('id-ID')}, Receipt refund: ${totalReceiptRefund.toLocaleString('id-ID')}`);
+            return;
+        }
+
         onSubmit(localSelectedData);
     };
 
@@ -192,7 +222,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "COST CENTER",
@@ -220,7 +250,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (val) => val || "-"
+            render: (_, record) => record.accountNumber || record.accountId || "-"
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -229,7 +259,10 @@ const ModalRefundReceipt = ({
             align: "right",
             sorter: true,
             width: 200,
-            render: (value) => value ? value.toLocaleString('id-ID') : '-'
+            render: (_, record) => {
+                const amount = record.unAppliedAmount || record.totalUnAppliedAmount || record.totalUnapplyAmount || 0;
+                return amount ? amount.toLocaleString('id-ID') : '0';
+            }
         }
     ];
     const handleRefundAmountChange = (value, recordKey) => {
@@ -241,7 +274,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => index + 1,
+            render: (_, _record, index) => index + 1,
         },
         {
             title: "COST CENTER",
@@ -268,7 +301,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (val) => val || "-"
+            render: (_, record) => record.accountNumber || record.accountId || "-"
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -276,7 +309,10 @@ const ModalRefundReceipt = ({
             key: "unAppliedAmount",
             align: "right",
             width: 200,
-            render: (value) => value ? value.toLocaleString('id-ID') : '-'
+            render: (_, record) => {
+                const amount = record.unAppliedAmount || record.totalUnAppliedAmount || record.totalUnapplyAmount || 0;
+                return amount ? amount.toLocaleString('id-ID') : '0';
+            }
         },
         {
             title: "REFUND AMOUNT",
@@ -304,7 +340,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => index + 1,
+            render: (_, _record, index) => index + 1,
         },
         {
             title: "RECEIPT CODE",
@@ -615,10 +651,6 @@ const ModalRefundReceipt = ({
             default:
                 return null;
         }
-    };
-
-    const renderFooter = () => {
-        return null; // Footer will be rendered separately
     };
 
     return (

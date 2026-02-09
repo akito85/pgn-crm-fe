@@ -25,7 +25,6 @@ const ModalHoldReceipt = ({
     isOpen,
     handleCancel,
     selectedData, // Initial selected item (single)
-    dataSource,   // Full list
     onSubmit,
 }) => {
     const dispatch = useDispatch();
@@ -195,7 +194,7 @@ const ModalHoldReceipt = ({
             title: "No",
             dataIndex: "no",
             key: "no",
-            render: (text, record, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "Receipt Code",
@@ -268,7 +267,7 @@ const ModalHoldReceipt = ({
             title: "Hold Amount",
             dataIndex: "holdAmount",
             key: "holdAmount",
-            render: (text, record) => {
+            render: (_, record) => {
                 // Parse balance dengan benar dari unAppliedAmountReal
                 const maxBalance = parseFloat(record.unAppliedAmountReal) || parseFloat(record.unAppliedAmount) || 0;
                 
@@ -285,15 +284,15 @@ const ModalHoldReceipt = ({
                         onChange={(value) => handleHoldAmountChange(value, record.key || record.id)}
                         onKeyDown={(e) => {
                             // Allow: backspace, delete, tab, escape, enter
-                            if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                            if (['Delete', 'Backspace', 'Tab', 'Escape', 'Enter'].includes(e.key) ||
                                 // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
                                 (e.ctrlKey === true || e.metaKey === true) ||
-                                // Allow: home, end, left, right
-                                (e.keyCode >= 35 && e.keyCode <= 39)) {
+                                // Allow: home, end, left, right, arrow keys
+                                ['Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
                                 return;
                             }
                             // Ensure that it is a number and stop the keypress
-                            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            if (e.shiftKey || !/^[0-9]$/.test(e.key)) {
                                 e.preventDefault();
                             }
                         }}
@@ -310,7 +309,7 @@ const ModalHoldReceipt = ({
             title: "Hold Amount",
             dataIndex: "holdAmount",
             key: "holdAmount",
-            render: (text, record) => {
+            render: (_, record) => {
                 const amount = record.holdAmount;
                 return amount ? `${amount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
             }

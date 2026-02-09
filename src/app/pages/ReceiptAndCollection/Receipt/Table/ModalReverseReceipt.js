@@ -136,7 +136,7 @@ const ModalReverseReceipt = ({
             title: "No",
             dataIndex: "no",
             key: "no",
-            render: (text, record, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "Receipt Code",
