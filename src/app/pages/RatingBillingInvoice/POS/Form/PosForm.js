@@ -177,7 +177,7 @@ const PosForm = ({ type }) => {
           }
         })
         .catch((error) => {
-          console.log("Validation failed:", error);
+          // Validation failed
         });
     } else {
       if (current < steps.length - 1) {
