@@ -3,6 +3,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   VIEW_RECEIPT: "/receipt-and-collection/receipt-list",
   CREATE_RECEIPT: "/receipt-and-collection/receipt-list/create",
   DETAIL_RECEIPT: "/receipt-and-collection/receipt-list/view",
+  APPROVAL_RECEIPT_HOLD: "/receipt-and-collection/receipt-list/approval/hold/:id",
+  APPROVAL_RECEIPT_RELEASE: "/receipt-and-collection/receipt-list/approval/release/:id",
+  APPROVAL_RECEIPT_REFUND: "/receipt-and-collection/receipt-list/approval/refund/:id",
+  APPROVAL_RECEIPT_REVERSE: "/receipt-and-collection/receipt-list/approval/reverse/:id",
   UPDATE_RECEIPT: "/receipt-and-collection/receipt-list/update",
   CREATE_ACCOUNTING: "/receipt-and-collection/receipt-list/create-accounting",
   // Receipt Reconciliation
