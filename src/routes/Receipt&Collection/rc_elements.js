@@ -84,6 +84,13 @@ import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/Gap
 import ViewPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ViewPaymentWarrantyPartner";
 import ListDetailPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListDetailPaymentWarrantyPartner";
 import ListFormPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListFormPaymentWarrantyPartner";
+import ViewLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ViewLiborRate";
+import ListDetailLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListDetailLiborRate";
+import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListFormLiborRate";
+import ViewRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ViewRateIndex";
+import ListDetailRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ListDetailRateIndex";
+import ListFormRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ListFormRateIndex";
+
 
 
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
@@ -235,4 +242,16 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PAYMENT_WARRANTY_PARTNER: <ListDetailPaymentWarrantyPartner />,
   CREATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"create"} />,
   UPDATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"update"} />,
+
+  // Libor Rate
+  VIEW_LIBOR_RATE: <ViewLiborRate />,
+  DETAIL_LIBOR_RATE: <ListDetailLiborRate />,
+  CREATE_LIBOR_RATE: <ListFormLiborRate type={"create"} />,
+  UPDATE_LIBOR_RATE: <ListFormLiborRate type={"update"} />,
+
+  // Rate Index
+  VIEW_RATE_INDEX: <ViewRateIndex />,
+  DETAIL_RATE_INDEX: <ListDetailRateIndex />,
+  CREATE_RATE_INDEX: <ListFormRateIndex type={"create"} />,
+  UPDATE_RATE_INDEX: <ListFormRateIndex type={"update"} />,
 };
