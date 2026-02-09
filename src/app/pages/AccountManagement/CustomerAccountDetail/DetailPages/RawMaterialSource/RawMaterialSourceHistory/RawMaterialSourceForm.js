@@ -69,7 +69,9 @@ const RawMaterialSourceForm = ({ type }) => {
 
   useEffect(() => {
     if (idRMS && data_detail_history?.id === idRMS) {
-      const dataDetail = (data_detail_history?.srcDistDtl || []).map(
+      const dataDetail = (data_detail_history?.srcDistDtl || [])
+      .filter((item) => item.country !== "INDONESIA")
+      .map(
         (item, index) => {
           return {
             key: index + 1,
@@ -94,6 +96,7 @@ const RawMaterialSourceForm = ({ type }) => {
       setStartDate(moment(data_detail_history?.effectiveDate));
       setListDataDetail(dataDetail);
       setDescription(data_detail_history?.description);
+      setImportVal(data_detail_history?.value2 || 0);
     }
   }, [dispatch, id, type, data_detail_history]);
 
