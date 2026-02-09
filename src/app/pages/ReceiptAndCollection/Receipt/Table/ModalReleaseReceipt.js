@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Steps, Input, Form, Alert, Spin, InputNumber } from "antd";
+import { useState, useEffect } from "react";
+import { Input, Form, Spin, InputNumber, Button } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { LeftOutlined } from "@ant-design/icons";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
@@ -44,12 +44,12 @@ const ModalReleaseReceipt = ({
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [selectedAppHierId, setSelectedAppHierId] = useState(null);
 
-    const nextParams = [
-        { label: "Receipt Information" },
-        { label: "Release Information" },
-        { label: "Approval Information" },
-        { label: "Attachment Information" },
-        { label: "Confirmation" }
+    const steps = [
+        { title: "Receipt Information" },
+        { title: "Release Information" },
+        { title: "Approval Information" },
+        { title: "Attachment Information" },
+        { title: "Confirmation" }
     ];
 
     useEffect(() => {
@@ -258,6 +258,8 @@ const ModalReleaseReceipt = ({
     };
 
     const handleNext = () => {
+        // Validasi sebelum next
+        if (isNextDisabled()) return;
         setCurrentStep(currentStep + 1);
     };
 
@@ -269,55 +271,16 @@ const ModalReleaseReceipt = ({
         setConfirmationTab(e.target.value);
     };
 
-
-    const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-5 items-center">
-                <ButtonComponent type="default" onClick={handleCancel} className="h-[40px]">
-                    Back
-                </ButtonComponent>
-                {currentStep > 0 && (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handlePrev}
-                        className="h-[40px]"
-                        icon={
-                            <LeftOutlined
-                                style={{ color: "#fff", fontSize: 12 }}
-                            />
-                        }
-                    >
-                        Previous
-                    </ButtonComponent>
-                )}
-                {currentStep < 4 ? (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handleNext}
-                        className="h-[40px]"
-                        disabled={isNextDisabled()}
-                    >
-                        Next
-                    </ButtonComponent>
-                ) : (
-                    <ButtonComponent
-                        type="submit"
-                        className="h-[40px]"
-                        onClick={() => onSubmit({
-                            receipts: localSelectedData.map(item => ({
-                                ...item,
-                                releaseAmount: releaseAmountData[item.key || item.id]
-                            })),
-                            reason: releaseReason,
-                            appHierId: selectedAppHierId,
-                            attachments: listDataAttachment
-                        })}
-                    >
-                        Confirm
-                    </ButtonComponent>
-                )}
-            </div>
-        );
+    const handleSubmit = () => {
+        onSubmit({
+            receipts: localSelectedData.map(item => ({
+                ...item,
+                releaseAmount: releaseAmountData[item.key || item.id]
+            })),
+            reason: releaseReason,
+            appHierId: selectedAppHierId,
+            attachments: listDataAttachment
+        });
     };
 
     // Add unique key to prevent selection issues
@@ -335,15 +298,14 @@ const ModalReleaseReceipt = ({
             handleCancel={handleCancel}
             header="RECEIPT RELEASE"
             width={1200}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="overflow-x-scroll scrollStepsCstm gap-5 mb-5 p-2">
-                <Steps
-                    current={currentStep}
-                    items={nextParams.map(item => ({ title: item.label }))}
-                    labelPlacement="vertical"
-                />
-            </div>
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
 
             <Spin spinning={loadingReceipt}>
                 <div className="mt-4">
@@ -479,6 +441,67 @@ const ModalReleaseReceipt = ({
                     )}
                 </div>
             </Spin>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                onClick={handleNext}
+                                type="primary"
+                                disabled={isNextDisabled()}
+                                style={{
+                                    backgroundColor: isNextDisabled() ? "#E0E3E9" : "#0075BF",
+                                    borderColor: isNextDisabled() ? "#E0E3E9" : "#0075BF",
+                                    color: isNextDisabled() ? "#BFC4D0" : "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
         </ModalCustom>
     );
 };

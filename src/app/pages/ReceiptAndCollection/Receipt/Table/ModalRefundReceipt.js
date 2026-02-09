@@ -1,22 +1,18 @@
 
 import React, { useEffect, useState } from "react";
-import { Modal, Steps, Button, message, Input, InputNumber, Segmented, DatePicker } from "antd";
+import { Button, message, Input, InputNumber, DatePicker } from "antd";
 import moment from "moment";
-import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { columnsReceipt } from "../ColumnReceiptView"; // Might use parts of this or define custom
+import { columnsReceipt } from "../ColumnReceiptView";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-// import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt"; // If needed
 import { getReceiptCustomerList, getListCategoryReceipt, getPaginateReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../../components/RadioTabs";
-
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-
-const { Step } = Steps;
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 
 const ModalRefundReceipt = ({
     isOpen,
@@ -116,7 +112,7 @@ const ModalRefundReceipt = ({
                     const content = response?.data?.result || [];
                     const eligible = content.filter(item =>
                         item.statusApproval === "Approved" &&
-                        (item.balance > 0 || item.unAppliedAmount > 0)
+                        (item.unAppliedAmountReal > 0 || item.unAppliedAmount > 0)
                     );
 
                     setEligibleReceipts(eligible);
@@ -167,6 +163,10 @@ const ModalRefundReceipt = ({
 
     const handlePrev = () => {
         setCurrentStep(currentStep - 1);
+    };
+
+    const handleSubmit = () => {
+        onSubmit(localSelectedData);
     };
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -618,36 +618,7 @@ const ModalRefundReceipt = ({
     };
 
     const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-5">
-                <ButtonComponent type="default" onClick={handleCancel} className="w-[120px]">
-                    Cancel
-                </ButtonComponent>
-                {currentStep > 0 && (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handlePrev}
-                        className="w-[120px]"
-                        icon={
-                            <LeftOutlined
-                                style={{ color: "#fff", fontSize: 15, marginRight: 10 }}
-                            />
-                        }
-                    >
-                        Previous
-                    </ButtonComponent>
-                )}
-                {currentStep < steps.length - 1 ? (
-                    <ButtonComponent type="submit" onClick={handleNext} className="w-[120px]">
-                        Next
-                    </ButtonComponent>
-                ) : (
-                    <ButtonComponent type="submit" onClick={() => onSubmit(localSelectedData)} className="w-[120px]">
-                        Confirm
-                    </ButtonComponent>
-                )}
-            </div>
-        );
+        return null; // Footer will be rendered separately
     };
 
     return (
@@ -657,18 +628,79 @@ const ModalRefundReceipt = ({
             header="RECEIPT REFUND"
             type={"confirmation"}
             width={1200}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="w-full gap-5">
-                <div className="overflow-x-scroll scrollStepsCstm gap-5">
-                    <Steps current={currentStep} labelPlacement="vertical">
-                        {steps.map((item) => (
-                            <Step key={item.key} title={item.title} />
-                        ))}
-                    </Steps>
-                </div>
-                <div className="min-h-[300px] mb-6">
-                    {renderContent()}
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
+            <div className="min-h-[300px] mb-6">
+                {renderContent()}
+            </div>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                key="btn-next"
+                                htmlType="button"
+                                onClick={handleNext}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#0075BF",
+                                    borderColor: "#0075BF",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                key="btn-submit"
+                                htmlType="button"
+                                onClick={handleSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </ModalCustom>
