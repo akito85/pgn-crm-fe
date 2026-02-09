@@ -32,6 +32,7 @@ const EditableCell = ({
   required,
   formPD,
   validateBoolean,
+  exportVal,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -111,7 +112,7 @@ const EditableCell = ({
           }
           help={
             validateBoolean && inputType === "number"
-              ? "Please adjust value. Total Percentage must be 100%"
+              ? `Please adjust value. Total Percentage must be ${exportVal}%`
               : undefined
           }
           rules={
@@ -122,12 +123,12 @@ const EditableCell = ({
                   {
                     validator: (_, value) => {
                       const percentage = formPD.getFieldValue().percentage;
-                      if (percentage >= 0 && percentage <= 100) {
+                      if (percentage >= 0 && percentage <= exportVal) {
                         return Promise.resolve();
                       } else {
                         return Promise.reject(
                           new Error(
-                            "Please adjust value. Total Percentage must be 100%"
+                            `Please adjust value. Total Percentage must be ${exportVal}%`
                           )
                         );
                       }
@@ -240,6 +241,8 @@ const FunctionalPDDetail = ({
   updateData = [],
   storedData = false,
   setStoredData = () => {},
+  localVal,
+  exportVal,
 }) => {
   // Selector
   const { data_country } = useSelector((state) => state.rawMaterialSource);
@@ -375,7 +378,7 @@ const FunctionalPDDetail = ({
         }, 0);
 
         // Check if the total percentage exceeds 100%
-        if (totalPercentage > 100) {
+        if (totalPercentage > exportVal) {
           return setValidateBoolean(true);
         }
 
@@ -396,10 +399,10 @@ const FunctionalPDDetail = ({
   // Function Add Row Data
   const addRow = () => {
     let errorBody = {};
-    if (totalPercentage === 100) {
+    if (totalPercentage === exportVal) {
       errorBody = {
         title: "Failed",
-        description: "Total percentage is 100%, you cannot add data again.",
+        description: `Total percentage is ${exportVal}%, you cannot add data again.`,
       };
       dispatch(showModalError(errorBody));
     } else {
@@ -593,7 +596,7 @@ const FunctionalPDDetail = ({
 
   return (
     <div className="flex flex-col w-full gap-4">
-      {type !== "detail" && type !== "preview" ? (
+      {type !== "detail" && type !== "preview" && localVal + exportVal === 100 ? (
         <div className="flex w-full justify-end">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -658,6 +661,7 @@ const FunctionalPDDetail = ({
                   required: col.required,
                   validateBoolean: validateBoolean,
                   formPD: formPD,
+                  exportVal: exportVal,
                 }),
               }))
             )}
@@ -686,7 +690,7 @@ const FunctionalPDDetail = ({
         {type !== "detail" && type !== "preview" ? (
           <div className={"w-full flex flex-col mt-5 gap-2 justify-start"}>
             <span className="font-bold">Total Percentage</span>
-            <span>{`${totalPercentage} / 100 %`}</span>
+            <span>{`${totalPercentage} / ${exportVal} %`}</span>
           </div>
         ) : null}
       </div>
