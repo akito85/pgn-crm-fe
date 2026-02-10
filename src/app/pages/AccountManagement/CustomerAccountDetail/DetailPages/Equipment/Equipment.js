@@ -22,6 +22,8 @@ import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import { useLocation } from "react-router-dom";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 
 const columns = (
   search,
@@ -444,17 +446,19 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     {
       action: "View",
       type: "table",
-      render: (record, data) => {
+      render: (record) => {
         return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
+          <Tooltip
+            title="Detail"
+            onClick={() => {
+              handleDetail(record);
+            }}
+          >
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDetail"
                 color={"#0075bf"}
                 width={20}
-                onClick={() => {
-                  handleDetail(record);
-                }}
               />
             </div>
           </Tooltip>
@@ -464,10 +468,10 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     {
       action: "Update",
       type: "table",
-      render: (record, data) => {
+      render: (record) => {
         return (
           <Tooltip title="Update">
-            <div className={`flex justify-center pt-1`}>
+            <div className={`flex items-center h-full`}>
               <SVGIcon
                 name="IconEdit"
                 width={20}
@@ -486,10 +490,10 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     {
       action: "Hapus",
       type: "table",
-      render: (record, data) => {
+      render: (record) => {
         return (
           <Tooltip title="Delete">
-            <div className="pt-1">
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDelete"
                 width={20}
@@ -549,29 +553,31 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   return (
     <>
       <Spin spinning={loading}>
-        <BaseContainer header={"Equipment List"}>
-          <div className="flex w-full justify-end gap-3 mb-5">
-            <ToolbarAccount items={itemActions} advancedAccess={access_account} />
-          </div>
-          <NxTable
-            idTable={"table-equipment-account-management"}
-            dataSource={currentData}
-            totalData={currentPagination?.totalElements}
-            current={page}
-            tableScrolled={{ y: 525, x: currentData.length ? "max-content" : "100%" }}
-            onSort={onSort}
-            columns={processedColumns}
-            usePagination={false}
-            useInfiniteScroll={true}
-            hashMore={hashMore}
-            onLoadMore={handleLoadMore}
-            loadMoreThreshold={20}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            columnDefinitions={columnDefinitions}
-            loading={loading}
-          />
-        </BaseContainer>
+        <NxCardContainer header={"EQUIPMEENT LIST"}>
+          <NxBaseContainer border>
+            <div className="flex w-full justify-end gap-3 mb-5">
+              <ToolbarAccount items={itemActions} advancedAccess={access_account} />
+            </div>
+            <NxTable
+              idTable={"table-equipment-account-management"}
+              dataSource={currentData}
+              totalData={currentPagination?.totalElements}
+              current={page}
+              tableScrolled={{ y: 525, x: currentData.length ? "max-content" : "100%" }}
+              onSort={onSort}
+              columns={processedColumns}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hashMore={hashMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              columnDefinitions={columnDefinitions}
+              loading={loading}
+            />
+          </NxBaseContainer>
+        </NxCardContainer>
         <EquipmentForm
           type={type}
           dispatch={dispatch}
