@@ -1,8 +1,9 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Collapse, Steps, Spin } from "antd";
-import { UpOutlined, LeftOutlined } from "@ant-design/icons";
+import { Collapse, Spin, Button } from "antd";
+import { UpOutlined } from "@ant-design/icons";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 import DetailText from "../../../../../components/DetailText";
 import TablePagination from "../../../../../components/TablePagination";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -15,7 +16,6 @@ import { configApp } from "../../../../../constants/configApp";
 import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 
 const { Panel } = Collapse;
-const { Step } = Steps;
 
 /**
  * Modal component for Create Accounting
@@ -363,54 +363,13 @@ const ModalCreateAccounting = ({
         </div>
     );
 
-    const stepItems = [
-        { label: "CREATE" },
-        { label: "ATTACHMENT" },
+    const steps = [
+        { title: "CREATE" },
+        { title: "ATTACHMENT" },
     ];
 
-    const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-3">
-                <ButtonComponent type="default" onClick={handleCancel}>
-                    Cancel
-                </ButtonComponent>
-                {currentStep === 0 && (
-                    <ButtonComponent
-                        type="default"
-                        onClick={handleClearData}
-                    >
-                        Clear Data
-                    </ButtonComponent>
-                )}
-                {currentStep > 0 && (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handlePrevious}
-                        icon={
-                            <LeftOutlined
-                                style={{ color: "#fff", fontSize: 15, marginRight: 10 }}
-                            />
-                        }
-                    >
-                        Previous
-                    </ButtonComponent>
-                )}
-                {currentStep === 0 && (
-                    <ButtonComponent
-                        type="default"
-                        onClick={() => { }}
-                    >
-                        Save as Draft
-                    </ButtonComponent>
-                )}
-                <ButtonComponent
-                    type="submit"
-                    onClick={handleNext}
-                >
-                    {currentStep === 0 ? "Next" : "Submit"}
-                </ButtonComponent>
-            </div>
-        );
+    const handlePrev = () => {
+        setCurrentStep(currentStep - 1);
     };
 
     return (
@@ -419,15 +378,14 @@ const ModalCreateAccounting = ({
             handleCancel={handleCancel}
             header="CREATE ACCOUNTING"
             width={1200}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="overflow-x-scroll scrollStepsCstm gap-5 mb-5 p-2">
-                <Steps
-                    current={currentStep}
-                    items={stepItems.map(item => ({ title: item.label }))}
-                    labelPlacement="vertical"
-                />
-            </div>
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
 
             <Spin spinning={loading}>
                 <div className="mt-4">
@@ -435,6 +393,70 @@ const ModalCreateAccounting = ({
                     {currentStep === 1 && renderAttachmentStep()}
                 </div>
             </Spin>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                key="btn-next"
+                                htmlType="button"
+                                onClick={handleNext}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#0075BF",
+                                    borderColor: "#0075BF",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                key="btn-submit"
+                                htmlType="button"
+                                onClick={handleSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
         </ModalCustom>
     );
 };

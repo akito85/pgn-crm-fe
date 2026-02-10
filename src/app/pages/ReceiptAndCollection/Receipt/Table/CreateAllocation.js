@@ -26,8 +26,6 @@ const CreateAllocation = ({
 }) => {
   const {
     loading,
-    data_table_allocation,
-    data_selected_allocation,
     data_recomendation_allocation,
   } = useSelector((state) => state?.receipt);
   const dispatch = useDispatch();
@@ -35,7 +33,7 @@ const CreateAllocation = ({
   // state
   const [page, setPage] = useState(1);
   const [pageChoose, setPageChoose] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const [pageSizeChoose, setPageSizeChoose] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -43,8 +41,7 @@ const CreateAllocation = ({
   const [selectDataTable, setSelectDataTable] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataRecomendation, setDataRecomendation] = useState([]);
-  const [disabledButton, setDisabledButton] = useState(false);
-  const [sort, setSort] = useState("");
+  const [sort] = useState("");
   const [search, setSearch] = useState({});
   const [typeColumn, setTypeColumn] = useState("");
   const [openModalReverse, setOpenModalReverse] = useState(false);
@@ -180,7 +177,7 @@ const CreateAllocation = ({
   };
 
   // on change select
-  const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
+  const onSelectChange = (newSelectedRowKeys, _newSelectedRows) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
   // row selections
@@ -223,18 +220,30 @@ const CreateAllocation = ({
   return (
     <div className="w-full items-end flex flex-col gap-5">
       {dataDetail?.approvalDto?.isApprover === false && (
-        <ButtonComponent
-          type={"submit"}
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
-          onClick={handleOpenModalAllocation}
-          disabled={
-            isInsert ||
-            unApliedAmount === 0 ||
-            dataDetail?.statusApproval !== "Approved"
-          }
-        >
-          Create
-        </ButtonComponent>
+        <>
+          <ButtonComponent
+            type={"submit"}
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            onClick={handleOpenModalAllocation}
+            disabled={
+              isInsert ||
+              unApliedAmount === 0 ||
+              dataDetail?.statusApproval !== "Approved" ||
+              !dataRecomendation ||
+              dataRecomendation?.length === 0
+            }
+          >
+            Create
+          </ButtonComponent>
+          {/* Info message when no allocation available */}
+          {dataDetail?.statusApproval === "Approved" &&
+            unApliedAmount > 0 &&
+            (!dataRecomendation || dataRecomendation?.length === 0) && (
+              <div className="text-sm text-gray-500 italic">
+                No outstanding invoices available for allocation
+              </div>
+            )}
+        </>
       )}
       <div className="w-full">
         <TableInlineAllocation
@@ -337,41 +346,58 @@ const CreateAllocation = ({
         ]}
       >
         <Spin spinning={loading}>
-          <TablePagination
-            columns={columnRecommendation(
-              pageChoose,
-              pageSizeChoose,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch
-            )}
-            current={pageChoose}
-            pageSize={pageSizeChoose}
-            dataSource={updatePagination(
-              dataRecomendation,
-              "data",
-              searchedColumn,
-              searchText,
-              pageChoose,
-              pageSizeChoose,
-              typeColumn
-            )}
-            totalData={updatePagination(
-              dataRecomendation,
-              "length",
-              searchedColumn,
-              searchText,
-              pageChoose,
-              pageSizeChoose,
-              typeColumn
-            )}
-            tableScrolled={{ x: 3500, y: 500 }}
-            onChange={handleChange}
-            rowSelection={rowSelection}
-            onSizeChanger={handleChange}
-          // onSort={onSort}
-          />
+          {/* Empty state message */}
+          {(!dataRecomendation || dataRecomendation?.length === 0) && !loading && (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <SVGIcon name="IconEmpty" width={80} />
+              <p className="text-lg font-semibold text-gray-700 mt-4">No Outstanding Invoices</p>
+              <p className="text-sm text-gray-500 mt-2 text-center max-w-md">
+                This account number does not have any unpaid or partially paid invoices available for allocation.
+              </p>
+              <p className="text-xs text-gray-400 mt-4">
+                Allocation can only be created for invoices with status "Unpaid" or "Partially Paid"
+              </p>
+            </div>
+          )}
+
+          {/* Table - only show if there's data */}
+          {dataRecomendation && dataRecomendation?.length > 0 && (
+            <TablePagination
+              columns={columnRecommendation(
+                pageChoose,
+                pageSizeChoose,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch
+              )}
+              current={pageChoose}
+              pageSize={pageSizeChoose}
+              dataSource={updatePagination(
+                dataRecomendation,
+                "data",
+                searchedColumn,
+                searchText,
+                pageChoose,
+                pageSizeChoose,
+                typeColumn
+              )}
+              totalData={updatePagination(
+                dataRecomendation,
+                "length",
+                searchedColumn,
+                searchText,
+                pageChoose,
+                pageSizeChoose,
+                typeColumn
+              )}
+              tableScrolled={{ x: 3500, y: 500 }}
+              onChange={handleChange}
+              rowSelection={rowSelection}
+              onSizeChanger={handleChange}
+            // onSort={onSort}
+            />
+          )}
         </Spin>
         {totalUnapliedAmount > unApliedAmount && (
           <span className="text-red-800">

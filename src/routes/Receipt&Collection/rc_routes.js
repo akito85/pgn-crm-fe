@@ -147,4 +147,16 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/view",
   CREATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/create",
   UPDATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/update",
+  
+  // Libor Rate
+  VIEW_LIBOR_RATE: "/receipt-and-collection/libor-rate",
+  DETAIL_LIBOR_RATE: "/receipt-and-collection/libor-rate/view",
+  CREATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/create",
+  UPDATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/update",
+
+  // Rate Index
+  VIEW_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index",
+  DETAIL_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/view",
+  CREATE_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/create",
+  UPDATE_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/update",
 };

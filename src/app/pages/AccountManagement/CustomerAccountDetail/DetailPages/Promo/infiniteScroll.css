@@ -1,0 +1,128 @@
+/* Infinite Scroll Styles for Promo Components */
+.infinite-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1.5rem;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.loading-row {
+  text-align: center !important;
+  color: #999 !important;
+  font-style: italic !important;
+  background-color: #fafafa !important;
+}
+
+.loading-row:hover {
+  background-color: #fafafa !important;
+}
+
+.loading-row .ant-table-cell {
+  border-bottom: none !important;
+}
+
+/* Custom scrollbar for Webkit browsers */
+.infinite-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.infinite-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.infinite-scroll-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.infinite-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Loading states */
+.promo-loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: transparent;
+}
+
+.promo-loading-indicator .ant-spin {
+  color: #1890ff;
+}
+
+.promo-no-more-data {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+  font-size: 14px;
+  background: #fafafa;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.promo-error-message {
+  text-align: center;
+  padding: 20px;
+  color: #f5222d;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.promo-error-message button {
+  margin-top: 10px;
+  padding: 6px 16px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.promo-error-message button:hover {
+  background-color: #40a9ff;
+}
+
+/* Observer element styling */
+.promo-observer-element {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* Empty state */
+.promo-empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  background: #fafafa;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-size: 16px;
+}
+
+#account-promo-table .ant-table-container {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#account-promo-table .ant-table {
+  background: transparent !important;
+}
+
+#account-promo-table .ant-table-content {
+  border-radius: 0 !important;
+}

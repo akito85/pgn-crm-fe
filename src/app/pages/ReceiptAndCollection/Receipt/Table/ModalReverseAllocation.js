@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Steps, Form, Alert, Spin } from "antd";
+import { useState, useEffect } from "react";
+import { Form, Alert, Spin, Button } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
 import InputComponent from "../../../../../components/InputComponent";
@@ -17,7 +18,6 @@ import {
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 const ModalReverseAllocation = ({ isOpen, handleCancel, record, receiptId, onSuccess }) => {
     const dispatch = useDispatch();
@@ -97,7 +97,18 @@ const ModalReverseAllocation = ({ isOpen, handleCancel, record, receiptId, onSuc
         return result;
     };
 
+    const steps = [
+        { title: "Allocation Information" },
+        { title: "Approval Information" },
+        { title: "Attachment Information" },
+        { title: "Confirmation" },
+    ];
+
     const handleNext = () => {
+        // Validasi sebelum next
+        if (currentStep === 0 && !forceObj.remark) return;
+        if (currentStep === 1 && !forceObj.approvalHierarchy) return;
+        
         setCurrentStep(currentStep + 1);
     };
 
@@ -124,64 +135,22 @@ const ModalReverseAllocation = ({ isOpen, handleCancel, record, receiptId, onSuc
         }
     };
 
-    const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-5">
-                <ButtonComponent type={"default"} onClick={handleCancel}>
-                    Cancel
-                </ButtonComponent>
-                {currentStep > 0 && (
-                    <ButtonComponent type={"submit"} onClick={handlePrev}>
-                        <div className="flex items-center gap-2">
-                            <LeftOutlined style={{ fontSize: 14 }} />
-                            <span>Previous</span>
-                        </div>
-                    </ButtonComponent>
-                )}
-                {currentStep < 3 ? (
-                    <ButtonComponent
-                        type={"submit"}
-                        onClick={handleNext}
-                        disabled={
-                            (currentStep === 0 && !forceObj.remark) ||
-                            (currentStep === 1 && !forceObj.approvalHierarchy)
-                        }
-                    >
-                        <div className="flex items-center gap-2">
-                            <span>Next</span>
-                            <RightOutlined style={{ fontSize: 14 }} />
-                        </div>
-                    </ButtonComponent>
-                ) : (
-                    <ButtonComponent type={"submit"} onClick={onSubmit}>
-                        Confirm
-                    </ButtonComponent>
-                )}
-            </div>
-        );
-    };
-
     return (
         <ModalCustom
             isOpen={isOpen}
             handleCancel={handleCancel}
             header={"Reverse Allocation"}
             width={1000}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="w-full">
-                <div className="mb-8">
-                    <Steps
-                        current={currentStep}
-                        items={[
-                            { title: "Allocation Information" },
-                            { title: "Approval Information" },
-                            { title: "Attachment Information" },
-                            { title: "Confirmation" },
-                        ]}
-                    />
-                </div>
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
 
+            <div className="w-full">
                 <Spin spinning={loading}>
                     <Form layout="vertical">
                         {currentStep === 0 && (
@@ -271,6 +240,79 @@ const ModalReverseAllocation = ({ isOpen, handleCancel, record, receiptId, onSuc
                         )}
                     </Form>
                 </Spin>
+            </div>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                onClick={handleNext}
+                                type="primary"
+                                disabled={
+                                    (currentStep === 0 && !forceObj.remark) ||
+                                    (currentStep === 1 && !forceObj.approvalHierarchy)
+                                }
+                                style={{
+                                    backgroundColor: 
+                                        (currentStep === 0 && !forceObj.remark) ||
+                                        (currentStep === 1 && !forceObj.approvalHierarchy)
+                                            ? "#E0E3E9" : "#0075BF",
+                                    borderColor: 
+                                        (currentStep === 0 && !forceObj.remark) ||
+                                        (currentStep === 1 && !forceObj.approvalHierarchy)
+                                            ? "#E0E3E9" : "#0075BF",
+                                    color: 
+                                        (currentStep === 0 && !forceObj.remark) ||
+                                        (currentStep === 1 && !forceObj.approvalHierarchy)
+                                            ? "#BFC4D0" : "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={onSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
+                </div>
             </div>
         </ModalCustom>
     );
