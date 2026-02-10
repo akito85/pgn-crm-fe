@@ -187,10 +187,11 @@ const SaInformation = ({
   return (
     <NxCardContainer header={"SERVICE AGREEMENT INFORMATION"}>
       <div className="flex flex-col gap-y-4">
-        {/* SERVICE TYPE SECTION */}
-        <BaseContainer border header={"SERVICE TYPE"}>
-          <div className={"grid grid-cols-3 w-full gap-x-6"}>
-            <Form.Item
+        {/* SERVICE AGREEMENT INFORMATION SECTION */}
+        <BaseContainer border header={"SERVICE AGREEMENT INFORMATION"}>
+          {/* Check If Not SA Main  */}
+            <div className={"grid grid-cols-3 w-full gap-x-6"}>
+              <Form.Item
               name={"serviceType"}
               label={"Service Type"}
               getValueFromEvent={(e) => handleSaInformationObj(e, "serviceType")}
@@ -217,30 +218,23 @@ const SaInformation = ({
                   ))}
               </SelectComponent>
             </Form.Item>
-          </div>
-        </BaseContainer>
-
-        {/* SERVICE AGREEMENT INFORMATION SECTION */}
-        <BaseContainer border header={"SERVICE AGREEMENT INFORMATION"}>
-          {/* Check If Not SA Main  */}
-          {saType !== "main" && (
-            <div className={"grid grid-cols-3 w-full gap-x-6"}>
-              <Form.Item
-                name={"serviceAgreementReferenceNumber"}
-                label={"Service Agreement Reference Number"}
-                getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
-                rules={[
-                  {
-                    message: " Please input your Service Agreement Reference Number",
-                    required: true,
-                  },
-                ]}
-              >
-                <InputComponent disabled={true} />
-              </Form.Item>
+            {saType !== "main" && (
+                <Form.Item
+                  name={"serviceAgreementReferenceNumber"}
+                  label={"Service Agreement Reference Number"}
+                  getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
+                  rules={[
+                    {
+                      message: " Please input your Service Agreement Reference Number",
+                      required: true,
+                    },
+                  ]}
+                >
+                  <InputComponent disabled={true} />
+                </Form.Item>
+            )
+            }
             </div>
-          )
-          }
           <div className={"grid grid-cols-3 w-full gap-x-6"}>
             <Form.Item
               name={"serviceAgreementNumber"}

@@ -138,6 +138,7 @@ import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentW
 import rateSourceReducer from "../slices/receipt_collection/rateSource";
 import rateIndexReducer from "../slices/receipt_collection/rateIndex";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
+import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -281,6 +282,7 @@ const reducer = combineReducers({
   paymentWarrantyPartner: paymentWarrantyPartnerReducer,
   rateSource: rateSourceReducer,
   rateIndex: rateIndexReducer,
+  paymentCycle: paymentCycleReducer,
 
   // Attachment
   attachment: attachmentReducer,

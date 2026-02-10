@@ -39,7 +39,7 @@ const EditableCell = ({
 	dataEditRecord,
 	urlIndex,
 	isProduct,
-	handleEditDataRecord = () => {},
+	handleEditDataRecord = () => { },
 	...restProps
 }) => {
 	const key = record?.key || 0;
@@ -63,34 +63,34 @@ const EditableCell = ({
 
 	const dependentData = () => {
 		if (options.length === 0) {
-		  return true;
+			return true;
 		}
 		return !dataDepend;
-	  };
+	};
 
 	const getInputNode = (inputType) => {
 		switch (inputType) {
 			case "select":
 				return (
-          <Select
-            showSearch
-            optionFilterProp="children"
-            filterOption={filterOption}
-            labelInValue
-            disabled={
-              (dataIndex === "name" && isProduct !== 2) || hasValue(dependDataIndex)
-                ? dependentData()
-                : false
-            }
-            // disabled={dependDataIndex ? !dataDepend : false}
-          >
-            {options.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select>
-        );
+					<Select
+						showSearch
+						optionFilterProp="children"
+						filterOption={filterOption}
+						labelInValue
+						disabled={
+							(dataIndex === "name" && isProduct !== 2) || hasValue(dependDataIndex)
+								? dependentData()
+								: false
+						}
+					// disabled={dependDataIndex ? !dataDepend : false}
+					>
+						{options.map((option) => (
+							<Select.Option key={option.value} value={option.value}>
+								{option.label}
+							</Select.Option>
+						))}
+					</Select>
+				);
 			case "number":
 				return (
 					<InputNumber
@@ -147,12 +147,12 @@ const EditableCell = ({
 const excludeOptionName = [687];
 const TableCalcRule = ({
 	type,
-	dispatch = () => {},
+	dispatch = () => { },
 	dataTable = [],
-	updateTable = () => {},
+	updateTable = () => { },
 	isProduct,
 	data = [],
-	handleSaDetailObj = () => {},
+	handleSaDetailObj = () => { },
 	setSaDetailObj,
 	saDetailObj
 }) => {
@@ -182,8 +182,8 @@ const TableCalcRule = ({
 	);
 
 	useEffect(() => {
-		if(isProduct === 2){
-      const selectedCalculationType = dataListCalculationType?.filter(item => item?.value === saDetailObj?.calculationType)[0]
+		if (isProduct === 2 && saDetailObj?.calculationType) {
+			const selectedCalculationType = dataListCalculationType?.filter(item => item?.value === saDetailObj?.calculationType)[0]
 			setSaDetailObj((prevState) => ({
 				...prevState,
 				objCaclucationType: {
@@ -193,9 +193,9 @@ const TableCalcRule = ({
 				},
 			}))
 		}
-		
-	}, [saDetailObj.calculationType])
-	
+
+	}, [saDetailObj?.calculationType])
+
 	// useEffect(() => {
 	//   if(data?.length){
 	//     updateTable(data)
@@ -316,15 +316,15 @@ const TableCalcRule = ({
 		const { key, ...extraProps } = record || {};
 		const tempValue = { ...extraProps };
 		for (const attribute in tempValue) {
-		  if (Object.hasOwnProperty.call(tempValue, attribute)) {
-			const tempData = tempValue[attribute];
-			setEditDataRecord((prevState) => {
-			  return {
-				...prevState,
-				[`${key}${attribute}`]: tempData,
-			  };
-			});
-		  }
+			if (Object.hasOwnProperty.call(tempValue, attribute)) {
+				const tempData = tempValue[attribute];
+				setEditDataRecord((prevState) => {
+					return {
+						...prevState,
+						[`${key}${attribute}`]: tempData,
+					};
+				});
+			}
 		}
 		if (record?.name && record?.name?.value) {
 			// const temp = listName.filter(
@@ -507,84 +507,82 @@ const TableCalcRule = ({
 				render: (_, record) => {
 					const editable = record.key === editingKey;
 					return (
-            <div className="flex w-full justify-center my-3 gap-2">
-              {editable ? (
-                <>
-                  <ButtonComponent
-                    onClick={() => cancel(record)}
-                    type="default"
-                  >
-                    Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
-                    onClick={() => save(record.key)}
-                    type="submit"
-                  >
-                    Save
-                  </ButtonComponent>
-                </>
-              ) : (
-                <>
-                  <Tooltip title="Edit">
-                    <span
-                      className={`flex justify-center${
-                        editingKey ? " cursor-not-allowed" : ""
-                      }`}
-                    >
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        width={24}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </span>
-                  </Tooltip>
-                  {isProduct === 2 && (
-                    <>
-                      <Tooltip title="Delete">
-                        <span
-                          className={`flex justify-center${
-                            record.typeData === "exist"
-                              ? " cursor-not-allowed"
-                              : ""
-                          }`}
-                        >
-                          <SVGIcon
-                            name="IconDelete"
-                            color={
-                              record.typeData !== "exist"
-                                ? "#D90000"
-                                : "#8D91A0"
-                            }
-                            width={24}
-                            className={
-                              record.typeData === "exist"
-                                ? "disabled"
-                                : undefined
-                            }
-                            onClick={
-                              record.typeData !== "exist"
-                                ? () => deleteRow(record)
-                                : undefined
-                            }
-                          />
-                        </span>
-                      </Tooltip>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          );
+						<div className="flex w-full justify-center my-3 gap-2">
+							{editable ? (
+								<>
+									<ButtonComponent
+										onClick={() => cancel(record)}
+										type="default"
+									>
+										Cancel
+									</ButtonComponent>
+									<ButtonComponent
+										onClick={() => save(record.key)}
+										type="submit"
+									>
+										Save
+									</ButtonComponent>
+								</>
+							) : (
+								<>
+									<Tooltip title="Edit">
+										<span
+											className={`flex justify-center${editingKey ? " cursor-not-allowed" : ""
+												}`}
+										>
+											<SVGIcon
+												name="IconEdit"
+												color={editingKey ? "#8D91A0" : "#ACC424"}
+												width={24}
+												onClick={!editingKey ? () => edit(record) : undefined}
+											/>
+										</span>
+									</Tooltip>
+									{isProduct === 2 && (
+										<>
+											<Tooltip title="Delete">
+												<span
+													className={`flex justify-center${record.typeData === "exist"
+															? " cursor-not-allowed"
+															: ""
+														}`}
+												>
+													<SVGIcon
+														name="IconDelete"
+														color={
+															record.typeData !== "exist"
+																? "#D90000"
+																: "#8D91A0"
+														}
+														width={24}
+														className={
+															record.typeData === "exist"
+																? "disabled"
+																: undefined
+														}
+														onClick={
+															record.typeData !== "exist"
+																? () => deleteRow(record)
+																: undefined
+														}
+													/>
+												</span>
+											</Tooltip>
+										</>
+									)}
+								</>
+							)}
+						</div>
+					);
 				},
 			},
 		];
 		// return temp
 		return temp
 		// isProduct === 2
-		  // ? 
-		  // temp
-		  // : temp.filter((col) => col.title !== "ACTION");
+		// ? 
+		// temp
+		// : temp.filter((col) => col.title !== "ACTION");
 	};
 
 	const [optionSelectedCol, setOptionSelectedCol] = useState([]);
