@@ -3,8 +3,8 @@
  * Redux slice for promo state management under Account Management
  */
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { promoService } from '../../services/promoService';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { promoService } from "../../services/promoService";
 
 // Initial state
 const initialState = {
@@ -89,19 +89,19 @@ const initialState = {
 
 // Valid Promo Operations
 export const fetchValidPromoList = createAsyncThunk(
-  'promo/fetchValidPromoList',
-  async ({ params, advancedSearch }, { rejectWithValue }) => {
+  "promo/fetchValidPromoList",
+  async ({ params, payload }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getListValidPromo(params, advancedSearch);
+      const response = await promoService.getListValidPromo(params, payload);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchValidPromoDetail = createAsyncThunk(
-  'promo/fetchValidPromoDetail',
+  "promo/fetchValidPromoDetail",
   async (promoId, { rejectWithValue }) => {
     try {
       const response = await promoService.getDetailValidPromoById(promoId);
@@ -109,150 +109,187 @@ export const fetchValidPromoDetail = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const downloadValidPromoList = createAsyncThunk(
-  'promo/downloadValidPromoList',
+  "promo/downloadValidPromoList",
   async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.downloadListValidPromo(params, advancedSearch);
+      const response = await promoService.downloadListValidPromo(
+        params,
+        advancedSearch,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // Promo Criteria Operations
 export const fetchPromoCriteriaList = createAsyncThunk(
-  'promo/fetchPromoCriteriaList',
+  "promo/fetchPromoCriteriaList",
   async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getListValidPromoCriteriaByPromoId(params, advancedSearch);
+      const response = await promoService.getListValidPromoCriteriaByPromoId(
+        params,
+        advancedSearch,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchPromoCriteriaDetail = createAsyncThunk(
-  'promo/fetchPromoCriteriaDetail',
+  "promo/fetchPromoCriteriaDetail",
   async (criteriaId, { rejectWithValue }) => {
     try {
-      const response = await promoService.getDetailValidPromoCriteria(criteriaId);
+      const response =
+        await promoService.getDetailValidPromoCriteria(criteriaId);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const downloadPromoCriteriaList = createAsyncThunk(
-  'promo/downloadPromoCriteriaList',
+  "promo/downloadPromoCriteriaList",
   async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.downloadListValidPromoCriteria(params, advancedSearch);
+      const response = await promoService.downloadListValidPromoCriteria(
+        params,
+        advancedSearch,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // Promo Condition Operations
 export const fetchPromoConditionList = createAsyncThunk(
-  'promo/fetchPromoConditionList',
+  "promo/fetchPromoConditionList",
   async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getListValidPromoConditionByPromoId(params, advancedSearch);
+      const response = await promoService.getListValidPromoConditionByPromoId(
+        params,
+        advancedSearch,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchPromoConditionDetail = createAsyncThunk(
-  'promo/fetchPromoConditionDetail',
+  "promo/fetchPromoConditionDetail",
   async (conditionId, { rejectWithValue }) => {
     try {
-      const response = await promoService.getDetailValidPromoCondition(conditionId);
+      const response =
+        await promoService.getDetailValidPromoCondition(conditionId);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const downloadPromoConditionList = createAsyncThunk(
-  'promo/downloadPromoConditionList',
+  "promo/downloadPromoConditionList",
   async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.downloadListValidPromoCondition(params, advancedSearch);
+      const response = await promoService.downloadListValidPromoCondition(
+        params,
+        advancedSearch,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // Promo History Operations
 export const fetchPromoHistoryList = createAsyncThunk(
-  'promo/fetchPromoHistoryList',
+  "promo/fetchPromoHistoryList",
   async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getListPromoHistory(params, advancedSearch);
+      const response = await promoService.getListPromoHistory(
+        params,
+        advancedSearch,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchPromoHistoryDetail = createAsyncThunk(
-  'promo/fetchPromoHistoryDetail',
+  "promo/fetchPromoHistoryDetail",
   async ({ billingCode, accountId }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getDetailPromoHistoryById(billingCode, accountId);
+      const response = await promoService.getDetailPromoHistoryById(
+        billingCode,
+        accountId,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchPromoHistoryDetailDetail = createAsyncThunk(
-  'promo/fetchPromoHistoryDetailDetail',
+  "promo/fetchPromoHistoryDetailDetail",
   async ({ billingCode, detailId, accountId }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getDetailDetailPromoHistoryById(billingCode, detailId, accountId);
+      const response = await promoService.getDetailDetailPromoHistoryById(
+        billingCode,
+        detailId,
+        accountId,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const downloadPromoHistoryList = createAsyncThunk(
-  'promo/downloadPromoHistoryList',
+  "promo/downloadPromoHistoryList",
   async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.downloadListPromoHistory(params, advancedSearch);
+      const response = await promoService.downloadListPromoHistory(
+        params,
+        advancedSearch,
+      );
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // Advanced Search Helpers
 export const fetchAdvancedSearchMetadata = createAsyncThunk(
-  'promo/fetchAdvancedSearchMetadata',
+  "promo/fetchAdvancedSearchMetadata",
   async (_, { rejectWithValue }) => {
     try {
-      const [conditions, operators, promoColumns, criteriaColumns, conditionColumns, historyColumns] = await Promise.all([
+      const [
+        conditions,
+        operators,
+        promoColumns,
+        criteriaColumns,
+        conditionColumns,
+        historyColumns,
+      ] = await Promise.all([
         promoService.getAdvanceSearchCondition(),
         promoService.getAdvanceSearchOperator(),
         promoService.getAdvancePromoColumn(),
@@ -272,12 +309,12 @@ export const fetchAdvancedSearchMetadata = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // Slice
 const promoSlice = createSlice({
-  name: 'promo',
+  name: "promo",
   initialState,
   reducers: {
     // Synchronous actions
@@ -456,9 +493,12 @@ const promoSlice = createSlice({
         state.advancedSearch.conditions = action.payload.conditions || [];
         state.advancedSearch.operators = action.payload.operators || [];
         state.advancedSearch.promoColumns = action.payload.promoColumns || [];
-        state.advancedSearch.criteriaColumns = action.payload.criteriaColumns || [];
-        state.advancedSearch.conditionColumns = action.payload.conditionColumns || [];
-        state.advancedSearch.historyColumns = action.payload.historyColumns || [];
+        state.advancedSearch.criteriaColumns =
+          action.payload.criteriaColumns || [];
+        state.advancedSearch.conditionColumns =
+          action.payload.conditionColumns || [];
+        state.advancedSearch.historyColumns =
+          action.payload.historyColumns || [];
       })
       .addCase(fetchAdvancedSearchMetadata.rejected, (state, action) => {
         state.advancedSearch.loading = false;
@@ -475,7 +515,7 @@ const promoSlice = createSlice({
         // No need to store blob in state
       })
       .addCase(downloadValidPromoList.rejected, (state, action) => {
-        console.error('Download failed:', action.payload);
+        console.error("Download failed:", action.payload);
       });
 
     // Download Promo Criteria List
@@ -487,7 +527,7 @@ const promoSlice = createSlice({
         // No need to store blob in state
       })
       .addCase(downloadPromoCriteriaList.rejected, (state, action) => {
-        console.error('Download criteria failed:', action.payload);
+        console.error("Download criteria failed:", action.payload);
       });
 
     // Download Promo Condition List
@@ -499,7 +539,7 @@ const promoSlice = createSlice({
         // No need to store blob in state
       })
       .addCase(downloadPromoConditionList.rejected, (state, action) => {
-        console.error('Download condition failed:', action.payload);
+        console.error("Download condition failed:", action.payload);
       });
 
     // Download Promo History List
@@ -511,7 +551,7 @@ const promoSlice = createSlice({
         // No need to store blob in state
       })
       .addCase(downloadPromoHistoryList.rejected, (state, action) => {
-        console.error('Download promo history failed:', action.payload);
+        console.error("Download promo history failed:", action.payload);
       });
   },
 });
@@ -527,16 +567,26 @@ export const {
 } = promoSlice.actions;
 
 // Selectors
-export const selectValidPromoList = (state) => state.accountPromo.validPromoList;
-export const selectValidPromoDetail = (state) => state.accountPromo.validPromoDetail;
-export const selectPromoCriteriaList = (state) => state.accountPromo.promoCriteriaList;
-export const selectPromoCriteriaDetail = (state) => state.accountPromo.promoCriteriaDetail;
-export const selectPromoConditionList = (state) => state.accountPromo.promoConditionList;
-export const selectPromoConditionDetail = (state) => state.accountPromo.promoConditionDetail;
-export const selectPromoHistoryList = (state) => state.accountPromo.promoHistoryList;
-export const selectPromoHistoryDetail = (state) => state.accountPromo.promoHistoryDetail;
-export const selectPromoHistoryDetailDetail = (state) => state.accountPromo.promoHistoryDetailDetail;
-export const selectAdvancedSearchMetadata = (state) => state.accountPromo.advancedSearch;
+export const selectValidPromoList = (state) =>
+  state.accountPromo.validPromoList;
+export const selectValidPromoDetail = (state) =>
+  state.accountPromo.validPromoDetail;
+export const selectPromoCriteriaList = (state) =>
+  state.accountPromo.promoCriteriaList;
+export const selectPromoCriteriaDetail = (state) =>
+  state.accountPromo.promoCriteriaDetail;
+export const selectPromoConditionList = (state) =>
+  state.accountPromo.promoConditionList;
+export const selectPromoConditionDetail = (state) =>
+  state.accountPromo.promoConditionDetail;
+export const selectPromoHistoryList = (state) =>
+  state.accountPromo.promoHistoryList;
+export const selectPromoHistoryDetail = (state) =>
+  state.accountPromo.promoHistoryDetail;
+export const selectPromoHistoryDetailDetail = (state) =>
+  state.accountPromo.promoHistoryDetailDetail;
+export const selectAdvancedSearchMetadata = (state) =>
+  state.accountPromo.advancedSearch;
 
 // Reducer
 export default promoSlice.reducer;
