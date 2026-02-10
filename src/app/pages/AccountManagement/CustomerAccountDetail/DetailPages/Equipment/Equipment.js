@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Form, Spin, Tooltip } from "antd";
 import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 
 import BaseContainer from "../../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import DetailEquipment from "./DetailEquipment";
@@ -20,36 +19,37 @@ import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
-import { hasValue, renderColumn } from "../../../../../../utils";
 import { useLocation } from "react-router-dom";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 
 const columns = (
   search,
-  page = 1,
-  pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleDetail,
-  setType,
-  setModalCreateUpdate,
-  setIdEquipment,
-  dispatch,
-  handleDelete
+  handleSearch
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
-      width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      dataIndex: "no",
+      width: 60,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "name",
       title: "NAME",
       dataIndex: "name",
+      width: 200,
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.name] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "name",
         searchInput,
         searchedColumn,
@@ -57,14 +57,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("name", hasValue(search['name']), searchText, text,false, 'input', search),
-
     },
     {
+      key: "typeEquipment",
       title: "TYPE",
       dataIndex: "typeEquipment",
+      width: 200,
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.typeEquipment] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "typeEquipment",
         searchInput,
         searchedColumn,
@@ -72,13 +74,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("typeEquipment", hasValue(search['typeEquipment']), searchText, text, false, 'input', search),
     },
     {
+      key: "brand",
       title: "BRAND",
       dataIndex: "brand",
+      width: 200,
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.brand] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "brand",
         searchInput,
         searchedColumn,
@@ -86,14 +91,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("brand", hasValue(search['brand']), searchText, text, false, 'input', search),
     },
     {
+      key: "qtyValue",
       title: "QUANTITY",
       dataIndex: "qtyValue",
       align: "right",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.qtyValue] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "qtyValue",
         searchInput,
         searchedColumn,
@@ -101,14 +108,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("qtyValue", hasValue(search['qtyValue']), searchText, text, false, 'input', search),
     },
     {
+      key: "capValue",
       title: "CAPACITY",
       dataIndex: "capValue",
       align: "right",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.capValue] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "capValue",
         searchInput,
         searchedColumn,
@@ -116,14 +125,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("capValue", hasValue(search['capValue']), searchText, text, false, 'input', search),
     },
     {
+      key: "conValue",
       title: "ENERGY CONSUMPTION",
       dataIndex: "conValue",
       align: "right",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.conValue] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "conValue",
         searchInput,
         searchedColumn,
@@ -131,14 +142,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("conValue", hasValue(search['conValue']), searchText, text, false, 'input', search),
     },
     {
+      key: "gasConvValue",
       title: "GAS CONVERSION/MONTH",
       dataIndex: "gasConvValue",
       align: "right",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.gasConvValue] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "gasConvValue",
         searchInput,
         searchedColumn,
@@ -146,14 +159,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("gasConvValue", hasValue(search['gasConvValue']), searchText, text, false, 'input', search),
     },
     {
+      key: "noh",
       title: "OPERATIOIN HOURS/DAY",
       dataIndex: "noh",
       align: "right",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.noh] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "noh",
         searchInput,
         searchedColumn,
@@ -161,14 +176,16 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("noh", hasValue(search['noh']), searchText, text, false, 'input', search),
     },
     {
+      key: "nod",
       title: "OPERATIOIN DAYS/WEEK",
       dataIndex: "nod",
       align: "right",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.nod] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "nod",
         searchInput,
         searchedColumn,
@@ -176,13 +193,15 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("nod", hasValue(search['nod']), searchText, text, false, 'input', search),
     },
     {
+      key: "isDualFuel",
       title: "DUAL FUEL",
       dataIndex: "isDualFuel",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.isDualFuel] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "isDualFuel",
         searchInput,
         searchedColumn,
@@ -190,13 +209,15 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("isDualFuel", hasValue(search['isDualFuel']), searchText, text, false, 'input', search),
     },
     {
+      key: "fuelType1",
       title: "FUEL TYPE 1",
       dataIndex: "fuelType1",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.fuelType1] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "fuelType1",
         searchInput,
         searchedColumn,
@@ -204,13 +225,15 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("fuelType1", hasValue(search['fuelType1']), searchText, text, false, 'input', search),
     },
     {
+      key: "fuelType2",
       title: "FUEL TYPE 2",
       dataIndex: "fuelType2",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.fuelType2] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "fuelType2",
         searchInput,
         searchedColumn,
@@ -218,13 +241,15 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("fuelType2", hasValue(search['fuelType2']), searchText, text, false, 'input', search),
     },
     {
+      key: "description",
       title: "DESCRIPTION",
       dataIndex: "description",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.description] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "description",
         searchInput,
         searchedColumn,
@@ -232,23 +257,27 @@ const columns = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn("description", hasValue(search['description']), searchText, text, false, 'input', search),
     },
   ];
 };
 
 const EquipmentPage = ({ idAccount, idCustomer }) => {
   const dispatch = useDispatch();
-  const { data, loading, data_detail } = useSelector(
+  const {
+    list_equipment,
+    pagination_equipment,
+    loading,
+    data_detail,
+  } = useSelector(
     (state) => state.accountEquipment
   );
+
   const { access_account } = useSelector(
     (state) => state.accountManagement
   );
   const [form] = Form.useForm();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -263,6 +292,13 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const location = useLocation();
+
+  const [loadMoreSize] = useState(20);
+
+  const currentData = useMemo(() => list_equipment, [list_equipment]);
+  const currentPagination = pagination_equipment;
+  
+  const hashMore = currentData.length < (currentPagination?.totalElements || 0);
 
   useEffect(() => {
     if(location?.pathname.includes('account-standard')) {
@@ -280,10 +316,11 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
         search: reqSearch,
         sort,
         page,
-        pageSize,
+        pageSize: loadMoreSize,
+        isLoadMore: false,
       })
     );
-  }, [idAccount, search, page, pageSize, sort, dispatch]);
+  }, [search, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -299,16 +336,33 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
       };
     });
   };
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = currentPagination?.totalPages || 0;
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getListEqupment({
+          id: idAccount,
+          search: reqSearch,
+          sort,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  }
+
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
-  };
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
   };
 
   const handleSave = () => {
@@ -324,7 +378,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
           search: reqSearch,
           sort,
           page,
-          pageSize,
+          pageSize: loadMoreSize,
         })
       );
     })  
@@ -356,7 +410,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
           search: reqSearch,
           sort,
           page,
-          pageSize,
+          pageSize: loadMoreSize,
         })
       );
     })  
@@ -376,7 +430,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
       action: 'Create',
       render: (
         <ButtonComponent
-          icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+          icon={<PlusOutlined style={{ fontSize: "20px" }} />}
           type="submit"
           onClick={() => {
             setModalCreateUpdate(true);
@@ -392,17 +446,19 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     {
       action: "View",
       type: "table",
-      render: (record, data) => {
+      render: (record) => {
         return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
+          <Tooltip
+            title="Detail"
+            onClick={() => {
+              handleDetail(record);
+            }}
+          >
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDetail"
                 color={"#0075bf"}
-                width={24}
-                onClick={() => {
-                  handleDetail(record);
-                }}
+                width={20}
               />
             </div>
           </Tooltip>
@@ -412,13 +468,13 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     {
       action: "Update",
       type: "table",
-      render: (record, data) => {
+      render: (record) => {
         return (
           <Tooltip title="Update">
-            <div className={`flex justify-center pt-1`}>
+            <div className={`flex items-center h-full`}>
               <SVGIcon
                 name="IconEdit"
-                width={24}
+                width={20}
                 onClick={() => {
                   setModalCreateUpdate(true);
                   setType("update");
@@ -434,13 +490,13 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     {
       action: "Hapus",
       type: "table",
-      render: (record, data) => {
+      render: (record) => {
         return (
           <Tooltip title="Delete">
-            <div className="pt-1">
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 onClick={() => handleDelete(record?.id)}
               />
             </div>
@@ -449,46 +505,79 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
       }
     },
   ];
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+
+  const actionCols = useColumnActionPermissionAccount(
+    ["View", "Update", "Hapus"],
+    itemActions,
+    access_account
+  ).map((col) => ({
+    ...col,
+    width: 70,
+    align: "center",
+  }));
+
+  const baseColumns = useMemo(() =>
+    columns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ), [search, searchText, searchedColumn]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }))
+  }, [allColumns]);
+
   return (
     <>
       <Spin spinning={loading}>
-        <BaseContainer header={"Equipment List"}>
-          <div className="flex w-full justify-end gap-3 mb-5">
-            <ToolbarAccount items={itemActions} advancedAccess={access_account} />
-          </div>
-          <TablePaginationNew
-            dataSource={data?.result}
-            totalData={data?.page?.totalElements}
-            current={page}
-            pageSize={pageSize}
-            tableScrolled={{ y: 525, x: 2500 }}
-            onChange={handleChange}
-            onSort={onSort}
-            onSizeChanger={handleChange}
-            columns={[
-              ...columns(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleDetail,
-                setType,
-                setModalCreateUpdate,
-                setIdEquipment,
-                dispatch,
-                handleDelete
-              ),
-              ...useColumnActionPermissionAccount(
-                ["View", "Update", "Hapus"],
-                itemActions,
-                access_account
-              )
-            ]}
-          />
-        </BaseContainer>
+        <NxCardContainer header={"EQUIPMEENT LIST"}>
+          <NxBaseContainer border>
+            <div className="flex w-full justify-end gap-3 mb-5">
+              <ToolbarAccount items={itemActions} advancedAccess={access_account} />
+            </div>
+            <NxTable
+              idTable={"table-equipment-account-management"}
+              dataSource={currentData}
+              totalData={currentPagination?.totalElements}
+              current={page}
+              tableScrolled={{ y: 525, x: currentData.length ? "max-content" : "100%" }}
+              onSort={onSort}
+              columns={processedColumns}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hashMore={hashMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              columnDefinitions={columnDefinitions}
+              loading={loading}
+            />
+          </NxBaseContainer>
+        </NxCardContainer>
         <EquipmentForm
           type={type}
           dispatch={dispatch}
