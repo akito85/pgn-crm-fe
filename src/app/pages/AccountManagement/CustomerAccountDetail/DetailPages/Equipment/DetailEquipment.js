@@ -1,7 +1,5 @@
 import React from "react";
-import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import CardComponent from "../../../../../../components/Card/CardComponent";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../utils";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
@@ -77,26 +75,6 @@ const DetailEquipment = ({ isOpen, setIsOpen, dataDetail }) => {
           </NxBaseContainer>
         </div>
       </NxModal>
-      {/* <ModalCustom
-        header={"DETAIL EQUIPMENT"}
-        isOpen={isOpen}
-        handleCancel={() => {
-          setIsOpen(false);
-        }}
-        type={"detail"}
-        width={900}
-        footer={
-          <ButtonComponent
-            type={"default"}
-            onClick={() => {
-              setIsOpen(false);
-            }}
-          >
-            Back
-          </ButtonComponent>
-        }
-      > 
-      </ModalCustom> */}
     </>
   );
 };
