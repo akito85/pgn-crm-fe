@@ -5,6 +5,7 @@ import DetailText from "../../../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import FunctionalRMSDetail from "./FunctionalRMSDetail";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 
 const ModalConfirmationRMS = ({
   isOpen,
@@ -36,17 +37,17 @@ const ModalConfirmationRMS = ({
         </div>
       }
     >
-      <div className="w-full grid grid-cols-3 gap-3">
-        <DetailText label={"Effective Date"}>
+      <div className="w-full grid grid-cols-3 gap-4">
+        <NxDetailText label={"Effective Date"}>
           {data?.effectiveDate
             ? moment(data?.effectiveDate).format(dateFormatting.date)
             : ""}
-        </DetailText>
-        <DetailText label={"Local (%)"}>{data?.value1}</DetailText>
-        <DetailText label={"Import (%)"}>{data?.value2}</DetailText>
+        </NxDetailText>
+        <NxDetailText label={"Local (%)"}>{data?.value1}</NxDetailText>
+        <NxDetailText label={"Import (%)"}>{data?.value2}</NxDetailText>
 
         <div className="col-span-3">
-          <DetailText label={"Description"}>{data?.description}</DetailText>
+          <NxDetailText label={"Description"}>{data?.description}</NxDetailText>
         </div>
       </div>
 
