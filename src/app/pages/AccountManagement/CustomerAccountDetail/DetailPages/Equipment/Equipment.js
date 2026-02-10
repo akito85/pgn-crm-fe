@@ -22,6 +22,7 @@ import { useColumnActionPermissionAccount } from "../../../ComponentAccount/Colu
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import { hasValue, renderColumn } from "../../../../../../utils";
 import { useLocation } from "react-router-dom";
+import NxTable from "../../../../../../components/Nx/NxTable";
 
 const columns = (
   search,
@@ -456,7 +457,41 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
           <div className="flex w-full justify-end gap-3 mb-5">
             <ToolbarAccount items={itemActions} advancedAccess={access_account} />
           </div>
-          <TablePaginationNew
+          <NxTable
+            idTable={"table-equipment-account-management"}
+            dataSource={data?.result}
+            current={page}
+            pageSize={pageSize}
+            tableScrolled={{ y: 525, x: 2500 }}
+            onChange={handleChange}
+            onSort={onSort}
+            onSizeChanger={handleChange}
+            useInfiniteScroll={true}
+            usePagination={false}
+            columns={[
+              ...columns(
+                search,
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                handleDetail,
+                setType,
+                setModalCreateUpdate,
+                setIdEquipment,
+                dispatch,
+                handleDelete
+              ),
+              ...useColumnActionPermissionAccount(
+                ["View", "Update", "Hapus"],
+                itemActions,
+                access_account
+              )
+            ]}
+          />
+          {/* <TablePaginationNew
             dataSource={data?.result}
             totalData={data?.page?.totalElements}
             current={page}
@@ -487,7 +522,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
                 access_account
               )
             ]}
-          />
+          /> */}
         </BaseContainer>
         <EquipmentForm
           type={type}
