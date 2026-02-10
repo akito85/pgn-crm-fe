@@ -1,5 +1,5 @@
 // NxTable.js (with resizable columns + grouped columns support + customHeaderLeft + showExport control)
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import {
   DownloadOutlined,
   FilterOutlined,
