@@ -49,7 +49,6 @@ const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId 
       isOpen={isOpen}
       handleClose={handleCancel}
       header={"Approval History"}
-      width={850}
       tabOptions={handleApprovalHistoryOptions()}
       dataApprover={dataApprovalHistoryFix?.dataApprover}
       dataHistory={dataApprovalHistoryFix?.dataHistory}

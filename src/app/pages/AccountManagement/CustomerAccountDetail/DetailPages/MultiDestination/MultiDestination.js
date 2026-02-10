@@ -308,7 +308,6 @@ const MultiDestination = ({
           isOpen={showApprovalHistoryModal}
           handleClose={() => handleApprovalHistoryModal(false)}
           header={"Approval History"}
-          width={850}
           tabOptions={handleApprovalHistoryOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
