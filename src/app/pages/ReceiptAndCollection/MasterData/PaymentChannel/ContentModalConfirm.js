@@ -30,13 +30,13 @@ const ContentModalConfirm = ({
               onClick={() => setExpanded(!expanded)}
             >
               <div className="text-[#0075bf] text-sm font-semibold uppercase">
-                PAYMENT CHANNEL INFORMATION
+                DELIVERY CHANNEL INFORMATION
               </div>
               <div>{expanded ? <UpOutlined /> : <DownOutlined />}</div>
             </div>
             {expanded && (
               <div className="grid grid-cols-5 gap-y-4 gap-x-2 w-full">
-                <DetailText label={"Payment Channel Code"}>
+                <DetailText label={"Delivery Channel Code"}>
                   {data?.ciCode}
                 </DetailText>
                 <DetailText label={"Name"}>{data?.name}</DetailText>

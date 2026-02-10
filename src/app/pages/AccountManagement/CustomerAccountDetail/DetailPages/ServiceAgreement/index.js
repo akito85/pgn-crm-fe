@@ -212,12 +212,14 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     dispatch(getApprovalList());
   }, [dispatch]);
 
+  // Initial load and when search/sort changes - reset to page 1
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getListServiceAgreement({ id, search: reqSearch, sort, page, pageSize: loadMoreSize })
+      getListServiceAgreement({ id, search: reqSearch, sort, page: 1, pageSize: loadMoreSize, isLoadMore: false })
     );
-  }, [dispatch, id, page, loadMoreSize, search, sort]);
+    setPage(1);
+  }, [dispatch, id, loadMoreSize, search, sort]);
 
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
@@ -243,9 +245,6 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -253,11 +252,16 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     });
   };
 
+  // Infinite scroll - load more with isLoadMore: true to append data
   const handleLoadMore = async () => {
     const totalPages = data?.page?.totalPages || 0;
     const nextPage = page + 1;
 
     if (nextPage <= totalPages) {
+      const reqSearch = encodeURIComponent(JSON.stringify(search));
+      await dispatch(
+        getListServiceAgreement({ id, search: reqSearch, sort, page: nextPage, pageSize: loadMoreSize, isLoadMore: true })
+      );
       setPage(nextPage);
     }
   };

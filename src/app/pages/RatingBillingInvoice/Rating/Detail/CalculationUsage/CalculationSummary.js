@@ -1,3 +1,5 @@
+// PERUBAHAN PADA CALCULATIONSUMMARY COMPONENT
+
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "antd";
@@ -24,7 +26,8 @@ const CalculationSummary = ({ ratingCode, saType }) => {
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
+  const initialPageSize = 100;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -38,53 +41,55 @@ const CalculationSummary = ({ ratingCode, saType }) => {
 
   // Data source untuk tabel utama
   const dataSource = useMemo(() => {
-    return (data_calculationSummary?.result || []).map((item, index) => ({
+    return (data_calculationSummary?.result || []).map((item) => ({
       ...item,
-      key: `${item.transactionDate}-${item.saType}`,
+      key: item.id || `${item.transactionDate}-${item.saType}`,
     }));
   }, [data_calculationSummary]);
 
-  // Fetch data tabel utama
+  // Hitung hasMore untuk infinite scroll
+  const currentPagination = data_calculationSummary?.page || {};
+  const hasMore = dataSource.length < (currentPagination?.totalElements || 0);
+
+  // Initial fetch - load pertama kali dengan pageSize besar
   useEffect(() => {
     if (ratingCode) {
       dispatch(
         getAllCalculationSummaryPaginate({
           ratingCode,
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 1,
+          pageSize: initialPageSize,
           sort,
+          isLoadMore: false,
         })
       );
+      setPage(1);
     }
-  }, [ratingCode, search, page, pageSize, sort, dispatch]);
+  }, [ratingCode, search, sort, dispatch]);
 
-  // Handle expand row - fetch data untuk row yang di-expand
+  // Handle expand row
   const handleExpand = (expanded, record) => {
-    const rowKey = `${record.transactionDate}-${record.saType}`;
+    const rowKey = record.id;
     
     if (expanded) {
-      // Add to expanded keys
       setExpandedRowKeys([...expandedRowKeys, rowKey]);
       
-      // Fetch data untuk expanded row
       dispatch(
         getAllCalculationSummaryExpandPaginate({
-          ratingCode,
-          transactionDate: record.transactionDate,
-          saType: record.saType,
+          id: record.id,
           page: 1,
-          pageSize: 100, // Ambil semua data expand sekaligus
+          pageSize: 100,
           search: "",
           sort: "",
         })
       );
     } else {
-      // Remove from expanded keys
       setExpandedRowKeys(expandedRowKeys.filter(key => key !== rowKey));
     }
   };
 
+  // Handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -100,11 +105,49 @@ const CalculationSummary = ({ ratingCode, saType }) => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  // Handle load more untuk infinite scroll
+  const handleLoadMore = async () => {
+    const totalElements = currentPagination?.totalElements || 0;
+    const currentDataLength = dataSource.length;
+
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    await dispatch(
+      getAllCalculationSummaryPaginate({
+        ratingCode,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      })
+    );
+    
+    setPage(nextPage);
   };
 
+  // Handle refresh
+  const handleRefresh = () => {
+    if (ratingCode) {
+      dispatch(
+        getAllCalculationSummaryPaginate({
+          ratingCode,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: initialPageSize,
+          sort,
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  };
+
+  // Handle sort
   const onSortApi = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -116,14 +159,13 @@ const CalculationSummary = ({ ratingCode, saType }) => {
   const baseColumns = useMemo(
     () =>
       columnsCalculationSummary(
-        page,
-        pageSize,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        search
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [searchedColumn, searchText, search]
   );
 
   const allColumns = useMemo(() => {
@@ -151,18 +193,21 @@ const CalculationSummary = ({ ratingCode, saType }) => {
         idTable="calculation-summary-table"
         dataSource={dataSource}
         columns={processedColumns}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChange}
-        onSizeChanger={handleChange}
-        totalData={data_calculationSummary?.page?.totalElements || 0}
-        tableScrolled={{x: 1000 }}
+        totalData={currentPagination?.totalElements || 0}
+        tableScrolled={{ x: 1000, }}
         onSort={onSortApi}
         showExport={true}
         columnDefinitions={columnDefinitions}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         loading={loading}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        showRefresh={true}
+        onRefresh={handleRefresh}
+        loadMoreThreshold={20}
         expandable={{
           expandedRowKeys,
           onExpand: handleExpand,
@@ -171,8 +216,8 @@ const CalculationSummary = ({ ratingCode, saType }) => {
             data_calculationSummaryExpand,
             loadingExpand
           ),
-          rowExpandable: () => true, // Semua row bisa di-expand
-          columnWidth: 32,
+          rowExpandable: () => true,
+          // columnWidth: 32,
           expandIcon: ({ expanded, onExpand, record }) => (
             <Button
               type="link"

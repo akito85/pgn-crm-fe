@@ -7,7 +7,13 @@ import {
 } from "../../general_slice";
 
 const initialState = {
-  data_relationship: {},
+  list_relationship: [],
+  pagination_relationship: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 20,
+  },
   data_relationshipDetail: {},
   data_relationshipType: [],
   data_relationshipCategory: [],
@@ -31,29 +37,10 @@ const initialState = {
   loadingApprovalHistory: false,
 };
 
-// Get Relationship List
-export const getRelationshipList = createAsyncThunk(
-  "GET_RELATIONSHIP_LIST",
-  async ({ idAccount, page, pageSize, sort, search }, thunkAPI) => {
-    try {
-      const searchParam = search ? `&searchs=${search}` : "";
-      const sortParam = sort ? `&sort=${sort}` : "";
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships?page=${page - 1}&size=${pageSize}${sortParam}${searchParam}`;
-      const response = await accountManagementService.getPagination(url);
-      return response?.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RELATIONSHIP_LIST" })
-      );
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
 // Get Relationship List with Advanced Filter (POST)
 export const getRelationshipListAdvanced = createAsyncThunk(
   "GET_RELATIONSHIP_LIST_ADVANCED",
-  async ({ idAccount, page, pageSize, sort, search, body }, thunkAPI) => {
+  async ({ idAccount, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
     try {
       // empty string for default sort
       const sortParam = sort === undefined || sort === "" ? "" : sort;
@@ -65,7 +52,10 @@ export const getRelationshipListAdvanced = createAsyncThunk(
         sort: sortParam,
       };
       const response = await accountManagementService.updateDataWithMethodPost(url, requestBody);
-      return response?.data;
+      return {
+        ...response?.data,
+        isLoadMore,
+      };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "GET_RELATIONSHIP_LIST_ADVANCED" })
@@ -662,28 +652,49 @@ const relationshipSlice = createSlice({
   name: "relationship",
   initialState,
   extraReducers: {
-    // Get Relationship List
-    [getRelationshipList.pending]: (state) => {
-      state.loading = true;
-    },
-    [getRelationshipList.fulfilled]: (state, action) => {
-      state.data_relationship = action.payload;
-      state.loading = false;
-    },
-    [getRelationshipList.rejected]: (state) => {
-      state.loading = false;
-    },
-
     // Get Relationship List Advanced
-    [getRelationshipListAdvanced.pending]: (state) => {
-      state.loading = true;
+    [getRelationshipListAdvanced.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getRelationshipListAdvanced.fulfilled]: (state, action) => {
-      state.data_relationship = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_relationship.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_relationship = [
+            ...state.list_relationship,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_relationship = result;
+        }
+      }
+
+      state.pagination_relationship = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 20,
+      };
     },
-    [getRelationshipListAdvanced.rejected]: (state) => {
+    [getRelationshipListAdvanced.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_relationship = [];
+        state.pagination_relationship = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 20,
+        };
+      }
     },
 
     // Get Relationship Detail

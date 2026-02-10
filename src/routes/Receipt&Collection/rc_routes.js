@@ -3,7 +3,12 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   VIEW_RECEIPT: "/receipt-and-collection/receipt-list",
   CREATE_RECEIPT: "/receipt-and-collection/receipt-list/create",
   DETAIL_RECEIPT: "/receipt-and-collection/receipt-list/view",
+  APPROVAL_RECEIPT_HOLD: "/receipt-and-collection/receipt-list/approval/hold/:id",
+  APPROVAL_RECEIPT_RELEASE: "/receipt-and-collection/receipt-list/approval/release/:id",
+  APPROVAL_RECEIPT_REFUND: "/receipt-and-collection/receipt-list/approval/refund/:id",
+  APPROVAL_RECEIPT_REVERSE: "/receipt-and-collection/receipt-list/approval/reverse/:id",
   UPDATE_RECEIPT: "/receipt-and-collection/receipt-list/update",
+  CREATE_ACCOUNTING: "/receipt-and-collection/receipt-list/create-accounting",
   // Receipt Reconciliation
 
   // Synchronize Receipt
@@ -137,4 +142,21 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   VIEW_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management",
   DETAIL_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management/view",
 
+  // Payment Warranty Partner
+  VIEW_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner",
+  DETAIL_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/view",
+  CREATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/create",
+  UPDATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/update",
+  
+  // Libor Rate
+  VIEW_LIBOR_RATE: "/receipt-and-collection/libor-rate",
+  DETAIL_LIBOR_RATE: "/receipt-and-collection/libor-rate/view",
+  CREATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/create",
+  UPDATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/update",
+
+  // Rate Index
+  VIEW_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index",
+  DETAIL_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/view",
+  CREATE_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/create",
+  UPDATE_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/update",
 };

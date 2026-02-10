@@ -50,7 +50,7 @@ export const columnsCalculationDetail = (
         "timeUnit",
         hasValue(search["timeUnit"]),
         searchText,
-        text || "-",
+        text || "",
         false,
         "input",
         search,
@@ -191,13 +191,13 @@ export const columnsCalculationDetail = (
         "saType",
         hasValue(search["saType"]),
         searchText,
-        text || "-",
+        text || "",
         false,
         "input",
         search,
       ),
   },
-  // GROUP: CALCULATED USAGE PARTITION
+  // CALCULATED USAGE PARTITION
   {
     title: "CALCULATED USAGE PARTITION",
     children: [
@@ -208,7 +208,7 @@ export const columnsCalculationDetail = (
         width: 120,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         title: "MIN",
@@ -239,7 +239,7 @@ export const columnsCalculationDetail = (
       },
     ],
   },
-  // GROUP: CONVERTED CALCULATED USAGE PARTITION
+  //CONVERTED CALCULATED USAGE PARTITION
   {
     title: "CONVERTED CALCULATED USAGE PARTITION",
     children: [
@@ -250,7 +250,7 @@ export const columnsCalculationDetail = (
         width: 120,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         title: "MIN",
@@ -281,7 +281,7 @@ export const columnsCalculationDetail = (
       },
     ],
   },
-  // GROUP: PRICE
+  // PRICE
   {
     title: "PRICE",
     children: [
@@ -342,7 +342,7 @@ export const columnsCalculationDetail = (
       },
     ],
   },
-  // GROUP: AMOUNT PARTITION
+  // AMOUNT PARTITION
   {
     title: "AMOUNT PARTITION",
     children: [
@@ -353,7 +353,7 @@ export const columnsCalculationDetail = (
         width: 120,
         isClassification:true,
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         title: "MIN",

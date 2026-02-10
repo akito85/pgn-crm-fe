@@ -6,7 +6,10 @@ import moment from "moment";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../components/FormStepNavigation";
 import SVGIcon from "../../../../assets/Icon/index";
 import AdjustmentBillingSectionForm from "./Form/AdjustmentBillingSectionForm";
 import {
@@ -210,7 +213,7 @@ const AdjustmentBillingForm = ({ type }) => {
         (dataDetail?.mAttachmentLists || []).map((attachData) => ({
           ...attachData,
           dataType: "exist",
-        }))
+        })),
       );
       setListDataABI(
         (dataDetail?.tAdjustmentBillingDetail || []).map((data, index) => {
@@ -226,10 +229,10 @@ const AdjustmentBillingForm = ({ type }) => {
           delete obj.updatedDate;
           delete obj.updatedBy;
           return obj;
-        })
+        }),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -337,7 +340,7 @@ const AdjustmentBillingForm = ({ type }) => {
       .map((a) => a.adjustmentAmount);
     const sumIDR = dataIDR.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     // Sum Total Adjustment USD
@@ -346,7 +349,7 @@ const AdjustmentBillingForm = ({ type }) => {
       .map((a) => a.adjustmentAmount);
     const sumUSD = dataUSD.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     delete bodyData?.accountNumberWithName;
@@ -390,13 +393,13 @@ const AdjustmentBillingForm = ({ type }) => {
       adjustmentBillingDetails: modifiedArray,
       submit: flag === 1 ? false : true,
       documentDate: moment(bodyData?.documentDate).format(
-        "YYYY-MM-DDTHH:mm:ss"
+        "YYYY-MM-DDTHH:mm:ss",
       ),
       accountingDate: moment(bodyData?.accountingDate).format(
-        "YYYY-MM-DDTHH:mm:ss"
+        "YYYY-MM-DDTHH:mm:ss",
       ),
       transactionDate: moment(bodyData?.transactionDate).format(
-        "YYYY-MM-DDTHH:mm:ss"
+        "YYYY-MM-DDTHH:mm:ss",
       ),
       rateType: bodyData?.rateType || dataInvoice?.rateType,
       rate: dataInvoice?.rate,
@@ -437,7 +440,7 @@ const AdjustmentBillingForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/adjustment/uploadAttachment/${idAdjustment}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -463,7 +466,7 @@ const AdjustmentBillingForm = ({ type }) => {
           setLoadingForm(true);
           const idAdjustment = data.id;
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -473,7 +476,7 @@ const AdjustmentBillingForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/adjustment/uploadAttachment/${idAdjustment}`,
-              body
+              body,
             );
           }
           loadingForm(false);
@@ -502,7 +505,7 @@ const AdjustmentBillingForm = ({ type }) => {
       for (let i = 0; i < steps.length; i++) {
         const stepParamValues = steps[i].paramValue || [];
         const hasError = errorFields.some((field) =>
-          stepParamValues.includes(field.name[0])
+          stepParamValues.includes(field.name[0]),
         );
         if (hasError) {
           setCurrentStep(i);

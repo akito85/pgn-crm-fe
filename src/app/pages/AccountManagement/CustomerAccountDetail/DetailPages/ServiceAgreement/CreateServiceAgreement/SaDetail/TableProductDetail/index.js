@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { getListChargingMethod, getListNameProductDetail, getListPaymentType, getListUnit } from "../../../../../../../../../redux/slices/product_promo/product";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
@@ -54,15 +54,15 @@ const EditableCell = ({
   dependDataIndex,
   dataEditRecord,
   urlIndex,
-  handleEditDataRecord = () => {},
+  handleEditDataRecord = () => { },
   dataTableDetailProduct,
-	isProduct,
+  isProduct,
   ...restProps
 }) => {
   const key = record?.key || 0;
   const dataDepend = dependDataIndex
-  ? dataEditRecord[key + dependDataIndex]
-  : "";
+    ? dataEditRecord[key + dependDataIndex]
+    : "";
 
   // const rules = () => {
   //   let rule = [];
@@ -125,7 +125,7 @@ const EditableCell = ({
             filterOption={filterOption}
             labelInValue
             disabled={(dataIndex === "name" && isProduct !== 2) || hasValue(dependDataIndex) ? dependentData() : false}
-            // disabled={dataTableDetailProduct?.versionList?.length > 0 ? true : false}
+          // disabled={dataTableDetailProduct?.versionList?.length > 0 ? true : false}
           >
             {options.map((option) => (
               <Select.Option key={option.value} value={option.value}>
@@ -192,7 +192,7 @@ const excludeOptionName = [214, 210];
 const TableProduct = ({
   dispatch,
   dataTableProduct = [], //data product detail from setDataTableProduct
-  setDataTableProduct = () => {}, // for set data product
+  setDataTableProduct = () => { }, // for set data product
   isProduct,
   // dataFromProductVersion=[], //fetch data from api product
   dataTableDetailProduct, // for dependence useEffect
@@ -208,7 +208,7 @@ const TableProduct = ({
   const [totalElements, setTotalElement] = useState(0);
   const [editingKey, setEditingKey] = useState("");
   const [storedDate, setStoredData] = useState(false);
-  
+
   const isEditing = (record) => record.key === editingKey;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -223,9 +223,9 @@ const TableProduct = ({
     dataListNameProductDetail = [],
     dataListUnit = [],
   } = useSelector((state) => state.product);
-  
+
   const exludeExisting =
-  dataTableProduct.length > 0 ? dataTableProduct.map((item) => item?.name?.value) : [];
+    dataTableProduct.length > 0 ? dataTableProduct.map((item) => item?.name?.value) : [];
   const listName = dataListNameProductDetail.filter(
     (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value)
   );
@@ -243,7 +243,7 @@ const TableProduct = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if(isProduct === 2){
+    if (isProduct === 2 && saDetailObj?.paymentType && saDetailObj?.chargingMethod) {
       const selectedPaymetType = dataListPaymentType?.filter(item => item.value === saDetailObj?.paymentType)[0]
       const selectedChargeMethod = dataListChargeMethod?.filter(item => item.value === saDetailObj?.chargingMethod)[0]
 
@@ -265,8 +265,8 @@ const TableProduct = ({
         },
       }))
     }
-  }, [saDetailObj.paymentType, saDetailObj.chargingMethod])
-  
+  }, [saDetailObj?.paymentType, saDetailObj?.chargingMethod])
+
   useEffect(() => {
     if (dataTableProduct.length > 0) {
       setTotalElement(dataTableProduct.length);
@@ -385,11 +385,11 @@ const TableProduct = ({
             [`${key}${attribute}`]:
               attribute === "name"
                 ? {
-                    ...tempData,
-                    isParent: dataListNameProductDetail.find(
-                      (item) => item.value === tempData.value
-                    )?.isParent,
-                  }
+                  ...tempData,
+                  isParent: dataListNameProductDetail.find(
+                    (item) => item.value === tempData.value
+                  )?.isParent,
+                }
                 : tempData,
           };
         });
@@ -589,10 +589,10 @@ const TableProduct = ({
               ) : (
                 <>
                   <Tooltip title="Edit">
-                    <span 
+                    <span
                       className={`flex justify-center${
                         editingKey ? " cursor-not-allowed" : ""
-                      }`}
+                        }`}
                     >
                       <SVGIcon
                         name="IconEdit"
@@ -605,9 +605,8 @@ const TableProduct = ({
                   {isProduct === 2 && (
                     <Tooltip title="Delete">
                       <span
-                        className={`flex justify-center${
-                          record.typeData === "exist" ? " cursor-not-allowed" : ""
-                        }`}
+                        className={`flex justify-center${record.typeData === "exist" ? " cursor-not-allowed" : ""
+                          }`}
                       >
                         <SVGIcon
                           name="IconDelete"
@@ -652,138 +651,138 @@ const TableProduct = ({
   };
 
   return (
-      <div>
-        {isProduct === 2 && (
-          <div className="flex w-full justify-end">
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-              onClick={!storedDate ? addRow : undefined}
-            >
-              Create
-            </ButtonComponent>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-4 w-full">
-          <Form.Item
-            name={"paymentType"}
-            rules={[{ message: "This field is required", required: true }]}
-            className="no-margin-form w-full"
-            // getValueFromEvent={(e) => updateBody(e, "paymentType")}
-            getValueFromEvent={(e) =>handleSaDetailObj(e, "paymentType")}
-            label={"Payment Type"}
-            required
+    <div>
+      {isProduct === 2 && (
+        <div className="flex w-full justify-end">
+          <ButtonComponent
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            type="submit"
+            onClick={!storedDate ? addRow : undefined}
           >
-            <SelectComponent>
-              {(dataListPaymentType || []).map((data, index) => (
-                <Select.Option key={index} value={data.value}>
-                  {data.label}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            name={"chargingMethod"}
-            rules={[{ message: "This field is required", required: true }]}
-            className="no-margin-form w-full"
-            // getValueFromEvent={(e) => updateBody(e, "chargingMethod")}
+            Create
+          </ButtonComponent>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-4 w-full">
+        <Form.Item
+          name={"paymentType"}
+          rules={[{ message: "This field is required", required: true }]}
+          className="no-margin-form w-full"
+          // getValueFromEvent={(e) => updateBody(e, "paymentType")}
+          getValueFromEvent={(e) => handleSaDetailObj(e, "paymentType")}
+          label={"Payment Type"}
+          required
+        >
+          <SelectComponent>
+            {(dataListPaymentType || []).map((data, index) => (
+              <Select.Option key={index} value={data.value}>
+                {data.label}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+        <Form.Item
+          name={"chargingMethod"}
+          rules={[{ message: "This field is required", required: true }]}
+          className="no-margin-form w-full"
+          // getValueFromEvent={(e) => updateBody(e, "chargingMethod")}
             getValueFromEvent={(e) =>handleSaDetailObj(e, "chargingMethod")}
-            label={"Charging Method"}
-            required
-          >
-            <SelectComponent>
-              {(dataListChargeMethod || []).map((data, index) => (
-                <Select.Option key={index} value={data.value}>
-                  {data.label}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-
-        {/* Start Pagination */}
-        <div className={"w-full flex justify-between py-6"}>
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-2/6"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns()
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    optionSelectedCol.length > 3
-                      ? optionSelectedCol.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
-
-          <Pagination
-            total={filteredData("length")}
-            className={"pr-1"}
-            showSizeChanger
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeSize}
-            showTotal={(total, range) =>
-              `Showing ${range[0]} to ${range[1]} of ${total} records`
-            }
-          />
-        </div>
-        {/* End Pagination */}
-
-        {/* Table */}
-        <Form form={formTable} component={false}>
-          <Table
-            dataSource={filteredData("data")}
-            columns={filterColumn(
-              columns().map((col) => ({
-                ...col,
-                onCell: (record) => ({
-                  record,
-                  inputType: col.inputType,
-                  dataIndex: col.dataIndex,
-                  title: col.title,
-                  editing: isEditing(record),
-                  dependDataIndex: col.dependDataIndex,
-                  urlIndex: col.url,
-                  options: col.options,
-                  required: col.required,
-                  dataEditRecord: editDataRecord,
-                  handleEditDataRecord: handleEditDataRecord,
-                  dataTableDetailProduct:dataTableDetailProduct,
-                  isProduct: isProduct,
-                }),
-              }))
-            )}
-            rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            scroll={{
-              x: 1300,
-              y: 300,
-            }}
-            pagination={false}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            onChange={onSort}
-          />
-        </Form>
-        
+          label={"Charging Method"}
+          required
+        >
+          <SelectComponent>
+            {(dataListChargeMethod || []).map((data, index) => (
+              <Select.Option key={index} value={data.value}>
+                {data.label}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
       </div>
+
+      {/* Start Pagination */}
+      <div className={"w-full flex justify-between py-6"}>
+        <Select
+          mode="multiple"
+          placeholder="Show All Column"
+          className={"w-2/6"}
+          maxTagCount={3}
+          onChange={handleDisplayColumn}
+        >
+          {columns()
+            .map((col) => (
+              <Select.Option
+                key={col.title}
+                value={col.title}
+                disabled={
+                  optionSelectedCol.length > 3
+                    ? optionSelectedCol.includes(col.title)
+                      ? false
+                      : true
+                    : false
+                }
+              >
+                {col.title}
+              </Select.Option>
+            ))
+            .splice(1)}
+        </Select>
+
+        <Pagination
+          total={filteredData("length")}
+          className={"pr-1"}
+          showSizeChanger
+          current={page}
+          pageSize={pageSize}
+          onChange={handleChangeSize}
+          showTotal={(total, range) =>
+            `Showing ${range[0]} to ${range[1]} of ${total} records`
+          }
+        />
+      </div>
+      {/* End Pagination */}
+
+      {/* Table */}
+      <Form form={formTable} component={false}>
+        <Table
+          dataSource={filteredData("data")}
+          columns={filterColumn(
+            columns().map((col) => ({
+              ...col,
+              onCell: (record) => ({
+                record,
+                inputType: col.inputType,
+                dataIndex: col.dataIndex,
+                title: col.title,
+                editing: isEditing(record),
+                dependDataIndex: col.dependDataIndex,
+                urlIndex: col.url,
+                options: col.options,
+                required: col.required,
+                dataEditRecord: editDataRecord,
+                handleEditDataRecord: handleEditDataRecord,
+                dataTableDetailProduct: dataTableDetailProduct,
+                isProduct: isProduct,
+              }),
+            }))
+          )}
+          rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+          scroll={{
+            x: 1300,
+            y: 300,
+          }}
+          pagination={false}
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          onChange={onSort}
+        />
+      </Form>
+
+    </div>
   );
 };
 

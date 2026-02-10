@@ -1,5 +1,7 @@
 import ViewReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ViewReceipt";
 import ListDetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ListDetailReceipt";
+import DetailReceiptApproval from "../../app/pages/ReceiptAndCollection/Receipt/DetailReceiptApproval";
+import CreateAccounting from "../../app/pages/ReceiptAndCollection/Receipt/CreateAccounting";
 import ViewSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/ViewSynchronizeReceipt";
 import DetailSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/DetailSynchronizeReceipt";
 import ViewReconcileReceiptHistories from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/ReconcileReceiptHistories/ViewReconcileReceiptHistories";
@@ -79,13 +81,29 @@ import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/Pay
 import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
 import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
 
+import ViewPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ViewPaymentWarrantyPartner";
+import ListDetailPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListDetailPaymentWarrantyPartner";
+import ListFormPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListFormPaymentWarrantyPartner";
+import ViewLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ViewLiborRate";
+import ListDetailLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListDetailLiborRate";
+import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListFormLiborRate";
+import ViewRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ViewRateIndex";
+import ListDetailRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ListDetailRateIndex";
+import ListFormRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ListFormRateIndex";
+
+
 
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
-  DETAIL_RECEIPT_PAGE: <ListDetailReceipt />,
+  DETAIL_RECEIPT_PAGE: <DetailReceiptApproval />,
+  APPROVAL_RECEIPT_HOLD: <DetailReceiptApproval type="hold" />,
+  APPROVAL_RECEIPT_RELEASE: <DetailReceiptApproval type="release" />,
+  APPROVAL_RECEIPT_REFUND: <DetailReceiptApproval type="refund" />,
+  APPROVAL_RECEIPT_REVERSE: <DetailReceiptApproval type="reverse" />,
   CREATE_RECEIPT: <ListRececiptForm type="create" />,
   UPDATE_RECEIPT: <ListRececiptForm type="update" />,
+  CREATE_ACCOUNTING: <CreateAccounting />,
 
   // Receipt Reconciliation
 
@@ -218,4 +236,22 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Gapura Management
   VIEW_GAPURA_MANAGEMENT_PAGE: <ViewGapuraManagement />,
   DETAIL_GAPURA_MANAGEMENT_PAGE: <ListDetailGapuraManagement />,
+
+  // Payment Warranty Partner
+  VIEW_PAYMENT_WARRANTY_PARTNER: <ViewPaymentWarrantyPartner />,
+  DETAIL_PAYMENT_WARRANTY_PARTNER: <ListDetailPaymentWarrantyPartner />,
+  CREATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"create"} />,
+  UPDATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"update"} />,
+
+  // Libor Rate
+  VIEW_LIBOR_RATE: <ViewLiborRate />,
+  DETAIL_LIBOR_RATE: <ListDetailLiborRate />,
+  CREATE_LIBOR_RATE: <ListFormLiborRate type={"create"} />,
+  UPDATE_LIBOR_RATE: <ListFormLiborRate type={"update"} />,
+
+  // Rate Index
+  VIEW_RATE_INDEX: <ViewRateIndex />,
+  DETAIL_RATE_INDEX: <ListDetailRateIndex />,
+  CREATE_RATE_INDEX: <ListFormRateIndex type={"create"} />,
+  UPDATE_RATE_INDEX: <ListFormRateIndex type={"update"} />,
 };

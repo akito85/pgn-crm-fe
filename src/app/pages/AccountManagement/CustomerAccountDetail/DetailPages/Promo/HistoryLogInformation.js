@@ -1,57 +1,54 @@
-import { Fragment } from "react";
 import ColoredPanel from "./components/ColoredPanel";
-import HeaderText from "./components/HeaderText";
 import { Col, Row, Space } from "antd";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../utils";
 
 const renderHistoryData = (label, value) => {
   return (
-    <Space direction="vertical" size={"small"}>
+    <Space direction="vertical" size="small">
       <strong>{label}</strong>
-      <span>{value || ""}</span>
+      <span>{value || "-"}</span>
     </Space>
   );
 };
 
 const formatDateTime = (dateString) => {
   if (!dateString) return "";
-  // Format from "2025-12-05T04:47:09.210+00:00" to "12 Dec 2025"
   return moment(dateString).format(dateFormatting.dateTime);
 };
 
 const renderHistoryLogContent = (data) => {
   if (!data) {
-    return (
-      <Fragment>
-        <HeaderText text="HISTORY LOG INFORMATION" />
-        <Row className="mt-4">
-          <Col span={24}>
-            <span>No data available</span>
-          </Col>
-        </Row>
-      </Fragment>
-    );
+    return <span>No data available</span>;
   }
 
   return (
-    <Fragment>
-      <HeaderText text="HISTORY LOG INFORMATION" />
-      <Row className="mt-4">
-        <Col span={6}>{renderHistoryData("Record Id", data?.recordId || data?.id)}</Col>
-        <Col span={6}>{renderHistoryData("Created Date", formatDateTime(data?.createdDate))}</Col>
-        <Col span={6}>{renderHistoryData("Created By", data?.createdBy)}</Col>
-        <Col span={6}>
-          {renderHistoryData("Updated Date", formatDateTime(data?.updatedDate))}
-        </Col>
-        <Col span={6}>{renderHistoryData("Updated By", data?.updatedBy)}</Col>
-      </Row>
-    </Fragment>
+    <Row gutter={[16, 8]}>
+      <Col span={4}>
+        {renderHistoryData("Record Id", data?.recordId || data?.id)}
+      </Col>
+
+      <Col span={4}>
+        {renderHistoryData("Created Date", formatDateTime(data?.createdDate))}
+      </Col>
+
+      <Col span={4}>{renderHistoryData("Created By", data?.createdBy)}</Col>
+
+      <Col span={4}>
+        {renderHistoryData("Updated Date", formatDateTime(data?.updatedDate))}
+      </Col>
+
+      <Col span={4}>{renderHistoryData("Updated By", data?.updatedBy)}</Col>
+    </Row>
   );
 };
 
 const HistoryLogInformation = ({ data }) => {
-  return <ColoredPanel> {renderHistoryLogContent(data)} </ColoredPanel>;
+  return (
+    <ColoredPanel title="HISTORY LOG INFORMATION">
+      {renderHistoryLogContent(data)}
+    </ColoredPanel>
+  );
 };
 
 export default HistoryLogInformation;

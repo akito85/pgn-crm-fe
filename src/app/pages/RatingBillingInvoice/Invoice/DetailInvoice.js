@@ -3,7 +3,6 @@ import { Tooltip } from "antd";
 import axios from "axios";
 import SVGIcon from "../../../../assets/Icon/index";
 
-import BaseContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
@@ -13,6 +12,7 @@ import { sorterFunction } from "../../../../utils/sorterFunction";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
 import CardContainer from "../../../../components/CardContainer";
+import ButtonComponent from "../../../../components/ButtonComponent";
 
 export const columns = (
   search,
@@ -188,11 +188,26 @@ export const columns = (
     width: 40,
     fixed: "right",
     isClassification: true,
-    render: (_, record) => (
-      <Tooltip title="Download">
-        <SVGIcon name="IconDownload" width={20} />
-      </Tooltip>
-    ),
+    render: (_, record) => {
+      const isSuccess = record.status === "SUCCESS";
+      return (
+        <Tooltip title={isSuccess ? "Download" : "File not available"}>
+          <ButtonComponent
+            type="text"
+            border={false}
+            icon={
+              <SVGIcon
+                name="IconDownload"
+                width={20}
+                color={isSuccess ? undefined : "#d9d9d9"}
+              />
+            }
+            disabled={!isSuccess}
+            onClick={isSuccess ? () => handlePreview(record) : undefined}
+          />
+        </Tooltip>
+      );
+    },
   },
 ];
 
