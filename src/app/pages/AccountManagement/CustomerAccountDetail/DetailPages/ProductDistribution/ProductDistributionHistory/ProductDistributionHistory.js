@@ -1,10 +1,10 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import { dateFormatting } from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
@@ -18,28 +18,34 @@ import ProductDistributionDetail from "./ProductDistributionDetail";
 import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const columns = (
-  page = 1,
-  pageSize = 10,
+  search,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch,
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
+      dataIndex: "no",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "effectiveDate",
       title: "EFFECTIVE DATE",
+      dataIndex: "effectiveDate",
       sorter: true,
       align: "center",
-      dataIndex: "effectiveDate",
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.effectiveDate] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "effectiveDate",
         searchInput,
         searchedColumn,
@@ -48,38 +54,16 @@ const columns = (
         true,
         "date"
       ),
-      render: (text) => {
-        const tempValue = text ? moment(text).format(dateFormatting.date) : "";
-        if (searchedColumn === "effectiveDate") {
-          const highlight = (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={tempValue || ""}
-            />
-          );
-          if (tempValue) {
-            return highlight;
-          }
-          return highlight;
-        } else {
-          if (tempValue) {
-            return tempValue;
-          }
-          return "";
-        }
-      },
     },
     {
+      key: "value1",
       title: "LOCAL (%)",
       dataIndex: "value1",
       sorter: true,
       align: "right",
+      filteredValue: [search?.value1] || null,
       ...getColumnSearchPropsPaging(
+        search,
         "value1",
         searchInput,
         searchedColumn,
@@ -88,11 +72,14 @@ const columns = (
       ),
     },
     {
+      key: "value2",
       title: "EXPORT (%)",
       dataIndex: "value2",
       align: "right",
       sorter: true,
+      filteredValue: [search?.value2] || null,
       ...getColumnSearchPropsPaging(
+        search,
         "value2",
         searchInput,
         searchedColumn,
@@ -101,38 +88,19 @@ const columns = (
       ),
     },
     {
+      key: "description",
       title: "DESCRIPTION",
       dataIndex: "description",
       align: "left",
+      filteredValue: [search?.description] || null,
       ...getColumnSearchPropsPaging(
+        search,
         "description",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
-      ellipsis: {
-        showTitle: false,
-      },
-      sorter: true,
-      render: (text) =>
-        searchedColumn === "description" ? (
-          <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
-            searchWords={[searchText]}
-            autoEscape
-            textToHighlight={text ? text.toString() : ""}
-          />
-        ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
-        ) : (
-          ""
-        ),
     },
   ];
 };
@@ -140,14 +108,18 @@ const columns = (
 const ProductDistributionHistory = ({ id, idCustomer }) => {
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
-  const { data, data_detail_history } = useSelector(
+  const {
+    list_productDistributionHistory,
+    pagination_productDistributionHistory,
+    data_detail_history,
+    loading
+  } = useSelector(
     (state) => state.productDistribution
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
 
   // State
   const [page, setPage] = useState(1);
@@ -164,7 +136,13 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   const [bodyError, setBodyError] = useState({});
   const [idData, setIdData] = useState();
   const location = useLocation();
+  const [loadMoreSize] = useState(20);
 
+  const currentData = useMemo(() => list_productDistributionHistory, [list_productDistributionHistory]);
+  const currentPagination = pagination_productDistributionHistory;
+
+  const hashMore = currentData.length < (currentPagination?.totalElements || 0);
+  
   // Use Effect
 
   useEffect(() => {
@@ -181,11 +159,11 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         id: id,
         search: encodeURIComponent(JSON?.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
-  }, [dispatch, id, search, page, pageSize, sort]);
+  }, [dispatch, id, search, page, loadMoreSize, sort]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -203,10 +181,24 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
     });
   };
 
-  // Function Change Pagination
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination_productDistributionHistory?.totalPages || 0;
+    const reqSearch = encodeURIComponent(JSON?.stringify(search));
+
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getAllPDHistoryPaginate({
+          id: id,
+          search: reqSearch,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true
+        })
+      );
+    }
+    setPage(nextPage);
   };
 
   // Function Sort Table
@@ -226,7 +218,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
       render: (record) => {
         return (
           <Tooltip title="Detail">
-            <div className="pt-1">
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDetail"
                 width={20}
@@ -247,7 +239,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
             state={{ idPD: record.id, accountId: id, idCustomer: idCustomer }}
           >
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div className="flex items-center h-full">
                 <SVGIcon name="IconEdit" width={20} />
               </div>
             </Tooltip>
@@ -256,12 +248,12 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
       },
     },
     {
-      action: "Delete",
+      action: "Hapus",
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Delete">
-            <div className="pt-1">
+          <Tooltip title="Hapus">
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDelete"
                 width={20}
@@ -332,35 +324,69 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
     setIdData();
     setEffectiveData();
   };
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+
+  const actionCols = useColumnActionPermission(["View", "Update", "Hapus"], itemGrantAccess, "View", "table").map(
+    (col) => ({
+      ...col,
+      width: 70,
+      align: "center",
+    })
+  );
+
+  const baseColumns = useMemo(() =>
+    columns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  [search, searchText, searchedColumn]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+  
   return (
     <Fragment>
       <NxBaseContainer border header={"PRODUCT DISTRIBUTION HISTORY LIST"}>
         <NxTable
           idTable="table-product-distribution-history"
-          dataSource={dataSource}
-          totalData={data?.page?.totalElements}
+          dataSource={currentData}
+          totalData={currentPagination}
           current={page}
-          tableScrolled={{ y: 525, x: dataSource?.length ? "max-content" : "100%" }}
+          tableScrolled={{ y: 525, x: currentData?.length ? "max-content" : "100%" }}
           onSort={onSort}
-            columns={[
-            ...columns(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDetail,
-              handleDelete
-            ),
-            ...useColumnActionPermissionAccount(
-              ["View", "Update", "Delete"],
-              itemGrantAccess,
-              access_account
-            ),
-          ]}
+          columns={processedColumns}
           usePagination={false}
           useInfiniteScroll={true}
+          hasMore={hashMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={20}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          columnDefinitions={columnDefinitions}
+          loading={loading}
         />
       </NxBaseContainer>
 
