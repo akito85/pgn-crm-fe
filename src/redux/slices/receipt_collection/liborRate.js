@@ -15,10 +15,13 @@ const initialState = {
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   dataListCategory: [],
+  dataListRateSource: [],
+  dataCurrency: [],
   dataApprovalHistory: [],
 };
 
-const BASE_URL = "/v1/dbs/api/rate-indices";
+const BASE_URL_INDEX = "/v1/dbs/api/rate-indices";
+const BASE_URL_SOURCE = "/v1/dbs/api/rate-sources";
 
 export const getPaginateRateIndex = createAsyncThunk(
   "GET_ALL_RATE_INDEX",
@@ -27,7 +30,7 @@ export const getPaginateRateIndex = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `${BASE_URL_INDEX}/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -50,7 +53,7 @@ export const getDownloadRateIndex = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `${BASE_URL_INDEX}/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
     } catch (response) {
@@ -70,7 +73,7 @@ export const createRateIndex = createAsyncThunk(
   "CREATE_RATE_INDEX",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/create-update`;
+      const url = `${BASE_URL_INDEX}/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
@@ -95,7 +98,7 @@ export const updateRateIndex = createAsyncThunk(
   "UPDATE_RATE_INDEX",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/create-update`;
+      const url = `${BASE_URL_INDEX}/create-update`;
       const data = await receiptCollectionHttpService.updateDataPost(url, body);
       return data.data;
     } catch (error) {
@@ -121,7 +124,7 @@ export const getDetailRateIndex = createAsyncThunk(
   "GET_DETAIL_RATE_INDEX",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/detail-get/${id}`;
+      const url = `${BASE_URL_INDEX}/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -145,10 +148,10 @@ export const getDetailRateIndex = createAsyncThunk(
 );
 
 export const getApprovalHistory = createAsyncThunk(
-  "GET_APPROVAL_HISTORY_RATE_INDEX",
+  "GET_APPROVAL_HISTORY_LIBOR_RATE",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approval-history-get/${id}`;
+      const url = `${BASE_URL_INDEX}/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -168,7 +171,7 @@ export const approveOrRejectRateIndex = createAsyncThunk(
   "APPROVE_OR_REJECT_RATE_INDEX",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approve-reject`;
+      const url = `${BASE_URL_INDEX}/approve-reject`;
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -204,7 +207,7 @@ export const approveOrRejectInactiveRateIndex = createAsyncThunk(
   "APPROVE_OR_REJECT_FOR_INACTIVE_RATE_INDEX",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approve-inactive`;
+      const url = `${BASE_URL_INDEX}/approve-inactive`;
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -237,7 +240,7 @@ export const approveOrRejectInactiveRateIndex = createAsyncThunk(
 );
 
 export const getAllApprovalList = createAsyncThunk(
-  "GET_ALL_APPROVAL_LIST_RATE_INDEX",
+  "GET_ALL_APPROVAL_LIST_LIBOR_RATE",
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-list-approval-hierarchies`;
@@ -264,7 +267,7 @@ export const getAllApprovalList = createAsyncThunk(
 );
 
 export const getListApprovalById = createAsyncThunk(
-  "GET_LIST_APPROVAL_BY_ID_RATE_INDEX",
+  "GET_LIST_APPROVAL_BY_ID_LIBOR_RATE",
   async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
@@ -291,11 +294,11 @@ export const getListApprovalById = createAsyncThunk(
 );
 
 export const activeInactiveRateIndex = createAsyncThunk(
-  "INACTIVE_RATE_INDEX",
+  "INACTIVE_LIBOR_RATE",
   async ({ body }, thunkAPI) => {
     let status = body?.status === "Active" ? "Inactivate" : "Activate";
     try {
-      const url = `${BASE_URL}/active-inactive`;
+      const url = `${BASE_URL_INDEX}/active-inactive`;
       const response = await receiptCollectionHttpService.activationWithRemarkPost(
         url,
         body
@@ -311,7 +314,7 @@ export const activeInactiveRateIndex = createAsyncThunk(
       thunkAPI.dispatch(
         validateError({
           error: errorBody(errorCode(response), status, errorMessage(response)),
-          action: "INACTIVE_RATE_INDEX",
+          action: "INACTIVE_LIBOR_RATE",
           back: false,
         })
       );
@@ -321,10 +324,10 @@ export const activeInactiveRateIndex = createAsyncThunk(
 );
 
 export const saveDraftRateIndex = createAsyncThunk(
-  "SAVE_DRAFT_RATE_INDEX",
+  "SAVE_DRAFT_LIBOR_RATE",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/save-draft`;
+      const url = `${BASE_URL_INDEX}/save-draft`;
       const data = await receiptCollectionHttpService.createData(url, body);
       const successBody = {
         title: "Successfull",
@@ -352,7 +355,7 @@ export const saveDraftRateIndex = createAsyncThunk(
 );
 
 export const getListCategory = createAsyncThunk(
-  "GET_LIST_CATEGORY_RATE_INDEX",
+  "GET_LIST_CATEGORY_LIBOR_RATE",
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/attachment/list-category`;
@@ -382,9 +385,48 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
+export const getListRateSource = createAsyncThunk(
+  "GET_LIST_RATE_SOURCE_FOR_LIBOR",
+  async (_, thunkAPI) => {
+    try {
+      const url = `${BASE_URL_SOURCE}/list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
 
-const rateIndexSlice = createSlice({
-  name: "rateIndex",
+export const getListCurrency = createAsyncThunk(
+  "GET_CURRENCY_LIST_LIBOR",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank/currency/get`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+const liborRateSlice = createSlice({
+  name: "liborRate",
   initialState,
   extraReducers: {
     [getPaginateRateIndex.pending]: (state) => {
@@ -510,8 +552,21 @@ const rateIndexSlice = createSlice({
     [getListCategory.rejected]: (state) => {
       state.loading = false;
     },
+    [getListRateSource.fulfilled]: (state, action) => {
+      state.dataListRateSource = action.payload;
+    },
+    [getListCurrency.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListCurrency.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataCurrency = action.payload;
+    },
+    [getListCurrency.rejected]: (state) => {
+      state.loading = false;
+    },
   },
 });
 
-const { reducer } = rateIndexSlice;
+const { reducer } = liborRateSlice;
 export default reducer;
