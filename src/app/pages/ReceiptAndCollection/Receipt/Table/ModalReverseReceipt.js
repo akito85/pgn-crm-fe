@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Steps, Input, Form, Alert, Spin, InputNumber } from "antd";
+import { useState, useEffect } from "react";
+import { Input, Form, Alert, Spin, Button } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { LeftOutlined } from "@ant-design/icons";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { useDispatch } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
@@ -136,7 +136,7 @@ const ModalReverseReceipt = ({
             title: "No",
             dataIndex: "no",
             key: "no",
-            render: (text, record, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "Receipt Code",
@@ -167,20 +167,41 @@ const ModalReverseReceipt = ({
         },
         {
             title: "Amount",
-            dataIndex: "receiptAmount",
-            key: "receiptAmount",
+            dataIndex: "amount",
+            key: "amount",
+            align: "right",
+            render: (value) => value ? value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'
+        },
+        {
+            title: "Applied Amount",
+            dataIndex: "appliedAmount",
+            key: "appliedAmount",
+            align: "right",
+            render: (value) => {
+                const amount = parseFloat(value || 0);
+                return (
+                    <span className={amount > 0 ? 'text-orange-600 font-semibold' : ''}>
+                        {amount > 0 ? amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+                    </span>
+                );
+            }
         }
     ];
 
-    const nextParams = [
-        { label: "Receipt Information" },
-        { label: "Reverse Information" },
-        { label: "Approval Information" },
-        { label: "Attachment Information" },
-        { label: "Confirmation" },
+    const steps = [
+        { title: "Receipt Information" },
+        { title: "Reverse Information" },
+        { title: "Approval Information" },
+        { title: "Attachment Information" },
+        { title: "Confirmation" },
     ];
 
     const handleNext = () => {
+        // Validasi sebelum next
+        if (currentStep === 0 && localSelectedData.length === 0) return;
+        if (currentStep === 1 && !reverseReason) return;
+        if (currentStep === 2 && !selectedAppHierId) return;
+        
         setCurrentStep(currentStep + 1);
     };
 
@@ -192,50 +213,13 @@ const ModalReverseReceipt = ({
         setConfirmationTab(e.target.value);
     };
 
-
-    const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-5">
-                <ButtonComponent type="default" onClick={handleCancel}>
-                    Cancel
-                </ButtonComponent>
-                {currentStep > 0 && (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handlePrev}
-                        icon={
-                            <LeftOutlined
-                                style={{ color: "#fff", fontSize: 15, marginRight: 10 }}
-                            />
-                        }
-                    >
-                        Previous
-                    </ButtonComponent>
-                )}
-                {currentStep < 4 ? (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handleNext}
-                        disabled={
-                            (currentStep === 0 && localSelectedData.length === 0) ||
-                            (currentStep === 1 && !reverseReason) ||
-                            (currentStep === 2 && !selectedAppHierId)
-                        }
-                    >
-                        Next
-                    </ButtonComponent>
-                ) : (
-                    <ButtonComponent type="submit" onClick={() => onSubmit({
-                        receipts: localSelectedData,
-                        reason: reverseReason,
-                        appHierId: selectedAppHierId,
-                        attachments: listDataAttachment
-                    })}>
-                        Confirm
-                    </ButtonComponent>
-                )}
-            </div>
-        );
+    const handleSubmit = () => {
+        onSubmit({
+            receipts: localSelectedData,
+            reason: reverseReason,
+            appHierId: selectedAppHierId,
+            attachments: listDataAttachment
+        });
     };
 
     // Add unique key to prevent selection issues
@@ -253,15 +237,14 @@ const ModalReverseReceipt = ({
             handleCancel={handleCancel}
             header="RECEIPT REVERSE"
             width={1200}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="overflow-x-scroll scrollStepsCstm gap-5 mb-5 p-2">
-                <Steps
-                    current={currentStep}
-                    items={nextParams.map(item => ({ title: item.label }))}
-                    labelPlacement="vertical"
-                />
-            </div>
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
 
             <Spin spinning={loadingReceipt}>
                 <div className="mt-4">
@@ -284,6 +267,33 @@ const ModalReverseReceipt = ({
                     {currentStep === 1 && (
                         <div className="w-full">
                             <p className="text-primary text-xl font-bold uppercase py-4">REVERSE INFORMATION</p>
+
+                            {/* Warning if any receipt has allocation */}
+                            {localSelectedData.some(item => parseFloat(item?.appliedAmount || 0) > 0) && (
+                                <Alert
+                                    message="Warning: Allocation Detected"
+                                    description={
+                                        <div>
+                                            <p>One or more selected receipts have existing allocations (Applied Amount &gt; 0).</p>
+                                            <p className="mt-2 font-semibold">Receipts with allocation:</p>
+                                            <ul className="list-disc ml-5 mt-1">
+                                                {localSelectedData
+                                                    .filter(item => parseFloat(item?.appliedAmount || 0) > 0)
+                                                    .map(item => (
+                                                        <li key={item.id}>
+                                                            {item.receiptCode} - Applied Amount: {parseFloat(item.appliedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </li>
+                                                    ))
+                                                }
+                                            </ul>
+                                            <p className="mt-2 text-orange-600">Please ensure allocations are reversed before reversing the receipt.</p>
+                                        </div>
+                                    }
+                                    type="warning"
+                                    showIcon
+                                    className="mb-4"
+                                />
+                            )}
 
                             <div className="mb-4">
                                 <TableRBI
@@ -397,6 +407,83 @@ const ModalReverseReceipt = ({
                     )}
                 </div>
             </Spin>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                onClick={handleNext}
+                                type="primary"
+                                disabled={
+                                    (currentStep === 0 && localSelectedData.length === 0) ||
+                                    (currentStep === 1 && !reverseReason) ||
+                                    (currentStep === 2 && !selectedAppHierId)
+                                }
+                                style={{
+                                    backgroundColor: 
+                                        (currentStep === 0 && localSelectedData.length === 0) ||
+                                        (currentStep === 1 && !reverseReason) ||
+                                        (currentStep === 2 && !selectedAppHierId)
+                                            ? "#E0E3E9" : "#0075BF",
+                                    borderColor: 
+                                        (currentStep === 0 && localSelectedData.length === 0) ||
+                                        (currentStep === 1 && !reverseReason) ||
+                                        (currentStep === 2 && !selectedAppHierId)
+                                            ? "#E0E3E9" : "#0075BF",
+                                    color: 
+                                        (currentStep === 0 && localSelectedData.length === 0) ||
+                                        (currentStep === 1 && !reverseReason) ||
+                                        (currentStep === 2 && !selectedAppHierId)
+                                            ? "#BFC4D0" : "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
         </ModalCustom>
     );
 };

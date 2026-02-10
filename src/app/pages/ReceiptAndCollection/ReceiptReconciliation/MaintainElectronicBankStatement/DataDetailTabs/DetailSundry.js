@@ -1659,7 +1659,8 @@ const DetailSundry = ({ data, id, isApprover, isSubmitter }) => {
         onSizeChanger={handleChange}
         onSort={onSort}
         tableScrolled={{
-          x: 3500,
+          // x: 3500,
+          x: "max-content",
           y: 300,
         }}
       />

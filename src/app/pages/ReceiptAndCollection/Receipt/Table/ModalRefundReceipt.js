@@ -1,31 +1,26 @@
 
-import React, { useEffect, useState } from "react";
-import { Modal, Steps, Button, message, Input, InputNumber, Segmented, DatePicker } from "antd";
+import { useEffect, useState } from "react";
+import { Button, message, Input, InputNumber, DatePicker } from "antd";
 import moment from "moment";
-import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { columnsReceipt } from "../ColumnReceiptView"; // Might use parts of this or define custom
+import { columnsReceipt } from "../ColumnReceiptView";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-// import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt"; // If needed
-import { getReceiptCustomerList, getListCategoryReceipt, getPaginateReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getReceiptCustomerList, getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../../components/RadioTabs";
-
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-
-const { Step } = Steps;
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 
 const ModalRefundReceipt = ({
     isOpen,
     handleCancel,
-    dataSource,
     onSubmit,
 }) => {
     const dispatch = useDispatch();
-    const { data_customer_list, data, loading } = useSelector((state) => state.receipt);
+    const { data_customer_list, loading } = useSelector((state) => state.receipt);
 
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -34,10 +29,6 @@ const ModalRefundReceipt = ({
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-
-    // Filter/Search State (Placeholder for now)
-    const [searchText, setSearchText] = useState("");
-    const [searchedColumn, setSearchedColumn] = useState("");
 
     // Step 2 Selection State (Receipts)
     const [eligibleReceipts, setEligibleReceipts] = useState([]); // Filtered receipts
@@ -116,7 +107,7 @@ const ModalRefundReceipt = ({
                     const content = response?.data?.result || [];
                     const eligible = content.filter(item =>
                         item.statusApproval === "Approved" &&
-                        (item.balance > 0 || item.unAppliedAmount > 0)
+                        (item.unAppliedAmountReal > 0 || item.unAppliedAmount > 0)
                     );
 
                     setEligibleReceipts(eligible);
@@ -132,23 +123,23 @@ const ModalRefundReceipt = ({
 
     const steps = [
         {
-            title: "Customer Information",
+            title: "Customer Info",
             key: "customerInfo",
         },
         {
-            title: "Receipt Information",
+            title: "Receipt Info",
             key: "receiptInfo",
         },
         {
-            title: "Refund Customer Information",
+            title: "Refund Customer",
             key: "refundCustomerInfo",
         },
         {
-            title: "Refund Receipt Information",
+            title: "Refund Receipt",
             key: "refundReceiptInfo",
         },
         {
-            title: "Attachment Information",
+            title: "Attachment",
             key: "attachmentInfo",
         },
         {
@@ -162,11 +153,50 @@ const ModalRefundReceipt = ({
             message.warning("Please select at least one record.");
             return;
         }
+        
+        // Validate refund date in Step 3 (Refund Customer Information)
+        if (currentStep === 2) {
+            if (!refundDate) {
+                message.error("Refund date is required");
+                return;
+            }
+            
+            // Check if refund date is in the future
+            if (refundDate.isAfter(moment(), 'day')) {
+                message.error("Refund date cannot be in the future");
+                return;
+            }
+            
+            // Check if refund date is before any receipt date
+            const earliestReceiptDate = selectedReceipts.reduce((earliest, receipt) => {
+                const receiptDate = moment(receipt.receiptDate);
+                return !earliest || receiptDate.isBefore(earliest) ? receiptDate : earliest;
+            }, null);
+            
+            if (earliestReceiptDate && refundDate.isBefore(earliestReceiptDate, 'day')) {
+                message.error(`Refund date cannot be before receipt date (${earliestReceiptDate.format('DD MMM YYYY')})`);
+                return;
+            }
+        }
+        
         setCurrentStep(currentStep + 1);
     };
 
     const handlePrev = () => {
         setCurrentStep(currentStep - 1);
+    };
+
+    const handleSubmit = () => {
+        // Validate refund amounts match
+        const totalCustomerRefund = Object.values(refundAmountData).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+        const totalReceiptRefund = Object.values(refundReceiptAmountData).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+
+        if (Math.abs(totalCustomerRefund - totalReceiptRefund) > 0.01) {
+            message.error(`Refund amounts mismatch! Customer refund: ${totalCustomerRefund.toLocaleString('id-ID')}, Receipt refund: ${totalReceiptRefund.toLocaleString('id-ID')}`);
+            return;
+        }
+
+        onSubmit(localSelectedData);
     };
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -192,7 +222,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "COST CENTER",
@@ -220,7 +250,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (val) => val || "-"
+            render: (_, record) => record.accountNumber || record.accountId || "-"
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -229,7 +259,10 @@ const ModalRefundReceipt = ({
             align: "right",
             sorter: true,
             width: 200,
-            render: (value) => value ? value.toLocaleString('id-ID') : '-'
+            render: (_, record) => {
+                const amount = record.unAppliedAmount || record.totalUnAppliedAmount || record.totalUnapplyAmount || 0;
+                return amount ? amount.toLocaleString('id-ID') : '0';
+            }
         }
     ];
     const handleRefundAmountChange = (value, recordKey) => {
@@ -241,7 +274,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => index + 1,
+            render: (_, _record, index) => index + 1,
         },
         {
             title: "COST CENTER",
@@ -268,7 +301,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (val) => val || "-"
+            render: (_, record) => record.accountNumber || record.accountId || "-"
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -276,7 +309,10 @@ const ModalRefundReceipt = ({
             key: "unAppliedAmount",
             align: "right",
             width: 200,
-            render: (value) => value ? value.toLocaleString('id-ID') : '-'
+            render: (_, record) => {
+                const amount = record.unAppliedAmount || record.totalUnAppliedAmount || record.totalUnapplyAmount || 0;
+                return amount ? amount.toLocaleString('id-ID') : '0';
+            }
         },
         {
             title: "REFUND AMOUNT",
@@ -304,7 +340,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => index + 1,
+            render: (_, _record, index) => index + 1,
         },
         {
             title: "RECEIPT CODE",
@@ -617,39 +653,6 @@ const ModalRefundReceipt = ({
         }
     };
 
-    const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-5">
-                <ButtonComponent type="default" onClick={handleCancel} className="w-[120px]">
-                    Cancel
-                </ButtonComponent>
-                {currentStep > 0 && (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handlePrev}
-                        className="w-[120px]"
-                        icon={
-                            <LeftOutlined
-                                style={{ color: "#fff", fontSize: 15, marginRight: 10 }}
-                            />
-                        }
-                    >
-                        Previous
-                    </ButtonComponent>
-                )}
-                {currentStep < steps.length - 1 ? (
-                    <ButtonComponent type="submit" onClick={handleNext} className="w-[120px]">
-                        Next
-                    </ButtonComponent>
-                ) : (
-                    <ButtonComponent type="submit" onClick={() => onSubmit(localSelectedData)} className="w-[120px]">
-                        Confirm
-                    </ButtonComponent>
-                )}
-            </div>
-        );
-    };
-
     return (
         <ModalCustom
             isOpen={isOpen}
@@ -657,18 +660,79 @@ const ModalRefundReceipt = ({
             header="RECEIPT REFUND"
             type={"confirmation"}
             width={1200}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="w-full gap-5">
-                <div className="overflow-x-scroll scrollStepsCstm gap-5">
-                    <Steps current={currentStep} labelPlacement="vertical">
-                        {steps.map((item) => (
-                            <Step key={item.key} title={item.title} />
-                        ))}
-                    </Steps>
-                </div>
-                <div className="min-h-[300px] mb-6">
-                    {renderContent()}
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
+            <div className="min-h-[300px] mb-6">
+                {renderContent()}
+            </div>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                key="btn-next"
+                                htmlType="button"
+                                onClick={handleNext}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#0075BF",
+                                    borderColor: "#0075BF",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                key="btn-submit"
+                                htmlType="button"
+                                onClick={handleSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </ModalCustom>

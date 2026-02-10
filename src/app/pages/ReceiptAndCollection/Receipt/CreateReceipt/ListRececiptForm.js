@@ -1,5 +1,5 @@
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import { Form, Spin, Steps } from "antd";
+import { Form, Spin } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -51,6 +51,7 @@ import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { countBadgeFieldsErrorMandatory, dateFormatting, hasValue } from "../../../../../utils";
 import moment from "moment";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 
 const ListRececiptForm = ({ type }) => {
   const {
@@ -428,6 +429,27 @@ const ListRececiptForm = ({ type }) => {
     { value: "Attachment" },
   ]);
   const [valuePage, setValuePage] = useState(tabData[0].value);
+  
+  const steps = [
+    { title: 'CREATE RECEIPT' },
+    { title: 'APPROVAL' },
+    { title: 'ATTACHMENT' }
+  ];
+
+  const currentStepIndex = tabData.findIndex(tab => tab.value === valuePage);
+
+  const handleNext = () => {
+    if (currentStepIndex < tabData.length - 1) {
+      setValuePage(tabData[currentStepIndex + 1].value);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentStepIndex > 0) {
+      setValuePage(tabData[currentStepIndex - 1].value);
+    }
+  };
+
   const onChange = (e) => {
     if (storedData) {
       const errorBody = {
@@ -650,18 +672,16 @@ const ListRececiptForm = ({ type }) => {
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
-      {/* Step Indicator */}
+      {/* Step Indicator with FormStepper */}
       <div className="mb-3">
-        <Steps
-          current={tabData.findIndex(tab => tab.value === valuePage)}
-          items={[
-            { title: 'CREATE RECEIPT' },
-            { title: 'APPROVAL' },
-            { title: 'ATTACHMENT' }
-          ]}
+        <FormStepper
+          steps={steps}
+          current={currentStepIndex}
+          onPrev={handlePrev}
+          onNext={handleNext}
         />
       </div>
-      {/* <Spin spinning={loadingForm}> */}
+      {/* RadioTabs for navigation */}
       <RadioTabs
         data={tabData}
         onChange={onChange}
