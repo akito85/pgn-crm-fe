@@ -94,12 +94,13 @@ const initialState = {
  */
 export const connectNotifications = createAsyncThunk(
   "notifications/connect",
-  async ({ userId }, { dispatch, rejectWithValue }) => {
+  async ({ userId, positionId = null }, { dispatch, rejectWithValue }) => {
     try {
 
       return new Promise((resolve, reject) => {
 
         notificationService.connect(userId, {
+          positionId,
           onMessage: (notification) => {
             dispatch(addNotification(notification));
           },
@@ -351,8 +352,10 @@ const notificationsSlice = createSlice({
 
       // Position-based filter: skip notifications targeted at a different position
       const notifPositionId = notification.toPositionId;
-      if (notifPositionId && state.currentPositionId) {
-        if (Number(notifPositionId) !== Number(state.currentPositionId)) {
+      if (notifPositionId) {
+        // If notification has a position ID, only accept if user's current position matches exactly
+        // This prevents users from seeing notifications for other positions they hold
+        if (!state.currentPositionId || Number(notifPositionId) !== Number(state.currentPositionId)) {
           return;
         }
       }
@@ -918,6 +921,9 @@ export const selectAvailableTypes = (state) =>
 // Get display type options from global settings
 export const selectDisplayTypeOptions = (state) =>
   state.notifications.globalSettings?.displayTypeOptions || ["standard", "toast", "popup", "inline"];
+
+// Get current position ID (for position-based filtering)
+export const selectCurrentPositionId = (state) => state.notifications.currentPositionId;
 
 /**
  * Export reducer

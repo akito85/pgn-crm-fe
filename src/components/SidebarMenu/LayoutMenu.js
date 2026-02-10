@@ -45,7 +45,7 @@ import {
   hideModalSuccess,
   showModalError,
 } from "../../redux/slices/general_slice";
-import { getGlobalFormatConfig } from "../../redux/slices/globalPropSlice";
+// import { getGlobalFormatConfig } from "../../redux/slices/globalPropSlice";
 import NotFound from "../../app/NotFound";
 import { IconModal } from "../../utils/Icon";
 import InputComponent from "../InputComponent";
@@ -148,9 +148,9 @@ const LayoutMenu = ({ children }) => {
     dispatch(getProfile());
   }, [dispatch, location, data_switch]);
 
-  useEffect(() => {
-    dispatch(getGlobalFormatConfig());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(getGlobalFormatConfig());
+  // }, [dispatch]);
 
   // use effect kick user
   useEffect(() => {

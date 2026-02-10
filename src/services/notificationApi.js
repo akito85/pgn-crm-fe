@@ -38,14 +38,22 @@ const notificationApi = {
    * GET /v1/api/notification/list
    * @param {string} userId - User ID to fetch notifications for
    * @param {Object} params - Query parameters (page, size, sort, status, type, priority)
+   * @param {number} [positionId] - Position ID for position-based filtering
    */
-  getAllUserNotifications: async (userId, params = {}) => {
+  getAllUserNotifications: async (userId, params = {}, positionId = null) => {
     try {
+      const queryParams = {
+        ...params,
+        toUserId: userId
+      };
+
+      // Include positionId in query params for position-based filtering
+      if (positionId) {
+        queryParams.positionId = positionId;
+      }
+
       const config = {
-        params: {
-          ...params,
-          toUserId: userId
-        },
+        params: queryParams,
         headers: notificationTokenHeader(),
         withCredentials: true,
       };
@@ -60,15 +68,21 @@ const notificationApi = {
   /**
    * Get user's unread notifications count
    * GET /v1/api/notification/unread-count
+   * @param {number} [positionId] - Position ID for position-based filtering
    */
-  getUnreadNotificationsCount: async () => {
+  getUnreadNotificationsCount: async (positionId = null) => {
     try {
       const headers = {
         ...notificationTokenHeader(),
         'Content-Type': 'application/json',
       };
+      const params = {};
+      if (positionId) {
+        params.positionId = positionId;
+      }
       const config = {
         headers,
+        params,
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread-count`, config);

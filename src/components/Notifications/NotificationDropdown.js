@@ -22,6 +22,7 @@ import {
   selectFilteredNotifications,
   selectAllNotifications,
   selectIsConnected,
+  selectCurrentPositionId,
   updateFilters,
   NOTIFICATION_TYPES,
   NOTIFICATION_PRIORITY,
@@ -99,16 +100,22 @@ const NotificationDropdown = () => {
   const allNotifications = useSelector(selectAllNotifications) || [];
   const userUnreadCount = useSelector(selectUnreadCount); // Use Redux state for unread count
   const isConnected = useSelector(selectIsConnected);
+  const currentPositionId = useSelector(selectCurrentPositionId); // Use Redux state for current position
+
+  // Get position info from auth state (from switch-pos API response)
+  const authCurrentPosition = useSelector((state) => state.auth?.currentPosition);
 
   // Defensive check: Ensure allNotifications is always an array
   const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
 
-  // Get user ID and position ID from token
+  // Get user ID from token
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
   );
   const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
-  const positionId = tokenJSON?.positionId;
+
+  // Get positionId from auth.currentPosition (from switch-pos API) or fallback to Redux notifications.currentPositionId
+  const positionId = authCurrentPosition?.positionId || currentPositionId;
 
   // Load read broadcast IDs from localStorage on mount
   useEffect(() => {
@@ -134,8 +141,13 @@ const NotificationDropdown = () => {
     // Position-based filter: if notification has a toPositionId, only show
     // when it matches the user's current position (belt-and-suspenders with backend filter)
     const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
-    if (notifPositionId && positionId) {
-      return Number(notifPositionId) === Number(positionId);
+    if (notifPositionId) {
+      // If notification is targeted at a specific position, ONLY show when user is in that exact position
+      // This ensures users don't see notifications for other roles/positions they hold
+      // Use Redux currentPositionId (not localStorage) to ensure reactivity when position changes
+      if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+        return false;
+      }
     }
 
     return true;
@@ -201,12 +213,14 @@ const NotificationDropdown = () => {
       return;
     }
 
-    // Get user ID and position ID from token - parse inside effect to avoid re-renders
+    // Get user ID from token
     const tokenJSON = JSON.parse(
       localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
     );
     const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
-    const positionId = tokenJSON?.positionId;
+
+    // Get positionId from auth.currentPosition (from switch-pos API response)
+    const positionId = authCurrentPosition?.positionId;
 
     if (userId) {
       // Set current position in Redux for position-based filtering
@@ -221,7 +235,7 @@ const NotificationDropdown = () => {
           await notificationApi.registerSession(userId);
 
           // Step 2: Connect to SSE (now authenticated with session cookie)
-          dispatch(connectNotifications({ userId }));
+          dispatch(connectNotifications({ userId, positionId }));
 
           // Step 3: Fetch unread count from API (filtered by position)
           dispatch(fetchUnreadCount(positionId));
@@ -230,7 +244,7 @@ const NotificationDropdown = () => {
           dispatch(fetchAllUserNotifications({ userId, positionId }));
         } catch (error) {
           // Continue anyway - user might still see notifications if backend allows
-          dispatch(connectNotifications({ userId }));
+          dispatch(connectNotifications({ userId, positionId }));
           dispatch(fetchUnreadCount(positionId));
           dispatch(fetchAllUserNotifications({ userId, positionId }));
         }
@@ -250,21 +264,23 @@ const NotificationDropdown = () => {
     };
   }, [dispatch]); // Only depend on dispatch, not userId - connect once on mount
 
-  // Refresh notifications when token changes (e.g., after position switch)
+  // Refresh notifications when token OR position changes (e.g., after position switch)
   useEffect(() => {
     if (!NOTIFICATION_CONFIG.ENABLED) {
       return;
     }
 
     // Skip on initial mount (handled by previous useEffect)
-    if (!authToken) {
+    if (!authToken && !authCurrentPosition) {
       return;
     }
 
-    // Get user ID and position ID from updated token
+    // Get user ID from token
     const tokenJSON = JSON.parse(authToken || "{}");
     const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
-    const positionId = tokenJSON?.positionId;
+
+    // Get positionId from auth.currentPosition (from switch-pos API response)
+    const positionId = authCurrentPosition?.positionId;
 
     if (userId) {
       // Update current position in Redux for position-based filtering
@@ -285,7 +301,7 @@ const NotificationDropdown = () => {
           await notificationApi.registerSession(userId);
 
           // Step 4: Reconnect to SSE with new user context
-          dispatch(connectNotifications({ userId }));
+          dispatch(connectNotifications({ userId, positionId }));
 
           // Step 5: Fetch updated unread count (filtered by new position)
           dispatch(fetchUnreadCount(positionId));
@@ -295,7 +311,7 @@ const NotificationDropdown = () => {
         } catch (error) {
           console.error("[NotificationDropdown] Error refreshing notifications after token change:", error);
           // Continue anyway - reconnect with basic setup
-          dispatch(connectNotifications({ userId }));
+          dispatch(connectNotifications({ userId, positionId }));
           dispatch(fetchUnreadCount(positionId));
           dispatch(fetchAllUserNotifications({ userId, positionId }));
         }
@@ -303,7 +319,7 @@ const NotificationDropdown = () => {
 
       refreshNotifications();
     }
-  }, [authToken, dispatch]); // Re-run when authToken changes
+  }, [authToken, authCurrentPosition, dispatch]); // Re-run when authToken OR position changes
 
   /**
    * Get icon based on notification type
