@@ -36,6 +36,9 @@ const initialState = {
   reconnectAttempts: 0,
   lastConnected: null,
 
+  // Position context
+  currentPositionId: null,
+
   // Notifications
   notifications: [], // All notifications
   unreadCount: 0,
@@ -146,9 +149,9 @@ export const fetchUserNotifications = createAsyncThunk(
  */
 export const fetchAllUserNotifications = createAsyncThunk(
   "notifications/fetchAllUserNotifications",
-  async ({ userId, params = {} }, { rejectWithValue }) => {
+  async ({ userId, positionId = null, params = {} }, { rejectWithValue }) => {
     try {
-      const response = await notificationApi.getAllUserNotifications(userId, params);
+      const response = await notificationApi.getAllUserNotifications(userId, params, positionId);
       return response;
     } catch (error) {
       return rejectWithValue({
@@ -164,9 +167,9 @@ export const fetchAllUserNotifications = createAsyncThunk(
  */
 export const fetchUnreadCount = createAsyncThunk(
   "notifications/fetchUnreadCount",
-  async (_, { rejectWithValue }) => {
+  async (positionId = null, { rejectWithValue }) => {
     try {
-      const response = await notificationApi.getUnreadNotificationsCount();
+      const response = await notificationApi.getUnreadNotificationsCount(positionId);
       return response;
     } catch (error) {
       return rejectWithValue({
@@ -344,6 +347,14 @@ const notificationsSlice = createSlice({
       const exists = state.notifications.some((n) => n.id === notification.id);
       if (exists) {
         return;
+      }
+
+      // Position-based filter: skip notifications targeted at a different position
+      const notifPositionId = notification.toPositionId;
+      if (notifPositionId && state.currentPositionId) {
+        if (Number(notifPositionId) !== Number(state.currentPositionId)) {
+          return;
+        }
       }
 
       // Ensure status properties are set for UI compatibility
@@ -527,6 +538,13 @@ const notificationsSlice = createSlice({
     resetFilters: (state) => {
       state.filters = initialState.filters;
 
+    },
+
+    /**
+     * Set current position ID for position-based filtering
+     */
+    setCurrentPositionId: (state, action) => {
+      state.currentPositionId = action.payload;
     },
 
     /**
@@ -781,6 +799,7 @@ export const {
   clearNotificationsByDirection,
   setConnectionStatus,
   setConnectionError,
+  setCurrentPositionId,
   updateFilters,
   resetFilters,
   updateSettings,

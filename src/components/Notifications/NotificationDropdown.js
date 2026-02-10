@@ -31,6 +31,7 @@ import {
   markNotificationAsReadApi,
   markAllNotificationsAsReadApi,
   deleteNotificationApi,
+  setCurrentPositionId,
 } from "../../redux/slices/notifications";
 import { NOTIFICATION_CONFIG } from "../../constants/configApp";
 import notificationApi from "../../services/notificationApi";
@@ -102,11 +103,12 @@ const NotificationDropdown = () => {
   // Defensive check: Ensure allNotifications is always an array
   const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
 
-  // Get user ID from token
+  // Get user ID and position ID from token
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
   );
   const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+  const positionId = tokenJSON?.positionId;
 
   // Load read broadcast IDs from localStorage on mount
   useEffect(() => {
@@ -116,7 +118,7 @@ const NotificationDropdown = () => {
     }
   }, [userId]);
 
-  // Filter notifications for current user only
+  // Filter notifications for current user and current position
   const userNotifications = safeAllNotifications.filter(notification => {
     // Include broadcast notifications (for all users) or notifications directed to this user
     const isForThisUser = notification.direction === "broadcast" ||
@@ -127,7 +129,16 @@ const NotificationDropdown = () => {
            notification.toUserId === "ALL" ||
            notification.toUserId === "BROADCAST";
 
-    return isForThisUser;
+    if (!isForThisUser) return false;
+
+    // Position-based filter: if notification has a toPositionId, only show
+    // when it matches the user's current position (belt-and-suspenders with backend filter)
+    const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
+    if (notifPositionId && positionId) {
+      return Number(notifPositionId) === Number(positionId);
+    }
+
+    return true;
   });
 
   // Check if a broadcast notification has been read locally
@@ -190,13 +201,17 @@ const NotificationDropdown = () => {
       return;
     }
 
-    // Get user ID from token - parse inside effect to avoid re-renders
+    // Get user ID and position ID from token - parse inside effect to avoid re-renders
     const tokenJSON = JSON.parse(
       localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}"
     );
     const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+    const positionId = tokenJSON?.positionId;
 
     if (userId) {
+      // Set current position in Redux for position-based filtering
+      dispatch(setCurrentPositionId(positionId || null));
+
       // Initialize notification system with session registration
       const initializeNotifications = async () => {
         try {
@@ -208,16 +223,16 @@ const NotificationDropdown = () => {
           // Step 2: Connect to SSE (now authenticated with session cookie)
           dispatch(connectNotifications({ userId }));
 
-          // Step 3: Fetch unread count from API
-          dispatch(fetchUnreadCount());
+          // Step 3: Fetch unread count from API (filtered by position)
+          dispatch(fetchUnreadCount(positionId));
 
-          // Step 4: Fetch all existing user notifications from API (list endpoint)
-          dispatch(fetchAllUserNotifications({ userId }));
+          // Step 4: Fetch all existing user notifications from API (filtered by position)
+          dispatch(fetchAllUserNotifications({ userId, positionId }));
         } catch (error) {
           // Continue anyway - user might still see notifications if backend allows
           dispatch(connectNotifications({ userId }));
-          dispatch(fetchUnreadCount());
-          dispatch(fetchAllUserNotifications({ userId }));
+          dispatch(fetchUnreadCount(positionId));
+          dispatch(fetchAllUserNotifications({ userId, positionId }));
         }
       };
 
@@ -246,15 +261,19 @@ const NotificationDropdown = () => {
       return;
     }
 
-    // Get user ID from token
+    // Get user ID and position ID from updated token
     const tokenJSON = JSON.parse(authToken || "{}");
     const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+    const positionId = tokenJSON?.positionId;
 
     if (userId) {
+      // Update current position in Redux for position-based filtering
+      dispatch(setCurrentPositionId(positionId || null));
+
       // Refresh notification data after token change (e.g., position switch)
       const refreshNotifications = async () => {
         try {
-          console.log("[NotificationDropdown] Token changed - refreshing notifications for userId:", userId);
+          console.log("[NotificationDropdown] Token changed - refreshing notifications for userId:", userId, "positionId:", positionId);
 
           // Step 1: Disconnect from current SSE connection
           dispatch(disconnectNotifications());
@@ -268,17 +287,17 @@ const NotificationDropdown = () => {
           // Step 4: Reconnect to SSE with new user context
           dispatch(connectNotifications({ userId }));
 
-          // Step 5: Fetch updated unread count
-          dispatch(fetchUnreadCount());
+          // Step 5: Fetch updated unread count (filtered by new position)
+          dispatch(fetchUnreadCount(positionId));
 
           // Step 6: Fetch fresh notification list for new position
-          dispatch(fetchAllUserNotifications({ userId }));
+          dispatch(fetchAllUserNotifications({ userId, positionId }));
         } catch (error) {
           console.error("[NotificationDropdown] Error refreshing notifications after token change:", error);
           // Continue anyway - reconnect with basic setup
           dispatch(connectNotifications({ userId }));
-          dispatch(fetchUnreadCount());
-          dispatch(fetchAllUserNotifications({ userId }));
+          dispatch(fetchUnreadCount(positionId));
+          dispatch(fetchAllUserNotifications({ userId, positionId }));
         }
       };
 

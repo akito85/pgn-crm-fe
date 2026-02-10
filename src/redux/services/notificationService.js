@@ -335,6 +335,7 @@ class NotificationService {
       // User identification
       fromUserId: raw.FROM_USER_ID || raw.fromUserId,
       toUserId: raw.TO_USER_ID || raw.toUserId,
+      toPositionId: raw.TO_POSITION_ID || raw.toPositionId,
 
       // Navigation fields
       module: raw.MODULE || raw.module,
