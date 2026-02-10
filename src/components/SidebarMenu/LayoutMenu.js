@@ -42,7 +42,7 @@ import {
   hideModalSuccess,
   showModalError,
 } from "../../redux/slices/general_slice";
-import { getGlobalFormatConfig } from "../../redux/slices/globalPropSlice";
+// import { getGlobalFormatConfig } from "../../redux/slices/globalPropSlice";
 import NotFound from "../../app/NotFound";
 import { IconModal } from "../../utils/Icon";
 import InputComponent from "../InputComponent";
@@ -72,8 +72,6 @@ const LayoutMenu = ({ children }) => {
   const [form] = Form.useForm();
   const [collapsed, setCollapsed] = useState(false);
   const [modalConfirmation, setModalConfirmation] = useState(false);
-  const isIdleTimerEnabled =
-    process.env.REACT_APP_IDLE_TIMER_ENABLED === "true";
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token"),
   );
@@ -95,9 +93,9 @@ const LayoutMenu = ({ children }) => {
     dispatch(getProfile());
   }, [dispatch, location, data_switch]);
 
-  useEffect(() => {
-    dispatch(getGlobalFormatConfig());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(getGlobalFormatConfig());
+  // }, [dispatch]);
 
   // use effect kick user
   useEffect(() => {

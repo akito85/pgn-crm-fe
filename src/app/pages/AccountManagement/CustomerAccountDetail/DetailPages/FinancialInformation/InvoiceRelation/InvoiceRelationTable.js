@@ -31,12 +31,35 @@ const InvoiceRelationTable = ({
   const navigate = useNavigate();
 
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION,
-    updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION,
-    detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION,
-    navigate,
+    handleView: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
+    handleCreate: () => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    ),
+    handleUpdate: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
     handleApproval,
     handleApprovalHistory: handleApprovalHistoryModal,
     handleDownload,

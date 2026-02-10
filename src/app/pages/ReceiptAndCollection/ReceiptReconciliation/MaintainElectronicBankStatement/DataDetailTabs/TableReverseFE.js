@@ -93,7 +93,8 @@ const TableReverseFE = ({
       current={page}
       pageSize={pageSize}
       tableScrolled={{
-        x: 3000,
+        // x: 3000,
+        x: "max-content",
         y: 525,
       }}
       onChange={paging !== "BE" ? handleChangeSize : handleChangeBE}
