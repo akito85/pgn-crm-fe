@@ -105,18 +105,39 @@ const RelationshipTable = ({
   const navigate = useNavigate();
 
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP,
-    updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
-    detailRoute: ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP,
-    navigate,
+    handleView: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
+    handleCreate: () => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    ),
+    handleUpdate: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
     handleApproval,
     handleApprovalHistory: handleApprovalHistoryModal,
     handleDownload,
     handleInactivate: handleInactivateModal,
-    idKey: "idRelationship",
-    type,
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
