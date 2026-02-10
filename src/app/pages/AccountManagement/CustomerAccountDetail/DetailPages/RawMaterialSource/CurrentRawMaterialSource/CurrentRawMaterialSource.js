@@ -12,6 +12,7 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import Toolbar from "../../../../../../../components/Toolbar";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 
 const columns = (
   search,
@@ -158,18 +159,18 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
     <>
       <div className="flex flex-col gap-4">
         <NxBaseContainer border header={"RAW MATERIAL SOURCE INFORMATION"}>
-          <div className="w-full grid grid-cols-3 gap-x-4">
-            <DetailText label={"Effective Date"}>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Effective Date"}>
               {data_current?.effectiveDate
                 ? moment(data_current.effectiveDate).format(dateFormatting.date)
                 : ""}
-            </DetailText>
-            <DetailText label={"Local (%)"}>{data_current?.value1}</DetailText>
-            <DetailText label={"Import (%)"}>{data_current?.value2}</DetailText>
+            </NxDetailText>
+            <NxDetailText label={"Local (%)"}>{data_current?.value1}</NxDetailText>
+            <NxDetailText label={"Import (%)"}>{data_current?.value2}</NxDetailText>
             <div className="col-span-3">
-              <DetailText label={"Description"}>
+              <NxDetailText label={"Description"}>
                 {data_current?.description}
-              </DetailText>
+              </NxDetailText>
             </div>
           </div>
         </NxBaseContainer>

@@ -8,6 +8,7 @@ import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumn
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 
 const columns = (
   page = 1,
@@ -126,36 +127,36 @@ const RawMaterialSourceDetail = ({ data_detail, openModal, closeModal }) => {
       <div className="flex flex-col gap-4">
 
         <NxBaseContainer border header={"RAW MATERIAL SOURCE INFORMATION"}>
-          <div className="w-full grid grid-cols-3 gap-x-4">
-            <DetailText label={"Effective Date"}>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Effective Date"}>
               {data_detail?.effectiveDate
                 ? moment(data_detail.effectiveDate).format(dateFormatting.date)
                 : ""}
-            </DetailText>
-            <DetailText label={"Local (%)"}>{data_detail?.value1}</DetailText>
-            <DetailText label={"Import (%)"}>{data_detail?.value2}</DetailText>
-            <DetailText label={"Description"}>
+            </NxDetailText>
+            <NxDetailText label={"Local (%)"}>{data_detail?.value1}</NxDetailText>
+            <NxDetailText label={"Import (%)"}>{data_detail?.value2}</NxDetailText>
+            <NxDetailText label={"Description"}>
               {data_detail?.description}
-            </DetailText>
+            </NxDetailText>
 
           </div>
         </NxBaseContainer>
 
         <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
-          <div className="w-full grid grid-cols-5 gap-x-4">
-            <DetailText label="Record ID">{data_detail?.id}</DetailText>
-            <DetailText label="Created Date">
+          <div className="w-full grid grid-cols-5 gap-4">
+            <NxDetailText label="Record ID">{data_detail?.id}</NxDetailText>
+            <NxDetailText label="Created Date">
               {data_detail?.createdDate
                 ? moment(data_detail.createdDate).format(dateFormatting.dateTime)
                 : ""}
-            </DetailText>
-            <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
-            <DetailText label="Updated Date">
+            </NxDetailText>
+            <NxDetailText label="Created By">{data_detail?.createdBy}</NxDetailText>
+            <NxDetailText label="Updated Date">
               {data_detail?.updatedDate
                 ? moment(data_detail.updatedDate).format(dateFormatting.dateTime)
                 : ""}
-            </DetailText>
-            <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
+            </NxDetailText>
+            <NxDetailText label="Updated By">{data_detail?.updatedBy}</NxDetailText>
           </div>
         </NxBaseContainer>
 
