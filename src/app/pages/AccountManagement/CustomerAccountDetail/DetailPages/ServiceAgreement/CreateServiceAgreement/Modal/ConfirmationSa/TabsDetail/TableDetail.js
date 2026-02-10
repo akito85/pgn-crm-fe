@@ -119,7 +119,7 @@ const TableDetail = ({
 
   return (
     <div>
-      <div className="grid grid-cols-4 gap-5 py-[10px]">
+      <div className="grid grid-cols-3 gap-5 py-[10px]">
         <DetailText label="Payment Type">{saDetailObj?.objPaymentType?.unitName}</DetailText>
         <DetailText label="Charging Method">{saDetailObj?.objChargingMethod?.unitName}</DetailText>
       </div>

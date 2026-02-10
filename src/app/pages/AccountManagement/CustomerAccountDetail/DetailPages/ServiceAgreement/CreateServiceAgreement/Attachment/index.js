@@ -281,7 +281,7 @@ const Attachment = ({ data = [], updateData = () => { }, type }) => {
     <NxCardContainer header={"ATTACHMENT"}>
       <div className="flex flex-col gap-y-4">
         {/* UPLOAD ATTACHMENT SECTION */}
-        <div className="flex flex-col w-full gap-2 items-end">
+        <div className="flex flex-col w-full gap-2">
           <div className="flex flex-col gap-y-1 justify-start">
             <p className="text-[13px] mb-0 text-dg-grey-dark">
               Attach File:
