@@ -1,106 +1,41 @@
-import React,{useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import NxTable from '../../../../../../../../components/Nx/NxTable';
+import { getLateChargeColumns } from './columns/getLateChargeColumns';
 
 const TableLateCharge = ({
-  dataTableLateCharge,
+  dataTableLateCharge = [],
   setDataTableLateCharge
 }) => {
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
-  useEffect(() => {
-    setTotalElement(dataTableLateCharge?.length)
-  }, [])
-  
-  
-  // const columns =[
-  //   {
-  //     title: "NO",
-  //     align: "center",
-  //     width: "5%",
-  //     render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  //   },
-  //   {
-  //     sorter: true,
-  //     title: "LATE CHARGE NAME",
-  //     dataIndex: "lateChargeName",
-  //     // ...getColumnSearchProps("accountNumber"),
-  //   },
-  //   {
-  //     sorter: true,
-  //     title: "CURRENCY",
-  //     dataIndex: "currency",
-  //     // ...getColumnSearchProps("accountNumber"),
-  //   },
-  //   {
-  //     sorter: true,
-  //     title: "LATE CHARGE MAXIMUM AMOUNT",
-  //     align: "right",
-  //     dataIndex: "maxAmount",
-  //     width: "300px",
-  //     // ...getColumnSearchProps("segment"),
-  //   },
-  //   {
-  //     sorter: true,
-  //     title: "LATE CHARGE RULE FORMULA",
-  //     dataIndex: "formula",
-  //     width: "400px",
-  //     // ...getColumnSearchProps("segment"),
-  //   },
-  //   {
-  //     sorter: true,
-  //     title: "DESCRIPTION",
-  //     dataIndex: "description",
-  //     // ...getColumnSearchProps("segment"),
-  //   },
-  // ]
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
-  };
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
-  };
-
-  const filterDataByPage = () => {
+  // Process and filter data
+  const processedData = useMemo(() => {
     let result = [...dataTableLateCharge];
+
+    // Apply search filter
     if (searchedColumn) {
       const fixSearchText = searchText.toLowerCase();
       result = result.filter((item) => {
         return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
       });
     }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
+
+    // Apply sorting
     if (fieldSort) {
       result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
+        let fa = a[fieldSort];
+        let fb = b[fieldSort];
         if (fa < fb) {
           return orderSort === "asc" ? -1 : 1;
         }
@@ -110,82 +45,88 @@ const TableLateCharge = ({
         return 0;
       });
     }
-    return result.slice((page - 1) * pageSize, page * pageSize);
+
+    return result;
+  }, [dataTableLateCharge, searchedColumn, searchText, fieldSort, orderSort]);
+
+  // Initialize display data
+  useEffect(() => {
+    const initialData = processedData.slice(0, loadedCount);
+    setDisplayData(initialData);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  // Handle infinite scroll load more
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      const nextCount = loadedCount + 20;
+      const nextData = processedData.slice(0, nextCount);
+      setDisplayData(nextData);
+      setLoadedCount(nextCount);
+      setHasMore(nextCount < processedData.length);
+      resolve();
+    });
+  }, [processedData, loadedCount]);
+
+  const onSort = (_, __, sort) => {
+    if (sort.order) {
+      setFieldSort(sort.field);
+      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
+    } else {
+      setFieldSort("");
+      setOrderSort("");
+    }
+    // Reset to first page when sorting
+    setLoadedCount(20);
   };
 
-  const columns = ({
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result =[
-      {
-        title: "NO",
-        align: "center",
-        width: "5%",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        sorter: true,
-        title: "LATE CHARGE NAME",
-        dataIndex: "lateChargeName",
-        // ...getColumnSearchProps("accountNumber"),
-      },
-      {
-        sorter: true,
-        title: "CURRENCY",
-        dataIndex: "currency",
-        // ...getColumnSearchProps("accountNumber"),
-      },
-      {
-        sorter: true,
-        title: "LATE CHARGE MAXIMUM AMOUNT",
-        align: "right",
-        dataIndex: "maxAmount",
-        width: "300px",
-        // ...getColumnSearchProps("segment"),
-      },
-      {
-        sorter: true,
-        title: "LATE CHARGE RULE FORMULA",
-        dataIndex: "formula",
-        width: "400px",
-        // ...getColumnSearchProps("segment"),
-      },
-      {
-        sorter: true,
-        title: "DESCRIPTION",
-        dataIndex: "description",
-        // ...getColumnSearchProps("segment"),
-      },
-    ]
-    return result
-  }
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    // Reset to first page when searching
+    setLoadedCount(10);
+  };
+
+  const columns = useMemo(() => {
+    return getLateChargeColumns({
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    });
+  }, [searchedColumn, searchText]);
+
+  const columnDefinitions = useMemo(() => {
+    return columns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [columns]);
 
   return (
     <div>
-      <TablePagination 
-        pageSize={pageSize}
-        current={page}
-        dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
-        totalData={totalElement}
-        onChange={handleChangeSize}
+      <NxTable
+        idTable="late-charge-table"
+        dataSource={displayData}
+        columns={columns}
+        totalData={processedData.length}
+        tableScrolled={{ y: 400, x: "max-content" }}
         onSort={onSort}
-        columns={columns({
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-        })}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columnDefinitions}
+        loading={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableLateCharge
+export default TableLateCharge;

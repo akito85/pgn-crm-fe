@@ -1,14 +1,13 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
-
+import { Select, Form, InputNumber } from "antd";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
-import { Select, Form, InputNumber } from "antd";
 import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../../../../components/InputComponent";
-import { columnsDetail } from "../TablePricing/TableDetail";
-import TablePagination from "../../../../../../../../../components/TablePagination";
+import { getPricingColumns } from "../columns/getPricingColumns";
 import { showModalError } from "../../../../../../../../../redux/slices/general_slice";
 import { hasValue } from "../../../../../../../../../utils";
 
@@ -18,9 +17,9 @@ function filterData(array, filters) {
 		for (const key in filters) {
 			if (filters.hasOwnProperty(key)) {
 				const fixSearchText =
-          key === "min" || key === "maximumName"
-            ? filters[key]?.replace(/,/g, "")?.toLowerCase()
-            : filters[key]?.toLowerCase();    
+					key === "min" || key === "maximumName"
+						? filters[key]?.replace(/,/g, "")?.toLowerCase()
+						: filters[key]?.toLowerCase();
 				if (key === "value") {
 					let temp;
 					if (typeof item[key] === "number") {
@@ -64,9 +63,13 @@ const TablePricing = ({
 	const dispatch = useDispatch();
 	// State
 	const [dataTable, setDataTable] = useState([]);
+	const [allProcessedData, setAllProcessedData] = useState([]); // All merged data
+	const [displayData, setDisplayData] = useState([]); // Data for display with infinite scroll
+	const [loadedCount, setLoadedCount] = useState(10);
+	const [hasMore, setHasMore] = useState(true);
 	const [totalElement, setTotalElement] = useState(0);
 	const [page, setPage] = useState(1);
-	const [pageSize, setPageSize] = useState(10);
+	const [pageSize, setPageSize] = useState(10); // Keep for row merging logic
 	const [PDselect, setPDselect] = useState(0);
 	const [searchText, setSearchText] = useState("");
 	const [searchedColumn, setSearchedColumn] = useState("");
@@ -79,6 +82,10 @@ const TablePricing = ({
 	const [orderSort, setOrderSort] = useState("");
 	const [sort, setSort] = useState("");
 	const [search, setSearch] = useState("");
+	const [fixedColumns, setFixedColumns] = useState(() => ({
+		right: isCustomTiering ? ["action"] : [],
+		left: [],
+	}));
 	const [minimum, setMinimum] = useState(0);
 
 	// useEffect(() => {
@@ -92,21 +99,21 @@ const TablePricing = ({
 		result = filterData(result, search);
 		const handleDataSort = (obj, field) => {
 			if (field === "value") {
-			  let temp;
-			  if (typeof obj[field] === "number") {
-				const dataTemp = new Intl.NumberFormat("de-DE", {
-				  style: "currency",
-				  currency: "EUR",
-				}).format(obj[field]);
-				temp = dataTemp.slice(0, dataTemp.length - 2);
-			  } else {
-				temp = obj[field];
-			  }
-			  return temp?.toLowerCase();
+				let temp;
+				if (typeof obj[field] === "number") {
+					const dataTemp = new Intl.NumberFormat("de-DE", {
+						style: "currency",
+						currency: "EUR",
+					}).format(obj[field]);
+					temp = dataTemp.slice(0, dataTemp.length - 2);
+				} else {
+					temp = obj[field];
+				}
+				return temp?.toLowerCase();
 			} else {
-			  return obj[field]?.toString()?.toLowerCase();
+				return obj[field]?.toString()?.toLowerCase();
 			}
-		  };
+		};
 		if (sort) {
 			const splitSort = sort.split("~");
 			result.sort((a, b) => {
@@ -234,6 +241,22 @@ const TablePricing = ({
 		}
 	}, [typeModal]);
 
+	// Infinite scroll: slice dataTable based on loadedCount
+	useEffect(() => {
+		const slicedData = dataTable.slice(0, loadedCount);
+		setDisplayData(slicedData);
+		setHasMore(loadedCount < dataTable.length);
+	}, [dataTable, loadedCount]);
+
+	// Handle infinite scroll load more
+	const handleLoadMore = useCallback(() => {
+		return new Promise((resolve) => {
+			const nextCount = loadedCount + 10;
+			setLoadedCount(nextCount);
+			resolve();
+		});
+	}, [loadedCount]);
+
 	// Function Search Column
 	const handleSearch = (selectedKeys, confirm, dataIndex) => {
 		confirm();
@@ -241,19 +264,19 @@ const TablePricing = ({
 		setSearchedColumn(selectedKeys[0] ? dataIndex : "");
 		setSearch((prevState) => {
 			if (prevState[dataIndex] !== selectedKeys[0]) {
-			  setPage(1);
+				setPage(1);
 			}
 			let tempData = {
-			  ...prevState,
+				...prevState,
 			};
-	  
+
 			if (selectedKeys[0]) {
-			  tempData[dataIndex] = selectedKeys[0];
+				tempData[dataIndex] = selectedKeys[0];
 			} else {
-			  delete tempData[dataIndex];
+				delete tempData[dataIndex];
 			}
 			return tempData;
-		  });
+		});
 	};
 
 	const handleChange = (pageChange, pageSizeChange) => {
@@ -523,33 +546,45 @@ const TablePricing = ({
 			) : null}
 
 			<div className="w-full">
-				<TablePagination
-					dataSource={dataTable?.map(item => ({ ...item, max: item?.max === 0 || hasValue(item?.max) === false ? "Unlimited" : item?.max }))}
-					totalData={totalElement}
-					current={page}
-					pageSize={pageSize}
-					onChange={handleChange}
+				<NxTable
+					idTable="pricing-table"
+					dataSource={displayData?.map(item => ({ ...item, max: item?.max === 0 || hasValue(item?.max) === false ? "Unlimited" : item?.max }))}
 					columns={filterColumns(
-						columnsDetail(
+						getPricingColumns({
 							search,
-							page,
-							pageSize,
-							searchInput,
-							searchedColumn,
-							searchText,
-							handleSearch,
 							handleDelete,
 							handleUpdate,
-							data,
-							minimums,
-							isCustomTiering
-						)
+							isCustomTiering,
+						})
 					)}
+					totalData={dataTable.length}
 					tableScrolled={{
-						x: 1500,
-						y: 300,
+						x: "max-content",
+						y: 400,
 					}}
 					onSort={onSort}
+					usePagination={false}
+					useInfiniteScroll={true}
+					hasMore={hasMore}
+					onLoadMore={handleLoadMore}
+					loadMoreThreshold={2}
+					fixedColumns={fixedColumns}
+					setFixedColumns={setFixedColumns}
+					columnDefinitions={useMemo(() => {
+						const cols = getPricingColumns({
+							search,
+							handleDelete,
+							handleUpdate,
+							isCustomTiering,
+						});
+						return cols.map((col) => ({
+							key: col.key || col.dataIndex || col.title,
+							title: col.title,
+						}));
+					}, [isCustomTiering])}
+					loading={false}
+					showAdvanceSearch={false}
+					showSearchBar={false}
 				/>
 			</div>
 

@@ -1,7 +1,5 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
-import { Tooltip } from 'antd';
-
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import NxTable from '../../../../../../../../../../components/Nx/NxTable'
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.tosDetail
@@ -9,16 +7,19 @@ const expandedRowRender = (record) => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       align: "center",
       width: 60,
       render: (text, object, index) => index + 1,
     },
     {
       title: 'ATTRIBUTE',
+      key: 'attributeName',
       dataIndex: 'attributeName',
     },
     {
       title: 'VALUE',
+      key: 'value',
       dataIndex: 'value',
       render: (text) => (<span>{text?.toString()}</span>)
     }
@@ -28,11 +29,15 @@ const expandedRowRender = (record) => {
       <p className="text-primary text-xs font-bold uppercase">
         TOS DETAIL
       </p>
-      <TablePagination
-        useSelect={false}
-        usePagination={false}
-        dataSource={dataExpand}
+      <NxTable
+        idTable="confirmation-tos-detail-expand"
+        dataSource={dataExpand || []}
         columns={columns}
+        totalData={dataExpand?.length || 0}
+        usePagination={false}
+        loading={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
       />
     </div>
   )
@@ -41,42 +46,59 @@ const expandedRowRender = (record) => {
 const TableTos = ({
   dataTermOfService
 }) => {
-  const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [dataTermOfServices, setDataTermOfServices] = useState([])
-
+  const [dataTermOfServices, setDataTermOfServices] = useState([]);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
   useEffect(() => {
     if (dataTermOfService?.length > 0) {
       const dataModif = dataTermOfService.map((a, index) => ({
         ...a,
         key: index + 1,
-        tosDetail: a.tosDetail?.map((b, index) => ({
+        tosDetail: a.tosDetail?.map((b, idx) => ({
           ...b,
-          key: index + 1,
+          key: idx + 1,
         })),
       }));
       setDataTermOfServices(dataModif);
-    }else{
-      setDataTermOfServices([])
+    } else {
+      setDataTermOfServices([]);
     }
-  }, [dataTermOfService])
+  }, [dataTermOfService]);
+
+  const processedData = useMemo(() => {
+    let result = [...dataTermOfServices];
+    if (fieldSort) {
+      result.sort((a, b) => {
+        let fa = a[fieldSort]?.toString()?.toLowerCase() || "";
+        let fb = b[fieldSort]?.toString()?.toLowerCase() || "";
+        if (fa < fb) return orderSort === "asc" ? -1 : 1;
+        if (fa > fb) return orderSort === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [dataTermOfServices, fieldSort, orderSort]);
 
   useEffect(() => {
-    setTotalElement(dataTermOfService?.length)
-  }, [])
-  
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
 
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -86,100 +108,58 @@ const TableTos = ({
       setFieldSort("");
       setOrderSort("");
     }
+    setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
-  };
+  const columns = [
+    {
+      title: "NO",
+      key: "no",
+      align: "center",
+      width: 60,
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: 'TERMS OF SERVICE NAME',
+      key: 'tosName',
+      dataIndex: 'tosName',
+      sorter: true,
+    },
+    {
+      title: 'DESCRIPTION',
+      key: 'description',
+      dataIndex: 'description',
+      sorter: true,
+    },
+  ];
 
-  const filterDataByPage = () => {
-    let result = [...dataTermOfServices];
-    if (searchedColumn) {
-      const fixSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
-
-  const columns = ({
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result = [
-      {
-        title: "NO",
-        align: "center",
-        width: 60,
-        render: (text, object, index) => index + 1,
-      },
-      {
-        title: 'TERMS OF SERVICE NAME',
-        dataIndex: 'tosName',
-        sorter:true,
-      },
-      {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
-        sorter: true,
-        ellipsis: {
-          showTitle: false
-        },
-        render: (description) => (
-          <Tooltip placement="topLeft" title={description}>
-            {description}
-          </Tooltip>
-        ),
-      },
-    ];
-    return result;
-  }
   return (
-    <div>
-      <TablePagination
-        pageSize={pageSize}
-        current={page}
-        dataSource={filterDataByPage()}
-        tableScrolled={{y: 525 }}
-        totalData={totalElement}
-        onChange={handleChangeSize}
-        onSort={onSort}
-        columns={columns({
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-        })}
-        expandable={{expandedRowRender}}
+    <div className="py-4">
+      <NxTable
+        idTable="confirmation-tos-table"
+        dataSource={displayData}
+        columns={columns}
+        totalData={processedData.length}
+        tableScrolled={{ x: "max-content", y: 400 }}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columns.map((col) => ({
+          key: col.key || col.dataIndex || col.title,
+          title: col.title,
+        }))}
+        onChange={onSort}
+        loading={false}
+        expandable={{
+          expandedRowRender,
+          rowExpandable: (record) => record?.tosDetail && record.tosDetail.length > 0,
+        }}
+        showAdvanceSearch={false}
+        showSearchBar={false}
       />
     </div>
   )

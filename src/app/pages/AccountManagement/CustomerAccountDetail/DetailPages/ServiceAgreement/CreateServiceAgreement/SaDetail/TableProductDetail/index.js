@@ -1,15 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { getListChargingMethod, getListNameProductDetail, getListPaymentType, getListUnit } from "../../../../../../../../../redux/slices/product_promo/product";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import { getColumnSearchProps } from "../../../../../../../../../utils/getColumnSearchProps";
 import Highlighter from "react-highlight-words";
-import { Form, Input, InputNumber, Pagination, Select, Table, Tooltip } from "antd";
+import { Form, Input, InputNumber, Select, Tooltip } from "antd";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import { getColumnSearchPropsCriteria } from "../../../../../../../ProductAndPromo/Product/columnTableCriteria";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
 import { hasValue } from "../../../../../../../../../utils";
 import InputComponent from "../../../../../../../../../components/InputComponent";
+import { getProductDetailColumns } from "../columns/getProductDetailColumns";
 
 const onFilter = (dataIndex, value, record) => {
   const tempSearchText = value.toLowerCase();
@@ -203,9 +205,9 @@ const TableProduct = ({
   const searchInput = useRef(null);
   const [formTable] = Form.useForm();
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [editingKey, setEditingKey] = useState("");
   const [storedDate, setStoredData] = useState(false);
 
@@ -216,6 +218,10 @@ const TableProduct = ({
   const [orderSort, setOrderSort] = useState("");
   const [editDataRecord, setEditDataRecord] = useState({});
   const [statusAction, setStatusAction] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["operation"],
+    left: [],
+  }));
 
   const {
     dataListPaymentType,
@@ -267,33 +273,8 @@ const TableProduct = ({
     }
   }, [saDetailObj?.paymentType, saDetailObj?.chargingMethod])
 
-  useEffect(() => {
-    if (dataTableProduct.length > 0) {
-      setTotalElement(dataTableProduct.length);
-    }
-  }, [dataTableProduct]);
-
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
-  };
-  const filteredData = (typeData = "data") => {
+  // Process all data (filter, sort)
+  const processedData = useMemo(() => {
     let result = [...dataTableProduct];
     if (searchedColumn) {
       const tempSearchText = searchText.toLowerCase();
@@ -305,36 +286,63 @@ const TableProduct = ({
               .toLowerCase()
               .includes(tempSearchText);
           default:
-            return item[searchedColumn]?.toLowerCase().includes(tempSearchText);
+            return item[searchedColumn]?.toString()?.toLowerCase().includes(tempSearchText);
         }
       });
     }
-    const handleSort = (obj) => {
-      switch (fieldSort) {
-        case "name":
-        case "unit":
-          return obj[fieldSort]?.label.toString().toLowerCase();
-        default:
-          return obj[fieldSort].toString().toLowerCase();
-      }
-    };
     if (fieldSort) {
       result.sort((a, b) => {
+        const handleSort = (obj) => {
+          switch (fieldSort) {
+            case "name":
+            case "unit":
+              return obj[fieldSort]?.label?.toString()?.toLowerCase() || "";
+            default:
+              return obj[fieldSort]?.toString()?.toLowerCase() || "";
+          }
+        };
         let fa = handleSort(a);
         let fb = handleSort(b);
-
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
+        if (fa < fb) return orderSort === "asc" ? -1 : 1;
+        if (fa > fb) return orderSort === "asc" ? 1 : -1;
         return 0;
       });
     }
-    const fix = result.slice((page - 1) * pageSize, page * pageSize);
-    return typeData === "data" ? fix : result.length;
+    return result;
+  }, [dataTableProduct, searchedColumn, searchText, fieldSort, orderSort]);
+
+  // Infinite scroll: slice processedData
+  useEffect(() => {
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  // Handle infinite scroll load more
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
+
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
   };
+
+  const onSort = (_, __, sort) => {
+    if (sort.order) {
+      setFieldSort(sort.field);
+      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
+    } else {
+      setFieldSort("");
+      setOrderSort("");
+    }
+  };
+
 
   const handleEditDataRecord = (data, key, index) => {
     const keyName = key + index;
@@ -463,180 +471,24 @@ const TableProduct = ({
     setStoredData(false);
   };
 
-  const columns = () => {
-    const temp = [
-      {
-        title: "NO",
-        width: 60,
-        dataIndex: "no",
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        title: "NAME",
-        width: 240,
-        dataIndex: "name",
-        onFilter: (value, record) => onFilter("name", value, record),
-        sorter: (a, b) => sorter("name", a, b),
-        options: listName,
-        inputType: "select",
-        required: { required: true, message: "Please input your" },
-        // render: (data)=>(
-        //   <div>{data?.label}</div>
-        // ),
-        ...getColumnSearchPropsCriteria(
-          "name",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-      },
-      {
-        title: "VALUE",
-        width: 240,
-        dataIndex: "value",
-        onFilter: (value, record) => onFilter("value", value, record),
-        sorter: (a, b) => sorter("value", a, b),
-        align: "right",
-        inputType: "number",
-        dependDataIndex: "name",
-        ...getColumnSearchProps(
-          "value",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-      },
-      {
-        title: "UNIT",
-        width: 240,
-        sorter: true,
-        align: "center",
-        dataIndex: "unit",
-        onFilter: (value, record) => onFilter("unit", value, record),
-        sorter: (a, b) => sorter("unit", a, b),
-        options: dataListUnit,
-        inputType: "select",
-        dependDataIndex: "name",
-        ...getColumnSearchPropsCriteria(
-          "unit",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-      },
-      {
-        title: "DESCRIPTION",
-        width: 240,
-        dataIndex: "description",
-        onFilter: (value, record) => onFilter("description", value, record),
-        sorter: (a, b) => sorter("description", a, b),
-        inputType: "description",
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchProps(
-          "description",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          searchedColumn === "description" ? (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          ) : text ? (
-            <Tooltip placement="topLeft" title={text}>
-              {text}
-            </Tooltip>
-          ) : (
-            ""
-          ),
-      },
-      {
-        title: "ACTION",
-        width: 240,
-        fixed: "right",
-        dataIndex: "operation",
-        render: (_, record) => {
-          const editable = record.key === editingKey;
-          return (
-            <div className="flex w-full justify-center my-3 gap-2">
-              {editable ? (
-                <>
-                  <ButtonComponent onClick={()=>cancel(record)} type="default">
-                    Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
-                    onClick={() => save(record.key)}
-                    type="submit"
-                  >
-                    Save
-                  </ButtonComponent>
-                </>
-              ) : (
-                <>
-                  <Tooltip title="Edit">
-                    <span
-                      className={`flex justify-center${
-                        editingKey ? " cursor-not-allowed" : ""
-                        }`}
-                    >
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        width={24}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </span>
-                  </Tooltip>
-                  {isProduct === 2 && (
-                    <Tooltip title="Delete">
-                      <span
-                        className={`flex justify-center${record.typeData === "exist" ? " cursor-not-allowed" : ""
-                          }`}
-                      >
-                        <SVGIcon
-                          name="IconDelete"
-                          width={24}
-                          className={
-                            record.typeData === "exist" ? "disabled" : undefined
-                          }
-                          onClick={
-                            record.typeData !== "exist"
-                              ? () => deleteRow(record)
-                              : undefined
-                          }
-                        />
-                      </span>
-                    </Tooltip>
-                  )
+  // Get columns with all handlers
+  const columnsConfig = useMemo(() => {
+    return getProductDetailColumns({
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      listName,
+      dataListUnit,
+      editingKey,
+      edit,
+      save,
+      cancel,
+      deleteRow,
+      isProduct,
+    });
+  }, [searchedColumn, searchText, listName, dataListUnit, editingKey, isProduct]);
 
-                  }
-                </>
-              )}
-            </div>
-          );
-        },
-      },
-    ];
-    return temp
-    // return isProduct === true
-    //   ? temp
-    //   : temp.filter((col) => col.title !== "ACTION");
-  };
 
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
 
@@ -700,55 +552,14 @@ const TableProduct = ({
           </SelectComponent>
         </Form.Item>
       </div>
-
       {/* Start Pagination */}
-      <div className={"w-full flex justify-between py-6"}>
-        <Select
-          mode="multiple"
-          placeholder="Show All Column"
-          className={"w-2/6"}
-          maxTagCount={3}
-          onChange={handleDisplayColumn}
-        >
-          {columns()
-            .map((col) => (
-              <Select.Option
-                key={col.title}
-                value={col.title}
-                disabled={
-                  optionSelectedCol.length > 3
-                    ? optionSelectedCol.includes(col.title)
-                      ? false
-                      : true
-                    : false
-                }
-              >
-                {col.title}
-              </Select.Option>
-            ))
-            .splice(1)}
-        </Select>
-
-        <Pagination
-          total={filteredData("length")}
-          className={"pr-1"}
-          showSizeChanger
-          current={page}
-          pageSize={pageSize}
-          onChange={handleChangeSize}
-          showTotal={(total, range) =>
-            `Showing ${range[0]} to ${range[1]} of ${total} records`
-          }
-        />
-      </div>
-      {/* End Pagination */}
-
-      {/* Table */}
+      <div className="py-4">
       <Form form={formTable} component={false}>
-        <Table
-          dataSource={filteredData("data")}
+        <NxTable
+          idTable="product-detail-table"
+          dataSource={displayData}
           columns={filterColumn(
-            columns().map((col) => ({
+            columnsConfig.map((col) => ({
               ...col,
               onCell: (record) => ({
                 record,
@@ -767,21 +578,35 @@ const TableProduct = ({
               }),
             }))
           )}
+          totalData={processedData.length}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-          scroll={{
-            x: 1300,
-            y: 300,
+          tableScrolled={{
+            x: "max-content",
+            y: 400,
           }}
-          pagination={false}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={2}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          columnDefinitions={columnsConfig.map((col) => ({
+            key: col.key || col.dataIndex || col.title,
+            title: col.title,
+          }))}
           components={{
             body: {
               cell: EditableCell,
             },
           }}
           onChange={onSort}
+          loading={false}
+          showAdvanceSearch={false}
+          showSearchBar={false}
         />
       </Form>
-
+      </div>
     </div>
   );
 };
