@@ -12,6 +12,8 @@ import NxTable from '../../../../../../components/Nx/NxTable'
 import NxCardContainer from '../../../../../../components/Nx/NxCardContainer'
 import BaseContainer from '../../../../../../components/BaseContainer'
 import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
+import NxModal from '../../../../../../components/Nx/NxModal'
+import NxDetailText from '../../../../../../components/Nx/NxDetailText'
 
 const columns = (
   search,
@@ -138,7 +140,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
 
   return (
     <>
-      <ModalCustom
+      <NxModal
         header={"DETAIL GAS UTILIZATION HISTORY"}
         isOpen={isOpen}
         handleCancel={() => {
@@ -157,24 +159,24 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
           </ButtonComponent>
         }
       >
-        <div className="flex flex-col gap-y-4">
+        <div className="flex flex-col p-4 gap-y-4">
 
           {/* GAS UTILIZATION INFORMATION */}
           <NxBaseContainer border header={"GAS UTILIZATION INFORMATION"}>
             <div className="w-full grid grid-cols-2 gap-4">
-              <DetailText label="Effective Date">{dataDetail?.effectiveDate}</DetailText>
-              <DetailText label="Description">{dataDetail?.description}</DetailText>
+              <NxDetailText label="Effective Date">{dataDetail?.effectiveDate}</NxDetailText>
+              <NxDetailText label="Description">{dataDetail?.description}</NxDetailText>
             </div>
           </NxBaseContainer>
 
           {/* HISTORY LOG INFORMATION */}
           <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
             <div className="w-full grid grid-cols-5 gap-4">
-              <DetailText label="Record ID">{dataDetail?.id}</DetailText>
-              <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail?.createdDate).format(dateFormatting.dateTime) : ''}</DetailText>
-              <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-              <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ''}</DetailText>
-              <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
+              <NxDetailText label="Record ID">{dataDetail?.id}</NxDetailText>
+              <NxDetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail?.createdDate).format(dateFormatting.dateTime) : ''}</NxDetailText>
+              <NxDetailText label="Created By">{dataDetail?.createdBy}</NxDetailText>
+              <NxDetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ''}</NxDetailText>
+              <NxDetailText label="Updated By">{dataDetail?.updatedBy}</NxDetailText>
             </div>
           </NxBaseContainer>
 
@@ -205,7 +207,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
             />
           </NxBaseContainer>
         </div>
-      </ModalCustom>
+      </NxModal>
     </>
   )
 }

@@ -10,6 +10,7 @@ import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/ge
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
 import Toolbar from '../../../../../../components/Toolbar'
 import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
+import NxDetailText from '../../../../../../components/Nx/NxDetailText'
 
 const columns = (
   search,
@@ -139,8 +140,8 @@ const TableGasUtilCurrent = ({idAccount}) => {
       <div className="flex flex-col gap-4">
         <NxBaseContainer border header={"GAS UTILIZATION"}>
           <div className="w-full grid grid-cols-2 gap-4">
-            <DetailText label={"Effective Date"}>{data_current?.effectiveDate}</DetailText>
-            <DetailText label={"Description"}>{data_current?.description}</DetailText>
+            <NxDetailText label={"Effective Date"}>{data_current?.effectiveDate}</NxDetailText>
+            <NxDetailText label={"Description"}>{data_current?.description}</NxDetailText>
           </div>
         </NxBaseContainer>
         <NxBaseContainer border header={"GAS UTILIZATION DETAIL LIST"}>

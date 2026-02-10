@@ -90,7 +90,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
       render: (record, data) => {
         return (
           <Tooltip title="Detail">
-            <div className="pt-1">
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDetail"
                 color={"#0075bf"}
@@ -119,7 +119,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
               }}
               >
               <div
-                className={`flex justify-center pt-1`}
+                className={`flex items-center h-full`}
               > 
                 <SVGIcon
                   name="IconEdit"
@@ -137,7 +137,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
       render: (record, data) => {
         return (
           <Tooltip title="Delete">
-            <div className="pt-1">
+            <div className="flex items-center h-full">
               <SVGIcon
                 name="IconDelete"
                 width={20}
