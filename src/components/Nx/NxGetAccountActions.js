@@ -7,6 +7,7 @@ import { Fragment } from "react";
 const nxGetAccountActions = ({
   idAccount = 0,
   idCustomer = 0,
+  type = "",
   createRoute = "",
   updateRoute = "",
   detailRoute = "",
@@ -46,6 +47,7 @@ const nxGetAccountActions = ({
       <Link to={createRoute} state={{
         idAccount,
         idCustomer,
+        type,
       }}>
         <ButtonComponent
           icon={<SVGIcon name="IconButtonCreate" width={20} />}
@@ -70,6 +72,7 @@ const nxGetAccountActions = ({
                 id: record.id,
                 idAccount,
                 idCustomer,
+                type,
               }
             })
           }
@@ -101,6 +104,7 @@ const nxGetAccountActions = ({
                 id: record.id,
                 idAccount,
                 idCustomer,
+                type,
               }
             })}
             type={"action"}
@@ -123,6 +127,7 @@ const nxGetAccountActions = ({
                         id: record.id,
                         idAccount,
                         idCustomer,
+                        type,
                       }
                     }) :
                     () => {}
@@ -133,7 +138,7 @@ const nxGetAccountActions = ({
         );
 
       return (
-        <Fragment key={`table-action-${index}`}>{content}</Fragment>          
+        <Fragment key={`table-action-${index}`}>{content}</Fragment>
       )
     }
   },
