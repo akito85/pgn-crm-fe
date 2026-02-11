@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import NxTabs from '../../../../../../../../../components/Nx/NxTabs';
 import NxBaseContainer from '../../../../../../../../../components/Nx/NxBaseContainer';
 import NxCardContainer from '../../../../../../../../../components/Nx/NxCardContainer';
@@ -30,8 +30,12 @@ const ConfirmationSa = ({
   dataTermOfService,
   dataTableLateCharge,
   dataTaxImplication,
-  dataListVersion
+  dataListVersion,
+  saRecordData,
+  location
 }) => {
+  const approvalStatus = location?.state?.approvalStatus
+  const status = location?.state?.status
   // Selector Slice
   const {
     data_service_type,
@@ -46,6 +50,13 @@ const ConfirmationSa = ({
 
 
   const [valuePage, setValuePage] = useState("saInfo");
+  const [disabledTabs, setDisabledTabs] = useState([]);
+
+  useEffect(() => {
+    if (approvalStatus === "DRAFT" && status === "ACTIVE") {
+      setDisabledTabs(["saDetail"]);
+    }
+  }, [approvalStatus, status]);
 
   const getSaTypeName = (val) => {
     const saTypeName = data_sa_type && data_sa_type?.filter((item) => item?.id === val)
@@ -197,6 +208,7 @@ const ConfirmationSa = ({
             {
               key: "saDetail",
               label: "Service Agreement Detail",
+              disabled: disabledTabs.includes("saDetail"),
               children: (
                 <div className="flex flex-col gap-y-4">
                   <NxBaseContainer border header={"CREATE FROM"}>
@@ -204,7 +216,7 @@ const ConfirmationSa = ({
                       <DetailText label="Create From">{saDetailObj?.createFrom === 1 ? "Product" : "Custom"}</DetailText>
                       {saDetailObj?.createFrom === 1 && (
                         <>
-                        <DetailText label="Choose Product">{saDetailObj?.productName}</DetailText></>
+                          <DetailText label="Choose Product">{saDetailObj?.productName}</DetailText></>
                       )}
                     </div>
                   </NxBaseContainer>
@@ -222,14 +234,14 @@ const ConfirmationSa = ({
                           </>
                         )}
                       </div>
-                      
+
                     </>
                     {/* )} */}
                   </NxBaseContainer>
                   <NxBaseContainer border header={"PAYMENT INFORMATION"}>
                     <div>
-                        <TableDetail dataTableProduct={dataTableProduct} saDetailObj={saDetailObj} />
-                      </div>
+                      <TableDetail dataTableProduct={dataTableProduct} saDetailObj={saDetailObj} />
+                    </div>
                   </NxBaseContainer>
                   <NxBaseContainer border header={"PRICING INFORMATION"}>
                     <TabsDetail
@@ -266,7 +278,7 @@ const ConfirmationSa = ({
               children: (
                 <NxBaseContainer border header={"ATTACHMENT"}>
                   <div className='w-full'>
-                    <TableAttachment data={listDataAttachment} />
+                    <TableAttachment saRecordData={saRecordData} data={listDataAttachment} />
                   </div>
                 </NxBaseContainer>
               ),
