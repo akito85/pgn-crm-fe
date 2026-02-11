@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { getColumnSearchProps } from "../../../../../../../../../utils/getColumnSearchProps";
 import {
 	Form,
 	Input,
 	InputNumber,
-	Pagination,
 	Select,
-	Table,
 	Tooltip,
 } from "antd";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
@@ -24,6 +23,7 @@ import {
 import { getColumnSearchPropsCriteria } from "../TableCalcRule/columnTableCriteria";
 import { hasValue } from "../../../../../../../../../utils";
 import InputComponent from "../../../../../../../../../components/InputComponent";
+import { getCalcRuleColumns } from "../columns/getCalcRuleColumns";
 
 const EditableCell = ({
 	editing,
@@ -158,8 +158,10 @@ const TableCalcRule = ({
 }) => {
 	const searchInput = useRef(null);
 	const [formTable] = Form.useForm();
-	const [page, setPage] = useState(1);
-	const [pageSize, setPageSize] = useState(10);
+	const [displayData, setDisplayData] = useState([]);
+	const [loadedCount, setLoadedCount] = useState(10);
+	const [hasMore, setHasMore] = useState(true);
+	const [pageSize] = useState(10); // Keep for NO column calculation
 	const [totalElements, setTotalElement] = useState(0);
 	const [editingKey, setEditingKey] = useState("");
 	const [storedDate, setStoredData] = useState(false);
@@ -169,6 +171,10 @@ const TableCalcRule = ({
 	const [orderSort, setOrderSort] = useState("");
 	const [editDataRecord, setEditDataRecord] = useState({});
 	const [statusAction, setStatusAction] = useState("");
+	const [fixedColumns, setFixedColumns] = useState(() => ({
+		right: ["operation"],
+		left: [],
+	}));
 	const isEditing = (record) => record.key === editingKey;
 	const {
 		dataListCalculationType,
@@ -218,16 +224,11 @@ const TableCalcRule = ({
 		setSearchText(selectedKeys[0]);
 		const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
 		if (searchedColumn !== tempSearchColumn) {
-			setPage(1);
+			setLoadedCount(10);
 		}
 		setSearchedColumn(tempSearchColumn);
 	};
 
-	const handleChangeSize = (pageChange, pageSizeChange) => {
-		const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-		setPage(tempPage);
-		setPageSize(pageSizeChange);
-	};
 	const onSort = (_, __, sort) => {
 		if (sort.order) {
 			setFieldSort(sort.field);
@@ -237,7 +238,8 @@ const TableCalcRule = ({
 			setOrderSort("");
 		}
 	};
-	const filteredData = (typeData = "data") => {
+	// Process all data (filter, sort)
+	const processedData = useMemo(() => {
 		let result = [...dataTable];
 		if (searchedColumn) {
 			const tempSearchText = searchText.toLowerCase();
@@ -276,9 +278,25 @@ const TableCalcRule = ({
 				return 0;
 			});
 		}
-		const fix = result.slice((page - 1) * pageSize, page * pageSize);
-		return typeData === "data" ? fix : result.length;
-	};
+		return result;
+	}, [dataTable, searchedColumn, searchText, fieldSort, orderSort]);
+
+	// Infinite scroll: slice processedData based on loadedCount
+	useEffect(() => {
+		const sliced = processedData.slice(0, loadedCount);
+		setDisplayData(sliced);
+		setHasMore(loadedCount < processedData.length);
+		setTotalElement(processedData.length);
+	}, [processedData, loadedCount]);
+
+	// Handle infinite scroll load more
+	const handleLoadMore = useCallback(() => {
+		return new Promise((resolve) => {
+			const nextCount = loadedCount + 10;
+			setLoadedCount(nextCount);
+			resolve();
+		});
+	}, [loadedCount]);
 
 	const handleEditDataRecord = (data, key, index) => {
 		const keyName = key + index;
@@ -404,186 +422,26 @@ const TableCalcRule = ({
 		setStoredData(false);
 	};
 
-	const columns = () => {
-		const temp = [
-			{
-				title: "NO",
-				width: 60,
-				dataIndex: "no",
-				align: "center",
-				render: (text, object, index) => (page - 1) * pageSize + index + 1,
-			},
-			{
-				title: "NAME",
-				width: 240,
-				sorter: true,
-				dataIndex: "name",
-				options: listName,
-				inputType: "select",
-				required: { required: true, message: "Please input your" },
-				...getColumnSearchPropsCriteria(
-					"name",
-					searchInput,
-					searchedColumn,
-					searchText,
-					handleSearch
-				),
-			},
-			{
-				title: "VALUE",
-				width: 240,
-				sorter: true,
-				dataIndex: "value",
-				align: "right",
-				inputType: "number",
-				...getColumnSearchProps(
-					"value",
-					searchInput,
-					searchedColumn,
-					searchText,
-					handleSearch
-				),
-			},
-			{
-				title: "UNIT",
-				width: 240,
-				sorter: true,
-				dataIndex: "unit",
-				options: dataListUnit,
-				inputType: "select",
-				dependDataIndex: "name",
-				...getColumnSearchPropsCriteria(
-					"unit",
-					searchInput,
-					searchedColumn,
-					searchText,
-					handleSearch
-				),
-				render: (text) => {
-					return <span>{text?.label}</span>
-				}
-			},
-			{
-				title: "DESCRIPTION",
-				width: 240,
-				sorter: true,
-				dataIndex: "description",
-				inputType: "description",
-				ellipsis: {
-					showTitle: false,
-				},
-				...getColumnSearchProps(
-					"description",
-					searchInput,
-					searchedColumn,
-					searchText,
-					handleSearch,
-					true
-				),
-				render: (text) =>
-					searchedColumn === "description" ? (
-						<Highlighter
-							highlightStyle={{
-								backgroundColor: "#ffc069",
-								padding: 0,
-							}}
-							searchWords={[searchText]}
-							autoEscape
-							textToHighlight={text ? text.toString() : ""}
-						/>
-					) : text ? (
-						<Tooltip placement="topLeft" title={text}>
-							{text}
-						</Tooltip>
-					) : (
-						""
-					),
-			},
-			{
-				title: "ACTION",
-				width: 240,
-				fixed: "right",
-				dataIndex: "operation",
-				render: (_, record) => {
-					const editable = record.key === editingKey;
-					return (
-						<div className="flex w-full justify-center my-3 gap-2">
-							{editable ? (
-								<>
-									<ButtonComponent
-										onClick={() => cancel(record)}
-										type="default"
-									>
-										Cancel
-									</ButtonComponent>
-									<ButtonComponent
-										onClick={() => save(record.key)}
-										type="submit"
-									>
-										Save
-									</ButtonComponent>
-								</>
-							) : (
-								<>
-									<Tooltip title="Edit">
-										<span
-											className={`flex justify-center${editingKey ? " cursor-not-allowed" : ""
-												}`}
-										>
-											<SVGIcon
-												name="IconEdit"
-												color={editingKey ? "#8D91A0" : "#ACC424"}
-												width={24}
-												onClick={!editingKey ? () => edit(record) : undefined}
-											/>
-										</span>
-									</Tooltip>
-									{isProduct === 2 && (
-										<>
-											<Tooltip title="Delete">
-												<span
-													className={`flex justify-center${record.typeData === "exist"
-															? " cursor-not-allowed"
-															: ""
-														}`}
-												>
-													<SVGIcon
-														name="IconDelete"
-														color={
-															record.typeData !== "exist"
-																? "#D90000"
-																: "#8D91A0"
-														}
-														width={24}
-														className={
-															record.typeData === "exist"
-																? "disabled"
-																: undefined
-														}
-														onClick={
-															record.typeData !== "exist"
-																? () => deleteRow(record)
-																: undefined
-														}
-													/>
-												</span>
-											</Tooltip>
-										</>
-									)}
-								</>
-							)}
-						</div>
-					);
-				},
-			},
-		];
-		// return temp
-		return temp
-		// isProduct === 2
-		// ? 
-		// temp
-		// : temp.filter((col) => col.title !== "ACTION");
-	};
+	// Get columns with all handlers
+	const columns = useMemo(() => {
+		return getCalcRuleColumns({
+			page: 1, // Always 1 for infinite scroll
+			pageSize,
+			searchInput,
+			searchedColumn,
+			searchText,
+			handleSearch,
+			listName,
+			dataListUnit,
+			editingKey,
+			edit,
+			save,
+			cancel,
+			deleteRow,
+			isProduct,
+		});
+	}, [searchedColumn, searchText, listName, dataListUnit, editingKey, isProduct]);
+
 
 	const [optionSelectedCol, setOptionSelectedCol] = useState([]);
 
@@ -631,50 +489,12 @@ const TableCalcRule = ({
 				</div>
 			)}
 
-			<div className={"w-full flex justify-between"}>
-				<Select
-					mode="multiple"
-					placeholder="Show All Column"
-					className={"w-2/6"}
-					maxTagCount={3}
-					onChange={handleDisplayColumn}
-				>
-					{columns()
-						.map((col) => (
-							<Select.Option
-								key={col.title}
-								value={col.title}
-								disabled={
-									optionSelectedCol.length > 3
-										? optionSelectedCol.includes(col.title)
-											? false
-											: true
-										: false
-								}
-							>
-								{col.title}
-							</Select.Option>
-						))
-						.splice(1)}
-				</Select>
-
-				<Pagination
-					total={filteredData("length")}
-					className={"pr-1"}
-					showSizeChanger
-					current={page}
-					pageSize={pageSize}
-					onChange={handleChangeSize}
-					showTotal={(total, range) =>
-						`Showing ${range[0]} to ${range[1]} of ${total} records`
-					}
-				/>
-			</div>
 			<Form form={formTable} component={false}>
-				<Table
-					dataSource={filteredData("data")}
+				<NxTable
+					idTable="calc-rule-table"
+					dataSource={displayData}
 					columns={filterColumn(
-						columns().map((col) => ({
+						columns.map((col) => ({
 							...col,
 							onCell: (record) => ({
 								record,
@@ -693,18 +513,32 @@ const TableCalcRule = ({
 							}),
 						}))
 					)}
+					totalData={processedData.length}
 					rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-					scroll={{
-						x: 1500,
-						y: 300,
+					tableScrolled={{
+						x: "max-content",
+						y: 400,
 					}}
-					pagination={false}
+					usePagination={false}
+					useInfiniteScroll={true}
+					hasMore={hasMore}
+					onLoadMore={handleLoadMore}
+					loadMoreThreshold={2}
+					fixedColumns={fixedColumns}
+					setFixedColumns={setFixedColumns}
+					columnDefinitions={columns.map((col) => ({
+						key: col.key || col.dataIndex || col.title,
+						title: col.title,
+					}))}
 					components={{
 						body: {
 							cell: EditableCell,
 						},
 					}}
 					onChange={onSort}
+					loading={false}
+					showAdvanceSearch={false}
+					showSearchBar={false}
 				/>
 			</Form>
 		</div>

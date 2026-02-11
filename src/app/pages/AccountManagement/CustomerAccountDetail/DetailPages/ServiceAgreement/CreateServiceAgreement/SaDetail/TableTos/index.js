@@ -1,53 +1,31 @@
-import React,{useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Table } from 'antd';
+import NxTable from '../../../../../../../../../components/Nx/NxTable';
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
-import { Tooltip } from 'antd';
-import ModalCustom from '../../../../../../../../../components/Modal/ModalCustom';
 import ButtonComponent from '../../../../../../../../../components/ButtonComponent';
+import { getTosColumns, getTosDetailColumns } from '../columns/getTosColumns';
 
 const TableTos = ({
-  isProduct, 
-  dataTermOfService = [], 
-  setDataTermOfService, 
+  isProduct,
+  dataTermOfService = [],
+  setDataTermOfService,
   openModalFormTos,
   setModalChooseTos,
   dataTosFromProductVersion,
 }) => {
-  
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-
-  const [modalUpdateTos, setModalUpdateTos] = useState(false)
-  const [dataUpdate, setdataUpdate] = useState([])
-
-  
-// useEffect(() => {
-//   if (dataTermOfService?.length > 0) {
-//     const dataModif = dataTermOfService.map((a, index) => ({
-//       ...a,
-//       key: index + 1,
-//       tosDetail: a.tosDetail?.map((b, index) => ({
-//         ...b,
-//         key: index + 1,
-//       })),
-//     }));
-//     setDataTermOfService(dataModif);
-//   }else{
-//     setDataTermOfService([])
-//   }
-// }, [dataTosFromProductVersion, setDataTermOfService])
-
-
-  
-useEffect(() => {
-  setTotalElement(dataTermOfService?.length);
-}, [dataTermOfService])
+  const [dataUpdate, setdataUpdate] = useState([]);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
 
   const deleteRow = (record) => {
     setDataTermOfService((prevState) =>
@@ -55,46 +33,23 @@ useEffect(() => {
     );
   };
 
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
-  };
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
-  };
-
-  const filterDataByPage = () => {
+  // Process and filter data
+  const processedData = useMemo(() => {
     let result = [...dataTermOfService];
-    if (searchedColumn) {
+
+    // Apply search filter
+    if (searchedColumn && searchText) {
       const fixSearchText = searchText.toLowerCase();
       result = result.filter((item) => {
         return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
       });
     }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
+
+    // Apply sorting
     if (fieldSort) {
       result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
+        let fa = a[fieldSort];
+        let fb = b[fieldSort];
         if (fa < fb) {
           return orderSort === "asc" ? -1 : 1;
         }
@@ -104,193 +59,86 @@ useEffect(() => {
         return 0;
       });
     }
-    return result.slice((page - 1) * pageSize, page * pageSize);
+
+    return result;
+  }, [dataTermOfService, searchedColumn, searchText, fieldSort, orderSort]);
+
+  // Initialize display data
+  useEffect(() => {
+    const initialData = processedData.slice(0, loadedCount);
+    setDisplayData(initialData);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  // Handle infinite scroll load more
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      const nextCount = loadedCount + 20;
+      const nextData = processedData.slice(0, nextCount);
+      setDisplayData(nextData);
+      setLoadedCount(nextCount);
+      setHasMore(nextCount < processedData.length);
+      resolve();
+    });
+  }, [processedData, loadedCount]);
+
+  const onSort = (_, __, sort) => {
+    if (sort.order) {
+      setFieldSort(sort.field);
+      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
+    } else {
+      setFieldSort("");
+      setOrderSort("");
+    }
+    // Reset to first page when sorting
+    setLoadedCount(20);
   };
 
-  // const columns = [
-  //   {
-  //     title: "NO",
-  //     width: 60,
-  //     align: "center",
-  //     render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  //   },
-  //   {
-  //     title: "TERM OF SERVICE",
-  //     dataIndex: "tosName",
-  //     sorter: true,
-  //     // ...getColumnSearchProps(
-  //     //   "houseName",
-  //     //   searchInput,
-  //     //   searchedColumn,
-  //     //   searchText,
-  //     //   handleSearch
-  //     // ),
-  //   },
-  //   {
-  //     title: "DESCRIPTION",
-  //     dataIndex: "description",
-  //     sorter: true,
-  //     // ...getColumnSearchProps(
-  //     //   "houseName",
-  //     //   searchInput,
-  //     //   searchedColumn,
-  //     //   searchText,
-  //     //   handleSearch
-  //     // ),
-  //   },
-  //   {
-  //     title: "ACTION",
-  //     align: "center",
-  //     width: 100,
-  //     fixed: "right",
-  //     render: (_, record) => {
-  //       return (
-  //         <div className="flex justify-center align-middle gap-2">
-  //           <Tooltip title="Edit">
-  //             <span className="flex justify-center">
-  //               <SVGIcon 
-  //                 name="IconEdit" 
-  //                 width={24} 
-  //                 onClick={()=>{
-  //                   setdataUpdate(record)
-  //                   openModalFormTos(record)
-  //                 }}
-  //               />
-  //             </span>
-  //           </Tooltip>
-  //          {isProduct === 2 && (
-  //             <Tooltip title="Delete">
-  //               <SVGIcon
-  //                 name="IconDelete"
-  //                 color={"#be3036"}
-  //                 width={24}
-  //                 onClick={() => {
-  //                   deleteRow(record)
-  //                 }}
-  //               />
-  //             </Tooltip>
-  //          )}
-  //         </div>
-  //       );
-  //     },
-  //   },
-  // ];
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    // Reset to first page when searching
+    setLoadedCount(20);
+  };
 
-  
-  const columns = ({
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result = [
-      {
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        title: "TERM OF SERVICE",
-        dataIndex: "tosName",
-        sorter: true,
-        // ...getColumnSearchProps(
-        //   "houseName",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        title: "DESCRIPTION",
-        dataIndex: "description",
-        sorter: true,
-        // ...getColumnSearchProps(
-        //   "houseName",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        title: "ACTION",
-        align: "center",
-        width: 100,
-        fixed: "right",
-        render: (_, record) => {
-          return (
-            <div className="flex justify-center align-middle gap-2">
-              <Tooltip title="Edit">
-                <span className="flex justify-center">
-                  <SVGIcon 
-                    name="IconEdit" 
-                    width={24} 
-                    onClick={()=>{
-                      setdataUpdate(record)
-                      openModalFormTos(record)
-                    }}
-                  />
-                </span>
-              </Tooltip>
-             {isProduct === 2 && (
-                <Tooltip title="Delete">
-                  <SVGIcon
-                    name="IconDelete"
-                    color={"#be3036"}
-                    width={24}
-                    onClick={() => {
-                      deleteRow(record)
-                    }}
-                  />
-                </Tooltip>
-             )}
-            </div>
-          );
-        },
-      },
-    ];
-    return result
-  }
+  const columns = useMemo(() => {
+    return getTosColumns({
+      isProduct,
+      openModalFormTos,
+      setdataUpdate,
+      deleteRow,
+    });
+  }, [isProduct]);
 
+  const columnDefinitions = useMemo(() => {
+    return columns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [columns]);
+
+  // Expandable row render for TOS Detail
   const expandedRowRender = (record) => {
-    const dataExpand = record?.tosDetail
-  
-    const columns = [
-      {
-        title: "NO",
-        align: "center",
-        width: 60,
-        render: (text, object, index) => index + 1,
-      },
-      {
-        title: 'ATTRIBUTE',
-        dataIndex: 'attributeName',
-      },
-      {
-        title: 'VALUE',
-        dataIndex: 'value',
-      }
-    ];
+    const dataExpand = record?.tosDetail || [];
+    const detailColumns = getTosDetailColumns();
+
     return (
       <div>
         <p className="text-primary text-xs font-bold uppercase pt-4">
           TOS DETAIL
         </p>
-        <TablePagination
-          useSelect={false}
-          usePagination={false}
+        <Table
           dataSource={dataExpand}
-          columns={columns}
-          className={"mb-4"}
+          columns={detailColumns}
+          pagination={false}
+          className="mb-4"
+          rowKey={(record, index) => index}
         />
       </div>
-    )
+    );
   };
-  
+
   return (
     <div>
       {isProduct === 2 && (
@@ -298,40 +146,38 @@ useEffect(() => {
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
-            onClick={()=>setModalChooseTos(true)}
+            onClick={() => setModalChooseTos(true)}
           >
             Choose Term of Service
           </ButtonComponent>
         </div>
       )}
-      <TablePagination
-        pageSize={pageSize}
-        current={page}
-        dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1000 }}
-        totalData={totalElement}
-        onChange={handleChangeSize}
+
+      <NxTable
+        idTable="tos-table"
+        dataSource={displayData}
+        columns={columns}
+        totalData={processedData.length}
+        tableScrolled={{ y: 400, x: "max-content" }}
         onSort={onSort}
-        columns={columns({
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-        })}
-        expandable={{expandedRowRender}}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columnDefinitions}
+        loading={false}
+        expandable={{
+          expandedRowRender,
+          rowExpandable: (record) => record?.tosDetail && record.tosDetail.length > 0,
+        }}
+        showAdvanceSearch={false}
+        showSearchBar={false}
       />
-
-      <ModalCustom
-        isOpen={modalUpdateTos}
-        handleCancel={()=>setModalUpdateTos(false)}
-        handleOk
-      >
-
-      </ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default TableTos
+export default TableTos;

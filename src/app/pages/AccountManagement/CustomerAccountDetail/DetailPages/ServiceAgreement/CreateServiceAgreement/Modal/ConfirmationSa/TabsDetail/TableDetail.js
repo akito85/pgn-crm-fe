@@ -1,28 +1,47 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import NxTable from '../../../../../../../../../../components/Nx/NxTable'
 import DetailText from '../../../../../../../../../../components/DetailText'
 
 const TableDetail = ({
   dataTableProduct,
   saDetailObj
 }) => {
-  const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
+
+  const processedData = useMemo(() => {
+    let result = [...(dataTableProduct || [])];
+    if (fieldSort) {
+      result.sort((a, b) => {
+        let fa = a[fieldSort]?.toString()?.toLowerCase() || "";
+        let fb = b[fieldSort]?.toString()?.toLowerCase() || "";
+        if (fa < fb) return orderSort === "asc" ? -1 : 1;
+        if (fa > fb) return orderSort === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [dataTableProduct, fieldSort, orderSort]);
 
   useEffect(() => {
-    setTotalElement(dataTableProduct?.length)
-  }, [])
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
 
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -32,115 +51,70 @@ const TableDetail = ({
       setFieldSort("");
       setOrderSort("");
     }
+    setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
+  const columns = [
+    {
+      title: "NO",
+      key: "no",
+      align: "center",
+      width: 60,
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: 'Name',
+      key: 'name',
+      dataIndex: 'name',
+      sorter: true,
+      render: (name) => <span>{name?.label}</span>
+    },
+    {
+      title: 'VALUE',
+      key: 'value',
+      dataIndex: 'value',
+      sorter: true,
+    },
+    {
+      title: 'UNIT',
+      key: 'unit',
+      dataIndex: 'unit',
+      sorter: true,
+      render: (unit) => <span>{unit !== undefined ? unit.label : ""}</span>
     }
-    setSearchedColumn(tempSearchColumn);
-  };
-
-  console.log(dataTableProduct, ' data table product');
-  
-  const filterDataByPage = () => {
-    let result = [...dataTableProduct];
-    if (searchedColumn) {
-      const fixSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
-
-  const columns = ({
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result = [
-      {
-        title: "NO",
-        align: "center",
-        width: 60,
-        render: (text, object, index) => index + 1,
-      },
-      {
-        title: 'Name',
-        dataIndex: 'name',
-        sorter:true,
-        render: (name)=>{
-          return (
-            <span>{name?.label}</span>
-          )
-        }
-      },
-      {
-        title: 'VALUE',
-        dataIndex: 'value',
-        sorter:true,
-      },
-      {
-        title: 'UNIT',
-        dataIndex: 'unit',
-        sorter:true,
-        render: (unit)=>{
-          return (
-            <span>{unit !== undefined ? unit.label : ""}</span>
-          )
-        }
-      }
-    ];
-    return result;
-  }
+  ];
 
   return (
     <div>
-      <div className="grid grid-cols-4 gap-5 py-[10px]">
+      <div className="grid grid-cols-3 gap-5 py-[10px]">
         <DetailText label="Payment Type">{saDetailObj?.objPaymentType?.unitName}</DetailText>
         <DetailText label="Charging Method">{saDetailObj?.objChargingMethod?.unitName}</DetailText>
       </div>
 
-      <TablePagination
-        pageSize={pageSize}
-        current={page}
-        dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
-        totalData={totalElement}
-        onChange={handleChangeSize}
-        onSort={onSort}
-        columns={columns({
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-        })}
-      />
+      <div className="py-4">
+        <NxTable
+          idTable="confirmation-detail-table"
+          dataSource={displayData}
+          columns={columns}
+          totalData={processedData.length}
+          tableScrolled={{ x: "max-content", y: 400 }}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={2}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          columnDefinitions={columns.map((col) => ({
+            key: col.key || col.dataIndex || col.title,
+            title: col.title,
+          }))}
+          onChange={onSort}
+          loading={false}
+          showAdvanceSearch={false}
+          showSearchBar={false}
+        />
+      </div>
     </div>
   )
 }
