@@ -1,28 +1,46 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import NxTable from '../../../../../../../../../../components/Nx/NxTable'
 import { Tooltip } from 'antd';
 
 const TableLateCharge = ({
   dataTableLateCharge
 }) => {
-  const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
+  const processedData = useMemo(() => {
+    let result = [...(dataTableLateCharge || [])];
+    if (fieldSort) {
+      result.sort((a, b) => {
+        let fa = a[fieldSort]?.toString()?.toLowerCase() || "";
+        let fb = b[fieldSort]?.toString()?.toLowerCase() || "";
+        if (fa < fb) return orderSort === "asc" ? -1 : 1;
+        if (fa > fb) return orderSort === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [dataTableLateCharge, fieldSort, orderSort]);
 
   useEffect(() => {
-    setTotalElement(dataTableLateCharge?.length)
-  }, [])
-  
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -32,121 +50,79 @@ const TableLateCharge = ({
       setFieldSort("");
       setOrderSort("");
     }
+    setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
-  };
-
-  const filterDataByPage = () => {
-    let result = [...dataTableLateCharge];
-    if (searchedColumn) {
-      const fixSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
-
-  const columns = ({
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result = [
-      {
-        title: "NO",
-        align: "center",
-        width: 60,
-        render: (text, object, index) => index + 1,
-      },
-      {
-        title: 'LATE CHARGE NAME',
-        dataIndex: 'lateChargeName',
-        sorter: true,
-        // render: (name)=>{
-        //   return (
-        //     <span>{name.label}</span>
-        //   )
-        // }
-      },
-      {
-        title: 'CURRENCY',
-        dataIndex: 'currency',
-        sorter: true,
-      },
-      {
-        title: 'LATE CHARGE MAXIMUM AMOUNT',
-        dataIndex: 'maxAmount',
-        align: "right",
-        sorter: true,
-      },
-      {
-        title: 'LATE CHARGE RULE FORMULA',
-        dataIndex: 'formula',
-        sorter: true,
-      },
-      {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
-        sorter: true,
-        ellipsis: {
-          showTitle: false
-        },
-        render: (description) => (
-          <Tooltip placement="topLeft" title={description}>
-            {description}
-          </Tooltip>
-        ),
-      },
-    ];
-    return result;
-  }
+  const columns = [
+    {
+      title: "NO",
+      key: "no",
+      align: "center",
+      width: 60,
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: 'LATE CHARGE NAME',
+      key: 'lateChargeName',
+      dataIndex: 'lateChargeName',
+      sorter: true,
+    },
+    {
+      title: 'CURRENCY',
+      key: 'currency',
+      dataIndex: 'currency',
+      sorter: true,
+    },
+    {
+      title: 'LATE CHARGE MAXIMUM AMOUNT',
+      key: 'maxAmount',
+      dataIndex: 'maxAmount',
+      align: "right",
+      sorter: true,
+    },
+    {
+      title: 'LATE CHARGE RULE FORMULA',
+      key: 'formula',
+      dataIndex: 'formula',
+      sorter: true,
+    },
+    {
+      title: 'DESCRIPTION',
+      key: 'description',
+      dataIndex: 'description',
+      sorter: true,
+      ellipsis: { showTitle: false },
+      render: (description) => (
+        <Tooltip placement="topLeft" title={description}>
+          {description}
+        </Tooltip>
+      ),
+    },
+  ];
 
   return (
-    <div>
-      <TablePagination
-        pageSize={pageSize}
-        current={page}
-        dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
-        totalData={totalElement}
-        onChange={handleChangeSize}
-        onSort={onSort}
-        columns={columns({
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-        })} 
+    <div className="py-4">
+      <NxTable
+        idTable="confirmation-late-charge-table"
+        dataSource={displayData}
+        columns={columns}
+        totalData={processedData.length}
+        tableScrolled={{ x: "max-content", y: 400 }}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columns.map((col) => ({
+          key: col.key || col.dataIndex || col.title,
+          title: col.title,
+        }))}
+        onChange={onSort}
+        loading={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
       />
     </div>
   )

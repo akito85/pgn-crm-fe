@@ -1,16 +1,12 @@
 import { Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
-import { Link } from "react-router-dom";
 import { Fragment } from "react";
 
 const nxGetAccountActions = ({
-  idAccount = 0,
-  idCustomer = 0,
-  createRoute = "",
-  updateRoute = "",
-  detailRoute = "",
-  navigate = () => {},
+  handleCreate = () => {},
+  handleUpdate = () => {},
+  handleView = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
   handleInactivate = () => {},
@@ -43,18 +39,14 @@ const nxGetAccountActions = ({
   {
     action: "Create",
     render: (
-      <Link to={createRoute} state={{
-        idAccount,
-        idCustomer,
-      }}>
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={20} />}
-          type={"submit"}
-          border={false}
-        >
-          Create
-        </ButtonComponent>
-      </Link>
+      <ButtonComponent
+        icon={<SVGIcon name="IconButtonCreate" width={20} />}
+        type={"submit"}
+        border={false}
+        onClick={handleCreate}
+      >
+        Create
+      </ButtonComponent>
     )
   },
   {
@@ -63,16 +55,8 @@ const nxGetAccountActions = ({
     render: (record, actionLength, index) => {
       return (
         <Tooltip
-          title="Detail"
-          onClick={
-            () => navigate(detailRoute, {
-              state: {
-                id: record.id,
-                idAccount,
-                idCustomer,
-              }
-            })
-          }
+          title="View"
+          onClick={() => handleView(record.id)}
           key={`table-action-${index}`}
         >
           <div className="flex items-center h-full">
@@ -96,13 +80,7 @@ const nxGetAccountActions = ({
             icon={<SVGIcon name="IconEdit" color={!isEditable ? "#BDBDBD" : "#0075BF"} width={20} />}
             border={false}
             disabled={!isEditable}
-            onClick={() => navigate(updateRoute, {
-              state: {
-                id: record.id,
-                idAccount,
-                idCustomer,
-              }
-            })}
+            onClick={() => handleUpdate(record.id)}
             type={"action"}
           >
             <span className={"text-black ml-3"}>Update</span>
@@ -118,13 +96,7 @@ const nxGetAccountActions = ({
                 className={!isEditable ? "cursor-not-allowed" : undefined}
                 onClick={
                   isEditable ?
-                    () => navigate(updateRoute, {
-                      state: {
-                        id: record.id,
-                        idAccount,
-                        idCustomer,
-                      }
-                    }) :
+                    () => handleUpdate(record.id) :
                     () => {}
                 }
               />
@@ -133,7 +105,7 @@ const nxGetAccountActions = ({
         );
 
       return (
-        <Fragment key={`table-action-${index}`}>{content}</Fragment>          
+        <Fragment key={`table-action-${index}`}>{content}</Fragment>
       )
     }
   },

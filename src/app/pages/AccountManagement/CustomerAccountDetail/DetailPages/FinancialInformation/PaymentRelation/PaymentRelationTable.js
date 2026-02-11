@@ -33,10 +33,35 @@ const PaymentRelationTable = ({
   const itemActions = nxGetAccountActions({
     idAccount,
     idCustomer,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION,
-    updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION,
-    detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
-    navigate,
+    handleView: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
+    handleCreate: () => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    ),
+    handleUpdate: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
     handleApproval,
     handleApprovalHistory: handleApprovalHistoryModal,
     handleDownload,

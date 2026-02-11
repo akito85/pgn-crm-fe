@@ -1,12 +1,11 @@
-import React, {useState, useEffect, useRef} from 'react'
-import moment from 'moment'
+import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react'
 import { FilterOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { DatePicker, Input, Tooltip } from 'antd'
-
+import moment from 'moment'
 import ModalCustom from '../../../../../../../../components/Modal/ModalCustom'
 import ButtonComponent from '../../../../../../../../components/ButtonComponent'
-import TablePagination from '../../../../../../../../components/TablePagination'
+import NxTable from '../../../../../../../../components/Nx/NxTable'
 import { dateFormatting } from '../../../../../../../../utils'
 
 const ModalChooseProduct = ({
@@ -22,27 +21,69 @@ const ModalChooseProduct = ({
   saRecordData
 }) => {
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState("");
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [search, setSearch] = useState("");
   const searchInput = useRef(null);
   const [orderSort, setOrderSort] = useState("");
   const [fieldSort, setFieldSort] = useState("");
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
 
   // USE EFFECT
   useEffect(() => {
+    setIsLoading(true);
     const body = {
       idAccount: idAccount,
       serviceTypeId: serviceType,
       idProductType: isMain ? 245 : 287
     }
     if(saRecordData.typeSa != "amandemen"){
-      dispatch(getListProduct({body:body}))
+      dispatch(getListProduct({body:body})).finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
     }
   }, [serviceType])
+
+  // Process all data (filter, sort)
+  const processedData = useMemo(() => {
+    let result = [...dataProduct];
+    if (searchedColumn) {
+      result = result.filter((item) =>
+        item[searchedColumn]?.toString()?.toLowerCase().includes(searchText?.toLowerCase())
+      );
+    }
+    if (fieldSort) {
+      result.sort((a, b) => {
+        let fa = a[fieldSort]?.toString()?.toLowerCase() || "";
+        let fb = b[fieldSort]?.toString()?.toLowerCase() || "";
+        if (fa < fb) return orderSort === "asc" ? -1 : 1;
+        if (fa > fb) return orderSort === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [dataProduct, searchedColumn, searchText, fieldSort, orderSort]);
+
+  // Infinite scroll: slice processedData
+  useEffect(() => {
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  // Handle infinite scroll load more
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, [])
 
   // Search Column Table
   const getColumnSearchProps = (dataIndex, type) => ({
@@ -119,7 +160,7 @@ const ModalChooseProduct = ({
     setSearchText(selectedKeys[0]);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
     if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
+      setLoadedCount(20);
     }
     setSearchedColumn(tempSearchColumn);
   };
@@ -129,7 +170,7 @@ const ModalChooseProduct = ({
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "PRODUCT NAME",
@@ -201,12 +242,6 @@ const ModalChooseProduct = ({
   ]
 
 
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
-
   const onSort = (_, __, sort) => {
     if (sort.order) {
       setFieldSort(sort.field);
@@ -217,45 +252,7 @@ const ModalChooseProduct = ({
     }
   };
 
-  const filterDataByPage = (typeData = "data") => {
-    let result = [...dataProduct];
-    if (searchedColumn) {
-      result = result.filter((item) => {
-        return item[searchedColumn]
-          ?.toLowerCase()
-          .includes(searchText.toLowerCase());
-      });
-    }
-    const handleDataSort = (obj) => {
-      switch (fieldSort) {
-        case "startDate":
-        case "endDate":
-          const date = obj[fieldSort]
-            ? moment(obj[fieldSort]).format("DD MMM YYYY")
-            : "";
-          return date.toString().toLowerCase();
-        case "fileSize":
-          return obj.size;
-        default:
-          return obj[fieldSort].toString().toLowerCase();
-      }
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    const fix = result.slice((page - 1) * pageSize, page * pageSize);
-    return typeData === "data" ? fix : result.length;
-  };
+
 
   return (
     <div>
@@ -281,22 +278,32 @@ const ModalChooseProduct = ({
           PRODUCT INFORMATION
         </span>
 
-        <div className="w-full">
-          {dataProduct && (
-            <TablePagination
-              dataSource={filterDataByPage("data")}
-              totalData={filterDataByPage("length")}
-              columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangeSize}
-              onSort={onSort}
-              tableScrolled={{
-                x: 1200,
-                y: 300,
-              }}
-            />
-          )}
+        <div className="w-full py-4">
+          <NxTable
+            idTable="modal-choose-product-table"
+            dataSource={displayData}
+            columns={columns}
+            totalData={processedData.length}
+            tableScrolled={{
+              x: "max-content",
+              y: 400,
+            }}
+            usePagination={false}
+            useInfiniteScroll={true}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+            loadMoreThreshold={2}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            columnDefinitions={columns.map((col) => ({
+              key: col.key || col.dataIndex || col.title,
+              title: col.title,
+            }))}
+            onChange={onSort}
+            loading={isLoading}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+          />
         </div>
       </ModalCustom>
     </div>

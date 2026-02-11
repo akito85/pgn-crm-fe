@@ -134,7 +134,10 @@ import writeOffReducer from "../slices/receipt_collection/writeOff";
 import paymentRelationReducer from "../slices/account_management/detailAccount/PaymentRelationSlice";
 import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
 import globalPropReducer from "../slices/globalPropSlice";
+import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentWarrantyPartner";
+import liborRateReducer from "../slices/receipt_collection/liborRate";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
+import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -275,6 +278,9 @@ const reducer = combineReducers({
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
   offset: offsetReducer,
+  paymentWarrantyPartner: paymentWarrantyPartnerReducer,
+  liborRate: liborRateReducer,
+  paymentCycle: paymentCycleReducer,
 
   // Attachment
   attachment: attachmentReducer,

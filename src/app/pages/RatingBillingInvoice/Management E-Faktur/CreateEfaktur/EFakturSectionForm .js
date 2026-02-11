@@ -131,7 +131,7 @@ const EFakturSectionForm = ({
               {dataListFakturCode &&
                 dataListFakturCode?.map((data, index) => (
                   <Select.Option value={data.value} key={index}>
-                    {data.label}
+                   {data.value}-{data.label}
                   </Select.Option>
                 ))}
             </SelectComponent>

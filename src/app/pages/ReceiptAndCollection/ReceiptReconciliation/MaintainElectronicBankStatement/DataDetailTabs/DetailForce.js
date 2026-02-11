@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import TablePagination from "../../../../../../components/TablePagination";
+import TableRBI from "../../../../../../components/TableRBI";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   showModalError,
@@ -677,7 +677,7 @@ const DetailForce = (props) => {
           ) : null}
         </div>
 
-        <TablePagination
+        <TableRBI
           dataSource={data?.result}
           columns={columnsAwalForce(
             page,
@@ -695,7 +695,8 @@ const DetailForce = (props) => {
           // onShowSizeChange={handleChange}
           onSort={onSort}
           tableScrolled={{
-            x: 3500,
+            // x: 3500,
+            x: "max-content",
             y: 300,
           }}
         />

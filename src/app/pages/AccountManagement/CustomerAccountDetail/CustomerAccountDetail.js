@@ -2,13 +2,11 @@ import { useEffect } from "react";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import HeaderDetail from "./HeaderDetail";
 import { useState } from "react";
 import AccountDetailInformation from "./AccountDetailInformation";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 
 const data = [
@@ -132,33 +130,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 dispatch = {dispatch}
                 // handleChangeInteraction={handleSetType}
               />
-              <div className="flex justify-between">
-                <Link
-                  to={
-                    type === "standard"
-                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                  }
-                >
-                  <ButtonComponent
-                    type={"submit"}
-                    // onClick={() => {
-                    //   navigate(-1)
-                    // }}
-                    icon={
-                      <LeftOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 24,
-                          justifyItems: "center",
-                        }}
-                      />
-                    }
-                  >
-                    Back
-                  </ButtonComponent>
-                </Link>
-              </div>
             </div>
           </div>
         </div>

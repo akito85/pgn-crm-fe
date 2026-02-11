@@ -80,12 +80,7 @@ const PointOfSalesPage = ({
     }
   }, [rangeDisableDate?.startDate]);
 
-  // console.log(valueDdl, "valueDdl")
   const onChangeSelect = (e) => {
-    // console.log({
-    //   action: "change",
-    //   value: e,
-    // })
     setValueDdl({
       action: "change",
       value: e,
@@ -118,17 +113,6 @@ const PointOfSalesPage = ({
         >
           <div className="w-full grid grid-cols-5 gap-1">
             {/* Row 1 */}
-            {/* <Form.Item
-              name="customerNumber"
-              label="Customer Number"
-              rules={[
-                { message: requiredMessage("Customer Number"), required: true },
-              ]}
-              style={{ marginBottom: 0 }}
-            >
-              <InputComponent placeholder="Enter Customer Number" />
-            </Form.Item> */}
-
             <Form.Item
               name="customerName"
               label="Customer Name"
@@ -141,7 +125,7 @@ const PointOfSalesPage = ({
             </Form.Item>
 
             <Form.Item
-              name="accountNumber"
+              name="registrationNumber"
               label="Registration Number"
               rules={[
                 {
@@ -168,68 +152,99 @@ const PointOfSalesPage = ({
               <InputComponent placeholder="Enter Account Name" />
             </Form.Item>
 
-            <Form.Item
-              name="sor"
-              label="SOR"
-              rules={[{ message: requiredMessage("SOR"), required: true }]}
-              style={{ marginBottom: 0 }}
-            >
-              <SelectComponent
-                onChange={onSorChange}
-                disabled={!!defaultData?.sor}
-                placeholder="SOR from User"
-                options={(data_sor_list || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
-                }))}
-              />
-            </Form.Item>
+            <div>
+              <Form.Item
+                name="sor"
+                label="SOR"
+                rules={[{ message: requiredMessage("SOR"), required: true }]}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  onChange={onSorChange}
+                  disabled={!!defaultData?.sor}
+                  placeholder="Select SOR"
+                  options={(data_sor_list || []).map((item) => ({
+                    label: item?.name,
+                    value: item?.id,
+                  }))}
+                />
+              </Form.Item>
+              {!!defaultData?.sor && (
+                <Form.Item name="sor" hidden>
+                  <Input />
+                </Form.Item>
+              )}
+            </div>
 
-            {/* Row 2 */}
-            <Form.Item
-              name="costCenter"
-              label="Cost Center"
-              rules={[
-                { message: requiredMessage("Cost Center"), required: true },
-              ]}
-              style={{ marginBottom: 0 }}
-            >
-              <SelectComponent
-                onChange={(value) => {
-                  if (!value) {
-                    form.resetFields(["meterReadingCode"]);
+            <div>
+              <Form.Item
+                name="costcenter"
+                label="Cost Center"
+                rules={[
+                  { message: requiredMessage("Cost Center"), required: true },
+                ]}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  onChange={(value) => {
+                    if (!value || value.length === 0) {
+                      form.resetFields(["meterReadingCode"]);
+                    }
+                    onCostCenterChange(value);
+                  }}
+                  disabled={
+                    !!defaultData?.costcenter &&
+                    defaultData.costcenter.length > 0
                   }
-                  onCostCenterChange(value);
-                }}
-                disabled={
-                  defaultData?.costCenter && defaultData.costCenter.length > 0
-                }
-                placeholder="Select Cost Center"
-                options={(data_cost_center_list || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
-                }))}
-              />
-            </Form.Item>
+                  placeholder="Select Cost Center"
+                  options={(data_cost_center_list || []).map((item) => ({
+                    label: item?.name,
+                    value: item?.id,
+                  }))}
+                />
+              </Form.Item>
+              {!!defaultData?.costcenter &&
+                defaultData.costcenter.length > 0 && (
+                  <Form.Item name="costcenter" hidden>
+                    <Input />
+                  </Form.Item>
+                )}
+            </div>
 
             <Form.Item
-              name="meterReadingCode"
-              label="Meter Reading Code"
-              style={{ marginBottom: 0 }}
+              noStyle
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.costcenter !== currentValues.costcenter
+              }
             >
-              <SelectComponent
-                onChange={onMeterReadingCodeChange}
-                disabled={
-                  !mergedArrayMrc ||
-                  mergedArrayMrc.length === 0 ||
-                  !isCostCenterFilled
-                }
-                placeholder="Select Meter Reading Code"
-                options={(mergedArrayMrc || []).map((item) => ({
-                  label: item?.name,
-                  value: item?.id,
-                }))}
-              />
+              {({ getFieldValue }) => {
+                const costCenter = getFieldValue("costcenter");
+                const isCostCenterFilled =
+                  costCenter &&
+                  (Array.isArray(costCenter) ? costCenter.length > 0 : true);
+
+                return (
+                  <Form.Item
+                    name="meterReadingCode"
+                    label="Meter Reading Code"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <SelectComponent
+                      onChange={onMeterReadingCodeChange}
+                      disabled={
+                        !mergedArrayMrc ||
+                        mergedArrayMrc.length === 0 ||
+                        !isCostCenterFilled
+                      }
+                      placeholder="Select Meter Reading Code"
+                      options={(mergedArrayMrc || []).map((item) => ({
+                        label: item?.name,
+                        value: item?.id,
+                      }))}
+                    />
+                  </Form.Item>
+                );
+              }}
             </Form.Item>
 
             <Form.Item
@@ -285,7 +300,7 @@ const PointOfSalesPage = ({
             >
               <InputComponent placeholder="Enter Email" />
             </Form.Item>
-            
+
             <div className="col-span-5">
               <Form.Item
                 name="address"
@@ -305,6 +320,7 @@ const PointOfSalesPage = ({
         </CardContainer>
       );
     } else {
+      // Customer - TIDAK BERUBAH
       return (
         <CardContainer
           header={
@@ -373,7 +389,7 @@ const PointOfSalesPage = ({
             <Form.Item name={"sor"} label={"SOR"}>
               <InputComponent disabled />
             </Form.Item>
-            <Form.Item name={"costCenter"} label={"Cost Center"}>
+            <Form.Item name={"costcenter"} label={"Cost Center"}>
               <InputComponent disabled />
             </Form.Item>
             <Form.Item name={"meterReadingCode"} label={"Meter Reading Code"}>
@@ -403,6 +419,7 @@ const PointOfSalesPage = ({
             transactionDate={transactionDate}
             idPos={idPos}
             dataUomCodes={data_uom_codes}
+            customerType={customerType}
           />
         );
       case listDetailPage[1].value:
@@ -422,12 +439,12 @@ const PointOfSalesPage = ({
             currency={currency}
             transactionDate={transactionDate}
             dataUomCodes={data_uom_codes}
+            customerType={customerType}
           />
         );
     }
   };
 
-  // console.log(data_dynamic, "data_dynamic");
   const handleDdlOrDate = (e) => {
     switch (e) {
       case "TOP":

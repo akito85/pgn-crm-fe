@@ -56,12 +56,12 @@ const PaymentChannelForm = (props) => {
 
   return (
     <div>
-      <BaseContainer header={"PAYMENT CHANNEL INFORMATION"}>
+      <BaseContainer header={"DELIVERY CHANNEL INFORMATION"}>
         <div className="w-full grid grid-cols-6 gap-5">
           <Form.Item
-            label={"Payment Channel Code"}
+            label={"Delivery Channel Code"}
             name={"ciCode"}
-            rules={formMessageRequired("Payment Channel Code")}
+            rules={formMessageRequired("Delivery Channel Code")}
           >
             <Input allowClear maxLength={4} />
           </Form.Item>

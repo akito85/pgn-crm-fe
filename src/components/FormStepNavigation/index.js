@@ -1,10 +1,25 @@
-import React from "react";
-import { Steps, Row, Col, Button } from "antd";
+import React, { useRef, useEffect } from "react";
+import { Steps, Button } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
 
 export const FormStepper = ({ steps, current, onPrev, onNext }) => {
+    const scrollContainerRef = useRef(null);
+
+    useEffect(() => {
+        if (scrollContainerRef.current && steps.length >= 5) {
+            const container = scrollContainerRef.current;
+            const stepWidth = container.scrollWidth / steps.length;
+            const scrollPosition = stepWidth * current - container.clientWidth / 2 + stepWidth / 2;
+
+            container.scrollTo({
+                left: Math.max(0, scrollPosition),
+                behavior: "smooth",
+            });
+        }
+    }, [current, steps.length]);
+
     return (
         <div className="bg-white rounded-lg border border-[#D6E1F0] p-3 mb-4">
             <div className="flex flex-row items-center justify-between w-full">
@@ -24,39 +39,50 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
                 >
                     <LeftOutlined style={{ fontSize: "12px", color: current > 0 ? "#0075BF" : "#BDBDBD" }} />
                 </div>
-                <div className="flex-1 px-4">
-                    <Row justify="center">
-                        <Col xs={24} md={20} lg={18}>
-                            <Steps
-                                current={current}
-                                labelPlacement="vertical"
-                                size="small"
-                                items={steps.map((s, i) => ({
-                                    title: <span style={{ whiteSpace: "nowrap", fontSize: "12px" }}>{s.title}</span>,
-                                    icon: (
-                                        <div
-                                            style={{
-                                                width: 24,
-                                                height: 24,
-                                                borderRadius: "50%",
-                                                background: i <= current ? "#0075BF" : "#9E9E9E",
-                                                color: "white",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                fontWeight: 600,
-                                                fontSize: "11px",
-                                                zIndex: 2,
-                                                position: "relative",
-                                            }}
-                                        >
-                                            {i + 1}
-                                        </div>
-                                    ),
-                                }))}
-                            />
-                        </Col>
-                    </Row>
+                <div
+                    ref={scrollContainerRef}
+                    className="flex-1 px-4 overflow-x-auto"
+                    style={{
+                        scrollBehavior: "smooth",
+                    }}
+                >
+                    <div
+                        style={{
+                            minWidth: steps.length >= 5 ? `${steps.length * 100}px` : "auto",
+                            display: "flex",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <Steps
+                            current={current}
+                            labelPlacement="vertical"
+                            size="small"
+                            style={{ width: "100%" }}
+                            items={steps.map((s, i) => ({
+                                title: <span style={{ whiteSpace: "nowrap", fontSize: "12px" }}>{s.title}</span>,
+                                icon: (
+                                    <div
+                                        style={{
+                                            width: 24,
+                                            height: 24,
+                                            borderRadius: "50%",
+                                            background: i <= current ? "#0075BF" : "#9E9E9E",
+                                            color: "white",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            fontWeight: 600,
+                                            fontSize: "11px",
+                                            zIndex: 2,
+                                            position: "relative",
+                                        }}
+                                    >
+                                        {i + 1}
+                                    </div>
+                                ),
+                            }))}
+                        />
+                    </div>
                 </div>
                 <div
                     style={{

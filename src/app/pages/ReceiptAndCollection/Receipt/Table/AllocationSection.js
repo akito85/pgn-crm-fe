@@ -4,38 +4,42 @@ import { columnAllocation } from "./ColumnAllocation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import moment from "moment";
-import { dateFormatting, formMessageRequired, hasValue } from "../../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+} from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
-import { Spin, Steps, Form, Input, Alert } from "antd";
+import { Spin, Form, Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import {
-  getAllocationRecomendationList,
-} from "../../../../../redux/slices/receipt_collection/receipt";
-import {
-  showModalError,
-} from "../../../../../redux/slices/general_slice";
+import { getAllocationRecomendationList } from "../../../../../redux/slices/receipt_collection/receipt";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import { columnRecommendation } from "./ColumnRecomendation";
 import { updatePagination } from "../../../../../utils/updatePagination";
 import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import { getAllApprovalList, getListApprovalById, getListCategory } from "../../../../../redux/slices/receipt_collection/electrionicBank";
+import {
+  getAllApprovalList,
+  getListApprovalById,
+  getListCategory,
+} from "../../../../../redux/slices/receipt_collection/electrionicBank";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import InputComponent from "../../../../../components/InputComponent";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 
 const AllocationSection = ({
   dataTable,
-  setDataTable = () => { },
-  setIsInsert = () => { },
+  setDataTable = () => {},
+  setIsInsert = () => {},
   isInsert,
   amount,
   totalAllocationAmount,
-  setTotalAllocationAmount = () => { },
+  setTotalAllocationAmount = () => {},
   accountNumberSelected,
   rateAmountValue,
   formValues,
@@ -77,10 +81,9 @@ const AllocationSection = ({
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const {
-    dataListAppHierId,
-    dataListAppHierDetail,
-  } = useSelector((state) => state.electronic);
+  const { dataListAppHierId, dataListAppHierDetail } = useSelector(
+    (state) => state.electronic,
+  );
 
   // Load Approval Hierarchy List
   useEffect(() => {
@@ -136,14 +139,19 @@ const AllocationSection = ({
       ...prevState,
       [type]: result,
     }));
+
+    // Manual sync for form validation
+    if (type === "approvalHierarchy") {
+      modalForm.setFieldsValue({ approvalHierarchy: result });
+    }
+
     return result;
   };
   // helper to parse formatted amount
   const parseAmount = (val) => {
-    if (typeof val === 'number') return val;
-    if (!val) return 0;
+    if (typeof val === "number") return val;
     // Remove dots (thousand separators) and replace comma with dot (decimal)
-    const normalized = val.toString().replace(/\./g, "").replace(/,/g, ".");
+    const normalized = val?.toString()?.replace(/\./g, "").replace(/,/g, ".");
     return parseFloat(normalized);
   };
 
@@ -151,7 +159,6 @@ const AllocationSection = ({
   const balance = parsedAmount - totalAllocationAmount;
   // use effec
   const [modalForm] = Form.useForm();
-
 
   useEffect(() => {
     if (data_recomendation_allocation) {
@@ -170,8 +177,8 @@ const AllocationSection = ({
         // setDataRecomendation(updatedDataRecomendation);
         setDataRecomendation(
           dataRecomendation.filter(
-            (item) => !dataTable.some((obj) => obj.key === item.key)
-          )
+            (item) => !dataTable.some((obj) => obj.key === item.key),
+          ),
         );
       } else {
         setDataRecomendation(
@@ -180,18 +187,18 @@ const AllocationSection = ({
               (item) =>
                 item?.billingItemAmount !== 0 &&
                 (item?.allocationStatus === "Unpaid" ||
-                  item?.allocationStatus === "Partially Paid")
+                  item?.allocationStatus === "Partially Paid"),
             )
             ?.map((item) => ({
               ...item,
               key: item?.id,
               billingPeriod: moment(item?.billingPeriod)?.format(
-                dateFormatting?.datePeriod
+                dateFormatting?.datePeriod,
               ),
               createdDate: moment(item.createdDate).format(
-                dateFormatting?.dateTime
+                dateFormatting?.dateTime,
               ),
-            }))
+            })),
         );
       }
     }
@@ -200,10 +207,7 @@ const AllocationSection = ({
   // set selected row by balance
   useEffect(() => {
     if (dataRecomendation && dataTable?.length === 0) {
-      setSelectedRowKeys(
-        dataRecomendation
-          ?.map((item) => item?.key)
-      );
+      setSelectedRowKeys(dataRecomendation?.map((item) => item?.key));
     }
   }, [dataRecomendation]);
 
@@ -211,7 +215,7 @@ const AllocationSection = ({
   useEffect(() => {
     if (dataTable?.length > 0) {
       setTotalAllocationAmount(
-        dataTable?.reduce((total, row) => total + row.allocationAmount, 0)
+        dataTable?.reduce((total, row) => total + row.allocationAmount, 0),
       );
     } else {
       setTotalAllocationAmount(0);
@@ -223,8 +227,8 @@ const AllocationSection = ({
     if (openModalAllocation) {
       setSelectDataTable(
         dataRecomendation?.filter((item) =>
-          selectedRowKeys?.includes(item?.key)
-        )
+          selectedRowKeys?.includes(item?.key),
+        ),
       );
     }
   }, [selectedRowKeys, openModalAllocation, dataRecomendation]);
@@ -242,13 +246,13 @@ const AllocationSection = ({
       case "createdDate":
         setTypeColumn("datetime");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.dateTime)
+          moment(selectedKeys[0])?.format(dateFormatting?.dateTime),
         );
         break;
       case "billingPeriod":
         setTypeColumn("datePeriod");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod)
+          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod),
         );
         break;
       default:
@@ -282,13 +286,13 @@ const AllocationSection = ({
       case "createdDate":
         setTypeColumn("datetime");
         setSearchTextChoose(
-          moment(selectedKeys[0])?.format(dateFormatting?.dateTime)
+          moment(selectedKeys[0])?.format(dateFormatting?.dateTime),
         );
         break;
       case "billingPeriod":
         setTypeColumn("datePeriod");
         setSearchTextChoose(
-          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod)
+          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod),
         );
         break;
       default:
@@ -316,16 +320,16 @@ const AllocationSection = ({
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch
+    handleSearch,
   )?.filter(
     (item) =>
       item?.dataIndex !== "allocationCode" &&
       item?.dataIndex !== "allocationNumber" &&
-      item?.dataIndex !== "allocationDate"
+      item?.dataIndex !== "allocationDate",
   );
 
   // handle open modal allocation
-  const handleOpen = () => { };
+  const handleOpen = () => {};
 
   // handle close modal allocation
   const handleCancel = () => {
@@ -393,16 +397,16 @@ const AllocationSection = ({
     } else {
       // dispatch(setDataAllocation(selectDataTable));
       // Merge new data (Approval, Remark, Attachment) into the selected rows
-      // Note: Since these are technically "header" info for the allocation SET, 
+      // Note: Since these are technically "header" info for the allocation SET,
       // we might need to attach them to EACH row, or the backend expects them differently.
       // Based on typical table-inline patterns, we'll attach them to the objects.
 
-      const enrichedData = selectDataTable.map(row => ({
+      const enrichedData = selectDataTable.map((row) => ({
         ...row,
         remark: forceObj.remark,
         approvalHierarchyId: forceObj.approvalHierarchy,
         attachments: listDataAttachment,
-        createdBy: userData?.userName
+        createdBy: userData?.userName,
       }));
 
       setDataTable((prev) => [...prev, ...enrichedData]);
@@ -452,23 +456,29 @@ const AllocationSection = ({
             balance: balance,
             currencyId: formValues?.currency,
             rateAmount: rateAmountValue,
-          })
+          }),
         )?.unwrap();
         setOpenModalAllocation(true);
       }
     } catch (error) {
       setOpenModalAllocation(false);
-
     }
   };
 
   // handle sort
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
+  const steps = [
+    { title: "Allocation Information" },
+    { title: "Approval Information" },
+    { title: "Attachment Information" },
+    { title: "Confirmation" },
+  ];
+
+  const handleNext = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handlePrev = () => {
+    setCurrentStep(currentStep - 1);
   };
 
   return (
@@ -489,7 +499,7 @@ const AllocationSection = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}
@@ -502,7 +512,7 @@ const AllocationSection = ({
             searchText,
             pageChoose,
             pageSizeChoose,
-            typeColumn
+            typeColumn,
           )}
           setInserted={setIsInsert}
           onDataChange={setDataTable}
@@ -513,15 +523,15 @@ const AllocationSection = ({
             searchText,
             pageChoose,
             pageSizeChoose,
-            typeColumn
+            typeColumn,
           )}
           setUpdateSelectDataTable={setSelectDataTable}
           setUpdateSelectRowKeys={setSelectedRowKeys}
           setUpdateTotalAmount={setTotalAllocationAmount}
           rateAmount={rateAmountValue}
           currency={currencyId}
-        // onSort={onSort}
-        // dispatcher={dispatch}
+          // onSort={onSort}
+          // dispatcher={dispatch}
         />
       </div>
       <div className="w-full flex flex-col">
@@ -545,9 +555,9 @@ const AllocationSection = ({
           {balance === 0
             ? 0
             : balance?.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
         </span>
       </div>
       <ModalCustom
@@ -556,85 +566,20 @@ const AllocationSection = ({
         type={"confirmation"}
         header={"Choose Allocation"}
         width={1200}
-        footer={
-          <div className="flex justify-end gap-5">
-            <ButtonComponent type={"default"} onClick={handleCancel}>
-              Back
-            </ButtonComponent>
-            {currentStep > 0 ? (
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setCurrentStep(currentStep - 1)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
-                      marginRight: 10,
-                    }}
-                  />
-                }
-              >
-                Previous
-              </ButtonComponent>
-            ) : null}
-
-            {currentStep < 3 && ( // 3 is index of Confirmation step
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setCurrentStep(currentStep + 1)}
-                disabled={
-                  (currentStep === 0 && (selectDataTable.length === 0 || !forceObj.remark)) || // Step 1: Selection + Remark
-                  (currentStep === 1 && !forceObj.approvalHierarchy) // Step 2: Approval
-                  // Step 3 (Attachment) is optional? Usually yes, or check listDataAttachment.length === 0
-                }
-              >
-                <div style={{ textAlign: "center" }}>
-                  <span>Next</span>
-                  <RightOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
-                      marginLeft: 10,
-                    }}
-                  />
-                </div>
-              </ButtonComponent>
-            )}
-            {currentStep === 3 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                onClick={handleSaveDataTable}
-              >
-                Confirm
-              </ButtonComponent>
-            )}
-          </div>
-        }
+        footer={null}
       >
         <div className="w-full gap-5">
-          <div className="overflow-x-scroll scrollStepsCstm gap-5">
-            <Steps
-              current={currentStep}
-              items={[
-                { title: "Allocation Information" },
-                { title: "Approval Information" },
-                { title: "Attachment Information" },
-                { title: "Confirmation" }
-              ]}
-              labelPlacement="vertical"
-            />
-          </div>
+          <FormStepper
+            steps={steps}
+            current={currentStep}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
 
-          <Form
-            layout="vertical"
-            className="mt-3"
-            form={modalForm}
-          >
+          <Form layout="vertical" className="mt-3" form={modalForm}>
             <Spin spinning={loading}>
               {/* Step 1: Allocation Information */}
-              <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 0 ? "block" : "none" }}>
                 <p className="text-primary text-xl font-semibold uppercase py-[20px] gap-5">
                   RECEIPT ON BANK STATEMENT
                 </p>
@@ -646,7 +591,7 @@ const AllocationSection = ({
                       searchInput,
                       searchedColumnChoose,
                       searchTextChoose,
-                      handleSearchModal
+                      handleSearchModal,
                     )}
                     current={pageChoose}
                     pageSize={pageSizeChoose}
@@ -657,7 +602,7 @@ const AllocationSection = ({
                       searchTextChoose,
                       pageChoose,
                       pageSizeChoose,
-                      typeColumn
+                      typeColumn,
                     )}
                     totalData={updatePagination(
                       dataRecomendation,
@@ -666,7 +611,7 @@ const AllocationSection = ({
                       searchTextChoose,
                       pageChoose,
                       pageSizeChoose,
-                      typeColumn
+                      typeColumn,
                     )}
                     tableScrolled={{ x: 3500, y: 500 }}
                     onChange={handleChange}
@@ -676,8 +621,8 @@ const AllocationSection = ({
                 </div>
                 {totalAllocationAmount > parsedAmount && (
                   <span className="text-red-800">
-                    Total amount of selected item has been exceeded Total available
-                    amount. Please select other item.
+                    Total amount of selected item has been exceeded Total
+                    available amount. Please select other item.
                   </span>
                 )}
                 <div className="mt-4">
@@ -685,7 +630,7 @@ const AllocationSection = ({
                     label={"Remark"}
                     required
                     validateStatus={!forceObj.remark ? "error" : "success"}
-                    help={!forceObj.remark ? "Remark is required" : null}
+                    help={!forceObj.remark ? "Please input your Remark!" : null}
                   >
                     <InputComponent
                       rows={5}
@@ -698,7 +643,7 @@ const AllocationSection = ({
               </div>
 
               {/* Step 2: Approval Information */}
-              <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 1 ? "block" : "none" }}>
                 <div className="my-5 gap-5">
                   <ApprovalSectionForm
                     dataTable={appHierDataDetail}
@@ -712,7 +657,7 @@ const AllocationSection = ({
               </div>
 
               {/* Step 3: Attachment Information */}
-              <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 2 ? "block" : "none" }}>
                 <div className="my-5 gap-5">
                   <AttachmentComponent
                     data={listDataAttachment}
@@ -728,7 +673,7 @@ const AllocationSection = ({
               </div>
 
               {/* Step 4: Confirmation */}
-              <div style={{ display: currentStep === 3 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 3 ? "block" : "none" }}>
                 <div className="flex flex-col gap-4">
                   <RadioTabs
                     data={[
@@ -754,15 +699,20 @@ const AllocationSection = ({
                             searchInput,
                             searchedColumnChoose,
                             searchTextChoose,
-                            handleSearchModal
+                            handleSearchModal,
                           )}
                           dataSource={selectDataTable}
                           usePagination={false}
                           tableScrolled={{ x: 3500, y: 300 }}
                         />
-                        <DetailText label={"Remark"}>{forceObj?.remark}</DetailText>
+                        <DetailText label={"Remark"}>
+                          {forceObj?.remark}
+                        </DetailText>
                         <div className="mt-2">
-                          <strong>Total Amount:</strong> {totalAllocationAmount?.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          <strong>Total Amount:</strong>{" "}
+                          {totalAllocationAmount?.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                          })}
                         </div>
                       </>
                     )}
@@ -774,7 +724,7 @@ const AllocationSection = ({
                         disableSelect={true}
                         approvalName={
                           (appHierOptions || []).filter(
-                            (data) => data.value === forceObj.approvalHierarchy
+                            (data) => data.value === forceObj.approvalHierarchy,
                           )?.[0]?.name || ""
                         }
                         dataTable={appHierDataDetail}
@@ -784,17 +734,88 @@ const AllocationSection = ({
 
                     {/* Attachment Info Tab */}
                     {confirmationTab === "Attachment" && (
-                      <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+                      <AttachmentSectionForm
+                        type={"preview"}
+                        data={listDataAttachment}
+                      />
                     )}
                   </div>
                 </div>
               </div>
-
             </Spin>
           </Form>
         </div>
-      </ModalCustom >
-    </div >
+
+        {/* Custom Footer without Clear Data and Save as Draft */}
+        <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+          <div className="flex w-full justify-between items-center">
+            <ButtonComponent
+              onClick={handleCancel}
+              className="!border-[#0075BF] !text-[#0075BF]"
+            >
+              Cancel
+            </ButtonComponent>
+            <div className="flex items-center gap-3">
+              <Button
+                disabled={currentStep === 0}
+                onClick={handlePrev}
+                style={{
+                  backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                  borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                  color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                  borderRadius: "6px",
+                  height: "32px",
+                  fontSize: "12px",
+                  border: "1px solid #DADDE5",
+                }}
+              >
+                Previous
+              </Button>
+              {currentStep < steps.length - 1 ? (
+                <Button
+                  key="btn-next"
+                  htmlType="button"
+                  onClick={handleNext}
+                  type="primary"
+                  disabled={
+                    (currentStep === 0 &&
+                      (selectDataTable.length === 0 || !forceObj.remark)) ||
+                    (currentStep === 1 && !forceObj.approvalHierarchy)
+                  }
+                  style={{
+                    backgroundColor: "#0075BF",
+                    borderColor: "#0075BF",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  key="btn-submit"
+                  htmlType="button"
+                  onClick={handleSaveDataTable}
+                  type="primary"
+                  style={{
+                    backgroundColor: "#388E3C",
+                    borderColor: "#388E3C",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Submit
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </ModalCustom>
+    </div>
   );
 };
 

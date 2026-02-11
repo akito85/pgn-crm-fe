@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import { getApprovalHistory } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 
 const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId }) => {
   const dispatch = useDispatch();
@@ -45,11 +45,10 @@ const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId 
   };
 
   return (
-    <ModalHistory
+    <NxHistoryModal
       isOpen={isOpen}
       handleClose={handleCancel}
       header={"Approval History"}
-      width={850}
       tabOptions={handleApprovalHistoryOptions()}
       dataApprover={dataApprovalHistoryFix?.dataApprover}
       dataHistory={dataApprovalHistoryFix?.dataHistory}
