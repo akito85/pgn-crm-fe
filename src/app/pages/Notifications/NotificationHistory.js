@@ -83,6 +83,10 @@ const NotificationHistory = () => {
   const unreadCount = useSelector(selectUnreadCount);
   const connectionStatus = useSelector(selectConnectionStatus);
 
+  // Get current position for filtering
+  const authCurrentPosition = useSelector((state) => state.auth?.currentPosition);
+  const currentPositionId = authCurrentPosition?.positionId;
+
   // Defensive check: Ensure all notification arrays are actually arrays
   const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
   const safeBroadcastNotifications = Array.isArray(broadcastNotifications) ? broadcastNotifications : [];
@@ -111,6 +115,23 @@ const NotificationHistory = () => {
   // Get filtered notifications based on all filters
   const getFilteredNotifications = () => {
     let notifications = safeAllNotifications;
+
+    // Filter by position - MUST be first to ensure position-based security
+    // Only show notifications that either:
+    // 1. Have no TO_POSITION_ID (broadcast/non-position notifications)
+    // 2. Have a TO_POSITION_ID that matches the user's current position
+    notifications = notifications.filter(notification => {
+      const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
+
+      // If notification has a position ID, only show when user is in that exact position
+      if (notifPositionId) {
+        if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     // Filter by tab (all/unread)
     if (activeTab === 'unread') {
