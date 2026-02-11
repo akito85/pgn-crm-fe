@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from "react";
-import { Form, Input, InputNumber, Pagination, Select, Table, Tooltip } from "antd";
+import { Button, Form, Input, InputNumber, Pagination, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getColumnSearchProps } from "../../../../../../../utils/getColumnSearchProps";
@@ -84,10 +84,17 @@ const EditableCell = ({
             optionFilterProp="children"
             filterOption={filterOption}
             labelInValue
+            size="small"
+            style={{
+              height: 24,
+              fontSize: 11,
+            }}
           >
             {options.map((option) => (
               <Select.Option key={option.value} value={option.value}>
-                {option.label}
+                <div className="text-xs">
+                  {option.label}
+                </div>
               </Select.Option>
             ))}
           </Select>
@@ -95,10 +102,13 @@ const EditableCell = ({
       case "number":
         return (
           <InputNumber
+            size="small"
             type={"number"}
             controls={false}
             style={{
               width: "100%",
+              fontSize: 11,
+              height: 24
             }}
           />
         );
@@ -131,7 +141,13 @@ const EditableCell = ({
   };
 
   return (
-    <td {...restProps}>
+    <td
+      {...restProps}
+      style={{
+        fontSize: 11,
+        lineHeight: "18px",
+      }}
+    >
       {editing ? (
         <Form.Item
           name={dataIndex}
@@ -156,7 +172,7 @@ const EditableCell = ({
                 ]
           }
         >
-          {inputNode}
+            {inputNode}
         </Form.Item>
       ) : (
         children
@@ -190,6 +206,11 @@ const GasUtilizationTableInline = ({
   const [orderSort, setOrderSort] = useState("");
   const [editDataRecord, setEditDataRecord] = useState({});
   const [statusAction, setStatusAction] = useState("");
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
 
   // const [fulfilPercentage, setFulfilPercentage] = useState(0);
   const [validationError, setValidationError] = useState('');
@@ -351,39 +372,6 @@ const GasUtilizationTableInline = ({
     }
   };
 
-
-  // const save = async (key) => {
-  //     try {
-  //       // Calculate the total percentage
-  //       const totalPercentage = dataTableGasUtilization.reduce((accumulator, currentValue) => {
-  //         return accumulator + currentValue.percentage;
-  //       }, 0);
-
-  //       const row = await formTable.validateFields();
-  //       const newData = [...dataTableGasUtilization];
-  //       const index = newData.findIndex((item) => key === item.key);
-
-  //       if (totalPercentage > 100 || totalPercentage < 100) {
-  //         alert('Percentage total must be exactly 100%');
-  //         return; // Exit the function if the total percentage is not 100%
-  //       }
-  //       if (index > -1) {
-  //         const item = newData[index];
-  //         const updatedRow = {
-  //           ...item,
-  //           ...row,
-  //         };
-  //         newData.splice(index, 1, updatedRow);
-  //         setDataTableGasUtilization(newData);
-  //         setEditingKey("");
-  //       }
-  //       setStoredData(false);
-  //       setStatusAction("");
-  //       formTable.resetFields();
-  //     } catch (errInfo) {
-  //       console.log("Validate Failed:", errInfo);
-  //     }
-  // };
   const save = async (key) => {
     try {
       // Validate the form fields
@@ -434,7 +422,6 @@ const GasUtilizationTableInline = ({
     }
   };
   
-
   const deleteRow = (record) => {
     setDataTableGasUtilization((prevState) =>
       prevState.filter((item) => item.key !== record.key)
@@ -445,6 +432,7 @@ const GasUtilizationTableInline = ({
   const columns = () => {
     const temp = [
       {
+        key: "no",
         title: "NO",
         width: 60,
         dataIndex: "no",
@@ -452,6 +440,7 @@ const GasUtilizationTableInline = ({
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "name",
         title: "UTILIZATION NAME",
         width: 240,
         dataIndex: "name",
@@ -469,6 +458,7 @@ const GasUtilizationTableInline = ({
         ),
       },
       {
+        key: "percentage",
         title: "PERCENTAGE",
         width: 240,
         dataIndex: "percentage",
@@ -487,6 +477,7 @@ const GasUtilizationTableInline = ({
         ),
       },
       {
+        key: "operation",
         title: "ACTION",
         width: 240,
         fixed: "right",
@@ -494,44 +485,77 @@ const GasUtilizationTableInline = ({
         render: (_, record) => {
           const editable = record.key === editingKey;
           return (
-            <div className="flex w-full justify-center my-3 gap-2">
+            <div className="flex w-full justify-center my-1 gap-2">
               {editable ? (
                 <>
-                  <ButtonComponent onClick={()=>cancel(record)} type="default">
-                    Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
-                    onClick={() => save(record.key)}
-                    type="submit"
+                  <Button
+                    onClick={() => cancel(record)}
+                    className={"flex w-full justify-center"}
+                    type={"default"}
+                    size={"small"}
+                    style={{
+                      borderColor: "var(--primary)",
+                      height: "22px",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      padding: "0 6px",
+                      lineHeight: "20px",
+                    }}
                   >
-                    Save
-                  </ButtonComponent>
+                    <div
+                      className="py-0.5 px-1 text-center"
+                    >
+                      Cancel
+                    </div>
+                  </Button>
+                  <Button
+                    onClick={() => save(record.key)}
+                    className={"flex w-full justify-center"}
+                    type={"submit"}
+                    size={"small"}
+                    style={{
+                      borderColor: "#0075bf00",
+                      backgroundColor: "var(--primary)",
+                      color: "#fff",
+                      height: "22px",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      padding: "0 6px",
+                      lineHeight: "20px",
+                    }}
+                  >
+                    <div
+                      className="py-0.5 px-1 text-center"
+                    >
+                      Save
+                    </div>
+                  </Button>
                 </>
               ) : (
                 <>
                   <Tooltip title="Edit">
                     <span 
-                      className={`flex justify-center${
+                      className={`flex items-center h-full ${
                         editingKey ? " cursor-not-allowed" : ""
                       }`}
                     >
                       <SVGIcon
                         name="IconEdit"
                         color={editingKey ? "#8D91A0" : "#ACC424"}
-                        width={24}
+                        width={20}
                         onClick={!editingKey ? () => edit(record) : undefined}
                       />
                     </span>
                   </Tooltip>
                   <Tooltip title="Delete">
                     <span
-                      className={`flex justify-center${
+                      className={`flex items-center h-full ${
                         editingKey ? " cursor-not-allowed" : ""
                       }`}
                     >
                       <SVGIcon
                         name="IconDelete"
-                        width={24}
+                        width={20}
                         className={
                           editingKey ? "disabled" : undefined
                         }
@@ -569,6 +593,7 @@ const GasUtilizationTableInline = ({
       return !optionSelectedCol.includes(col.title);
     });
   };
+
   const totalPercentage = dataTableGasUtilization.reduce((accumulator, currentValue) => {
     return accumulator + (currentValue.percentage || 0); // Ensure currentValue.percentage is a number
   }, 0);
@@ -615,63 +640,12 @@ const GasUtilizationTableInline = ({
               ))
               .splice(1)}
           </Select>
-
-          <Pagination
-            total={filteredData("length")}
-            className={"pr-1"}
-            showSizeChanger
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeSize}
-            showTotal={(total, range) =>
-              `Showing ${range[0]} to ${range[1]} of ${total} records`
-            }
-          />
         </div>
-        {/* End Pagination */}
 
         {/* Table */}
         <Form form={formTable} component={false}>
-          {/* TODO: Implementasikan table format baru */}
-          {/* <NxTable
-            idTable="gas-utilization-table-inline"
-            dataSource={filteredData("data")}
-            pageSize={10}
-            rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            scroll={{
-              x: 800,
-              y: 300,
-            }}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            columns={filterColumn(
-              columns().map((col) => ({
-                ...col,
-                onCell: (record) => ({
-                  record,
-                  inputType: col.inputType,
-                  dataIndex: col.dataIndex,
-                  title: col.title,
-                  editing: isEditing(record),
-                  dependDataIndex: col.dependDataIndex,
-                  urlIndex: col.url,
-                  options: col.options,
-                  required: col.require,
-                  dataEditRecord: editDataRecord,
-                  handleEditDataRecord: handleEditDataRecord,
-                  dataTableGasUtilization:dataTableGasUtilization,
-                  rules: col.rules,
-                  totalPercentage:totalPercentage,
-                  formTable: formTable,
-                  validationError: validationError
-                }),
-              }))
-            )}
-          /> */}
-          <Table
+          <NxTable
+            idTable="gas-utilization-table"
             dataSource={filteredData("data")}
             columns={filterColumn(
               columns().map((col) => ({
@@ -692,22 +666,19 @@ const GasUtilizationTableInline = ({
                   rules: col.rules,
                   totalPercentage:totalPercentage,
                   formTable: formTable,
-                  validationError: validationError
+                  validationError: validationError,
                 }),
               }))
             )}
+            totalData={filteredData("length")}
+            tableScrolled={{ x: 800, y: 300 }}
+            usePagination={false}
+            useInfiniteScroll={false}
+            onSort={onSort}
+            components={{ body: { cell: EditableCell } }}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            scroll={{
-              x: 800,
-              y: 300,
-            }}
-            pagination={false}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            onChange={onSort}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
 
           {type === 'create' && (
