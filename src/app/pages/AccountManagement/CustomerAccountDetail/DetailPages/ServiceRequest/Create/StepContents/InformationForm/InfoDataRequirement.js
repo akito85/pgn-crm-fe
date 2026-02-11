@@ -5,7 +5,8 @@ import { Popconfirm, Button, Space, Form, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../../../assets/Icon";
 
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
@@ -207,8 +208,9 @@ export default function InfoDataRequirement({
   }
 
   return(
-    <> 
-      <NxPanel title={"DATA REQUIREMENT"}>
+    <>
+      <NxCardContainer header={"DATA REQUIREMENT"}>
+        <NxBaseContainer border>
         <div className="w-full flex justify-between items-center gap-5 mb-5">
           {/* Filter Button - Left side */}
           <ButtonComponent
@@ -293,7 +295,8 @@ export default function InfoDataRequirement({
           dataMain={dataRequirement}
           columnMain={columnMain}
         />
-      </NxPanel>
+        </NxBaseContainer>
+      </NxCardContainer>
 
       <NxModal
         isOpen={isDataRequirement}

@@ -527,21 +527,14 @@ const CreateCustomerServiceRequest = (props) => {
               </ButtonComponent>
             )}
             {current < steps.length - 1 && (
-              <Button
+              <ButtonComponent
                 onClick={handleButtonNext}
-                type="primary"
-                className="ant-btn ant-btn-submit flex w-full justify-center"
+                type={"submit"}
                 disabled={steps[current].disabled}
+                icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
               >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-              </Button>
+                Next
+              </ButtonComponent>
             )}
             {current === steps.length - 1 && (
               <ButtonComponent

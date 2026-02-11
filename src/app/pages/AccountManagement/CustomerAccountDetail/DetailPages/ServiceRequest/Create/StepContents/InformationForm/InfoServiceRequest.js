@@ -8,7 +8,8 @@ import InputComponent from "../../../../../../../../../components/InputComponent
 import StatusComponent from "../../../../../../../../../components/StatusComponent";
 import DateComponent from "../../../../../../../../../components/DateComponent";
 
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
@@ -431,7 +432,8 @@ export default function InfoServiceRequest({
 
   return(
     <Fragment>
-      <NxPanel title={"SERVICE INFORMATION"}>
+      <NxCardContainer header={"SERVICE INFORMATION"}>
+        <NxBaseContainer border>
         {/* Remove the wrapper Form component since form is passed as prop */}
         <div className="w-full grid grid-cols-2 gap-4">
           {/* Left Column */}
@@ -628,7 +630,8 @@ export default function InfoServiceRequest({
             />
           </Form.Item>
         </div>
-      </NxPanel>
+        </NxBaseContainer>
+      </NxCardContainer>
 
       <NxModal
         isOpen={isOpen}
