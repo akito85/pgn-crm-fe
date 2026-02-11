@@ -599,7 +599,7 @@ const GasUtilizationTableInline = ({
   }, 0);
 
   return (
-      <div>
+      <div className="flex flex-col gap-4">
         {type === "create" && (
           <div className="flex w-full justify-end">
             <ButtonComponent
@@ -614,7 +614,7 @@ const GasUtilizationTableInline = ({
         )}
 
         {/* Start Pagination */}
-        <div className={"w-full flex justify-between py-6"}>
+        {/* <div className={"w-full flex justify-between py-6"}>
           <Select
             mode="multiple"
             placeholder="Show All Column"
@@ -640,7 +640,7 @@ const GasUtilizationTableInline = ({
               ))
               .splice(1)}
           </Select>
-        </div>
+        </div> */}
 
         {/* Table */}
         <Form form={formTable} component={false}>
