@@ -1,3 +1,4 @@
+import moment from "moment";
 import {
   WarningOutlined,
 } from "@ant-design/icons";
@@ -10,14 +11,14 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
-  createRateSource,
-  updateRateSource,
-  saveDraftRateSource,
-  getDetailRateSource,
+  createRateIndex,
+  updateRateIndex,
+  saveDraftRateIndex,
+  getDetailRateIndex,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-} from "../../../../../redux/slices/receipt_collection/rateSource";
+} from "../../../../../redux/slices/receipt_collection/liborRate";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import LiborRateForm from "./LiborRateForm";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
@@ -36,13 +37,7 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 
 const ListFormLiborRate = (props) => {
   const { type } = props;
-  const {
-    data_detail,
-    dataListAppHierId,
-    dataListAppHierDetail,
-    loading,
-    dataType,
-  } = useSelector((state) => state.rateSource);
+  const { data_detail, dataListAppHierId, dataListAppHierDetail, loading,dataListCategory } = useSelector((state) => state.liborRate);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -59,14 +54,14 @@ const ListFormLiborRate = (props) => {
   const [current, setCurrent] = useState(0);
 
   const steps = [
-    { title: "CREATE", value: "Libor Rate" },
+    { title: "CREATE", value: "Rate Index" },
     { title: "APPROVAL", value: "Approval" },
     { title: "ATTACHMENT", value: "Attachment" },
   ];
 
   useEffect(() => {
     if (id && type === "update") {
-        dispatch(getDetailRateSource(id));
+        dispatch(getDetailRateIndex(id));
     }
   }, [dispatch, id, type]);
 
@@ -108,14 +103,17 @@ const ListFormLiborRate = (props) => {
 
   useEffect(() => {
     if (id && data_detail) {
-      const rateSource = data_detail?.rateSource || {};
+      const rateIndex = data_detail?.rateIndex || {};
       const formattedData = {
-        ...rateSource,
-        apphierId: rateSource.appHierId,
+        ...rateIndex,
+        apphierId: rateIndex.appHierId,
+        sourceId: rateIndex.sourceId,
+        startDate: rateIndex.startDate ? moment(rateIndex.startDate) : null,
+        endDate: rateIndex.endDate ? moment(rateIndex.endDate) : null,
       };
       
       form.setFieldsValue(formattedData);
-      setSelectedHierarchy(rateSource?.appHierId);
+      setSelectedHierarchy(rateIndex?.appHierId);
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
           ...attachData,
@@ -128,8 +126,8 @@ const ListFormLiborRate = (props) => {
 
   const [tabData] = useState([
     {
-      value: "Libor Rate", 
-      paramValue: ["sourceCode", "sourceName", "description"]
+      value: "Rate Index", 
+      paramValue: ["indexCode", "indexName", "sourceId", "currencyCode", "tenorValue", "tenorUnit", "ratePercentage", "startDate", "endDate", "remarks"]
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -189,7 +187,7 @@ const ListFormLiborRate = (props) => {
       appHierId: selectedHierarchy,
       id: id,
     };
-    dispatch(saveDraftRateSource(dataValue))
+    dispatch(saveDraftRateIndex(dataValue))
       .unwrap()
       .then(() => {
         navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_LIBOR_RATE);
@@ -218,7 +216,7 @@ const ListFormLiborRate = (props) => {
       return: false,
     };
 
-    const action = type === "update" ? updateRateSource : createRateSource;
+    const action = type === "update" ? updateRateIndex : createRateIndex;
 
     dispatch(action(sendBody))
       .unwrap()
@@ -230,7 +228,7 @@ const ListFormLiborRate = (props) => {
           const body = {
             referensiId: referensiId,
             files: element.file,
-            category: "RATE_SOURCE",
+            category: "RATE_INDEX",
             fileCategoryId: element.fileCategoryId,
           };
           await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body);
@@ -259,7 +257,7 @@ const ListFormLiborRate = (props) => {
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         <Form layout="vertical" form={form} onFinish={handleSubmitForm}>
           <div style={{ display: current !== 0 ? "none" : undefined }}>
-            <LiborRateForm dataType={dataType} form={form} />
+            <LiborRateForm form={form} additionalSource={data_detail?.rateSource} />
           </div>
           <div style={{ display: current !== 1 ? "none" : undefined }}>
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -277,7 +275,7 @@ const ListFormLiborRate = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="rateSource"
+                typeSelector="liborRate"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}

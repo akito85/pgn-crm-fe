@@ -87,9 +87,6 @@ import ListFormPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection
 import ViewLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ViewLiborRate";
 import ListDetailLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListDetailLiborRate";
 import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListFormLiborRate";
-import ViewRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ViewRateIndex";
-import ListDetailRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ListDetailRateIndex";
-import ListFormRateIndex from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/RateIndex/ListFormRateIndex";
 
 
 
@@ -248,10 +245,4 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_LIBOR_RATE: <ListDetailLiborRate />,
   CREATE_LIBOR_RATE: <ListFormLiborRate type={"create"} />,
   UPDATE_LIBOR_RATE: <ListFormLiborRate type={"update"} />,
-
-  // Rate Index
-  VIEW_RATE_INDEX: <ViewRateIndex />,
-  DETAIL_RATE_INDEX: <ListDetailRateIndex />,
-  CREATE_RATE_INDEX: <ListFormRateIndex type={"create"} />,
-  UPDATE_RATE_INDEX: <ListFormRateIndex type={"update"} />,
 };
