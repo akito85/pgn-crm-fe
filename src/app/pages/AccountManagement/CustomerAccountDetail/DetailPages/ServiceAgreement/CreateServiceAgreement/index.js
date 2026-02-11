@@ -22,7 +22,7 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import HeaderDetail from "../../../HeaderDetail";
 import SaInformation from "./SaInformation";
-import SaDetail from "./SaDetail";
+import SaDetail from "../shared/SaDetail";
 import Attachment from "./Attachment";
 import Approval from "./Approval";
 import {
@@ -47,7 +47,7 @@ import {
 import {
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
-import ConfirmationSa from "./Modal/ConfirmationSa";
+import ConfirmationSa from "../shared/Modal/ConfirmationSa";
 import { hasValue } from "../../../../../../../utils";
 
 const CreateServiceAgreement = ({ saType }) => {
@@ -1978,80 +1978,80 @@ const CreateServiceAgreement = ({ saType }) => {
             {/* Section Action Steps */}
             <NxBaseContainer border>
               <div className="steps-action flex w-full justify-between gap-x-2">
-                  
-                  <ButtonComponent
-                    type={"menu"}
-                    onClick={() => {
-                      setModalBack(true);
-                    }}
-                  >
-                    Cancel
-                  </ButtonComponent>
-                  <div className="flex w-full justify-end gap-x-2">
-                    <ButtonComponent
-                      icon={
-                        saRecordData?.typeSa === "main" ? (
-                          <SVGIcon name={`IconButtonClear`} width={24} />
-                        ) : (
-                          <SVGIcon name={`IconButtonReset`} width={24} />
-                        )
-                      }
-                      type="reject"
 
-                      onClick={() =>
-                        saRecordData?.typeSa === "main"
-                          ? handleClear()
-                          : setIsReset(!isReset)
-                      }
+                <ButtonComponent
+                  type={"menu"}
+                  onClick={() => {
+                    setModalBack(true);
+                  }}
+                >
+                  Cancel
+                </ButtonComponent>
+                <div className="flex w-full justify-end gap-x-2">
+                  <ButtonComponent
+                    icon={
+                      saRecordData?.typeSa === "main" ? (
+                        <SVGIcon name={`IconButtonClear`} width={16} />
+                      ) : (
+                        <SVGIcon name={`IconButtonReset`} width={16} />
+                      )
+                    }
+                    type="reject"
+
+                    onClick={() =>
+                      saRecordData?.typeSa === "main"
+                        ? handleClear()
+                        : setIsReset(!isReset)
+                    }
+                  >
+                    {saRecordData?.typeSa === "main" ? "Clear Data" : "Reset"}
+                  </ButtonComponent>
+
+
+                  {current === steps.length - 1 && (
+                    <>
+                      <ButtonComponent
+                        htmlType="submit"
+                        type="secondary"
+                        onClick={() => setTypeSubmit("draft")}
+                      >
+                        Save as Draft
+                      </ButtonComponent>
+                    </>
+                  )}
+                  {current > 0 && (
+                    <ButtonComponent
+                      onClick={() => {
+                        prev();
+                        scrollLeftHandler();
+                      }}
+                      type={"menu"}
                     >
-                      {saRecordData?.typeSa === "main" ? "Clear Data" : "Reset"}
+                      Previous
                     </ButtonComponent>
-                    
-                    
-                    {current === steps.length - 1 && (
-                      <>
-                        <ButtonComponent
-                          htmlType="submit"
-                          type="submit"
-                          onClick={() => setTypeSubmit("draft")}
-                        >
-                          Save as Draft
-                        </ButtonComponent>
-                      </>
-                    )}
-                    {current > 0 && (
+                  )}
+                  {current < steps.length - 1 && (
+                    <ButtonComponent
+                      onClick={handleButtonNext}
+                      type={"submit"}
+                      disabled={steps[current].disabled}
+                    >
+                      Next
+                    </ButtonComponent>
+                  )}
+                  {current === steps.length - 1 && (
+                    <>
                       <ButtonComponent
-                        onClick={() => {
-                          prev();
-                          scrollLeftHandler();
-                        }}
-                        type={"menu"}
+                        htmlType="submit"
+                        type="approve"
+                        onClick={() => setTypeSubmit("submit")}
+                      // disabled={listDataAttachment.length === 0 && true}
                       >
-                        Previous
+                        Submit
                       </ButtonComponent>
-                    )}
-                    {current < steps.length - 1 && (
-                      <ButtonComponent
-                        onClick={handleButtonNext}
-                        type={"submit"}
-                        disabled={steps[current].disabled}
-                      >
-                        Next
-                      </ButtonComponent>
-                    )}
-                    {current === steps.length - 1 && (
-                      <>
-                        <ButtonComponent
-                          htmlType="submit"
-                          type="approve"
-                          onClick={() => setTypeSubmit("submit")}
-                        // disabled={listDataAttachment.length === 0 && true}
-                        >
-                          Submit
-                        </ButtonComponent>
-                      </>
-                    )}
-                  </div>
+                    </>
+                  )}
+                </div>
               </div>
             </NxBaseContainer>
           </Form>
