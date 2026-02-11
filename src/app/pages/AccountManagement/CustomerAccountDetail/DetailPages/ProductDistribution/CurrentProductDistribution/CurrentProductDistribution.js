@@ -1,10 +1,9 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import DetailText from "../../../../../../../components/DetailText";
 import moment from "moment";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 import { useDispatch, useSelector } from "react-redux";
-import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
-import { dateFormatting } from "../../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
+import { dateFormatting, renderColumn } from "../../../../../../../utils";
 import { getCurrentPB } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import Toolbar from "../../../../../../../components/Toolbar";
@@ -13,54 +12,62 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_m
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import { sorterFunction } from "../../../../../../../utils/sorterFunction";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const columns = (
-  page = 1,
-  pageSize = 10,
+  search,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  onFilter = () => {},
-  sorter = () => {}
+  handleSearch,
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "country",
       title: "COUNTRY",
       dataIndex: "country",
-      sorter: true,
       width: 150,
-      onFilter: (value, record) => onFilter("country", value, record),
-      sorter: (a, b) => sorter("country", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("country", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "country",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
+      render: (text) => {
+        return renderColumn("country", searchedColumn, searchText, text, false, "input", search)
+      }
     },
     {
+      key: "percentage",
       title: "PERCENTAGE (%)",
       dataIndex: "percentage",
       align: "right",
-      sorter: true,
       width: 150,
-      onFilter: (value, record) => onFilter("percentage", value, record),
-      sorter: (a, b) => sorter("percentage", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("percentage", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "percentage",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
+      render: (text) => {
+        return renderColumn("percentage", searchedColumn, searchText, text, false, "input", search)
+      }
     },
   ];
 };
@@ -91,16 +98,25 @@ const CurrentProductDistribution = ({ id, idCustomer }) => {
   // Selector
   const { data_current } = useSelector((state) => state.productDistribution);
 
+  const listData = data_current?.srcDistDtl || [];
+
+  const dataWithKeys = useMemo(() => {
+    if (!listData?.length) return [];
+
+    return listData.map((item, index) => ({
+      ...item,
+      key: `current-product-distribution-${item.id || index}`,
+    }));
+  }, [listData]);
+
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_current?.srcDistDtl;
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState({});
 
   // Use Effect
   useEffect(() => {
@@ -111,41 +127,49 @@ const CurrentProductDistribution = ({ id, idCustomer }) => {
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      }
+    })
   };
+  
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
-  // Handle Change Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+  const baseColumns = useMemo(() =>
+    columns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ), [search, searchText, searchedColumn]
+  );
 
-  const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = value.toLowerCase();
-    const recordValue = record[dataIndex];
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+ 
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
 
-    if (recordValue != null) {
-      return recordValue.toString().toLowerCase().includes(fixSearchText);
-    }
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns, fixedColumns]);
 
-    return false;
-  };
-
-  const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
-      const value = obj[fieldSort];
-      return value != null ? value.toString().toLowerCase() : "";
-    };
-
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-
-    return fa.localeCompare(fb);
-  };
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -170,22 +194,15 @@ const CurrentProductDistribution = ({ id, idCustomer }) => {
             <Toolbar items={itemGrantAccess} type="detail" />
             <NxTable
               idTable="current-product-distribution"
-              dataSource={dataSource}
-              totalData={dataSource?.srcDistDtl?.length}
-              current={page}
-              tableScrolled={{ y: 400, x: dataSource?.srcDistDtl?.length ? "max-content" : "100%" }}
-              onSort={sorter}
-              columns={columns(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                onFilter,
-              )}
+              dataSource={dataWithKeys}
+              tableScrolled={{ y: 400, x: dataWithKeys?.length ? "max-content" : "100%" }}
+              columns={processedColumns}
               usePagination={false}
-              useInfiniteScroll={true}
+              useInfiniteScroll={false}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              columnDefinitions={columnDefinitions}
+              showAdvanceSearch={false}
             />
           </div>
         </NxBaseContainer>
