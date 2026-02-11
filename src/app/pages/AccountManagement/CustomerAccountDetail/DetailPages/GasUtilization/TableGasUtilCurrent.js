@@ -2,61 +2,70 @@ import React,{ useEffect, useState, useRef, useMemo} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { getCurrentGasUtilization } from '../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice'
-import DetailText from '../../../../../../components/DetailText'
 import NxTable from '../../../../../../components/Nx/NxTable'
 import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColumns'
 import { nxGetAccountActions } from '../../../../../../components/Nx/NxGetAccountActions'
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
+import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../utils/getColumnSearchProps'
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
 import Toolbar from '../../../../../../components/Toolbar'
 import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
 import NxDetailText from '../../../../../../components/Nx/NxDetailText'
 import { useNavigate } from 'react-router-dom'
+import { sorterFunction } from '../../../../../../utils/sorterFunction'
+import { renderColumn } from '../../../../../../utils'
 
 const columns = (
-  page = 1,
-  pageSize = 10,
+  search,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  onFilter = () => {},
-  sorter = () => {}
+  handleSearch,
 ) => { 
   return [
     {
+      key: "no",
       title: "NO",
       width: 20,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "name",
       title: "UTILIZATION NAME",
       dataIndex: "name",
       width: 150,
-      onFilter: (value, record) => onFilter("name", value, record),
-      sorter: (a, b) => sorter("name", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("name", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "name",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
+      render: (text) => {
+        return renderColumn("name", searchedColumn, searchText, text, false, "input", search)
+      }
     },
     {
+      key: "percentage",
       title: "PERCENTAGE",
       dataIndex: "percentage",
       width: 150,
-      onFilter: (value, record) => onFilter("percentage", value, record),
-      sorter: (a, b) => sorter("percentage", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("percentage", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "percentage",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
+      render: (text) => {
+        return renderColumn("percentage", searchedColumn, searchText, text, false, "input", search)
+      }
     }
   ]
 }
@@ -66,10 +75,11 @@ const TableGasUtilCurrent = ({idAccount}) => {
   const dispatch = useDispatch();
   const {
     data_current,
-    loading,
   } = useSelector(
     (state) =>  state.accountGasUtilization
   );
+
+  const listData = data_current?.gasUtilsDtl || [];
 
   const itemActions = nxGetAccountActions({
     idAccount,
@@ -83,40 +93,40 @@ const TableGasUtilCurrent = ({idAccount}) => {
     )
   });
   
-  // TODO: sort dan page size belum dipakai
-  const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [page, setPage] = useState(1);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [pageSize, setPageSize] = useState(10);
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!listData?.length) return [];
+
+    return listData.map((item, index) => ({
+      ...item,
+      key: `gas-util-current-${item.id || index}`,
+    }));
+  }, [listData])
 
   useEffect(() => {
     dispatch(getCurrentGasUtilization({id: idAccount}))
   }, [dispatch, idAccount])
   
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field},${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  }
-
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
     });
   };
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
   const baseColumns = useMemo(() =>
     columns(
@@ -137,32 +147,15 @@ const TableGasUtilCurrent = ({idAccount}) => {
   }, [baseColumns]);
  
   const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns);
-  }, [allColumns]);
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
 
-  const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = value.toLowerCase();
-    const recordValue = record[dataIndex];
-
-    if (recordValue != null) {
-      return recordValue.toString().toLowerCase().includes(fixSearchText);
-    }
-
-    return false;
-  };
-  
-  const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
-      const value = obj[fieldSort];
-      return value != null ? value.toString().toLowerCase() : "";
-    };
-
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-
-    return fa.localeCompare(fb);
-  };
-
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns, fixedColumns]);
 
   return (
     <>
@@ -178,22 +171,15 @@ const TableGasUtilCurrent = ({idAccount}) => {
             <Toolbar items={itemActions} type="detail" />
             <NxTable
               id={"table-gas-util-current"}
-              dataSource={data_current?.gasUtilsDtl}
-              totalData={data_current?.gasUtilsDtl?.length}
-              current={page}
-              tableScrolled={{ y: 525, x: data_current?.length ? "max-content" : "100%" }}
-              columns={columns(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                onFilter,
-                sorter
-              )}
+              dataSource={dataSourceWithKeys}
+              tableScrolled={{ y: 525, x: dataSourceWithKeys?.length ? "max-content" : "100%" }}
+              columns={processedColumns}
               usePagination={false}
               useInfiniteScroll={false}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              columnDefinitions={columnDefinitions}
+              showAdvanceSearch={false}
             />
           </div>
         </NxBaseContainer>
