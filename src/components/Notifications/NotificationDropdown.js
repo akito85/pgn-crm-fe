@@ -193,10 +193,9 @@ const NotificationDropdown = () => {
   const allCount = userNotifications.length;
   const unreadCountForTab = userNotifications.filter(notification => !isNotificationRead(notification)).length;
 
-  // Client-side validation: Use client-calculated unread count as fallback
-  // This protects against backend returning count for all users
-  // If Redux unreadCount doesn't match our filtered count, use the filtered count as it's more reliable
-  const safeUnreadCount = userUnreadCount !== undefined ? Math.min(userUnreadCount, unreadCountForTab) : unreadCountForTab;
+  // Use position-filtered unread count (more accurate than backend count which might not be position-filtered)
+  // userNotifications is already filtered by current position, so unreadCountForTab reflects the correct count
+  const safeUnreadCount = unreadCountForTab;
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },

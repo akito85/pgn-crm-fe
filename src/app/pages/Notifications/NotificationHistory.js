@@ -180,9 +180,20 @@ const NotificationHistory = () => {
   const endIndex = startIndex + pageSize;
   const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
 
-  // Calculate counts for tabs
-  const allCount = safeAllNotifications.length;
-  const unreadCountForTab = safeAllNotifications.filter(notification =>
+  // Calculate counts for tabs - use position-filtered notifications (without other filters like search/date)
+  // Position filter must be applied for accurate counts
+  const positionFilteredNotifications = safeAllNotifications.filter(notification => {
+    const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
+    if (notifPositionId) {
+      if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const allCount = positionFilteredNotifications.length;
+  const unreadCountForTab = positionFilteredNotifications.filter(notification =>
     (notification.STATUS || notification.status) !== "read"
   ).length;
 
@@ -191,8 +202,8 @@ const NotificationHistory = () => {
     setCurrentPage(1);
   }, [search, startDate, endDate, selectedNotificationType, activeTab]);
 
-  // Safe unread count
-  const safeUnreadCount = unreadCount !== undefined ? Math.min(unreadCount, unreadCountForTab) : unreadCountForTab;
+  // Use position-filtered unread count (more accurate than backend count)
+  const safeUnreadCount = unreadCountForTab;
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
