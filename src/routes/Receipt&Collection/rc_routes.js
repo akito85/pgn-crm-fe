@@ -150,13 +150,7 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   
   // Libor Rate
   VIEW_LIBOR_RATE: "/receipt-and-collection/libor-rate",
-  DETAIL_LIBOR_RATE: "/receipt-and-collection/libor-rate/view",
   CREATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/create",
   UPDATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/update",
-
-  // Rate Index
-  VIEW_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index",
-  DETAIL_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/view",
-  CREATE_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/create",
-  UPDATE_RATE_INDEX: "/receipt-and-collection/libor-rate/rate-index/update",
+  DETAIL_LIBOR_RATE: "/receipt-and-collection/libor-rate/view",
 };
