@@ -145,6 +145,7 @@ const NxTable = ({
   enableRowClick = false,
   selectedRowKey = null,
   onRowClick = () => { },
+  components: externalComponents,
 }) => {
   // Resolve aliases for backward compatibility
   const resolvedDataSource = dataSource || dataMain || [];
@@ -385,15 +386,20 @@ const NxTable = ({
             onDragEnd: isDraggable ? handleDragEnd : undefined,
           };
         },
-        onCell: () => ({
-          style: {
-            textAlign: textAlign,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontSize: "11px",
-          },
-        }),
+        onCell: (record, index) => {
+          const externalOnCell = col.onCell ? col.onCell(record, index) : {};
+          return {
+            ...externalOnCell,
+            style: {
+              textAlign: textAlign,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontSize: "11px",
+              ...(externalOnCell.style || {}),
+            },
+          };
+        },
       };
 
       if (fixedPos) {
@@ -515,6 +521,11 @@ const NxTable = ({
     header: {
       cell: ResizableTitle,
     },
+    ...(externalComponents ? {
+      body: {
+        ...(externalComponents.body || {}),
+      },
+    } : {}),
   };
 
   const hasRightControls =

@@ -12,13 +12,13 @@ import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Col
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
-  getPaginateRateSource,
+  getPaginateRateIndex,
+  getDownloadRateIndex,
   getApprovalHistory,
-  getDownloadRateSource,
-  activeInactiveRateSource,
+  activeInactiveRateIndex,
   getAllApprovalList,
   getListApprovalById,
-} from "../../../../../redux/slices/receipt_collection/rateSource";
+} from "../../../../../redux/slices/receipt_collection/liborRate";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import Toolbar from "../../../../../components/Toolbar";
@@ -26,11 +26,11 @@ import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { disabledActionByStatus } from "../../../../../utils";
 import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
-import ViewRateIndex from "./RateIndex/ViewRateIndex";
+
 
 const ViewLiborRate = () => {
   const navigate = useNavigate();
-  const { loading, data, dataApprovalHistory } = useSelector((state) => state.rateSource);
+  const { loading, data, dataApprovalHistory } = useSelector((state) => state.liborRate);
   const { bodyError } = useSelector((state) => state?.general);
 
   const dispatch = useDispatch();
@@ -53,11 +53,11 @@ const ViewLiborRate = () => {
     right: ["status", "approvalStatus", "action"],
   }));
   const [selectedSource, setSelectedSource] = useState(null);
-  const rateIndexRef = useRef(null);
+  // const rateIndexRef = useRef(null);
 
   const handleFetch = useCallback(() => {
     dispatch(
-      getPaginateRateSource({
+      getPaginateRateIndex({
         page,
         pageSize,
         sort,
@@ -98,12 +98,12 @@ const ViewLiborRate = () => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
       setDataApprovalHistoryFix({
         dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.RATE_SOURCE || [],
-          inactive: dataApprovalHistory?.dataApprover?.INACTIVE_RATE_SOURCE || [],
+          create: dataApprovalHistory?.dataApprover?.RATE_INDEX || [],
+          inactive: dataApprovalHistory?.dataApprover?.INACTIVE_RATE_INDEX || [],
         },
         dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.RATE_SOURCE || [],
-          inactive: dataApprovalHistory?.dataHistory?.INACTIVE_RATE_SOURCE || [],
+          create: dataApprovalHistory?.dataHistory?.RATE_INDEX || [],
+          inactive: dataApprovalHistory?.dataHistory?.INACTIVE_RATE_INDEX || [],
         },
       });
     } else {
@@ -130,28 +130,99 @@ const ViewLiborRate = () => {
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "SOURCE CODE",
-      dataIndex: "sourceCode",
+      title: "CODE",
+      dataIndex: "indexCode",
+      key: "indexCode",
+      sorter: true,
+      ...getColumnSearchPropsPaging("indexCode", searchInput, searchedColumn, searchText, handleSearch, true),
+      render: (text) => renderColumn("indexCode", searchedColumn, searchText, text, true, "input", search),
+    },
+    {
+      title: "SOURCE",
+      dataIndex: ["rateSource", "sourceCode"],
       key: "sourceCode",
       sorter: true,
-      ...getColumnSearchPropsPaging("sourceCode", searchInput, searchedColumn, searchText, handleSearch, true),
-      render: (text) => renderColumn("sourceCode", searchedColumn, searchText, text, true, "input", search),
+      ...getColumnSearchPropsPaging("rateSource.sourceCode", searchInput, searchedColumn, searchText, handleSearch, true),
+      render: (text, record) => renderColumn("sourceCode", searchedColumn, searchText, record?.rateSource?.sourceCode, true, "input", search),
     },
     {
       title: "SOURCE NAME",
-      dataIndex: "sourceName",
+      dataIndex: ["rateSource", "sourceName"],
       key: "sourceName",
       sorter: true,
-      ...getColumnSearchPropsPaging("sourceName", searchInput, searchedColumn, searchText, handleSearch, false),
-      render: (text) => renderColumn("sourceName", searchedColumn, searchText, text, true, "input", search),
+      ...getColumnSearchPropsPaging("rateSource.sourceName", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text, record) => renderColumn("sourceName", searchedColumn, searchText, record?.rateSource?.sourceName, true, "input", search),
+    },
+    {
+      title: "RATE INDEX CODE",
+      dataIndex: "indexCode",
+      key: "indexCode_2",
+      sorter: true,
+      ...getColumnSearchPropsPaging("indexCode", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => renderColumn("indexCode", searchedColumn, searchText, text, true, "input", search),
+    },
+    {
+      title: "RATE INDEX NAME",
+      dataIndex: "indexName",
+      key: "indexName",
+      sorter: true,
+      ...getColumnSearchPropsPaging("indexName", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => renderColumn("indexName", searchedColumn, searchText, text, true, "input", search),
+    },
+    {
+      title: "TENOR",
+      dataIndex: "tenorValue",
+      key: "tenorValue",
+      sorter: true,
+      ...getColumnSearchPropsPaging("tenorValue", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => renderColumn("tenorValue", searchedColumn, searchText, text, true, "input", search),
+    },
+    {
+      title: "RATE VALUE",
+      dataIndex: "ratePercentage",
+      key: "ratePercentage",
+      sorter: true,
+      align: "right",
+      ...getColumnSearchPropsPaging("ratePercentage", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => `${text}%`,
+    },
+    {
+      title: "UNIT",
+      dataIndex: "tenorUnit",
+      key: "tenorUnit",
+      sorter: true,
+      ...getColumnSearchPropsPaging("tenorUnit", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => renderColumn("tenorUnit", searchedColumn, searchText, text, true, "input", search),
+    },
+    {
+      title: "CURRENCY",
+      dataIndex: "currencyCode",
+      key: "currencyCode",
+      sorter: true,
+      ...getColumnSearchPropsPaging("currencyCode", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => renderColumn("currencyCode", searchedColumn, searchText, text, true, "input", search),
+    },
+    {
+      title: "START DATE",
+      dataIndex: "startDate",
+      key: "startDate",
+      sorter: true,
+      render: (text) => renderColumn("startDate", searchedColumn, searchText, text, false, "date"),
+    },
+    {
+      title: "END DATE",
+      dataIndex: "endDate",
+      key: "endDate",
+      sorter: true,
+      render: (text) => renderColumn("endDate", searchedColumn, searchText, text, false, "date"),
     },
     {
       title: "DESCRIPTION",
-      dataIndex: "description",
-      key: "description",
+      dataIndex: "remarks",
+      key: "remarks",
       sorter: true,
-      ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch, false),
-      render: (text) => renderColumn("description", searchedColumn, searchText, text, true, "input", search),
+      ...getColumnSearchPropsPaging("remarks", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => renderColumn("remarks", searchedColumn, searchText, text, true, "input", search),
     },
     {
       title: "STATUS",
@@ -174,20 +245,20 @@ const ViewLiborRate = () => {
   ];
 
   const handleDownload = () => {
-    dispatch(getDownloadRateSource({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(getDownloadRateIndex({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
   };
 
   const handleInactive = (r) => {
     setOpenModalInactivate(true);
     setId(r?.id);
-    setNameModalActiveOrInactivate(r?.sourceName);
+    setNameModalActiveOrInactivate(r?.indexName);
     setStatus(r?.status);
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
     const body = { id, appHierId: res.approvalHierarchy, status: status === "Inactive" ? "Active" : "Inactive", remark: res.remark };
     setBody({ body });
-    dispatch(activeInactiveRateSource({ body })).unwrap().then(() => {
+    dispatch(activeInactiveRateIndex({ body })).unwrap().then(() => {
       handleClear();
       setOpenModalInactivate(false);
       handleFetch();
@@ -213,39 +284,39 @@ const ViewLiborRate = () => {
         </NavLink>
       ),
     },
-    {
-      action: "Rate Index",
-      type: "table",
-      render: (record, data_length) => (
-        data_length > 3 ? (
-          <ButtonComponent
-            className="gap-5"
-            icon={<SVGIcon name="IconRateSource" color={"#0075bf"} width={24} />}
-            border={false}
-            type="action"
-            onClick={() => {
-              setSelectedSource(record);
-              setTimeout(() => {
-                rateIndexRef.current?.scrollIntoView({ behavior: "smooth" });
-              }, 100);
-            }}
-          >
-            <span className={"text-black gap-2 text-center"}>Rate Index</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title={'Rate Index'}>
-            <div className="cursor-pointer" onClick={() => {
-              setSelectedSource(record);
-              setTimeout(() => {
-                rateIndexRef.current?.scrollIntoView({ behavior: "smooth" });
-              }, 100);
-            }}>
-              <SVGIcon name="IconRateSource" color={"#0075bf"} width={24} />
-            </div>
-          </Tooltip>
-        )
-      ),
-    },
+    // {
+    //   action: "Rate Index",
+    //   type: "table",
+    //   render: (record, data_length) => (
+    //     data_length > 3 ? (
+    //       <ButtonComponent
+    //         className="gap-5"
+    //         icon={<SVGIcon name="IconRateSource" color={"#0075bf"} width={24} />}
+    //         border={false}
+    //         type="action"
+    //         onClick={() => {
+    //           setSelectedSource(record);
+    //           setTimeout(() => {
+    //             rateIndexRef.current?.scrollIntoView({ behavior: "smooth" });
+    //           }, 100);
+    //         }}
+    //       >
+    //         <span className={"text-black gap-2 text-center"}>Rate Index</span>
+    //       </ButtonComponent>
+    //     ) : (
+    //       <Tooltip title={'Rate Index'}>
+    //         <div className="cursor-pointer" onClick={() => {
+    //           setSelectedSource(record);
+    //           setTimeout(() => {
+    //             rateIndexRef.current?.scrollIntoView({ behavior: "smooth" });
+    //           }, 100);
+    //         }}>
+    //           <SVGIcon name="IconRateSource" color={"#0075bf"} width={24} />
+    //         </div>
+    //       </Tooltip>
+    //     )
+    //   ),
+    // },
     {
       action: "View",
       type: "table",
@@ -367,7 +438,9 @@ const ViewLiborRate = () => {
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px] font-bold">LIBOR RATE LIST</p>
-            <Toolbar items={itemActions} />
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
           </div>
         }>
           <TableRBI
@@ -375,7 +448,7 @@ const ViewLiborRate = () => {
             handleDownload={handleDownload}
             dataSource={data?.result}
             pageSize={pageSize}
-            columns={[...columns, ...useColumnActionPermission(["view", "history", "update", 'activate', 'Rate Index'], itemActions)]}
+            columns={[...columns, ...useColumnActionPermission(["view", "history", "update", 'activate'], itemActions)]}
             current={page}
             onChange={handleChange}
             onSizeChanger={handleChange}
@@ -392,15 +465,12 @@ const ViewLiborRate = () => {
           />
         </CardContainer>
 
-        <div ref={rateIndexRef}>
-          <ViewRateIndex selectedSource={selectedSource} />
-        </div>
 
         <ModalActiveInactive
           dispatch={dispatch}
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
-          selector={"rateSource"}
+          selector={"liborRate"}
           alertMessage={`Are you sure you want to change status for ${nameModalActiveOrInactivate}?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={() => setOpenModalInactivate(false)}

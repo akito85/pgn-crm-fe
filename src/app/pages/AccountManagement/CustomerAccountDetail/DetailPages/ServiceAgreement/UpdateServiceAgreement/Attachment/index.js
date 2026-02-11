@@ -20,6 +20,9 @@ import { getListCategoryAttachment, getGlobalPropertiesAttachment } from "../../
 import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 import { configApp } from "../../../../../../../../constants/configApp";
 import accountPromoHttpService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 
 
 const columnAttachment = (
@@ -277,57 +280,64 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
 
   return (
     // <BaseContainer header={"Attachment Information"}>
-    <div>
-      <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3></div>
-      <div className="flex flex-col w-full gap-2">
-        <div>
-        <p className="text-[13px] mb-0 text-dg-grey-dark">
-              Attach File:
-              {(
-                <span className={"pl-1"} style={{ color: "red" }}>
-                  *
-                </span>
-              )}
-            </p>
-          <div className="flex flex-row gap-2 items-center">
-            <ButtonComponent
-              fontSizeClassname="text-[11px]"
-              size="small"
-              type="default"
-              onClick={() => setModalUpload(true)}
-            >
-              Choose File
-            </ButtonComponent>
-            <p className="text-[11px] text-dg-grey-dark mb-0">
-              No file choosen
-            </p>
+    <NxCardContainer header={"ATTACHMENT"}>
+      <NxBaseContainer border>
+        <div className="flex flex-col gap-y-4">
+          <div className="flex flex-col w-full gap-2">
+            <div className="gap-y-1 justify-start">
+              <div>
+                <p className="text-[13px] mb-1 text-dg-grey-dark">
+                    Attach File:
+                    {(
+                      <span className={"pl-1"} style={{ color: "red" }}>
+                        *
+                      </span>
+                    )}
+                </p>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <ButtonComponent
+                  fontSizeClassname="text-[11px]"
+                  size="small"
+                  type="default"
+                  onClick={() => setModalUpload(true)}
+                >
+                  Choose File
+                </ButtonComponent>
+                <p className="text-[11px] text-dg-grey-dark mb-0">
+                  No file choosen
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="pt-[30px]">
-          <TablePagination
+          <NxTable
+            columns={
+              columnAttachment(
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                handleDelete,
+                previewFileAttachment,
+                previewFile,
+                handleShow,
+                type
+              )
+            }
             dataSource={filterDataByPage()}
             totalData={data?.length}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeAttachment}
-            onSizeChanger={handleChangeAttachment}
-            columns={columnAttachment(
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDelete,
-              previewFileAttachment,
-              previewFile,
-              handleShow,
-              type
-            )}
+            tableScrolled={{
+              x: "max-content",
+              y: 400
+            }}
+            usePagination={false}
             onSort={onSort}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            useInfiniteScroll={true}
           />
         </div>
-      </div>
-
+      </NxBaseContainer>
       <ModalAttachment
         openUpload={modalUpload}
         updateData={updateData}
@@ -340,7 +350,24 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
         }
         withLink
       />
-    </div>
+    </NxCardContainer>
+    // <div>
+    //   <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3></div>
+      
+
+    //   <ModalAttachment
+    //     openUpload={modalUpload}
+    //     updateData={updateData}
+    //     categoryOptions={data_category_attachment}
+    //     handleCancel={() => setModalUpload(false)}
+    //     valueGuard={
+    //       configApplication === configApp.MASTER_MANAGEMENT
+    //         ? dataGlobalPropAttachment
+    //         : {}
+    //     }
+    //     withLink
+    //   />
+    // </div>
     // </BaseContainer>
   );
 };

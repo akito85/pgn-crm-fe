@@ -5,6 +5,8 @@ import DateComponent from '../../../../../../../../components/DateComponent'
 import InputComponent from '../../../../../../../../components/InputComponent'
 import moment from "moment";
 import { getTaxImplication } from '../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice'
+import NxCardContainer from '../../../../../../../../components/Nx/NxCardContainer'
+import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer'
 
 const SaInformation = ({
   saType, 
@@ -170,14 +172,9 @@ const SaInformation = ({
   };
 
   return (
-    <div>
-
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            SERVICE TYPE         
-          </h3>
-        </div>
+    <NxCardContainer header={"SERVICE AGREEMENT INFORMATION"}>
+    <div className="flex flex-col gap-y-4">
+      <NxBaseContainer border header={"SERVICE AGREEMENT INFORMATION"}>
         <div className={"grid grid-cols-3 w-full gap-x-6"}>
           <Form.Item
             name={"serviceType"}
@@ -206,36 +203,28 @@ const SaInformation = ({
                 ))}
               </SelectComponent>
           </Form.Item>
-        </div>
-      </div>
+          {/* Check If Not SA Main  */}
+          {saRecordData.isMain !== "Y" && (
+            <div className={"grid grid-cols-3 w-full gap-x-6"}>
+              <Form.Item
+                name={"serviceAgreementReferenceNumber"}
+                label={"Service Agreement Reference Number"}
+                getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
+                rules={[
+                  {
+                    message: "Please input your Service Agreement Reference Number",
+                    required: true,
+                  },
+                ]}
+              >
+                <InputComponent disabled={true} />
+              </Form.Item>
+            </div>
+          )
+          }
 
-      {/* SECTION SERVICE AGREEMENT INFORMATION   */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            SERVICE AGREEMENT INFORMATION          
-          </h3>
         </div>
-        {/* Check If Not SA Main  */}
-        {saRecordData.isMain !== "Y" && (
           <div className={"grid grid-cols-3 w-full gap-x-6"}>
-            <Form.Item
-              name={"serviceAgreementReferenceNumber"}
-              label={"Service Agreement Reference Number"}
-              getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
-              rules={[
-                {
-                  message: "Please input your Service Agreement Reference Number",
-                  required: true,
-                },
-              ]}
-            >
-              <InputComponent disabled={true} />
-            </Form.Item>
-          </div>
-        )
-        }
-        <div className={"grid grid-cols-3 w-full gap-x-6"}>
           <Form.Item
             name={"serviceAgreementNumber"}
             label={"Service Agreement Number"}
@@ -338,15 +327,10 @@ const SaInformation = ({
             <DateComponent dateDisable={handleValidateMore} onChange={(e)=>handleDateValidation(e, "endDate")}/>
           </Form.Item>
         </div>
-      </div>
+      </NxBaseContainer>
 
-      {/* SECTION SERVICE AGREEMENT INFORMATION   */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            BILLING & PAYMENT INFORMATION          
-          </h3>
-        </div>
+      {/* BILLING & PAYMENT INFORMATION SECTION */}
+      <NxBaseContainer border header={"BILLING & PAYMENT INFORMATION"}>
         <div className={"grid grid-cols-3 w-full gap-x-6"}>
           <Form.Item
             name={"billingCycle"}
@@ -408,16 +392,11 @@ const SaInformation = ({
               ))}
               </SelectComponent>
           </Form.Item>
-        </div>    
-      </div>
-
-      {/* SECTION ADDITIONAL INFORMATION   */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            ADDITIONAL INFORMATION          
-          </h3>
         </div>
+      </NxBaseContainer>
+
+      {/* ADDITIONAL INFORMATION SECTION */}
+      <NxBaseContainer border header={"ADDITIONAL INFORMATION"}>
         <div className={"grid grid-cols-3 w-full gap-x-6"}>
           <Form.Item 
             name="alreadyGasIn" 
@@ -462,7 +441,9 @@ const SaInformation = ({
           >
             <DateComponent dateDisable={handleValidateMoreSaDate} onChange={(e)=>handleDateValidation(e, "commitmentDate")} disabled={saRecordData.status === "ACTIVE" || saRecordData?.isMain == "N"  ? true : false}/>
             </Form.Item>
-        </div> 
+        </div>
+      </NxBaseContainer>
+      <NxBaseContainer border>
         <div className={"grid grid-cols-1 w-full gap-x-6"}>
           <Form.Item
             label={"Description"}
@@ -474,9 +455,10 @@ const SaInformation = ({
               type="textarea"
             />
           </Form.Item>
-        </div>   
-      </div>
+        </div> 
+      </NxBaseContainer>
     </div>
+    </NxCardContainer>
   )
 }
 
