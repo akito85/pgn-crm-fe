@@ -169,29 +169,30 @@ const GasUtilizationForm = ({type}) => {
 
           <div className="flex flex-col gap-4 mt-4">
             <NxCardContainer border header={"GAS UTILIZATION INFORMATION"}>
-              <Form id={"form"} layout='vertical' form={form} onFinish={handleSave}>
-                <div className={"grid grid-cols-1 w-full gap-x-6"}>
-                  <Form.Item
-                    name={"effectiveDate"}
-                    label={"Effective Date"}
-                    rules={[
-                      {
-                        message: requiredMessage("Effective Date!"),
-                        required: true,
-                      },
-                    ]}
-                  >
-                  <DateComponent disabled={type === "update"} />
-                  </Form.Item>
-                  <Form.Item name={"description"} label={"Description"}>
-                    <InputComponent
-                      type="textarea"
-                      value={"description"}
-                      // onChange={(e) => setDescription(e.target.value)}
-                    />
-                  </Form.Item>
-                </div>
-              </Form>
+              <NxBaseContainer border>
+                <Form id={"form"} layout='vertical' form={form} onFinish={handleSave}>
+                  <div className={"grid grid-cols-1 w-full gap-x-6"}>
+                    <Form.Item
+                      name={"effectiveDate"}
+                      label={"Effective Date"}
+                      rules={[
+                        {
+                          message: requiredMessage("Effective Date!"),
+                          required: true,
+                        },
+                      ]}
+                    >
+                    <DateComponent disabled={type === "update"} />
+                    </Form.Item>
+                    <Form.Item name={"description"} label={"Description"}>
+                      <InputComponent
+                        type="textarea"
+                        value={"description"}
+                      />
+                    </Form.Item>
+                  </div>
+                </Form>
+              </NxBaseContainer>
             </NxCardContainer>
 
             <NxCardContainer border header={"GAS UTILIZATION DETAIL"}>

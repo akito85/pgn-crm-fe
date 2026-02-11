@@ -6,66 +6,63 @@ import DetailText from '../../../../../../components/DetailText'
 import NxTable from '../../../../../../components/Nx/NxTable'
 import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColumns'
 import { nxGetAccountActions } from '../../../../../../components/Nx/NxGetAccountActions'
-import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
+import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
 import Toolbar from '../../../../../../components/Toolbar'
 import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
 import NxDetailText from '../../../../../../components/Nx/NxDetailText'
+import { useNavigate } from 'react-router-dom'
 
 const columns = (
-  search,
+  page = 1,
+  pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch,
-) => {
+  handleSearch = () => {},
+  onFilter = () => {},
+  sorter = () => {}
+) => { 
   return [
     {
-      key: "no",
       title: "NO",
-      align: "center",  
-      dataIndex: "no",
       width: 20,
-      render: (_, __, index) => index + 1,
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      key: "utilizationName",
-      title: "UTLIZATION NAME",
+      title: "UTILIZATION NAME",
       dataIndex: "name",
       width: 150,
-      sorter: true,
-      filteredValue: [search?.name] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+      onFilter: (value, record) => onFilter("name", value, record),
+      sorter: (a, b) => sorter("name", a, b),
+      ...getColumnSearchPropsPaging(
         "name",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        true
+        handleSearch
       ),
     },
     {
-      key: "percentage",
       title: "PERCENTAGE",
       dataIndex: "percentage",
       width: 150,
-      sorter: true,
-      filteredValue: [search?.percentage] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
+      onFilter: (value, record) => onFilter("percentage", value, record),
+      sorter: (a, b) => sorter("percentage", a, b),
+      ...getColumnSearchPropsPaging(
         "percentage",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        true
+        handleSearch
       ),
     }
   ]
 }
 
 const TableGasUtilCurrent = ({idAccount}) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     data_current,
@@ -76,7 +73,14 @@ const TableGasUtilCurrent = ({idAccount}) => {
 
   const itemActions = nxGetAccountActions({
     idAccount,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_GAS_UTILIZATION,
+    handleCreate: () => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.CREATE_GAS_UTILIZATION,
+      {
+        state: {
+          idAccount,
+        }
+      }
+    )
   });
   
   // TODO: sort dan page size belum dipakai
@@ -86,6 +90,7 @@ const TableGasUtilCurrent = ({idAccount}) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     dispatch(getCurrentGasUtilization({id: idAccount}))
@@ -135,6 +140,30 @@ const TableGasUtilCurrent = ({idAccount}) => {
     return nxApplyFixedColumns(allColumns);
   }, [allColumns]);
 
+  const onFilter = (dataIndex, value, record) => {
+    const fixSearchText = value.toLowerCase();
+    const recordValue = record[dataIndex];
+
+    if (recordValue != null) {
+      return recordValue.toString().toLowerCase().includes(fixSearchText);
+    }
+
+    return false;
+  };
+  
+  const sorter = (fieldSort, a, b) => {
+    const handleDataSort = (obj) => {
+      const value = obj[fieldSort];
+      return value != null ? value.toString().toLowerCase() : "";
+    };
+
+    let fa = handleDataSort(a);
+    let fb = handleDataSort(b);
+
+    return fa.localeCompare(fb);
+  };
+
+
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -148,16 +177,23 @@ const TableGasUtilCurrent = ({idAccount}) => {
           <div className="flex flex-col gap-y-4">
             <Toolbar items={itemActions} type="detail" />
             <NxTable
-              idTable="gas-util-current-table"
+              id={"table-gas-util-current"}
               dataSource={data_current?.gasUtilsDtl}
               totalData={data_current?.gasUtilsDtl?.length}
               current={page}
-              tableScrolled={{ y: 525, x: 800 }}
-              onSort={onSort}
-              columns={processedColumns}
+              tableScrolled={{ y: 525, x: data_current?.length ? "max-content" : "100%" }}
+              columns={columns(
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                onFilter,
+                sorter
+              )}
               usePagination={false}
-              useInfiniteScroll={true}
-              hasMore={false}
+              useInfiniteScroll={false}
             />
           </div>
         </NxBaseContainer>
