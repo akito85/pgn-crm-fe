@@ -76,7 +76,6 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
 
-  const [selectedAppHierId, setSelectedAppHierId] = useState();
   const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
@@ -316,7 +315,6 @@ const CreateUpdatePaymentRelation = ({ type }) => {
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
     dispatch(getDetailPrApprovalHierarchy({id: appHierId}));
-    setSelectedAppHierId(appHierId);
     setSelectedApprovalName(approvalName);
   }
 
@@ -346,7 +344,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
             key: `detail-detail-${index}`,
           }))}
           dataOption={data_prApprovalHierarchy}
-          selectedAppHierId={selectedAppHierId}
+          selectedAppHierId={formCreate.getFieldValue("appHierId")}
           handleSelectHiararchy={handleSelectHiararchy}
           className={`${current !== 1 ? "hidden" : ""}`}
           key={`payment-relation-tab-1`}
@@ -565,7 +563,6 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   const handleClear = () => {
     if (type === "create") {
       setDataAttachment([]);
-      setSelectedAppHierId();
       setSelectedApprovalName();
       formCreate.resetFields();
       setCurrent(0);
@@ -708,7 +705,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
             form={"paymentRelationForm"}
             isOpen={showConfirmationModal}
             handleCancel={() => handleSetShowConfirmationModal(false)}
-            selectedAppHierId={selectedAppHierId}
+            selectedAppHierId={formCreate.getFieldValue("appHierId")}
             selectedApprovalName={selectedApprovalName}
             hierarchyTableData={(detail_prApprovalHierarchy || []).map((detail, index) => ({
               ...detail,
