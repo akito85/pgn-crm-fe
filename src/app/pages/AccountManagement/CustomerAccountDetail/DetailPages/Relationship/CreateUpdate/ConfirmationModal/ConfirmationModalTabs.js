@@ -2,14 +2,12 @@ import ConfirmationModalInfo from "./ConfirmationModalInfo";
 import ConfirmationModalApproval from "./ConfirmationModalApproval";
 import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
-import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const ConfirmationModalTabs = ({
-  selectedAppHierId,
-  selectedApprovalName,
   hierarchyTableData,
-  attachments,
-  data = {},
+  dataAttachment,
+  values = {},
   service,
   type = "",
   configApplication,
@@ -20,7 +18,7 @@ const ConfirmationModalTabs = ({
     {
       key: 0,
       label: "Relationship Information",
-      children: <ConfirmationModalInfo data={data} />,
+      children: <ConfirmationModalInfo values={values} />,
     },
     {
       key: 1,
@@ -28,8 +26,7 @@ const ConfirmationModalTabs = ({
       children: (
         <ConfirmationModalApproval
           dataTable={hierarchyTableData}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
+          values={values}
         />
       ),
     },
@@ -38,7 +35,7 @@ const ConfirmationModalTabs = ({
       label: "Attachment",
       children: (
         <ConfirmationModalAttachment
-          data={attachments}
+          data={dataAttachment}
           service={service}
           configApplication={configApplication}
         />

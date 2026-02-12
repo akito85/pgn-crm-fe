@@ -303,66 +303,65 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <div className={`${className}`}>
-      <NxCardContainer header={"ATTACHMENT"} >
-        <Spin spinning={loadingDownload}>
-          <div className="flex flex-col gap-y-4">
-            {type !== "detail" && type !== "preview" ? (
-              <div className="flex flex-col gap-y-2">
-                <span className="text-sm">
-                  Attach File:
-                  {mandatory ? (
-                  <span className={"pl-1"} style={{ color: "red" }}>
-                    *
-                  </span>
-                ) : null}
+    <>
+    
+      <Spin spinning={loadingDownload}>
+        <div className="flex flex-col gap-y-4">
+          {type !== "detail" && type !== "preview" ? (
+            <div className="flex flex-col gap-y-2">
+              <span className="text-sm">
+                Attach File:
+                {mandatory ? (
+                <span className={"pl-1"} style={{ color: "red" }}>
+                  *
                 </span>
-                <div className="flex gap-x-2 items-center">
-                  <ButtonComponent
-                    type="menu"
-                    onClick={handleOpenModal}
-                  >
-                    Choose File
-                  </ButtonComponent>
-                  {!data.length && (
-                    <span className="text-sm text-dg-grey-dark">
-                      No file choosen
-                    </span>
-                  )}
-                </div>
+              ) : null}
+              </span>
+              <div className="flex gap-x-2 items-center">
+                <ButtonComponent
+                  type="menu"
+                  onClick={handleOpenModal}
+                >
+                  Choose File
+                </ButtonComponent>
+                {!data.length && (
+                  <span className="text-sm text-dg-grey-dark">
+                    No file choosen
+                  </span>
+                )}
               </div>
-            ) : null}
-            <NxTable
-              dataSource={data}
-              totalData={data.length}
-              tableScrolled={{ y: 300, x: 1500 }}
-              columns={columnAttachmentData(
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleDelete,
-                type,
-                handleShow
-              )}
-              usePagination={false}
-            />
-          </div>
-        </Spin>
-        <ModalAttachment
-          openUpload={modalUpload}
-          updateData={updateData}
-          categoryOptions={categoryOptions}
-          handleCancel={() => setModalUpload(false)}
-          valueGuard={
-            configApplication === configApp.MASTER_MANAGEMENT
-              ? dataGlobalPropAttachment
-              : {}
-          }
-          withLink
-        />
-      </NxCardContainer>
-    </div>
+            </div>
+          ) : null}
+          <NxTable
+            dataSource={data}
+            totalData={data.length}
+            tableScrolled={{ y: 300, x: 1500 }}
+            columns={columnAttachmentData(
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handleDelete,
+              type,
+              handleShow
+            )}
+            usePagination={false}
+          />
+        </div>
+      </Spin>
+      <ModalAttachment
+        openUpload={modalUpload}
+        updateData={updateData}
+        categoryOptions={categoryOptions}
+        handleCancel={() => setModalUpload(false)}
+        valueGuard={
+          configApplication === configApp.MASTER_MANAGEMENT
+            ? dataGlobalPropAttachment
+            : {}
+        }
+        withLink
+      />
+    </>
   );
 };
 

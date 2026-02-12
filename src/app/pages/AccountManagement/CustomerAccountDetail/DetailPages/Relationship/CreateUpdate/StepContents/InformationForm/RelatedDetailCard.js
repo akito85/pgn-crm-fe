@@ -1,6 +1,4 @@
 import TablePaginationNew from "../../../../../../../../../components/TablePaginationNew";
-import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
-import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const RelatedDetailCard = ({
   data = [],
@@ -12,29 +10,30 @@ const RelatedDetailCard = ({
   // Columns for Account type (CHILD_OF, PARENT_OF) - same as ModalChooseRelated accountColumns
 	const accountColumns = [
 		{
-				title: "NO",
-				width: 60,
-				align: "center",
-				render: (text, object, index) => (
-						<div className="py-2.5">{index + 1}</div>
-				),
+			key: "no",
+			title: "NO",
+			width: 60,
+			align: "center",
+			render: (text, object, index) => index + 1
 		},
-		
 		{
 			title: "ACCOUNT NUMBER",
 			dataIndex: "accountNumber",
+			key: "accountNumber",
 			width: 250,
 			sorter: (a, b) => (a.accountNumber || "").localeCompare(b.accountNumber || ""),
 		},
 		{
 			title: "ACCOUNT NAME",
 			dataIndex: "accountName",
+			key: "accountName",
 			width: 200,
 			sorter: (a, b) => (a.accountName || "").localeCompare(b.accountName || ""),
 		},
 		{
 			title: "CATEGORY",
 			dataIndex: "accountCategory",
+			key: "accountCategory",
 			width: 120,
 			sorter: (a, b) => (a.accountCategory || "").localeCompare(b.accountCategory || ""),
 			render: (text) => text || "-",
@@ -42,6 +41,7 @@ const RelatedDetailCard = ({
 		{
 			title: "SOR",
 			dataIndex: "sor",
+			key: "sor",
 			width: 200,
 			sorter: (a, b) => (a.sor || "").localeCompare(b.sor || ""),
 			render: (text) => text || "-",
@@ -49,6 +49,7 @@ const RelatedDetailCard = ({
 		{
 			title: "COST CENTER",
 			dataIndex: "costCenter",
+			key: "costCenter",
 			width: 150,
 			sorter: (a, b) => (a.costCenter || "").localeCompare(b.costCenter || ""),
 			render: (text) => text || "-",
@@ -56,6 +57,7 @@ const RelatedDetailCard = ({
 		{
 			title: "METER READING CODES",
 			dataIndex: "meterReadingCode",
+			key: "meterReadingCode",
 			width: 250,
 			sorter: (a, b) => (a.meterReadingCode || "").localeCompare(b.meterReadingCode || ""),
 			render: (text) => text || "-",
@@ -63,6 +65,7 @@ const RelatedDetailCard = ({
 		{
 			title: "CUSTOMER MANAGEMENT",
 			dataIndex: "customerManagement",
+			key: "customerManagement",
 			width: 250,
 			sorter: (a, b) => (a.customerManagement || "").localeCompare(b.customerManagement || ""),
 			render: (text) => text || "-",
@@ -70,6 +73,7 @@ const RelatedDetailCard = ({
 		{
 			title: "CLASSIFICATION TYPE",
 			dataIndex: "classificationType",
+			key: "classificationType",
 			width: 250,
 			sorter: (a, b) => (a.classificationType || "").localeCompare(b.classificationType || ""),
 			render: (text) => text || "-",
@@ -77,6 +81,7 @@ const RelatedDetailCard = ({
 		{
 			title: "SEGMENT",
 			dataIndex: "accountSegment",
+			key: "accountSegment",
 			width: 150,
 			sorter: (a, b) => (a.accountSegment || "").localeCompare(b.accountSegment || ""),
 			render: (text) => text || "-",
@@ -84,6 +89,7 @@ const RelatedDetailCard = ({
 		{
 			title: "ACCOUNT GROUP TYPE",
 			dataIndex: "accountGroupType",
+			key: "accountGroupType",
 			width: 250,
 			sorter: (a, b) => (a.accountGroupType || "").localeCompare(b.accountGroupType || ""),
 			render: (text) => text || "-",
@@ -91,6 +97,7 @@ const RelatedDetailCard = ({
 		{
 			title: "PREMISE ADDRESS",
 			dataIndex: "premiseAddress",
+			key: "premiseAddress",
 			width: 250,
 			sorter: (a, b) => (a.premiseAddress || "").localeCompare(b.premiseAddress || ""),
 			render: (text) => text || "-",
@@ -98,6 +105,7 @@ const RelatedDetailCard = ({
 		{
 			title: "SUBDISTRICT",
 			dataIndex: "subDistrict",
+			key: "subDistrict",
 			width: 150,
 			sorter: (a, b) => (a.subDistrict || "").localeCompare(b.subDistrict || ""),
 			render: (text) => text || "-",
@@ -105,6 +113,7 @@ const RelatedDetailCard = ({
 		{
 			title: "DISTRICT",
 			dataIndex: "district",
+			key: "district",
 			width: 150,
 			sorter: (a, b) => (a.district || "").localeCompare(b.district || ""),
 			render: (text) => text || "-",
@@ -112,6 +121,7 @@ const RelatedDetailCard = ({
 		{
 			title: "CITY",
 			dataIndex: "city",
+			key: "city",
 			width: 150,
 			sorter: (a, b) => (a.city || "").localeCompare(b.city || ""),
 			render: (text) => text || "-",
@@ -119,6 +129,7 @@ const RelatedDetailCard = ({
 		{
 			title: "COUNTRY",
 			dataIndex: "country",
+			key: "country",
 			width: 150,
 			sorter: (a, b) => (a.country || "").localeCompare(b.country || ""),
 			render: (text) => text || "-",
@@ -126,6 +137,7 @@ const RelatedDetailCard = ({
 		{
 			title: "LONGITUDE",
 			dataIndex: "longitude",
+			key: "longitude",
 			width: 120,
 			sorter: (a, b) => (a.longitude || "").localeCompare(b.longitude || ""),
 			render: (text) => text || "-",
@@ -133,6 +145,7 @@ const RelatedDetailCard = ({
 		{
 			title: "LATITUDE",
 			dataIndex: "latitude",
+			key: "latitude",
 			width: 120,
 			sorter: (a, b) => (a.latitude || "").localeCompare(b.latitude || ""),
 			render: (text) => text || "-",
@@ -142,27 +155,16 @@ const RelatedDetailCard = ({
 	// Select appropriate columns based on type
 	const columns = accountColumns;
 
-	// Don't render if no data
-	if (!data || data.length === 0) {
-			return null;
-	}
-
 	return (
-		<div className={className}>
-			<NxCardContainer header={"RELATED DETAIL"}>
-				<NxBaseContainer border>
-					<TablePaginationNew
-						usePagination={false}
-						dataSource={data}
-						columns={columns}
-						tableScrolled={{ x: 3500 }}
-						className="related-detail-table"
-						rowKey={(record, index) => `related-${record?.accountNumber || index}`}
-					/>
-				</NxBaseContainer>
-			</NxCardContainer>
-		</div>
-	);
+		<TablePaginationNew
+			usePagination={false}
+			dataSource={data}
+			columns={columns}
+			tableScrolled={{ x: 3500 }}
+			className="related-detail-table"
+			rowKey={(record, index) => `related-${record?.accountNumber || index}`}
+		/>
+	)
 };
 
 export default RelatedDetailCard;

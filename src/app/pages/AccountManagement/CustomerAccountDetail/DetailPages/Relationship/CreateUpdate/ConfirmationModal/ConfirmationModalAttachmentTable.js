@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import { previewFileAttachment } from "../../../../../../../utils/previewFileAttachment";
-import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
+import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
+import { getColumnSearchPropsPaging } from "../../../../../../../../utils/getColumnSearchProps";
 import moment from "moment";
-import { getBase64 } from "../../../../../../../utils/getBase64";
-import { tokenHeader } from "../../../../../../../utils/tokenHeader";
+import { getBase64 } from "../../../../../../../../utils/getBase64";
+import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
 import axios from "axios";
 import FileSaver from "file-saver";
-import { configApp } from "../../../../../../../constants/configApp";
-import NxTable from "../../../../../../../components/Nx/NxTable";
-import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
+import { configApp } from "../../../../../../../../constants/configApp";
+import NxTable from "../../../../../../../../components/Nx/NxTable";
+import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();

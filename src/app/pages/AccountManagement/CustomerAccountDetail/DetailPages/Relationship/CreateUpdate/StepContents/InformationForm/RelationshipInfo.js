@@ -12,8 +12,6 @@ import {
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { requiredMessage } from "../../../../../../../../../utils";
 import ModalChooseRelated from "./ModalChooseRelated";
-import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
-import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const RelationshipInfo = ({
   form,
@@ -41,147 +39,143 @@ const RelationshipInfo = ({
   }, [dispatch, idAccount]);
 
   return (
-    <div className={className}>
-      <NxCardContainer header={"RELATIONSHIP INFORMATION"}>
-        <NxBaseContainer border>
-          <div className="w-full grid grid-cols-3 gap-4">
-            <Form.Item name={"objectId"} hidden>
-              <Input />
-            </Form.Item>
+    <>
+      <div className="w-full grid grid-cols-3 gap-4">
+        <Form.Item name={"objectId"} hidden>
+          <Input />
+        </Form.Item>
 
-            {/* Row 1 - Col 1: Relationship Type */}
+        {/* Row 1 - Col 1: Relationship Type */}
+        <Form.Item
+          name="relationshipType"
+          label="Relationship Type"
+          rules={[
+            { message: requiredMessage("Relationship Type"), required: true },
+          ]}
+          className="no-margin-form"
+        >
+          <SelectComponent
+            loading={loadingType}
+            onChange={(_, option) => {
+              setSelectedRTText(option.children)
+              onRelatedDetailChange([]);
+              // Also clear related name/number fields
+              form.setFieldsValue({
+                relatedName: undefined,
+                relatedNumber: undefined,
+              });
+            }}
+          >
+            {data_relationshipType?.map((item) => (
+              <Select.Option key={item.id} value={item.id}>
+                {item.text}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+
+        {/* Row 1 - Col 2: Relationship Category */}
+        <Form.Item
+          name="relationshipCategory"
+          label="Relationship Category"
+          rules={[
+            {
+              message: requiredMessage("Relationship Category"),
+              required: true,
+            },
+          ]}
+          className="no-margin-form"
+        >
+          <SelectComponent
+            onChange={(_, option) => setSelectedRCText(option.children)}
+            loading={loadingCategory}
+          >
+            {data_relationshipCategory?.map((item) => (
+              <Select.Option key={item.id} value={item.id}>
+                {item.text}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+
+        {/* Row 1 - Col 3: Related Name with Select Button */}
+        <Form.Item
+          label={"Related Name"}
+          required
+          className="no-margin-form"
+        >
+          <Input.Group compact>
             <Form.Item
-              name="relationshipType"
-              label="Relationship Type"
+              name="relatedName"
               rules={[
-                { message: requiredMessage("Relationship Type"), required: true },
+                { message: requiredMessage("Related Name"), required: true },
               ]}
-              className="no-margin-form"
-            >
-              <SelectComponent
-                loading={loadingType}
-                onChange={(_, option) => {
-                  setSelectedRTText(option.children)
-                  onRelatedDetailChange([]);
-                  // Also clear related name/number fields
-                  form.setFieldsValue({
-                    relatedName: undefined,
-                    relatedNumber: undefined,
-                  });
-                }}
-              >
-                {data_relationshipType?.map((item) => (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item.text}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
-
-            {/* Row 1 - Col 2: Relationship Category */}
-            <Form.Item
-              name="relationshipCategory"
-              label="Relationship Category"
-              rules={[
-                {
-                  message: requiredMessage("Relationship Category"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent
-                onChange={(_, option) => setSelectedRCText(option.children)}
-                loading={loadingCategory}
-              >
-                {data_relationshipCategory?.map((item) => (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item.text}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
-
-            {/* Row 1 - Col 3: Related Name with Select Button */}
-            <Form.Item
-              label={"Related Name"}
-              required
-              className="no-margin-form"
-            >
-              <Input.Group compact>
-                <Form.Item
-                  name="relatedName"
-                  rules={[
-                    { message: requiredMessage("Related Name"), required: true },
-                  ]}
-                  noStyle
-                >
-                  <InputComponent
-                    disabled
-                  />
-                </Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  onClick={() => setModalChoose(true)}
-                  size="small"
-                  disabled={!form.getFieldValue("relationshipType") || !form.getFieldValue("relationshipCategory")}
-                >
-                  Select
-                </ButtonComponent>
-              </Input.Group>
-            </Form.Item>
-
-            {/* Row 2 - Col 1: Related Number */}
-            <Form.Item
-              name="relatedNumber"
-              label="Related Number"
-              rules={[
-                { message: requiredMessage("Related Number"), required: true },
-              ]}
-              className="no-margin-form"
+              noStyle
             >
               <InputComponent
                 disabled
               />
             </Form.Item>
-
-            {/* Row 2 - Col 2: Start Date */}
-            <Form.Item
-              name="startDate"
-              label="Start Date"
-              rules={[{ message: requiredMessage("Start Date"), required: true }]}
-              className="no-margin-form"
+            <ButtonComponent
+              type="submit"
+              onClick={() => setModalChoose(true)}
+              size="small"
+              disabled={!form.getFieldValue("relationshipType") || !form.getFieldValue("relationshipCategory")}
             >
-              <DateComponent />
-            </Form.Item>
+              Select
+            </ButtonComponent>
+          </Input.Group>
+        </Form.Item>
 
-            {/* Row 2 - Col 3: End Date */}
-            <Form.Item
-              name="endDate"
-              label="End Date"
-              rules={[{ message: requiredMessage("End Date"), required: false }]}
-              className="no-margin-form"
-            >
-              <DateComponent />
-            </Form.Item>
-          </div>
+        {/* Row 2 - Col 1: Related Number */}
+        <Form.Item
+          name="relatedNumber"
+          label="Related Number"
+          rules={[
+            { message: requiredMessage("Related Number"), required: true },
+          ]}
+          className="no-margin-form"
+        >
+          <InputComponent
+            disabled
+          />
+        </Form.Item>
 
-          {/* Description - Full width */}
-          <div className="w-full my-5">
-            <Form.Item
-              name="description"
-              label="Description"
-              rules={[{ message: requiredMessage("Description"), required: false }]}
-              className="no-margin-form"
-            >
-              <InputComponent
-                type="textarea"
-              />
-            </Form.Item>
-          </div>
-        {/* Modal Choose Related */}
-        </NxBaseContainer>
-      </NxCardContainer>
+        {/* Row 2 - Col 2: Start Date */}
+        <Form.Item
+          name="startDate"
+          label="Start Date"
+          rules={[{ message: requiredMessage("Start Date"), required: true }]}
+          className="no-margin-form"
+        >
+          <DateComponent />
+        </Form.Item>
+
+        {/* Row 2 - Col 3: End Date */}
+        <Form.Item
+          name="endDate"
+          label="End Date"
+          rules={[{ message: requiredMessage("End Date"), required: false }]}
+          className="no-margin-form"
+        >
+          <DateComponent />
+        </Form.Item>
+      </div>
+
+      {/* Description - Full width */}
+      <div className="w-full my-5">
+        <Form.Item
+          name="description"
+          label="Description"
+          rules={[{ message: requiredMessage("Description"), required: false }]}
+          className="no-margin-form"
+        >
+          <InputComponent
+            type="textarea"
+          />
+        </Form.Item>
+      </div>
+      {/* Modal Choose Related */}
       <ModalChooseRelated
         isOpen={modalChoose}
         idAccount={idAccount}
@@ -211,7 +205,7 @@ const RelationshipInfo = ({
           onRelatedDetailChange(relatedDetail);
         }}
       />
-    </div>
+    </>
   );
 };
 

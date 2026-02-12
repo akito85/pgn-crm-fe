@@ -1,7 +1,7 @@
 import { Form } from "antd";
-import InputComponent from "../../../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../../../utils";
-import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import InputComponent from "../../../../../../../../components/InputComponent";
+import { requiredMessage } from "../../../../../../../../utils";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalRemark = () => {
   return (

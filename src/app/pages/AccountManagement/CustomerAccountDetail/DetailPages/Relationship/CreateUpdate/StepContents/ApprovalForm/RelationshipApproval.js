@@ -160,65 +160,59 @@ const RelationshipApproval = ({
   };
 
   return (
-    <div className={className}>
-      <NxCardContainer header={"APPROVAL"}>
-        <NxBaseContainer border>
-          <div className="flex flex-col gap-y-4">
-            {!hideSelector ? (
-              <>
-                <Form.Item name={"appHierLabel"} hidden>
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="Approval Hierarchy"
-                  name="appHierId"
-                  rules={[
-                    {
-                      message: "Please input your Approval Hierarchy",
-                      required: true,
-                    },
-                  ]}
-                  className="no-margin-form w-1/3"
-                >
-                  <SelectComponent onChange={handleSelectHierarchy}>
-                    {dataApprovalList.map((data, index) => (
-                      <Select.Option key={index} value={data?.appHierId}>
-                        {data?.approvalName}
-                      </Select.Option>
-                    ))}
-                  </SelectComponent>
-                </Form.Item>
-              </>
-            ) : (
-              <div className="mb-4">
-                <p className="text-[13px] mb-1 text-dg-grey-dark">
-                  Approval Hierarchy
-                </p>
-                <p className="text-[14px] font-medium">{values.appHierLabel}</p>
-              </div>
-            )}
+    <div className="flex flex-col gap-y-4">
+      {!hideSelector ? (
+        <>
+          <Form.Item name={"appHierLabel"} hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Approval Hierarchy"
+            name="appHierId"
+            rules={[
+              {
+                message: "Please input your Approval Hierarchy",
+                required: true,
+              },
+            ]}
+            className="no-margin-form w-1/3"
+          >
+            <SelectComponent onChange={handleSelectHierarchy}>
+              {dataApprovalList.map((data, index) => (
+                <Select.Option key={index} value={data?.appHierId}>
+                  {data?.approvalName}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+        </>
+      ) : (
+        <div className="mb-4">
+          <p className="text-[13px] mb-1 text-dg-grey-dark">
+            Approval Hierarchy
+          </p>
+          <p className="text-[14px] font-medium">{values.appHierLabel}</p>
+        </div>
+      )}
 
-            {/* Table */}
-            <Spin spinning={loading}>
-              {((hideSelector && appHierDataDetail.length > 0) || values.appHierId) && (
-                <div className="mb-6">
-                  <TablePagination
-                    useSelect={false}
-                    usePagination={false}
-                    dataSource={appHierDataDetail}
-                    columns={columns}
-                    expandable={{
-                      expandedRowRender,
-                      defaultExpandAllRows: true,
-                      columnWidth: 50,
-                    }}
-                  />
-                </div>
-              )}
-            </Spin>
+      {/* Table */}
+      <Spin spinning={loading}>
+        {((hideSelector && appHierDataDetail.length > 0) || values.appHierId) && (
+          <div className="mb-6">
+            <TablePagination
+              useSelect={false}
+              usePagination={false}
+              dataSource={appHierDataDetail}
+              columns={columns}
+              expandable={{
+                expandedRowRender,
+                defaultExpandAllRows: true,
+                columnWidth: 50,
+              }}
+            />
           </div>
-        </NxBaseContainer>
-      </NxCardContainer>
+        )}
+      </Spin>
     </div>
   );
 };

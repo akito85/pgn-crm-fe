@@ -1,5 +1,5 @@
 import ConfirmationModalAttachmentTable from "./ConfirmationModalAttachmentTable";
-import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 
 const ConfirmationModalAttachment = ({
   data = [],

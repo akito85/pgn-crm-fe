@@ -26,8 +26,9 @@ import { showModalError, validateCreateUpdate } from "../../../../../../../redux
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
-import ConfirmationModal from "./ConfirmationModal";
+import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { configApp } from "../../../../../../../constants/configApp";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 
 const CreateUpdateRelationship = ({
   type = {},
@@ -487,60 +488,75 @@ const CreateUpdateRelationship = ({
   const steps = [
     {
       title: "Relationship Information",
-      content: (
-        <>
-          <RelationshipInfo
-            form={form}
-            initialRelationshipType={data_relationshipDetail?.relationshipType}
-            initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
-            key={`relationship-tab-0`}
-            className={`${current !== 0 ? "hidden" : ""}`}
-            onRelatedDetailChange={(data) => setRelatedDetailData(data)}
-          />
-          <RelatedDetailCard
-            data={relatedDetailData}
-            className={`${current !== 0 ? "hidden" : ""} mt-4`}
-          />
-        </>
-      ),
+      cards: [
+        {
+          header: "Relationship Information",
+          content: (
+            <RelationshipInfo
+              form={form}
+              initialRelationshipType={data_relationshipDetail?.relationshipType}
+              initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
+              key={`relationship-tab-0`}
+              onRelatedDetailChange={(data) => setRelatedDetailData(data)}
+            />
+          )
+        },
+        {
+          header: "Related Detail",
+          content: (
+            <RelatedDetailCard
+              data={relatedDetailData}
+            />
+          ),
+          hidden: !relatedDetailData.length
+        }
+      ],
       disabled: false,
     },
     {
       title: "Approval",
-      content: (
-        <RelationshipApproval
-          values={form.getFieldsValue()}
-          dataApprovalList={data_approvalHierarchies}
-          dataDetailApproval={(data_approvalHierarchyDetail || []).map((item, index) => ({
-            ...item,
-            employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
-              ...emp,
-              key: `employee-detail-${empIndex}`,
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          handleSelectHierarchy={handleSelectHierarchy}
-          loading={loadingApprovalHierarchyDetail}
-          key={`relationship-tab-1`}
-          className={`${current !== 1 ? "hidden" : ""}`}
-        />
-      ),
-      disabled: false,
+      cards: [
+        {
+          header: "Approval",
+          content: (
+            <RelationshipApproval
+              values={form.getFieldsValue()}
+              dataApprovalList={data_approvalHierarchies}
+              dataDetailApproval={(data_approvalHierarchyDetail || []).map((item, index) => ({
+                ...item,
+                employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
+                  ...emp,
+                  key: `employee-detail-${empIndex}`,
+                })),
+                key: `detail-detail-${index}`,
+              }))}
+              handleSelectHierarchy={handleSelectHierarchy}
+              loading={loadingApprovalHierarchyDetail}
+              key={`relationship-tab-1`}
+              className={`${current !== 1 ? "hidden" : ""}`}
+            />
+          )
+        }
+      ]
     },
     {
       title: "Attachment",
-      content: (
-        <RelationshipAttachment
-          data={listDataAttachment}
-          updateData={setListDataAttachment}
-          type={type}
-          dispatch={dispatch}
-          key={`relationship-tab-2`}
-          className={`${current !== 2 ? "hidden" : ""}`}
-          mandatory
-        />
-      ),
-      disabled: false,
+      cards: [
+        {
+          header: "Attachment",
+          content: (
+            <RelationshipAttachment
+              data={listDataAttachment}
+              updateData={setListDataAttachment}
+              type={type}
+              dispatch={dispatch}
+              key={`relationship-tab-2`}
+              className={`${current !== 2 ? "hidden" : ""}`}
+              mandatory
+            />
+          )
+        }
+      ]
     },
   ];
 
@@ -567,7 +583,15 @@ const CreateUpdateRelationship = ({
               {/* Steps Content */}
               <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
-              {steps.map((step) => step.content)}
+              {steps.map((step, stepIndex) =>
+                step.cards.map((card, cardIndex) => (
+                  <NxCardContainer header={card.header} className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`} key={`${stepIndex}-${cardIndex}`}>
+                    <NxBaseContainer border>
+                      {card.content}
+                    </NxBaseContainer>
+                  </NxCardContainer>
+                ))
+              )}
               
               {/* Section Action Steps */}
               <NxBaseContainer border>

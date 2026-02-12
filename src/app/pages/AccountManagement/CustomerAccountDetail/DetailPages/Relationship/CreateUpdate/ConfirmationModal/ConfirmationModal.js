@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import NxModal from "../../../../../../../components/Nx/NxModal";
+import ButtonComponent from "../../../../../../../../components/ButtonComponent";
+import NxModal from "../../../../../../../../components/Nx/NxModal";
 
 const ConfirmationModal = ({
   form,
   isOpen,
   handleCancel,
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
-  attachments,
   type = "",
-  data = {},
-  service,
+  values = {},
+  approvalData,
+  attachmentData,
   configApplication,
+  service,
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
@@ -41,7 +39,7 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={type === "draft" ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
+      header={"CONFIRMATION RELATIONSHIP"}
       type={"confirmation"}
       hidePadding={{
         top: true,
@@ -70,11 +68,9 @@ const ConfirmationModal = ({
       ]}
     >
       <ConfirmationModalTabs
-        selectedAppHierId={selectedAppHierId}
-        selectedApprovalName={selectedApprovalName}
-        hierarchyTableData={hierarchyTableData}
-        attachments={attachments}
-        data={data}
+        hierarchyTableData={approvalData}
+        dataAttachment={attachmentData}
+        values={values}
         service={service}
         type={type}
         configApplication={configApplication}
