@@ -403,16 +403,18 @@ const ProductDistributionForm = ({ type }) => {
             </NxCardContainer>
 
             <NxCardContainer header={"RAW MATERIAL SOURCE IMPORT DETAIL"}>
-              <FunctionalPDDetail
-                type={type}
-                data={listDataDetail}
-                updateData={setListDataDetail}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-                required={{ required: true, message: "Please input your" }}
-                localVal={localVal}
-                exportVal={exportVal}
-              />
+              <NxBaseContainer border>
+                <FunctionalPDDetail
+                  type={type}
+                  data={listDataDetail}
+                  updateData={setListDataDetail}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  required={{ required: true, message: "Please input your" }}
+                  localVal={localVal}
+                  exportVal={exportVal}
+                />
+              </NxBaseContainer>
             </NxCardContainer>
 
             <NxBaseContainer border>
@@ -436,7 +438,7 @@ const ProductDistributionForm = ({ type }) => {
                         width={20}
                       />
                     }
-                    type="submit"
+                    type="reject"
                     onClick={() => {
                       handleClear();
                     }}

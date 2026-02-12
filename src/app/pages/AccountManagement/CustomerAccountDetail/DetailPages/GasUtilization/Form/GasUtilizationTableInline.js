@@ -612,36 +612,6 @@ const GasUtilizationTableInline = ({
             </ButtonComponent>
           </div>
         )}
-
-        {/* Start Pagination */}
-        {/* <div className={"w-full flex justify-between py-6"}>
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-2/6"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns()
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    optionSelectedCol.length > 3
-                      ? optionSelectedCol.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
-        </div> */}
-
         {/* Table */}
         <Form form={formTable} component={false}>
           <NxTable

@@ -196,13 +196,15 @@ const GasUtilizationForm = ({type}) => {
             </NxCardContainer>
 
             <NxCardContainer border header={"GAS UTILIZATION DETAIL"}>
-              <GasUtilizationTableInline
-                dataTableGasUtilization =  {dataTableGasUtilization}
-                setDataTableGasUtilization = {setDataTableGasUtilization}
-                dispatch={dispatch}
-                ddlUtilizationName={ddlUtilizationName}
-                setIsEdit={setIsEdit}
-              />
+              <NxBaseContainer border>
+                <GasUtilizationTableInline
+                  dataTableGasUtilization =  {dataTableGasUtilization}
+                  setDataTableGasUtilization = {setDataTableGasUtilization}
+                  dispatch={dispatch}
+                  ddlUtilizationName={ddlUtilizationName}
+                  setIsEdit={setIsEdit}
+                />
+              </NxBaseContainer>
             </NxCardContainer>
 
             <NxBaseContainer border>
@@ -217,7 +219,7 @@ const GasUtilizationForm = ({type}) => {
                   <ButtonComponent
                     onClick={handleResetClear}
                     type={"reject"}
-                    icon={<SVGIcon name="IconButtonClear" width={24} />}
+                    icon={<SVGIcon name="IconButtonClear" width={20} />}
                   >
                     { type === "update" ? "Reset" : "Clear" }
                   </ButtonComponent>
@@ -228,48 +230,6 @@ const GasUtilizationForm = ({type}) => {
               </div>
             </NxBaseContainer>
           </div>
-
-          {/* <div className={"w-full my-5 flex"}>
-            <Link
-              state={{
-                section: "Gas Utilization",
-                idAccount: accountId,
-                idCustomer: customerId,
-              }}
-            >
-              <ButtonComponent
-                icon={
-                  <LeftOutlined style={{ fontSize: "24px", color: "#fff" }} />
-                }
-                type="submit"
-                onClick={() => setModalBack(true)}
-                disabled={isEdit}
-                // onClick={() => navigate(-1)}
-              >
-                Back
-              </ButtonComponent>
-            </Link>
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleResetClear}
-                disabled={isEdit}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent type="submit" htmlType={"submit"} form={"form"} disabled={isEdit}>
-                Save
-              </ButtonComponent>
-            </div>
-          </div> */}
 
           {/* Modal Confirmation */}
           <ModalCustom

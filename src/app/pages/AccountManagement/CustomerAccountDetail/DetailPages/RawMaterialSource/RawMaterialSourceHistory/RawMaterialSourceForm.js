@@ -405,16 +405,18 @@ const RawMaterialSourceForm = ({ type }) => {
             </NxCardContainer>
 
             <NxCardContainer header={"Raw Material Source Import Detail"}>
-              <FunctionalRMSDetail
-                type={type}
-                data={listDataDetail}
-                updateData={setListDataDetail}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-                required={{ required: true, message: "Please input your" }}
-                localVal={localVal}
-                importVal={importVal}
-              />
+              <NxBaseContainer border>
+                <FunctionalRMSDetail
+                  type={type}
+                  data={listDataDetail}
+                  updateData={setListDataDetail}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  required={{ required: true, message: "Please input your" }}
+                  localVal={localVal}
+                  importVal={importVal}
+                />
+              </NxBaseContainer>
             </NxCardContainer>
             
             <NxBaseContainer border>
@@ -426,28 +428,28 @@ const RawMaterialSourceForm = ({ type }) => {
                   Cancel
                 </ButtonComponent>
                 <div className="flex w-full justify-end gap-x-4">
-                    <ButtonComponent
-                      disabled={storedDataInline ? true : false}
-                      icon={
-                        <SVGIcon
-                          name={
-                            type === "update"
-                              ? `IconButtonReset`
-                              : `IconButtonClear`
-                          }
-                          width={20}
-                        />
-                      }
-                      type="submit"
-                      onClick={() => {
-                        handleClear();
-                      }}
-                    >
-                      {type === "update" ? "Reset" : "Clear"}
-                    </ButtonComponent>
-                    <ButtonComponent type="submit" htmlType={"submit"} form={"form"}>
-                      Save
-                    </ButtonComponent>
+                  <ButtonComponent
+                    disabled={storedDataInline ? true : false}
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update"
+                            ? `IconButtonReset`
+                            : `IconButtonClear`
+                        }
+                        width={20}
+                      />
+                    }
+                    type="reject"
+                    onClick={() => {
+                      handleClear();
+                    }}
+                  >
+                    {type === "update" ? "Reset" : "Clear"}
+                  </ButtonComponent>
+                  <ButtonComponent type="submit" htmlType={"submit"} form={"form"}>
+                    Save
+                  </ButtonComponent>
                 </div>
               </div>
             </NxBaseContainer>

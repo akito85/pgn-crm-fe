@@ -76,22 +76,6 @@ const GasUtilization = ({idAccount, idCustomer, type}) => {
           withoutTopPadding
         >
         </NxCardContainer>
-        {/* <BaseContainer header="GAS UTILIZATION INFORMATION">
-          <div className="pt-[20px]">
-            <RadioTabs
-              data={listSegmentedPage}
-              onChange={handleSegmentedPage}
-              currentPosition={segmentedPage}
-            />
-          </div>
-          <div className={"w-full pt-4"}>
-            {segmentedPage === listSegmentedPage[0].value ? (
-              <TableGasUtilCurrent idAccount={idAccount} idCustomer={idCustomer}/>
-            ) : (
-              <TableGasUtilHistory access={access_account} idAccount={idAccount} idCustomer={idCustomer}/>
-            )}
-          </div>
-        </BaseContainer> */}
       </Spin>
     </>
   )
