@@ -376,7 +376,7 @@ const NotificationDropdown = () => {
     const isRead = isNotificationRead(notification);
 
     if (!isRead && notificationId) {
-      dispatch(markAsRead(notificationId));
+      dispatch(markNotificationAsReadApi(notificationId));
     }
 
     // Navigate using state-based routing pattern

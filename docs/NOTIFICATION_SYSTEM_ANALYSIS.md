@@ -1361,6 +1361,51 @@ DROP TABLE M_NOTIFICATION_READ_STATUS CASCADE CONSTRAINTS;
 
 ---
 
-**Document Version**: 1.1
+## Notification Click Behavior Fix (Critical)
+
+**Fix Date**: 2026-02-12
+**Severity**: Critical - Read status was not persisting to database
+
+### Issue Summary
+
+When users clicked notifications in dropdown or history page, the **read status was only updated locally** (Redux state) and **did not persist to the database**. This caused:
+- Notifications reappearing as unread after page refresh
+- Broadcast notifications not being recorded in `M_NOTIFICATION_READ_STATUS` table
+- Read status not syncing across devices
+
+### Root Cause
+
+Both `NotificationDropdown.js` and `NotificationHistory.js` used the synchronous `markAsRead()` action instead of the async thunk `markNotificationAsReadApi()`:
+
+```javascript
+// BROKEN:
+dispatch(markAsRead(notificationId)); // ❌ Local state only, no API call
+
+// FIXED:
+dispatch(markNotificationAsReadApi(notificationId)); // ✅ API call + persistence
+```
+
+### Files Requiring Changes
+
+1. **NotificationDropdown.js:379** - Replace `markAsRead` with `markNotificationAsReadApi`
+2. **NotificationHistory.js:399** - Replace `markAsRead` with `markNotificationAsReadApi`
+
+### Expected Behavior After Fix
+
+1. User clicks notification → API call to `PATCH /v1/api/notification/:id/read`
+2. Backend updates database:
+   - **Broadcast**: Creates entry in `M_NOTIFICATION_READ_STATUS` (per-user)
+   - **Direct**: Updates `STATUS='read'` in `M_NOTIFICATIONS`
+3. Redux state updates locally
+4. Read status persists across sessions and devices
+5. Broadcast notifications stay marked as read after logout/login
+
+### See Also
+
+Detailed implementation plan and testing checklist: `/docs/NOTIFICATION_CLICK_BEHAVIOR_FIX.md`
+
+---
+
+**Document Version**: 1.2
 **Last Updated**: 2026-02-12
 **Review Schedule**: Quarterly or after major system changes

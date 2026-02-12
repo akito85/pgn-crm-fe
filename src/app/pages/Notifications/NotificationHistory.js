@@ -42,6 +42,7 @@ import {
   selectConnectionStatus,
   markAsRead,
   markAllAsRead,
+  markNotificationAsReadApi,
   removeNotification,
   clearAllNotifications,
   clearNotificationsByDirection,
@@ -396,7 +397,7 @@ const NotificationHistory = () => {
     const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
 
     if (!isRead && notificationId) {
-      dispatch(markAsRead(notificationId));
+      dispatch(markNotificationAsReadApi(notificationId));
     }
 
     // Navigate using state-based routing pattern
