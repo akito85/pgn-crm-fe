@@ -41,37 +41,9 @@ import moment from "moment";
 const { Text } = Typography;
 
 /**
- * LocalStorage helpers for tracking read broadcast notifications
- * Since broadcast notifications are shared records, we track per-user read status locally
+ * Helper to check if a notification is a broadcast notification
+ * Broadcast read status is now tracked server-side in M_NOTIFICATION_READ_STATUS table
  */
-const BROADCAST_READ_KEY_PREFIX = "broadcast_read_";
-
-const getBroadcastReadKey = (userId) => `${BROADCAST_READ_KEY_PREFIX}${userId}`;
-
-const getReadBroadcastIds = (userId) => {
-  try {
-    const key = getBroadcastReadKey(userId);
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : [];
-  } catch (e) {
-    console.warn("[NotificationDropdown] Error reading broadcast read status:", e);
-    return [];
-  }
-};
-
-const markBroadcastsAsRead = (userId, notificationIds) => {
-  try {
-    const key = getBroadcastReadKey(userId);
-    const existing = getReadBroadcastIds(userId);
-    const updated = [...new Set([...existing, ...notificationIds])];
-    localStorage.setItem(key, JSON.stringify(updated));
-    return updated;
-  } catch (e) {
-    console.warn("[NotificationDropdown] Error saving broadcast read status:", e);
-    return [];
-  }
-};
-
 const isBroadcastNotification = (notification) => {
   return notification.direction === "broadcast" ||
          notification.TO_USER_ID === "BROADCAST" ||
@@ -88,13 +60,12 @@ const NotificationDropdown = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('unread');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [lastViewedTime, setLastViewedTime] = useState(null);
   const [clickedTab, setClickedTab] = useState(null);
   const [animatingNotifications, setAnimatingNotifications] = useState(new Set());
   const [animatingDateGroups, setAnimatingDateGroups] = useState(new Set());
-  const [readBroadcastIds, setReadBroadcastIds] = useState([]);
 
   // Get notification state
   const allNotifications = useSelector(selectAllNotifications) || [];
@@ -116,14 +87,6 @@ const NotificationDropdown = () => {
 
   // Get positionId from auth.currentPosition (from switch-pos API) or fallback to Redux notifications.currentPositionId
   const positionId = authCurrentPosition?.positionId || currentPositionId;
-
-  // Load read broadcast IDs from localStorage on mount
-  useEffect(() => {
-    if (userId) {
-      const storedReadBroadcasts = getReadBroadcastIds(userId);
-      setReadBroadcastIds(storedReadBroadcasts);
-    }
-  }, [userId]);
 
   // Filter notifications for current user and current position
   const userNotifications = safeAllNotifications.filter(notification => {
@@ -153,25 +116,10 @@ const NotificationDropdown = () => {
     return true;
   });
 
-  // Check if a broadcast notification has been read locally
-  const isBroadcastReadLocally = (notification) => {
-    if (!isBroadcastNotification(notification)) return false;
-    const notificationId = notification.id || notification.ID;
-    return readBroadcastIds.includes(notificationId);
-  };
-
-  // Get effective read status (considers local broadcast read tracking)
+  // Get effective read status (backend now handles broadcast read status via M_NOTIFICATION_READ_STATUS table)
   const isNotificationRead = (notification) => {
-    // Check backend status first
-    const backendRead = (notification.STATUS || notification.status) === "read";
-    if (backendRead) return true;
-
-    // For broadcasts, also check local storage
-    if (isBroadcastNotification(notification)) {
-      return isBroadcastReadLocally(notification);
-    }
-
-    return false;
+    // Backend now handles broadcast read status, so we just check the status field
+    return (notification.STATUS || notification.status || notification.EFFECTIVE_STATUS) === "read";
   };
 
   // Calculate new notifications count (unread notifications that arrived since last view)
@@ -198,8 +146,8 @@ const NotificationDropdown = () => {
   const safeUnreadCount = unreadCountForTab;
 
   const tabs = [
-    { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
-    { id: 'unread', label: 'Unread', count: unreadCountForTab, badgeVariant: 'soft' }
+    { id: 'unread', label: 'Unread', count: unreadCountForTab, badgeVariant: 'soft' },
+    { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' }
   ];
 
   // Get auth token from Redux (to detect token changes)
@@ -423,16 +371,11 @@ const NotificationDropdown = () => {
    * Handle notification click - State-based navigation with proper NAVIGATION_STATE parsing
    */
   const handleNotificationClick = (notification) => {
-    // Mark as read if not already read
+    // Mark as read if not already read (backend now handles broadcast read status)
     const notificationId = notification.id || notification.ID;
     const isRead = isNotificationRead(notification);
 
     if (!isRead && notificationId) {
-      // For broadcast notifications, also persist to localStorage
-      if (isBroadcastNotification(notification) && userId) {
-        const updatedReadBroadcasts = markBroadcastsAsRead(userId, [notificationId]);
-        setReadBroadcastIds(updatedReadBroadcasts);
-      }
       dispatch(markAsRead(notificationId));
     }
 
@@ -555,15 +498,9 @@ const NotificationDropdown = () => {
         }, dateGroupDelay);
       });
 
-      // After all animations complete, dispatch the API call and persist broadcast read status
+      // After all animations complete, dispatch the API call (backend handles broadcast read status)
       const totalAnimationTime = visualOrderNotifications.length * delayBetweenAnimations + dateGroupAnimationDelay + 400; // +400ms for animation duration
       setTimeout(() => {
-        // Persist broadcast read status to localStorage
-        if (broadcastIds.length > 0 && userId) {
-          const updatedReadBroadcasts = markBroadcastsAsRead(userId, broadcastIds);
-          setReadBroadcastIds(updatedReadBroadcasts);
-        }
-
         dispatch(markAllNotificationsAsReadApi());
 
         // Clear animating notifications and date groups after a delay to allow Redux state to update
@@ -574,13 +511,7 @@ const NotificationDropdown = () => {
         }, 300);
       }, totalAnimationTime);
     } else {
-      // In 'all' tab, just mark as read without animation
-      // Persist broadcast read status to localStorage
-      if (broadcastIds.length > 0 && userId) {
-        const updatedReadBroadcasts = markBroadcastsAsRead(userId, broadcastIds);
-        setReadBroadcastIds(updatedReadBroadcasts);
-      }
-
+      // In 'all' tab, just mark as read without animation (backend handles broadcast read status)
       dispatch(markAllNotificationsAsReadApi());
     }
   };
@@ -782,7 +713,8 @@ const NotificationDropdown = () => {
                       style={{
                         padding: "12px 16px",
                         cursor: (notification.LINK || notification.link) ? "pointer" : "default",
-                        backgroundColor: isNotificationRead(notification) ? "#ffffff" : "#f0f7ff",
+                        backgroundColor: isNotificationRead(notification) ? "#f5f5f5" : "#ffffff",
+                        opacity: isNotificationRead(notification) ? 0.7 : 1,
                         borderBottom: "1px dashed rgb(29 28 29 / 0.1)",
                         borderTop: "1px dashed rgb(29 28 29 / 0.1)",
                         marginTop: "-1px"
