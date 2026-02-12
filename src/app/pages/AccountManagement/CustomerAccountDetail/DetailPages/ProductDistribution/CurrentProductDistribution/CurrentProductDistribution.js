@@ -121,7 +121,7 @@ const CurrentProductDistribution = ({ id, idCustomer }) => {
   // Use Effect
   useEffect(() => {
     dispatch(getCurrentPB(id));
-  }, [dispatch]);
+  }, [dispatch, id]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {

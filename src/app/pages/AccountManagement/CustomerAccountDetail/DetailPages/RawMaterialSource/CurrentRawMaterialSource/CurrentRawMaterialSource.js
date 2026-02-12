@@ -122,7 +122,7 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
   // Use Effect
   useEffect(() => {
     dispatch(getCurrentRaw(id));
-  }, [dispatch]);
+  }, [dispatch, id]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {

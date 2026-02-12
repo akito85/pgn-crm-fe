@@ -58,6 +58,10 @@ const GasUtilization = ({idAccount, idCustomer, type}) => {
 
   const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
 
+  if (!access_account || Object.keys(access_account).length === 0) {
+    return <Spin spinning />;
+  }
+
   return (
     <>
       <Spin spinning={loading}>
