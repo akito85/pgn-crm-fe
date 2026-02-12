@@ -271,7 +271,11 @@ console.log(data_list_gl, ' data list gl');
     return [
       {
         path: "",
-        breadcrumbName: "Receipt & Collection",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
       },
       {
         path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK,

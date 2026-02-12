@@ -25,7 +25,7 @@ const DetailSettings = ({ data_detail, data_req }) => {
           </div>
         </DetailSection>
       ) : null}
-      <DetailSection header={"SETTING INFORMATION"}>
+      <DetailSection header={"PAYMENT CHANNEL CONFIGURATION INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label={"Collecting Agent Code"}>
             {data_detail?.caCode}
