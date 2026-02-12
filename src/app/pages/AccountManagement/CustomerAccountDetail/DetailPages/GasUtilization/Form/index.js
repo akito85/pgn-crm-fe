@@ -33,8 +33,8 @@ const GasUtilizationForm = ({type}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const accountId = location?.state?.idAccount;
-  const customerId = location?.state?.idCustomer;
+  const accountId = location?.state?.accountId || location?.state?.idAccount;
+  const customerId = location?.state?.customerId || location?.state?.idCustomer;
   const idUpdate = location?.state?.id;
 
   const [dataTableGasUtilization, setDataTableGasUtilization] = useState([]);
