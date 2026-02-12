@@ -44,15 +44,24 @@ export default function InfoServiceRequest({
     console.log("InfoServiceRequest - Current form values:", values);
   }, [form]);
 
-  // Create safe accessor functions
+  // Create safe accessor functions that handle both array and { data: [] } formats
+  const getDropdownItems = (dropdownKey) => {
+    const dropdown = dropdowns?.[dropdownKey];
+    if (!dropdown) return [];
+    if (Array.isArray(dropdown)) return dropdown;
+    if (Array.isArray(dropdown?.data)) return dropdown.data;
+    return [];
+  };
+
   const getDropdownOptions = (dropdownKey) => {
-    if (!dropdowns || !dropdowns[dropdownKey] || !dropdowns[dropdownKey].data) {
-      return [];
-    }
-    return dropdowns[dropdownKey].data.map(item => ({
+    return getDropdownItems(dropdownKey).map(item => ({
       value: item.glbTypeValId?.toString() || item.id?.toString(),
       label: item.name || item.glbTypeValName
     }));
+  };
+
+  const isDropdownLoaded = (dropdownKey) => {
+    return getDropdownItems(dropdownKey).length > 0;
   };
 
   // Or use destructuring with defaults
@@ -435,7 +444,7 @@ export default function InfoServiceRequest({
       <NxCardContainer header={"SERVICE INFORMATION"}>
         <NxBaseContainer border>
         {/* Remove the wrapper Form component since form is passed as prop */}
-        <div className="w-full grid grid-cols-2 gap-4">
+        <div className="w-full grid grid-cols-3 gap-4">
           {/* Left Column */}
           <div className="space-y-4">
             <div class="w-full gap-4 flex flex-row items-end">
@@ -465,6 +474,7 @@ export default function InfoServiceRequest({
                 Select
               </Button>
             </div>
+
             <Form.Item
               key="category"
               name="category"
@@ -479,7 +489,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Category"
-                loading={!dropdowns?.serviceRequestCategories?.data}
+                loading={!isDropdownLoaded('serviceRequestCategories')}
                 options={getDropdownOptions('serviceRequestCategories')}
               />
             </Form.Item>
@@ -498,11 +508,14 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Priorities"
-                loading={!dropdowns?.serviceRequestPriorities?.data}
+                loading={!isDropdownLoaded('serviceRequestPriorities')}
                 options={getDropdownOptions('serviceRequestPriorities')}
               />
             </Form.Item>
+          </div>
 
+          {/* Middle Column */}
+          <div className="space-y-4">
             <Form.Item
               key="srFormAccountCostCenter"
               name="srFormAccountCostCenter"
@@ -532,14 +545,11 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Sub Category"
-                loading={!dropdowns?.serviceRequestSubcategories?.data}
+                loading={!isDropdownLoaded('serviceRequestSubcategories')}
                 options={getDropdownOptions('serviceRequestSubcategories')}
               />
             </Form.Item>
-          </div>
 
-          {/* Right Column */}
-          <div className="space-y-4">
             <Form.Item
               key="requestSource"
               name="requestSource"
@@ -554,11 +564,14 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Sources"
-                loading={!dropdowns?.serviceRequestSources?.data}
+                loading={!isDropdownLoaded('serviceRequestSources')}
                 options={getDropdownOptions('serviceRequestSources')}
               />
             </Form.Item>
+          </div>
 
+          {/* Right Column */}
+          <div className="space-y-4">
             <Form.Item
               key="type"
               name="type"
@@ -573,7 +586,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Types"
-                loading={!dropdowns?.serviceRequestTypes?.data}
+                loading={!isDropdownLoaded('serviceRequestTypes')}
                 options={getDropdownOptions('serviceRequestTypes')}
               />
             </Form.Item>
@@ -592,7 +605,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Channels"
-                loading={!dropdowns?.serviceRequestChannels?.data}
+                loading={!isDropdownLoaded('serviceRequestChannels')}
                 options={getDropdownOptions('serviceRequestChannels')}
               />
             </Form.Item>

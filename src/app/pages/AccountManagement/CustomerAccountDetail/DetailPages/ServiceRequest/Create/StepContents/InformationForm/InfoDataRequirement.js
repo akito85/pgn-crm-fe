@@ -39,15 +39,24 @@ export default function InfoDataRequirement({
     }
   }, [form]);
 
-  // Create safe accessor functions
+  // Create safe accessor functions that handle both array and { data: [] } formats
+  const getDropdownItems = (dropdownKey) => {
+    const dropdown = dropdowns?.[dropdownKey];
+    if (!dropdown) return [];
+    if (Array.isArray(dropdown)) return dropdown;
+    if (Array.isArray(dropdown?.data)) return dropdown.data;
+    return [];
+  };
+
   const getDropdownOptions = (dropdownKey) => {
-    if (!dropdowns || !dropdowns[dropdownKey] || !dropdowns[dropdownKey].data) {
-      return [];
-    }
-    return dropdowns[dropdownKey].data.map(item => ({
+    return getDropdownItems(dropdownKey).map(item => ({
       value: item.glbTypeValId?.toString() || item.id?.toString(),
       label: item.name || item.glbTypeValName
     }));
+  };
+
+  const isDropdownLoaded = (dropdownKey) => {
+    return getDropdownItems(dropdownKey).length > 0;
   };
 
   // A limiter for sercurity purpose
@@ -350,7 +359,7 @@ export default function InfoDataRequirement({
             >
               <Select
                 placeholder="Select Data Requirement"
-                loading={!dropdowns?.serviceRequestDataRequirements?.data}
+                loading={!isDropdownLoaded('serviceRequestDataRequirements')}
                 options={getDropdownOptions('serviceRequestDataRequirements')}
               />
             </Form.Item>

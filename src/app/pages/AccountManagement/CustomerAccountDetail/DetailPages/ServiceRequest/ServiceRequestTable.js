@@ -31,7 +31,15 @@ const ServiceRequestTable = ({
   const itemActions = nxGetAccountActions({
     idAccount,
     idCustomer,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_REQUEST,
+    handleCreate: () => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_REQUEST,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    ),
     updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST,
     detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
     navigate,

@@ -65,7 +65,7 @@ import {
   getServiceRequestSources,
   getServiceRequestDataRequirements,
   getServiceRequestPrerequisites,
-} from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequest";
+} from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 const CreateCustomerServiceRequest = (props) => {
   const containerRef = useRef(null);
@@ -92,9 +92,29 @@ const CreateCustomerServiceRequest = (props) => {
     (state) => state.accountManagement,
   );
 
-  const { dropdowns, serviceRequestDetail } = useSelector(
-    (state) => state.serviceRequest,
-  );
+  const {
+    data_types,
+    data_categories,
+    data_subcategories,
+    data_priorities,
+    data_channels,
+    data_sources,
+    data_prerequisite_types,
+    data_data_requirement_types,
+    data_detail: serviceRequestDetail,
+  } = useSelector((state) => state.serviceRequest);
+
+  // Map state keys to the dropdowns structure expected by child components
+  const dropdowns = {
+    serviceRequestTypes: data_types,
+    serviceRequestCategories: data_categories,
+    serviceRequestSubcategories: data_subcategories,
+    serviceRequestPriorities: data_priorities,
+    serviceRequestChannels: data_channels,
+    serviceRequestSources: data_sources,
+    serviceRequestPrerequisites: data_prerequisite_types,
+    serviceRequestDataRequirements: data_data_requirement_types,
+  };
 
   const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
 
@@ -260,6 +280,7 @@ const CreateCustomerServiceRequest = (props) => {
     ) {
       setDropdownsLoaded(true);
     }
+    console.log("Dropdowns loaded = ", dropdowns);
   }, [dropdowns]);
 
   const handleSetData = (e) => {
