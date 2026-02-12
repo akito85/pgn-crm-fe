@@ -321,7 +321,7 @@ const ProductDistributionForm = ({ type }) => {
           type="standard"
         />
 
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Form id="form" form={form} layout="vertical" onFinish={handleSubmit}>
           <div className="flex flex-col gap-y-4 mt-4">
             <NxCardContainer header={"RAW MATERIAL SOURCE INFORMATION"}>
               <div className="w-full grid grid-cols-3 gap-3">
@@ -424,55 +424,6 @@ const ProductDistributionForm = ({ type }) => {
                   Cancel
                 </ButtonComponent>
                 <div className="flex w-full justify-end gap-x-4">
-                  <Form.Item>
-                    <ButtonComponent
-                      disabled={storedDataInline ? true : false}
-                      icon={
-                        <SVGIcon
-                          name={
-                            type === "update"
-                              ? `IconButtonReset`
-                              : `IconButtonClear`
-                          }
-                          width={24}
-                        />
-                      }
-                      type="submit"
-                      onClick={() => {
-                        handleClear();
-                      }}
-                    >
-                      {type === "update" ? "Reset" : "Clear"}
-                    </ButtonComponent>
-                  </Form.Item>
-                  <Form.Item>
-                    <ButtonComponent type="submit" htmlType={"submit"}>
-                      Save
-                    </ButtonComponent>
-                  </Form.Item>
-                </div>
-              </div>
-            </NxBaseContainer>
-
-            {/* <div className="flex mt-[30px]">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setModalBack(true)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
-              >
-                Back
-              </ButtonComponent>
-
-              <div className={"w-full flex justify-end gap-5"}>
-                <Form.Item>
                   <ButtonComponent
                     disabled={storedDataInline ? true : false}
                     icon={
@@ -482,7 +433,7 @@ const ProductDistributionForm = ({ type }) => {
                             ? `IconButtonReset`
                             : `IconButtonClear`
                         }
-                        width={24}
+                        width={20}
                       />
                     }
                     type="submit"
@@ -492,14 +443,12 @@ const ProductDistributionForm = ({ type }) => {
                   >
                     {type === "update" ? "Reset" : "Clear"}
                   </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent type="submit" htmlType={"submit"}>
+                  <ButtonComponent type="submit" htmlType={"submit"} form={"form"}>
                     Save
                   </ButtonComponent>
-                </Form.Item>
+                </div>
               </div>
-            </div> */}
+            </NxBaseContainer>
           </div>
         </Form>
 

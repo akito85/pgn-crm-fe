@@ -1,14 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Space,
-  Table,
-  Tooltip,
-  DatePicker,
-} from "antd";
+import { Form, Input, InputNumber, Select, Space, Tooltip, DatePicker, Button } from "antd";
+import { getColumnSearchPropsCriteria } from "../../../../../ProductAndPromo/Product/columnTableCriteria";
 import Highlighter from "react-highlight-words";
 import { FilterOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
@@ -17,6 +9,7 @@ import { showModalError } from "../../../../../../../redux/slices/general_slice"
 import { useDispatch, useSelector } from "react-redux";
 import { getCountryRMS } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import InputComponent from "../../../../../../../components/InputComponent";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 
 const EditableCell = ({
   editing,
@@ -31,8 +24,8 @@ const EditableCell = ({
   dataEditRecord,
   required,
   formPD,
-  validateBoolean,
-  exportVal,
+  validationError,
+  importVal,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -57,6 +50,11 @@ const EditableCell = ({
             showSearch
             allowClear
             labelInValue
+            size="small"
+            style={{
+              height: 24,
+              fontSize: 11,
+            }}
             filterOption={(input, option) =>
               (option?.children ?? "")
                 .toLowerCase()
@@ -65,7 +63,7 @@ const EditableCell = ({
           >
             {options?.map((option) => (
               <Select.Option key={option.value} value={option.value}>
-                {option.label}
+                <div className="text-xs">{option.label}</div>
               </Select.Option>
             ))}
           </Select>
@@ -75,8 +73,11 @@ const EditableCell = ({
           <InputNumber
             type={"number"}
             controls={false}
+            size="small"
             style={{
               width: "100%",
+              fontSize: 11,
+              height: 24,
             }}
           />
         );
@@ -108,13 +109,9 @@ const EditableCell = ({
             handleEditDataRecord(value, key, dataIndex)
           }
           validateStatus={
-            validateBoolean && inputType === "number" ? "error" : undefined
+            validationError && dataIndex === "percentage" ? "error" : undefined
           }
-          help={
-            validateBoolean && inputType === "number"
-              ? `Please adjust value. Total Percentage must be ${exportVal}%`
-              : undefined
-          }
+          help={validationError && dataIndex === "percentage" ? validationError : undefined}
           rules={
             inputType !== "number"
               ? rules()
@@ -122,14 +119,14 @@ const EditableCell = ({
                   ...rules(),
                   {
                     validator: (_, value) => {
-                      const percentage = formPD.getFieldValue().percentage;
-                      if (percentage >= 0 && percentage <= exportVal) {
+                      const max = importVal !== undefined ? importVal : 100;
+                      if (value >= 0 && value <= max) {
                         return Promise.resolve();
                       } else {
                         return Promise.reject(
                           new Error(
-                            `Please adjust value. Total Percentage must be ${exportVal}%`
-                          )
+                            `Please adjust value. Value must be between 0 and ${max}`,
+                          ),
                         );
                       }
                     },
@@ -278,7 +275,11 @@ const FunctionalPDDetail = ({
   const [statusAction, setStatusAction] = useState("");
   const [editDataRecord, setEditDataRecord] = useState({});
 
-  const [validateBoolean, setValidateBoolean] = useState(false);
+  const [validationError, setValidationError] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
 
   // Use Effect
   useEffect(() => {
@@ -379,13 +380,14 @@ const FunctionalPDDetail = ({
 
         // Check if the total percentage exceeds 100%
         if (totalPercentage > exportVal) {
-          return setValidateBoolean(true);
+          setValidationError(`Please adjust value. Total Percentage must be ${exportVal}%`);
+          return;
         }
 
         newData.splice(index, 1, updatedRow);
         updateData(newData);
         setEditingKey("");
-        setValidateBoolean(false);
+        setValidationError("");
       }
 
       setStoredData(false);
@@ -433,6 +435,7 @@ const FunctionalPDDetail = ({
   };
 
   // Filter Table
+  // Filter Table
   const onFilter = (dataIndex, value, record) => {
     const fixSearchText = value.toLowerCase();
     switch (dataIndex) {
@@ -464,6 +467,7 @@ const FunctionalPDDetail = ({
   const columns = () => {
     const temp = [
       {
+        key: "no",
         title: "NO",
         width: 60,
         dataIndex: "no",
@@ -471,6 +475,7 @@ const FunctionalPDDetail = ({
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "country",
         required: true,
         title: "COUNTRY",
         width: 240,
@@ -478,8 +483,8 @@ const FunctionalPDDetail = ({
         sorter: (a, b) => sorter("country", a, b),
         dataIndex: "country",
         inputType: "select",
-        option: listOption,
-        ...getColumnSearchProps(
+        options: listOption,
+        ...getColumnSearchPropsCriteria(
           "country",
           searchInput,
           searchedColumn,
@@ -488,6 +493,7 @@ const FunctionalPDDetail = ({
         ),
       },
       {
+        key: "percentage",
         required: true,
         title: "PERCENTAGE (%)",
         width: 240,
@@ -505,6 +511,7 @@ const FunctionalPDDetail = ({
         ),
       },
       {
+        key: "action",
         title: "ACTION",
         dataIndex: "operation",
         width: 240,
@@ -514,57 +521,79 @@ const FunctionalPDDetail = ({
           const editable = record.key === editingKey;
 
           return (
-            <Space className="my-3 gap-2">
-              {editable ? (
-                <>
-                  <ButtonComponent
-                    onClick={() => cancel(record)}
-                    type="default"
-                  >
-                    Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
-                    onClick={() => save(record.key)}
-                    type="submit"
-                  >
-                    Save
-                  </ButtonComponent>
-                </>
-              ) : (
-                <div className="flex w-full justify-center gap-4">
-                  <Tooltip title="Edit">
-                    <div>
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        className={
-                          editingKey ? "cursor-not-allowed" : undefined
-                        }
-                        width={24}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </div>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <div>
-                      <SVGIcon
-                        name="IconDelete"
-                        color={!editingKey ? "#D90000" : "#8D91A0"}
-                        width={24}
-                        className={
-                          !editingKey
-                            ? undefined
-                            : "disabled cursor-not-allowed"
-                        }
-                        onClick={
-                          !editingKey ? () => deleteRow(record) : undefined
-                        }
-                      />
-                    </div>
-                  </Tooltip>
-                </div>
-              )}
-            </Space>
+              <Space className="fleex w-full justify-center my-1 gap-2">
+                {editable ? (
+                  <>
+                    <Button
+                      onClick={() => cancel(record)}
+                      className="flex w-full justify-center"
+                      type="default"
+                      size="small"
+                      style={{
+                        borderColor: "var(--primary)",
+                        height: "22px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        padding: "0px 6px",
+                        lineHeight: "20px",
+                      }}
+                    >
+                      <div className="py-0.5 px-1 text-center">Cancel</div>
+                    </Button>
+                    <Button
+                      onClick={() => save(record.key)}
+                      className={"flex w-full justify-center"}
+                      type={"submit"}
+                      size={"small"}
+                      style={{
+                        borderColor: "#0075bf00",
+                        backgroundColor: "var(--primary)",
+                        color: "#fff",
+                        height: "22px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        padding: "0 6px",
+                        lineHeight: "20px",
+                      }}
+                    >
+                      <div className="py-0.5 px-1 text-center">Save</div>
+                    </Button>
+                  </>
+                ) : (
+                  <div className="flex w-full justify-center gap-4">
+                    <Tooltip title="Edit">
+                      <div>
+                        <SVGIcon
+                          name="IconEdit"
+                          color={editingKey ? "#8D91A0" : "#ACC424"}
+                          className={
+                            editingKey ? "cursor-not-allowed" : undefined
+                          }
+                          width={20}
+                          onClick={!editingKey ? () => edit(record) : undefined}
+                        />
+                      </div>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <div>
+                        <SVGIcon
+                          name="IconDelete"
+                          color={!editingKey ? "#D90000" : "#8D91A0"}
+                          width={20}
+                          className={
+                            !editingKey
+                              ? undefined
+                              : "disabled cursor-not-allowed"
+                          }
+                          onClick={
+                            !editingKey ? () => deleteRow(record) : undefined
+                          }
+                        />
+                      </div>
+                    </Tooltip>
+                  </div>
+                )}
+              </Space>
           );
         },
       },
@@ -609,42 +638,9 @@ const FunctionalPDDetail = ({
       ) : null}
 
       <div className="relative flex flex-col w-full">
-        <div
-          className={`${
-            totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-          } w-1/4 flex`}
-        >
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-full"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns()
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    optionSelectedCol.length > 3
-                      ? optionSelectedCol.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
-        </div>
-
         <Form form={formPD} component={false}>
-          <Table
-            bordered
-            className="w-full"
+          <NxTable
+            idTable="pd-functional-pd-detail-table"
             dataSource={data}
             columns={filterColumn(
               columns().map((col) => ({
@@ -655,34 +651,27 @@ const FunctionalPDDetail = ({
                   dataIndex: col.dataIndex,
                   title: col.title,
                   editing: isEditing(record),
-                  options: col.option,
+                  dependDataIndex: col.dependDataIndex,
+                  options: col.options,
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                   required: col.required,
-                  validateBoolean: validateBoolean,
+                  validationError: validationError,
                   formPD: formPD,
-                  exportVal: exportVal,
+                  importVal: exportVal,
                 }),
               }))
             )}
-            pagination={{
-              position: ["topRight"],
-              current: page,
-              pageSize: pageSize,
-              onChange: handleChange,
-              className: "pr-1 w-3/4",
-              style: { marginLeft: "auto", marginRight: 0 },
-              showSizeChanger: true,
-              showTotal: (total, range) =>
-                `Showing ${range[0]} to ${range[1]} of ${total} records`,
-            }}
+            usePagination={false}
+            useInfiniteScroll={false}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
               body: {
                 cell: EditableCell,
               },
             }}
-            // scroll={scroll}
             onChange={onChange}
           />
         </Form>
