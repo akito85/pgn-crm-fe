@@ -23,6 +23,7 @@ import { createUpdateGasUtilization, getDetailGasUtilization, getDdlUtilizationN
 import ModalBack from '../../../../../../../components/Modal/ModalBack'
 import NxBaseContainer from '../../../../../../../components/Nx/NxBaseContainer'
 import NxCardContainer from '../../../../../../../components/Nx/NxCardContainer'
+import NxModal from '../../../../../../../components/Nx/NxModal'
 
 const GasUtilizationForm = ({type}) => {
   const { data_detail, ddlUtilizationName } = useSelector(
@@ -232,7 +233,7 @@ const GasUtilizationForm = ({type}) => {
           </div>
 
           {/* Modal Confirmation */}
-          <ModalCustom
+          <NxModal
             header={`CONFIRMATION`}
             isOpen={openConfirmation}
             type={"confirmation"}
@@ -259,26 +260,24 @@ const GasUtilizationForm = ({type}) => {
               </div>
             }
           >
-            <div>
-              <div className="text-primary text-xs font-bold uppercase py-4">
-                Gas Utilization Information
-              </div>
-              <div className='w-full grid grid-cols-3'>
-                <DetailText label={'Effective Date'}>{moment(body?.body?.effectiveDate).format(dateFormatting.date)}</DetailText>
-                <DetailText label={'Description'}>{body?.body?.description}</DetailText>
-              </div>
-              <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-                {"Gas Utilization Detail"}
-              </p>
-              <GasUtilizationTableInline
-                dataTableGasUtilization =  {dataTableGasUtilization}
-                setDataTableGasUtilization = {setDataTableGasUtilization}
-                dispatch={dispatch}
-                ddlUtilizationName={ddlUtilizationName}
-                type={"preview"}
-              />
+            <div className="flex flex-col gap-4 p-4">
+              <NxBaseContainer border header={"Gas Utilization Information"}>
+                <div className='w-full grid grid-cols-3'>
+                  <DetailText label={'Effective Date'}>{moment(body?.body?.effectiveDate).format(dateFormatting.date)}</DetailText>
+                  <DetailText label={'Description'}>{body?.body?.description}</DetailText>
+                </div>
+              </NxBaseContainer>
+              <NxBaseContainer border header={"Gas Utilization Detail"}>
+                <GasUtilizationTableInline
+                  dataTableGasUtilization =  {dataTableGasUtilization}
+                  setDataTableGasUtilization = {setDataTableGasUtilization}
+                  dispatch={dispatch}
+                  ddlUtilizationName={ddlUtilizationName}
+                  type={"preview"}
+                />
+              </NxBaseContainer>
             </div>
-          </ModalCustom>
+          </NxModal>
 
           {/* Modal Back */}
           <ModalBack

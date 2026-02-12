@@ -8,34 +8,99 @@ import { getColumnSearchPropsCriteria } from "../../../../../ProductAndPromo/Pro
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import InputComponent from "../../../../../../../components/InputComponent";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import Highlighter from "react-highlight-words";
 
 const onFilter = (dataIndex, value, record) => {
-  const tempSearchText = value.toLowerCase();
-  switch (dataIndex) {
-    case "name":
-    case "unit":
-      return record[dataIndex]?.label.toLowerCase().includes(tempSearchText);
-    default:
-      return record[dataIndex]
-        ?.toString()
-        ?.toLowerCase()
-        .includes(tempSearchText);
+  const fixSearchText = String(value || "").toLowerCase().trim();
+  const cell = record ? record[dataIndex] : undefined;
+
+  if (cell === undefined || cell === null) return false;
+
+  if (dataIndex === "percentage") {
+    const temp = cell !== undefined && cell !== null ? String(cell) : "";
+    return temp.toLowerCase().includes(fixSearchText);
   }
+
+  // handle React element as label or nested label/value objects
+  const rawLabel = cell?.label ?? cell;
+
+  // If rawLabel is a React element, try to read its children
+  if (React.isValidElement(rawLabel)) {
+    const child = rawLabel.props?.children;
+    const childStr =
+      child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+        ? String(child).toLowerCase().trim()
+        : "";
+    if (childStr.includes(fixSearchText)) return true;
+  } else if (typeof rawLabel === "string" || typeof rawLabel === "number") {
+    if (String(rawLabel).toLowerCase().trim().includes(fixSearchText)) return true;
+  }
+
+  // also check cell.value if present
+  const valStr = cell?.value !== undefined && cell?.value !== null ? String(cell.value).toLowerCase().trim() : "";
+  if (valStr.includes(fixSearchText)) return true;
+
+  return false;
 };
 
 const sorter = (fieldSort, a, b) => {
-  const handleDataSort = (obj) => {
-    switch (fieldSort) {
-      case "name":
-      case "unit":
-        return obj[fieldSort]?.label?.toLowerCase();
-      default:
-        return obj[fieldSort]?.toString()?.toLowerCase();
+  const extractSortable = (obj) => {
+    const cell = obj ? obj[fieldSort] : undefined;
+    if (cell === undefined || cell === null) return "";
+
+    if (fieldSort === "percentage") {
+      const n = Number(cell);
+      return isNaN(n) ? String(cell).toLowerCase() : n;
     }
+
+    if (typeof cell === "string" || typeof cell === "number") {
+      return String(cell).toLowerCase();
+    }
+
+    if (typeof cell === "object") {
+      const lbl = cell.label !== undefined ? cell.label : undefined;
+      const val = cell.value !== undefined ? cell.value : undefined;
+
+      if (lbl !== undefined) {
+        if (React.isValidElement(lbl)) {
+          const child = lbl.props?.children;
+          if (child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")) {
+            return String(child).toLowerCase();
+          }
+          try {
+            return String(lbl).toLowerCase();
+          } catch (e) {
+            // fallthrough
+          }
+        }
+
+        if (typeof lbl === "string" || typeof lbl === "number") {
+          return String(lbl).toLowerCase();
+        }
+      }
+
+      if (val !== undefined && (typeof val === "string" || typeof val === "number")) {
+        return String(val).toLowerCase();
+      }
+
+      try {
+        return JSON.stringify(cell).toLowerCase();
+      } catch (e) {
+        return "";
+      }
+    }
+
+    return String(cell).toLowerCase();
   };
-  let fa = handleDataSort(a);
-  let fb = handleDataSort(b);
-  return fa.localeCompare(fb);
+
+  const aVal = extractSortable(a);
+  const bVal = extractSortable(b);
+
+  if (typeof aVal === "number" && typeof bVal === "number") {
+    return aVal - bVal;
+  }
+
+  return String(aVal).localeCompare(String(bVal));
 };
 
 
@@ -248,44 +313,20 @@ const GasUtilizationTableInline = ({
 
   const filteredData = (typeData = "data") => {
     let result = [...dataTableGasUtilization];
+
+    // filtering using the robust onFilter
     if (searchedColumn) {
-      const tempSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        switch (searchedColumn) {
-          case "name":
-          case "unit":
-            return item[searchedColumn]?.label
-              .toLowerCase()
-              .includes(tempSearchText);
-          default:
-            return item[searchedColumn]?.toLowerCase().includes(tempSearchText);
-        }
-      });
+      result = result.filter((item) => onFilter(searchedColumn, searchText, item));
     }
 
-    const handleSort = (obj) => {
-      switch (fieldSort) {
-        case "name":
-        case "unit":
-          return obj[fieldSort]?.label.toString().toLowerCase();
-        default:
-          return obj[fieldSort].toString().toLowerCase();
-      }
-    };
+    // sorting using the robust sorter
     if (fieldSort) {
       result.sort((a, b) => {
-        let fa = handleSort(a);
-        let fb = handleSort(b);
-
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
+        const res = sorter(fieldSort, a, b);
+        return orderSort === "asc" ? res : -res;
       });
     }
+
     const fix = result.slice((page - 1) * pageSize, page * pageSize);
     return typeData === "data" ? fix : result.length;
   };
@@ -456,6 +497,47 @@ const GasUtilizationTableInline = ({
           searchText,
           handleSearch
         ),
+        render: (data) => {
+          // support label as string, number, React element, or fallback
+          const rawLabel = data?.label ?? data ?? "";
+
+          // If it's a React element, try to extract children text or return element
+          if (React.isValidElement(rawLabel)) {
+            const child = rawLabel.props?.children;
+            const childStr =
+              child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+                ? String(child)
+                : null;
+
+            if (searchedColumn === "name" && searchText && childStr) {
+              return (
+                <Highlighter
+                  highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                  searchWords={[searchText]}
+                  autoEscape
+                  textToHighlight={childStr}
+                />
+              );
+            }
+
+            // fallback to rendering the element itself
+            return rawLabel;
+          }
+
+          const label = rawLabel !== undefined && rawLabel !== null ? String(rawLabel) : "";
+          if (searchedColumn === "name" && searchText) {
+            return (
+              <Highlighter
+                highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={label}
+              />
+            );
+          }
+
+          return label || "";
+        },
       },
       {
         key: "percentage",
@@ -649,6 +731,7 @@ const GasUtilizationTableInline = ({
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
+            showAdvanceSearch={false}
           />
 
           {type === 'create' && (
