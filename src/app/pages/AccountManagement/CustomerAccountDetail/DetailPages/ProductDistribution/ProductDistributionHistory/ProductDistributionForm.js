@@ -189,7 +189,7 @@ const ProductDistributionForm = ({ type }) => {
       errorBody = {
         title: "Failed",
         description:
-          "Raw Material Source Import Detail Mandatory. Please insert data.",
+          "Product Distribution Source Export Detail Mandatory. Please insert data.",
       };
       dispatch(showModalError(errorBody));
     } else if (storedDataInline) {

@@ -6,6 +6,8 @@ import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import FunctionalRMSDetail from "./FunctionalRMSDetail";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import NxModal from "../../../../../../../components/Nx/NxModal";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const ModalConfirmationRMS = ({
   isOpen,
@@ -15,7 +17,7 @@ const ModalConfirmationRMS = ({
   handleConfirm = () => {},
 }) => {
   return (
-    <ModalCustom
+    <NxModal
       isOpen={isOpen}
       type={"confirmation"}
       header={"confirmation"}
@@ -37,26 +39,28 @@ const ModalConfirmationRMS = ({
         </div>
       }
     >
-      <div className="w-full grid grid-cols-3 gap-4">
-        <NxDetailText label={"Effective Date"}>
-          {data?.effectiveDate
-            ? moment(data?.effectiveDate).format(dateFormatting.date)
-            : ""}
-        </NxDetailText>
-        <NxDetailText label={"Local (%)"}>{data?.value1}</NxDetailText>
-        <NxDetailText label={"Import (%)"}>{data?.value2}</NxDetailText>
+      <div className="flex flex-col gap-4 p-4">
+        <NxBaseContainer border>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Effective Date"}>
+              {data?.effectiveDate
+                ? moment(data?.effectiveDate).format(dateFormatting.date)
+                : ""}
+            </NxDetailText>
+            <NxDetailText label={"Local (%)"}>{data?.value1}</NxDetailText>
+            <NxDetailText label={"Import (%)"}>{data?.value2}</NxDetailText>
 
-        <div className="col-span-3">
-          <NxDetailText label={"Description"}>{data?.description}</NxDetailText>
-        </div>
+            <div className="col-span-3">
+              <NxDetailText label={"Description"}>{data?.description}</NxDetailText>
+            </div>
+          </div>
+        </NxBaseContainer>
+
+        <NxBaseContainer border header={"RAW MATERIAL SOURCE DETAIL"}>
+          <FunctionalRMSDetail type={"preview"} data={dataDetail} />
+        </NxBaseContainer>
       </div>
-
-      <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-        {"Raw Material Source Import Detail"}
-      </p>
-
-      <FunctionalRMSDetail type={"preview"} data={dataDetail} />
-    </ModalCustom>
+    </NxModal>
   );
 };
 

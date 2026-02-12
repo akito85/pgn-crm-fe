@@ -452,32 +452,127 @@ const FunctionalRMSDetail = ({
     setStoredData(false);
   };
 
-  // Filter Table
+  // Filter Table (robust: handles primitive values, objects with label, and nulls)
   const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = value.toLowerCase();
-    switch (dataIndex) {
-      case "percentage":
-        const temp = record[dataIndex]?.toString();
-        return temp.toLowerCase().includes(fixSearchText);
-      default:
-        return record[dataIndex]?.label?.toLowerCase().includes(fixSearchText);
+    const fixSearchText = String(value || "").toLowerCase().trim();
+    const cell = record[dataIndex];
+
+    if (dataIndex === "percentage") {
+      const temp = cell !== undefined && cell !== null ? String(cell) : "";
+      return temp.toLowerCase().includes(fixSearchText);
+    }
+
+    // Special handling for country: support label (string or React element) and value
+    if (dataIndex === "country") {
+      if (cell === undefined || cell === null) return false;
+
+      // rawLabel may be cell.label or the cell itself
+      const rawLabel = cell?.label ?? cell ?? "";
+
+      // If label is a React element, try to extract text children
+      if (React.isValidElement(rawLabel)) {
+        const child = rawLabel.props?.children;
+        const childStr =
+          child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+            ? String(child).toLowerCase().trim()
+            : "";
+        if (childStr.includes(fixSearchText)) return true;
+      } else {
+        const labelStr = rawLabel !== undefined && rawLabel !== null ? String(rawLabel).toLowerCase().trim() : "";
+        if (labelStr.includes(fixSearchText)) return true;
+      }
+
+      // also check cell.value if present
+      const valStr = cell?.value !== undefined && cell?.value !== null ? String(cell.value).toLowerCase().trim() : "";
+      if (valStr.includes(fixSearchText)) return true;
+
+      return false;
+    }
+
+    // Generic handling for other columns
+    if (cell === undefined || cell === null) return false;
+
+    if (typeof cell === "string" || typeof cell === "number") {
+      return String(cell).toLowerCase().trim().includes(fixSearchText);
+    }
+
+    if (typeof cell === "object") {
+      const label = cell.label !== undefined && cell.label !== null ? String(cell.label).toLowerCase().trim() : "";
+      const val = cell.value !== undefined && cell.value !== null ? String(cell.value).toLowerCase().trim() : "";
+      const combined = `${label} ${val}`.trim();
+      return combined.includes(fixSearchText);
+    }
+
+    try {
+      return String(cell).toLowerCase().trim().includes(fixSearchText);
+    } catch (e) {
+      return false;
     }
   };
 
-  // Sorter Table
+  // Sorter Table (robust)
   const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
-      switch (fieldSort) {
-        case "percentage":
-          const temp = obj[fieldSort]?.toString();
-          return temp.toLowerCase();
-        default:
-          return obj[fieldSort].label?.toLowerCase();
+    const extractSortable = (obj) => {
+      const cell = obj ? obj[fieldSort] : undefined;
+      if (cell === undefined || cell === null) return "";
+
+      // For percentage: prefer numeric comparison
+      if (fieldSort === "percentage") {
+        const n = Number(cell);
+        return isNaN(n) ? String(cell).toLowerCase() : n;
       }
+
+      // Primitive types
+      if (typeof cell === "string" || typeof cell === "number") {
+        return String(cell).toLowerCase();
+      }
+
+      // Object: attempt to extract label or value; support React element in label
+      if (typeof cell === "object") {
+        const lbl = cell.label !== undefined ? cell.label : undefined;
+        const val = cell.value !== undefined ? cell.value : undefined;
+
+        if (lbl !== undefined) {
+          if (React.isValidElement(lbl)) {
+            const child = lbl.props?.children;
+            if (child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")) {
+              return String(child).toLowerCase();
+            }
+            try {
+              return String(lbl).toLowerCase();
+            } catch (e) {
+              // continue
+            }
+          }
+
+          if (typeof lbl === "string" || typeof lbl === "number") {
+            return String(lbl).toLowerCase();
+          }
+        }
+
+        if (val !== undefined && (typeof val === "string" || typeof val === "number")) {
+          return String(val).toLowerCase();
+        }
+
+        // fallback to JSON string
+        try {
+          return JSON.stringify(cell).toLowerCase();
+        } catch (e) {
+          return "";
+        }
+      }
+
+      return String(cell).toLowerCase();
     };
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-    return fa.localeCompare(fb);
+
+    const aVal = extractSortable(a);
+    const bVal = extractSortable(b);
+
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return aVal - bVal;
+    }
+
+    return String(aVal).localeCompare(String(bVal));
   };
 
   // Columns Table
@@ -499,8 +594,8 @@ const FunctionalRMSDetail = ({
         onFilter: (value, record) => onFilter("country", value, record),
         sorter: (a, b) => sorter("country", a, b),
         dataIndex: "country",
-  inputType: "select",
-  options: listOption,
+        inputType: "select",
+        options: listOption,
         ...getColumnSearchPropsCriteria(
           "country",
           searchInput,
@@ -508,6 +603,47 @@ const FunctionalRMSDetail = ({
           searchText,
           handleSearch,
         ),
+        render: (data) => {
+          // support label as string, number, React element, or fallback
+          const rawLabel = data?.label ?? data ?? "";
+
+          // If it's a React element, try to extract children text or return element
+          if (React.isValidElement(rawLabel)) {
+            const child = rawLabel.props?.children;
+            const childStr =
+              child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+                ? String(child)
+                : null;
+
+            if (searchedColumn === "country" && searchText && childStr) {
+              return (
+                <Highlighter
+                  highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                  searchWords={[searchText]}
+                  autoEscape
+                  textToHighlight={childStr}
+                />
+              );
+            }
+
+            // fallback to rendering the element itself
+            return rawLabel;
+          }
+
+          const label = rawLabel !== undefined && rawLabel !== null ? String(rawLabel) : "";
+          if (searchedColumn === "country" && searchText) {
+            return (
+              <Highlighter
+                highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={label}
+              />
+            );
+          }
+
+          return label || "";
+        },
       },
       {
         key: "percentage",
@@ -693,6 +829,7 @@ const FunctionalRMSDetail = ({
               },
             }}
             onChange={onChange}
+            showAdvanceSearch={false}
           />
         </Form>
 
