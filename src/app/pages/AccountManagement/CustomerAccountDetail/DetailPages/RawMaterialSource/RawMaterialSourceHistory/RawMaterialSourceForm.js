@@ -321,85 +321,87 @@ const RawMaterialSourceForm = ({ type }) => {
           type="standard"
         />
 
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Form id="form" form={form} layout="vertical" onFinish={handleSubmit}>
           <div className="flex flex-col gap-y-4 mt-4">
             <NxCardContainer header={"RAW MATERIAL SOURCE INFORMATION"}>
-              <div className="w-full grid grid-cols-3 gap-3">
-                <Form.Item
-                  label={"Effective Date"}
-                  name={"effectiveDate"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Effective Date!",
-                    },
-                  ]}
-                >
-                  <DateComponent
-                    disabled={type !== "create" ? true : false}
-                    onChange={(e) => handleStartDate(e)}
-                    dateDisable={disabledDate}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={"Local (%)"}
-                  name={"value1"}
-                  dependencies={["value2"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Local (%)!",
-                    },
-                    { validator: validatePercentage }
-                  ]}
-                >
-                  <InputComponent
-                    type={"number"}
-                    onChange={(e) => {
-                      const val = Number(e.target.value || 0);
-                      setLocalVal(val);
-                      form.setFieldValue("value1", val);
-                    }}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={"Import (%)"}
-                  name={"value2"}
-                  dependencies={["value1"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Import (%)!",
-                    },
-                    { validator: validatePercentage }
-                  ]}
-                >
-                  <InputComponent
-                    type={"number"}
-                    onChange={(e) => {
-                      const val = Number(e.target.value || 0);
-                      setImportVal(val);
-                      form.setFieldValue("value2", val);
-                    }}
-                  />
-                </Form.Item>
-
-                <div className="col-span-3">
+              <NxBaseContainer border>
+                <div className="w-full grid grid-cols-3 gap-3">
                   <Form.Item
-                    label={"Description"}
-                    name={"description"}
-                    className={"w-full"}
+                    label={"Effective Date"}
+                    name={"effectiveDate"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Effective Date!",
+                      },
+                    ]}
                   >
-                    <InputComponent
-                      type="textarea"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                    <DateComponent
+                      disabled={type !== "create" ? true : false}
+                      onChange={(e) => handleStartDate(e)}
+                      dateDisable={disabledDate}
                     />
                   </Form.Item>
+
+                  <Form.Item
+                    label={"Local (%)"}
+                    name={"value1"}
+                    dependencies={["value2"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Local (%)!",
+                      },
+                      { validator: validatePercentage }
+                    ]}
+                  >
+                    <InputComponent
+                      type={"number"}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        setLocalVal(val);
+                        form.setFieldValue("value1", val);
+                      }}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label={"Import (%)"}
+                    name={"value2"}
+                    dependencies={["value1"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Import (%)!",
+                      },
+                      { validator: validatePercentage }
+                    ]}
+                  >
+                    <InputComponent
+                      type={"number"}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        setImportVal(val);
+                        form.setFieldValue("value2", val);
+                      }}
+                    />
+                  </Form.Item>
+
+                  <div className="col-span-3">
+                    <Form.Item
+                      label={"Description"}
+                      name={"description"}
+                      className={"w-full"}
+                    >
+                      <InputComponent
+                        type="textarea"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      />
+                    </Form.Item>
+                  </div>
                 </div>
-              </div>
+              </NxBaseContainer>
             </NxCardContainer>
 
             <NxCardContainer header={"Raw Material Source Import Detail"}>
@@ -415,7 +417,6 @@ const RawMaterialSourceForm = ({ type }) => {
               />
             </NxCardContainer>
             
-            {/* TODO: style navigasi masih belum benar */}
             <NxBaseContainer border>
               <div className="flex justify-between">
                 <ButtonComponent
@@ -425,7 +426,6 @@ const RawMaterialSourceForm = ({ type }) => {
                   Cancel
                 </ButtonComponent>
                 <div className="flex w-full justify-end gap-x-4">
-                  <Form.Item>
                     <ButtonComponent
                       disabled={storedDataInline ? true : false}
                       icon={
@@ -435,7 +435,7 @@ const RawMaterialSourceForm = ({ type }) => {
                               ? `IconButtonReset`
                               : `IconButtonClear`
                           }
-                          width={24}
+                          width={20}
                         />
                       }
                       type="submit"
@@ -445,61 +445,12 @@ const RawMaterialSourceForm = ({ type }) => {
                     >
                       {type === "update" ? "Reset" : "Clear"}
                     </ButtonComponent>
-                  </Form.Item>
-                  <Form.Item>
-                    <ButtonComponent type="submit" htmlType={"submit"}>
+                    <ButtonComponent type="submit" htmlType={"submit"} form={"form"}>
                       Save
                     </ButtonComponent>
-                  </Form.Item>
                 </div>
               </div>
             </NxBaseContainer>
-
-          {/* <div className="flex mt-[30px]">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
-            </div> */}
           </div>
         </Form>
 
