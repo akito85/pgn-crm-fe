@@ -10,7 +10,7 @@ const ConfirmationModal = ({
   selectedAppHierId,
   selectedApprovalName,
   hierarchyTableData,
-  dataAttachment,
+  attachments,
   type = "",
   data = {},
   service,
@@ -73,7 +73,7 @@ const ConfirmationModal = ({
         selectedAppHierId={selectedAppHierId}
         selectedApprovalName={selectedApprovalName}
         hierarchyTableData={hierarchyTableData}
-        dataAttachment={dataAttachment}
+        attachments={attachments}
         data={data}
         service={service}
         type={type}

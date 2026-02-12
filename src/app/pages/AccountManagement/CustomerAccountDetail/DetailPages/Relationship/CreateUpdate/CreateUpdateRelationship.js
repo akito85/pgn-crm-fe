@@ -1,7 +1,6 @@
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import { useEffect, useState, useRef } from "react";
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -28,6 +27,7 @@ import accountManagementService from "../../../../../../../redux/services/accoun
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
 import ConfirmationModal from "./ConfirmationModal";
+import { configApp } from "../../../../../../../constants/configApp";
 
 const CreateUpdateRelationship = ({
   type = {},
@@ -59,15 +59,12 @@ const CreateUpdateRelationship = ({
 
   // State Management
   const [current, setCurrent] = useState(0);
-  const [modalConfirm, setModalConfirm] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
   // Relationship Data States
-  const [approvalObj, setApprovalObj] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [relatedDetailData, setRelatedDetailData] = useState([]);
-
-  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     if (idAccount) {
@@ -300,12 +297,12 @@ const CreateUpdateRelationship = ({
       }))
         .unwrap()
         .then(() => {
-          setModalConfirm(show);
+          setShowConfirmModal(show);
           setConfirmationType(submitType);
         })
         .catch(() => { });
     } else {
-      setModalConfirm(show);
+      setShowConfirmModal(show);
       setConfirmationType("");
     }
   };
@@ -442,11 +439,6 @@ const CreateUpdateRelationship = ({
           appHierName: detail.appHierName,
         });
 
-        // Restore approvalObj
-        setApprovalObj({
-          appHierId: detail.appHierId,
-        });
-
         // Restore approval hierarchy detail
         if (detail.appHierId) {
           dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
@@ -518,7 +510,6 @@ const CreateUpdateRelationship = ({
       content: (
         <RelationshipApproval
           values={form.getFieldsValue()}
-          approvalObj={approvalObj}
           dataApprovalList={data_approvalHierarchies}
           dataDetailApproval={(data_approvalHierarchyDetail || []).map((item, index) => ({
             ...item,
@@ -566,7 +557,7 @@ const CreateUpdateRelationship = ({
           />
           <Spin spinning={loadingDetail}>
             <Form
-              id="formRelationship"
+              id="relationshipForm"
               form={form}
               layout={"vertical"}
               onFinish={handleSubmitForm}
@@ -634,63 +625,24 @@ const CreateUpdateRelationship = ({
                   </div>
                 </div>
               </NxBaseContainer>
-              {/* Modal Confirmation */}
-              <ModalCustom
-                isOpen={modalConfirm}
-                type="confirmation"
-                header={confirmationType === "draft" ? "CONFIRMATION SAVE AS DRAFT" : "CONFIRMATION RELATIONSHIP"}
-                width={1000}
-                centered={false}
-                style={{ top: 20 }}
-                handleCancel={() => handleSetShowConfirmationModal(false)}
-                footer={[
-                  <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
-                    {activeTab > 0 ? (
-                      <ButtonComponent type={"default"} onClick={() => setActiveTab(prev => prev - 1)}>
-                        Previous
-                      </ButtonComponent>
-                    ) : (
-                      <ButtonComponent type={"default"} onClick={() => handleSetShowConfirmationModal(false)}>
-                        Cancel
-                      </ButtonComponent>
-                    )}
-                    {(activeTab < (confirmationType === "draft" ? 2 : 3))  && (
-                      <ButtonComponent type={"submit"} onClick={() => setActiveTab(prev => prev + 1)}>
-                        Next
-                      </ButtonComponent>
-                    )}
-                    {(activeTab === (confirmationType === "draft" ? 2 : 3)) && (
-                      <ButtonComponent
-                        type={"submit"}
-                        onClick={() => {
-                          handleSubmitForm();
-                          handleSetShowConfirmationModal(false);
-                        }}
-                      >
-                        {confirmationType === "draft" ? "Save as Draft" : "Submit"}
-                      </ButtonComponent>
-                    )}
-                  </div>,
-                ]}
-              >
-                <ConfirmationModal
-                  values={form.getFieldsValue()}
-                  approvalData={(data_approvalHierarchyDetail || []).map((item, index) => ({
-                    ...item,
-                    employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
-                      ...emp,
-                      key: `employee-detail-${empIndex}`,
-                    })),
-                    key: `detail-detail-${index}`,
-                  }))}
-                  attachmentData={listDataAttachment}
-                  idAccount={idAccount}
-                  dispatch={dispatch}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  isDraftSubmission={confirmationType === "draft"}
-                />
-              </ModalCustom>
+              <ConfirmationModal
+                form={"relationshipForm"}
+                isOpen={showConfirmModal}
+                handleCancel={() => {handleSetShowConfirmationModal(false)}}
+                values={form.getFieldsValue()}
+                approvalData={(data_approvalHierarchyDetail || []).map((item, index) => ({
+                  ...item,
+                  employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
+                    ...emp,
+                    key: `employee-detail-${empIndex}`,
+                  })),
+                  key: `detail-detail-${index}`,
+                }))}
+                type={confirmationType}
+                attachmentData={listDataAttachment}
+                idAccount={idAccount}
+                configApplication={configApp.ACCOUNT_SERVICE}
+              />
             </Form>
           </Spin>
         </div>

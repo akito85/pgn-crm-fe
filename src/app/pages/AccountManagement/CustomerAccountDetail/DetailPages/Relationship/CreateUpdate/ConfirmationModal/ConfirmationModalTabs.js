@@ -8,7 +8,7 @@ const ConfirmationModalTabs = ({
   selectedAppHierId,
   selectedApprovalName,
   hierarchyTableData,
-  dataAttachment,
+  attachments,
   data = {},
   service,
   type = "",
@@ -38,7 +38,7 @@ const ConfirmationModalTabs = ({
       label: "Attachment",
       children: (
         <ConfirmationModalAttachment
-          data={dataAttachment}
+          data={attachments}
           service={service}
           configApplication={configApplication}
         />
