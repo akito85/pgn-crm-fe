@@ -233,14 +233,12 @@ const AttachmentSectionForm = ({
   className,
 }) => {
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const { data_attachmentCategory, getConfigFile } = useSelector((state) => state.relationship);
+  const { data_attachmentCategory } = useSelector((state) => state.relationship);
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
   useEffect(() => {
@@ -261,9 +259,6 @@ const AttachmentSectionForm = ({
     confirm();
     setSearchText(selectedKeys[0]);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
     setSearchedColumn(tempSearchColumn);
   };
   
@@ -313,29 +308,27 @@ const AttachmentSectionForm = ({
         <Spin spinning={loadingDownload}>
           <div className="flex flex-col gap-y-4">
             {type !== "detail" && type !== "preview" ? (
-              <div className="flex flex-col w-full gap-2 items-end">
-                <div className="flex flex-col gap-y-1 justify-start">
-                  <p className="text-[13px] mb-0 text-dg-grey-dark">
-                    Attach File:
-                    {mandatory ? (
-                    <span className={"pl-1"} style={{ color: "red" }}>
-                      *
-                    </span>
-                  ) : null}
-                  </p>
-                  <div className="flex flex-row gap-2 items-center">
-                    <ButtonComponent
-                      fontSizeClassname="text-[11px]"
-                      size="small"
-                      type="default"
-                      onClick={handleOpenModal}
-                    >
-                      Choose File
-                    </ButtonComponent>
-                    <p className="text-[11px] text-dg-grey-dark mb-0">
+              <div className="flex flex-col gap-y-2">
+                <span className="text-sm">
+                  Attach File:
+                  {mandatory ? (
+                  <span className={"pl-1"} style={{ color: "red" }}>
+                    *
+                  </span>
+                ) : null}
+                </span>
+                <div className="flex gap-x-2 items-center">
+                  <ButtonComponent
+                    type="menu"
+                    onClick={handleOpenModal}
+                  >
+                    Choose File
+                  </ButtonComponent>
+                  {!data.length && (
+                    <span className="text-sm text-dg-grey-dark">
                       No file choosen
-                    </p>
-                  </div>
+                    </span>
+                  )}
                 </div>
               </div>
             ) : null}
