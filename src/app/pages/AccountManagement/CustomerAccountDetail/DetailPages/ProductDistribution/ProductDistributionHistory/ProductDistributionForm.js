@@ -323,7 +323,7 @@ const ProductDistributionForm = ({ type }) => {
 
         <Form id="form" form={form} layout="vertical" onFinish={handleSubmit}>
           <div className="flex flex-col gap-y-4 mt-4">
-            <NxCardContainer header={"RAW MATERIAL SOURCE INFORMATION"}>
+            <NxCardContainer header={"PRODUCT DISTRIBUTION SOURCE INFORMATION"}>
               <NxBaseContainer border>
                 <div className="w-full grid grid-cols-3 gap-3">
                   <Form.Item
@@ -404,7 +404,7 @@ const ProductDistributionForm = ({ type }) => {
               </NxBaseContainer>
             </NxCardContainer>
 
-            <NxCardContainer header={"RAW MATERIAL SOURCE IMPORT DETAIL"}>
+            <NxCardContainer header={"PRODUCT DISTRIBUTION SOURCE EXPORT DETAIL"}>
               <NxBaseContainer border>
                 <FunctionalPDDetail
                   type={type}

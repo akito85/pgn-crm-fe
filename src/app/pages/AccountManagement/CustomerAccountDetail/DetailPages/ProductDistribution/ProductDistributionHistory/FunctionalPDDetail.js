@@ -492,15 +492,16 @@ const FunctionalPDDetail = ({
     }
   };
 
-  // Sorter Table
+  // Sorter Table (robust)
   const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
+    const extractSortable = (obj) => {
       const cell = obj ? obj[fieldSort] : undefined;
       if (cell === undefined || cell === null) return "";
 
-      // Percentage: treat as primitive (number/string)
+      // For percentage: prefer numeric comparison
       if (fieldSort === "percentage") {
-        return String(cell).toLowerCase();
+        const n = Number(cell);
+        return isNaN(n) ? String(cell).toLowerCase() : n;
       }
 
       // Primitive types
@@ -508,16 +509,36 @@ const FunctionalPDDetail = ({
         return String(cell).toLowerCase();
       }
 
-      // Object: prefer label, then value, then fallback to string
+      // Object: attempt to extract label or value; support React element in label
       if (typeof cell === "object") {
-        if (cell.label !== undefined && cell.label !== null) {
-          return String(cell.label).toLowerCase();
+        const lbl = cell.label !== undefined ? cell.label : undefined;
+        const val = cell.value !== undefined ? cell.value : undefined;
+
+        if (lbl !== undefined) {
+          if (React.isValidElement(lbl)) {
+            const child = lbl.props?.children;
+            if (child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")) {
+              return String(child).toLowerCase();
+            }
+            try {
+              return String(lbl).toLowerCase();
+            } catch (e) {
+              // continue
+            }
+          }
+
+          if (typeof lbl === "string" || typeof lbl === "number") {
+            return String(lbl).toLowerCase();
+          }
         }
-        if (cell.value !== undefined && cell.value !== null) {
-          return String(cell.value).toLowerCase();
+
+        if (val !== undefined && (typeof val === "string" || typeof val === "number")) {
+          return String(val).toLowerCase();
         }
+
+        // fallback to JSON string
         try {
-          return String(cell).toLowerCase();
+          return JSON.stringify(cell).toLowerCase();
         } catch (e) {
           return "";
         }
@@ -526,9 +547,14 @@ const FunctionalPDDetail = ({
       return String(cell).toLowerCase();
     };
 
-    const fa = handleDataSort(a);
-    const fb = handleDataSort(b);
-    return fa.localeCompare(fb);
+    const aVal = extractSortable(a);
+    const bVal = extractSortable(b);
+
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return aVal - bVal;
+    }
+
+    return String(aVal).localeCompare(String(bVal));
   };
 
   // Columns Table
