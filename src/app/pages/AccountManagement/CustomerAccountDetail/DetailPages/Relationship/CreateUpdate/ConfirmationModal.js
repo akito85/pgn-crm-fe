@@ -7,10 +7,8 @@ import InputComponent from "../../../../../../../components/InputComponent";
 import { requiredMessage } from "../../../../../../../utils";
 
 const ConfirmationModal = ({
-  data = {},
-  approvalData = [],
-  attachmentData = [],
-  approvalHierarchyName = "",
+  values,
+  attachmentData,
   idAccount,
   dispatch,
   activeTab,
@@ -41,27 +39,27 @@ const ConfirmationModal = ({
             </div>
             <div className="w-full grid grid-cols-3 gap-4">
               <DetailText label="Relationship Type">
-                {data?.relationshipTypeName || "-"}
+                {values?.relationshipTypeName || "-"}
               </DetailText>
               <DetailText label="Relationship Category">
-                {data?.relationshipCategoryName || "-"}
+                {values?.relationshipCategoryName || "-"}
               </DetailText>
               <DetailText label="Related Name">
-                {data?.relatedName || data?.objectName || "-"}
+                {values?.relatedName || values?.objectName || "-"}
               </DetailText>
               <DetailText label="Related Number">
-                {data?.relatedNumber || data?.objectValue || "-"}
+                {values?.relatedNumber || values?.objectValue || "-"}
               </DetailText>
               <DetailText label="Start Date">
-                {data?.startDateDisplay || "-"}
+                {values?.startDateDisplay || "-"}
               </DetailText>
               <DetailText label="End Date">
-                {data?.endDateDisplay || "-"}
+                {values?.endDateDisplay || "-"}
               </DetailText>
             </div>
             <div className="w-full mt-4">
               <DetailText label="Description">
-                {data?.description || "-"}
+                {values?.description || "-"}
               </DetailText>
             </div>
           </div>
@@ -70,9 +68,8 @@ const ConfirmationModal = ({
       case 1:
         return (
           <RelationshipApproval
-            dataDetailApproval={approvalData}
+            values={values}
             hideSelector={true}
-            approvalHierarchyLabel={approvalHierarchyName}
             className={`${activeTab !== 1 ? "hidden" : ""}`}
           />
         )

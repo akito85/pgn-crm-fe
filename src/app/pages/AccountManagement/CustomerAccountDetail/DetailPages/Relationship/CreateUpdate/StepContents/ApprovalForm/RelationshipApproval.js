@@ -44,7 +44,7 @@ const expandedRowRender = (record) => {
 };
 
 const RelationshipApproval = ({
-  form,
+  values = {},
   dataApprovalList = [],
   dataDetailApproval = [],
   handleSelectHierarchy = () => {},
@@ -56,8 +56,6 @@ const RelationshipApproval = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
-
-  const isApprovalId = form?.getFieldsValue("appHierId");
 
   // Map data from props to local state for table display
   useEffect(() => {
@@ -196,28 +194,27 @@ const RelationshipApproval = ({
                 <p className="text-[13px] mb-1 text-dg-grey-dark">
                   Approval Hierarchy
                 </p>
-                <p className="text-[14px] font-medium">{form.getFieldValue("appHierLabel")}</p>
+                <p className="text-[14px] font-medium">{values.appHierLabel}</p>
               </div>
             )}
 
             {/* Table */}
             <Spin spinning={loading}>
-              {((hideSelector && appHierDataDetail.length > 0) ||
-                (isApprovalId && isApprovalId.appHierId !== undefined)) && (
-                  <div className="mb-6">
-                    <TablePagination
-                      useSelect={false}
-                      usePagination={false}
-                      dataSource={appHierDataDetail}
-                      columns={columns}
-                      expandable={{
-                        expandedRowRender,
-                        defaultExpandAllRows: true,
-                        columnWidth: 50,
-                      }}
-                    />
-                  </div>
-                )}
+              {((hideSelector && appHierDataDetail.length > 0) || values.appHierId) && (
+                <div className="mb-6">
+                  <TablePagination
+                    useSelect={false}
+                    usePagination={false}
+                    dataSource={appHierDataDetail}
+                    columns={columns}
+                    expandable={{
+                      expandedRowRender,
+                      defaultExpandAllRows: true,
+                      columnWidth: 50,
+                    }}
+                  />
+                </div>
+              )}
             </Spin>
           </div>
         </NxBaseContainer>
