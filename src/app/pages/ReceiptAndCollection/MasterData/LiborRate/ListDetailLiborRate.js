@@ -39,8 +39,19 @@ const ListDetailLiborRate = () => {
   const isShowButton = data_detail?.tApprovalDto?.isApprover;
 
   const routes = [
-    { path: "", breadcrumbName: "Receipt & Collection" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_LIBOR_RATE, breadcrumbName: "Libor Rate" },
+    {
+      path: "",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
+    },
+
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_LIBOR_RATE,
+      breadcrumbName: "Libor Rate",
+    },
     { path: "", breadcrumbName: `Detail Libor Rate` },
   ];
 

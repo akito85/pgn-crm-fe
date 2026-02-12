@@ -83,18 +83,22 @@ const ListDetailCaPaymentChannel = () => {
 
     // Breadcrumbs
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_PAYMENT_CHANNEL,
-            breadcrumbName: "Ca Payment Channel",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_CA_PAYMENT_CHANNEL,
-            breadcrumbName: `Detail ${segmentedPage}`,
-        },
+      {
+        path: "",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_PAYMENT_CHANNEL,
+        breadcrumbName: "Payment Channel Mapping",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_CA_PAYMENT_CHANNEL,
+        breadcrumbName: `Detail ${segmentedPage}`,
+      },
     ];
 
     // handle Confirm
@@ -126,7 +130,7 @@ const ListDetailCaPaymentChannel = () => {
                 onChange={setSegmentedPage}
                 items={[
                     {
-                        label: "Ca Payment Channel",
+                        label: "Payment Channel Mapping",
                         key: "Ca Payment Channel",
                         children: (
                             <DetailCaPaymentChannel
@@ -161,7 +165,7 @@ const ListDetailCaPaymentChannel = () => {
                 onFinish={handleConfirm}
                 header={approveOrReject}
                 approveOrReject={approveOrReject}
-                menu={"Ca Payment Channel"}
+                menu={"Payment Channel Mapping"}
                 named={data_detail?.name}
             />
 

@@ -23,7 +23,7 @@ const DetailPartnerCa = ({ data_detail, data_req }) => {
           </div>
         </DetailSection>
       ) : null}
-      <DetailSection header={"PARTNER CA INFORMATION"}>
+      <DetailSection header={"PARTNER COLLECTING AGENT MAPPING INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label="Partner Code">
             {data_detail?.partnerCode}

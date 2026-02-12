@@ -30,7 +30,7 @@ const ContentModalConfirm = ({
               onClick={() => setExpanded(!expanded)}
             >
               <div className="text-[#0075bf] text-sm font-semibold uppercase">
-                CA PAYMENT CHANNEL INFORMATION
+                PAYMENT CHANNEL MAPPING INFORMATION
               </div>
               <div>{expanded ? <UpOutlined /> : <DownOutlined />}</div>
             </div>
