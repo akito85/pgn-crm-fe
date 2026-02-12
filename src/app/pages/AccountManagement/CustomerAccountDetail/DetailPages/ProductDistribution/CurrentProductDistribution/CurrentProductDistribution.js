@@ -73,16 +73,13 @@ const columns = (
 };
 
 const CurrentProductDistribution = ({ id, idCustomer }) => {
-  const itemGrantAccess = [
+  const itemGrantAccess = useMemo(() => [
     {
       action: "Create",
       render: (
         <NavLink
           to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PRODUCT_DISTRIBUTION}
-          state={{
-            accountId: id,
-            idCustomer: idCustomer,
-          }}
+          state={{ accountId: id, idCustomer }}
         >
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -92,8 +89,8 @@ const CurrentProductDistribution = ({ id, idCustomer }) => {
           </ButtonComponent>
         </NavLink>
       ),
-    },
-  ];
+    }
+  ], [id, idCustomer]);
 
   // Selector
   const { data_current } = useSelector((state) => state.productDistribution);
