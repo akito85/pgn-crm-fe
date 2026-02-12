@@ -47,7 +47,7 @@ const CaPaymentChannelForm = (props) => {
 
     return (
         <div>
-            <BaseContainer header={"CA PAYMENT CHANNEL"}>
+            <BaseContainer header={"PAYMENT CHANNEL MAPPING"}>
                 <div className="w-full grid grid-cols-5 gap-5">
                     {/* <Form.Item
                         label={"Collection Agent Code"}

@@ -85,18 +85,22 @@ const ListDetailCollectingAgent = () => {
 
     // Breadcrumbs
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
-            breadcrumbName: "Collecting Agent",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_COLLECTING_AGENT,
-            breadcrumbName: `Detail ${segmentedPage}`,
-        },
+      {
+        path: "",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
+        breadcrumbName: "Collecting Agent",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_COLLECTING_AGENT,
+        breadcrumbName: `Detail ${segmentedPage}`,
+      },
     ];
 
     // handle Confirm

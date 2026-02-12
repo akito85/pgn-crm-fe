@@ -71,8 +71,18 @@ const ViewLiborRate = () => {
   }, [handleFetch]);
 
   const routes = [
-    { path: "", breadcrumbName: "Receipt & Collection" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_LIBOR_RATE, breadcrumbName: "Libor Rate" },
+    {
+      path: "",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
+    },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_LIBOR_RATE,
+      breadcrumbName: "Libor Rate",
+    },
   ];
 
   const handleOptions = () => {

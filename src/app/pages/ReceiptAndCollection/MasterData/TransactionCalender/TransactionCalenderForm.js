@@ -306,7 +306,11 @@ const TransactionCalenderForm = (props) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSACTION_CALENDER,
