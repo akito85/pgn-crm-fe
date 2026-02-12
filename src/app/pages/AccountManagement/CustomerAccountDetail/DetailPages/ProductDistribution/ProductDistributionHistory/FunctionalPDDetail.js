@@ -434,16 +434,43 @@ const FunctionalPDDetail = ({
     setStoredData(false);
   };
 
-  // Filter Table
-  // Filter Table
+  // Filter Table (robust: handles primitive values, objects with label, and nulls)
   const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = value.toLowerCase();
-    switch (dataIndex) {
-      case "percentage":
-        const temp = record[dataIndex]?.toString();
-        return temp.toLowerCase().includes(fixSearchText);
-      default:
-        return record[dataIndex]?.label?.toLowerCase().includes(fixSearchText);
+    const fixSearchText = String(value || "").toLowerCase();
+    const cell = record[dataIndex];
+
+    if (dataIndex === "percentage") {
+      const temp = cell !== undefined && cell !== null ? String(cell) : "";
+      return temp.toLowerCase().includes(fixSearchText);
+    }
+
+    if (dataIndex === "country") {
+      const temp = cell !== undefined && cell !== null ? String(cell?.label?.props?.children) : "";
+      return temp.toLowerCase().includes(fixSearchText);
+    }
+
+    // handle object with label/value, primitive, or other
+    if (cell === undefined || cell === null) {
+      return "" .toLowerCase().includes(fixSearchText);
+    }
+
+    if (typeof cell === "string" || typeof cell === "number") {
+      return String(cell).toLowerCase().includes(fixSearchText);
+    }
+
+    if (typeof cell === "object") {
+      // check label and value fields if present
+      const label = cell.label !== undefined ? String(cell.label) : "";
+      const val = cell.value !== undefined ? String(cell.value) : "";
+      const combined = `${label} ${val}`.toLowerCase();
+      return combined.includes(fixSearchText);
+    }
+
+    // fallback to stringifying the value
+    try {
+      return String(cell).toLowerCase().includes(fixSearchText);
+    } catch (e) {
+      return false;
     }
   };
 
@@ -491,6 +518,23 @@ const FunctionalPDDetail = ({
           searchText,
           handleSearch
         ),
+        render: (data) => {
+          const label = data?.label?.props?.children;
+          if (searchedColumn === "country") {
+            return (
+              <Highlighter
+                highlightStyle={{
+                  backgroundColor: "#ffc069",
+                  padding: 0,
+                }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={label ? label.toString() : ""}
+              />
+            );
+          }
+          return label || "";
+        },
       },
       {
         key: "percentage",
@@ -673,6 +717,7 @@ const FunctionalPDDetail = ({
               },
             }}
             onChange={onChange}
+            showAdvanceSearch={false}
           />
         </Form>
 
