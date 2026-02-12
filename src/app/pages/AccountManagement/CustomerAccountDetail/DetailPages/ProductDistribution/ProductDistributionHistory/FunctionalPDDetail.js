@@ -436,7 +436,7 @@ const FunctionalPDDetail = ({
 
   // Filter Table (robust: handles primitive values, objects with label, and nulls)
   const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = String(value || "").toLowerCase();
+    const fixSearchText = String(value || "").toLowerCase().trim();
     const cell = record[dataIndex];
 
     if (dataIndex === "percentage") {
@@ -444,31 +444,49 @@ const FunctionalPDDetail = ({
       return temp.toLowerCase().includes(fixSearchText);
     }
 
+    // Special handling for country: support label (string or React element) and value
     if (dataIndex === "country") {
-      const temp = cell !== undefined && cell !== null ? String(cell?.label?.props?.children) : "";
-      return temp.toLowerCase().includes(fixSearchText);
+      if (cell === undefined || cell === null) return false;
+
+      // rawLabel may be cell.label or the cell itself
+      const rawLabel = cell?.label ?? cell ?? "";
+
+      // If label is a React element, try to extract text children
+      if (React.isValidElement(rawLabel)) {
+        const child = rawLabel.props?.children;
+        const childStr =
+          child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+            ? String(child).toLowerCase().trim()
+            : "";
+        if (childStr.includes(fixSearchText)) return true;
+      } else {
+        const labelStr = rawLabel !== undefined && rawLabel !== null ? String(rawLabel).toLowerCase().trim() : "";
+        if (labelStr.includes(fixSearchText)) return true;
+      }
+
+      // also check cell.value if present
+      const valStr = cell?.value !== undefined && cell?.value !== null ? String(cell.value).toLowerCase().trim() : "";
+      if (valStr.includes(fixSearchText)) return true;
+
+      return false;
     }
 
-    // handle object with label/value, primitive, or other
-    if (cell === undefined || cell === null) {
-      return "" .toLowerCase().includes(fixSearchText);
-    }
+    // Generic handling for other columns
+    if (cell === undefined || cell === null) return false;
 
     if (typeof cell === "string" || typeof cell === "number") {
-      return String(cell).toLowerCase().includes(fixSearchText);
+      return String(cell).toLowerCase().trim().includes(fixSearchText);
     }
 
     if (typeof cell === "object") {
-      // check label and value fields if present
-      const label = cell.label !== undefined ? String(cell.label) : "";
-      const val = cell.value !== undefined ? String(cell.value) : "";
-      const combined = `${label} ${val}`.toLowerCase();
+      const label = cell.label !== undefined && cell.label !== null ? String(cell.label).toLowerCase().trim() : "";
+      const val = cell.value !== undefined && cell.value !== null ? String(cell.value).toLowerCase().trim() : "";
+      const combined = `${label} ${val}`.trim();
       return combined.includes(fixSearchText);
     }
 
-    // fallback to stringifying the value
     try {
-      return String(cell).toLowerCase().includes(fixSearchText);
+      return String(cell).toLowerCase().trim().includes(fixSearchText);
     } catch (e) {
       return false;
     }
@@ -477,16 +495,39 @@ const FunctionalPDDetail = ({
   // Sorter Table
   const sorter = (fieldSort, a, b) => {
     const handleDataSort = (obj) => {
-      switch (fieldSort) {
-        case "percentage":
-          const temp = obj[fieldSort]?.toString();
-          return temp.toLowerCase();
-        default:
-          return obj[fieldSort].label?.toLowerCase();
+      const cell = obj ? obj[fieldSort] : undefined;
+      if (cell === undefined || cell === null) return "";
+
+      // Percentage: treat as primitive (number/string)
+      if (fieldSort === "percentage") {
+        return String(cell).toLowerCase();
       }
+
+      // Primitive types
+      if (typeof cell === "string" || typeof cell === "number") {
+        return String(cell).toLowerCase();
+      }
+
+      // Object: prefer label, then value, then fallback to string
+      if (typeof cell === "object") {
+        if (cell.label !== undefined && cell.label !== null) {
+          return String(cell.label).toLowerCase();
+        }
+        if (cell.value !== undefined && cell.value !== null) {
+          return String(cell.value).toLowerCase();
+        }
+        try {
+          return String(cell).toLowerCase();
+        } catch (e) {
+          return "";
+        }
+      }
+
+      return String(cell).toLowerCase();
     };
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
+
+    const fa = handleDataSort(a);
+    const fb = handleDataSort(b);
     return fa.localeCompare(fb);
   };
 
@@ -519,20 +560,44 @@ const FunctionalPDDetail = ({
           handleSearch
         ),
         render: (data) => {
-          const label = data?.label?.props?.children;
-          if (searchedColumn === "country") {
+          // support label as string, number, React element, or fallback
+          const rawLabel = data?.label ?? data ?? "";
+
+          // If it's a React element, try to extract children text or return element
+          if (React.isValidElement(rawLabel)) {
+            const child = rawLabel.props?.children;
+            const childStr =
+              child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+                ? String(child)
+                : null;
+
+            if (searchedColumn === "country" && searchText && childStr) {
+              return (
+                <Highlighter
+                  highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                  searchWords={[searchText]}
+                  autoEscape
+                  textToHighlight={childStr}
+                />
+              );
+            }
+
+            // fallback to rendering the element itself
+            return rawLabel;
+          }
+
+          const label = rawLabel !== undefined && rawLabel !== null ? String(rawLabel) : "";
+          if (searchedColumn === "country" && searchText) {
             return (
               <Highlighter
-                highlightStyle={{
-                  backgroundColor: "#ffc069",
-                  padding: 0,
-                }}
+                highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
                 searchWords={[searchText]}
                 autoEscape
-                textToHighlight={label ? label.toString() : ""}
+                textToHighlight={label}
               />
             );
           }
+
           return label || "";
         },
       },
