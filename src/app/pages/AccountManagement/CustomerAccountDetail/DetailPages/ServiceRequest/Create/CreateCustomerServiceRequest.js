@@ -260,6 +260,13 @@ const CreateCustomerServiceRequest = (props) => {
     );
 
     dispatch(getDetailAccountContact(idCustomer));
+    dispatch(getListDetailAccountAddress({
+        id: idAccount,
+        search: "",
+        sort: "createdDate~desc",
+        page: 1,
+        pageSize: 999,
+      }));
     // dispatch(getServiceRequestById(idAccount));
   }, [dispatch, idAccount]);
 
@@ -366,7 +373,7 @@ const CreateCustomerServiceRequest = (props) => {
       const accountSums = data_accountDetail.accountSummary;
 
       const premiseAddress = data_account_address?.result?.find(
-        (item) => item?.premise?.bool === false
+        (item) => item?.premise?.bool === true
       );
 
       formCreate.setFieldsValue({
@@ -383,10 +390,8 @@ const CreateCustomerServiceRequest = (props) => {
         srFormSubdistrict: premiseAddress?.subDistrict?.name || "",
         srFormCity: premiseAddress?.city?.name || "",
         srFormCountry: premiseAddress?.country?.name || "",
-        // srFormLatitude: premiseAddress?.latitude || "",
-        // srFormLongitude: premiseAddress?.longitude || "",
-        srFormLatitude: premiseAddress?.country?.name || "",
-        srFormLongitude: premiseAddress?.country?.name || "",
+        srFormLatitude: premiseAddress?.latitude || "",
+        srFormLongitude: premiseAddress?.longitude || "",
       });
     }
 
