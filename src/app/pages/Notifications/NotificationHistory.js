@@ -602,6 +602,7 @@ const NotificationHistory = () => {
   return (
   <LayoutMenu>
     <div className={transitionClass}>
+    {/*
     <div class="w-full flex flex-col justify-end items-end mb-5">
       <ButtonComponent 
         type={"submit"}
@@ -631,6 +632,7 @@ const NotificationHistory = () => {
           Setting
       </ButtonComponent>
     </div>
+    */}
     
     <div className="notification-history-page">
       {/* Page Header */}
