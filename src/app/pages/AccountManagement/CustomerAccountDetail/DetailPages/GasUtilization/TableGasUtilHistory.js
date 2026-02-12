@@ -1,11 +1,10 @@
 import React,{ useEffect, useState, useRef, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
-import { Button, Tooltip } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import { Button } from 'antd'
 
 import DetailGasUtilHistory from './DetailGasUtilHistory'
 import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
-import SVGIcon from "../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
 import { deleteGasUtilization, getDetailGasUtilization, getListGasUtilizationHistory, getListGasUtilizationHistoryNew } from '../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice'
 import NxTable from '../../../../../../components/Nx/NxTable'
@@ -13,8 +12,8 @@ import { useColumnActionPermission } from '../../../../../../components/ColumnAc
 import { nxApplyFixedColumns } from '../../../../../../utils/Nx/nxApplyFixedColumns'
 import { WarningOutlined } from '@ant-design/icons'
 import ModalCustom from '../../../../../../components/Modal/ModalCustom'
-import { hasValue, renderDateColumn } from '../../../../../../utils'
 import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
+import { nxGetAccountActions } from '../../../../../../components/Nx/NxGetAccountActions'
 
 const columns = (
   search,
@@ -72,6 +71,7 @@ const columns = (
 
 const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     list_gasUtilizationHistory,
@@ -82,73 +82,23 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     (state) => state.accountGasUtilization
   );
 
-  const itemActions = [
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={20}
-                onClick={() => {
-                  handleDetail(record);
-                }}
-              />
-            </div>
-          </Tooltip>
-        )
+  const itemActions = nxGetAccountActions({
+    handleView: (record, _) => handleDetail(record),
+    handleUpdate: (record, _) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_UTILIZATION,
+      {
+        state: {
+          id: record?.id,
+          accountId: idAccount,
+          customerId: idCustomer,
+        }
       }
+    ),
+    handleDelete: (record, _) => {
+      console.log('delete', record)
+      handleOpenDelete(record)
     },
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip title="Update">
-            <Link
-              to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_UTILIZATION}
-              state={{
-                id: record?.id,
-                accountId: idAccount,
-                customerId: idCustomer
-              }}
-              >
-              <div
-                className={`flex items-center h-full`}
-              > 
-                <SVGIcon
-                  name="IconEdit"
-                  width={20}
-                />
-              </div>
-            </Link>
-          </Tooltip>
-        )
-      }
-    },
-    {
-      action: "Hapus",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip title="Delete">
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-                onClick={() => handleOpenDelete(record?.id)}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
-    },
-  ];
+  });
 
   const [page, setPage] = useState(1);
   const searchInput = useRef(null);
@@ -162,7 +112,17 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   const [idSelected, setIdSelected] = useState('');
   const [loadMoreSize] = useState(20);
 
-  const currentData = useMemo(() => list_gasUtilizationHistory, [list_gasUtilizationHistory]);
+  const currentData = useMemo(() => {
+    if (!Array.isArray(list_gasUtilizationHistory)) return [];
+
+    return list_gasUtilizationHistory.map(item => ({
+      ...item,
+      statusApproval: item?.statusApproval ?? "DRAFT",
+    }));
+  }, [list_gasUtilizationHistory]);
+
+
+  // const currentData = useMemo(() => list_gasUtilizationHistory, [list_gasUtilizationHistory]);
   const currentPagination = pagination_gasUtilizationHistory;
 
   const hasMore = currentData.length < (currentPagination?.totalElements || 0);
@@ -228,6 +188,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
 
   const handleOpenDelete = (r) => {
     setOpenModalDelete(true)
+    console.log('id delete', r)
     setIdSelected(r)
   }
 

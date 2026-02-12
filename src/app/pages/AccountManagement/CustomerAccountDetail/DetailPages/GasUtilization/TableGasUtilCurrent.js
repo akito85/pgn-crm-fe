@@ -82,7 +82,6 @@ const TableGasUtilCurrent = ({idAccount}) => {
   const listData = data_current?.gasUtilsDtl || [];
 
   const itemActions = nxGetAccountActions({
-    idAccount,
     handleCreate: () => navigate(
       ACCOUNT_MANAGEMENT_ROUTES.CREATE_GAS_UTILIZATION,
       {
