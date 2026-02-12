@@ -94,10 +94,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
         }
       }
     ),
-    handleDelete: (record, _) => {
-      console.log('delete', record)
-      handleOpenDelete(record)
-    },
+    handleDelete: (record, _) => handleOpenDelete(record),
   });
 
   const [page, setPage] = useState(1);

@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from "react";
+import React, {useState, useRef, useEffect, Fragment} from "react";
 import { Button, Form, Input, InputNumber, Pagination, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../assets/Icon/index";
@@ -9,6 +9,7 @@ import { showModalError } from "../../../../../../../redux/slices/general_slice"
 import InputComponent from "../../../../../../../components/InputComponent";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import Highlighter from "react-highlight-words";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const onFilter = (dataIndex, value, record) => {
   const fixSearchText = String(value || "").toLowerCase().trim();
@@ -288,17 +289,15 @@ const GasUtilizationTableInline = ({
     setFilterDdlUtilName(filteredListName)
   }, [dataTableGasUtilization, ddlUtilizationName])
 
+  const itemActions = nxGetAccountActions({
+    handleUpdate: (record, _) => edit(record),
+    handleDelete: (record, _) => deleteRow(record),
+  }).filter(action => action.action === "Hapus" || action.action === "Update");
   
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-  };
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
   };
 
   const onSort = (_, __, sort) => {
@@ -346,10 +345,11 @@ const GasUtilizationTableInline = ({
   };
 
   const edit = (record, field) => {
+    const dataEdit = dataTableGasUtilization[record - 1];
     setStatusAction("edit");
     setIsEdit(true)
-    formTable.setFieldsValue(record);
-    const { key, ...extraProps } = record || {};
+    formTable.setFieldsValue(dataEdit);
+    const { key, ...extraProps } = dataEdit || {};
     const tempValue = { ...extraProps };
     for (const attribute in tempValue) {
       if (Object.hasOwnProperty.call(tempValue, attribute)) {
@@ -367,7 +367,7 @@ const GasUtilizationTableInline = ({
         });
       }
     }
-    setEditingKey(record.key);
+    setEditingKey(record);
    
   };
 
@@ -465,7 +465,7 @@ const GasUtilizationTableInline = ({
   
   const deleteRow = (record) => {
     setDataTableGasUtilization((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record)
     );
     setStoredData(false);
   };
@@ -566,6 +566,8 @@ const GasUtilizationTableInline = ({
         dataIndex: "operation",
         render: (_, record) => {
           const editable = record.key === editingKey;
+          record.id = record.key;
+          record.statusApproval = "DRAFT";
           return (
             <div className="flex w-full justify-center my-1 gap-2">
               {editable ? (
@@ -615,41 +617,11 @@ const GasUtilizationTableInline = ({
                 </>
               ) : (
                 <>
-                  <Tooltip title="Edit">
-                    <span 
-                      className={`flex items-center h-full ${
-                        editingKey ? " cursor-not-allowed" : ""
-                      }`}
-                    >
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        width={20}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </span>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <span
-                      className={`flex items-center h-full ${
-                        editingKey ? " cursor-not-allowed" : ""
-                      }`}
-                    >
-                      <SVGIcon
-                        name="IconDelete"
-                        width={20}
-                        className={
-                          editingKey ? "disabled" : undefined
-                        }
-                        color={editingKey ? "#8D91A0" : "#ff2e2e"}
-                        onClick={
-                          !editingKey
-                            ? () => deleteRow(record)
-                            : undefined
-                        }
-                      />
-                    </span>
-                  </Tooltip>
+                  {itemActions.map((action, index) => (
+                    <Fragment key={`table-action-${index}`}>
+                      {action.render(record, itemActions.length, index)}
+                    </Fragment>
+                  ))}
                 </>
               )}
             </div>
@@ -665,10 +637,6 @@ const GasUtilizationTableInline = ({
   };
 
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
-
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
 
   const filterColumn = (dataColumn) => {
     return dataColumn.filter((col) => {
