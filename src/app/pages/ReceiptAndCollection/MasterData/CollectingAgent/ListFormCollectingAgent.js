@@ -336,18 +336,22 @@ const ListFormCollectingAgent = (props) => {
 
     // Breadcrumbs
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
-            breadcrumbName: "Collecting Agent",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_COLLECTING_AGENT,
-            breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
-        },
+      {
+        path: "",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
+        breadcrumbName: "Collecting Agent",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_COLLECTING_AGENT,
+        breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      },
     ];
 
     //kirim body
@@ -516,6 +520,7 @@ const ListFormCollectingAgent = (props) => {
                         onCancel={handleBack}
                         onClear={handleClear}
                         onSaveDraft={handleSaveDraft}
+                        onSubmit={() => form.submit()}
                         type={type}
                     />
                 </Form>

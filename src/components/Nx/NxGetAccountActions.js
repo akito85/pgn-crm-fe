@@ -1,16 +1,12 @@
-import { Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
-import { Link } from "react-router-dom";
 import { Fragment } from "react";
 
 const nxGetAccountActions = ({
-  idAccount = 0,
-  idCustomer = 0,
-  createRoute = "",
-  updateRoute = "",
-  detailRoute = "",
-  navigate = () => {},
+  handleCreate = () => {},
+  handleUpdate = () => {},
+  handleView = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
   handleInactivate = () => {},
@@ -43,18 +39,14 @@ const nxGetAccountActions = ({
   {
     action: "Create",
     render: (
-      <Link to={createRoute} state={{
-        idAccount,
-        idCustomer,
-      }}>
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={20} />}
-          type={"submit"}
-          border={false}
-        >
-          Create
-        </ButtonComponent>
-      </Link>
+      <ButtonComponent
+        icon={<SVGIcon name="IconButtonCreate" width={20} />}
+        type={"submit"}
+        border={false}
+        onClick={handleCreate}
+      >
+        Create
+      </ButtonComponent>
     )
   },
   {
@@ -63,21 +55,17 @@ const nxGetAccountActions = ({
     render: (record, actionLength, index) => {
       return (
         <Tooltip
-          title="Detail"
-          onClick={
-            () => navigate(detailRoute, {
-              state: {
-                id: record.id,
-                idAccount,
-                idCustomer,
-              }
-            })
-          }
+          title="View"
+          onClick={() => handleView(record.id)}
           key={`table-action-${index}`}
         >
-          <div className="flex items-center h-full">
+          <Button
+            onClick={() => handleUpdate(record.id)}
+            type="table-action"
+            directChildren
+          >
             <SVGIcon name="IconDetail" width={20} />
-          </div>
+          </Button>
         </Tooltip>
       )
     }
@@ -93,47 +81,32 @@ const nxGetAccountActions = ({
       const content = actionLength > 3 ?
         (
           <ButtonComponent
-            icon={<SVGIcon name="IconEdit" color={!isEditable ? "#BDBDBD" : "#0075BF"} width={20} />}
+            icon={<SVGIcon name="IconEdit" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />}
             border={false}
             disabled={!isEditable}
-            onClick={() => navigate(updateRoute, {
-              state: {
-                id: record.id,
-                idAccount,
-                idCustomer,
-              }
-            })}
+            onClick={() => handleUpdate(record.id)}
             type={"action"}
+            className="group"
           >
             <span className={"text-black ml-3"}>Update</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Update">
-            <div className="flex items-center h-full">
-
+          <Tooltip title={isEditable ? "Update" : ""} className="group">
+            <Button
+              onClick={() => handleUpdate(record.id)}
+              disabled={!isEditable}
+              type="table-action"
+            >
               <SVGIcon
                 name="IconEdit"
                 width={20}
-                color={!isEditable ? "#8D91A0" : "#ACC424"}
-                className={!isEditable ? "cursor-not-allowed" : undefined}
-                onClick={
-                  isEditable ?
-                    () => navigate(updateRoute, {
-                      state: {
-                        id: record.id,
-                        idAccount,
-                        idCustomer,
-                      }
-                    }) :
-                    () => {}
-                }
               />
-            </div>
+            </Button>
           </Tooltip>
         );
 
       return (
-        <Fragment key={`table-action-${index}`}>{content}</Fragment>          
+        <Fragment key={`table-action-${index}`}>{content}</Fragment>
       )
     }
   },
@@ -164,17 +137,15 @@ const nxGetAccountActions = ({
           </ButtonComponent>
         ) : (
           <Tooltip
-            title="Inactivate"
+            title={isActive ? "Inactivate" : ""}
           >
-            <div className="flex items-center h-full">
-              <Checkbox
-                className="action-checkbox"
-                disabled={isActive ? false : true}
-                checked={isActive ? false : true}
-                onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
-                style={{ transform: "scale(0.9)" }}
-              />
-            </div>
+            <Checkbox
+              className="action-checkbox"
+              disabled={!isActive}
+              checked={isInactive}
+              onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+              style={{ transform: "scale(0.9)" }}
+            />
           </Tooltip>
         );
 
@@ -189,22 +160,28 @@ const nxGetAccountActions = ({
         (
           <ButtonComponent
             icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+              <SVGIcon name="IconLogHistory" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
             }
             border={false}
             onClick={() => handleApprovalHistory(true, record?.id)}
             type={"action"}
+            className="group"
           >
             <span className={"text-black ml-3"}>Approval History</span>
           </ButtonComponent>
         ) : (
           <Tooltip title="Approval History">
-            <SVGIcon
-              name="IconLogHistory"
-              color={"#0075bf"}
-              width={20}
+            <Button
+              className="flex items-center h-full p-0 b-0 disabled:border-0 bg-transparent cursor-pointer disabled:cursor-not-allowed group"
               onClick={() => handleApprovalHistory(true, record?.id)}
-            />
+              type="table-action"
+              directChildren
+            >
+              <SVGIcon
+                name="IconLogHistory"
+                width={20}
+              />
+            </Button>
           </Tooltip>
         );
 

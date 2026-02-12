@@ -80,14 +80,18 @@ const ViewCollectingAgent = () => {
 
     // Breadcrumbs
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
-            breadcrumbName: "Collecting Agent",
-        },
+      {
+        path: "",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
+        breadcrumbName: "Collecting Agent",
+      },
     ];
 
     const handleOptions = () => {

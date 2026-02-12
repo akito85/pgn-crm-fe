@@ -170,7 +170,7 @@ const ListFormSettings = (props) => {
 
   const [tabData, setTabData] = useState([
     {
-      title: "Setting",
+      title: "Payment Channel Configuration",
       value: "Setting",
       paramValue: [
         "dateStart",
@@ -345,11 +345,15 @@ const ListFormSettings = (props) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
-      breadcrumbName: "Settings",
+      breadcrumbName: "Payment Channel Configuration",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_SETTINGS,
@@ -529,6 +533,7 @@ const ListFormSettings = (props) => {
             onCancel={handleBack}
             onClear={handleClear}
             onSaveDraft={handleSaveDraft}
+            onSubmit={() => form.submit()}
             type={type}
           />
         </Form>

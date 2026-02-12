@@ -84,4 +84,10 @@ export const SYSTEM_SETUP_ROUTES = {
 
   // MAINTENANCE MODE
   VIEW_MAINTENANCE_MODE: "/system-setup/maintenance-mode",
+
+  // Payment Cycle
+  VIEW_PAYMENT_CYCLE: "/system-setup/payment-cycle",
+  DETAIL_PAYMENT_CYCLE: "/system-setup/payment-cycle/view",
+  CREATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/create",
+  UPDATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/update",
 };

@@ -723,7 +723,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
                 >
                   Cancel
                 </ButtonComponent>
-                <div className="flex w-full justify-end gap-x-4">
+                <div className="flex w-full justify-end gap-x-2">
                   <ButtonComponent
                     onClick={handleClear}
                     type={"reject"}

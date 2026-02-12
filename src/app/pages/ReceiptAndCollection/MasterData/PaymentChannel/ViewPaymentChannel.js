@@ -90,11 +90,15 @@ const ViewPaymentChannel = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL,
-      breadcrumbName: "Payment Channel",
+      breadcrumbName: "Delivery Channel",
     },
   ];
 
@@ -190,7 +194,7 @@ const ViewPaymentChannel = () => {
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "PAYMENT CHANNEL CODE",
+      title: "DELIVERY CHANNEL CODE",
       dataIndex: "ciCode",
       sorter: true,
       ...getColumnSearchPropsPaging(
@@ -618,7 +622,7 @@ const ViewPaymentChannel = () => {
         {/* <Toolbar items={itemActions} /> */}
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PAYMENT CHANNEL LIST</p>
+            <p className="mt-[15px] font-bold">DELIVERY CHANNEL LIST</p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
             </div>
@@ -665,7 +669,7 @@ const ViewPaymentChannel = () => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"paymentChannel"}
-          alertMessage={`Are you sure you want to inactivate this Payment Channel with Payment Channel Code ${nameModalActiveOrInactivate}?`}
+          alertMessage={`Are you sure you want to inactivate this Delivery Channel with Delivery Channel Code ${nameModalActiveOrInactivate}?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}

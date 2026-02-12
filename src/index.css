@@ -327,6 +327,35 @@ button.ant-btn.ant-btn-action:disabled:hover {
   background: transparent;
 }
 
+button.ant-btn.ant-btn-table-action {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+
+  svg {
+    color: black;
+    transition: color 0.3s ease-in-out;
+  }
+
+  &:hover {
+    background-color: transparent;
+
+    svg {
+      color: #0075BF;
+
+    }
+  }
+
+  &:disabled {
+    svg {
+      color: #BDBDBD;
+      
+    }
+  }
+}
+
 button.ant-btn.ant-btn-default {
   border-width: 1px;
   border-radius: 8px;
@@ -605,7 +634,7 @@ td.ant-table-column-sort {
 }
 
 .table-expand-custom .ant-table-tbody > tr > td {
-  padding: 16px !important;
+  padding: 0px !important;
 }
 
 #table-expand .ant-table-tbody > tr > td {
@@ -1157,4 +1186,66 @@ span.ant-tree-title {
 
 .custom-radio-tabs .ant-radio-button-wrapper span {
   font-size: 12px !important;
+}
+
+/* ========================================
+   Custom Collapse Styling for Receipt Approval Detail
+   Based on Figma Design Specs
+   ======================================== */
+
+/* Remove default collapse styling */
+.ant-collapse {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Collapse Item - Main container */
+.ant-collapse > .ant-collapse-item {
+  background: var(--Semantic-Background-light-bg-primary, #FFFFFF) !important;
+  border: 1px solid var(--Semantic-Border-light-border-primary, #C8CDD4) !important;
+  border-radius: 8px !important;
+  margin-bottom: 24px !important;
+  overflow: hidden !important;
+}
+
+/* Active/Expanded item with border highlight */
+.ant-collapse > .ant-collapse-item.ant-collapse-item-active {
+  border: 1px solid var(--Semantic-Border-light-border-primary, #C8CDD4) !important;
+}
+
+/* Collapse Header */
+.ant-collapse-header {
+  background: var(--Semantic-Background-light-bg-secondary, #F5F5F5) !important;
+  color: #0075BF !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  padding: 16px 20px !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Collapse Header when active/expanded */
+.ant-collapse-item-active .ant-collapse-header {
+  border-bottom: 1px solid var(--Semantic-Border-light-border-primary, #C8CDD4) !important;
+}
+
+/* Collapse arrow icon */
+.ant-collapse-header .ant-collapse-arrow {
+  color: #0075BF !important;
+  font-size: 14px !important;
+}
+
+/* Collapse Content */
+.ant-collapse-content {
+  background: var(--Semantic-Background-light-bg-primary, #FFFFFF) !important;
+  border-top: none !important;
+}
+
+/* Collapse Content Body */
+.ant-collapse-content-box {
+  padding: 20px !important;
+}
+
+/* Remove extra border on last item */
+.ant-collapse > .ant-collapse-item:last-child {
+  margin-bottom: 0 !important;
 }

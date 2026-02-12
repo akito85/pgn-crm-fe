@@ -41,7 +41,7 @@ const getServiceAgreementColumns = (
     },
     {
         key: "saReference",
-        title: "SA REFERENCE NUMBER",
+        title: "SA REFERENCE",
         dataIndex: "saReference",
         width: 180,
         sorter: true,
@@ -264,6 +264,24 @@ const getServiceAgreementColumns = (
             "date"
         ),
         render: (date) => date ? moment(date, "DD-MM-YYYY").format(dateFormatting.date) : "-",
+    },
+    {
+        key: "alreadyGasIn",
+        title: "ALREADY GAS IN",
+        dataIndex: "alreadyGasIn",
+        width: 130,
+        sorter: true,
+        filteredValue: [search?.alreadyGasIn] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "alreadyGasIn",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (text) => text?.value || "No",
     },
     includeStatus && {
         key: "approvalStatus",

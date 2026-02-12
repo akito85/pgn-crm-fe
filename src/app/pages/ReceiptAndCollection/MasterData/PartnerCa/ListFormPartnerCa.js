@@ -296,11 +296,15 @@ const ListFormPartnerCa = (props) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
-      breadcrumbName: "Partner Ca",
+      breadcrumbName: "Partner Collecting Agent Mapping",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER_CA,
@@ -500,6 +504,7 @@ const ListFormPartnerCa = (props) => {
             onCancel={handleBack}
             onClear={handleClear}
             onSaveDraft={handleSaveDraft}
+            onSubmit={() => form.submit()}
             type={type}
           />
         </Form>

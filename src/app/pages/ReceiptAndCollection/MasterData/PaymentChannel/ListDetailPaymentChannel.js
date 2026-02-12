@@ -84,11 +84,15 @@ const ListDetailPaymentChannel = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL,
-      breadcrumbName: "Payment Channel",
+      breadcrumbName: "Delivery Channel",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PAYMENT_CHANNEL,
@@ -142,7 +146,7 @@ const ListDetailPaymentChannel = () => {
           onChange={setSegmentedPage}
           items={[
             {
-              label: "Payment Channel",
+              label: "Delivery Channel",
               key: "Payment Channel",
               children: (
                 <DetailPaymentChannel
@@ -178,7 +182,7 @@ const ListDetailPaymentChannel = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Payment Channel"}
+        menu={"Delivery Channel"}
         named={data_detail?.peOpCi?.name
         }
       />

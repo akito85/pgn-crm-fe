@@ -86,7 +86,11 @@ const ViewPartner = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER,
@@ -487,7 +491,7 @@ const ViewPartner = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Partner
+            Create
           </ButtonComponent>
         </NavLink>
       ),
