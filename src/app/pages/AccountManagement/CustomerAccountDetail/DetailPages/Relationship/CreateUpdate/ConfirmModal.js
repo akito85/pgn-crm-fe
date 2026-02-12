@@ -1,17 +1,16 @@
-import { useState } from "react";
-import DetailText from "../../../../../../components/DetailText";
-import RelationshipApproval from "./RelationshipApproval";
-import RelationshipAttachment from "./RelationshipAttachment";
+import DetailText from "../../../../../../../components/DetailText";
+import RelationshipApproval from "./../CreateUpdate/StepContents/ApprovalForm/RelationshipApproval";
+import RelationshipAttachment from "./../RelationshipAttachment";
 import { Button, Divider, Form } from "antd";
-import { downloadAttachment } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import InputComponent from "../../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../../utils";
+import { downloadAttachment } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import InputComponent from "../../../../../../../components/InputComponent";
+import { requiredMessage } from "../../../../../../../utils";
 
-const RelationshipConfirm = ({
+const ConfirmationModal = ({
   data = {},
   approvalData = [],
   attachmentData = [],
-  approvalHierarchyName = "Hierarchy SA 1", // Nama approval hierarchy yang dipilih
+  approvalHierarchyName = "",
   idAccount,
   dispatch,
   activeTab,
@@ -162,5 +161,5 @@ const RelationshipConfirm = ({
   );
 };
 
-export default RelationshipConfirm;
+export default ConfirmationModal;
 

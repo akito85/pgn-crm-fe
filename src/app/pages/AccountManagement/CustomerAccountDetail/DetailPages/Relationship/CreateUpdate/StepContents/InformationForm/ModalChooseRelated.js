@@ -3,20 +3,20 @@ import { Input, Tooltip } from "antd";
 import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
-import SVGIcon from "../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import SVGIcon from "../../../../../../../../../assets/Icon/index";
+import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import { TablePaginationNew } from "poc-table-dragandrop";
-import { getRelatedObjectData } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import moment from "moment";
+import { getRelatedObjectData } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import NxModal from "../../../../../../../../../components/Nx/NxModal";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 const ModalChooseRelated = ({
   isOpen = false,
-  handleCancel = () => { },
-  handleSelect = () => { },
+  handleCancel = () => {},
+  handleSelect = () => {},
   idAccount = null,
-  relationshipType = null,
-  relationshipCategory = null,
+  relationshipType,
+  relationshipCategory,
 }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -40,16 +40,6 @@ const ModalChooseRelated = ({
   //            CHILD_OF, PARENT_OF = CUSTOMER
   const isAccountType = normalizedRelationType && ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
   const isCustomerType = normalizedRelationType && ["BRANCH_OF", "HEAD_QUARTER_OF", "COMPANY_GROUP"].includes(normalizedRelationType);
-
-  // Debug logging
-  useEffect(() => {
-    console.log("DEBUG - ModalChooseRelated Props:", {
-      relationshipType,
-      normalizedRelationType,
-      isCustomerType,
-      isAccountType
-    });
-  }, [relationshipType, normalizedRelationType, isCustomerType, isAccountType]);
 
   useEffect(() => {
     if (isOpen && idAccount && relationshipType && relationshipCategory) {
@@ -438,71 +428,49 @@ const ModalChooseRelated = ({
   // Determine modal header based on type
   const modalHeader = isAccountType ? "CHOOSE ACCOUNT" : isCustomerType ? "CHOOSE CUSTOMER" : "CHOOSE RELATED";
 
-  // Debug columns selection
-  console.log("DEBUG - Columns Selection:", {
-    isCustomerType,
-    isAccountType,
-    totalColumns: columns.length,
-    modalHeader,
-    columnTitles: columns.map(col => col.title)
-  });
-
   const handleChange = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  const handleConfirmSelect = () => {
-    if (selectedRow) {
-      handleSelect(selectedRow);
-      handleCancel();
-      setSelectedRow(null);
-    }
-  };
-
   return (
-    <ModalCustom
+    <NxModal
       isOpen={isOpen}
-      type="confirmation"
       header={modalHeader}
-      width={1400}
-      handleCancel={() => {
-        handleCancel();
-        setSelectedRow(null);
-      }}
+      handleCancel={handleCancel}
+      width={1100}
       footer={
-        <div className="w-full flex justify-end">
+        <div className="flex justify-end">
           <ButtonComponent
-            type="default"
-            onClick={() => {
-              handleCancel();
-              setSelectedRow(null);
-            }}
+            type="menu"
+            onClick={handleCancel}
           >
             Back
           </ButtonComponent>
         </div>
       }
     >
-      <div className="w-full">
-        <TablePaginationNew
-          loading={loadingRelatedObject}
-          dataSource={dataSource}
-          totalData={totalData}
-          current={page}
-          pageSize={pageSize}
-          onChange={handleChange}
-          columns={columns}
-          tableScrolled={{ x: tableScrolledWidth, y: 400 }}
-          rowClassName={(record) =>
-            record.id === selectedRow?.id ? "bg-blue-50" : ""
-          }
-          rowKey="id"
-          enableDragColumn={true}
-        />
+      <div className="p-4">
+        <NxBaseContainer border>
+          <TablePaginationNew
+            loading={loadingRelatedObject}
+            dataSource={dataSource}
+            totalData={totalData}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            columns={columns}
+            tableScrolled={{ x: tableScrolledWidth, y: 400 }}
+            rowClassName={(record) =>
+              record.id === selectedRow?.id ? "bg-blue-50" : ""
+            }
+            rowKey="id"
+            enableDragColumn={true}
+          />
+        </NxBaseContainer>
       </div>
-    </ModalCustom>
+    </NxModal>
   );
 };
 
