@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -119,6 +119,7 @@ const CreateCustomerServiceRequest = (props) => {
   const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
 
   const {
+    data: data_account_address,
     data_country,
     data_province,
     data_city,
@@ -129,12 +130,35 @@ const CreateCustomerServiceRequest = (props) => {
     data_business_purpose,
   } = useSelector((state) => state.accountAddress);
 
+  const { idAccount, idCustomer, accountType } = useMemo(() => {
+    // Prioritas 1: Ambil dari location.state (navigasi normal)
+    if (location.state) {
+      return {
+        idAccount: location.state.idAccount,
+        idCustomer: location.state.idCustomer,
+        accountType: location.state.type,
+      };
+    }
+    // Prioritas 2: Fallback ke sessionStorage (setelah reload)
+    const persistedData = sessionStorage.getItem("serviceRequestCreation");
+    if (persistedData) {
+      const parsedData = JSON.parse(persistedData);
+      return {
+        idAccount: parsedData.idAccount,
+        idCustomer: parsedData.idCustomer,
+        accountType: parsedData.type,
+      };
+    }
+    // Default jika tidak ada data sama sekali
+    return { idAccount: null, idCustomer: null, accountType: null };
+  }, [location.state]);
+
   //declare
   const [formCreate] = Form.useForm();
-  const id = location?.state?.id;
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
-  const accountType = location?.state?.type; // "standard" or "onetime"
+  // const id = location?.state?.id;
+  // const idAccount = location?.state?.idAccount;
+  // const idCustomer = location?.state?.idCustomer;
+  // const accountType = location?.state?.type; // "standard" or "onetime"
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
@@ -219,11 +243,11 @@ const CreateCustomerServiceRequest = (props) => {
   }, [dispatch, idAccount, idCustomer, accountType]);
 
   useEffect(() => {
-    if (id) {
-      dispatch(getCustomerDetail(id));
-      // dispatch(getDetailContact(id));
+    if (idCustomer) {
+      dispatch(getCustomerDetail(idCustomer));
+      // dispatch(getDetailContact(idCustomer));
     }
-  }, [dispatch, id]);
+  }, [dispatch, idCustomer]);
 
   useEffect(() => {
     dispatch(
@@ -280,7 +304,6 @@ const CreateCustomerServiceRequest = (props) => {
     ) {
       setDropdownsLoaded(true);
     }
-    console.log("Dropdowns loaded = ", dropdowns);
   }, [dropdowns]);
 
   const handleSetData = (e) => {
@@ -342,6 +365,10 @@ const CreateCustomerServiceRequest = (props) => {
       const accountInfo = data_accountDetail.accountInformation;
       const accountSums = data_accountDetail.accountSummary;
 
+      const premiseAddress = data_account_address?.result?.find(
+        (item) => item?.premise?.bool === false
+      );
+
       formCreate.setFieldsValue({
         accountGroupType: accountInfo?.accountGroupType || "",
         srFormAccountId: accountInfo?.accountId || "",
@@ -351,16 +378,20 @@ const CreateCustomerServiceRequest = (props) => {
         srFormAccountSegment: accountInfo?.segment || "",
         srFormAccountGroupType: accountInfo?.accountGroupType || "",
         srFormAccountType: accountInfo?.accountType || "",
-        srFormPremiseAddress: data_detail?.contactAddress || "",
-        srFormDistrict: data_district || "",
-        srFormSubdistrict: data_subdistrict || "",
-        srFormCity: data_city || "",
-        srFormCountry: data_country || "",
+        srFormPremiseAddress: premiseAddress?.fullAddress || "",
+        srFormDistrict: premiseAddress?.district?.name || "",
+        srFormSubdistrict: premiseAddress?.subDistrict?.name || "",
+        srFormCity: premiseAddress?.city?.name || "",
+        srFormCountry: premiseAddress?.country?.name || "",
+        // srFormLatitude: premiseAddress?.latitude || "",
+        // srFormLongitude: premiseAddress?.longitude || "",
+        srFormLatitude: premiseAddress?.country?.name || "",
+        srFormLongitude: premiseAddress?.country?.name || "",
       });
     }
-    console.log(data_district)
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data_accountDetail, data_detail, data_district, data_subdistrict, data_city, data_country]);
+  }, [data_account_address, data_accountDetail, data_detail, data_district, data_subdistrict, data_city, data_country]);
 
   const handleChangeName = (e, type) => {
     switch (type) {
@@ -462,8 +493,20 @@ const CreateCustomerServiceRequest = (props) => {
     }
   };
   const handleButtonNext = () => {
-    next();
-    scrollRightHandler();
+    if (current === 0) {
+      formCreate
+        .validateFields()
+        .then(() => {
+          next();
+          scrollRightHandler();
+        })
+        .catch((info) => {
+          console.log("Validate Failed:", info);
+        });
+    } else {
+      next();
+      scrollRightHandler();
+    }
   };
 
   const items = steps.map((item) => ({

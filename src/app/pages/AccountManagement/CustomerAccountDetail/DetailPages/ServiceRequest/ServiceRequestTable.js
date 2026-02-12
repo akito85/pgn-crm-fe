@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setData } from "../../../../../../redux/slices/data_slice";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
@@ -26,20 +28,27 @@ const ServiceRequestTable = ({
   handleSearch = () => {},
   loading = false,
 }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const itemActions = nxGetAccountActions({
     idAccount,
     idCustomer,
-    handleCreate: () => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_REQUEST,
-      {
+    handleCreate: () => {
+      dispatch(
+        setData({
+          key: "serviceRequestCreation",
+          data: { idAccount, idCustomer, type: "standard" },
+        })
+      );
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_REQUEST, {
         state: {
           idAccount,
           idCustomer,
-        }
-      }
-    ),
+          type: "standard",
+        },
+      });
+    },
     updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST,
     detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
     navigate,

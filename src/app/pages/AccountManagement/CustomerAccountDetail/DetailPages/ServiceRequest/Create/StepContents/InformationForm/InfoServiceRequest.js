@@ -41,7 +41,6 @@ export default function InfoServiceRequest({
   // Debug: Log form values when they change
   useEffect(() => {
     const values = form?.getFieldsValue();
-    console.log("InfoServiceRequest - Current form values:", values);
   }, [form]);
 
   // Create safe accessor functions that handle both array and { data: [] } formats
