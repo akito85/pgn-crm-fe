@@ -36,6 +36,9 @@ const initialState = {
   reconnectAttempts: 0,
   lastConnected: null,
 
+  // Position context
+  currentPositionId: null,
+
   // Notifications
   notifications: [], // All notifications
   unreadCount: 0,
@@ -91,12 +94,13 @@ const initialState = {
  */
 export const connectNotifications = createAsyncThunk(
   "notifications/connect",
-  async ({ userId }, { dispatch, rejectWithValue }) => {
+  async ({ userId, positionId = null }, { dispatch, rejectWithValue }) => {
     try {
 
       return new Promise((resolve, reject) => {
 
         notificationService.connect(userId, {
+          positionId,
           onMessage: (notification) => {
             dispatch(addNotification(notification));
           },
@@ -146,9 +150,9 @@ export const fetchUserNotifications = createAsyncThunk(
  */
 export const fetchAllUserNotifications = createAsyncThunk(
   "notifications/fetchAllUserNotifications",
-  async ({ userId, params = {} }, { rejectWithValue }) => {
+  async ({ userId, positionId = null, params = {} }, { rejectWithValue }) => {
     try {
-      const response = await notificationApi.getAllUserNotifications(userId, params);
+      const response = await notificationApi.getAllUserNotifications(userId, params, positionId);
       return response;
     } catch (error) {
       return rejectWithValue({
@@ -164,9 +168,9 @@ export const fetchAllUserNotifications = createAsyncThunk(
  */
 export const fetchUnreadCount = createAsyncThunk(
   "notifications/fetchUnreadCount",
-  async (_, { rejectWithValue }) => {
+  async (positionId = null, { rejectWithValue }) => {
     try {
-      const response = await notificationApi.getUnreadNotificationsCount();
+      const response = await notificationApi.getUnreadNotificationsCount(positionId);
       return response;
     } catch (error) {
       return rejectWithValue({
@@ -344,6 +348,16 @@ const notificationsSlice = createSlice({
       const exists = state.notifications.some((n) => n.id === notification.id);
       if (exists) {
         return;
+      }
+
+      // Position-based filter: skip notifications targeted at a different position
+      const notifPositionId = notification.toPositionId;
+      if (notifPositionId) {
+        // If notification has a position ID, only accept if user's current position matches exactly
+        // This prevents users from seeing notifications for other positions they hold
+        if (!state.currentPositionId || Number(notifPositionId) !== Number(state.currentPositionId)) {
+          return;
+        }
       }
 
       // Ensure status properties are set for UI compatibility
@@ -527,6 +541,13 @@ const notificationsSlice = createSlice({
     resetFilters: (state) => {
       state.filters = initialState.filters;
 
+    },
+
+    /**
+     * Set current position ID for position-based filtering
+     */
+    setCurrentPositionId: (state, action) => {
+      state.currentPositionId = action.payload;
     },
 
     /**
@@ -781,6 +802,7 @@ export const {
   clearNotificationsByDirection,
   setConnectionStatus,
   setConnectionError,
+  setCurrentPositionId,
   updateFilters,
   resetFilters,
   updateSettings,
@@ -899,6 +921,9 @@ export const selectAvailableTypes = (state) =>
 // Get display type options from global settings
 export const selectDisplayTypeOptions = (state) =>
   state.notifications.globalSettings?.displayTypeOptions || ["standard", "toast", "popup", "inline"];
+
+// Get current position ID (for position-based filtering)
+export const selectCurrentPositionId = (state) => state.notifications.currentPositionId;
 
 /**
  * Export reducer

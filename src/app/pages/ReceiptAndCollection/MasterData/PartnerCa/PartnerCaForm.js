@@ -47,7 +47,7 @@ const PartnerCaForm = (props) => {
 
   return (
     <div>
-      <BaseContainer header={"PARTNER CA INFORMATION"}>
+      <BaseContainer header={"PARTNER COLLECTING AGENT MAPPING INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-5">
 
           <Form.Item

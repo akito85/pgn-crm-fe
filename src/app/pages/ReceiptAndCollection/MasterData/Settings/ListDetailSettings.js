@@ -94,11 +94,15 @@ const ListDetailSettings = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
-      breadcrumbName: "Settings",
+      breadcrumbName: "Payment Channel Configuration",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_SETTINGS,
@@ -161,7 +165,7 @@ const ListDetailSettings = () => {
           onChange={setSegmentedPage}
           items={[
             {
-              label: "Setting",
+              label: "Payment Channel Configuration",
               key: "Setting",
               children: (
                 <DetailSettings
@@ -196,7 +200,7 @@ const ListDetailSettings = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Setting"}
+        menu={"Payment Channel Configuration"}
         named={data_detail?.settings?.partnerCode}
         loading={loadingConfirm}
       />

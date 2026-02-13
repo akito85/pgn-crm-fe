@@ -168,7 +168,7 @@ const ListFormCaPaymentChannel = (props) => {
 
     const [steps, setSteps] = useState([
         {
-            title: "Ca Payment Channel",
+            title: "Payment Channel Mapping",
             value: "Ca Payment Channel",
             paramValue: [
                 "caCode",
@@ -362,18 +362,22 @@ const ListFormCaPaymentChannel = (props) => {
 
     // Breadcrumbs
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_PAYMENT_CHANNEL,
-            breadcrumbName: "Ca Payment Channel",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_CA_PAYMENT_CHANNEL,
-            breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
-        },
+      {
+        path: "",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_PAYMENT_CHANNEL,
+        breadcrumbName: "Payment Channel Mapping",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_CA_PAYMENT_CHANNEL,
+        breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      },
     ];
 
     //kirim body
