@@ -14,6 +14,7 @@ import { WarningOutlined } from '@ant-design/icons'
 import ModalCustom from '../../../../../../components/Modal/ModalCustom'
 import NxBaseContainer from '../../../../../../components/Nx/NxBaseContainer'
 import { nxGetAccountActions } from '../../../../../../components/Nx/NxGetAccountActions'
+import moment from 'moment'
 
 const columns = (
   search,
@@ -135,15 +136,24 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+
+    let value = selectedKeys[0];
+
+    // convert date field sebelum dikirim ke backend
+    if (dataIndex === "effectiveDate" && value) {
+      value = moment(value, "DD MMM YYYY", true).format("YYYY-MM-DD");
+    }
+
+    setSearchText(value);
+    setSearchedColumn(value ? dataIndex : "");
+
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
+      if (prevState[dataIndex] !== value) {
         setPage(1);
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: value,
       };
     });
   };
