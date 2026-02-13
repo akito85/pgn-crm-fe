@@ -29,6 +29,7 @@ import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavi
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { configApp } from "../../../../../../../constants/configApp";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 const CreateUpdateRelationship = ({
   type = {},
@@ -52,6 +53,8 @@ const CreateUpdateRelationship = ({
     data_approvalHierarchies,
     data_approvalHierarchyDetail,
     data_relationshipDetail,
+    data_relationshipType,
+    data_relationshipCategory,
     loadingDetail,
     loadingApprovalHierarchyDetail
   } = useSelector(
@@ -83,41 +86,54 @@ const CreateUpdateRelationship = ({
 
   // Populate form when both detail data AND approval hierarchy list are loaded (update mode)
   useEffect(() => {
+    const detail = data_relationshipDetail;
+
     if (
       type === "update" &&
+      detail?.appHierId &&
+      detail?.relationshipType &&
       data_relationshipDetail?.id &&
-      data_approvalHierarchies?.length
+      data_approvalHierarchies?.length &&
+      data_relationshipType?.length &&
+      data_relationshipCategory?.length
     ) {
-      const detail = data_relationshipDetail;
-
       // Set form values
       form.setFieldsValue({
         relationshipType: detail.relationshipType,
         relationshipCategory: detail.relationshipCategory,
-        relatedName: detail.objectName,
-        relatedNumber: detail.objectNumber,
         startDate: detail.startDate ? moment(detail.startDate) : null,
         endDate: detail.endDate ? moment(detail.endDate) : null,
         description: detail.description || "",
         appHierId: detail.appHierId,
-        appHierName: detail.appHierName,
       });
 
       // Find matching approval option and load hierarchy detail
-      if (detail.appHierId) {
-        const appHierOption = data_approvalHierarchies.find(
-          (option) => option.appHierId === detail.appHierId
-        );
+      const appHierOption = data_approvalHierarchies.find(
+        (option) => option.appHierId === detail.appHierId
+      );
 
-        if (appHierOption) {
-          handleSelectHierarchy(detail.appHierId);
-        }
-      }
+      if (appHierOption)
+        form.setFieldValue("appHierName", appHierOption.approvalName);
+
+      // Find matching relationship type option
+      const relationshipTypeOption = data_relationshipType.find(
+        (option) => option.id === detail.relationshipType
+      );
+
+      if (relationshipTypeOption)
+        form.setFieldValue("relationshipTypeName", relationshipTypeOption.text);
+
+      // Find matching relationship category option
+      const relationshipCategoryOption = data_relationshipCategory.find(
+        (option) => option.id === detail.relationshipCategory
+      );
+
+      if (relationshipCategoryOption)
+        form.setFieldValue("relationshipCategoryName", relationshipCategoryOption.text);
 
       // Populate Related Detail data for update mode
-      if (detail.relatedDetail && detail.relatedDetail.length > 0) {
+      if (detail.relatedDetail && detail.relatedDetail.length > 0)
         setRelatedDetails(detail.relatedDetail);
-      }
     }
   }, [data_relationshipDetail, data_approvalHierarchies, type]);
 
@@ -145,8 +161,10 @@ const CreateUpdateRelationship = ({
     if (idAccount && appHierId)
       dispatch(getApprovalHierarchyDetail({ idAccount, appHierId }));
 
-    const appHierLabel = appHierOptions.children;
-    form.setFieldsValue({ appHierLabel })
+    if (appHierOptions) {
+      const appHierLabel = appHierOptions.children;
+      form.setFieldsValue({ appHierLabel })
+    }
   };
 
   const handleSubmitForm = () => {
@@ -156,6 +174,7 @@ const CreateUpdateRelationship = ({
       objectId,
       startDate,
       endDate,
+      appHierId,
       remark,
     } = form.getFieldsValue(true);
 
@@ -164,8 +183,9 @@ const CreateUpdateRelationship = ({
       relationshipCategory,
       objectId,
       subjectId: idAccount,
-      startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : "",
-      endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : "",
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
+      appHierId,
       action: confirmationType,
       remark,
     };
@@ -434,8 +454,8 @@ const CreateUpdateRelationship = ({
           relationshipCategory: detail.relationshipCategory,
           relatedName: detail.objectName,
           relatedNumber: detail.objectNumber,
-          startDate: detail.startDate ? moment(detail.startDate) : null,
-          endDate: detail.endDate ? moment(detail.endDate) : null,
+          startDate: detail.startDate,
+          endDate: detail.endDate,
           description: detail.description || "",
           appHierId: detail.appHierId,
           appHierName: detail.appHierName,
@@ -467,7 +487,6 @@ const CreateUpdateRelationship = ({
           fileType: item.fileType,
           urlFile1: item.urlFile1,
           createdBy: item.createdBy,
-          createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
           dataType: "exist",
         }));
         setListDataAttachment(mapped);
