@@ -132,7 +132,7 @@ const EditableCell = ({
                   ...rules(),
                   {
                     validator: (_, value) => {
-                      const max = importVal !== undefined ? importVal : 100;
+                      const max = importVal !== undefined ? Number(importVal) : 100;
                       if (value >= 0 && value <= max) {
                         return Promise.resolve();
                       } else {
@@ -251,9 +251,17 @@ const FunctionalRMSDetail = ({
   updateData = [],
   storedData = false,
   setStoredData = () => {},
-  localVal,
-  importVal,
+  localValue,
+  importValue,
 }) => {
+
+  const [localVal, setLocalValue] = useState(localValue);
+  const [importVal, setImportValue] = useState(importValue);
+
+  useEffect(() => {
+    setLocalValue(localValue);
+    setImportValue(importValue);
+  }, [localValue, importValue]);
   // Selector
   const { data_country } = useSelector((state) => state.rawMaterialSource);
 
@@ -395,8 +403,8 @@ const FunctionalRMSDetail = ({
         }, 0);
 
         // Check if the total percentage exceeds allowed importVal
-        if (totalPercentage > importVal) {
-          setValidationError(`Total Percentage must be ${importVal}%`);
+          if (totalPercentage > Number(importVal)) {
+            setValidationError(`Total Percentage must be ${Number(importVal)}%`);
           return;
         }
 
@@ -419,7 +427,7 @@ const FunctionalRMSDetail = ({
   // Function Add Row Data
   const addRow = () => {
     let errorBody = {};
-    if (totalPercentage === importVal) {
+    if (totalPercentage === Number(importVal)) {
       errorBody = {
         title: "Failed",
         description: `Total percentage is ${importVal}%, you cannot add data again.`,
@@ -778,9 +786,9 @@ const FunctionalRMSDetail = ({
 
   return (
     <div className="flex flex-col w-full gap-4">
-      {type !== "detail" &&
-      type !== "preview" &&
-      localVal + importVal === 100 ? (
+  {type !== "detail" &&
+  type !== "preview" &&
+  Number(localVal) + Number(importVal) === 100 ? (
         <div className="flex w-full justify-end">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}

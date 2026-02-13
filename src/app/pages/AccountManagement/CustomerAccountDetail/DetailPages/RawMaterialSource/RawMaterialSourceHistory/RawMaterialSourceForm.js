@@ -96,7 +96,9 @@ const RawMaterialSourceForm = ({ type }) => {
       setStartDate(moment(data_detail_history?.effectiveDate));
       setListDataDetail(dataDetail);
       setDescription(data_detail_history?.description);
-      setImportVal(data_detail_history?.value2 || 0);
+      setImportVal(Number(data_detail_history?.value2 || 0));
+      // also set local value from fetched detail so child receives correct initial prop
+      setLocalVal(Number(data_detail_history?.value1 || 0));
     }
   }, [dispatch, id, type, data_detail_history]);
 
@@ -413,8 +415,8 @@ const RawMaterialSourceForm = ({ type }) => {
                   setStoredData={setStoredDataInline}
                   storedData={storedDataInline}
                   required={{ required: true, message: "Please input your" }}
-                  localVal={localVal}
-                  importVal={importVal}
+                  localValue={localVal}
+                  importValue={importVal}
                 />
               </NxBaseContainer>
             </NxCardContainer>
