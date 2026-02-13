@@ -88,9 +88,7 @@ export const createValidasiPaymentCycle = createAsyncThunk(
             return data.data;
         } catch (error) {
             const message =
-                (error.response &&
-                    error.response.data &&
-                    error.response.data.message) ||
+                error.response?.data?.message ||
                 error.message ||
                 error.toString();
             if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
@@ -195,9 +193,7 @@ export const saveDraftPaymentCycle = createAsyncThunk(
             return data.data;
         } catch (error) {
             const message =
-                (error.response &&
-                    error.response.data &&
-                    error.response.data.message) ||
+                error.response?.data?.message ||
                 error.message ||
                 error.toString();
             const errorBody = {
