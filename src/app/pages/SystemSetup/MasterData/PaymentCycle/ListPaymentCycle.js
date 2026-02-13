@@ -14,6 +14,7 @@ import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { EyeOutlined } from "@ant-design/icons";
+import StatusComponent from "../../../../../components/StatusComponent";
 import {
     getListPaymentCycle,
     inactivePaymentCycle,
@@ -384,6 +385,31 @@ const ListPaymentCycle = () => {
             isClassification: true,
             render: (text, object, index) => (page - 1) * pageSize + index + 1,
         },
+        {
+            title: "PERIOD",
+            dataIndex: "periodName",
+            key: "periodName",
+            align: "left",
+            sorter: true,
+            ...getColumnSearchPropsPaging(
+                "periodName",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true
+            ),
+            render: (text) =>
+                renderColumn(
+                    "periodName",
+                    searchedColumn,
+                    searchText,
+                    text,
+                    true,
+                    "input",
+                    search
+                ),
+        },
 
         {
             title: "BEGIN CYCLE",
@@ -559,6 +585,27 @@ const ListPaymentCycle = () => {
                     "input",
                     search
                 ),
+        },
+        {
+            title: "STATUS OPEN",
+            dataIndex: "statusOpen",
+            key: "statusOpen",
+            width: 150,
+            sorter: true,
+            fixed: "right",
+            ...getColumnSearchPropsPaging(
+                "statusOpen",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                false
+            ),
+            render: (text) => (
+                <div className="flex justify-center">
+                    <StatusComponent colour={text}>{text}</StatusComponent>
+                </div>
+            ),
         },
         {
             title: "STATUS",

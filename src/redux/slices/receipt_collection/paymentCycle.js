@@ -13,6 +13,7 @@ const initialState = {
     data_time_unit: [],
     dataListCategory: [],
     dataEndBegin: [],
+    dataPaymentPeriods: [],
 };
 
 export const getTimeUnit = createAsyncThunk(
@@ -83,12 +84,23 @@ export const createValidasiPaymentCycle = createAsyncThunk(
     async (param, thunkAPI) => {
         try {
             const url = `/v1/dbs/api/payment-cycle/validate-create-update`;
-            const response = await receiptCollectionHttpService.createData(url, param);
-            return response;
+            const data = await receiptCollectionHttpService.createData(url, param);
+            return data.data;
         } catch (error) {
-            if (!error.success) {
-                return thunkAPI.rejectWithValue(error);
+            const message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
+                error.message ||
+                error.toString();
+            if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
             }
+            return thunkAPI.rejectWithValue(error);
         }
     }
 );
@@ -296,6 +308,21 @@ export const getAllBeginEnd = createAsyncThunk(
     }
 );
 
+export const getPaymentPeriods = createAsyncThunk(
+    "GET_PAYMENT_PERIODS",
+    async (thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/payment-period/get-list`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response.data;
+        } catch (error) {
+            if (!error.success) {
+                return thunkAPI.rejectWithValue(error);
+            }
+        }
+    }
+);
+
 const paymentCycleSlice = createSlice({
     name: "paymentCycle",
     initialState,
@@ -415,6 +442,16 @@ const paymentCycleSlice = createSlice({
                 state.dataEndBegin = action.payload;
             })
             .addCase(getAllBeginEnd.rejected, (state, action) => {
+                state.loading = false;
+            })
+            .addCase(getPaymentPeriods.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getPaymentPeriods.fulfilled, (state, action) => {
+                state.loading = false;
+                state.dataPaymentPeriods = action.payload;
+            })
+            .addCase(getPaymentPeriods.rejected, (state) => {
                 state.loading = false;
             });
     },

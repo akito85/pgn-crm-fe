@@ -23,12 +23,14 @@ import {
     getAllBeginEnd,
     createValidasiPaymentCycle,
     uploadAttachmentPaymentCycle,
+
     saveDraftPaymentCycle,
+    getPaymentPeriods,
 } from "../../../../../redux/slices/receipt_collection/paymentCycle";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
-import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
+
 
 const { TextArea } = Input;
 
@@ -110,20 +112,30 @@ const PaymentCycleForm = ({ type }) => {
         const values = form.getFieldsValue();
         const dataValue = {
             id: isEdit ? id : null,
-            period: values.period,
+            periodId: values.period,
             beginCycle: values.beginCycle,
             endCycle: values.endCycle,
             timeUnit: values.timeUnit,
-            startDate: values.startDate ? values.startDate.format("DD MMM YYYY") : null,
-            endDate: values.endDate ? values.endDate.format("DD MMM YYYY") : null,
+            startDate: values.startDate ? values.startDate.format("YYYY-MM-DD") : null,
+            endDate: values.endDate ? values.endDate.format("YYYY-MM-DD") : null,
             description: values.description,
+            statusOpen: values.statusOpen,
             appHierId: values.apphierId || selectedHierarchy,
         };
 
         dispatch(saveDraftPaymentCycle(dataValue))
             .unwrap()
             .then(() => {
-                navigate(SYSTEM_SETUP_ROUTES.VIEW_PAYMENT_CYCLE);
+                dispatch(showModalSuccess({
+                    title: "Success",
+                    description: "Draft saved successfully",
+                    return: false
+                }));
+                navigate("/system-setup/payment-cycle");
+            })
+            .catch((error) => {
+                const message = error?.message || "Failed to save draft";
+                dispatch(showModalError({ title: "Error", description: message }));
             });
     };
 
@@ -143,7 +155,9 @@ const PaymentCycleForm = ({ type }) => {
         data_time_unit,
         dataListAppHierId,
         dataListAppHierDetail,
+
         dataEndBegin,
+        dataPaymentPeriods,
     } = useSelector((state) => state.paymentCycle);
 
     // Initial Fetch
@@ -151,6 +165,7 @@ const PaymentCycleForm = ({ type }) => {
         dispatch(getTimeUnit());
         dispatch(getAllApprovalList());
         dispatch(getAllBeginEnd());
+        dispatch(getPaymentPeriods());
         if (isEdit && id) {
             dispatch(getDetailPaymentCycle(id));
         }
@@ -161,13 +176,14 @@ const PaymentCycleForm = ({ type }) => {
         if (isEdit && data_detail?.paymentCycleDetail) {
             const detail = data_detail.paymentCycleDetail;
             form.setFieldsValue({
-                period: detail.period,
+                period: detail.periodId,
                 beginCycle: detail.beginCycle,
                 endCycle: detail.endCycle,
                 timeUnit: detail.timeUnitId || detail.timeUnit,
                 startDate: detail.startDate ? moment(detail.startDate) : null,
                 endDate: detail.endDate ? moment(detail.endDate) : null,
                 description: detail.description,
+                statusOpen: detail.statusOpen,
                 apphierId: detail.appHierId,
             });
             setSelectedHierarchy(detail.appHierId);
@@ -183,7 +199,7 @@ const PaymentCycleForm = ({ type }) => {
                 setFiles(mappedFiles);
             }
         }
-    }, [data_detail, isEdit]);
+    }, [data_detail, isEdit, form]);
 
     useEffect(() => {
         if (dataListAppHierId?.length > 0) {
@@ -207,7 +223,7 @@ const PaymentCycleForm = ({ type }) => {
         } else {
             setAppHierDataDetail([]);
         }
-    }, [dispatch, selectedHierarchy]);
+    }, [dispatch, selectedHierarchy, form]);
 
     useEffect(() => {
         if (dataListAppHierDetail?.length > 0) {
@@ -237,13 +253,14 @@ const PaymentCycleForm = ({ type }) => {
         // Prepare JSON Data
         const data = {
             id: isEdit ? id : null,
-            period: values.period,
+            periodId: values.period,
             beginCycle: values.beginCycle,
             endCycle: values.endCycle,
             timeUnit: values.timeUnit,
-            startDate: values.startDate ? values.startDate.format("DD MMM YYYY") : null,
-            endDate: values.endDate ? values.endDate.format("DD MMM YYYY") : null,
+            startDate: values.startDate ? values.startDate.format("YYYY-MM-DD") : null,
+            endDate: values.endDate ? values.endDate.format("YYYY-MM-DD") : null,
             description: values.description,
+            statusOpen: values.statusOpen,
             appHierId: values.apphierId,
         };
 
@@ -259,8 +276,7 @@ const PaymentCycleForm = ({ type }) => {
                 }
             })
             .catch((error) => {
-                const message = error?.message || "Validation failed. Please check your input.";
-                dispatch(showModalError({ title: "Validation Failed", description: message }));
+                console.log("Validation failed:", error);
             });
     };
 
@@ -291,7 +307,8 @@ const PaymentCycleForm = ({ type }) => {
 
             dispatch(showModalSuccess({
                 title: "Success",
-                description: isEdit ? "Payment Cycle updated successfully" : "Payment Cycle created successfully"
+                description: isEdit ? "Payment Cycle updated successfully" : "Payment Cycle created successfully",
+                return: false
             }));
 
             navigate("/system-setup/payment-cycle");
@@ -355,9 +372,20 @@ const PaymentCycleForm = ({ type }) => {
                                 <Form.Item
                                     label="Period"
                                     name="period"
-                                    rules={[{ required: true, message: "Please input period!" }]}
+                                    rules={[{ required: true, message: "Please select period!" }]}
                                 >
-                                    <Input placeholder="e.g., 2026-01" />
+                                    <Select placeholder="Select Period"
+                                        showSearch
+                                        filterOption={(input, option) =>
+                                            String(option.children).toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    >
+                                        {dataPaymentPeriods?.map(item => (
+                                            <Select.Option key={item.id} value={item.id}>
+                                                {item.periodName}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
                                 </Form.Item>
 
                                 <Form.Item
@@ -446,9 +474,19 @@ const PaymentCycleForm = ({ type }) => {
                                 </Form.Item>
 
                                 <Form.Item
+                                    label="Status Open"
+                                    name="statusOpen"
+                                >
+                                    <Select placeholder="Select Status">
+                                        <Select.Option value="OPEN">OPEN</Select.Option>
+                                        <Select.Option value="CLOSE">CLOSE</Select.Option>
+                                    </Select>
+                                </Form.Item>
+
+                                <Form.Item
                                     label="Description"
                                     name="description"
-                                    className="col-span-4"
+                                    className="col-span-3"
                                 >
                                     <TextArea rows={4} placeholder="Enter description" showCount maxLength={255} />
                                 </Form.Item>
@@ -491,6 +529,7 @@ const PaymentCycleForm = ({ type }) => {
                             onClear={handleClear}
                             onSaveDraft={handleSaveDraft}
                             type={isEdit ? "update" : "create"}
+                            onSubmit={() => form.submit()}
                         />
                     </Form>
                 </BaseContainer>
@@ -524,6 +563,7 @@ const PaymentCycleForm = ({ type }) => {
                         data={submitData}
                         dataTimeUnit={data_time_unit}
                         dataOption={appHierOptions}
+                        dataPaymentPeriods={dataPaymentPeriods}
                         selectedHierarchy={submitData?.appHierId}
                         listDataAppHierDetail={appHierDataDetail}
                         listDataAttachment={files}

@@ -171,7 +171,7 @@ const ViewPaymentCycle = () => {
         <div>
             <DetailSection header={"PAYMENT CYCLE INFORMATION"}>
                 <div className="w-full grid grid-cols-4 gap-4">
-                    <DetailText label="Period">{detail.period}</DetailText>
+                    <DetailText label="Period">{detail.periodName}</DetailText>
                     <DetailText label="Time Unit">{detail.timeUnit}</DetailText>
                     <DetailText label="Begin Cycle">{detail.beginCycle}</DetailText>
                     <DetailText label="End Cycle">{detail.endCycle}</DetailText>
@@ -194,6 +194,9 @@ const ViewPaymentCycle = () => {
                         <Tag color={getApprovalStatusColor(detail.statusApproval)}>
                             {detail.statusApproval}
                         </Tag>
+                    </DetailText>
+                    <DetailText label="Status Open">
+                        {detail.statusOpen}
                     </DetailText>
                     <div className="col-span-4">
                         <DetailText label="Description">
@@ -318,7 +321,7 @@ const ViewPaymentCycle = () => {
                     approveOrReject={modalAction.type}
                     header={modalAction.type}
                     menu="Payment Cycle"
-                    named={detail.period}
+                    named={detail.periodName}
                 />
             </Spin>
         </LayoutMenu>
