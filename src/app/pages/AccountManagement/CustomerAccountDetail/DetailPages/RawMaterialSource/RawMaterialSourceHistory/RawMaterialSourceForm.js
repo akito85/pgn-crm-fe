@@ -171,7 +171,6 @@ const RawMaterialSourceForm = ({ type }) => {
       "/v1/dbs/api/account-detail/source-distribution/validate-create-update";
 
     try {
-      console.log('Validating data:', processData(formValue));
       await dispatch(
         validateCreateUpdate({
           body: processData(formValue),

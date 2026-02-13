@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, Fragment } from "react";
 import { Form, Input, InputNumber, Select, Space, Tooltip, DatePicker, Button } from "antd";
 import { getColumnSearchPropsCriteria } from "../../../../../ProductAndPromo/Product/columnTableCriteria";
 import Highlighter from "react-highlight-words";
@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCountryRMS } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import InputComponent from "../../../../../../../components/InputComponent";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const EditableCell = ({
   editing,
@@ -25,7 +26,7 @@ const EditableCell = ({
   required,
   formPD,
   validationError,
-  importVal,
+  exportVal,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -119,7 +120,7 @@ const EditableCell = ({
                   ...rules(),
                   {
                     validator: (_, value) => {
-                      const max = importVal !== undefined ? importVal : 100;
+                      const max = exportVal !== undefined ? Number(exportVal) : 100;
                       if (value >= 0 && value <= max) {
                         return Promise.resolve();
                       } else {
@@ -238,9 +239,17 @@ const FunctionalPDDetail = ({
   updateData = [],
   storedData = false,
   setStoredData = () => {},
-  localVal,
-  exportVal,
+  localValue,
+  exportValue,
 }) => {
+  const [localVal, setLocalValue] = useState(localValue);
+  const [exportVal, setExportValue] = useState(exportValue);
+
+  useEffect(() => {
+    setLocalValue(localValue);
+    setExportValue(exportValue);
+  }, [localValue, exportValue]);
+
   // Selector
   const { data_country } = useSelector((state) => state.rawMaterialSource);
 
@@ -250,6 +259,17 @@ const FunctionalPDDetail = ({
   const dispatch = useDispatch();
   const isEditing = (record) => record.key === editingKey;
   const dataItem = data?.length > 0 ? data?.map((item) => item?.country) : [];
+
+  const itemActions = nxGetAccountActions({
+    handleUpdate: (id) => {
+      const rec = data.find((d) => d.key === id || d.id === id);
+      if (rec) edit(rec);
+    },
+    handleDelete: (id) => {
+      const rec = data.find((d) => d.key === id || d.id === id);
+      if (rec) deleteRow(rec);
+    },
+  }).filter((action) => action.action === "Delete" || action.action === "Update");
 
   const filterItem = () => {
     return dataItem?.length > 0
@@ -379,8 +399,8 @@ const FunctionalPDDetail = ({
         }, 0);
 
         // Check if the total percentage exceeds 100%
-        if (totalPercentage > exportVal) {
-          setValidationError(`Please adjust value. Total Percentage must be ${exportVal}%`);
+        if (totalPercentage > Number(exportVal)) {
+            setValidationError(`Total Percentage must be ${Number(exportVal)}%`);
           return;
         }
 
@@ -401,10 +421,10 @@ const FunctionalPDDetail = ({
   // Function Add Row Data
   const addRow = () => {
     let errorBody = {};
-    if (totalPercentage === exportVal) {
+    if (totalPercentage === Number(exportVal)) {
       errorBody = {
         title: "Failed",
-        description: `Total percentage is ${exportVal}%, you cannot add data again.`,
+        description: `Total percentage is ${Number(exportVal)}%, you cannot add data again.`,
       };
       dispatch(showModalError(errorBody));
     } else {
@@ -654,6 +674,7 @@ const FunctionalPDDetail = ({
         align: "center",
         render: (_, record) => {
           const editable = record.key === editingKey;
+          record.statusApproval = record.statusApproval || "DRAFT";
 
           return (
               <Space className="fleex w-full justify-center my-1 gap-2">
@@ -695,38 +716,13 @@ const FunctionalPDDetail = ({
                     </Button>
                   </>
                 ) : (
-                  <div className="flex w-full justify-center gap-4">
-                    <Tooltip title="Edit">
-                      <div>
-                        <SVGIcon
-                          name="IconEdit"
-                          color={editingKey ? "#8D91A0" : "#ACC424"}
-                          className={
-                            editingKey ? "cursor-not-allowed" : undefined
-                          }
-                          width={20}
-                          onClick={!editingKey ? () => edit(record) : undefined}
-                        />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <div>
-                        <SVGIcon
-                          name="IconDelete"
-                          color={!editingKey ? "#D90000" : "#8D91A0"}
-                          width={20}
-                          className={
-                            !editingKey
-                              ? undefined
-                              : "disabled cursor-not-allowed"
-                          }
-                          onClick={
-                            !editingKey ? () => deleteRow(record) : undefined
-                          }
-                        />
-                      </div>
-                    </Tooltip>
-                  </div>
+                  <>
+                    {itemActions.map((action, index) => (
+                      <Fragment key={`table-action-${index}`}>
+                        {action.render(record, itemActions.length, index)}
+                      </Fragment>
+                    ))}
+                  </>
                 )}
               </Space>
           );
@@ -760,7 +756,9 @@ const FunctionalPDDetail = ({
 
   return (
     <div className="flex flex-col w-full gap-4">
-      {type !== "detail" && type !== "preview" && localVal + exportVal === 100 ? (
+      {type !== "detail" &&
+      type !== "preview" &&
+      Number(localVal) + Number(exportVal) === 100 ? (
         <div className="flex w-full justify-end">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -793,7 +791,7 @@ const FunctionalPDDetail = ({
                   required: col.required,
                   validationError: validationError,
                   formPD: formPD,
-                  importVal: exportVal,
+                  exportVal: exportVal,
                 }),
               }))
             )}

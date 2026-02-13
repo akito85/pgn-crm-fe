@@ -96,7 +96,8 @@ const ProductDistributionForm = ({ type }) => {
       setStartDate(moment(data_detail_history?.effectiveDate));
       setListDataDetail(dataDetail);
       setDescription(data_detail_history?.description);
-      setExportVal(data_detail_history?.value2);
+      setLocalVal(Number(data_detail_history?.value1));
+      setExportVal(Number(data_detail_history?.value2));
     }
   }, [dispatch, id, type, data_detail_history]);
 
@@ -413,8 +414,8 @@ const ProductDistributionForm = ({ type }) => {
                   setStoredData={setStoredDataInline}
                   storedData={storedDataInline}
                   required={{ required: true, message: "Please input your" }}
-                  localVal={localVal}
-                  exportVal={exportVal}
+                  localValue={localVal}
+                  exportValue={exportVal}
                 />
               </NxBaseContainer>
             </NxCardContainer>
