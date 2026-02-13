@@ -176,8 +176,8 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     setSort(dataSort);
   };
 
-  const handleDetail = async (r) => { 
-    dispatch(getDetailGasUtilization({id:r?.id}));
+  const handleDetail = async (r) => {
+    dispatch(getDetailGasUtilization({id:r}));
     setModalDetail(true)
     setDataDetail(r)
     // dispatch()
