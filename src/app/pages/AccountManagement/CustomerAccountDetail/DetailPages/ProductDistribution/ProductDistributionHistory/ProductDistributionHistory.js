@@ -1,25 +1,23 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import { dateFormatting } from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ModalConfirm,
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
-import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
 import ProductDistributionDetail from "./ProductDistributionDetail";
 import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const columns = (
   search,
@@ -62,13 +60,14 @@ const columns = (
       sorter: true,
       align: "right",
       filteredValue: [search?.value1] || null,
-      ...getColumnSearchPropsPaging(
+      ...getColumnSearchPropsUseFilteredValue(
         search,
         "value1",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true,
       ),
     },
     {
@@ -78,13 +77,14 @@ const columns = (
       align: "right",
       sorter: true,
       filteredValue: [search?.value2] || null,
-      ...getColumnSearchPropsPaging(
+      ...getColumnSearchPropsUseFilteredValue(
         search,
         "value2",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true,
       ),
     },
     {
@@ -92,20 +92,23 @@ const columns = (
       title: "DESCRIPTION",
       dataIndex: "description",
       align: "left",
+      sorter: true,
       filteredValue: [search?.description] || null,
-      ...getColumnSearchPropsPaging(
+      ...getColumnSearchPropsUseFilteredValue(
         search,
         "description",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true,
       ),
     },
   ];
 };
 
 const ProductDistributionHistory = ({ id, idCustomer }) => {
+  const navigate = useNavigate();
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
   const {
@@ -138,7 +141,14 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   const location = useLocation();
   const [loadMoreSize] = useState(20);
 
-  const currentData = useMemo(() => list_productDistributionHistory, [list_productDistributionHistory]);
+  const currentData = useMemo(() => {
+    if (!Array.isArray(list_productDistributionHistory)) return [];
+
+    return list_productDistributionHistory.map(item => ({
+      ...item,
+      statusApproval: item?.statusApproval ?? "DRAFT",
+    }));
+   }, [list_productDistributionHistory]);
   const currentPagination = pagination_productDistributionHistory;
 
   const hashMore = currentData.length < (currentPagination?.totalElements || 0);
@@ -210,73 +220,33 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
     setSort(dataSort);
   };
 
-  const itemGrantAccess = [
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDetail"
-                width={20}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PRODUCT_DISTRIBUTION}
-            state={{ idPD: record.id, accountId: id, idCustomer: idCustomer }}
-          >
-            <Tooltip title="Update">
-              <div className="flex items-center h-full">
-                <SVGIcon name="IconEdit" width={20} />
-              </div>
-            </Tooltip>
-          </Link>
-        );
-      },
-    },
-    {
-      action: "Hapus",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Hapus">
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-                onClick={() => handleDelete(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
+  const itemGrantAccess = nxGetAccountActions({
+    handleView: (record, _) => handleDetail(record),
+    handleUpdate: (record, _) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PRODUCT_DISTRIBUTION,
+      {
+        state: {
+          idPD: record,
+          accountId: id,
+          idCustomer: idCustomer,
+        }
+      }
+    ),
+    handleDelete: (record, _) => handleDelete(record),
+  });
 
   // Handle Detail
   const handleDetail = (record) => {
     setModalDetail(true);
-    dispatch(getDetailPDHistory(record.id));
+    dispatch(getDetailPDHistory(record));
   };
 
   // Handle Delete
   const handleDelete = (record) => {
+    const data = currentData.find((item) => item.id === record);
     setModalDelete(true);
-    setIdData(record?.id);
-    setEffectiveData(record?.effectiveDate);
+    setIdData(data?.id);
+    setEffectiveData(data?.effectiveDate);
   };
 
   const handleDeleteOk = () => {
@@ -330,7 +300,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
     left: [],
   }));
 
-  const actionCols = useColumnActionPermission(["View", "Update", "Hapus"], itemGrantAccess, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View", "Update", "Delete"], itemGrantAccess, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
