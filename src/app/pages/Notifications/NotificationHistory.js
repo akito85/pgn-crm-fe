@@ -42,6 +42,7 @@ import {
   selectConnectionStatus,
   markAsRead,
   markAllAsRead,
+  markNotificationAsReadApi,
   removeNotification,
   clearAllNotifications,
   clearNotificationsByDirection,
@@ -83,6 +84,10 @@ const NotificationHistory = () => {
   const unreadCount = useSelector(selectUnreadCount);
   const connectionStatus = useSelector(selectConnectionStatus);
 
+  // Get current position for filtering
+  const authCurrentPosition = useSelector((state) => state.auth?.currentPosition);
+  const currentPositionId = authCurrentPosition?.positionId;
+
   // Defensive check: Ensure all notification arrays are actually arrays
   const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
   const safeBroadcastNotifications = Array.isArray(broadcastNotifications) ? broadcastNotifications : [];
@@ -111,6 +116,23 @@ const NotificationHistory = () => {
   // Get filtered notifications based on all filters
   const getFilteredNotifications = () => {
     let notifications = safeAllNotifications;
+
+    // Filter by position - MUST be first to ensure position-based security
+    // Only show notifications that either:
+    // 1. Have no TO_POSITION_ID (broadcast/non-position notifications)
+    // 2. Have a TO_POSITION_ID that matches the user's current position
+    notifications = notifications.filter(notification => {
+      const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
+
+      // If notification has a position ID, only show when user is in that exact position
+      if (notifPositionId) {
+        if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     // Filter by tab (all/unread)
     if (activeTab === 'unread') {
@@ -159,9 +181,20 @@ const NotificationHistory = () => {
   const endIndex = startIndex + pageSize;
   const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
 
-  // Calculate counts for tabs
-  const allCount = safeAllNotifications.length;
-  const unreadCountForTab = safeAllNotifications.filter(notification =>
+  // Calculate counts for tabs - use position-filtered notifications (without other filters like search/date)
+  // Position filter must be applied for accurate counts
+  const positionFilteredNotifications = safeAllNotifications.filter(notification => {
+    const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
+    if (notifPositionId) {
+      if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const allCount = positionFilteredNotifications.length;
+  const unreadCountForTab = positionFilteredNotifications.filter(notification =>
     (notification.STATUS || notification.status) !== "read"
   ).length;
 
@@ -170,8 +203,8 @@ const NotificationHistory = () => {
     setCurrentPage(1);
   }, [search, startDate, endDate, selectedNotificationType, activeTab]);
 
-  // Safe unread count
-  const safeUnreadCount = unreadCount !== undefined ? Math.min(unreadCount, unreadCountForTab) : unreadCountForTab;
+  // Use position-filtered unread count (more accurate than backend count)
+  const safeUnreadCount = unreadCountForTab;
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
@@ -364,7 +397,7 @@ const NotificationHistory = () => {
     const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
 
     if (!isRead && notificationId) {
-      dispatch(markAsRead(notificationId));
+      dispatch(markNotificationAsReadApi(notificationId));
     }
 
     // Navigate using state-based routing pattern
@@ -569,6 +602,7 @@ const NotificationHistory = () => {
   return (
   <LayoutMenu>
     <div className={transitionClass}>
+    {/*
     <div class="w-full flex flex-col justify-end items-end mb-5">
       <ButtonComponent 
         type={"submit"}
@@ -598,6 +632,7 @@ const NotificationHistory = () => {
           Setting
       </ButtonComponent>
     </div>
+    */}
     
     <div className="notification-history-page">
       {/* Page Header */}

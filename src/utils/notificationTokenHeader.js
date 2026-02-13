@@ -50,7 +50,7 @@ export const notificationTokenHeader = () => {
     if (tokenType === 'JWT' || typeof token === 'object') {
       // Handle parsed JWT object
       const userId = token?.userId || token?.id || token?.username;
-      
+
       if (userId) {
         headers["X-User-Id"] = userId;
         headers["X-Auth-Type"] = "jwt-payload";
@@ -58,7 +58,13 @@ export const notificationTokenHeader = () => {
         console.warn("[notificationTokenHeader] No user identifier found in JWT payload");
         return {};
       }
-      
+
+      // Include position ID for position-based notification filtering
+      const positionId = token?.positionId;
+      if (positionId) {
+        headers["X-Position-Id"] = String(positionId);
+      }
+
       // Also include Authorization header for JWT
       if (token?.accessToken || token?.token) {
         headers["Authorization"] = `Bearer ${token.accessToken || token.token}`;

@@ -144,16 +144,74 @@ const NotificationSettings = () => {
     setHasChanges(true);
   };
 
-  // Handle type preference change
+  // Handle type preference change (enabled/disabled)
   const handleTypePreferenceChange = (typeCode, enabled) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      typePreferences: {
-        ...prev.typePreferences,
-        [typeCode]: enabled,
-      },
-    }));
+    setLocalSettings(prev => {
+      const currentPref = prev.typePreferences[typeCode];
+
+      // If current preference is an object (enhanced format), update enabled field
+      if (typeof currentPref === 'object' && currentPref !== null) {
+        return {
+          ...prev,
+          typePreferences: {
+            ...prev.typePreferences,
+            [typeCode]: {
+              ...currentPref,
+              enabled: enabled,
+            },
+          },
+        };
+      }
+
+      // Otherwise, set as boolean (simple format)
+      return {
+        ...prev,
+        typePreferences: {
+          ...prev.typePreferences,
+          [typeCode]: enabled,
+        },
+      };
+    });
     setHasChanges(true);
+  };
+
+  // Handle type display type change
+  const handleTypeDisplayTypeChange = (typeCode, displayType) => {
+    setLocalSettings(prev => {
+      const currentPref = prev.typePreferences[typeCode];
+
+      // Convert to object format if it's currently boolean
+      const newPref = typeof currentPref === 'object' && currentPref !== null
+        ? { ...currentPref, displayType }
+        : { enabled: !!currentPref, displayType };
+
+      return {
+        ...prev,
+        typePreferences: {
+          ...prev.typePreferences,
+          [typeCode]: newPref,
+        },
+      };
+    });
+    setHasChanges(true);
+  };
+
+  // Helper: Get enabled status for a type
+  const getTypeEnabledStatus = (typeCode) => {
+    const pref = localSettings.typePreferences[typeCode];
+    if (typeof pref === 'object' && pref !== null) {
+      return pref.enabled ?? true;
+    }
+    return pref ?? true;
+  };
+
+  // Helper: Get display type value for a type
+  const getTypeDisplayTypeValue = (typeCode) => {
+    const pref = localSettings.typePreferences[typeCode];
+    if (typeof pref === 'object' && pref !== null) {
+      return pref.displayType || localSettings.displayType || 'standard';
+    }
+    return localSettings.displayType || 'standard';
   };
 
   // Save settings
@@ -355,7 +413,7 @@ const NotificationSettings = () => {
                 <BellOutlined className="mr-2 text-purple-500" />
                 <span className="font-medium">Notification Type Preferences</span>
                 <Tag color="purple" className="ml-2">
-                  {Object.values(localSettings.typePreferences).filter(Boolean).length} / {availableTypes.length} enabled
+                  {availableTypes.filter(type => getTypeEnabledStatus(type.typeCode)).length} / {availableTypes.length} enabled
                 </Tag>
               </div>
             }
@@ -365,23 +423,44 @@ const NotificationSettings = () => {
               {availableTypes.map((type) => (
                 <div
                   key={type.typeCode}
-                  className="flex flex-row justify-between items-center py-2 px-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                  className="flex flex-col py-2 px-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
                 >
-                  <div className="flex items-center">
-                    {renderIcon(type.icon, type.color)}
-                    <div>
-                      <div className="font-medium text-gray-800">{type.typeName}</div>
-                      {type.description && (
-                        <div className="text-sm text-gray-500">{type.description}</div>
-                      )}
+                  {/* Type Header with Enable Toggle */}
+                  <div className="flex flex-row justify-between items-center mb-2">
+                    <div className="flex items-center flex-1">
+                      {renderIcon(type.icon, type.color)}
+                      <div>
+                        <div className="font-medium text-gray-800">{type.typeName}</div>
+                        {type.description && (
+                          <div className="text-sm text-gray-500">{type.description}</div>
+                        )}
+                      </div>
                     </div>
+                    <NxSwitch
+                      size="md"
+                      checked={getTypeEnabledStatus(type.typeCode)}
+                      onChange={(checked) => handleTypePreferenceChange(type.typeCode, checked)}
+                      disabled={isTransitioning || isSaving}
+                    />
                   </div>
-                  <NxSwitch
-                    size="md"
-                    checked={localSettings.typePreferences[type.typeCode] ?? true}
-                    onChange={(checked) => handleTypePreferenceChange(type.typeCode, checked)}
-                    disabled={isTransitioning || isSaving}
-                  />
+
+                  {/* Display Type Selector (only visible when enabled) */}
+                  {getTypeEnabledStatus(type.typeCode) && (
+                    <div className="flex flex-row justify-between items-center pl-7 pt-2 border-t border-gray-200">
+                      <div className="text-sm text-gray-600">Display as:</div>
+                      <Select
+                        value={getTypeDisplayTypeValue(type.typeCode)}
+                        onChange={(value) => handleTypeDisplayTypeChange(type.typeCode, value)}
+                        disabled={isTransitioning || isSaving}
+                        size="small"
+                        style={{ width: 130 }}
+                        options={displayTypeOptions.map(opt => ({
+                          value: opt,
+                          label: opt.charAt(0).toUpperCase() + opt.slice(1),
+                        }))}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
               {availableTypes.length === 0 && (

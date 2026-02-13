@@ -86,11 +86,15 @@ const ViewSettings = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
-      breadcrumbName: "Settings",
+      breadcrumbName: "Payment Channel Configuration",
     },
   ];
 
@@ -695,7 +699,7 @@ const ViewSettings = () => {
         {/* <Toolbar items={itemActions} /> */}
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold uppercase">Settings List</p>
+            <p className="mt-[15px] font-bold uppercase">Payment Channel Configuration List</p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
             </div>

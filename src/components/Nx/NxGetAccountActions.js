@@ -11,6 +11,7 @@ const nxGetAccountActions = ({
   handleDownload = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
+  handleDelete = () => {},
 }) => [
   {
     action: "Download",
@@ -56,11 +57,10 @@ const nxGetAccountActions = ({
       return (
         <Tooltip
           title="View"
-          onClick={() => handleView(record.id)}
           key={`table-action-${index}`}
-        >
+          >
           <Button
-            onClick={() => handleUpdate(record.id)}
+            onClick={() => handleView(record.id)}
             type="table-action"
             directChildren
           >
@@ -186,7 +186,27 @@ const nxGetAccountActions = ({
 
       return <Fragment key={`table-action-${index}`}>{content}</Fragment>
     }
-  }
+  },
+  {
+    action: 'Delete',
+    type: 'table',
+    render: (record, _, index) => {
+      return (
+        <Tooltip
+          title="Delete"
+          key={`table-action-${index}`}
+        >
+          <Button
+            onClick={() => handleDelete(record.id)}
+            type="table-action"
+            directChildren
+          >
+            <SVGIcon name="IconDelete" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
+          </Button>
+        </Tooltip>
+      )
+    }
+  },
 ];
 
 export {
