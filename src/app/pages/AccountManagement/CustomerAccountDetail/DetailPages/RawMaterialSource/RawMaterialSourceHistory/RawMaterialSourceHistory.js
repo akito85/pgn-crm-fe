@@ -24,6 +24,7 @@ import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const columns = (
   search,
@@ -149,7 +150,14 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
   const location = useLocation();
   const [loadMoreSize] = useState(20);
 
-  const currentData = useMemo(() => list_rawMaterialSourceHistory, [list_rawMaterialSourceHistory]);
+  const currentData = useMemo(() => {
+    if (!Array.isArray(list_rawMaterialSourceHistory)) return [];
+
+    return list_rawMaterialSourceHistory.map(item => ({
+      ...item,
+      statusApproval: item?.statusApproval ?? "DRAFT",
+    }));
+  }, [list_rawMaterialSourceHistory]);
   const currentPagination = pagination_rawMaterialSourceHistory;
 
   const hashMore = currentData.length < (currentPagination?.totalElements || 0);
@@ -221,78 +229,26 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
     setSort(dataSort);
   };
 
-  const itemGrantAccess = [
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip
-            title="Detail"
-            onClick={() => handleDetail(record)}
-          >
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDetail"
-                width={20}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Update">
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconEdit"
-                width={20}
-                onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RAW_MATERIAL_SOURCE, {
-                  state: { idRMS: record.id, accountId: id, idCustomer: idCustomer },
-                })}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Delete",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip
-            title="Delete"
-            onClick={() => handleDelete(record)}
-          >
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
+  const itemGrantAccess = nxGetAccountActions({
+    handleView: (record, _) => handleDetail(record),
+    handleUpdate: (record, _) => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RAW_MATERIAL_SOURCE, {
+      state: { idRMS: record, accountId: id, idCustomer: idCustomer },
+    }),
+    handleDelete: (record, _) => handleDelete(record),
+  })
 
   // Handle Detail
   const handleDetail = (record) => {
     setModalDetail(true);
-    dispatch(getDetailRMSHistory(record.id));
+    dispatch(getDetailRMSHistory(record));
   };
 
   // Handle Delete
   const handleDelete = (record) => {
+    const data = currentData.find((item) => item.id === record);
     setModalDelete(true);
-    setIdData(record?.id);
-    setEffectiveData(record?.effectiveDate);
+    setIdData(data?.id);
+    setEffectiveData(data?.effectiveDate);
   };
 
   const handleDeleteOk = () => {

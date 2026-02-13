@@ -212,7 +212,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     left: [],
   }));
 
-  const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History", "Hapus"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History", "Delete"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,

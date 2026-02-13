@@ -189,12 +189,12 @@ const nxGetAccountActions = ({
     }
   },
   {
-    action: 'Hapus',
+    action: 'Delete',
     type: 'table',
     render: (record, _, index) => {
       return (
         <Tooltip
-          title="Hapus"
+          title="Delete"
           key={`table-action-${index}`}
         >
           <Button
