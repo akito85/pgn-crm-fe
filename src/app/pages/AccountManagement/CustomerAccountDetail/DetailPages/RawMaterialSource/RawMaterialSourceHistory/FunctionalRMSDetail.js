@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, Fragment } from "react";
 import {
   Form,
   Input,
@@ -19,6 +19,7 @@ import { getCountryRMS } from "../../../../../../../redux/slices/account_managem
 import InputComponent from "../../../../../../../components/InputComponent";
 import { getColumnSearchPropsCriteria } from "../../../../../ProductAndPromo/Product/columnTableCriteria";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const EditableCell = ({
   editing,
@@ -271,6 +272,19 @@ const FunctionalRMSDetail = ({
   const dispatch = useDispatch();
   const isEditing = (record) => record.key === editingKey;
   const dataItem = data?.length > 0 ? data?.map((item) => item?.country) : [];
+
+  const itemActions = nxGetAccountActions({
+    // nxGetAccountActions will call handlers with the record id (e.g. handleUpdate(record.id))
+    // so map the id back to the actual record object before calling edit/deleteRow
+    handleUpdate: (id) => {
+      const rec = data.find((d) => d.key === id || d.id === id);
+      if (rec) edit(rec);
+    },
+    handleDelete: (id) => {
+      const rec = data.find((d) => d.key === id || d.id === id);
+      if (rec) deleteRow(rec);
+    },
+  }).filter((action) => action.action === "Delete" || action.action === "Update");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["action"],
@@ -680,6 +694,7 @@ const FunctionalRMSDetail = ({
         align: "center",
         render: (_, record) => {
           const editable = record.key === editingKey;
+          record.statusApproval = record.statusApproval || "DRAFT";
 
           return (
             <Space className="fleex w-full justify-center my-1 gap-2">
@@ -721,38 +736,13 @@ const FunctionalRMSDetail = ({
                   </Button>
                 </>
               ) : (
-                <div className="flex w-full justify-center gap-4">
-                  <Tooltip title="Edit">
-                    <div>
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        className={
-                          editingKey ? "cursor-not-allowed" : undefined
-                        }
-                        width={20}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </div>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <div>
-                      <SVGIcon
-                        name="IconDelete"
-                        color={!editingKey ? "#D90000" : "#8D91A0"}
-                        width={20}
-                        className={
-                          !editingKey
-                            ? undefined
-                            : "disabled cursor-not-allowed"
-                        }
-                        onClick={
-                          !editingKey ? () => deleteRow(record) : undefined
-                        }
-                      />
-                    </div>
-                  </Tooltip>
-                </div>
+                <>
+                  {itemActions.map((action, index) => (
+                    <Fragment key={`table-action-${index}`}>
+                      {action.render(record, itemActions.length, index)}
+                    </Fragment>
+                  ))}
+                </>
               )}
             </Space>
           );
