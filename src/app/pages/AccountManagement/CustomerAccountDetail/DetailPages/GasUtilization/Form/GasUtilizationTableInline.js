@@ -292,7 +292,7 @@ const GasUtilizationTableInline = ({
   const itemActions = nxGetAccountActions({
     handleUpdate: (record, _) => edit(record),
     handleDelete: (record, _) => deleteRow(record),
-  }).filter(action => action.action === "Hapus" || action.action === "Update");
+  }).filter(action => action.action === "Delete" || action.action === "Update");
   
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();

@@ -88,7 +88,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
       ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_UTILIZATION,
       {
         state: {
-          id: record?.id,
+          id: record,
           accountId: idAccount,
           customerId: idCustomer,
         }
