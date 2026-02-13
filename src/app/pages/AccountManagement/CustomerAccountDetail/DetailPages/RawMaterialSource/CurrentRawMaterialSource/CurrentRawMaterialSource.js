@@ -2,11 +2,12 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
 import { getCurrentRaw } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
+import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 import { dateFormatting, renderColumn } from "../../../../../../../utils";
 import moment from "moment";
 import NxTable from '../../../../../../../components/Nx/NxTable'
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import Toolbar from "../../../../../../../components/Toolbar";
@@ -74,6 +75,7 @@ const columns = (
 };
 
 const CurrentRawMaterialSource = ({ id, idCustomer }) => {
+  const location = useLocation();
   const itemGrantAccess = [
     {
       action: "Create",
@@ -123,6 +125,15 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
   useEffect(() => {
     dispatch(getCurrentRaw(id));
   }, [dispatch, id]);
+
+  useEffect(() => {
+    // fetch granted access detail for raw-material-source so Toolbar can render actions (e.g. Create)
+    if (location?.pathname?.includes("account-standard")) {
+      dispatch(getGrantedAccessAccount('/account-management/account-standard/raw-material-source'));
+    } else {
+      dispatch(getGrantedAccessAccount('/account-management/account-onetime/raw-material-source'));
+    }
+  }, [dispatch, location]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {

@@ -5,15 +5,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
 import { dateFormatting, renderColumn } from "../../../../../../../utils";
 import { getCurrentPB } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import Toolbar from "../../../../../../../components/Toolbar";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { sorterFunction } from "../../../../../../../utils/sorterFunction";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const columns = (
   search,
@@ -73,24 +75,17 @@ const columns = (
 };
 
 const CurrentProductDistribution = ({ id, idCustomer }) => {
-  const itemGrantAccess = useMemo(() => [
-    {
-      action: "Create",
-      render: (
-        <NavLink
-          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PRODUCT_DISTRIBUTION}
-          state={{ accountId: id, idCustomer }}
-        >
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
-      ),
-    }
-  ], [id, idCustomer]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const itemGrantAccess = nxGetAccountActions({
+    handleCreate: () => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.CREATE_PRODUCT_DISTRIBUTION,
+      {
+        state: { accountId: id, idCustomer }
+      }
+    )
+  });
 
   // Selector
   const { data_current } = useSelector((state) => state.productDistribution);
@@ -118,7 +113,13 @@ const CurrentProductDistribution = ({ id, idCustomer }) => {
   // Use Effect
   useEffect(() => {
     dispatch(getCurrentPB(id));
-  }, [dispatch, id]);
+    // ensure granted access detail for product-distribution is fetched so Toolbar can render actions like Create
+    if (location?.pathname?.includes("account-standard")) {
+      dispatch(getGrantedAccessAccount('/account-management/account-standard/product-distribution'));
+    } else {
+      dispatch(getGrantedAccessAccount('/account-management/account-onetime/product-distribution'));
+    }
+  }, [dispatch, id, location]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
