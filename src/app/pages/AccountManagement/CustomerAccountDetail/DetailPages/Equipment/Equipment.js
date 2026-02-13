@@ -24,6 +24,7 @@ import NxTable from "../../../../../../components/Nx/NxTable";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
 
 const columns = (
   search,
@@ -295,7 +296,14 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
 
   const [loadMoreSize] = useState(20);
 
-  const currentData = useMemo(() => list_equipment, [list_equipment]);
+  const currentData = useMemo(() => {
+    if (!Array.isArray(list_equipment)) return [];
+
+    return list_equipment.map(item => ({
+      ...item,
+      statusApproval: item?.statusApproval ?? "DRAFT",
+    }));
+  }, [list_equipment]);
   const currentPagination = pagination_equipment;
   
   const hashMore = currentData.length < (currentPagination?.totalElements || 0);
@@ -389,7 +397,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
 }
   const handleDetail = async (r) => {
     setModalDetail(true);
-    dispatch(getDetailEquipment({ id: r?.id }));
+    dispatch(getDetailEquipment({ id: r }));
   };
 
   const handleDelete = (id) => {
@@ -424,87 +432,105 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     setIdEquipment("");
   };  
 
-  const itemActions = [
-    //action toolbar
-    {
-      action: 'Create',
-      render: (
-        <ButtonComponent
-          icon={<PlusOutlined style={{ fontSize: "20px" }} />}
-          type="submit"
-          onClick={() => {
-            setModalCreateUpdate(true);
-            setType("create");
-          }}
-        >
-          Create
-        </ButtonComponent>
-      )
+  const itemActions = nxGetAccountActions({
+    handleCreate: () => {
+      setModalCreateUpdate(true);
+      setType("create");
     },
+    handleView: (record) => {
+      handleDetail(record);
+    },
+    handleUpdate: (record) => {
+      setModalCreateUpdate(true);
+      setType("update");
+      setIdEquipment(record);
+      dispatch(getDetailEquipment({ id: record }));
+    },
+    handleDelete: (record) => {
+      handleDelete(record);
+    },
+  })
+  // const itemActions = [
+  //   //action toolbar
+  //   {
+  //     action: 'Create',
+  //     render: (
+  //       <ButtonComponent
+  //         icon={<PlusOutlined style={{ fontSize: "20px" }} />}
+  //         type="submit"
+  //         onClick={() => {
+  //           setModalCreateUpdate(true);
+  //           setType("create");
+  //         }}
+  //       >
+  //         Create
+  //       </ButtonComponent>
+  //     )
+  //   },
 
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip
-            title="Detail"
-            onClick={() => {
-              handleDetail(record);
-            }}
-          >
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={20}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Update">
-            <div className={`flex items-center h-full`}>
-              <SVGIcon
-                name="IconEdit"
-                width={20}
-                onClick={() => {
-                  setModalCreateUpdate(true);
-                  setType("update");
-                  setIdEquipment(record?.id);
-                  dispatch(getDetailEquipment({ id: record?.id }));
-                }}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
-    },
-    {
-      action: "Hapus",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Delete">
-            <div className="flex items-center h-full">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-                onClick={() => handleDelete(record?.id)}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
-    },
-  ];
+  //   // Column Action Table
+  //   {
+  //     action: "View",
+  //     type: "table",
+  //     render: (record) => {
+  //       return (
+  //         <Tooltip
+  //           title="Detail"
+  //           onClick={() => {
+  //             handleDetail(record);
+  //           }}
+  //         >
+  //           <div className="flex items-center h-full">
+  //             <SVGIcon
+  //               name="IconDetail"
+  //               color={"#0075bf"}
+  //               width={20}
+  //             />
+  //           </div>
+  //         </Tooltip>
+  //       )
+  //     }
+  //   },
+  //   {
+  //     action: "Update",
+  //     type: "table",
+  //     render: (record) => {
+  //       return (
+  //         <Tooltip title="Update">
+  //           <div className={`flex items-center h-full`}>
+  //             <SVGIcon
+  //               name="IconEdit"
+  //               width={20}
+  //               onClick={() => {
+  //                 setModalCreateUpdate(true);
+  //                 setType("update");
+  //                 setIdEquipment(record?.id);
+  //                 dispatch(getDetailEquipment({ id: record?.id }));
+  //               }}
+  //             />
+  //           </div>
+  //         </Tooltip>
+  //       )
+  //     }
+  //   },
+  //   {
+  //     action: "Hapus",
+  //     type: "table",
+  //     render: (record) => {
+  //       return (
+  //         <Tooltip title="Delete">
+  //           <div className="flex items-center h-full">
+  //             <SVGIcon
+  //               name="IconDelete"
+  //               width={20}
+  //               onClick={() => handleDelete(record?.id)}
+  //             />
+  //           </div>
+  //         </Tooltip>
+  //       )
+  //     }
+  //   },
+  // ];
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["action"],
@@ -512,7 +538,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   }));
 
   const actionCols = useColumnActionPermissionAccount(
-    ["View", "Update", "Hapus"],
+    ["View", "Update", "Delete"],
     itemActions,
     access_account
   ).map((col) => ({
