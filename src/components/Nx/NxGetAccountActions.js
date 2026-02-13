@@ -91,7 +91,7 @@ const nxGetAccountActions = ({
             <span className={"text-black ml-3"}>Update</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title={isEditable ? "Update" : ""} className="group">
+          <Tooltip title={isEditable ? "Update" : ""} key={`table-action-${index}`}>
             <Button
               onClick={() => handleUpdate(record.id)}
               disabled={!isEditable}
@@ -138,6 +138,7 @@ const nxGetAccountActions = ({
         ) : (
           <Tooltip
             title={isActive ? "Inactivate" : ""}
+            key={`table-action-${index}`}
           >
             <Checkbox
               className="action-checkbox"
@@ -170,12 +171,10 @@ const nxGetAccountActions = ({
             <span className={"text-black ml-3"}>Approval History</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Approval History">
+          <Tooltip title="Approval History" key={`table-action-${index}`}>
             <Button
-              className="flex items-center h-full p-0 b-0 disabled:border-0 bg-transparent cursor-pointer disabled:cursor-not-allowed group"
               onClick={() => handleApprovalHistory(true, record?.id)}
               type="table-action"
-              directChildren
             >
               <SVGIcon
                 name="IconLogHistory"

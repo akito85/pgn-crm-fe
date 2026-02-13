@@ -330,6 +330,7 @@ button.ant-btn.ant-btn-action:disabled:hover {
 button.ant-btn.ant-btn-table-action {
   display: flex;
   align-items: center;
+  height: 20px;
   padding: 0;
   border: none;
   background-color: transparent;
