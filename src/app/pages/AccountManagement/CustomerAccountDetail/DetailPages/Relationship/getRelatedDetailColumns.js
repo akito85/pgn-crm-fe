@@ -1,6 +1,6 @@
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
-import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
-import { sorterFunction } from "../../../../../../../utils/sorterFunction";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { sorterFunction } from "../../../../../../utils/sorterFunction";
 
 const getRelatedDetailColumns = (
   search,
