@@ -65,7 +65,7 @@ const CreateUpdateRelationship = ({
 
   // Relationship Data States
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [relatedDetailData, setRelatedDetailData] = useState([]);
+  const [relatedDetails, setRelatedDetails] = useState([]);
 
   useEffect(() => {
     if (idAccount) {
@@ -116,7 +116,7 @@ const CreateUpdateRelationship = ({
 
       // Populate Related Detail data for update mode
       if (detail.relatedDetail && detail.relatedDetail.length > 0) {
-        setRelatedDetailData(detail.relatedDetail);
+        setRelatedDetails(detail.relatedDetail);
       }
     }
   }, [data_relationshipDetail, data_approvalHierarchies, type]);
@@ -156,7 +156,8 @@ const CreateUpdateRelationship = ({
       objectId,
       startDate,
       endDate,
-    } = form.getFieldsValue();
+      remark,
+    } = form.getFieldsValue(true);
 
     const payload = {
       relationshipType,
@@ -166,7 +167,7 @@ const CreateUpdateRelationship = ({
       startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : "",
       endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : "",
       action: confirmationType,
-      remark: form.getFieldValue("remark"),
+      remark,
     };
 
     // Filter only new attachments (not existing ones)
@@ -241,7 +242,7 @@ const CreateUpdateRelationship = ({
             endDate,
             description,
             appHierId,
-          } = form.getFieldsValue();
+          } = form.getFieldsValue(true);
 
           const body = {
             id: type === "update" ? id : undefined,
@@ -275,7 +276,7 @@ const CreateUpdateRelationship = ({
         endDate,
         description,
         appHierId,
-      } = form.getFieldsValue();
+      } = form.getFieldsValue(true);
 
       const body = {
         id: type === "update" ? id : undefined,
@@ -371,7 +372,7 @@ const CreateUpdateRelationship = ({
           endDate,
           description,
           appHierId,
-        } = form.getFieldsValue();
+        } = form.getFieldsValue(true);
 
         const body = {
           id: type === "update" ? id : undefined,
@@ -419,7 +420,7 @@ const CreateUpdateRelationship = ({
   const handleClear = () => {
     if (type === "create") {
       setListDataAttachment([]);
-      setRelatedDetailData([]);
+      setRelatedDetails([]);
       form.resetFields();
       setCurrent(0);
     } else if (type === "update") {
@@ -447,9 +448,9 @@ const CreateUpdateRelationship = ({
 
         // Restore Related Detail data
         if (detail.relatedDetail && detail.relatedDetail.length > 0) {
-          setRelatedDetailData(detail.relatedDetail);
+          setRelatedDetails(detail.relatedDetail);
         } else {
-          setRelatedDetailData([]);
+          setRelatedDetails([]);
         }
       }
 
@@ -494,10 +495,8 @@ const CreateUpdateRelationship = ({
           content: (
             <RelationshipInfo
               form={form}
-              initialRelationshipType={data_relationshipDetail?.relationshipType}
-              initialRelationshipCategory={data_relationshipDetail?.relationshipCategory}
               key={`relationship-tab-0`}
-              onRelatedDetailChange={(data) => setRelatedDetailData(data)}
+              setRelatedDetails={setRelatedDetails}
             />
           )
         },
@@ -505,10 +504,10 @@ const CreateUpdateRelationship = ({
           header: "Related Detail",
           content: (
             <RelatedDetailCard
-              data={relatedDetailData}
+              relatedDetails={relatedDetails}
             />
           ),
-          hidden: !relatedDetailData.length
+          hidden: !relatedDetails.length
         }
       ],
       disabled: false,
@@ -520,7 +519,7 @@ const CreateUpdateRelationship = ({
           header: "Approval",
           content: (
             <RelationshipApproval
-              values={form.getFieldsValue()}
+              form={form}
               dataApprovalList={data_approvalHierarchies}
               dataDetailApproval={(data_approvalHierarchyDetail || []).map((item, index) => ({
                 ...item,
@@ -650,10 +649,10 @@ const CreateUpdateRelationship = ({
                 </div>
               </NxBaseContainer>
               <ConfirmationModal
-                form={"relationshipForm"}
+                form={form}
+                formId={"relationshipForm"}
                 isOpen={showConfirmModal}
                 handleCancel={() => {handleSetShowConfirmationModal(false)}}
-                values={form.getFieldsValue()}
                 approvalData={(data_approvalHierarchyDetail || []).map((item, index) => ({
                   ...item,
                   employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
@@ -666,6 +665,7 @@ const CreateUpdateRelationship = ({
                 attachmentData={listDataAttachment}
                 idAccount={idAccount}
                 configApplication={configApp.ACCOUNT_SERVICE}
+                relatedDetails={relatedDetails}
               />
             </Form>
           </Spin>

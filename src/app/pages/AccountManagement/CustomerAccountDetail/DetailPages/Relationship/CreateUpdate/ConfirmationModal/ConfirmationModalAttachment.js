@@ -1,5 +1,5 @@
-import ConfirmationModalAttachmentTable from "./ConfirmationModalAttachmentTable";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import RelationshipAttachment from "../StepContents/AttachmentForm/RelationshipAttachment";
 
 const ConfirmationModalAttachment = ({
   data = [],
@@ -9,11 +9,12 @@ const ConfirmationModalAttachment = ({
 }) => {
   return (
     <NxBaseContainer border header={"ATTACHMENT"}>
-      <ConfirmationModalAttachmentTable
+      <RelationshipAttachment
         data={data}
         dispatch={dispatch}
         service={service}
         configApplication={configApplication}
+        type={"confirmation"}
       />
     </NxBaseContainer>
   );

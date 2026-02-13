@@ -2,14 +2,14 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import RelationshipApproval from "../StepContents/ApprovalForm/RelationshipApproval";
 
 const ConfirmationModalApproval = ({
+  form,
   dataTable = [],
-  values = {},
 }) => (
   <NxBaseContainer border header={"APPROVAL"}>
     <RelationshipApproval
-      values={values}
+      form={form}
       dataDetailApproval={dataTable}
-      hideSelector
+      formView={false}
     />
   </NxBaseContainer>
 );

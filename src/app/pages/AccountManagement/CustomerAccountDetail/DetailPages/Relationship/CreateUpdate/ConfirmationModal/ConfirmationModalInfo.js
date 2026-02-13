@@ -1,23 +1,24 @@
+import { useEffect } from "react";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
-import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
+import RelationshipInfo from "../StepContents/InformationForm/RelationshipInfo";
+import RelatedDetailCard from "../StepContents/InformationForm/RelatedDetailCard";
 
 const ConfirmationModalInfo = ({
-  values = {},
+  form,
+  relatedDetails,
 }) => {
+  useEffect(() => {
+    console.log("form", form);
+  }, [])
   return (
-    <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
-      <div className="w-full grid grid-cols-3 gap-4">
-        <NxDetailText label="Relationship Type">{values.relationshipTypeName || "-"}</NxDetailText>
-        <NxDetailText label="Relationship Category">{values.relationshipCategoryName || "-"}</NxDetailText>
-        <NxDetailText label="Related Name">{values.relatedName || values.objectName || "-"}</NxDetailText>
-        <NxDetailText label="Related Number">{values.relatedNumber || values.objectValue || "-"}</NxDetailText>
-        <NxDetailText label="Start Date">{values.startDateDisplay || "-"}</NxDetailText>
-        <NxDetailText label="End Date">{values.endDateDisplay || "-"}</NxDetailText>
-      </div>
-      <div className="w-full mt-4">
-        <NxDetailText label="Description">{values.description || "-"}</NxDetailText>
-      </div>
-    </NxBaseContainer>
+    <div className="flex flex-col gap-y-4">
+      <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
+        <RelationshipInfo form={form} formView={false} />
+      </NxBaseContainer>
+      <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
+        <RelatedDetailCard relatedDetails={relatedDetails} />
+      </NxBaseContainer>
+    </div>
   );
 };
 

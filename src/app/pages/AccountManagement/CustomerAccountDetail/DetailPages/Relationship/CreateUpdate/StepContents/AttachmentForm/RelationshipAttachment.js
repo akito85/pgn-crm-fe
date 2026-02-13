@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
-import { Spin, Tooltip } from "antd";
+import { Button, Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachmentRelationship";
@@ -16,7 +16,6 @@ import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../redux/slices/product_promo/product";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
-import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -175,29 +174,29 @@ const columnAttachmentData = (
         return (
           <div className="flex justify-center align-middle gap-2 py-1">
             <Tooltip title="Preview">
-              <span className="flex justify-center">
-                <EyeOutlined
-                  style={{ fontSize: "20px", color: "#0075bf" }}
-                  onClick={() => handleShow(r)}
+              <Button
+                onClick={() => handleShow(r)}
+                disabled={!r.dataType === "exist"}
+                type="table-action"
+              >
+                <SVGIcon
+                  name="IconEye"
+                  width={20}
                 />
-              </span>
+              </Button>
             </Tooltip>
-            {type !== "detail" ? (
+            {type !== "detail" && type !== "confirmation" ? (
               <Tooltip title="Delete">
-                <span
-                  className={`flex justify-center${r.dataType === "exist" ? " cursor-not-allowed" : ""
-                    }`}
+                <Button
+                  onClick={() => handleDelete(r)}
+                  disabled={!r.dataType === "exist"}
+                  type="table-action"
                 >
                   <SVGIcon
                     name="IconDelete"
-                    color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
                     width={20}
-                    className={r.dataType === "exist" ? "disabled" : undefined}
-                    onClick={
-                      r.dataType !== "exist" ? () => handleDelete(r) : undefined
-                    }
                   />
-                </span>
+                </Button>
               </Tooltip>
             ) : null}
           </div>
@@ -220,7 +219,8 @@ const columnAttachmentData = (
     )
     : res;
 };
-const AttachmentSectionForm = ({
+
+const RelationshipAttachment = ({
   data = [],
   updateData = () => { },
   type,
@@ -230,7 +230,6 @@ const AttachmentSectionForm = ({
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
-  className,
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -304,10 +303,9 @@ const AttachmentSectionForm = ({
 
   return (
     <>
-    
       <Spin spinning={loadingDownload}>
         <div className="flex flex-col gap-y-4">
-          {type !== "detail" && type !== "preview" ? (
+          {type !== "detail" && type !== "preview" && type !== "confirmation" ? (
             <div className="flex flex-col gap-y-2">
               <span className="text-sm">
                 Attach File:
@@ -343,7 +341,7 @@ const AttachmentSectionForm = ({
               handleSearch,
               handleDelete,
               type,
-              handleShow
+              handleShow,
             )}
             usePagination={false}
           />
@@ -365,4 +363,4 @@ const AttachmentSectionForm = ({
   );
 };
 
-export default AttachmentSectionForm;
+export default RelationshipAttachment;

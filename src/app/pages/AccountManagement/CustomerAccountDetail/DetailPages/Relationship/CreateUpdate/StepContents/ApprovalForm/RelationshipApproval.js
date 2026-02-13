@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
 import TablePagination from "../../../../../../../../../components/TablePagination";
-import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
-import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.employeeDetail || [];
@@ -43,15 +42,23 @@ const expandedRowRender = (record) => {
   );
 };
 
+/**
+ * Relationship approval step component
+ * @param {{ form: import("antd").FormInstance, dataApprovalList: any[]; dataDetailApproval: any[]; formView: boolean; loading: boolean; handleSelectHierarchy: (appHierId: number, appHierOption: import("antd/lib/select").DefaultOptionType ) }} props 
+ * @returns {JSX.Element}
+ */
 const RelationshipApproval = ({
-  values = {},
+  form,
   dataApprovalList = [],
   dataDetailApproval = [],
-  handleSelectHierarchy = () => {},
   loading = false,
-  hideSelector = false, // Tambahan prop untuk hide selector di summary
-  className = "", // Tambahan prop untuk tambahan class
+  formView = true,
+  handleSelectHierarchy = () => {},
 }) => {
+  // Initialize form field states
+  const appHierLabel = Form.useWatch("appHierLabel", { form, preserve: true });
+  const appHierId = Form.useWatch("appHierId", { form });
+
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -161,7 +168,7 @@ const RelationshipApproval = ({
 
   return (
     <div className="flex flex-col gap-y-4">
-      {!hideSelector ? (
+      {formView ? (
         <>
           <Form.Item name={"appHierLabel"} hidden>
             <Input />
@@ -187,17 +194,14 @@ const RelationshipApproval = ({
           </Form.Item>
         </>
       ) : (
-        <div className="mb-4">
-          <p className="text-[13px] mb-1 text-dg-grey-dark">
-            Approval Hierarchy
-          </p>
-          <p className="text-[14px] font-medium">{values.appHierLabel}</p>
-        </div>
+        <NxDetailText label={"Approval Hierarchy"}>
+          {appHierLabel}
+        </NxDetailText>
       )}
 
       {/* Table */}
       <Spin spinning={loading}>
-        {((hideSelector && appHierDataDetail.length > 0) || values.appHierId) && (
+        {((!formView && appHierDataDetail.length > 0) || appHierId) && (
           <div className="mb-6">
             <TablePagination
               useSelect={false}

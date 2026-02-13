@@ -5,17 +5,17 @@ import NxModal from "../../../../../../../../components/Nx/NxModal";
 
 const ConfirmationModal = ({
   form,
+  formId,
   isOpen,
   handleCancel,
   type = "",
-  values = {},
   approvalData,
   attachmentData,
   configApplication,
   service,
+  relatedDetails,
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
-
   const [activeTab, setActiveTab] = useState(0);
 
   /**
@@ -59,7 +59,7 @@ const ConfirmationModal = ({
               </ButtonComponent>
             )}
             {activeTab === (tabLength - 1) && (
-              <ButtonComponent type={"submit"} form={form} htmlType={"submit"}>
+              <ButtonComponent type={"submit"} form={formId} htmlType={"submit"}>
                 {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
               </ButtonComponent>
             )}
@@ -68,13 +68,14 @@ const ConfirmationModal = ({
       ]}
     >
       <ConfirmationModalTabs
+        form={form}
         hierarchyTableData={approvalData}
         dataAttachment={attachmentData}
-        values={values}
         service={service}
         type={type}
         configApplication={configApplication}
         activeTab={activeTab}
+        relatedDetails={relatedDetails}
         setActiveTab={setActiveTab}
       />
     </NxModal>

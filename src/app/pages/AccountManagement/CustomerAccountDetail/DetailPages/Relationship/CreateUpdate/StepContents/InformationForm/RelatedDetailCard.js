@@ -1,168 +1,82 @@
-import TablePaginationNew from "../../../../../../../../../components/TablePaginationNew";
+import { useMemo, useRef, useState } from "react";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
+import { getRelatedDetailColumns } from "../../../getRelatedDetailColumns";
+import { nxApplyFixedColumns } from "../../../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const RelatedDetailCard = ({
-  data = [],
-  className = "",
+  relatedDetails = [],
 }) => {
-  // Columns for Customer type (from relatedDetail)
-   
+ 	const searchInput = useRef(null);
 
-  // Columns for Account type (CHILD_OF, PARENT_OF) - same as ModalChooseRelated accountColumns
-	const accountColumns = [
-		{
-			key: "no",
-			title: "NO",
-			width: 60,
-			align: "center",
-			render: (text, object, index) => index + 1
-		},
-		{
-			title: "ACCOUNT NUMBER",
-			dataIndex: "accountNumber",
-			key: "accountNumber",
-			width: 250,
-			sorter: (a, b) => (a.accountNumber || "").localeCompare(b.accountNumber || ""),
-		},
-		{
-			title: "ACCOUNT NAME",
-			dataIndex: "accountName",
-			key: "accountName",
-			width: 200,
-			sorter: (a, b) => (a.accountName || "").localeCompare(b.accountName || ""),
-		},
-		{
-			title: "CATEGORY",
-			dataIndex: "accountCategory",
-			key: "accountCategory",
-			width: 120,
-			sorter: (a, b) => (a.accountCategory || "").localeCompare(b.accountCategory || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "SOR",
-			dataIndex: "sor",
-			key: "sor",
-			width: 200,
-			sorter: (a, b) => (a.sor || "").localeCompare(b.sor || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "COST CENTER",
-			dataIndex: "costCenter",
-			key: "costCenter",
-			width: 150,
-			sorter: (a, b) => (a.costCenter || "").localeCompare(b.costCenter || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "METER READING CODES",
-			dataIndex: "meterReadingCode",
-			key: "meterReadingCode",
-			width: 250,
-			sorter: (a, b) => (a.meterReadingCode || "").localeCompare(b.meterReadingCode || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "CUSTOMER MANAGEMENT",
-			dataIndex: "customerManagement",
-			key: "customerManagement",
-			width: 250,
-			sorter: (a, b) => (a.customerManagement || "").localeCompare(b.customerManagement || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "CLASSIFICATION TYPE",
-			dataIndex: "classificationType",
-			key: "classificationType",
-			width: 250,
-			sorter: (a, b) => (a.classificationType || "").localeCompare(b.classificationType || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "SEGMENT",
-			dataIndex: "accountSegment",
-			key: "accountSegment",
-			width: 150,
-			sorter: (a, b) => (a.accountSegment || "").localeCompare(b.accountSegment || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "ACCOUNT GROUP TYPE",
-			dataIndex: "accountGroupType",
-			key: "accountGroupType",
-			width: 250,
-			sorter: (a, b) => (a.accountGroupType || "").localeCompare(b.accountGroupType || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "PREMISE ADDRESS",
-			dataIndex: "premiseAddress",
-			key: "premiseAddress",
-			width: 250,
-			sorter: (a, b) => (a.premiseAddress || "").localeCompare(b.premiseAddress || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "SUBDISTRICT",
-			dataIndex: "subDistrict",
-			key: "subDistrict",
-			width: 150,
-			sorter: (a, b) => (a.subDistrict || "").localeCompare(b.subDistrict || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "DISTRICT",
-			dataIndex: "district",
-			key: "district",
-			width: 150,
-			sorter: (a, b) => (a.district || "").localeCompare(b.district || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "CITY",
-			dataIndex: "city",
-			key: "city",
-			width: 150,
-			sorter: (a, b) => (a.city || "").localeCompare(b.city || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "COUNTRY",
-			dataIndex: "country",
-			key: "country",
-			width: 150,
-			sorter: (a, b) => (a.country || "").localeCompare(b.country || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "LONGITUDE",
-			dataIndex: "longitude",
-			key: "longitude",
-			width: 120,
-			sorter: (a, b) => (a.longitude || "").localeCompare(b.longitude || ""),
-			render: (text) => text || "-",
-		},
-		{
-			title: "LATITUDE",
-			dataIndex: "latitude",
-			key: "latitude",
-			width: 120,
-			sorter: (a, b) => (a.latitude || "").localeCompare(b.latitude || ""),
-			render: (text) => text || "-",
-		},
-	];
+	// Related Detail table state
+	const [searchedColumn, setSearchedColumn] = useState("");
+	const [searchText, setSearchText] = useState("");
+	const [search, setSearch] = useState({});
 
-	// Select appropriate columns based on type
-	const columns = accountColumns;
+	const [fixedColumns, setFixedColumns] = useState(() => ({
+		right: [],
+		left: [],
+	}));
+
+	/**
+	 * @param {string[]} selectedKeys
+	 * @param {() => {}} confirm
+	 * @param {string} dataIndex
+	 */
+	const handleSearch = (selectedKeys, confirm, dataIndex) => {
+		confirm();
+		setSearchText(selectedKeys[0]);
+		setSearchedColumn(dataIndex);
+		setSearch((prevState) => {
+			return {
+				...prevState,
+				[dataIndex]: selectedKeys[0],
+			};
+		});
+	};
+	
+	const baseColumns = useMemo(
+		() =>
+			getRelatedDetailColumns(
+				search,
+				searchInput,
+				searchedColumn,
+				searchText,
+				handleSearch
+			),
+		[search, searchText, searchedColumn]
+	);
+ 
+	const allColumns = useMemo(() => {
+		const columnsWithKeys = baseColumns.map((col) => ({
+			...col,
+			key: col.key || col.dataIndex || col.title,
+		}));
+		return columnsWithKeys;
+	}, [baseColumns]);
+
+	const processedColumns = useMemo(() => {
+		return nxApplyFixedColumns(allColumns, fixedColumns);
+	}, [allColumns, fixedColumns]);
+
+	const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
 	return (
-		<TablePaginationNew
+		<NxTable
+			idTable="create-update-relationship-related-detail-table"
+			dataSource={relatedDetails}
 			usePagination={false}
-			dataSource={data}
-			columns={columns}
+			columns={processedColumns}
 			tableScrolled={{ x: 3500 }}
-			className="related-detail-table"
-			rowKey={(record, index) => `related-${record?.accountNumber || index}`}
+			useInfiniteScroll={false}
+			fixedColumns={fixedColumns}
+			setFixedColumns={setFixedColumns}
+			columnDefinitions={columnDefinitions}
 		/>
 	)
 };
