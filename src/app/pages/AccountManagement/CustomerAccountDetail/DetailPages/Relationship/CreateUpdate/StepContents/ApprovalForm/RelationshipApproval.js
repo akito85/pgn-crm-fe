@@ -2,9 +2,9 @@ import { FilterOutlined } from "@ant-design/icons";
 import { Form, Input, Select, Spin } from "antd";
 import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
-import SelectComponent from "../../../../../../../components/SelectComponent";
-import TablePagination from "../../../../../../../components/TablePagination";
-import NxPanel from "../../../../../../../components/Nx/NxPanel";
+import SelectComponent from "../../../../../../../../../components/SelectComponent";
+import TablePagination from "../../../../../../../../../components/TablePagination";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.employeeDetail || [];
@@ -42,24 +42,27 @@ const expandedRowRender = (record) => {
   );
 };
 
+/**
+ * Relationship approval step component
+ * @param {{ form: import("antd").FormInstance, dataApprovalList: any[]; dataDetailApproval: any[]; formView: boolean; loading: boolean; handleSelectHierarchy: (appHierId: number, appHierOption: import("antd/lib/select").DefaultOptionType ) }} props 
+ * @returns {JSX.Element}
+ */
 const RelationshipApproval = ({
   form,
-  approvalObj = {},
-  handleApprovalObj = () => { },
   dataApprovalList = [],
   dataDetailApproval = [],
-  handleDetailApproval = () => { },
   loading = false,
-  hideSelector = false, // Tambahan prop untuk hide selector di summary
-  approvalHierarchyLabel = "", // Tambahan prop untuk display selected hierarchy name
-  className = "", // Tambahan prop untuk tambahan class
+  formView = true,
+  handleSelectHierarchy = () => {},
 }) => {
+  // Initialize form field states
+  const appHierLabel = Form.useWatch("appHierLabel", { form, preserve: true });
+  const appHierId = Form.useWatch("appHierId", { form });
+
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
-
-  const isApprovalId = form?.getFieldsValue("appHierId");
 
   // Map data from props to local state for table display
   useEffect(() => {
@@ -163,72 +166,57 @@ const RelationshipApproval = ({
     setSearchedColumn(dataIndex);
   };
 
-  // Handle selection change to auto-load data
-  const handleHierarchyChange = (hierarchyId) => {
-    form.setFieldsValue({ appHierId: hierarchyId });
-    handleApprovalObj(hierarchyId, "appHierId");
-    // Call parent handler to fetch detail approval data
-    handleDetailApproval(hierarchyId);
-  };
-
   return (
-    <div className={className}>
-      <NxPanel title={"APPROVAL"} removeBottomMargin>
-        {!hideSelector ? (
-          <div className="w-full grid grid-cols-1 gap-2">
-            <div className="w-1/3">
-              <Form.Item
-                label="Approval Hierarchy"
-                name="appHierId"
-                rules={[
-                  {
-                    message: "Please input your Approval Hierarchy",
-                    required: true,
-                  },
-                ]}
-                className="pb-6"
-              >
-                <SelectComponent onChange={handleHierarchyChange}>
-                  {dataApprovalList.map((data, index) => (
-                    <Select.Option key={index} value={data?.appHierId}>
-                      {data?.approvalName}
-                    </Select.Option>
-                  ))}
-                </SelectComponent>
-              </Form.Item>
-            </div>
-          </div>
-        ) : (
-          approvalHierarchyLabel && (
-            <div className="mb-4">
-              <p className="text-[13px] mb-1 text-dg-grey-dark">
-                Approval Hierarchy
-              </p>
-              <p className="text-[14px] font-medium">{approvalHierarchyLabel}</p>
-            </div>
-          )
-        )}
+    <div className="flex flex-col gap-y-4">
+      {formView ? (
+        <>
+          <Form.Item name={"appHierLabel"} hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Approval Hierarchy"
+            name="appHierId"
+            rules={[
+              {
+                message: "Please input your Approval Hierarchy",
+                required: true,
+              },
+            ]}
+            className="no-margin-form w-1/3"
+          >
+            <SelectComponent onChange={handleSelectHierarchy}>
+              {dataApprovalList.map((data, index) => (
+                <Select.Option key={index} value={data?.appHierId}>
+                  {data?.approvalName}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+        </>
+      ) : (
+        <NxDetailText label={"Approval Hierarchy"}>
+          {appHierLabel}
+        </NxDetailText>
+      )}
 
-        {/* Table */}
-        <Spin spinning={loading}>
-          {((hideSelector && appHierDataDetail.length > 0) ||
-            (isApprovalId && isApprovalId.appHierId !== undefined)) && (
-              <div className="mb-6">
-                <TablePagination
-                  useSelect={false}
-                  usePagination={false}
-                  dataSource={appHierDataDetail}
-                  columns={columns}
-                  expandable={{
-                    expandedRowRender,
-                    defaultExpandAllRows: true,
-                    columnWidth: 50,
-                  }}
-                />
-              </div>
-            )}
-        </Spin>
-      </NxPanel>
+      {/* Table */}
+      <Spin spinning={loading}>
+        {((!formView && appHierDataDetail.length > 0) || appHierId) && (
+          <div className="mb-6">
+            <TablePagination
+              useSelect={false}
+              usePagination={false}
+              dataSource={appHierDataDetail}
+              columns={columns}
+              expandable={{
+                expandedRowRender,
+                defaultExpandAllRows: true,
+                columnWidth: 50,
+              }}
+            />
+          </div>
+        )}
+      </Spin>
     </div>
   );
 };

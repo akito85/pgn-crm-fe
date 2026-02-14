@@ -330,6 +330,7 @@ button.ant-btn.ant-btn-action:disabled:hover {
 button.ant-btn.ant-btn-table-action {
   display: flex;
   align-items: center;
+  height: 20px;
   padding: 0;
   border: none;
   background-color: transparent;
@@ -797,6 +798,11 @@ td.ant-table-column-sort {
 span.ant-tree-title {
   color: #000 !important;
 }
+
+.ant-form-item-label {
+  padding-bottom: 4px !important;
+}
+
 .ant-form-item-label
   > label.ant-form-item-required:not(
     .ant-form-item-required-mark-optional

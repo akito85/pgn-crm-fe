@@ -21,6 +21,9 @@ import DetailText from '../../../../../../../components/DetailText'
 import moment from 'moment'
 import { createUpdateGasUtilization, getDetailGasUtilization, getDdlUtilizationName } from '../../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice'
 import ModalBack from '../../../../../../../components/Modal/ModalBack'
+import NxBaseContainer from '../../../../../../../components/Nx/NxBaseContainer'
+import NxCardContainer from '../../../../../../../components/Nx/NxCardContainer'
+import NxModal from '../../../../../../../components/Nx/NxModal'
 
 const GasUtilizationForm = ({type}) => {
   const { data_detail, ddlUtilizationName } = useSelector(
@@ -30,8 +33,8 @@ const GasUtilizationForm = ({type}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const accountId = location?.state?.accountId;
-  const customerId = location?.state?.customerId;
+  const accountId = location?.state?.accountId ? location?.state?.accountId : location?.state?.idAccount;
+  const customerId = location?.state?.customerId ? location?.state?.customerId : location?.state?.idCustomer;
   const idUpdate = location?.state?.id;
 
   const [dataTableGasUtilization, setDataTableGasUtilization] = useState([]);
@@ -39,10 +42,11 @@ const GasUtilizationForm = ({type}) => {
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-
+  const [formCreate] = Form.useForm();
 
   const [form] = Form.useForm();
 
+  useEffect(() => console.log("location state:", location.state), [location.state]);
 
   useEffect(() => {
     if(type === 'update'){
@@ -164,86 +168,72 @@ const GasUtilizationForm = ({type}) => {
             type={'standard'}
           />
 
-          <BaseContainer header="GAS UTILIZATION INFORMATION">
-            <Form id={"form"} layout='vertical' form={form} onFinish={handleSave}>
-              <div className={"grid grid-cols-1 w-full gap-x-6"}>
-                <Form.Item
-                  name={"effectiveDate"}
-                  label={"Effective Date"}
-                  rules={[
-                    {
-                      message: requiredMessage("Effective Date!"),
-                      required: true,
-                    },
-                  ]}
+          <div className="flex flex-col gap-4 mt-4">
+            <NxCardContainer border header={"GAS UTILIZATION INFORMATION"}>
+              <NxBaseContainer border>
+                <Form id={"form"} layout='vertical' form={form} onFinish={handleSave}>
+                  <div className={"grid grid-cols-1 w-full gap-x-6"}>
+                    <Form.Item
+                      name={"effectiveDate"}
+                      label={"Effective Date"}
+                      rules={[
+                        {
+                          message: requiredMessage("Effective Date!"),
+                          required: true,
+                        },
+                      ]}
+                    >
+                    <DateComponent disabled={type === "update"} />
+                    </Form.Item>
+                    <Form.Item name={"description"} label={"Description"}>
+                      <InputComponent
+                        type="textarea"
+                        value={"description"}
+                      />
+                    </Form.Item>
+                  </div>
+                </Form>
+              </NxBaseContainer>
+            </NxCardContainer>
+
+            <NxCardContainer border header={"GAS UTILIZATION DETAIL"}>
+              <NxBaseContainer border>
+                <GasUtilizationTableInline
+                  dataTableGasUtilization =  {dataTableGasUtilization}
+                  setDataTableGasUtilization = {setDataTableGasUtilization}
+                  dispatch={dispatch}
+                  ddlUtilizationName={ddlUtilizationName}
+                  setIsEdit={setIsEdit}
+                />
+              </NxBaseContainer>
+            </NxCardContainer>
+
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <ButtonComponent
+                  type={"menu"}
+                  onClick={()=>{navigate(-1)}}
                 >
-                  <DateComponent disabled={type === "update"} />
-                </Form.Item>
-                <Form.Item name={"description"} label={"Description"}>
-                  <InputComponent
-                    type="textarea"
-                    value={"description"}
-                    // onChange={(e) => setDescription(e.target.value)}
-                  />
-                </Form.Item>
+                  Cancel
+                </ButtonComponent>
+                              <div className="flex w-full justify-end gap-x-4">
+                  <ButtonComponent
+                    onClick={handleResetClear}
+                    type={"reject"}
+                    icon={<SVGIcon name="IconButtonClear" width={20} />}
+                  >
+                    { type === "update" ? "Reset" : "Clear" }
+                  </ButtonComponent>
+                  <ButtonComponent type="submit" htmlType={"submit"} form={"form"} disabled={isEdit}>
+                    Save
+                  </ButtonComponent>
+                </div>
               </div>
-            </Form>
-          </BaseContainer> 
-
-          <BaseContainer header="GAS UTILIZATION DETAIL">
-            <GasUtilizationTableInline
-              dataTableGasUtilization =  {dataTableGasUtilization}
-              setDataTableGasUtilization = {setDataTableGasUtilization}
-              dispatch={dispatch}
-              ddlUtilizationName={ddlUtilizationName}
-              setIsEdit={setIsEdit}
-            />
-          </BaseContainer> 
-
-          <div className={"w-full my-5 flex"}>
-            <Link
-              state={{
-                section: "Gas Utilization",
-                idAccount: accountId,
-                idCustomer: customerId,
-              }}
-            >
-              <ButtonComponent
-                icon={
-                  <LeftOutlined style={{ fontSize: "24px", color: "#fff" }} />
-                }
-                type="submit"
-                onClick={() => setModalBack(true)}
-                disabled={isEdit}
-                // onClick={() => navigate(-1)}
-              >
-                Back
-              </ButtonComponent>
-            </Link>
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleResetClear}
-                disabled={isEdit}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent type="submit" htmlType={"submit"} form={"form"} disabled={isEdit}>
-                Save
-              </ButtonComponent>
-            </div>
+            </NxBaseContainer>
           </div>
 
           {/* Modal Confirmation */}
-          <ModalCustom
+          <NxModal
             header={`CONFIRMATION`}
             isOpen={openConfirmation}
             type={"confirmation"}
@@ -270,26 +260,24 @@ const GasUtilizationForm = ({type}) => {
               </div>
             }
           >
-            <div>
-              <div className="text-primary text-xs font-bold uppercase py-4">
-                Gas Utilization Information
-              </div>
-              <div className='w-full grid grid-cols-3'>
-                <DetailText label={'Effective Date'}>{moment(body?.body?.effectiveDate).format(dateFormatting.date)}</DetailText>
-                <DetailText label={'Description'}>{body?.body?.description}</DetailText>
-              </div>
-              <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-                {"Gas Utilization Detail"}
-              </p>
-              <GasUtilizationTableInline
-                dataTableGasUtilization =  {dataTableGasUtilization}
-                setDataTableGasUtilization = {setDataTableGasUtilization}
-                dispatch={dispatch}
-                ddlUtilizationName={ddlUtilizationName}
-                type={"preview"}
-              />
+            <div className="flex flex-col gap-4 p-4">
+              <NxBaseContainer border header={"Gas Utilization Information"}>
+                <div className='w-full grid grid-cols-3'>
+                  <DetailText label={'Effective Date'}>{moment(body?.body?.effectiveDate).format(dateFormatting.date)}</DetailText>
+                  <DetailText label={'Description'}>{body?.body?.description}</DetailText>
+                </div>
+              </NxBaseContainer>
+              <NxBaseContainer border header={"Gas Utilization Detail"}>
+                <GasUtilizationTableInline
+                  dataTableGasUtilization =  {dataTableGasUtilization}
+                  setDataTableGasUtilization = {setDataTableGasUtilization}
+                  dispatch={dispatch}
+                  ddlUtilizationName={ddlUtilizationName}
+                  type={"preview"}
+                />
+              </NxBaseContainer>
             </div>
-          </ModalCustom>
+          </NxModal>
 
           {/* Modal Back */}
           <ModalBack

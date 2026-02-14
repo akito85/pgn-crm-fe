@@ -6,7 +6,7 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
-import { getRelatedDetailColumns } from "./getRelatedDetailColumns";
+import { getRelatedDetailColumns } from "../getRelatedDetailColumns";
 
 const RelationshipDetailInfo = ({ dataDetail = {} }) => {
   const searchInput = useRef(null);
@@ -22,9 +22,6 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
   }));
 
   const listRelatedDetail = dataDetail?.relatedDetail || [];
-
-  // Calculate pagination for infinite scroll
-  const totalElements = listRelatedDetail.length;
 
   /**
    * @param {string[]} selectedKeys
@@ -82,10 +79,6 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
       key: `related-${item.id || item.accountNumber || index}`,
     }));
   }, [listRelatedDetail]);
-
-  useEffect(() => {
-    console.log("dataSourceWithKeys", dataSourceWithKeys)
-  }, [dataSourceWithKeys])
 
   return (
     <div className="flex flex-col gap-y-4">

@@ -11,6 +11,13 @@ const initialState = {
   loading: false,
   message: "",
   ddlUtilizationName: [],
+  list_gasUtilizationHistory: [],
+  pagination_gasUtilizationHistory: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
 };
 
 // Get list pagination address
@@ -32,6 +39,26 @@ export const getListGasUtilizationHistory = createAsyncThunk(
           back: false,
         })
       );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getListGasUtilizationHistoryNew = createAsyncThunk(
+  "GET_LIST_GAS_UTILIZATION",
+  async ({ id, page, pageSize, search, sort, isLoadMore }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "effectiveDate~desc" : sort;
+      
+        const url = `/v1/dbs/api/account-detail/gas-utilization/view-paging/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await accountManagementService.getPagination(url);
+      return {
+        ...response.data,
+        isLoadMore
+      };
+    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -174,6 +201,51 @@ const accountGasUtilizationSlice = createSlice({
       state.loading = false;
     },
 
+    // Get All Gas Utilization History New
+    [getListGasUtilizationHistoryNew.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getListGasUtilizationHistoryNew.rejected]: (state, action) => {
+      state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_gasUtilizationHistory = [];
+        state.pagination_gasUtilizationHistory = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
+    },
+    [getListGasUtilizationHistoryNew.fulfilled]: (state, action) => {
+      state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_gasUtilizationHistory.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_gasUtilizationHistory = [
+            ...state.list_gasUtilizationHistory,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_gasUtilizationHistory = result;        
+      }
+
+      state.pagination_gasUtilizationHistory = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
+    },
+
     // Get Current
     [getCurrentGasUtilization.pending]: (state) => {
       state.loading = true;
@@ -182,8 +254,8 @@ const accountGasUtilizationSlice = createSlice({
       state.loading = false;
     },
     [getCurrentGasUtilization.fulfilled]: (state, action) => {
-      state.data_current = action.payload;
       state.loading = false;
+      state.data_current = action.payload;
     },
 
     // Get Detail Gas Utilization History
