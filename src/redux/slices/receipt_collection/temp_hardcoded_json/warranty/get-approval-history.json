@@ -1,0 +1,89 @@
+{
+  "code": 200,
+  "status": "OK",
+  "message": "Success",
+  "data": {
+    "dataApprover": {
+      "HOLD": [
+        {
+          "name": "User Maker",
+          "role": "Maker",
+          "status": "SUBMIT",
+          "date": "2023-10-27T10:00:00"
+        },
+        {
+          "name": "User Checker",
+          "role": "Checker",
+          "status": "APPROVE",
+          "date": "2023-10-27T11:00:00"
+        }
+      ],
+      "RELEASE": [
+        {
+          "name": "User Maker",
+          "role": "Maker",
+          "status": "SUBMIT",
+          "date": "2023-10-28T10:00:00"
+        },
+        {
+          "name": "User Checker",
+          "role": "Checker",
+          "status": "APPROVE",
+          "date": "2023-10-28T11:00:00"
+        }
+      ],
+      "REFUND": [
+        {
+          "name": "User Maker",
+          "role": "Maker",
+          "status": "SUBMIT",
+          "date": "2023-10-29T10:00:00"
+        },
+        {
+          "name": "User Checker",
+          "role": "Checker",
+          "status": "REJECT",
+          "date": "2023-10-29T11:00:00"
+        }
+      ]
+    },
+    "dataHistory": {
+      "HOLD": [
+        {
+          "id": 3,
+          "status": "SUBMIT",
+          "hierarchy": "Hierarchy 1",
+          "name": "User Maker",
+          "role": "Maker",
+          "taskDate": "2023-10-27T10:00:00",
+          "actionDate": "2023-10-27T10:05:00",
+          "description": "Request Hold"
+        }
+      ],
+      "RELEASE": [
+        {
+          "id": 4,
+          "status": "SUBMIT",
+          "hierarchy": "Hierarchy 1",
+          "name": "User Maker",
+          "role": "Maker",
+          "taskDate": "2023-10-28T10:00:00",
+          "actionDate": "2023-10-28T10:05:00",
+          "description": "Request Release"
+        }
+      ],
+      "REFUND": [
+        {
+          "id": 5,
+          "status": "REJECTED",
+          "hierarchy": "Hierarchy 2",
+          "name": "User Checker",
+          "role": "Checker",
+          "taskDate": "2023-10-29T11:00:00",
+          "actionDate": "2023-10-29T11:05:00",
+          "description": "Rejected due to insufficient data"
+        }
+      ]
+    }
+  }
+}

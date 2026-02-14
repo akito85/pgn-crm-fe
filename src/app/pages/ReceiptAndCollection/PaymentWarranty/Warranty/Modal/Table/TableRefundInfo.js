@@ -1,11 +1,6 @@
-import Highlighter from "react-highlight-words";
 import { InputNumber } from "antd";
-import moment from "moment";
-import { dateFormatting } from "../../../../../../../utils";
-import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
-import { Form } from "antd";
 import DateComponent from "../../../../../../../components/DateComponent";
-import InputComponent from "../../../../../../../components/InputComponent";
+import { columnsWarrantyInfo } from "./TableWarrantyInfo";
 
 export const columnsRefundInfo = (
   page = 1,
@@ -17,145 +12,55 @@ export const columnsRefundInfo = (
   refundAmountData = {},
   handleRefundAmountChange = () => {},
   refundDateData = {},
-  handleRefundDateChange = () => {}
-) => [
-  {
-    key: "no",
-    title: "NO",
-    isClassification: true,
-    width: 60,
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  },
-  {
-    key: "paymentWarrantyCode",
-    title: "PAYMENT WARRANTY CODE",
-    dataIndex: "paymentWarrantyCode",
-    width: 120,
-    sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
-    ...getColumnSearchPropsPaging(
-      "paymentWarrantyCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    onFilter: (value, record) =>
-      record["paymentWarrantyCode"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
-  },
-  {
-    key: "areaCode",
-    title: "AREA CODE",
-    dataIndex: "areaCode",
-    width: 120,
-    sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
-    ...getColumnSearchPropsPaging(
-      "areaCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    onFilter: (value, record) =>
-      record["areaCode"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
-  },
-  {
-    key: "areaName",
-    title: "AREA NAME",
-    dataIndex: "areaName",
-    width: 120,
-    sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
-    ...getColumnSearchPropsPaging(
-      "areaName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    onFilter: (value, record) =>
-      record["areaName"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
-  },
-  {
-    key: "customerId",
-    title: "CUSTOMER ID",
-    dataIndex: "customerId",
-    width: 120,
-    sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
-    ...getColumnSearchPropsPaging(
-      "customerId",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    onFilter: (value, record) =>
-      record["customerId"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
-  },
-  {
-    key: "date",
-    title: "DATE",
-    dataIndex: "date",
-    width: 120,
-    sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
-    ...getColumnSearchPropsPaging(
-      "date",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    onFilter: (value, record) =>
-      record["date"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
-    render: (_, record) => (
-      <DateComponent
-        style={{ width: '100%' }}
-        value={refundDateData[record.key]}
-        onChange={(val) => handleRefundDateChange(val, record.key)}
-        controls={false}
-      />
-    )
-  },
-  {
-    key: "refundAmount",
-    title: "REFUND AMOUNT",
-    dataIndex: "refundAmount",
-    width: 120,
-    sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
-    ...getColumnSearchPropsPaging(
-      "refundAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    onFilter: (value, record) =>
-      record["refundAmount"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
-    render: (_, record) => (
-      <InputNumber
-        style={{ width: '100%' }}
-        formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-        parser={value => value.replace(/\$\s?|(\.*)/g, '')}
-        value={refundAmountData[record.key]}
-        onChange={(val) => handleRefundAmountChange(val, record.key)}
-        controls={false}
-      />
-    )
-  }
-];
+  handleRefundDateChange = () => {},
+  disabled = false
+) => {
+  const warrantyCols = columnsWarrantyInfo(
+    page,
+    pageSize,
+    searchInput,
+    searchedColumn,
+    searchText,
+    handleSearch
+  ).map(col => ({
+    ...col,
+    fixed: false
+  }));
+
+  return [
+    ...warrantyCols,
+    {
+      key: "date",
+      title: "DATE",
+      dataIndex: "date",
+      width: 150,
+      fixed: "right",
+      render: (_, record) => (
+        <DateComponent
+          style={{ width: '100%' }}
+          value={refundDateData[record.key]}
+          onChange={(val) => handleRefundDateChange(val, record.key)}
+          disabled={disabled}
+        />
+      )
+    },
+    {
+      key: "refundAmount",
+      title: "REFUND AMOUNT",
+      dataIndex: "refundAmount",
+      width: 150,
+      fixed: "right",
+      render: (_, record) => (
+        <InputNumber
+          style={{ width: '100%' }}
+          formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+          parser={value => value.replace(/\$\s?|(\.*)/g, '')}
+          value={refundAmountData[record.key]}
+          onChange={(val) => handleRefundAmountChange(val, record.key)}
+          controls={false}
+          disabled={disabled}
+        />
+      )
+    }
+  ];
+};
