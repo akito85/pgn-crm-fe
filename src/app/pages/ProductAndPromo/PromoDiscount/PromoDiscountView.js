@@ -4,7 +4,6 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
 import { Spin } from "antd";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import { itemsActionView, TablePromoView } from "./Table/TablePromoView";
@@ -22,6 +21,8 @@ import ModalInactivateWithHierarchy from "../../../../components/Modal/ModalInac
 import Toolbar from "../../../../components/Toolbar";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PromoDiscountView = () => {
   // Selector
@@ -48,9 +49,6 @@ const PromoDiscountView = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
-  // Use Effect
-  const access = useGrantAccessHooks();
-  // console.log(access, "access");
   useEffect(() => {
     dispatch(
       getAllPromoPaginate({
@@ -209,34 +207,8 @@ const PromoDiscountView = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar
-          items={itemsActionView(
-            handleInactive,
-            handleApprovalHistory,
-            handleDownload
-          )}
-        />
-        {/* <div className="w-full flex justify-end gap-[20px]">
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonDownload" width={24} />}
-            type="submit"
-            onClick={handleDownload}
-          >
-            Download List
-          </ButtonComponent>
-
-          <NavLink to={PRODUCT_PROMO_ROUTES.CREATE_PROMO_DISCOUNT}>
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-            >
-              Create Promo
-            </ButtonComponent>
-          </NavLink>
-        </div> */}
-
-        <BaseContainer header={"PROMO LIST"}>
-          <div className={" w-full"}>
+        <NxCardContainer header={"PROMO LIST"}>
+          <NxBaseContainer border>
             <TablePaginationNew
               dataSource={data?.result || []}
               columns={[
@@ -268,8 +240,8 @@ const PromoDiscountView = () => {
               onSort={onSort}
               tableScrolled={{ y: 525, x: 3200 }}
             />
-          </div>
-        </BaseContainer>
+          </NxBaseContainer>
+        </NxCardContainer>
 
         {/* Modal Inactive */}
         {modalInactive ? (
