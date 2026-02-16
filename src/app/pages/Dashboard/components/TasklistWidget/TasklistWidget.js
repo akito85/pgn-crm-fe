@@ -109,8 +109,7 @@ const TasklistWidget = () => {
 
   return (
     <div className="flex flex-col gap-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">My Tasks</h3>
+      <div className="flex justify-end items-center">
         <Space>
           <Button
             icon={<ReloadOutlined />}

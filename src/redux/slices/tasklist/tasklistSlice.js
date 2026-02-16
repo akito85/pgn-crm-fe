@@ -23,10 +23,26 @@ export const tasklistSlice = createApi({
         api
       ) => {
         try {
+          // Parse sort parameter (format: "field~order")
+          const [sortBy = "createdAt", sortOrderLower = "desc"] = sort.split("~");
+          const sortOrder = sortOrderLower.toUpperCase();
+
+          // Get userId from token
+          const token = JSON.parse(
+            localStorage.getItem("token") || sessionStorage.getItem("token") || "{}"
+          );
+          const userId = token?.userId || token?.id || token?.username;
+
+          if (!userId) {
+            throw new Error("User ID not found in token");
+          }
+
           const params = new URLSearchParams({
+            userId,        // Add userId to query params
             page,
             size,
-            sort,
+            sortBy,
+            sortOrder,
           });
 
           // Add filters
@@ -43,14 +59,27 @@ export const tasklistSlice = createApi({
           const headers = notificationTokenHeader();
           const config = { headers, withCredentials: true };
 
+          console.log('[TasklistSlice] Request URL:', url);
+          console.log('[TasklistSlice] Headers:', headers);
+          console.log('[TasklistSlice] UserId:', userId);
+
           const result = await axios.get(url, config);
+          console.log('[TasklistSlice] Success response:', result.data);
           return { data: result.data };
         } catch (error) {
+          console.error('[TasklistSlice] Error details:', {
+            status: error?.response?.status,
+            statusText: error?.response?.statusText,
+            data: error?.response?.data,
+            message: error?.message,
+            config: error?.config
+          });
+
           const errorBody = {
             action: "getTasklistPagination",
             title: "Failed to load tasklist",
             description:
-              error?.response?.data?.message + ". Please try again.",
+              error?.response?.data?.message || error?.message || "Please try again.",
             code: error?.response?.status,
             back: false,
           };

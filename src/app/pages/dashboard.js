@@ -1,7 +1,8 @@
 import React from "react";
-import { Card, Row, Col } from "antd";
+import { Row, Col } from "antd";
 import BreadCrumb from "../../components/BreadCrumb";
 import LayoutMenu from "../../components/SidebarMenu/LayoutMenu";
+import NxBaseContainer from "../../components/Nx/NxBaseContainer";
 import TasklistWidget from "./Dashboard/components/TasklistWidget/TasklistWidget";
 
 const Dashboard = () => {
@@ -9,12 +10,12 @@ const Dashboard = () => {
 	return (
 		<LayoutMenu>
 			<BreadCrumb pageName={["Dashboard"]} />
-			<div className="dashboard-container p-4">
+			<div className="dashboard-container">
 				<Row gutter={[16, 16]}>
 					<Col span={24}>
-						<Card title="My Tasks" bordered={false}>
+						<NxBaseContainer header="My Tasks">
 							<TasklistWidget />
-						</Card>
+						</NxBaseContainer>
 					</Col>
 				</Row>
 			</div>
