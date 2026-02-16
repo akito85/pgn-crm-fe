@@ -28,8 +28,6 @@ const PromoDiscountTable = ({
     left: [],
   }));
 
-  const loadMoreSize = 20;
-
   const itemActions = nxGetAccountActions(
     {
       handleInactivate: handleInactive,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useMemo, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -31,7 +31,7 @@ const PromoDiscountView = () => {
   const searchInput = useRef(null);
 
   // State
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -69,7 +69,10 @@ const PromoDiscountView = () => {
         isLoadMore: false,
       })
     );
+    
+    setPage(0);
   }, [dispatch, search, sort]);
+
   // Breadcrumbs
   const routes = [
     {
