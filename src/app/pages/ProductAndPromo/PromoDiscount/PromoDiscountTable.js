@@ -5,6 +5,8 @@ import NxTable from "../../../../components/Nx/NxTable";
 import { TablePromoView, itemsActionView } from "./Table/TablePromoView";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
+import { useNavigate } from "react-router-dom";
+import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 
 const PromoDiscountTable = ({
   data = [],
@@ -23,6 +25,8 @@ const PromoDiscountTable = ({
   handleSearch = () => {},
   loading = false,
 }) => {
+  const navigate = useNavigate();
+
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["status", "statusApproval", "action"],
     left: [],
@@ -30,6 +34,8 @@ const PromoDiscountTable = ({
 
   const itemActions = nxGetAccountActions(
     {
+      handleCreate: () => navigate(PRODUCT_PROMO_ROUTES.CREATE_PROMO_DISCOUNT),
+      handleUpdate: (id) => navigate(PRODUCT_PROMO_ROUTES.UPDATE_PROMO_DISCOUNT, { state: { id } }),
       handleInactivate: handleInactive,
       handleApprovalHistory,
       handleDownload,
