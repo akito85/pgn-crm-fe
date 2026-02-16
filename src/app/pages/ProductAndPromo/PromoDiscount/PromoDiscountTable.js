@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -37,13 +37,12 @@ const PromoDiscountTable = ({
   );
 
   const actionCols = useColumnActionPermission(
-    ["view", "Update", "Activate", "History"],
+    ["View", "Update", "Activate", "History"],
     itemActions,
-    "view",
-    "table"
+    "View",
   ).map((col) => ({
     ...col,
-    width: 70,
+    width: 150,
     align: "center",
   }));
 
@@ -80,7 +79,7 @@ const PromoDiscountTable = ({
 
   return (
     <div className="flex flex-col gap-y-4">
-      <Toolbar items={itemActions} type="detail" />
+      <Toolbar items={itemActions} />
       <NxTable
         idTable="promo-discount-table"
         dataSource={data}
