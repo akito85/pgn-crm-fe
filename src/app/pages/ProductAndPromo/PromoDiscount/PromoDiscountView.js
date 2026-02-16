@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { Spin } from "antd";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
-import { itemsActionView, TablePromoView } from "./Table/TablePromoView";
+import PromoDiscountTable from "./PromoDiscountTable";
 import {
   downloadPromo,
   getAllPromoPaginate,
@@ -16,17 +15,14 @@ import {
   inactivePromo,
 } from "../../../../redux/slices/product_promo/promoSlice";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import ModalHistory from "../../../../components/Modal/ModalHistory";
-import ModalInactivateWithHierarchy from "../../../../components/Modal/ModalInactivateWithHierarchy";
-import Toolbar from "../../../../components/Toolbar";
-import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import NxHistoryModal from "../../../../components/Nx/NxHistoryModal";
+import NxApproveOrRejectModal from "../../../../components/Nx/NxApproveOrRejectModal";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PromoDiscountView = () => {
   // Selector
-  const { data, data_ApprovalHistory, loading } = useSelector(
+  const { list_promo, pagination_promo, data_ApprovalHistory, loading } = useSelector(
     (state) => state.promo
   );
 
@@ -36,7 +32,7 @@ const PromoDiscountView = () => {
 
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
@@ -49,16 +45,31 @@ const PromoDiscountView = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
+  // Memoized data for infinite scroll
+  const currentData = useMemo(() => list_promo, [list_promo]);
+  const currentPagination = pagination_promo;
+  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!currentData || currentData.length === 0) return [];
+
+    return currentData.map((item, index) => ({
+      ...item,
+      key: `${item.id}-${index}`,
+    }));
+  }, [currentData]);
+
   useEffect(() => {
     dispatch(
       getAllPromoPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
+        isLoadMore: false,
       })
     );
-  }, [dispatch, search, page, pageSize, sort]);
+  }, [dispatch, search, sort]);
   // Breadcrumbs
   const routes = [
     {
@@ -108,12 +119,6 @@ const PromoDiscountView = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -126,7 +131,9 @@ const PromoDiscountView = () => {
     const data = dataApprovalHistory?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
 
@@ -141,10 +148,29 @@ const PromoDiscountView = () => {
       downloadPromo({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
+  };
+
+  // Handle Load More
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination_promo?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getAllPromoPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
   };
 
   const handleCancel = () => {
@@ -183,11 +209,13 @@ const PromoDiscountView = () => {
         dispatch(
           getAllPromoPaginate({
             search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           })
         );
+        setPage(1);
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -209,68 +237,50 @@ const PromoDiscountView = () => {
         <BreadCrumb routes={routes} />
         <NxCardContainer header={"PROMO LIST"}>
           <NxBaseContainer border>
-            <TablePaginationNew
-              dataSource={data?.result || []}
-              columns={[
-                ...TablePromoView(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  // handleApprovalHistory,
-                  // handleInactive
-                ),
-                ...useColumnActionPermission(
-                  ["view", "Update", "Activate", "History"],
-                  itemsActionView(
-                    handleInactive,
-                    handleApprovalHistory,
-                    handleDownload
-                  )
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
+            <PromoDiscountTable
+              data={dataSourceWithKeys}
+              totalElement={pagination_promo?.totalElements || 0}
+              page={page}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 3200 }}
+              handleInactive={handleInactive}
+              handleApprovalHistory={handleApprovalHistory}
+              handleDownload={handleDownload}
+              handleLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              searchText={searchText}
+              search={search}
+              searchedColumn={searchedColumn}
+              searchInput={searchInput}
+              handleSearch={handleSearch}
+              loading={loading}
             />
           </NxBaseContainer>
         </NxCardContainer>
 
         {/* Modal Inactive */}
-        {modalInactive ? (
-          <ModalInactivateWithHierarchy
-            selector={"promo"}
-            dispatch={dispatch}
-            getAPIOption={getAvailableApprovalPromo}
-            getAPIDetail={getSelectedApprovalPromo}
-            alertMessage={`Are you sure you want to inactivate this promo with name ${
-              chooseId?.name || ""
-            }?`}
-            openModalInactivate={modalInactive}
-            handleCloseModalInactivate={handleCancel}
-            onFinish={handleOk}
-          />
-        ) : null}
+        <NxApproveOrRejectModal
+          isOpen={modalInactive}
+          header={"INACTIVATE"}
+          handleCloseModal={handleCancel}
+          customMessage={`Are you sure you want to inactivate this promo with name ${
+            chooseId?.name || ""
+          }?`}
+          onFinish={({ remark }, handleClear) => handleOk({ remark }, handleClear)}
+          selector="promo"
+          dispatch={dispatch}
+          getAPIOption={getAvailableApprovalPromo}
+          getAPIDetail={getSelectedApprovalPromo}
+        />
 
         {/* Modal Approval History */}
-        {modalApprovalHistory && dataApprovalHistory ? (
-          <ModalHistory
-            isOpen={modalApprovalHistory && dataApprovalHistory}
-            handleClose={() => setModalApprovalHistory(false)}
-            header={"Approval History"}
-            width={1000}
-            tabOptions={handleOptions()}
-            dataApprover={dataApprovalHistory?.dataApprover}
-            dataHistory={dataApprovalHistory?.dataHistory}
-          />
-        ) : null}
+        <NxHistoryModal
+          isOpen={modalApprovalHistory}
+          handleClose={() => setModalApprovalHistory(false)}
+          header={"Approval History"}
+          tabOptions={handleOptions()}
+          dataApprover={dataApprovalHistory?.dataApprover}
+          dataHistory={dataApprovalHistory?.dataHistory}
+        />
 
         {/* Modal Modal Error Inactive */}
         {modalError ? (
@@ -295,4 +305,4 @@ const PromoDiscountView = () => {
   );
 };
 
-export default PromoDiscountView;
+export default memo(PromoDiscountView);
