@@ -36,6 +36,7 @@ const PromoDiscountTable = ({
     {
       handleCreate: () => navigate(PRODUCT_PROMO_ROUTES.CREATE_PROMO_DISCOUNT),
       handleUpdate: (id) => navigate(PRODUCT_PROMO_ROUTES.UPDATE_PROMO_DISCOUNT, { state: { id } }),
+      handleView: (id) => navigate(PRODUCT_PROMO_ROUTES.DETAIL_PROMO_DISCOUNT,  { state: { id } }),
       handleInactivate: handleInactive,
       handleApprovalHistory,
       handleDownload,
