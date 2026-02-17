@@ -118,6 +118,7 @@ const BillingItemForm = (props) => {
   //Billing item
   const [checkedLateCharge, setCheckedLateCharge] = useState(false);
   const [checkedPaymentWarranty, setCheckedPaymentWarranty] = useState(false);
+  const [checkedInstallmentRestructure, setCheckedInstallmentRestructure] = useState(false);
 
   //data Map info
   const [dataTable, setdataTable] = useState([]);
@@ -230,6 +231,7 @@ const BillingItemForm = (props) => {
       });
       setCheckedLateCharge(dataDetail?.lateCharge);
       setCheckedPaymentWarranty(dataDetail?.paymentWarranty);
+      setCheckedInstallmentRestructure(dataDetail?.installmentRestructure);
       setListDataAttachment(
         dataDetail?.attachmentDtoList
           ? (dataDetail?.attachmentDtoList || [])?.map((item) => {
@@ -324,6 +326,7 @@ const BillingItemForm = (props) => {
           attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
           lateCharge: data_detailDraft?.lateCharge,
           paymentWarranty: data_detailDraft?.paymentWarranty,
+          installmentRestructure: checkedInstallmentRestructure ? checkedInstallmentRestructure : false,
           status: data_BillingItemDetail?.status,
           statusApproval: data_BillingItemDetail?.statusApproval,
         };
@@ -394,6 +397,10 @@ const BillingItemForm = (props) => {
   const handleChangesLateCharge = (e) => {
     setCheckedLateCharge(e.target.checked);
   };
+
+  const handleChangesInstallmentRestructure = (e) => {
+  setCheckedInstallmentRestructure(e.target.checked);
+};
 
   const handleCheckDetailDateConflict = (data) => {
     const index = data_billingItemCategory
@@ -750,6 +757,7 @@ const BillingItemForm = (props) => {
       setIsEditable(false);
       setCheckedLateCharge(false);
       setCheckedPaymentWarranty(false);
+      setCheckedInstallmentRestructure(false);
       setTypeSubmit(false);
       setStartDate(null);
       setStartDateMap(null);
@@ -854,8 +862,10 @@ const BillingItemForm = (props) => {
                 data_glAccount={[]}
                 checkedLateCharge={checkedLateCharge}
                 checkedPaymentWarranty={checkedPaymentWarranty}
+                checkedInstallmentRestructure={checkedInstallmentRestructure}
                 onChangeLateCharge={handleChangesLateCharge}
                 onChangePayment={handleChangesPayment}
+                onChangeInstallmentRestructure={handleChangesInstallmentRestructure}
                 startDate={startDate}
                 endDate={endDate}
                 handleStartDate={handleStartDate}

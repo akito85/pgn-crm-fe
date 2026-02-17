@@ -58,10 +58,15 @@ const PointOfSalesPage = ({
   data_cost_center_list = [],
   data_uom_codes = [],
   mergedArrayMrc = [],
+  selectedTransactionDate = null,
+  setSelectedTransactionDate = () => {},
+  selectedInvoiceDate = null,
+  setSelectedInvoiceDate = () => {},
 }) => {
   const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
+
 
   useEffect(() => {
     if (hasValue(selectedBilingPeriod)) {
@@ -86,6 +91,26 @@ const PointOfSalesPage = ({
       value: e,
     });
   };
+
+  const handleRangeDisableInvoiceDate = useCallback(
+    (current) => {
+      if (selectedTransactionDate) {
+        return current < moment(selectedTransactionDate).startOf('day');
+      }
+      return current < moment(rangeDisableDate?.startDate);
+    },
+    [rangeDisableDate, selectedTransactionDate],
+  );
+
+  const handleRangeDisableTOPDate = useCallback(
+    (current) => {
+      if (selectedInvoiceDate) {
+        return current < moment(selectedInvoiceDate).startOf('day');
+      }
+      return false;
+    },
+    [selectedInvoiceDate],
+  );
 
   const listDetailPage = [
     { value: "Detail" },
@@ -458,7 +483,13 @@ const PointOfSalesPage = ({
           </SelectComponent>
         );
       case "DATE":
-        return <DateComponent width={"100%"} />;
+        return (
+          <DateComponent
+            width={"100%"}
+            dateDisable={handleRangeDisableTOPDate}
+            placeholder="Select Terms of Payment Date"
+          />
+        );
       default:
         return (
           <SelectComponent width={"100%"} disabled>
@@ -482,12 +513,12 @@ const PointOfSalesPage = ({
     [rangeDisableDate],
   );
 
-  const handleRangeDisableInvoiceDate = useCallback(
-    (current) => {
-      return current < moment(rangeDisableDate?.startDate);
-    },
-    [rangeDisableDate],
-  );
+  // const handleRangeDisableInvoiceDate = useCallback(
+  //   (current) => {
+  //     return current < moment(rangeDisableDate?.startDate);
+  //   },
+  //   [rangeDisableDate],
+  // );
 
   return (
     <Fragment>
@@ -567,8 +598,18 @@ const PointOfSalesPage = ({
               dateDisable={handleRangeDisable}
               defaultPickerValue={defaultPicker}
               key={keyPicker}
+              onChange={(date) => {
+                setSelectedTransactionDate(date);
+                // Reset invoice date jika lebih kecil dari transaction date baru
+                const currentInvoiceDate = form.getFieldValue('invoiceDate');
+                if (currentInvoiceDate && date && moment(currentInvoiceDate).isBefore(moment(date), 'day')) {
+                  form.setFieldsValue({ invoiceDate: null });
+                  setSelectedInvoiceDate(null);
+                }
+              }}
             />
           </Form.Item>
+          
           <Form.Item
             name={"invoiceDate"}
             label={"Invoice Date"}
@@ -579,7 +620,21 @@ const PointOfSalesPage = ({
           >
             <DateComponent
               disabled={data.length > 0}
-              onChange={setTransactionDate}
+              onChange={(date) => {
+                setTransactionDate(date);
+                setSelectedInvoiceDate(date);
+                // Reset TOP date jika lebih kecil dari invoice date baru
+                const currentTOPValue = form.getFieldValue(['termType', 'termValue']);
+                if (currentTOPValue && moment.isMoment(currentTOPValue) && 
+                    date && moment(currentTOPValue).isBefore(moment(date), 'day')) {
+                  form.setFieldsValue({ 
+                    termType: { 
+                      ...form.getFieldValue('termType'),
+                      termValue: null 
+                    } 
+                  });
+                }
+              }}
               dateDisable={handleRangeDisableInvoiceDate}
               defaultPickerValue={defaultPicker}
               key={keyPicker}

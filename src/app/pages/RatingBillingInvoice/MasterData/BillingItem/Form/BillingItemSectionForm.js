@@ -12,16 +12,20 @@ const BillingItemSectionForm = ({
   statusDetail = false,
   data_billType = [],
   data_billingItemCategory = [],
-  data_glAccount = [],
+  data_typeOptions = [], // Tambahkan ini untuk data Type
+  data_criteriaOptions = [], // Tambahkan ini untuk data Criteria
   checkedLateCharge,
   checkedPaymentWarranty,
+  checkedInstallmentRestructure,
   onChangeLateCharge = () => {},
   onChangePayment = () => {},
+  onChangeInstallmentRestructure = () => {},
   startDate,
   endDate,
   handleStartDate = () => {},
   handleEndDate = () => {},
   mappingData = 0,
+  selectedCategory = null, // Tambahkan ini untuk generate transaction mapping code
 }) => {
   const handleDisableEndDate = (current) => {
     if (startDate !== null) {
@@ -34,16 +38,25 @@ const BillingItemSectionForm = ({
     return false;
   };
 
+  // Generate Transaction Mapping Code berdasarkan category
+  const transactionMappingCode = selectedCategory 
+    ? `{category_${selectedCategory}}` 
+    : "{category_number}";
+
   return (
     <Fragment>
-      <BaseContainer header={"BILLING ITEM INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-3">
+      <BaseContainer header={"TRANSACTION MAPPING INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-3">
+          {/* Baris 1: 5 kolom */}
           <Form.Item
-            label={"Billing Item Category"}
+            label={"Category"}
             name={"billingItemCategory"}
-            rules={formMessageRequired("Billing Item Category")}
+            rules={formMessageRequired("Category")}
           >
-            <SelectComponent disabled={type === "update" && statusDetail}>
+            <SelectComponent 
+              disabled={type === "update" && statusDetail}
+              placeholder="Select"
+            >
               {(data_billingItemCategory || [])?.map((data, index) => (
                 <Select.Option value={data.id} key={index}>
                   {data.name}
@@ -51,24 +64,58 @@ const BillingItemSectionForm = ({
               ))}
             </SelectComponent>
           </Form.Item>
+
           <Form.Item
-            // className={"w-full"}
+            label={"Type"}
+            name={"type"}
+            rules={formMessageRequired("Type")}
+          >
+            <SelectComponent 
+              disabled={type === "update" && statusDetail}
+              placeholder="Select"
+            >
+              {(data_typeOptions || [])?.map((data, index) => (
+                <Select.Option value={data.id} key={index}>
+                  {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            label={"Transaction Mapping Code"}
+            name={"transactionMappingCode"}
+          >
+            <InputComponent
+              type="text"
+              disabled={true}
+              value={transactionMappingCode}
+              placeholder="{category_number}"
+            />
+          </Form.Item>
+
+          <Form.Item
             label={"Name"}
-            rules={formMessageRequired("name")}
+            rules={formMessageRequired("Name")}
             name={"name"}
           >
             <InputComponent
               type="text"
               disabled={type === "update" && statusDetail}
-               maxLength={100}
+              maxLength={100}
+              placeholder="Type here.."
             />
           </Form.Item>
+
           <Form.Item
             label={"Bill Type"}
             name={"billType"}
             rules={formMessageRequired("Bill Type")}
           >
-            <SelectComponent disabled={type === "update" && statusDetail}>
+            <SelectComponent 
+              disabled={type === "update" && statusDetail}
+              placeholder="Select"
+            >
               {(data_billType || [])?.map((data, index) => (
                 <Select.Option value={data.id} key={index}>
                   {data.name}
@@ -76,8 +123,23 @@ const BillingItemSectionForm = ({
               ))}
             </SelectComponent>
           </Form.Item>
+
+          {/* Baris 2: 3 kolom (dengan 2 kolom kosong di kanan) */}
           <Form.Item
-            // className={"w-full"}
+            label={"Criteria"}
+            name={"criteria"}
+            rules={formMessageRequired("Criteria")}
+          >
+            <SelectComponent placeholder="Select">
+              {(data_criteriaOptions || [])?.map((data, index) => (
+                <Select.Option value={data.id} key={index}>
+                  {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
             label={"Start Date"}
             rules={formMessageRequired("Start Date")}
             name={"startDate"}
@@ -86,10 +148,11 @@ const BillingItemSectionForm = ({
               dateDisable={disabledDate}
               onChange={(e) => handleStartDate(e)}
               disabled={(type === "update" && statusDetail) || mappingData > 0}
+              placeholder="Select Start Date"
             />
           </Form.Item>
+
           <Form.Item
-            // className={"w-full"}
             label={"End Date"}
             name={"endDate"}
             rules={[
@@ -103,36 +166,34 @@ const BillingItemSectionForm = ({
                         )
                       ),
               },
-              // { message: requiredMessage("End Date"), required: true },
             ]}
           >
             <DateComponent
               disabled={mappingData > 0}
               dateDisable={handleDisableEndDate}
               onChange={(e) => handleEndDate(e)}
+              placeholder="Select End Date"
             />
           </Form.Item>
-          <Form.Item
-            className="col-span-3"
-            label={"GL Account"}
-            // rules={formMessageRequired("glaccount")}
-            name={"glAccount"}
-          >
-            <SelectComponent>
-              {(data_glAccount || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <div className="col-span-3">
-            <Form.Item label={"Description"} name={"description"}>
-              <InputComponent type="textarea" />
+
+          {/* 2 kolom kosong untuk menyamakan dengan layout 5 kolom */}
+          <div></div>
+          <div></div>
+
+          {/* Baris 3: Description full width (span 5 kolom) */}
+          <div className="col-span-5">
+            <Form.Item 
+              label={"Description"} 
+              name={"description"}
+              rules={formMessageRequired("Description")}
+            >
+              <InputComponent type="textarea" rows={4} />
             </Form.Item>
           </div>
+
+          {/* Baris 4: 3 Checkboxes (masing-masing 1-2 kolom) */}
           <Form.Item name="lateCharge" valuePropName="checked" noStyle>
-            <div className="flex flex-col pt-[30px]">
+            <div className="flex flex-col pt-[30px] col-span-2">
               <Checkbox
                 checked={checkedLateCharge}
                 onChange={onChangeLateCharge}
@@ -144,8 +205,9 @@ const BillingItemSectionForm = ({
               </span>
             </div>
           </Form.Item>
+
           <Form.Item name="paymentWarranty" valuePropName="checked" noStyle>
-            <div className="flex flex-col pt-[30px]">
+            <div className="flex flex-col pt-[30px] col-span-2">
               <Checkbox
                 checked={checkedPaymentWarranty}
                 onChange={onChangePayment}
@@ -155,6 +217,20 @@ const BillingItemSectionForm = ({
               <span className="text-xs text-[#92979D]">
                 Click or tap this checkbox if this item is included in payment
                 warranty deduction list
+              </span>
+            </div>
+          </Form.Item>
+
+          <Form.Item name="installmentRestructure" valuePropName="checked" noStyle>
+            <div className="flex flex-col pt-[30px]">
+              <Checkbox
+                checked={checkedInstallmentRestructure}
+                onChange={onChangeInstallmentRestructure}
+              >
+                Installment / Restructure
+              </Checkbox>
+              <span className="text-xs text-[#92979D]">
+                Click or tap this checkbox to apply installment or restructuring terms to this item
               </span>
             </div>
           </Form.Item>
