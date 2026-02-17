@@ -9,15 +9,19 @@ import {
   getListCategory,
   getListApprovalById,
   getAllApprovalList,
+  submitApproval,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 import DetailWarranty from "./DetailWarranty";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import FooterDetail from "../../../../../components/FooterDetail";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
+import { configApp } from "../../../../../constants/configApp";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 
 const ListDetailWarranty = () => {
   const location = useLocation();
@@ -29,7 +33,6 @@ const ListDetailWarranty = () => {
   const {
     data_detail,
     data_approval_info,
-    data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
@@ -50,7 +53,6 @@ const ListDetailWarranty = () => {
         dispatch(getApprovalListPaginate({ page: 1, pageSize: 10 }));
       }
     } else if (activeTab === "attachment") {
-      dispatch(getAllAttachmentInfoPaginate({ page: 1, pageSize: 10 }));
       dispatch(getListCategory());
     }
   }, [activeTab, dispatch, data_detail?.appHierId]);
@@ -95,11 +97,11 @@ const ListDetailWarranty = () => {
       children: (
         <BaseContainer header={"ATTACHMENT INFORMATION"}>
           <AttachmentComponent
-            data={data_attachment_info?.result || data_attachment_info || []}
+            data={data_detail?.attachments || []}
             type="detail"
             typeSelector="warranty"
-            dispatch={dispatch}
-            getAPICategory={getListCategory}
+            service={receiptCollectionHttpService}
+            configApplication={configApp.PAYMENT_SERVICE}
           />
         </BaseContainer>
       ),
@@ -111,6 +113,39 @@ const ListDetailWarranty = () => {
   };
 
   const isShowButton = data_detail?.isApprover || false;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [approvalAction, setApprovalAction] = useState("");
+
+  const handleApprove = () => {
+    setApprovalAction("APPROVE");
+    setIsModalOpen(true);
+  };
+
+  const handleReject = () => {
+    setApprovalAction("REJECT");
+    setIsModalOpen(true);
+  };
+
+  const onFinishApproval = async (values, clearForm) => {
+    const body = {
+      approvalId: data_detail?.approvalId,
+      id: data_detail?.id,
+      action: approvalAction,
+      remark: values.remark,
+    };
+
+    dispatch(submitApproval({ body }))
+      .unwrap()
+      .then(() => {
+        setIsModalOpen(false);
+        clearForm();
+        dispatch(getDetailWarranty({ id }));
+      })
+      .catch(() => {
+        // Error is handled in thunk with showModalError
+      });
+  };
 
   const routes = [
     {
@@ -143,6 +178,18 @@ const ListDetailWarranty = () => {
             <FooterDetail
                 onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.WARRANTY)}
                 showApproval={isShowButton === true}
+                onApprove={handleApprove}
+                onReject={handleReject}
+            />
+
+            <ModalApproveOrReject
+              isOpen={isModalOpen}
+              handleCloseModal={() => setIsModalOpen(false)}
+              onFinish={onFinishApproval}
+              header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
+              approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
+              menu="Payment Warranty"
+              named={data_detail?.customerName || "-"}
             />
         </Spin>
     </LayoutMenu>

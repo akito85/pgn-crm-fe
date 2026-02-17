@@ -1,3 +1,4 @@
+// VERIFICATION_TAG: 2026-02-17-001
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
@@ -33,11 +34,10 @@ import {
   getAllCustomerInfoPaginate,
   getAllWarrantyInfoPaginate,
   getAllHoldInfoPaginate,
-  getAllAttachmentInfoPaginate,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-  requestedHold,
+  submitWarrantyRequest,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -292,73 +292,54 @@ const ModalHold = ({
   const [loadingSave, setLoadingSave] = useState(false);
 
   // Handle Save for Modal Confirmation
-  const handleSave = (formValue) => {
-    // handleBack(); // Removed to allow async operations before closing
-
-    const body = {
-      idAppHier: selectedHierarchy,
-      requestType: "WARRANTY_HOLD",
-      remark: remarkHoldInformation,
-      attachment: listDataAttachment?.map((item) => ({
-        fileId: item.fileId,
-        category: item.category,
-      })),
-      data: {
-        customer: dataCustomerInfoSelect[0],
-        warranty: dataWarrantyInfoSelect[0],
-        holds: dataSourceHoldInfoWithKeys.map(item => ({
-          ...item,
-          holdAmount: holdAmountData[item.key] || item.equivalent,
-          holdDate: holdDateData[item.key]
-        }))
-      }
-    };
-    
+  const handleSave = async (formValue) => {
     setLoadingSave(true);
-    dispatch(requestedHold({ body: body }))
-      .unwrap()
-      .then(async (res) => {
-        const referensiId = res.id;
-        const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-        
-        for (const element of newAttachments) {
-          const body = {
-            referensiId: referensiId,
-            files: element.file,
-            category: "PAYMENT_WARRANTY",
-            fileCategoryId: element.fileCategoryId,
-          };
-          await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body);
+    
+    try {
+      // 1. Upload new attachments first to get their IDs
+      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+      const attachmentIds = (listDataAttachment.filter(item => item.dataType === "exist") || []).map(item => item.id);
+      
+      for (const element of newAttachments) {
+        const uploadBody = {
+          // referensiId: null, // No reference ID yet as per new unified submit flow
+          files: element.file,
+          category: "PAYMENT_WARRANTY",
+          fileCategoryId: element.fileCategoryId,
+        };
+        const uploadRes = await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+        if (uploadRes?.data?.id) {
+          attachmentIds.push(uploadRes.data.id);
         }
+      }
 
-        handleRefresh();
-        handleBack();
-        setSelectedCustomerInfoRowKeys([]);
-        setDataCustomerInfoSelect([]);
-        setDataWarrantyInfoSelect([]);
-        setDataTable([]);
-        setBoolean(false);
-        setRemarkHoldInformation("");
-        setCurrent(0);
-        setSearch({});
-        setPage(1);
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-        form.resetFields();
-        setLoadingSave(false);
-      })
-      .catch((error) => {
-        setLoadingSave(false);
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message, type: "requested" });
-          setModalError(true);
-        }
-      });
+      // 2. Prepare unified submission body
+      const submitBody = {
+        warrantyTransTypeId: 10, // 10 = Hold
+        appHierId: selectedHierarchy,
+        items: dataWarrantyInfoSelect.map((item, index) => ({
+          payWarrantyId: item.id,
+          amount: holdAmountData[dataSourceHoldInfoWithKeys[index]?.key] || 0,
+          currency: item.currency || "IDR",
+        })),
+        attachmentIds: attachmentIds,
+        remark: remarkHoldInformation,
+      };
+
+      // 3. Dispatch the unified thunk
+      await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+
+      // 4. Cleanup and close
+      handleRefresh();
+      handleBack();
+      clearAllState();
+      setLoadingSave(false);
+    } catch (error) {
+      setLoadingSave(false);
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      setBodyError({ message, type: "requested" });
+      setModalError(true);
+    }
   };
 
 
@@ -378,6 +359,7 @@ const ModalHold = ({
           page,
           pageSize,
           sort,
+          transTypeName: "HOLD",
         })
       );
     }

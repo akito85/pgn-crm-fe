@@ -171,17 +171,17 @@ const ViewWarranty = () => {
 
   /* Effect for Approval History */
   useEffect(() => {
-    if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+    if (dataApprovalHistory && (dataApprovalHistory?.approver || dataApprovalHistory?.history)) {
       setDataApprovalHistoryFix({
         dataApprover: {
-          hold: dataApprovalHistory?.dataApprover?.HOLD || [],
-          release: dataApprovalHistory?.dataApprover?.RELEASE || [],
-          refund: dataApprovalHistory?.dataApprover?.REFUND || [],
+          hold: dataApprovalHistory?.approver?.WARRANTY_HOLD || [],
+          release: dataApprovalHistory?.approver?.WARRANTY_RELEASE || [],
+          refund: dataApprovalHistory?.approver?.WARRANTY_REFUND || [],
         },
         dataHistory: {
-          hold: dataApprovalHistory?.dataHistory?.HOLD || [],
-          release: dataApprovalHistory?.dataHistory?.RELEASE || [],
-          refund: dataApprovalHistory?.dataHistory?.REFUND || [],
+          hold: dataApprovalHistory?.history?.WARRANTY_HOLD || [],
+          release: dataApprovalHistory?.history?.WARRANTY_RELEASE || [],
+          refund: dataApprovalHistory?.history?.WARRANTY_REFUND || [],
         },
       });
     } else {

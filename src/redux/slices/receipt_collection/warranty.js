@@ -109,7 +109,7 @@ export const getAllCustomerInfoPaginate = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/receipt/customer/get-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/payment-warranty/customer/get-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -134,14 +134,18 @@ export const getAllCustomerInfoPaginate = createAsyncThunk(
 
 export const getAllWarrantyInfoPaginate = createAsyncThunk(
   "GET_ALL_WARRANTY_INFO_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, transTypeName }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
       const [orderBy, order] = sortValue.split("~");
       
-      const url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+      let url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
       
+      if (transTypeName) {
+        url += `&transTypeName=${transTypeName}`;
+      }
+
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -378,10 +382,8 @@ export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY_WARRANTY",
   async ({ id }, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/payment-warranty/approval-history-get/${id}`;
-      // const response = await receiptCollectionHttpService.getDetail(url);
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      const response = hc_approval_history;
+      const url = `/v1/dbs/api/payment-warranty/approval-history-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
       const message =
@@ -434,122 +436,74 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
-export const requestedRefund = createAsyncThunk(
-  "REQUESTED_REFUND",
+export const submitWarrantyRequest = createAsyncThunk(
+  "SUBMIT_WARRANTY_REQUEST",
   async ({ body }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/billing/create-request-approve";
-      // const response = await receiptCollectionHttpService.createData(url, body);
-      
-      // Simulate Success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = { data: { id: "DUMMY_ID_REFUND_123" } }; 
+      const url = "/v1/dbs/api/payment-warranty/request-submit";
+      const response = await receiptCollectionHttpService.createData(url, body);
 
       const successBody = {
         title: `Successful`,
-        description: "Your data has been requested.",
+        description: "Your request has been submitted.",
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
-      await new Promise((resolve) => setTimeout(resolve, 500));;
       return response.data;
-    } catch (response) {
+    } catch (error) {
       const message =
-        response?.response?.data?.message ||
-        response?.message ||
-        response?.toString();
-      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
-        if (response?.data?.code === 419) {
-          thunkAPI.dispatch(setBodyError(response));
-        } else {
-          const errorBody = {
-            title: "Failed",
-            description: `Your data was not requested. ${message}. Please try again.`,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
-        return thunkAPI.rejectWithValue(response);
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.toString();
+      
+      if (error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Submission failed. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
-export const requestedHold = createAsyncThunk(
-  "REQUESTED_HOLD",
+export const submitApproval = createAsyncThunk(
+  "SUBMIT_APPROVAL_WARRANTY",
   async ({ body }, thunkAPI) => {
     try {
-      // const url = "/v1/dbs/api/billing/create-request-approve";
-      // const response = await receiptCollectionHttpService.createData(url, body);
+      const url = "/v1/dbs/api/payment-warranty/approval-submit";
+      const response = await receiptCollectionHttpService.createData(url, body);
 
-      // Simulate Success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = { data: { id: "DUMMY_ID_HOLD_123" } };
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.toString();
       
-      const successBody = {
-        title: `Successful`,
-        description: "Your data has been requested.",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      return response.data;
-    } catch (response) {
-      const message =
-        response?.response?.data?.message ||
-        response?.message ||
-        response?.toString();
-      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
-        if (response?.data?.code === 419) {
-          thunkAPI.dispatch(setBodyError(response));
-        } else {
-          const errorBody = {
-            title: "Failed",
-            description: `Your data was not requested. ${message}. Please try again.`,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
-        return thunkAPI.rejectWithValue(response);
+      if (error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
       }
-    }
-  }
-);
-
-export const requestedRelease = createAsyncThunk(
-  "REQUESTED_RELEASE",
-  async ({ body }, thunkAPI) => {
-    try {
-      // const url = "/v1/dbs/api/billing/create-request-approve";
-      // const response = await receiptCollectionHttpService.createData(url, body);
-
-      // Simulate Success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = { data: { id: "DUMMY_ID_RELEASE_123" } };
-
-      const successBody = {
-        title: `Successful`,
-        description: "Your data has been requested.",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      return response.data;
-    } catch (response) {
-      const message =
-        response?.response?.data?.message ||
-        response?.message ||
-        response?.toString();
-      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
-        if (response?.data?.code === 419) {
-          thunkAPI.dispatch(setBodyError(response));
-        } else {
-          const errorBody = {
-            title: "Failed",
-            description: `Your data was not requested. ${message}. Please try again.`,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
-        return thunkAPI.rejectWithValue(response);
-      }
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
@@ -561,7 +515,7 @@ export const downloadWarrantyList = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty/download?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
     } catch (error) {
@@ -581,12 +535,8 @@ export const deleteWarranty = createAsyncThunk(
   "DELETE_WARRANTY",
   async (id, thunkAPI) => {
     try {
-      // const url = `/v1/dbs/api/billing/warranty/${id}`;
-      // const response = await receiptCollectionHttpService.deleteData(url);
-
-      // Simulate Success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = { data: { id: id } };
+      const url = `/v1/dbs/api/payment-warranty/delete/${id}`;
+      const response = await receiptCollectionHttpService.deleteData(url);
 
       const successBody = {
         title: `Successful`,
@@ -594,7 +544,6 @@ export const deleteWarranty = createAsyncThunk(
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
-      await new Promise((resolve) => setTimeout(resolve, 500));
       return response.data;
     } catch (response) {
       const message =
@@ -732,6 +681,20 @@ const warrantySlice = createSlice({
       state.loadingProduct = false;
     },
 
+    /** Get Approval History */
+    [getApprovalHistory.pending]: (state) => {
+      state.loading = true;
+      state.dataApprovalHistory = null;
+    },
+    [getApprovalHistory.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataApprovalHistory = action.payload;
+    },
+    [getApprovalHistory.rejected]: (state) => {
+      state.loading = false;
+      state.dataApprovalHistory = null;
+    },
+
     // Download Warranty
     [downloadWarrantyList.pending]: (state) => {
       state.loading = true;
@@ -743,43 +706,29 @@ const warrantySlice = createSlice({
       state.loading = false;
     },
 
-    // Requested Refund
-    [requestedRefund.pending]: (state) => {
+    // Submit Warranty Request (Unified Hold, Release, Refund)
+    [submitWarrantyRequest.pending]: (state) => {
       state.loading = true;
     },
-    [requestedRefund.fulfilled]: (state) => {
+    [submitWarrantyRequest.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [requestedRefund.rejected]: (state, action) => {
+    [submitWarrantyRequest.rejected]: (state, action) => {
       state.loading = false;
       state.isFailed = true;
       state.result = action.payload;
     },
 
-    // Requested Hold
-    [requestedHold.pending]: (state) => {
+    // Submit Approval (Approve / Reject)
+    [submitApproval.pending]: (state) => {
       state.loading = true;
     },
-    [requestedHold.fulfilled]: (state) => {
+    [submitApproval.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [requestedHold.rejected]: (state, action) => {
-      state.loading = false;
-      state.isFailed = true;
-      state.result = action.payload;
-    },
-
-    // Requested Release
-    [requestedRelease.pending]: (state) => {
-      state.loading = true;
-    },
-    [requestedRelease.fulfilled]: (state) => {
-      state.isSuccess = true;
-      state.loading = false;
-    },
-    [requestedRelease.rejected]: (state, action) => {
+    [submitApproval.rejected]: (state, action) => {
       state.loading = false;
       state.isFailed = true;
       state.result = action.payload;
@@ -836,3 +785,4 @@ const warrantySlice = createSlice({
 
 const { reducer } = warrantySlice;
 export default reducer;
+
