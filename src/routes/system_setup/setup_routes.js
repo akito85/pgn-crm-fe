@@ -90,4 +90,10 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_PAYMENT_CYCLE: "/system-setup/payment-cycle/view",
   CREATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/create",
   UPDATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/update",
+
+  // Billing Item Category
+  VIEW_BILLING_ITEM_CATEGORY: "/system-setup/billing-item-category",
+  DETAIL_BILLING_ITEM_CATEGORY: "/system-setup/billing-item-category/view",
+  CREATE_BILLING_ITEM_CATEGORY: "/system-setup/billing-item-category/create",
+  UPDATE_BILLING_ITEM_CATEGORY: "/system-setup/billing-item-category/update",
 };
