@@ -101,14 +101,12 @@ const NotificationDropdown = () => {
 
     if (!isForThisUser) return false;
 
-    // Position-based filter: if notification has a toPositionId, only show
-    // when it matches the user's current position (belt-and-suspenders with backend filter)
+    // Position-based filter: if notification has a toPositionId AND user has a current position set,
+    // only show when it matches. When no position is set (before switch-pos API), allow all through
+    // to prevent silently hiding notifications before user selects a position.
     const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
-    if (notifPositionId) {
-      // If notification is targeted at a specific position, ONLY show when user is in that exact position
-      // This ensures users don't see notifications for other roles/positions they hold
-      // Use Redux currentPositionId (not localStorage) to ensure reactivity when position changes
-      if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+    if (notifPositionId && currentPositionId) {
+      if (Number(notifPositionId) !== Number(currentPositionId)) {
         return false;
       }
     }

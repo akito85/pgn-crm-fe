@@ -351,11 +351,12 @@ const notificationsSlice = createSlice({
       }
 
       // Position-based filter: skip notifications targeted at a different position
+      // Only filter when user has an active position set (after switch-pos API call)
+      // When currentPositionId is not set, allow all notifications through to avoid
+      // silently dropping notifications before user selects a position
       const notifPositionId = notification.toPositionId;
-      if (notifPositionId) {
-        // If notification has a position ID, only accept if user's current position matches exactly
-        // This prevents users from seeing notifications for other positions they hold
-        if (!state.currentPositionId || Number(notifPositionId) !== Number(state.currentPositionId)) {
+      if (notifPositionId && state.currentPositionId) {
+        if (Number(notifPositionId) !== Number(state.currentPositionId)) {
           return;
         }
       }
