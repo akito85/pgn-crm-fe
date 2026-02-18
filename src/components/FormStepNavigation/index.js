@@ -57,7 +57,7 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
                             current={current}
                             labelPlacement="vertical"
                             size="small"
-                            style={{ width: "100%" }}
+                            style={{ width: steps.length < 5 ? `${steps.length * 180}px` : "100%", }}
                             items={steps.map((s, i) => ({
                                 title: <span style={{ whiteSpace: "nowrap", fontSize: "12px" }}>{s.title}</span>,
                                 icon: (
