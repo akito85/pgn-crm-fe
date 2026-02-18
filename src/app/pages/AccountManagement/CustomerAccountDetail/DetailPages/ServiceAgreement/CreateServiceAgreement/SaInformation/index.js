@@ -13,6 +13,7 @@ import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContain
 const SaInformation = ({
   saType,
   handleSaInformationObj = () => { },
+  handleServiceAgreementTypeChange = () => { },
   setStartDate,
   setServiceAgreementDate,
   setEndDate,
