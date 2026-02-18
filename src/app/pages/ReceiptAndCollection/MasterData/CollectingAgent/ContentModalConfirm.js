@@ -85,7 +85,7 @@ const ContentModalConfirm = ({
   ];
 
   return (
-    <div className="flex flex-col gap-0 -mt-5 -mx-5 -mb-5 bg-white">
+    <div className="flex flex-col gap-0 -mt-4 -mx-4 -mb-4 bg-white">
       <Tabs
         defaultActiveKey={tabData[0].value}
         activeKey={valuePage}
@@ -93,8 +93,8 @@ const ContentModalConfirm = ({
         items={items}
         className="custom-confirm-tabs"
         tabBarStyle={{
-          paddingLeft: "20px",
-          paddingRight: "20px",
+          paddingLeft: "16px",
+          paddingRight: "16px",
           marginBottom: 0,
           borderBottom: "1px solid #dbdade"
         }}
