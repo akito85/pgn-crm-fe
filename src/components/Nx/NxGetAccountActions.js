@@ -1,4 +1,4 @@
-import { Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
 import { Fragment } from "react";
@@ -11,6 +11,7 @@ const nxGetAccountActions = ({
   handleDownload = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
+  handleDelete = () => {},
 }) => [
   {
     action: "Download",
@@ -56,12 +57,15 @@ const nxGetAccountActions = ({
       return (
         <Tooltip
           title="View"
-          onClick={() => handleView(record.id)}
           key={`table-action-${index}`}
-        >
-          <div className="flex items-center h-full">
+          >
+          <Button
+            onClick={() => handleView(record.id)}
+            type="table-action"
+            directChildren
+          >
             <SVGIcon name="IconDetail" width={20} />
-          </div>
+          </Button>
         </Tooltip>
       )
     }
@@ -77,30 +81,27 @@ const nxGetAccountActions = ({
       const content = actionLength > 3 ?
         (
           <ButtonComponent
-            icon={<SVGIcon name="IconEdit" color={!isEditable ? "#BDBDBD" : "#0075BF"} width={20} />}
+            icon={<SVGIcon name="IconEdit" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />}
             border={false}
             disabled={!isEditable}
             onClick={() => handleUpdate(record.id)}
             type={"action"}
+            className="group"
           >
             <span className={"text-black ml-3"}>Update</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Update">
-            <div className="flex items-center h-full">
-
+          <Tooltip title={isEditable ? "Update" : ""} key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleUpdate(record.id)}
+              disabled={!isEditable}
+              type="table-action"
+            >
               <SVGIcon
                 name="IconEdit"
                 width={20}
-                color={!isEditable ? "#8D91A0" : "#ACC424"}
-                className={!isEditable ? "cursor-not-allowed" : undefined}
-                onClick={
-                  isEditable ?
-                    () => handleUpdate(record.id) :
-                    () => {}
-                }
               />
-            </div>
+            </Button>
           </Tooltip>
         );
 
@@ -136,17 +137,16 @@ const nxGetAccountActions = ({
           </ButtonComponent>
         ) : (
           <Tooltip
-            title="Inactivate"
+            title={isActive ? "Inactivate" : ""}
+            key={`table-action-${index}`}
           >
-            <div className="flex items-center h-full">
-              <Checkbox
-                className="action-checkbox"
-                disabled={isActive ? false : true}
-                checked={isActive ? false : true}
-                onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
-                style={{ transform: "scale(0.9)" }}
-              />
-            </div>
+            <Checkbox
+              className="action-checkbox"
+              disabled={!isActive}
+              checked={isInactive}
+              onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+              style={{ transform: "scale(0.9)" }}
+            />
           </Tooltip>
         );
 
@@ -161,28 +161,52 @@ const nxGetAccountActions = ({
         (
           <ButtonComponent
             icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+              <SVGIcon name="IconLogHistory" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
             }
             border={false}
             onClick={() => handleApprovalHistory(true, record?.id)}
             type={"action"}
+            className="group"
           >
             <span className={"text-black ml-3"}>Approval History</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Approval History">
-            <SVGIcon
-              name="IconLogHistory"
-              color={"#0075bf"}
-              width={20}
+          <Tooltip title="Approval History" key={`table-action-${index}`}>
+            <Button
               onClick={() => handleApprovalHistory(true, record?.id)}
-            />
+              type="table-action"
+            >
+              <SVGIcon
+                name="IconLogHistory"
+                width={20}
+              />
+            </Button>
           </Tooltip>
         );
 
       return <Fragment key={`table-action-${index}`}>{content}</Fragment>
     }
-  }
+  },
+  {
+    action: 'Delete',
+    type: 'table',
+    render: (record, _, index) => {
+      return (
+        <Tooltip
+          title="Delete"
+          key={`table-action-${index}`}
+        >
+          <Button
+            onClick={() => handleDelete(record.id)}
+            type="table-action"
+            directChildren
+          >
+            <SVGIcon name="IconDelete" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
+          </Button>
+        </Tooltip>
+      )
+    }
+  },
 ];
 
 export {

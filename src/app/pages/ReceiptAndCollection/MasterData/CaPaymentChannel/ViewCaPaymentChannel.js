@@ -79,14 +79,18 @@ const ViewCaPaymentChannel = () => {
 
     // Breadcrumbs
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_PAYMENT_CHANNEL,
-            breadcrumbName: "Ca Payment Channel",
-        },
+      {
+        path: "",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_PAYMENT_CHANNEL,
+        breadcrumbName: "Payment Channel Mapping",
+      },
     ];
 
     const handleOptions = () => {
@@ -617,7 +621,7 @@ const ViewCaPaymentChannel = () => {
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
                     <div className="flex -my-4 justify-between items-center">
-                        <p className="mt-[15px] font-bold">CA PAYMENT CHANNEL LIST</p>
+                        <p className="mt-[15px] font-bold">PAYMENT CHANNEL MAPPING LIST</p>
                         <div className="flex gap-2">
                             <Toolbar items={itemActions} />
                         </div>
@@ -663,7 +667,7 @@ const ViewCaPaymentChannel = () => {
                     getAPIOption={getAllApprovalListCaPaymentChannel}
                     getAPIDetail={getListApprovalByIdCaPaymentChannel}
                     selector={"caPaymentChannel"}
-                    alertMessage={`Are you sure you want to inactivate this Ca Payment Channel with Ca Code ${nameModalActiveOrInactivate}?`}
+                    alertMessage={`Are you sure you want to inactivate this Payment Channel Mapping with Ca Code ${nameModalActiveOrInactivate}?`}
                     openModalInactivate={openModalInactivate}
                     handleCloseModalInactivate={handleCancelModalInactivate}
                     onFinish={handleSubmitActiveInactive}

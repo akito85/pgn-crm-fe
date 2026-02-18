@@ -327,6 +327,36 @@ button.ant-btn.ant-btn-action:disabled:hover {
   background: transparent;
 }
 
+button.ant-btn.ant-btn-table-action {
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+
+  svg {
+    color: black;
+    transition: color 0.3s ease-in-out;
+  }
+
+  &:hover {
+    background-color: transparent;
+
+    svg {
+      color: #0075BF;
+
+    }
+  }
+
+  &:disabled {
+    svg {
+      color: #BDBDBD;
+      
+    }
+  }
+}
+
 button.ant-btn.ant-btn-default {
   border-width: 1px;
   border-radius: 8px;
@@ -768,6 +798,11 @@ td.ant-table-column-sort {
 span.ant-tree-title {
   color: #000 !important;
 }
+
+.ant-form-item-label {
+  padding-bottom: 4px !important;
+}
+
 .ant-form-item-label
   > label.ant-form-item-required:not(
     .ant-form-item-required-mark-optional

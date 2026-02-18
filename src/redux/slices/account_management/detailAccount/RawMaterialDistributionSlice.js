@@ -16,6 +16,13 @@ const initialState = {
   data_detail_history: {},
   data_country: {},
   dataDelete: {},
+  list_rawMaterialSourceHistory: [],
+  pagination_rawMaterialSourceHistory: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
 };
 
 export const createRMS = createAsyncThunk(
@@ -92,14 +99,17 @@ export const getCurrentRaw = createAsyncThunk(
 
 export const getAllRMSHistoryPaginate = createAsyncThunk(
   "GET_ALL_RMSHistory_PAGINATE",
-  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+  async ({ id, search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account-detail/source-distribution/view-paging/raw-material/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getAll(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore
+      };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
@@ -205,16 +215,47 @@ const rawMaterialSourceSlice = createSlice({
 
     //get all Raw Material Source paginate
     [getAllRMSHistoryPaginate.pending]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllRMSHistoryPaginate.fulfilled]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_rawMaterialSourceHistory.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          
+          state.list_rawMaterialSourceHistory = [
+            ...state.list_rawMaterialSourceHistory,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_rawMaterialSourceHistory = result;
+        }
+      }
+
+      state.pagination_rawMaterialSourceHistory = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.currentPage || 0,
+        pageSize: page?.pageSize || 10,
+      };
     },
     [getAllRMSHistoryPaginate.rejected]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_rawMaterialSourceHistory = [];
+        state.pagination_rawMaterialSourceHistory = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
 
     // Get Current Raw Material Source
