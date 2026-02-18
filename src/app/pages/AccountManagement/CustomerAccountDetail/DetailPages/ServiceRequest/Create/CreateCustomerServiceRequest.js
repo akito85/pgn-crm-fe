@@ -497,9 +497,9 @@ const CreateCustomerServiceRequest = (props) => {
       containerRef.current.scrollLeft += 250;
     }
   };
-  const handleButtonNext = () => {
+  const handleButtonNext = async () => {
     if (current === 0) {
-      formCreate
+      await formCreate
         .validateFields()
         .then(() => {
           next();
@@ -508,6 +508,9 @@ const CreateCustomerServiceRequest = (props) => {
         .catch((info) => {
           console.log("Validate Failed:", info);
         });
+
+        const values = formCreate.getFieldsValue();
+        console.log("Form Values at Step 1:", values);
     } else {
       next();
       scrollRightHandler();
