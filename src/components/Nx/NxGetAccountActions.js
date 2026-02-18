@@ -74,8 +74,9 @@ const nxGetAccountActions = ({
     type: 'table',
     render: (record, actionLength, index) => {
       const isEditable =
-        record.statusApproval === "DRAFT" ||
-        record.statusApproval === "REJECTED";
+        record.status !== "INACTIVE" &&
+        record.statusApproval !== "WAITING_APPROVAL" &&
+        record.statusApproval !== "WAITING_FOR_APPROVAL";
 
       const content = actionLength > 3 ?
         (
