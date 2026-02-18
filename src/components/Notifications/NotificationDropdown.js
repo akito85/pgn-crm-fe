@@ -256,7 +256,7 @@ const NotificationDropdown = () => {
       // Refresh notification data after token change (e.g., position switch)
       const refreshNotifications = async () => {
         try {
-          console.log("[NotificationDropdown] Token changed - refreshing notifications for userId:", userId, "positionId:", positionId);
+          // console.log("[NotificationDropdown] Token changed - refreshing notifications for userId:", userId, "positionId:", positionId);
 
           // Step 1: Disconnect from current SSE connection
           dispatch(disconnectNotifications());
