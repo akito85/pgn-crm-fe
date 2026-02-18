@@ -8,6 +8,7 @@ import NxCardContainer from '../../../../../../../../components/Nx/NxCardContain
 import moment from "moment";
 import { hasValue } from '../../../../../../../../utils'
 import { getTaxImplication } from '../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice'
+import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer'
 
 const SaInformation = ({
   saType,
@@ -20,6 +21,7 @@ const SaInformation = ({
   segment,
   dataServiceType,
   dataSaType,
+  dataSaChildType,
   dataPjbg,
   dataTermOfPayment,
   dataBillingCycle,
@@ -36,6 +38,7 @@ const SaInformation = ({
   const [isGas, setIsGas] = useState('')
   const [inputValue, setInputValue] = useState('');
 
+  console.log(`SA Type ${saType}`)
 
   useEffect(() => {
     if (saInfoObj.serviceType) {
@@ -188,10 +191,10 @@ const SaInformation = ({
     <NxCardContainer header={"SERVICE AGREEMENT INFORMATION"}>
       <div className="flex flex-col gap-y-4">
         {/* SERVICE AGREEMENT INFORMATION SECTION */}
-        <BaseContainer border header={"SERVICE AGREEMENT INFORMATION"}>
+        <NxBaseContainer border header={"SERVICE AGREEMENT INFORMATION"}>
           {/* Check If Not SA Main  */}
-            <div className={"grid grid-cols-3 w-full gap-x-6"}>
-              <Form.Item
+          <div className={"grid grid-cols-3 w-full gap-x-6"}>
+            <Form.Item
               name={"serviceType"}
               label={"Service Type"}
               getValueFromEvent={(e) => handleSaInformationObj(e, "serviceType")}
@@ -219,22 +222,23 @@ const SaInformation = ({
               </SelectComponent>
             </Form.Item>
             {saType !== "main" && (
-                <Form.Item
-                  name={"serviceAgreementReferenceNumber"}
-                  label={"Service Agreement Reference Number"}
-                  getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
-                  rules={[
-                    {
-                      message: " Please input your Service Agreement Reference Number",
-                      required: true,
-                    },
-                  ]}
-                >
-                  <InputComponent disabled={true} />
-                </Form.Item>
+              <Form.Item
+                name={"serviceAgreementReferenceNumber"}
+                label={"Service Agreement Reference Number"}
+                getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementReferenceNumber")}
+                rules={[
+                  {
+                    message: " Please input your Service Agreement Reference Number",
+                    required: true,
+                  },
+                ]}
+              >
+                <InputComponent disabled={true} />
+              </Form.Item>
             )
             }
-            </div>
+            {/* SA Child Type field removed - moved to SA Detail component */}
+          </div>
           <div className={"grid grid-cols-3 w-full gap-x-6"}>
             <Form.Item
               name={"serviceAgreementNumber"}
@@ -242,7 +246,7 @@ const SaInformation = ({
               getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementNumber")}
               rules={[
                 {
-                  message: "Please input your Service Agreement Number",
+                  message: "Please input Service Agreement Number",
                   required: true,
                 },
                 {
@@ -259,15 +263,27 @@ const SaInformation = ({
               getValueFromEvent={(e) => handleSaInformationObj(e, "serviceAgreementType")}
               rules={[
                 {
-                  message: "Please input your Service Agreement Type",
+                  message: "Please input Service Agreement Type",
                   required: true,
                 },
               ]}
             >
               <SelectComponent
-                disabled={saRecordData?.typeSa !== "main" || !hasValue(saInfoObj?.serviceType) ? true : false}
-                onChange={(e) => {
-                  handlePjbgTypeValidate(e)
+                disabled={
+                  saRecordData?.typeSa === "main" ? !hasValue(saInfoObj?.serviceType) :  // Main: enabled when service type selected
+                    saRecordData?.typeSa === "Amendment" ? true :  // Amendment: disabled
+                      !hasValue(saInfoObj?.serviceType)  // Child (addon): enabled when service type selected
+                }
+                onChange={(selectedId) => {
+                  handlePjbgTypeValidate(selectedId);
+
+                  // Find the selected option to get both ID and string value
+                  const selectedOption = dataSaType?.find(item => item.id === selectedId);
+
+                  // Call Handler from Parent (updates saInfoObj AND resets saDetailObj)
+                  handleServiceAgreementTypeChange(selectedId, selectedOption?.value);
+
+                  // Note: Create From auto-setting is handled by useEffect in SA Detail component
                 }}
               >
                 {dataSaType &&
@@ -278,6 +294,7 @@ const SaInformation = ({
                   ))}
               </SelectComponent>
             </Form.Item>
+            {/* hardcode service Agreement Type */}
             <Form.Item
               name={"pjbgType"}
               label={"PJBG Type"}
@@ -289,7 +306,7 @@ const SaInformation = ({
                 },
               ]}
             >
-              <SelectComponent disabled={(saInfoObj?.serviceAgreementType === 1170 || saRecordData?.typeSa !== "main") ? false : true}>
+              <SelectComponent disabled={(saInfoObj?.serviceAgreementType === 1170) ? false : true}>
                 {dataPjbg &&
                   dataPjbg?.map((item, index) => (
                     <Select.Option value={item.id} key={index}>
@@ -337,123 +354,54 @@ const SaInformation = ({
             >
               <DateComponent dateDisable={handleValidateMore} onChange={(e) => handleDateValidation(e, "endDate")} />
             </Form.Item>
-          </div>
-        </BaseContainer>
-
-        {/* BILLING & PAYMENT INFORMATION SECTION */}
-        <BaseContainer border header={"BILLING & PAYMENT INFORMATION"}>
-          <div className={"grid grid-cols-3 w-full gap-x-6"}>
-            <Form.Item
-              name={"billingCycle"}
-              label={"Billing Cycle"}
-              getValueFromEvent={(e) => handleSaInformationObj(e, "billingCycle")}
-
-              rules={[
-                {
-                  message: "Please input your Billing Cycle",
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
-                {dataBillingCycle &&
-                  dataBillingCycle?.map((item, index) => (
-                    <Select.Option value={item.id} key={index}>
-                      {item.value}
-                    </Select.Option>
-                  ))}
-              </SelectComponent>
-            </Form.Item>
-            <Form.Item
-              name={"termOfPayment"}
-              label={"Term Of Payment"}
-              getValueFromEvent={(e) => handleSaInformationObj(e, "termOfPayment")}
-              rules={[
-                {
-                  message: "Please input your Term Of Payment",
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
-                {dataTermOfPayment &&
-                  dataTermOfPayment?.map((item, index) => (
-                    <Select.Option value={item.termsOfPaymentId} key={index}>
-                      {item.termsOfPaymentName}
-                    </Select.Option>
-                  ))}
-              </SelectComponent>
-            </Form.Item>
-            <Form.Item
-              name={"invoiceTemplate"}
-              label={"Invoice Template"}
-              getValueFromEvent={(e) => handleSaInformationObj(e, "invoiceTemplate")}
-              rules={[
-                {
-                  message: "Please input your Invoice Template",
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent disabled={saRecordData?.typeSa !== "main" ? true : false}>
-                {dataInvoiceTemplate &&
-                  dataInvoiceTemplate?.map((item, index) => (
-                    <Select.Option value={item.id} key={index}>
-                      {item.invoiceName}
-                    </Select.Option>
-                  ))}
-              </SelectComponent>
-            </Form.Item>
-          </div>
-        </BaseContainer>
-
-        {/* ADDITIONAL INFORMATION SECTION */}
-        <BaseContainer border header={"ADDITIONAL INFORMATION"}>
-          <div className={"grid grid-cols-3 w-full gap-x-6"}>
-            <Form.Item
-              name="alreadyGasIn"
-              label={"Already Gas In"}
-              valuePropName="checked"
-              noStyle
-              getValueFromEvent={(e) => handleSaInformationObj(e, "alreadyGasIn")}
-            >
-              <div className='flex flex-col'>
-                <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked}>Already Gas In</Checkbox>
-                <span className='pl-[26px] text-[10px]'>Check if the service agreement is gas in or not</span>
-              </div>
-            </Form.Item>
-            <Form.Item
-              name={"gasInPlanDate"}
-              label={"Gas In Plan Date"}
-              getValueFromEvent={(e) => handleSaInformationObj(e, "gasInPlanDate")}
-              rules={[
-                {
-                  message: "Please input Gas In Plan Date",
-                  // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? !saInfoObj?.alreadyGasIn: true,
-                  required: (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true,
-                },
-              ]}
-            >
-              <DateComponent
-                dateDisable={handleRangeStartEnd}
-                onChange={(e) => handleDateValidation(e, "gasInPlanDate")}
-                // disabled={(saInfoObj?.serviceType !== 608 || saRecordData?.typeSa !== "main" || saInfoObj?.alreadyGasIn === true) && true} 
-                disabled={(saInfoObj?.serviceType !== 608 || saInfoObj?.alreadyGasIn === true) && true}
-              />
-            </Form.Item>
-            <Form.Item
-              name={"commitmentDate"}
-              label={"Commitment Date"}
-              getValueFromEvent={(e) => handleSaInformationObj(e, "commitmentDate")}
-              rules={[
-                {
-                  message: "Please input your Commitment Date",
-                  required: (segment === "KI" && saRecordData?.typeSa === "main") ? true : false,
-                },
-              ]}
-            >
-              <DateComponent dateDisable={handleValidateMoreSaDate} onChange={(e) => handleDateValidation(e, "commitmentDate")} disabled={saRecordData?.typeSa !== "main" ? true : false} />
-            </Form.Item>
+            {saRecordData?.typeSa === "main" && (
+              <>
+                <Form.Item
+                  name="alreadyGasIn"
+                  label={"Already Gas In"}
+                  valuePropName="checked"
+                  noStyle
+                  getValueFromEvent={(e) => handleSaInformationObj(e, "alreadyGasIn")}
+                >
+                  <div className='flex flex-col'>
+                    <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked}>Already Gas In</Checkbox>
+                    <span className='pl-[26px] text-[10px]'>Check if the service agreement is gas in or not</span>
+                  </div>
+                </Form.Item>
+                <Form.Item
+                  name={"gasInPlanDate"}
+                  label={"Gas In Plan Date"}
+                  getValueFromEvent={(e) => handleSaInformationObj(e, "gasInPlanDate")}
+                  rules={[
+                    {
+                      message: "Please input Gas In Plan Date",
+                      // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? !saInfoObj?.alreadyGasIn: true,
+                      required: (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true,
+                    },
+                  ]}
+                >
+                  <DateComponent
+                    dateDisable={handleRangeStartEnd}
+                    onChange={(e) => handleDateValidation(e, "gasInPlanDate")}
+                    // disabled={(saInfoObj?.serviceType !== 608 || saRecordData?.typeSa !== "main" || saInfoObj?.alreadyGasIn === true) && true} 
+                    disabled={(saInfoObj?.serviceType !== 608 || saInfoObj?.alreadyGasIn === true) && true}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name={"commitmentDate"}
+                  label={"Commitment Date"}
+                  getValueFromEvent={(e) => handleSaInformationObj(e, "commitmentDate")}
+                  rules={[
+                    {
+                      message: "Please input your Commitment Date",
+                      required: (segment === "KI" && saRecordData?.typeSa === "main") ? true : false,
+                    },
+                  ]}
+                >
+                  <DateComponent dateDisable={handleValidateMoreSaDate} onChange={(e) => handleDateValidation(e, "commitmentDate")} disabled={saRecordData?.typeSa !== "main" ? true : false} />
+                </Form.Item>
+              </>
+            )}
           </div>
           <div className={"grid grid-cols-1 w-full gap-x-6"}>
             <Form.Item
@@ -467,7 +415,78 @@ const SaInformation = ({
               />
             </Form.Item>
           </div>
-        </BaseContainer>
+
+        </NxBaseContainer>
+
+        {/* Show Billing & Payment for Main and Amendment, hide for Child */}
+        {(saRecordData?.typeSa === "main" || saRecordData?.typeSa === "Amendment") && (
+          <NxBaseContainer border header={"BILLING & PAYMENT INFORMATION"}>
+            <div className={"grid grid-cols-3 w-full gap-x-6"}>
+              <Form.Item
+                name={"billingCycle"}
+                label={"Billing Cycle"}
+                getValueFromEvent={(e) => handleSaInformationObj(e, "billingCycle")}
+
+                rules={[
+                  {
+                    message: "Please input your Billing Cycle",
+                    required: true,
+                  },
+                ]}
+              >
+                <SelectComponent disabled={saRecordData?.typeSa === "Amendment" ? false : saRecordData?.typeSa !== "main"}>
+                  {dataBillingCycle &&
+                    dataBillingCycle?.map((item, index) => (
+                      <Select.Option value={item.id} key={index}>
+                        {item.value}
+                      </Select.Option>
+                    ))}
+                </SelectComponent>
+              </Form.Item>
+              <Form.Item
+                name={"termOfPayment"}
+                label={"Term Of Payment"}
+                getValueFromEvent={(e) => handleSaInformationObj(e, "termOfPayment")}
+                rules={[
+                  {
+                    message: "Please input your Term Of Payment",
+                    required: true,
+                  },
+                ]}
+              >
+                <SelectComponent disabled={saRecordData?.typeSa === "Amendment" ? false : saRecordData?.typeSa !== "main"}>
+                  {dataTermOfPayment &&
+                    dataTermOfPayment?.map((item, index) => (
+                      <Select.Option value={item.termsOfPaymentId} key={index}>
+                        {item.termsOfPaymentName}
+                      </Select.Option>
+                    ))}
+                </SelectComponent>
+              </Form.Item>
+              <Form.Item
+                name={"invoiceTemplate"}
+                label={"Invoice Template"}
+                getValueFromEvent={(e) => handleSaInformationObj(e, "invoiceTemplate")}
+                rules={[
+                  {
+                    message: "Please input your Invoice Template",
+                    required: true,
+                  },
+                ]}
+              >
+                <SelectComponent disabled={saRecordData?.typeSa === "Amendment" ? false : saRecordData?.typeSa !== "main"}>
+                  {dataInvoiceTemplate &&
+                    dataInvoiceTemplate?.map((item, index) => (
+                      <Select.Option value={item.id} key={index}>
+                        {item.invoiceName}
+                      </Select.Option>
+                    ))}
+                </SelectComponent>
+              </Form.Item>
+            </div>
+          </NxBaseContainer>
+        )}
+
       </div>
     </NxCardContainer>
   )
