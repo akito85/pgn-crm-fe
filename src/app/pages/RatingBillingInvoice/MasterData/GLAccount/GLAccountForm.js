@@ -28,7 +28,6 @@ import {
   createGLAccount,
   updateGLAccount,
   uploadAttachment,
-  getSpecialGLList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
 import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
@@ -62,7 +61,7 @@ const GLAccountForm = ({ type }) => {
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "GL Account",
-      paramValue: ["glAccount", "glAccountDesc", "specialGlValue", "reference"],
+      paramValue: ["glAccount", "glAccountDesc","reference"],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -81,7 +80,6 @@ const GLAccountForm = ({ type }) => {
   // Use Effect
   useEffect(() => {
     dispatch(getApprovalHierarchyList());
-    dispatch(getSpecialGLList());
   }, [dispatch]);
 
   useEffect(() => {
@@ -124,7 +122,6 @@ const GLAccountForm = ({ type }) => {
       form.setFieldsValue({
         glAccount: glAccount?.glAccount || "",
         glAccountDesc: glAccount?.glAccountDesc || "",
-        specialGlValue: glAccount?.specialGl || null,
         reference: glAccount?.reference || "",
         apphierId: approvalInfo?.tAppId || null,
       });
@@ -203,7 +200,6 @@ const GLAccountForm = ({ type }) => {
     const jsonData = {
       ...(type === "update" && { glAccountId: id }),
       glAccount: formValue.glAccount,
-      specialGlValue: formValue.specialGlValue,
       reference: formValue.reference,
       glAccountDesc: formValue.glAccountDesc,
       apphierId: formValue.apphierId,
@@ -259,7 +255,6 @@ const GLAccountForm = ({ type }) => {
               paramValue: [
                 "glAccount",
                 "glAccountDesc",
-                "specialGlValue",
                 "reference",
               ],
             },
@@ -279,7 +274,6 @@ const GLAccountForm = ({ type }) => {
     const jsonData = {
       ...(type === "update" && { glAccountId: id }),
       glAccount: bodyData.glAccount,
-      specialGlValue: bodyData.specialGlValue,
       reference: bodyData.reference,
       glAccountDesc: bodyData.glAccountDesc,
       apphierId: bodyData.apphierId,
@@ -419,7 +413,6 @@ const GLAccountForm = ({ type }) => {
           paramValue: [
             "glAccount",
             "glAccountDesc",
-            "specialGlValue",
             "reference",
           ],
         },
