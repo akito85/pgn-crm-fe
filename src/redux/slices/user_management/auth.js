@@ -893,6 +893,9 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       state.loading = false;
       state.user = action.payload;
+      // Clear notification userId and positionId persistence
+      localStorage.removeItem("notification_userId");
+      localStorage.removeItem("notification_positionId");
     },
     [logout.rejected]: (state, action) => {
       state.isLoggedIn = false;
@@ -904,7 +907,7 @@ const authSlice = createSlice({
       state.selectedPosition = false;
       state.loading = true;
     },
-    [choosePosition.fulfilled]: (state) => {
+    [choosePosition.fulfilled]: (state, action) => {
       state.loading = false;
       state.isFailed = false;
       state.token =
@@ -912,6 +915,11 @@ const authSlice = createSlice({
       state.side_bar =
         localStorage.getItem("side_bar") ||
         window.sessionStorage.getItem("side_bar");
+      // Persist positionId for notification system (survives page refresh/navigation)
+      if (action.payload?.data?.position?.positionId) {
+        state.currentPosition = action.payload.data.position;
+        localStorage.setItem("notification_positionId", action.payload.data.position.positionId);
+      }
     },
     [choosePosition.rejected]: (state) => {
       state.selectedPosition = false;
@@ -1049,6 +1057,8 @@ const authSlice = createSlice({
       // The token doesn't contain positionId, but the full response does at action.payload.position
       if (action.payload?.position) {
         state.currentPosition = action.payload.position;
+        // Persist positionId for notification system (survives page refresh/navigation)
+        localStorage.setItem("notification_positionId", action.payload.position.positionId);
       }
     },
     [changePosition.rejected]: (state) => {
