@@ -67,8 +67,18 @@ const ViewPaymentWarrantyPartner = () => {
   }, [handleFetch]);
 
   const routes = [
-    { path: "", breadcrumbName: "Receipt & Collection" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_WARRANTY_PARTNER, breadcrumbName: "Payment Warranty Partner" },
+    {
+      path: "",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
+    },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_WARRANTY_PARTNER,
+      breadcrumbName: "Payment Warranty Partner",
+    },
   ];
 
   const handleOptions = () => {
@@ -240,14 +250,15 @@ const ViewPaymentWarrantyPartner = () => {
               state={{ id: record?.id }}
             >
               <ButtonComponent
-                className="gap-5 w-full"
+                className="gap-5"
                 icon={
                   <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
                 }
                 border={false}
                 disabled={!isEditable}
+                type="action"
               >
-                <span className={"text-black gap-2 text-xl text-center w-full"}>Update</span>
+                <span className={"text-black gap-2 text-center"}>Update</span>
               </ButtonComponent>
             </Link>
           ) : (
@@ -275,16 +286,17 @@ const ViewPaymentWarrantyPartner = () => {
           <div className="w-full">
             <ButtonComponent
               border={false}
-              className={'gap-5 w-full'}
+              className={'gap-5'}
               onClick={() => handleInactive(record)}
               disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)}
+              type="action"
             >
               <Checkbox
                 onClick={() => handleInactive(record)}
                 checked={record?.status !== "Active"}
                 disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)}
               />
-              <span className={"text-black ml-6 gap-2 text-xl text-center w-full"}>
+              <span className={"text-black ml-6 gap-2 text-center"}>
                 {record?.status === "Active" ? "Inactivate" : "Activate"}
               </span>
             </ButtonComponent>
@@ -308,8 +320,9 @@ const ViewPaymentWarrantyPartner = () => {
             icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
             border={false}
             onClick={() => handleApprovalHistory(record?.id)}
+            type="action"
           >
-            <span className={"text-black gap-2 text-xl text-center"}>Approval History</span>
+            <span className={"text-black gap-2 text-center"}>Approval History</span>
           </ButtonComponent>
         ) : (
           <Tooltip title={'Approval History'}>
@@ -335,7 +348,9 @@ const ViewPaymentWarrantyPartner = () => {
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px] font-bold">WARRANTY PARTNER LIST</p>
-            <Toolbar items={itemActions} />
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
           </div>
         }>
           <TableRBI

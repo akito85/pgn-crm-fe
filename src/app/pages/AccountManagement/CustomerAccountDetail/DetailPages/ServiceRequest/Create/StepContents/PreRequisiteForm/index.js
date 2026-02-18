@@ -11,7 +11,8 @@ import {
 
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 import ModalPreRequisiteDetail from "./ModalPreRequisiteDetail";
 
@@ -341,7 +342,8 @@ export default function PreRequisiteForm({
 
   return (
     <Fragment>
-      <NxPanel title={"PREREQUSITE LIST"}>
+      <NxCardContainer header={"PREREQUISITE LIST"}>
+        <NxBaseContainer border>
         {/* Create Button */}
         <div className="w-full flex justify-end items-center gap-2.5 mb-5">
           <ButtonComponent
@@ -393,7 +395,8 @@ export default function PreRequisiteForm({
           })}
           border="true"
         />
-      </NxPanel>
+        </NxBaseContainer>
+      </NxCardContainer>
 
       <ModalPreRequisiteDetail
         isOpen={isOpen}

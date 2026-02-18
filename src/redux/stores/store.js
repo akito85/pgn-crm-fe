@@ -90,6 +90,7 @@ import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
+import { tasklistSlice } from "../slices/tasklist/tasklistSlice";
 import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog";
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
@@ -135,8 +136,7 @@ import paymentRelationReducer from "../slices/account_management/detailAccount/P
 import invoiceRelationReducer from "../slices/account_management/detailAccount/InvoiceRelationSlice";
 import globalPropReducer from "../slices/globalPropSlice";
 import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentWarrantyPartner";
-import rateSourceReducer from "../slices/receipt_collection/rateSource";
-import rateIndexReducer from "../slices/receipt_collection/rateIndex";
+import liborRateReducer from "../slices/receipt_collection/liborRate";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 
@@ -280,8 +280,7 @@ const reducer = combineReducers({
   historyWarranty: historyWarrantyReducer,
   offset: offsetReducer,
   paymentWarrantyPartner: paymentWarrantyPartnerReducer,
-  rateSource: rateSourceReducer,
-  rateIndex: rateIndexReducer,
+  liborRate: liborRateReducer,
   paymentCycle: paymentCycleReducer,
 
   // Attachment
@@ -294,6 +293,9 @@ const reducer = combineReducers({
   [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
   [reportCustomerAgreementSlice.reducerPath]:
     reportCustomerAgreementSlice.reducer,
+
+  // tasklist
+  [tasklistSlice.reducerPath]: tasklistSlice.reducer,
 
   // debt and collection
   gracePeriod: gracePeriodReducer,
@@ -317,7 +319,10 @@ const store = configureStore({
   reducer: reducer,
   devTools: true,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(reportCustomerSlice.middleware),
+    getDefaultMiddleware()
+      .concat(reportCustomerSlice.middleware)
+      .concat(reportCustomerAgreementSlice.middleware)
+      .concat(tasklistSlice.middleware),
 });
 
 setupListeners(store.dispatch);

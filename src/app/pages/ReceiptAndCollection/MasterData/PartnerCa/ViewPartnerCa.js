@@ -83,11 +83,15 @@ const ViewPartnerCa = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
-      breadcrumbName: "Partner Ca",
+      breadcrumbName: "Partner Collecting Agent Mapping",
     },
   ];
 
@@ -664,7 +668,7 @@ const ViewPartnerCa = () => {
         {/* <Toolbar items={itemActions} /> */}
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PARTNER CA List</p>
+            <p className="mt-[15px] font-bold">PARTNER COLLECTING AGENT MAPPING List</p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
             </div>

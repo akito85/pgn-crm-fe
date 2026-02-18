@@ -1,0 +1,232 @@
+/* Inline Notifications Container Styles */
+
+.inline-notifications-container {
+  width: 100%;
+  padding: 8px 0;
+  animation: slideDown 0.3s ease-out;
+}
+
+.inline-notification-alert {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeInSlide 0.3s ease-out;
+}
+
+.inline-notification-alert .ant-alert-message {
+  width: 100%;
+}
+
+.inline-notification-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.inline-notification-text {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.inline-notification-action {
+  flex-shrink: 0;
+  padding: 0 8px;
+  height: auto;
+  font-size: 13px;
+}
+
+.inline-notifications-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 8px;
+}
+
+.inline-notifications-dismiss-all {
+  font-size: 12px;
+  color: #8c8c8c;
+  padding: 4px 8px;
+}
+
+.inline-notifications-dismiss-all:hover {
+  color: #262626;
+  background-color: #f5f5f5;
+}
+
+.inline-notifications-overflow {
+  text-align: center;
+  padding: 8px 0;
+  border-top: 1px dashed #d9d9d9;
+}
+
+/* Compact variant */
+.inline-notification-compact {
+  border-radius: 6px;
+  margin-bottom: 4px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.inline-notification-compact .ant-alert-message {
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+/* With Actions variant */
+.inline-notification-with-actions {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 12px 16px;
+}
+
+.inline-notification-with-actions .ant-alert-message {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.inline-notification-with-actions .ant-alert-description {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Animation for entrance */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Type-specific styling */
+.inline-notification-alert.ant-alert-info {
+  border-left: 4px solid #1890ff;
+}
+
+.inline-notification-alert.ant-alert-success {
+  border-left: 4px solid #52c41a;
+}
+
+.inline-notification-alert.ant-alert-warning {
+  border-left: 4px solid #faad14;
+}
+
+.inline-notification-alert.ant-alert-error {
+  border-left: 4px solid #ff4d4f;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .inline-notification-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .inline-notification-text {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inline-notification-action {
+    align-self: flex-start;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .inline-notifications-container {
+    padding: 4px 0;
+  }
+
+  .inline-notification-alert {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .inline-notification-text strong {
+    font-size: 13px !important;
+  }
+
+  .inline-notification-text span {
+    font-size: 12px !important;
+  }
+}
+
+/* Print styles - hide notifications when printing */
+@media print {
+  .inline-notifications-container {
+    display: none;
+  }
+}
+
+/* Dark theme support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .inline-notification-alert {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .inline-notifications-dismiss-all {
+    color: #bfbfbf;
+  }
+
+  .inline-notifications-dismiss-all:hover {
+    color: #ffffff;
+    background-color: #262626;
+  }
+
+  .inline-notifications-overflow {
+    border-top-color: #434343;
+  }
+}
+
+/* Accessibility improvements */
+.inline-notification-alert:focus-within {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+.inline-notification-action:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+/* Smooth exit animation */
+.inline-notification-alert.ant-alert-motion-leave {
+  animation: fadeOutSlide 0.2s ease-in forwards;
+}
+
+@keyframes fadeOutSlide {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    max-height: 100px;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}

@@ -38,6 +38,7 @@ const initialState = {
   data_position: [],
   data_extended: null,
   data_switch: null,
+  currentPosition: null, // Position info from switch-pos API { positionId, positionName }
 };
 let remember_me = "";
 export const login = createAsyncThunk(
@@ -1036,7 +1037,19 @@ const authSlice = createSlice({
     },
     [changePosition.fulfilled]: (state, action) => {
       state.loading = false;
+      state.isFailed = false;
       state.data_switch = action.payload;
+      state.token =
+        localStorage.getItem("token") || window.sessionStorage.getItem("token");
+      state.side_bar =
+        localStorage.getItem("side_bar") ||
+        window.sessionStorage.getItem("side_bar");
+
+      // Store position information for notification filtering
+      // The token doesn't contain positionId, but the full response does at action.payload.position
+      if (action.payload?.position) {
+        state.currentPosition = action.payload.position;
+      }
     },
     [changePosition.rejected]: (state) => {
       state.loading = false;

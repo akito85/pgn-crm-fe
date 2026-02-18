@@ -80,11 +80,15 @@ const ListDetailPartnerCa = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
-      breadcrumbName: "Partner Ca",
+      breadcrumbName: "Partner Collecting Agent Mapping",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER_CA,
@@ -145,7 +149,7 @@ const ListDetailPartnerCa = () => {
           onChange={setSegmentedPage}
           items={[
             {
-              label: "Partner Ca",
+              label: "Partner Collecting Agent Mapping",
               key: "Partner Ca",
               children: (
                 <DetailPartnerCa

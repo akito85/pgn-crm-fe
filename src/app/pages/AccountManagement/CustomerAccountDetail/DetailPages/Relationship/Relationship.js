@@ -35,7 +35,7 @@ const Relationship = ({
   const searchInput = useRef(null);
 
   // state
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -68,7 +68,7 @@ const Relationship = ({
 
   const handleRefresh = () => {
     const body = {
-      page: 1,
+      page: 0,
       size: loadMoreSize,
       sort,
       searchs: search,
@@ -78,14 +78,14 @@ const Relationship = ({
     dispatch(
       getRelationshipListAdvanced({
         idAccount: id,
-        page: 1,
+        page: 0,
         pageSize: loadMoreSize,
         sort,
         body,
         isLoadMore: false,
       })
     );
-    setPage(1);
+    setPage(0);
   };
 
   /**
@@ -139,7 +139,7 @@ const Relationship = ({
         dispatch(
           getRelationshipListAdvanced({
             idAccount: id,
-            page: 1,
+            page: 0,
             pageSize: loadMoreSize,
             sort,
             body,
@@ -163,7 +163,7 @@ const Relationship = ({
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
@@ -240,7 +240,7 @@ const Relationship = ({
           sort,
           body,
           isLoadMore: true,
-        })
+        }).unwrap()
       );
     }
     setPage(nextPage);

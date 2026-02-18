@@ -6,10 +6,10 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import DetailLiborRate from "./DetailLiborRate";
 import {
-  getDetailRateSource,
-  approveOrRejectRateSource,
-  approveOrRejectInactiveRateSource,
-} from "../../../../../redux/slices/receipt_collection/rateSource";
+  getDetailRateIndex,
+  approveOrRejectRateIndex,
+  approveOrRejectInactiveRateIndex,
+} from "../../../../../redux/slices/receipt_collection/liborRate";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
@@ -23,7 +23,7 @@ const ListDetailLiborRate = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = location?.state || {};
-  const { data_detail, loading } = useSelector((state) => state.rateSource);
+  const { data_detail, loading } = useSelector((state) => state.liborRate);
 
   const [modalApprove, setModalApprove] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
@@ -32,22 +32,33 @@ const ListDetailLiborRate = () => {
 
   useEffect(() => {
     if (id) {
-      dispatch(getDetailRateSource(id));
+      dispatch(getDetailRateIndex(id));
     }
   }, [dispatch, id]);
 
   const isShowButton = data_detail?.tApprovalDto?.isApprover;
 
   const routes = [
-    { path: "", breadcrumbName: "Receipt & Collection" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_LIBOR_RATE, breadcrumbName: "Libor Rate" },
+    {
+      path: "",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
+    },
+
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_LIBOR_RATE,
+      breadcrumbName: "Libor Rate",
+    },
     { path: "", breadcrumbName: `Detail Libor Rate` },
   ];
 
   const handleConfirm = (res, handleClear) => {
     setLoadingConfirm(true);
-    const isInactiveApproval = data_detail?.tApprovalDto?.approvalType === "INACTIVE_RATE_SOURCE";
-    const action = isInactiveApproval ? approveOrRejectInactiveRateSource : approveOrRejectRateSource;
+    const isInactiveApproval = data_detail?.tApprovalDto?.approvalType === "INACTIVE_RATE_INDEX";
+    const action = isInactiveApproval ? approveOrRejectInactiveRateIndex : approveOrRejectRateIndex;
 
     const body = {
       id: id,
@@ -91,7 +102,7 @@ const ListDetailLiborRate = () => {
                     <AttachmentComponent
                       type={"detail"}
                       data={data_detail?.attachmentDtoList || []}
-                      typeSelector="rateSource"
+                      typeSelector="liborRate"
                       service={receiptCollectionHttpService}
                       configApplication={configApp.PAYMENT_SERVICE}
                     />
@@ -110,7 +121,7 @@ const ListDetailLiborRate = () => {
         header={approveOrReject}
         approveOrReject={approveOrReject}
         menu={"Libor Rate"}
-        named={data_detail?.rateSource?.sourceName}
+        named={data_detail?.rateIndex?.indexName}
         loading={loadingConfirm}
       />
 
