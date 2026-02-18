@@ -904,33 +904,6 @@ export const columnsBilling = (
       ),
   },
   {
-    key: "totalAmount",
-    title: "TOTAL AMOUNT",
-    dataIndex: "totalAmount",
-    width: 75,
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmount",
-        hasValue(search["totalAmount"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
     key: "prevBalance",
     title: "PREV BALANCE",
     dataIndex: "prevBalance",
@@ -991,6 +964,33 @@ export const columnsBilling = (
       }
       return numberFormatting(text);
     },
+  },
+    {
+    key: "totalAmount",
+    title: "TOTAL AMOUNT",
+    dataIndex: "totalAmount",
+    width: 75,
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "totalAmount",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "totalAmount",
+        hasValue(search["totalAmount"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
   },
   {
     key: "convertedCurrency",
