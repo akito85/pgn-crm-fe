@@ -40,6 +40,7 @@ import {
   selectDirectNotifications,
   selectUnreadCount,
   selectConnectionStatus,
+  selectCurrentPositionId,
   markAsRead,
   markAllAsRead,
   markNotificationAsReadApi,
@@ -86,7 +87,8 @@ const NotificationHistory = () => {
 
   // Get current position for filtering
   const authCurrentPosition = useSelector((state) => state.auth?.currentPosition);
-  const currentPositionId = authCurrentPosition?.positionId;
+  const reduxCurrentPositionId = useSelector(selectCurrentPositionId);
+  const currentPositionId = authCurrentPosition?.positionId || reduxCurrentPositionId;
 
   // Defensive check: Ensure all notification arrays are actually arrays
   const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
@@ -124,9 +126,11 @@ const NotificationHistory = () => {
     notifications = notifications.filter(notification => {
       const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
 
-      // If notification has a position ID, only show when user is in that exact position
-      if (notifPositionId) {
-        if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+      // If notification has a position ID AND user has a current position set,
+      // only show when it matches. When no position is set, allow all through
+      // to prevent silently hiding notifications before user selects a position.
+      if (notifPositionId && currentPositionId) {
+        if (Number(notifPositionId) !== Number(currentPositionId)) {
           return false;
         }
       }
@@ -185,8 +189,9 @@ const NotificationHistory = () => {
   // Position filter must be applied for accurate counts
   const positionFilteredNotifications = safeAllNotifications.filter(notification => {
     const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
-    if (notifPositionId) {
-      if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+    // Only filter by position when both notification has position ID AND user has current position
+    if (notifPositionId && currentPositionId) {
+      if (Number(notifPositionId) !== Number(currentPositionId)) {
         return false;
       }
     }

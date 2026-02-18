@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Modal } from "antd";
+import { Tooltip } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import NxTable from "../../../../../components/Nx/NxTable";
 import { getTasklistColumns } from "./getTasklistColumns";
 import { nxApplyFixedColumns } from "../../../../../utils/Nx/nxApplyFixedColumns";
@@ -32,15 +33,18 @@ const TasklistTable = ({
       navigate(`/approval/${tappId}`, {
         state: {
           taskId: record.TASK_ID || record.taskId,
+          tappId,
+          module: record.MODULE || record.module,
+          category: record.CATEGORY || record.category,
+          taskType: record.TASK_TYPE || record.taskType,
+          taskStatus: record.TASK_STATUS || record.taskStatus,
+          priority: record.PRIORITY || record.priority,
+          taskSubject: record.TASK_SUBJECT || record.taskSubject,
           returnTo: "/dashboard",
         },
       });
-    } else {
-      Modal.info({
-        title: "No Approval Page",
-        content: "This task does not have an associated approval page.",
-      });
     }
+    // No fallback modal — button is visually disabled when no tappId
   };
 
   const actionCols = [
@@ -49,15 +53,21 @@ const TasklistTable = ({
       title: "ACTION",
       width: 70,
       align: "center",
-      render: (_, record) => (
-        <Button
-          size="small"
-          onClick={() => handleViewAction(record)}
-          disabled={!record.TAPP_ID && !record.tappId}
-        >
-          View
-        </Button>
-      ),
+      render: (_, record) => {
+        const tappId = record.TAPP_ID || record.tappId;
+        return (
+          <Tooltip title="View">
+            <EyeOutlined
+              onClick={tappId ? () => handleViewAction(record) : undefined}
+              style={{
+                fontSize: 18,
+                color: tappId ? "#0075bf" : "#d9d9d9",
+                cursor: tappId ? "pointer" : "not-allowed",
+              }}
+            />
+          </Tooltip>
+        );
+      },
     },
   ];
 

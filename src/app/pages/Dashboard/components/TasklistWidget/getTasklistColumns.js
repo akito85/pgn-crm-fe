@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Badge, Button, Modal } from "antd";
+import { Badge } from "antd";
 import { dateFormatting, toTitleCase } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../components/StatusComponent";
@@ -36,46 +36,6 @@ export const getTasklistColumns = (
       true
     ),
     render: (text, record) => text || record.taskSubject || "-",
-  },
-  {
-    key: "taskType",
-    title: "TASK TYPE",
-    dataIndex: "TASK_TYPE",
-    width: 150,
-    sorter: true,
-    filteredValue: [search?.taskType] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "taskType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "select",
-      [
-        { value: "APPROVAL_REQUEST", label: "Approval Request" },
-        { value: "REVIEW", label: "Review" },
-        { value: "ACKNOWLEDGE", label: "Acknowledge" },
-        { value: "ACTION_REQUIRED", label: "Action Required" },
-      ]
-    ),
-    render: (text, record) => {
-      const type = text || record.taskType || "-";
-      const colorMap = {
-        APPROVAL_REQUEST: "blue",
-        REVIEW: "cyan",
-        ACKNOWLEDGE: "green",
-        ACTION_REQUIRED: "orange",
-      };
-      const labelMap = {
-        APPROVAL_REQUEST: "Approval Request",
-        REVIEW: "Review",
-        ACKNOWLEDGE: "Acknowledge",
-        ACTION_REQUIRED: "Action Required",
-      };
-      return <Badge color={colorMap[type] || "default"} text={labelMap[type] || type} />;
-    },
   },
   {
     key: "taskStatus",
@@ -146,65 +106,6 @@ export const getTasklistColumns = (
     },
   },
   {
-    key: "dueDate",
-    title: "DUE DATE",
-    dataIndex: "DUE_DATE",
-    width: 140,
-    align: "center",
-    sorter: true,
-    filteredValue: [search?.dueDate] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "dueDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text, record) => {
-      const date = text || record.dueDate;
-      return date ? moment(date).format(dateFormatting.date) : "-";
-    },
-  },
-  {
-    key: "module",
-    title: "MODULE",
-    dataIndex: "MODULE",
-    width: 180,
-    sorter: true,
-    filteredValue: [search?.module] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "module",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text, record) => toTitleCase(text || record.module || "-"),
-  },
-  {
-    key: "category",
-    title: "CATEGORY",
-    dataIndex: "CATEGORY",
-    width: 180,
-    sorter: true,
-    filteredValue: [search?.category] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "category",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text, record) => toTitleCase(text || record.category || "-"),
-  },
-  {
     key: "taskSender",
     title: "SENDER",
     dataIndex: "TASK_SENDER",
@@ -222,21 +123,11 @@ export const getTasklistColumns = (
     render: (text, record) => text || record.taskSender || "-",
   },
   {
-    key: "taskReceiver",
-    title: "RECEIVER",
-    dataIndex: "TASK_RECEIVER",
+    key: "remarks",
+    title: "REMARKS",
+    dataIndex: "REMARKS",
     width: 200,
-    filteredValue: [search?.taskReceiver] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "taskReceiver",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text, record) => text || record.taskReceiver || "-",
+    render: (text, record) => text || record.remarks || "-",
   },
   {
     key: "createdAt",
@@ -288,33 +179,25 @@ export const getTasklistColumns = (
     key: "taskBody",
     title: "ADDITIONAL INFO",
     dataIndex: "TASK_BODY",
-    width: 100,
-    align: "center",
+    width: 220,
     render: (text, record) => {
       const body = text || record.taskBody;
       if (!body) return "-";
-
-      const handleShowDetails = () => {
-        try {
-          const parsed = typeof body === "string" ? JSON.parse(body) : body;
-          Modal.info({
-            title: "Task Details",
-            width: 600,
-            content: <pre>{JSON.stringify(parsed, null, 2)}</pre>,
-          });
-        } catch (e) {
-          Modal.error({
-            title: "Error",
-            content: "Unable to parse task details",
-          });
-        }
-      };
-
-      return (
-        <Button size="small" onClick={handleShowDetails}>
-          View
-        </Button>
-      );
+      try {
+        const parsed = typeof body === "string" ? JSON.parse(body) : body;
+        if (typeof parsed !== "object" || parsed === null) return String(body);
+        return (
+          <ul style={{ margin: 0, padding: "0 0 0 16px", fontSize: 12 }}>
+            {Object.entries(parsed).map(([k, v]) => (
+              <li key={k}>
+                <strong>{k}:</strong> {String(v ?? "-")}
+              </li>
+            ))}
+          </ul>
+        );
+      } catch {
+        return body;
+      }
     },
   },
 ];

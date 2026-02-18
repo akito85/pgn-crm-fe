@@ -86,7 +86,10 @@ const NotificationDropdown = () => {
   const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
 
   // Get positionId from auth.currentPosition (from switch-pos API) or fallback to Redux notifications.currentPositionId
-  const positionId = authCurrentPosition?.positionId || currentPositionId;
+  // Also check localStorage for persistence across navigation/refresh
+  const persistedPositionId = localStorage.getItem("notification_positionId");
+  const positionId = authCurrentPosition?.positionId || currentPositionId || persistedPositionId ?
+    (authCurrentPosition?.positionId || currentPositionId || persistedPositionId) : null;
 
   // Filter notifications for current user and current position
   const userNotifications = safeAllNotifications.filter(notification => {
@@ -164,10 +167,18 @@ const NotificationDropdown = () => {
     );
     const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
 
-    // Get positionId from auth.currentPosition (from switch-pos API response)
-    const positionId = authCurrentPosition?.positionId;
+    // Get positionId from auth.currentPosition or localStorage fallback
+    const positionId = authCurrentPosition?.positionId || localStorage.getItem("notification_positionId");
 
     if (userId) {
+      // Persist userId for reconnects (survives token format changes)
+      localStorage.setItem("notification_userId", userId);
+
+      // Persist positionId for reconnects (survives navigation/refresh)
+      if (positionId) {
+        localStorage.setItem("notification_positionId", positionId);
+      }
+
       // Set current position in Redux for position-based filtering
       dispatch(setCurrentPositionId(positionId || null));
 
@@ -220,14 +231,25 @@ const NotificationDropdown = () => {
       return;
     }
 
-    // Get user ID from token
+    // Get user ID from token - fall back to persisted value if token format changed
     const tokenJSON = JSON.parse(authToken || "{}");
-    const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+    const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username
+                 || localStorage.getItem("notification_userId"); // fallback if token format changed
 
-    // Get positionId from auth.currentPosition (from switch-pos API response)
-    const positionId = authCurrentPosition?.positionId;
+    // Get positionId from auth.currentPosition or localStorage fallback
+    const positionId = authCurrentPosition?.positionId || localStorage.getItem("notification_positionId");
 
     if (userId) {
+      // Persist userId if not already stored (survives token format changes)
+      if (!localStorage.getItem("notification_userId")) {
+        localStorage.setItem("notification_userId", userId);
+      }
+
+      // Persist positionId if available (survives navigation/refresh)
+      if (positionId && !localStorage.getItem("notification_positionId")) {
+        localStorage.setItem("notification_positionId", positionId);
+      }
+
       // Update current position in Redux for position-based filtering
       dispatch(setCurrentPositionId(positionId || null));
 
