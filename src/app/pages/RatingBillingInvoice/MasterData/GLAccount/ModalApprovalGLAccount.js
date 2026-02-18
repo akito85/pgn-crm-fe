@@ -168,7 +168,6 @@ const ModalApprovalGLAccount = ({
 
   // Handle Save for Modal Confirmation
   const handleSave = (formValue) => {
-    handleCancel();
 
     const glAccountItems = dataTableSelect.map((item) => ({
       glAccountId: item.glAccountId,

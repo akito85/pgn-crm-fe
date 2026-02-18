@@ -28,7 +28,7 @@ import ModalApprovalGLAccount from "./ModalApprovalGLAccount";
 
 const GLAccountView = () => {
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.glAccount
+    (state) => state.glAccount,
   );
 
   // Declaration
@@ -76,7 +76,7 @@ const GLAccountView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, sort, page, pageSize, dispatch]);
 
@@ -194,7 +194,7 @@ const GLAccountView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -248,7 +248,7 @@ const GLAccountView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -260,12 +260,27 @@ const GLAccountView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
   // Grant Access Item
   const itemGrantAccess = [
+    {
+      action: "Approve",
+      render: (
+        <ButtonComponent
+          icon={
+            <SVGIcon name="IconRequestApproval" width={24} color="#ffffff" />
+          }
+          type="submit"
+          className="bg-red-500"
+          onClick={() => setModalApproval(true)}
+        >
+          Bulk Approve
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Download",
       render: (
@@ -278,21 +293,6 @@ const GLAccountView = () => {
           }}
         >
           Download List
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Approve",
-      render: (
-        <ButtonComponent
-          icon={
-            <SVGIcon name="IconRequestApproval" width={24} color="#0075bf" />
-          }
-          type="default"
-          className="bg-red-500"
-          onClick={() => setModalApproval(true)}
-        >
-          Bulk Approve
         </ButtonComponent>
       ),
     },
@@ -321,7 +321,7 @@ const GLAccountView = () => {
             state={{ id: record.glAccountId }}
           >
             <Tooltip title="Detail">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon name="IconDetail" width={24} />
               </div>
             </Tooltip>
@@ -361,7 +361,7 @@ const GLAccountView = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon
                   name="IconEdit"
                   width={24}
@@ -474,7 +474,7 @@ const GLAccountView = () => {
   // Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // Get base columns with key property
@@ -487,7 +487,7 @@ const GLAccountView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];
