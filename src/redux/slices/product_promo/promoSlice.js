@@ -125,7 +125,7 @@ export const approvePromo = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your data has been ${
-          body?.action ? "approved" : "rejected"
+          body?.action === "APPROVE" ? "approved" : "rejected"
         }`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
