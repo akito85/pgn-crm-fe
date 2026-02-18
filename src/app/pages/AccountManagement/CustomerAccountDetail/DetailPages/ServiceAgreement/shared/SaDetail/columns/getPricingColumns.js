@@ -3,6 +3,7 @@ import { Tooltip } from 'antd';
 import { NumericFormat } from 'react-number-format';
 import SVGIcon from '../../../../../../../../../assets/Icon/index';
 import { hasValue, renderColumn } from '../../../../../../../../../utils';
+import { CurrencyFormatting, currencyFormatting } from "../../../../../../../../../utils/formatCurrency";
 
 const separatorNumber = (text) => {
     const thousandSeparator = ",";
@@ -126,14 +127,9 @@ export const getPricingColumns = ({
                     align: "right",
                     width: 120,
                     render: (value, record) => (
-                        <NumericFormat
-                            displayType="text"
+                        <CurrencyFormatting
                             value={value}
-                            className="text-right"
-                            thousandSeparator={record.currency === "USD" ? "," : "."}
-                            decimalSeparator={record.currency === "USD" ? "." : ","}
-                            decimalScale={2}
-                            fixedDecimalScale
+                            currency={record.currency?.toLowerCase()}
                         />
                     ),
                 },

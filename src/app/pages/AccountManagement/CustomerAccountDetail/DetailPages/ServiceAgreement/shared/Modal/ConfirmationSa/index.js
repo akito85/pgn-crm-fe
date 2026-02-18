@@ -40,6 +40,7 @@ const ConfirmationSa = ({
   const {
     data_service_type,
     data_sa_type = [],
+    data_sa_child_type = [],
     data_pjbg = [],
     data_term_of_payment,
     data_billing_cycle,
@@ -136,6 +137,11 @@ const ConfirmationSa = ({
     }
   }
 
+  // useEffect(() => {
+  //   console.log("saRecordData", saRecordData)
+  //   console.log("saInfoObj", saInfoObj)
+  // }, [])
+
 
   return (
     <div>
@@ -183,11 +189,15 @@ const ConfirmationSa = ({
                       <DetailText label="Service Agreement Date">{dataFinal?.saInfo?.saDate ? moment(dataFinal?.saInfo?.saDate).format(dateFormatting.date) : ''}</DetailText>
                       <DetailText label="Start Date">{dataFinal?.saInfo?.startDate ? moment(dataFinal?.saInfo?.startDate).format(dateFormatting.date) : ''}</DetailText>
                       <DetailText label="End Date">{dataFinal?.saInfo?.endDate ? moment(dataFinal?.saInfo?.endDate).format(dateFormatting.date) : ''}</DetailText>
-                      <DetailText label="Commitment Date">
-                        {dataFinal?.saInfo?.commitmentDate ? moment(dataFinal?.saInfo?.commitmentDate).format(dateFormatting.date) : ''}
-                      </DetailText>
-                      <DetailText label="Already Gas In">{dataFinal?.saInfo?.alreadyGasIn === true ? "Yes" : 'No'}</DetailText>
-                      <DetailText label="Gas In Plan Date">{dataFinal?.saInfo?.gasInPlanDate ? moment(dataFinal?.saInfo?.gasInPlanDate).format(dateFormatting.date) : ''}</DetailText>
+                      {dataFinal?.isMain && (
+                        <>
+                          <DetailText label="Commitment Date">
+                            {dataFinal?.saInfo?.commitmentDate ? moment(dataFinal?.saInfo?.commitmentDate).format(dateFormatting.date) : ''}
+                          </DetailText>
+                          <DetailText label="Already Gas In">{dataFinal?.saInfo?.alreadyGasIn === true ? "Yes" : 'No'}</DetailText>
+                          <DetailText label="Gas In Plan Date">{dataFinal?.saInfo?.gasInPlanDate ? moment(dataFinal?.saInfo?.gasInPlanDate).format(dateFormatting.date) : ''}</DetailText>
+                        </>
+                      )}
                     </div>
                     <div className='w-full'>
                       <DetailText label="Description">{dataFinal?.saInfo?.description}</DetailText>
@@ -195,13 +205,15 @@ const ConfirmationSa = ({
                   </NxBaseContainer>
 
                   {/* BILLING AND PAYMENT INFORMATION */}
-                  <NxBaseContainer border header={"BILLING & PAYMENT INFORMATION"}>
-                    <div className="grid grid-cols-3 gap-5">
-                      <DetailText label="Billing Cycle">{getBillingCycleName(dataFinal?.saInfo?.billingCycle)}</DetailText>
-                      <DetailText label="Term Of Payment">{getTermsName(dataFinal?.saInfo?.termOfPayment)}</DetailText>
-                      <DetailText label="Invoice Template">{getInvoiceName(dataFinal?.saInfo?.invoiceTemplate)}</DetailText>
-                    </div>
-                  </NxBaseContainer>
+                  {!(saInfoObj?.serviceAgreementTypeValue === "ADDON") && (
+                    <NxBaseContainer border header={"BILLING & PAYMENT INFORMATION"}>
+                      <div className="grid grid-cols-3 gap-5">
+                        <DetailText label="Billing Cycle">{getBillingCycleName(dataFinal?.saInfo?.billingCycle)}</DetailText>
+                        <DetailText label="Term Of Payment">{getTermsName(dataFinal?.saInfo?.termOfPayment)}</DetailText>
+                        <DetailText label="Invoice Template">{getInvoiceName(dataFinal?.saInfo?.invoiceTemplate)}</DetailText>
+                      </div>
+                    </NxBaseContainer>
+                  )}
                 </div>
               ),
             },
@@ -214,6 +226,16 @@ const ConfirmationSa = ({
                   <NxBaseContainer border header={"CREATE FROM"}>
                     <div className="grid grid-cols-3 gap-5">
                       <DetailText label="Create From">{saDetailObj?.createFrom === 1 ? "Product" : "Custom"}</DetailText>
+                      {/* SA Child Type */}
+                      {(saInfoObj?.serviceAgreementTypeValue === "ADDON" || saInfoObj?.serviceAgreementTypeValue === "OTHERS") && (
+                        <DetailText label="Service Agreement Child Type">
+                          {saInfoObj?.serviceAgreementTypeValue === "ADDON"
+                            ? (saDetailObj?.serviceAgreementChildType || "-")
+                            : (data_sa_child_type?.find(item => item.id === saDetailObj?.serviceAgreementChildType)?.value || "-")
+                          }
+                        </DetailText>
+                      )}
+
                       {saDetailObj?.createFrom === 1 && (
                         <>
                           <DetailText label="Choose Product">{saDetailObj?.productName}</DetailText></>

@@ -9,6 +9,7 @@ const initialState = {
   data_detail_draft: {},
   data_service_type: [],
   data_sa_type: [],
+  data_sa_child_type: [],
   data_pjbg: [],
   data_product: [],
   data_product_detail: {},
@@ -352,6 +353,20 @@ export const getSaType = createAsyncThunk(
     }
   }
 );
+// Get Service Agreement Child Type
+export const getSaChildType = createAsyncThunk(
+  "GET_SERVICE_AGREEMENT_CHILD_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/saChildType`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Get Service Agreement Type
 export const getPjbg = createAsyncThunk("GET_PJBG_TYPE", async (thunkAPI) => {
   try {
@@ -875,6 +890,24 @@ const accountServiceAgreementSlice = createSlice({
     },
     [getSaType.rejected]: (state, action) => {
       state.data_sa_type = action.payload;
+      state.loading = false;
+    },
+
+    // Service Agreement Child Type
+    [getSaChildType.pending]: (state, action) => {
+      state.isFailed = false;
+      state.isSuccess = false;
+      state.loading = true;
+      state.data_sa_child_type = action.payload;
+    },
+    [getSaChildType.fulfilled]: (state, action) => {
+      state.isFailed = false;
+      state.isSuccess = false;
+      state.data_sa_child_type = action.payload;
+      state.loading = false;
+    },
+    [getSaChildType.rejected]: (state, action) => {
+      state.data_sa_child_type = action.payload;
       state.loading = false;
     },
 
