@@ -31,6 +31,7 @@ const EditableCell = ({
   endDate,
   requiredDate,
   indexValue,
+  type,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -38,6 +39,20 @@ const EditableCell = ({
   const key = record?.key || 0;
 
   const disabledCondition = (dependDataIndex, dataIndex, record) => {
+    // Status-based field disabling for update type
+    if (type === "update" && record?.status) {
+      const status = record.status;
+      // INACTIVE: all fields disabled (shouldn't happen since edit icon is disabled)
+      if (status === "INACTIVE") {
+        return true;
+      }
+      // ACTIVE: only endDate is editable
+      if (status === "ACTIVE") {
+        return dataIndex !== "endDate";
+      }
+      // DRAFT: all fields editable (fall through to normal logic)
+    }
+
     return dataDependAdvanced(dependDataIndex, key, dataEditRecord);
     // ||
     // record[dataIndex]?.disabled ||
@@ -129,7 +144,10 @@ const EditableCell = ({
             allowClear
             optionFilterProp="children"
             labelInValue
-            disabled={dataDepended(dependDataIndex, dataIndex, record, dataEditRecord)}
+            disabled={
+              disabledCondition(dependDataIndex, dataIndex, record) ||
+              dataDepended(dependDataIndex, dataIndex, record, dataEditRecord)
+            }
             filterOption={(input, option) =>
               (option?.children ?? "")
                 .toLowerCase()
@@ -149,6 +167,7 @@ const EditableCell = ({
             onChange={(e) => {
               formTableCriteria.resetFields(["endDate"]);
             }}
+            disabled={disabledCondition(dependDataIndex, dataIndex, record)}
             dateDisable={handleDisableDate}
           />
         );
@@ -157,8 +176,9 @@ const EditableCell = ({
         return (
           <DateComponent
             disabled={
-              formTableCriteria.getFieldValue().startDate === null ||
-              formTableCriteria.getFieldValue().startDate === undefined
+              (formTableCriteria.getFieldValue().startDate === null ||
+               formTableCriteria.getFieldValue().startDate === undefined) ||
+              (type === "update" && record?.status === "INACTIVE")
             }
             dateDisable={handleDisableDate}
           />
@@ -542,6 +562,8 @@ const FunctionalCriteriaProduct = ({
       const dataOverlap = [];
       // if (hasValue(formHeader?.endDate)) {
       dataTable?.forEach(item => {
+        console.log("startDate val:", moment(item?.startDate).startOf('day') < moment(formHeader?.startDate).startOf('day'))
+        console.log("endDate val:", moment(item?.endDate).startOf('day') > moment(formHeader?.endDate).startOf('day'))
         if (moment(item?.startDate).startOf('day') < moment(formHeader?.startDate).startOf('day') || moment(item?.endDate).startOf('day') > moment(formHeader?.endDate).startOf('day')) {
           dataOverlap?.push(item)
         }
@@ -762,13 +784,21 @@ const FunctionalCriteriaProduct = ({
                         <div>
                           <SVGIcon
                             name="IconEdit"
-                            color={editingKey ? "#8D91A0" : "#ACC424"}
+                            color={
+                              editingKey || (type === "update" && record?.status === "INACTIVE")
+                                ? "#8D91A0"
+                                : "#ACC424"
+                            }
                             className={
-                              editingKey ? "cursor-not-allowed" : undefined
+                              editingKey || (type === "update" && record?.status === "INACTIVE")
+                                ? "cursor-not-allowed"
+                                : undefined
                             }
                             width={24}
                             onClick={
-                              !editingKey ? () => edit(record) : undefined
+                              !editingKey && !(type === "update" && record?.status === "INACTIVE")
+                                ? () => edit(record)
+                                : undefined
                             }
                           />
                         </div>
@@ -948,6 +978,7 @@ const FunctionalCriteriaProduct = ({
                       required: col.required,
                       endDate: endDate,
                       requiredDate:checkStartDate,
+                      type: type,
                       // disableDate,
                       formTableCriteria: formTableCriteria,
                     }),
