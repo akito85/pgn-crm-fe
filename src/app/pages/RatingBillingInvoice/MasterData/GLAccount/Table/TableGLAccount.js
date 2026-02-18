@@ -67,39 +67,14 @@ export const columnsGLAccount = (
           "input",
           search
         ),
-    },
-    {
-      title: "SPECIAL GL",
-      dataIndex: "specialGlName",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "specialGlName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text, record) => {
-        const specialGlName = record?.specialGlRef?.name || text;
-        return renderColumn(
-          "specialGlName",
-          hasValue(search["specialGlName"]),
-          searchText,
-          specialGlName,
-          false,
-          "input",
-          search
-        );
-      },
-    },
+    }, 
     {
       title: "REFERENCE",
-      dataIndex: "reference",
+      dataIndex: "remark",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "reference",
+        "remark",
         searchInput,
         searchedColumn,
         searchText,
@@ -107,8 +82,8 @@ export const columnsGLAccount = (
       ),
       render: (text) =>
         renderColumn(
-          "reference",
-          hasValue(search["reference"]),
+          "remark",
+          hasValue(search["remark"]),
           searchText,
           text,
           false,

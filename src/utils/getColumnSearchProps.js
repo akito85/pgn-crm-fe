@@ -19,6 +19,7 @@ export const getColumnSearchPropsPaging = (
   search
 ) => {
   let obj = {
+    filteredValue: search?.[dataIndex] ? [search[dataIndex]] : null,
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
       const onDataChange = (value, dateString) => {
         // setSelectedKeys(dateString ? [dateString] : null);
@@ -54,7 +55,7 @@ export const getColumnSearchPropsPaging = (
             <Input
               ref={searchInput}
               placeholder={`Search`}
-              value={selectedKeys[0]}
+              value={selectedKeys[0] || search?.[dataIndex] || ""}
               onChange={(e) =>
                 setSelectedKeys(e.target.value ? [e.target.value] : [])
               }
@@ -117,7 +118,7 @@ export const getColumnSearchPropsPaging = (
     filterIcon: (filtered) => (
       <FilterOutlined
         style={{
-          color: filtered ? "#1890ff" : undefined,
+          color: filtered || search?.[dataIndex] ? "#1890ff" : undefined,
         }}
       />
     ),

@@ -139,6 +139,7 @@ import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentW
 import liborRateReducer from "../slices/receipt_collection/liborRate";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
+import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -282,6 +283,7 @@ const reducer = combineReducers({
   paymentWarrantyPartner: paymentWarrantyPartnerReducer,
   liborRate: liborRateReducer,
   paymentCycle: paymentCycleReducer,
+  billingItemCategory: billingItemCategoryReducer,
 
   // Attachment
   attachment: attachmentReducer,
