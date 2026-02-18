@@ -31,7 +31,7 @@ const MultiDestination = ({
   const searchInput = useRef(null);
 
   //state
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -64,7 +64,7 @@ const MultiDestination = ({
 
   const handleRefresh = () => {
     const body = {
-      page: 1,
+      page: 0,
       size: loadMoreSize,
       sort,
       searchs: search,
@@ -78,7 +78,7 @@ const MultiDestination = ({
         isLoadMore: false,
       })
     );
-    setPage(1);
+    setPage(0);
   };
 
   /**
@@ -233,12 +233,14 @@ const MultiDestination = ({
 
   useEffect(() => {
     const body = {
-      page,
+      page: 0,
       size: loadMoreSize,
       sort,
       searchs: search,
       inputFields: tempFilters,
     }
+
+    setPage(0);
 
     dispatch(getMultiDestination({ id, body, isLoadMore: false }));
   }, [sort, search, tempFilters]);
@@ -308,7 +310,6 @@ const MultiDestination = ({
           isOpen={showApprovalHistoryModal}
           handleClose={() => handleApprovalHistoryModal(false)}
           header={"Approval History"}
-          width={850}
           tabOptions={handleApprovalHistoryOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
