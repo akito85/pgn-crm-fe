@@ -52,7 +52,7 @@ const GLAccountSectionForm = ({ type, form }) => {
 
           <Form.Item
             label="Reference"
-            name="reference"
+            name="remark"
             rules={[
               {
                 required: true,

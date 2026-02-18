@@ -516,6 +516,7 @@ export const bulkApproveGLAccount = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your data has been ${action}.`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;

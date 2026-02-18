@@ -70,11 +70,11 @@ export const columnsGLAccount = (
     }, 
     {
       title: "REFERENCE",
-      dataIndex: "reference",
+      dataIndex: "remark",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "reference",
+        "remark",
         searchInput,
         searchedColumn,
         searchText,
@@ -82,8 +82,8 @@ export const columnsGLAccount = (
       ),
       render: (text) =>
         renderColumn(
-          "reference",
-          hasValue(search["reference"]),
+          "remark",
+          hasValue(search["remark"]),
           searchText,
           text,
           false,
