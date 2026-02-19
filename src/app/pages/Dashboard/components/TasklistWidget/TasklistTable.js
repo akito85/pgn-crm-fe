@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tooltip } from "antd";
+import { Tooltip, message } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import NxTable from "../../../../../components/Nx/NxTable";
 import { getTasklistColumns } from "./getTasklistColumns";
 import { nxApplyFixedColumns } from "../../../../../utils/Nx/nxApplyFixedColumns";
+import { getApprovalRoute, buildApprovalState } from "../../../../../utils/approvalRouteHelper";
 
 const TasklistTable = ({
   data = [],
@@ -29,22 +30,14 @@ const TasklistTable = ({
 
   const handleViewAction = (record) => {
     const tappId = record.TAPP_ID || record.tappId;
-    if (tappId) {
-      navigate(`/approval/${tappId}`, {
-        state: {
-          taskId: record.TASK_ID || record.taskId,
-          tappId,
-          module: record.MODULE || record.module,
-          category: record.CATEGORY || record.category,
-          taskType: record.TASK_TYPE || record.taskType,
-          taskStatus: record.TASK_STATUS || record.taskStatus,
-          priority: record.PRIORITY || record.priority,
-          taskSubject: record.TASK_SUBJECT || record.taskSubject,
-          returnTo: "/dashboard",
-        },
-      });
+    
+    if (!tappId) {
+      message.error('Cannot view: Missing approval ID');
+      return;
     }
-    // No fallback modal — button is visually disabled when no tappId
+    
+    const route = getApprovalRoute(record.MODULE || record.module, record.CATEGORY || record.category, tappId);
+    navigate(route, { state: buildApprovalState(record, null) });
   };
 
   const actionCols = [
