@@ -258,6 +258,7 @@ const Promo = ({
               "STATUS",
             ]}
             endDate={endDate}
+            showInactivate={type !== "detail" && type !== "preview"}
           />
         </div>
         <div className={`${valuePage !== "Conditions" ? "hidden" : ""}`}>
