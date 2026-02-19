@@ -1,166 +1,240 @@
-import React, { Fragment } from "react";
 import { Checkbox, Form, Select } from "antd";
+import moment from "moment";
+
+// Components
 import SelectComponent from "../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../components/DateComponent";
+import CardContainer from "../../../../../../components/CardContainer";
+
+// Utils
 import { formMessageRequired } from "../../../../../../utils";
-import BaseContainer from "../../../../../../components/BaseContainer";
-import moment from "moment";
 
 const BillingItemSectionForm = ({
   type,
   statusDetail = false,
   data_billType = [],
   data_billingItemCategory = [],
-  data_glAccount = [],
+  data_typeOptions = [],
+  data_criteriaOptions = [],
+  onCategoryChange = () => {},
   checkedLateCharge,
   checkedPaymentWarranty,
+  checkedInstallmentRestructure,
   onChangeLateCharge = () => {},
   onChangePayment = () => {},
+  onChangeInstallmentRestructure = () => {},
   startDate,
   endDate,
   handleStartDate = () => {},
   handleEndDate = () => {},
   mappingData = 0,
 }) => {
-  const handleDisableEndDate = (current) => {
-    if (startDate !== null) {
+  // ============================================================================
+  // DATE VALIDATION HANDLERS
+  // ============================================================================
+
+  const disabledStartDate = (current) => {
+    return current && current < moment().startOf("day");
+  };
+
+  const disabledEndDate = (current) => {
+    if (startDate) {
       return moment(startDate) >= current;
     }
     return moment().add(-1, "days") >= current;
   };
 
-  const disabledDate = (current) => {
-    return false;
+  const validateEndDate = (_, value) => {
+    if (!value || (value && moment(startDate) <= moment(value))) {
+      return Promise.resolve();
+    }
+    return Promise.reject(
+      new Error(
+        "The end date must be greater than or equal to the start date!",
+      ),
+    );
   };
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  const isDisabledForUpdate = type === "update" && statusDetail;
+
   return (
-    <Fragment>
-      <BaseContainer header={"BILLING ITEM INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-3">
-          <Form.Item
-            label={"Billing Item Category"}
-            name={"billingItemCategory"}
-            rules={formMessageRequired("Billing Item Category")}
+    <CardContainer header="TRANSACTION MAPPING INFORMATION">
+      <div className="w-full grid grid-cols-4 gap-x-2 gap-y-0">
+        {/* Category */}
+        <Form.Item
+          label="Category"
+          name="billingItemCategory"
+          rules={formMessageRequired("Category")}
+        >
+          <SelectComponent
+            disabled={isDisabledForUpdate}
+            placeholder="Select"
+            onChange={onCategoryChange}
           >
-            <SelectComponent disabled={type === "update" && statusDetail}>
-              {(data_billingItemCategory || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
+            {data_billingItemCategory?.map((data, index) => (
+              <Select.Option value={data.categoryId} key={index}>
+                {data.name}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+
+        {/* Type */}
+        <Form.Item label="Type" name="type" rules={formMessageRequired("Type")}>
+          <SelectComponent disabled={isDisabledForUpdate} placeholder="Select">
+            {data_typeOptions?.map((data, index) => (
+              <Select.Option value={data.id} key={index}>
+                {data.name}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+
+        {/* Transaction Mapping Code */}
+        <Form.Item
+          label="Transaction Mapping Code"
+          name="transactionMappingCode"
+        >
+          <InputComponent
+            type="text"
+            disabled={true}
+            placeholder="{category_number}"
+          />
+        </Form.Item>
+
+        {/* Name */}
+        <Form.Item label="Name" name="name" rules={formMessageRequired("Name")}>
+          <InputComponent
+            type="text"
+            disabled={isDisabledForUpdate}
+            maxLength={100}
+            placeholder="Type here.."
+          />
+        </Form.Item>
+
+        {/* Bill Type */}
+        <Form.Item
+          label="Bill Type"
+          name="billType"
+          rules={formMessageRequired("Bill Type")}
+        >
+          <SelectComponent disabled={isDisabledForUpdate} placeholder="Select">
+            {data_billType?.map((data, index) => (
+              <Select.Option value={data.id} key={index}>
+                {data.name}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+
+        {/* Criteria */}
+        <Form.Item
+          label="Criteria"
+          name="criteria"
+          rules={formMessageRequired("Criteria")}
+        >
+          <SelectComponent placeholder="Select">
+            {data_criteriaOptions?.map((data, index) => (
+              <Select.Option value={data.id} key={index}>
+                {data.name}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+
+        {/* Start Date */}
+        <Form.Item
+          label="Start Date"
+          name="startDate"
+          rules={formMessageRequired("Start Date")}
+        >
+          <DateComponent
+            dateDisable={disabledStartDate}
+            onChange={handleStartDate}
+            disabled={isDisabledForUpdate || mappingData > 0}
+            placeholder="Select Start Date"
+          />
+        </Form.Item>
+
+        {/* End Date */}
+        <Form.Item
+          label="End Date"
+          name="endDate"
+          rules={[{ validator: validateEndDate }]}
+        >
+          <DateComponent
+            disabled={mappingData > 0}
+            dateDisable={disabledEndDate}
+            onChange={handleEndDate}
+            placeholder="Select End Date"
+          />
+        </Form.Item>
+
+        {/* Description */}
+        <div className="col-span-4">
           <Form.Item
-            // className={"w-full"}
-            label={"Name"}
-            rules={formMessageRequired("name")}
-            name={"name"}
+            label="Description"
+            name="description"
+            rules={formMessageRequired("Description")}
           >
-            <InputComponent
-              type="text"
-              disabled={type === "update" && statusDetail}
-               maxLength={100}
-            />
-          </Form.Item>
-          <Form.Item
-            label={"Bill Type"}
-            name={"billType"}
-            rules={formMessageRequired("Bill Type")}
-          >
-            <SelectComponent disabled={type === "update" && statusDetail}>
-              {(data_billType || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            // className={"w-full"}
-            label={"Start Date"}
-            rules={formMessageRequired("Start Date")}
-            name={"startDate"}
-          >
-            <DateComponent
-              dateDisable={disabledDate}
-              onChange={(e) => handleStartDate(e)}
-              disabled={(type === "update" && statusDetail) || mappingData > 0}
-            />
-          </Form.Item>
-          <Form.Item
-            // className={"w-full"}
-            label={"End Date"}
-            name={"endDate"}
-            rules={[
-              {
-                validator: (_, value) =>
-                  (value && moment(startDate) <= moment(value)) || !value
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error(
-                          "The end date must be greater than or equal to the start date!"
-                        )
-                      ),
-              },
-              // { message: requiredMessage("End Date"), required: true },
-            ]}
-          >
-            <DateComponent
-              disabled={mappingData > 0}
-              dateDisable={handleDisableEndDate}
-              onChange={(e) => handleEndDate(e)}
-            />
-          </Form.Item>
-          <Form.Item
-            className="col-span-3"
-            label={"GL Account"}
-            // rules={formMessageRequired("glaccount")}
-            name={"glAccount"}
-          >
-            <SelectComponent>
-              {(data_glAccount || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <div className="col-span-3">
-            <Form.Item label={"Description"} name={"description"}>
-              <InputComponent type="textarea" />
-            </Form.Item>
-          </div>
-          <Form.Item name="lateCharge" valuePropName="checked" noStyle>
-            <div className="flex flex-col pt-[30px]">
-              <Checkbox
-                checked={checkedLateCharge}
-                onChange={onChangeLateCharge}
-              >
-                Late Charge Object
-              </Checkbox>
-              <span className="text-xs text-[#92979D]">
-                Click or tap this checkbox if late charge applied to this item
-              </span>
-            </div>
-          </Form.Item>
-          <Form.Item name="paymentWarranty" valuePropName="checked" noStyle>
-            <div className="flex flex-col pt-[30px]">
-              <Checkbox
-                checked={checkedPaymentWarranty}
-                onChange={onChangePayment}
-              >
-                Payment Warranty Deduction Object
-              </Checkbox>
-              <span className="text-xs text-[#92979D]">
-                Click or tap this checkbox if this item is included in payment
-                warranty deduction list
-              </span>
-            </div>
+            <InputComponent type="textarea" rows={4} />
           </Form.Item>
         </div>
-      </BaseContainer>
-    </Fragment>
+
+        {/* Late Charge Checkbox */}
+        <Form.Item name="lateCharge" valuePropName="checked" noStyle>
+          <div className="flex flex-col pt-0 col-span-1">
+            <Checkbox checked={checkedLateCharge} onChange={onChangeLateCharge}>
+              Late Charge Object
+            </Checkbox>
+            <span className="text-xs text-[#92979D]">
+              Click or tap this checkbox if late charge applied to this item
+            </span>
+          </div>
+        </Form.Item>
+
+        {/* Payment Warranty Checkbox */}
+        <Form.Item name="paymentWarranty" valuePropName="checked" noStyle>
+          <div className="flex flex-col pt-0 col-span-2">
+            <Checkbox
+              checked={checkedPaymentWarranty}
+              onChange={onChangePayment}
+            >
+              Payment Warranty Deduction Object
+            </Checkbox>
+            <span className="text-xs text-[#92979D]">
+              Click or tap this checkbox if this item is included in payment
+              warranty deduction list
+            </span>
+          </div>
+        </Form.Item>
+
+        {/* Installment/Restructure Checkbox */}
+        <Form.Item
+          name="installmentRestructure"
+          valuePropName="checked"
+          noStyle
+        >
+          <div className="flex flex-col pt-0">
+            <Checkbox
+              checked={checkedInstallmentRestructure}
+              onChange={onChangeInstallmentRestructure}
+            >
+              Installment / Restructure
+            </Checkbox>
+            <span className="text-xs text-[#92979D]">
+              Click or tap this checkbox to apply installment or restructuring
+              terms to this item
+            </span>
+          </div>
+        </Form.Item>
+      </div>
+    </CardContainer>
   );
 };
 

@@ -65,19 +65,36 @@ const EditableCell = ({
   };
 
   const handleDisableDate = (current) => {
-    if (dataIndex === 'endDate') {
-        if (hasValue(startDateLock) && hasValue(endDateLock) && hasValue(form.getFieldValue('startDate')) === false) {
-            return current < moment(startDateLock) || current > moment(endDateLock).add(1, "days")
-        } else if (hasValue(form.getFieldValue('startDate')) && hasValue(endDateLock)) {
-            return current && (moment(form.getFieldValue('startDate')) > current || current > moment(endDateLock).add(1, "days"));
-        } else if (hasValue(form.getFieldValue('startDate'))) {
-            return moment(form.getFieldValue().startDate) > current
-        } else {
-            return null;
-        }
+    if (dataIndex === "endDate") {
+      if (
+        hasValue(startDateLock) &&
+        hasValue(endDateLock) &&
+        hasValue(form.getFieldValue("startDate")) === false
+      ) {
+        return (
+          current < moment(startDateLock) ||
+          current > moment(endDateLock).add(1, "days")
+        );
+      } else if (
+        hasValue(form.getFieldValue("startDate")) &&
+        hasValue(endDateLock)
+      ) {
+        return (
+          current &&
+          (moment(form.getFieldValue("startDate")) > current ||
+            current > moment(endDateLock).add(1, "days"))
+        );
+      } else if (hasValue(form.getFieldValue("startDate"))) {
+        return moment(form.getFieldValue().startDate) > current;
+      } else {
+        return null;
+      }
     } else if (dataIndex === "startDate") {
-      if(hasValue(endDateLock)){
-        return moment(startDateLock) >= current || current > moment(endDateLock).add(1, "days")
+      if (hasValue(endDateLock)) {
+        return (
+          moment(startDateLock) >= current ||
+          current > moment(endDateLock).add(1, "days")
+        );
       } else {
         return moment(startDateLock) > current;
       }
@@ -87,12 +104,12 @@ const EditableCell = ({
   };
 
   const handleDisabledColumn = (dataIndex, record = null) => {
-    if(dataIndex === "categoryName" || dataIndex === "itemName"){
+    if (dataIndex === "categoryName" || dataIndex === "itemName") {
       return record?.dataType === "exist" ? true : false;
     } else {
-      return false
+      return false;
     }
-  }
+  };
 
   const getInputNode = (inputType, options) => {
     switch (inputType) {
@@ -271,7 +288,7 @@ const DynamicTableInlineBilling = ({
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
-  handleValidateUpdate = () => {}
+  handleValidateUpdate = () => {},
 }) => {
   const [form] = Form.useForm();
   // const [data, setData] = useState([]);
@@ -345,7 +362,15 @@ const DynamicTableInlineBilling = ({
         dataValid = handleValidate(row, statusAction);
       }
       if (dataValid) {
-        if (checkInputBy === undefined && handleValidateUpdate([...tableData], {...row, key:key}, statusAction, header?.includes("DETAIL"))) {
+        if (
+          checkInputBy === undefined &&
+          handleValidateUpdate(
+            [...tableData],
+            { ...row, key: key },
+            statusAction,
+            header?.includes("DETAIL"),
+          )
+        ) {
           const item = newData[index];
           const updatedRow = {
             ...item,
@@ -366,14 +391,14 @@ const DynamicTableInlineBilling = ({
           setStatusAction("");
           form.resetFields();
           setIsValid(true);
-        } 
+        }
         // else if (
         //   newData.filter((item) => item[checkInputBy] === row[checkInputBy])
         //     .length > 0 &&
         //   statusAction === "add"
         // ) {
         //   // setIsSame(true);
-        // } 
+        // }
         // else {
         //   //new data
         //   if (index > -1) {
@@ -398,7 +423,7 @@ const DynamicTableInlineBilling = ({
         //   setIsValid(true);
         // }
         setIsInsert(false);
-      } 
+      }
       // else {
       //   setIsValid(false);
       // }
@@ -407,6 +432,12 @@ const DynamicTableInlineBilling = ({
     }
   };
   const addRow = () => {
+    console.log("🔵 addRow called");
+    console.log("📊 Current tableData:", tableData);
+    console.log("📝 Header:", header);
+    console.log("🔒 storedDate:", storedDate);
+    console.log("📅 startDateLock:", startDateLock);
+
     form.resetFields();
     setStoredData(true);
     setIsInsert(true);
@@ -418,9 +449,15 @@ const DynamicTableInlineBilling = ({
         : { rCategoryId: null }),
       // status: "ACTIVE",
     };
-    onDataChange([...tableData, newRow], newRow);
-    // onDataChange((prevData) => [...prevData, newRow]);
+
+    console.log("✨ New row created:", newRow);
+    const newData = [...tableData, newRow];
+    console.log("📤 Calling onDataChange with:", newData);
+
+    onDataChange(newData, newRow);
     setEditingKey(newRow.key);
+
+    console.log("✅ addRow completed");
   };
 
   const deleteRow = (key) => {
@@ -615,34 +652,32 @@ const DynamicTableInlineBilling = ({
                   <Tooltip title="Update">
                     <div
                       className={`flex justify-center${
-                        editingKey !== "" || isDynamicEditable 
-                        // || record?.dataType === "exist"
-                          ? " cursor-not-allowed"
+                        editingKey !== "" || isDynamicEditable
+                          ? // || record?.dataType === "exist"
+                            " cursor-not-allowed"
                           : ""
                       }`}
                     >
                       <SVGIcon
                         name="IconEdit"
                         color={
-                          editingKey !== "" ||
-                          isDynamicEditable 
-                          // ||record?.dataType === "exist"
-                            ? "#8D91A0"
+                          editingKey !== "" || isDynamicEditable
+                            ? // ||record?.dataType === "exist"
+                              "#8D91A0"
                             : "#ACC424"
                         }
                         className={
-                          editingKey !== "" ||
-                          isDynamicEditable 
-                          // ||record?.dataType === "exist"
-                            ? "disabled"
+                          editingKey !== "" || isDynamicEditable
+                            ? // ||record?.dataType === "exist"
+                              "disabled"
                             : undefined
                         }
                         width={24}
                         onClick={
                           editingKey === "" || !isDynamicEditable
-                          // (editingKey === "" || !isDynamicEditable) 
-                          // && record?.dataType !== "exist"
-                            ? () => edit(record)
+                            ? // (editingKey === "" || !isDynamicEditable)
+                              // && record?.dataType !== "exist"
+                              () => edit(record)
                             : undefined
                         }
                       />
@@ -703,7 +738,7 @@ const DynamicTableInlineBilling = ({
                         }
                         width={24}
                         onClick={
-                          editingKey === "" || !isDynamicEditable
+                          editingKey === "" && !isDynamicEditable
                             ? () => onCreate(record)
                             : undefined
                         }
@@ -752,59 +787,66 @@ const DynamicTableInlineBilling = ({
   };
 
   return useContainer === true ? (
-    <BaseContainer header={header} subHeader={subHeader}>
-      <div className={"w-full flex flex-col gap-4"}>
-        <div className={"w-full flex justify-end"}>
-          {showCreateButton && (
-            <ButtonComponent
-              onClick={() => {
-                if (storedDate === false && startDateLock) {
-                  addRow();
-                } else {
-                  if (!startDateLock) {
-                    setModalRequired(true);
-                  }
-                }
-              }}
-              type={"submit"}
-              border={false}
-              icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-              disabled={isDynamicEditable}
+    // <BaseContainer header={header} subHeader={subHeader}>
+    <div className={"w-full flex flex-col gap-4"}>
+      <div className={"w-full flex justify-end"}>
+        {showCreateButton && (
+          <ButtonComponent
+            onClick={() => {
+              console.log("🎯 Create button clicked!");
+              console.log("📅 startDateLock:", startDateLock);
+              console.log("🔒 storedDate:", storedDate);
+              console.log("🚫 isDynamicEditable:", isDynamicEditable);
+
+              if (!startDateLock) {
+                console.log("❌ No startDateLock - showing modal");
+                setModalRequired(true);
+              } else if (storedDate === false) {
+                console.log("✅ Conditions met - calling addRow");
+                addRow();
+              } else {
+                console.log("⚠️ storedDate is true - cannot add row");
+              }
+            }}
+            type={"submit"}
+            border={false}
+            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            disabled={isDynamicEditable || storedDate}
+          >
+            Create
+          </ButtonComponent>
+        )}
+      </div>
+      {useSelect || usePagination ? (
+        <div className={"w-full flex mb-5 gap-2 justify-between"}>
+          {useSelect ? (
+            <Select
+              mode="multiple"
+              placeholder="Show All Column"
+              className={"w-2/6"}
+              maxTagCount={3}
+              onChange={handleDisplayColumn}
             >
-              Create
-            </ButtonComponent>
-          )}
-        </div>
-        {useSelect || usePagination ? (
-          <div className={"w-full flex mb-5 gap-2 justify-between"}>
-            {useSelect ? (
-              <Select
-                mode="multiple"
-                placeholder="Show All Column"
-                className={"w-2/6"}
-                maxTagCount={3}
-                onChange={handleDisplayColumn}
-              >
-                {columns
-                  .map((col) => (
-                    <Select.Option
-                      key={col.title}
-                      value={col.title}
-                      disabled={
-                        optionSelectedCol.length > 3
-                          ? optionSelectedCol.includes(col.title)
-                            ? false
-                            : true
-                          : false
-                      }
-                    >
-                      {col.title}
-                    </Select.Option>
-                  ))
-                  .splice(1)}
-              </Select>
-            ) : null}
-            {/* {usePagination ? (
+              {columns
+                .map((col) => (
+                  <Select.Option
+                    key={col.title}
+                    value={col.title}
+                    disabled={
+                      optionSelectedCol.length > 3
+                        ? optionSelectedCol.includes(col.title)
+                          ? false
+                          : true
+                        : false
+                    }
+                  >
+                    {col.title}
+                  </Select.Option>
+                ))
+                .splice(1)}
+            </Select>
+          ) : null}
+          {/* {usePagination ? (
               <Pagination
                 total={totalData}
                 className={"pr-1"}
@@ -818,78 +860,78 @@ const DynamicTableInlineBilling = ({
                 }
               />
             ) : null} */}
-          </div>
-        ) : null}
-        <Form form={form} component={false}>
-          <Table
-            dataSource={tableData}
-            columns={filterColumn(
-              columns.map((col) => {
-                return {
-                  ...col,
-                  onCell: (record) => ({
-                    record,
-                    inputType: col.inputType,
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: isEditing(record),
-                    options: col.options,
-                    onCellClicked: col.onClick,
-                    showPassword: visiblePassword,
-                    handlePassword: handleVisiblePassword,
-                    regex: regex,
-                    required: col.required,
-                    disableDate,
-                    form: form,
-                    onInput: col.onInput,
-                    maxLength: col.maxLength,
-                    startDateLock,
-                    endDateLock
-                  }),
-                };
-              })
-            )}
-            rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            pagination={{
-              position: ["topRight"],
-              current: current,
-              pageSize: pageSize,
-              onChange: onChangePage,
-              className: "pr-1 w-3/4",
-              style: { marginLeft: "auto", marginRight: 0 },
-              showSizeChanger: true,
-              showTotal: (total, range) =>
-                `Showing ${range[0]} to ${range[1]} of ${total} records`,
-            }}
-            scroll={scrollTable}
-            tableLayout="fixed"
-            bordered
-            // onChange={onSort}
-            // pagination={false}
-          />
-        </Form>
-        {isSame && (
-          <div className={"w-full flex mb-5 gap-2 justify-between"}>
-            <span className="font-bold text-red-700">
-              {checkNameColumn} is exist
-            </span>
-          </div>
-        )}
-        {!isValid ? (
-          <div className={"w-full flex mb-5 gap-2 justify-between"}>
-            <span className="font-bold text-red-700">
-              {messageValidate || "data cannot save"}
-            </span>
-          </div>
-        ) : null}
-      </div>
-    </BaseContainer>
+        </div>
+      ) : null}
+      <Form form={form} component={false}>
+        <Table
+          dataSource={tableData}
+          columns={filterColumn(
+            columns.map((col) => {
+              return {
+                ...col,
+                onCell: (record) => ({
+                  record,
+                  inputType: col.inputType,
+                  dataIndex: col.dataIndex,
+                  title: col.title,
+                  editing: isEditing(record),
+                  options: col.options,
+                  onCellClicked: col.onClick,
+                  showPassword: visiblePassword,
+                  handlePassword: handleVisiblePassword,
+                  regex: regex,
+                  required: col.required,
+                  disableDate,
+                  form: form,
+                  onInput: col.onInput,
+                  maxLength: col.maxLength,
+                  startDateLock,
+                  endDateLock,
+                }),
+              };
+            }),
+          )}
+          rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          pagination={{
+            position: ["topRight"],
+            current: current,
+            pageSize: pageSize,
+            onChange: onChangePage,
+            className: "pr-1 w-3/4",
+            style: { marginLeft: "auto", marginRight: 0 },
+            showSizeChanger: true,
+            showTotal: (total, range) =>
+              `Showing ${range[0]} to ${range[1]} of ${total} records`,
+          }}
+          scroll={scrollTable}
+          tableLayout="fixed"
+          bordered
+          // onChange={onSort}
+          // pagination={false}
+        />
+      </Form>
+      {isSame && (
+        <div className={"w-full flex mb-5 gap-2 justify-between"}>
+          <span className="font-bold text-red-700">
+            {checkNameColumn} is exist
+          </span>
+        </div>
+      )}
+      {!isValid ? (
+        <div className={"w-full flex mb-5 gap-2 justify-between"}>
+          <span className="font-bold text-red-700">
+            {messageValidate || "data cannot save"}
+          </span>
+        </div>
+      ) : null}
+    </div>
   ) : (
+    // </BaseContainer>
     <>
       {useSelect || usePagination ? (
         <div className={"w-full flex mb-5 gap-2 justify-between"}>
@@ -964,7 +1006,7 @@ const DynamicTableInlineBilling = ({
                   startDateLock,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

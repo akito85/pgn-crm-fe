@@ -2,27 +2,22 @@ import React, { useState, useEffect, useRef } from "react";
 import { Tabs } from "antd";
 import CardContainer from "../../../../../components/CardContainer";
 import BillingItemTab from "./BillingItemTab";
-import PaymentTab from "./PaymentTab";
-import PrevBillingTab from "./PrevBillingTab";
-import PrevPaymentTab from "./PrevPaymentTab";
+import RatingSummaryTab from "./RatingSummaryTab";
+import AdjustmentTab from "./AdjustmentTab";
 
 const BillingDetail = ({
   billingCodeId,
   calculationCodeId,
   ratingCodeId,
-  saNumberId,
-  accountNumberId,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState("1");
   const detailRef = useRef(null);
 
-  // Use Effect untuk scroll otomatis saat komponen muncul
   useEffect(() => {
     if (billingCodeId && detailRef.current) {
       setActiveTab("1");
 
-      // Gunakan requestAnimationFrame untuk scroll lebih smooth
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           detailRef.current?.scrollIntoView({
@@ -42,36 +37,19 @@ const BillingDetail = ({
       children: (
         <BillingItemTab
           billingCodeId={billingCodeId}
-          ratingCodeId={ratingCodeId}
           calculationCodeId={calculationCodeId}
         />
       ),
     },
     {
       key: "2",
-      label: "Payment",
-      children: (
-        <PaymentTab
-          billingCodeId={billingCodeId}
-          calculationCodeId={calculationCodeId}
-        />
-      ),
+      label: "Rating Summary",
+      children: <RatingSummaryTab ratingCodeId={ratingCodeId} />,
     },
     {
       key: "3",
-      label: "Previous Billing",
-      children: (
-        <PrevBillingTab
-          billingCodeId={billingCodeId}
-          saNumberId={saNumberId}
-          accountNumberId={accountNumberId}
-        />
-      ),
-    },
-    {
-      key: "4",
-      label: "Previous Payment",
-      children: <PrevPaymentTab billingCodeId={billingCodeId} />,
+      label: "Adjustment",
+      children: <AdjustmentTab billingCodeId={billingCodeId} />,
     },
   ];
 

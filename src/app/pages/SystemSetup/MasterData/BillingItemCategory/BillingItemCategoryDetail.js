@@ -42,7 +42,7 @@ const BillingItemCategoryDetail = () => {
   const [modalError, setModalError] = useState(false);
   const [modalErrorServer, setModalErrorServer] = useState(false);
 
-  const [valuePage, setValuePage] = useState("Billing Item Category");
+  const [valuePage, setValuePage] = useState("Transaction Mapping Category");
   const [approveOrReject, setApproveOrReject] = useState("");
 
   const [dataDetail, setDataDetail] = useState({});
@@ -51,7 +51,7 @@ const BillingItemCategoryDetail = () => {
   const [dataLogInformation, setDataLogInformation] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const listSectionInfo = [
-    { value: "Billing Item Category" },
+    { value: "Transaction Mapping Category" },
     { value: "Attachment" },
   ];
   const [bodyApproval, setBodyApproval] = useState({
@@ -132,20 +132,20 @@ const BillingItemCategoryDetail = () => {
     },
     {
       path: SYSTEM_SETUP_ROUTES.VIEW_BILLING_ITEM_CATEGORY,
-      breadcrumbName: "Billing Item Category",
+      breadcrumbName: "Transaction Mapping Category",
     },
     {
       path: SYSTEM_SETUP_ROUTES.DETAIL_BILLING_ITEM_CATEGORY,
-      breadcrumbName: "Detail Billing Item Category",
+      breadcrumbName: "Transaction Mapping Category",
     },
   ];
 
   const layout = (valuePage) => {
     switch (valuePage) {
-      case "Billing Item Category":
+      case "Transaction Mapping Category":
         return (
           <>
-            <CardContainer header={"Billing Item Category Information"}>
+            <CardContainer header={"Transaction Mapping Category Information"}>
               <div className="w-full grid grid-cols-4 gap-3">
                 <DetailText label={"Category Code"}>
                   {dataDetail?.categoryCode}
@@ -301,7 +301,7 @@ const BillingItemCategoryDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[10px]">
+        <div className="flex mt-[10px] w-full p-3 rounded-md bg-white">
           <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
