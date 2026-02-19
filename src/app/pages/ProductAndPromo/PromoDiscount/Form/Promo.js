@@ -211,7 +211,14 @@ const Promo = ({
             type={type}
             data={listDataCriteria || []} //data
             dataCriteria={criteriaValues || []} //ddl
-            updateData={setListDataCriteria}
+            updateData={(updater) => {
+              setListDataCriteria((prev) => {
+                const next = typeof updater === "function" ? updater(prev) : updater;
+                return next.map((row) =>
+                  row.status === undefined ? { ...row, status: "DRAFT" } : row
+                );
+              });
+            }}
             setStoredData={setStoredDataInline}
             storedData={storedDataInline}
             startDate={startDate}
@@ -239,21 +246,7 @@ const Promo = ({
               getProductList,
               getProductVersionList,
             }}
-            columnsTable={(listOption, searchInput, searchedColumn, searchText, handleSearch, search, storedData) => {
-              const allColumns = columnsTableCriteriaPromo(
-                listOption,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                search,
-                storedData
-              );
-              // Only include STATUS column when type is "update"
-              return type === "update"
-                ? allColumns
-                : allColumns.filter(col => col.title !== "STATUS");
-            }}
+            columnsTable={columnsTableCriteriaPromo}
             fixedColumn={[
               "ADJUSTMENT TYPE",
               "ADJUSTMENT VALUE",
@@ -262,7 +255,7 @@ const Promo = ({
               "MAX VALUE UOM",
               "FROM ITEM",
               "TIERING",
-              ...(type === "update" ? ["STATUS"] : []),
+              "STATUS",
             ]}
             endDate={endDate}
           />
