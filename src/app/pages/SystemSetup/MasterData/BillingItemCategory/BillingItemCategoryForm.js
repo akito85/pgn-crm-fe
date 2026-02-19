@@ -83,7 +83,7 @@ const BillingItemCategoryForm = ({ type }) => {
 
   // Steps configuration
   const steps = [
-    { title: "BILLING ITEM CATEGORY", value: "Billing Item Category" },
+    { title: "TRANSACTION MAPPING CATEGORY", value: "Billing Item Category" },
     { title: "APPROVAL", value: "Approval" },
     { title: "ATTACHMENT", value: "Attachment" },
   ];
@@ -134,7 +134,9 @@ const BillingItemCategoryForm = ({ type }) => {
       const canUpdate =
         statusApproval === "DRAFT" || statusApproval === "REJECTED";
       if (!canUpdate) {
-        navigate("/system-setup/billing-item-category", { replace: true });
+        navigate(SYSTEM_SETUP_ROUTES.VIEW_BILLING_ITEM_CATEGORY, {
+          replace: true,
+        });
       }
     }
   }, [type, statusApproval, navigate]);
@@ -286,7 +288,7 @@ const BillingItemCategoryForm = ({ type }) => {
     },
     {
       path: SYSTEM_SETUP_ROUTES.VIEW_BILLING_ITEM_CATEGORY,
-      breadcrumbName: "Billing Item Category",
+      breadcrumbName: "Transaction Mapping Category",
     },
     {
       path:
@@ -295,8 +297,8 @@ const BillingItemCategoryForm = ({ type }) => {
           : SYSTEM_SETUP_ROUTES.UPDATE_BILLING_ITEM_CATEGORY,
       breadcrumbName:
         type === "create"
-          ? "Create Billing Item Category"
-          : "Update Billing Item Category",
+          ? "Create Transaction Mapping Category"
+          : "Update Transaction Mapping Category",
     },
   ];
 
