@@ -14,6 +14,7 @@ const BillingItemSectionForm = ({
   data_billingItemCategory = [],
   data_typeOptions = [], // Tambahkan ini untuk data Type
   data_criteriaOptions = [], // Tambahkan ini untuk data Criteria
+  onCategoryChange = () => {},
   checkedLateCharge,
   checkedPaymentWarranty,
   checkedInstallmentRestructure,
@@ -25,7 +26,6 @@ const BillingItemSectionForm = ({
   handleStartDate = () => {},
   handleEndDate = () => {},
   mappingData = 0,
-  selectedCategory = null, // Tambahkan ini untuk generate transaction mapping code
 }) => {
   const handleDisableEndDate = (current) => {
     if (startDate !== null) {
@@ -38,11 +38,6 @@ const BillingItemSectionForm = ({
     return false;
   };
 
-  // Generate Transaction Mapping Code berdasarkan category
-  const transactionMappingCode = selectedCategory 
-    ? `{category_${selectedCategory}}` 
-    : "{category_number}";
-
   return (
     <Fragment>
       <BaseContainer header={"TRANSACTION MAPPING INFORMATION"}>
@@ -53,12 +48,15 @@ const BillingItemSectionForm = ({
             name={"billingItemCategory"}
             rules={formMessageRequired("Category")}
           >
-            <SelectComponent 
+            <SelectComponent
               disabled={type === "update" && statusDetail}
               placeholder="Select"
+              onChange={onCategoryChange} // tambah ini
             >
               {(data_billingItemCategory || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
+                <Select.Option value={data.categoryId} key={index}>
+                  {" "}
+                  {/* ganti value dari data.id ke data.categoryId */}
                   {data.name}
                 </Select.Option>
               ))}
@@ -70,7 +68,7 @@ const BillingItemSectionForm = ({
             name={"type"}
             rules={formMessageRequired("Type")}
           >
-            <SelectComponent 
+            <SelectComponent
               disabled={type === "update" && statusDetail}
               placeholder="Select"
             >
@@ -89,8 +87,8 @@ const BillingItemSectionForm = ({
             <InputComponent
               type="text"
               disabled={true}
-              value={transactionMappingCode}
               placeholder="{category_number}"
+              // hapus value={transactionMappingCode} — sudah dikontrol oleh form.setFieldsValue
             />
           </Form.Item>
 
@@ -112,7 +110,7 @@ const BillingItemSectionForm = ({
             name={"billType"}
             rules={formMessageRequired("Bill Type")}
           >
-            <SelectComponent 
+            <SelectComponent
               disabled={type === "update" && statusDetail}
               placeholder="Select"
             >
@@ -162,8 +160,8 @@ const BillingItemSectionForm = ({
                     ? Promise.resolve()
                     : Promise.reject(
                         new Error(
-                          "The end date must be greater than or equal to the start date!"
-                        )
+                          "The end date must be greater than or equal to the start date!",
+                        ),
                       ),
               },
             ]}
@@ -182,8 +180,8 @@ const BillingItemSectionForm = ({
 
           {/* Baris 3: Description full width (span 5 kolom) */}
           <div className="col-span-5">
-            <Form.Item 
-              label={"Description"} 
+            <Form.Item
+              label={"Description"}
               name={"description"}
               rules={formMessageRequired("Description")}
             >
@@ -221,7 +219,11 @@ const BillingItemSectionForm = ({
             </div>
           </Form.Item>
 
-          <Form.Item name="installmentRestructure" valuePropName="checked" noStyle>
+          <Form.Item
+            name="installmentRestructure"
+            valuePropName="checked"
+            noStyle
+          >
             <div className="flex flex-col pt-[30px]">
               <Checkbox
                 checked={checkedInstallmentRestructure}
@@ -230,7 +232,8 @@ const BillingItemSectionForm = ({
                 Installment / Restructure
               </Checkbox>
               <span className="text-xs text-[#92979D]">
-                Click or tap this checkbox to apply installment or restructuring terms to this item
+                Click or tap this checkbox to apply installment or restructuring
+                terms to this item
               </span>
             </div>
           </Form.Item>
