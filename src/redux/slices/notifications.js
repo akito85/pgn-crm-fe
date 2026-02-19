@@ -65,7 +65,7 @@ const initialState = {
 
   // Settings
   settings: {
-    soundEnabled: true,
+    soundEnabled: false,
     desktopNotificationsEnabled: false,
     maxNotifications: 100, // Maximum notifications to keep in state
     displayType: "standard",
