@@ -1,47 +1,42 @@
 import React from "react";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import DetailText from "../../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../../utils";
 import moment from "moment";
 
 const GLAccountSection = ({ dataDetailGLAccount = {}, dataHistory = {} }) => {
   return (
-    <>
+    <div className="-mt-6">
       {/* GL Account Information */}
-      <BaseContainer header={"GL Account Information"}>
-        <div className="flex flex-col gap-3 w-full">
-          <div className="flex w-full gap-3 justify-between">
-            <DetailText label={"GL Account Number"}>
-              {dataDetailGLAccount?.glAccount || "-"}
-            </DetailText>
-
-            <DetailText label={"GL Account Description"}>
-              {dataDetailGLAccount?.glAccountDesc || "-"}
-            </DetailText>
-
-            <DetailText label={"Special GL"}>
-              {dataDetailGLAccount?.specialGlName || "-"}
-            </DetailText>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">GL ACCOUNT INFORMATION</p>
           </div>
-
-          <div className="flex w-full gap-3">
-            <DetailText label={"Reference"}>
-              {dataDetailGLAccount?.reference || "-"}
-            </DetailText>
-
-            <DetailText label={"Status"}>
-              {dataDetailGLAccount?.status || "-"}
-            </DetailText>
-
-            <DetailText label={"Status Approval"}>
-              {dataDetailGLAccount?.statusApproval || "-"}
-            </DetailText>
-          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
+          <DetailText label={"GL Account Number"}>
+            {dataDetailGLAccount?.glAccount || "-"}
+          </DetailText>
+          <DetailText label={"GL Account Description"}>
+            {dataDetailGLAccount?.glAccountDesc || "-"}
+          </DetailText>
+          <DetailText label={"Description"}>
+            {dataDetailGLAccount?.remark || "-"}
+          </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"History Log Information"}>
-        <div className="w-full grid grid-cols-5 gap-3">
+      {/* History Log Information */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2">
           <DetailText label={"Record ID"}>
             {dataHistory?.recordId || "-"}
           </DetailText>
@@ -62,8 +57,8 @@ const GLAccountSection = ({ dataDetailGLAccount = {}, dataHistory = {} }) => {
             {dataHistory?.updatedBy || "-"}
           </DetailText>
         </div>
-      </BaseContainer>
-    </>
+      </CardContainer>
+    </div>
   );
 };
 

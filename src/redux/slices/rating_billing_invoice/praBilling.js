@@ -678,8 +678,6 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
     try {
       const searchParams = search || "";
       const sortParams = sort || "createdDtm~desc";
-
-      // UPDATED: Tambahkan billPeriodId ke URL
       const url = `/v1/dbs/api/prabill-init-populate/list?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&billPeriodId=${billPeriodId}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
@@ -708,7 +706,7 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
     }
   }
 );
-// Update untuk getDetailPrabillingInit thunk
+// Update  getDetailPrabillingInit thunk
 export const getDetailPrabillingInit = createAsyncThunk(
   "GET_DETAIL_PRABILLING_INIT",
   async (initCode, thunkAPI) => {
@@ -814,8 +812,6 @@ export const getDetailPrabillingResult = createAsyncThunk(
 
       const response = await ratingBillingHttpService.getPagination(url);
 
-      // Response structure sama dengan log:
-      // { success, code, message, data: { result, page, links } }
       const apiData = response.data?.data || response.data;
 
       return {
@@ -826,7 +822,7 @@ export const getDetailPrabillingResult = createAsyncThunk(
           totalPages: 0,
           number: 0,
         },
-        isLoadMore, // Pass the flag to reducer
+        isLoadMore,
       };
     } catch (error) {
       const message =

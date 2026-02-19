@@ -38,11 +38,14 @@ import LoggingPage from "../../app/pages/SystemSetup/Logging/LoggingPage";
 import ListPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ListPaymentCycle";
 import PaymentCycleForm from "../../app/pages/SystemSetup/MasterData/PaymentCycle/PaymentCycleForm";
 import ViewPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ViewPaymentCycle";
+import ListBillingItemCategory from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/ListBillingItemCategory";
+import BillingItemCategoryForm from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryForm";
+import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryDetail";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // logging
   VIEW_LOGGING_PAGE: <LoggingPage />,
-  
+
   // menu
   VIEW_MENU_PAGE: <Menu />,
   CREATE_MENU_PAGE: <FormMenu type={"create"} />,
@@ -51,7 +54,7 @@ export const SYSTEM_SETUP_ELEMENTS = {
   //Job Management
   VIEW_JOBM_PAGE: <ListJob />,
   CREATE_JOBM_PAGE: <FormJob type={"create"} />,
-  DETAIL_JOBM_PAGE: <FormJob type={"view"}/>,
+  DETAIL_JOBM_PAGE: <FormJob type={"view"} />,
 
   //Job Control
   VIEW_JOB_CONTROL_PAGE: <JobControlPage />,
@@ -131,4 +134,10 @@ export const SYSTEM_SETUP_ELEMENTS = {
   DETAIL_PAYMENT_CYCLE: <ViewPaymentCycle />,
   CREATE_PAYMENT_CYCLE: <PaymentCycleForm type="create" />,
   UPDATE_PAYMENT_CYCLE: <PaymentCycleForm type="update" />,
+
+  // Billing Item Category
+  VIEW_BILLING_ITEM_CATEGORY: <ListBillingItemCategory />,
+  DETAIL_BILLING_ITEM_CATEGORY: <BillingItemCategoryDetail />,
+  CREATE_BILLING_ITEM_CATEGORY: <BillingItemCategoryForm type="create" />,
+  UPDATE_BILLING_ITEM_CATEGORY: <BillingItemCategoryForm type="update" />,
 };

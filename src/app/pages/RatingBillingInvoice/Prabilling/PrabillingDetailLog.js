@@ -63,18 +63,16 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     });
   };
 
-  // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = detail_prabilling_log?.totalPages || 0;
 
-    // Check if there's more data to load
     if (nextPage <= totalPages) {
       await dispatch(
         getDetailPrabillingLog({
           initCode: prabillData.initCode,
-          page: nextPage - 1, // Backend uses 0-based indexing
-          size: loadMoreSize, // Load 20 more
+          page: nextPage - 1, 
+          size: loadMoreSize,
           sort: sort || "createdDtm~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
           isLoadMore: true,
