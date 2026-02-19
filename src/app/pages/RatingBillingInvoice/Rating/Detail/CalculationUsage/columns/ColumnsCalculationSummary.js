@@ -226,6 +226,22 @@ export const getExpandedColumns = () => [
     ],
   },
   {
+    title: "Range Min",
+    dataIndex: "rangeMin",
+    key: "rangeMin",
+    width: 100,
+    align: "center",
+    render: (text) => text || "",
+  },
+  {
+    title: "Range Max",
+    dataIndex: "rangeMax",
+    key: "rangeMax",
+    width: 100,
+    align: "center",
+    render: (text) => text || "",
+  },
+  {
     title: "PRICE",
     children: [
       {
