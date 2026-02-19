@@ -449,7 +449,7 @@ const ListBillingItemCategory = () => {
                 <Checkbox
                   className="inactive-check"
                   disabled={true}
-                  checked={true}
+                  checked={false}
                 />
                 <span className="text-gray-400 ml-6">Inactivate</span>
               </div>
@@ -463,7 +463,7 @@ const ListBillingItemCategory = () => {
                     canInactivate ? () => handleInactive(record) : undefined
                   }
                   disabled={!canInactivate}
-                  checked={!canInactivate}
+                  checked={false}
                 />
               </div>
             </Tooltip>
