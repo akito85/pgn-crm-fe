@@ -29,10 +29,10 @@ import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 const BillingItemView = () => {
   // Selector
   const { data_view, data_ApprovalHistory, loading } = useSelector(
-    (state) => state.billing_item
+    (state) => state.billing_item,
   );
   const { bodyError: bodyErrorGeneral } = useSelector(
-    (state) => state?.general
+    (state) => state?.general,
   );
 
   // Declaration
@@ -65,7 +65,7 @@ const BillingItemView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -160,7 +160,7 @@ const BillingItemView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -206,7 +206,7 @@ const BillingItemView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -284,33 +284,28 @@ const BillingItemView = () => {
 
         const linkContent =
           data > 3 ? (
-            <ButtonComponent
-              icon={
-                <SVGIcon
-                  name="IconEdit"
-                  color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
-                />
-              }
-              border={false}
-              disabled={!isEditable}
-            >
-              <span
-                className={`ml-3 ${
-                  isEditable ? "text-black" : "text-[#8D91A0]"
-                }`}
+            isEditable ? (
+              <ButtonComponent
+                icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
+                border={false}
               >
-                {" "}
-                Update
-              </span>
-            </ButtonComponent>
+                <span className="text-black ml-3">Update</span>
+              </ButtonComponent>
+            ) : (
+              <div className="flex items-center px-1 py-1 cursor-not-allowed">
+                <span className="pointer-events-none">
+                  <SVGIcon name="IconEdit" color="#8D91A0" width={24} />
+                </span>
+                <span className="text-[#8D91A0] ml-4 pointer-events-none">Update</span>
+              </div>
+            )
           ) : (
             <Tooltip title="Update">
               <div>
                 <SVGIcon
                   name="IconEdit"
                   width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
+                  color={isEditable ? "#ACC424" : "#8D91A0"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
               </div>
@@ -344,35 +339,46 @@ const BillingItemView = () => {
           (record.statusApproval === "WAITING APPROVAL" &&
             record.status === "ACTIVE");
 
+        const isActive = record.status === "ACTIVE";
+
         const Content =
           data > 3 ? (
-            <ButtonComponent
-              icon={
+            isActivateOrInactivate ? (
+              <ButtonComponent
+                icon={
+                  <Checkbox
+                    className="inactive-check"
+                    disabled={false}
+                    checked={!isActive}
+                  />
+                }
+                border={false}
+                onClick={() => handleInactive(record)}
+              >
+                <span className="text-black ml-5">Inactivate</span>
+              </ButtonComponent>
+            ) : (
+              <div className="flex items-center px-2 py-1">
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={true}
+                  checked={false}
                 />
-              }
-              border={false}
-              disabled={!isActivateOrInactivate}
-              onClick={() => handleInactive(record)}
-            >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-              </span>
-            </ButtonComponent>
+                <span className="text-[#8D91A0] ml-5">Inactivate</span>
+              </div>
+            )
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title="Inactivate">
               <div>
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  onClick={
+                    isActivateOrInactivate
+                      ? () => handleInactive(record)
+                      : undefined
+                  }
+                  disabled={!isActivateOrInactivate}
+                  checked={isActivateOrInactivate && !isActive}
                 />
               </div>
             </Tooltip>
@@ -422,13 +428,13 @@ const BillingItemView = () => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     );
   }, [search, page, pageSize, searchedColumn, searchText]);
 
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: 100,
@@ -456,86 +462,86 @@ const BillingItemView = () => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      {/* <Spin spinning={loading}> */}
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">TRANSACTION MAPPING LIST</p>
-              <div className="mt-[15px] flex gap-[20px]">
-                <Toolbar items={itemGrantAccess} />
-              </div>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px]">TRANSACTION MAPPING LIST</p>
+            <div className="mt-[15px] flex gap-[20px]">
+              <Toolbar items={itemGrantAccess} />
             </div>
-          }
-        >
-          <div className="my-0">
-            <TableRBI
-              dataSource={data_view?.result}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data_view?.page?.totalElements || 0}
-              tableScrolled={{ x: 2300, y: 525 }}
-              onSort={onSort}
-              columnDefinitions={columnDefinitions}
-              handleDownload={handleDownload}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-            />
           </div>
-        </CardContainer>
-
-        {/* Modal Inactive */}
-        {modalInactive ? (
-          <ModalInactivateWithHierarchy
-            selector={"billing_item"}
-            dispatch={dispatch}
-            getAPIOption={getAvailableApproval}
-            getAPIDetail={getSelectedApproval}
-            alertMessage={`Are you sure you want to inactivate this Transaction mapping with name ${
-              chooseId?.billingItemCode || ""
-            }?`}
-            openModalInactivate={modalInactive}
-            handleCloseModalInactivate={handleCancel}
-            onFinish={handleOk}
+        }
+      >
+        <div className="my-0">
+          <TableRBI
+            dataSource={data_view?.result}
+            columns={processedColumns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={data_view?.page?.totalElements || 0}
+            tableScrolled={{ x: 2300, y: 525 }}
+            onSort={onSort}
+            columnDefinitions={columnDefinitions}
+            handleDownload={handleDownload}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
           />
-        ) : null}
+        </div>
+      </CardContainer>
 
-        {/* Modal Approval History */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          width={1000}
-          tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
+      {/* Modal Inactive */}
+      {modalInactive ? (
+        <ModalInactivateWithHierarchy
+          selector={"billing_item"}
+          dispatch={dispatch}
+          getAPIOption={getAvailableApproval}
+          getAPIDetail={getSelectedApproval}
+          alertMessage={`Are you sure you want to inactivate this Transaction mapping with name ${
+            chooseId?.billingItemCode || ""
+          }?`}
+          openModalInactivate={modalInactive}
+          handleCloseModalInactivate={handleCancel}
+          onFinish={handleOk}
         />
+      ) : null}
 
-        {/* Modal Modal Error Inactive */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">
-              {bodyError?.message ||
-                bodyErrorGeneral?.response?.data?.message?.toString()}
-            </p>
-            <p className="pl-[70px]">Please try again.</p>
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
+
+      {/* Modal Modal Error Inactive */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-        </ModalError>
-      </Spin>
+          <p className="pl-[70px]">
+            {bodyError?.message ||
+              bodyErrorGeneral?.response?.data?.message?.toString()}
+          </p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
+      {/* </Spin> */}
     </LayoutMenu>
   );
 };
