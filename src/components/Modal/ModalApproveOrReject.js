@@ -43,7 +43,7 @@ const ModalApproveOrReject = ({
       width={width}
       type={"confirmation"}
       footer={
-        <div className="w-full flex justify-end gap-5 p-4">
+        <div className="w-full flex justify-end gap-2 p-4">
           <ButtonComponent onClick={handleCancelModalFinal} type="default">
             Cancel
           </ButtonComponent>

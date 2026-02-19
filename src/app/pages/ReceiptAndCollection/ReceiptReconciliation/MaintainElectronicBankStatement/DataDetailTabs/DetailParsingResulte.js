@@ -412,37 +412,37 @@ const DetailParsingResulte = (props) => {
             ""
           ),
       },
-      {
-        key: "statusApproval",
-        title: "STATUS APPROVAL",
-        dataIndex: "statusApproval",
-        align: "center",
-        sorter: true,
-        fixed: "right",
-        ...getColumnSearchPropsPaging(
-          "statusApproval",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          searchedColumn === "statusApproval" ? (
-            <Highlighter
-              highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          ) : text ? (
-            <div className="flex justify-center">
-              <StatusComponent colour={text}>{text}</StatusComponent>
-            </div>
-          ) : (
-            ""
-          ),
-      },
+      // {
+      //   key: "statusApproval",
+      //   title: "STATUS APPROVAL",
+      //   dataIndex: "statusApproval",
+      //   align: "center",
+      //   sorter: true,
+      //   fixed: "right",
+      //   ...getColumnSearchPropsPaging(
+      //     "statusApproval",
+      //     searchInput,
+      //     searchedColumn,
+      //     searchText,
+      //     handleSearch,
+      //     true
+      //   ),
+      //   render: (text) =>
+      //     searchedColumn === "statusApproval" ? (
+      //       <Highlighter
+      //         highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+      //         searchWords={[searchText]}
+      //         autoEscape
+      //         textToHighlight={text ? text.toString() : ""}
+      //       />
+      //     ) : text ? (
+      //       <div className="flex justify-center">
+      //         <StatusComponent colour={text}>{text}</StatusComponent>
+      //       </div>
+      //     ) : (
+      //       ""
+      //     ),
+      // },
     ];
 
 

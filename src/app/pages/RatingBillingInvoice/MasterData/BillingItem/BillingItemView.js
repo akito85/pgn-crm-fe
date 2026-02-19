@@ -87,7 +87,7 @@ const BillingItemView = () => {
     },
     {
       path: "",
-      breadcrumbName: "Billing Item",
+      breadcrumbName: "Transaction Mapping",
     },
   ];
 
@@ -248,7 +248,7 @@ const BillingItemView = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Billing Item
+            Create Transaction Mapping
           </ButtonComponent>
         </NavLink>
       ),
@@ -462,7 +462,7 @@ const BillingItemView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">BILLING ITEM LIST</p>
+              <p className="mt-[15px]">TRANSACTION MAPPING LIST</p>
               <div className="mt-[15px] flex gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
@@ -496,7 +496,7 @@ const BillingItemView = () => {
             dispatch={dispatch}
             getAPIOption={getAvailableApproval}
             getAPIDetail={getSelectedApproval}
-            alertMessage={`Are you sure you want to inactivate this Billing Item with name ${
+            alertMessage={`Are you sure you want to inactivate this Transaction mapping with name ${
               chooseId?.billingItemCode || ""
             }?`}
             openModalInactivate={modalInactive}

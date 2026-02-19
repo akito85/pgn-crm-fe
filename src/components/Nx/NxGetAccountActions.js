@@ -62,7 +62,6 @@ const nxGetAccountActions = ({
           <Button
             onClick={() => handleView(record.id)}
             type="table-action"
-            directChildren
           >
             <SVGIcon name="IconDetail" width={20} />
           </Button>
@@ -75,8 +74,9 @@ const nxGetAccountActions = ({
     type: 'table',
     render: (record, actionLength, index) => {
       const isEditable =
-        record.statusApproval === "DRAFT" ||
-        record.statusApproval === "REJECTED";
+        record.status !== "INACTIVE" &&
+        record.statusApproval !== "WAITING_APPROVAL" &&
+        record.statusApproval !== "WAITING_FOR_APPROVAL";
 
       const content = actionLength > 3 ?
         (
@@ -199,7 +199,6 @@ const nxGetAccountActions = ({
           <Button
             onClick={() => handleDelete(record.id)}
             type="table-action"
-            directChildren
           >
             <SVGIcon name="IconDelete" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
           </Button>
