@@ -9,6 +9,7 @@ import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/Atta
 const ConfirmModalPaymentCycle = ({
     data,
     dataTimeUnit,
+    dataPaymentPeriods,
     dataOption,
     selectedHierarchy,
     listDataAppHierDetail = [],
@@ -27,7 +28,9 @@ const ConfirmModalPaymentCycle = ({
                 return (
                     <div className="w-full">
                         <div className="grid grid-cols-2 gap-4 w-full">
-                            <DetailText label={"Period"}>{data?.period}</DetailText>
+                            <DetailText label={"Period"}>
+                                {dataPaymentPeriods?.find(p => p.id === data?.periodId)?.periodName || "-"}
+                            </DetailText>
                             <DetailText label={"Time Unit"}>{time}</DetailText>
                             <DetailText label={"Begin Cycle"}>{data?.beginCycle}</DetailText>
                             <DetailText label={"End Cycle"}>{data?.endCycle}</DetailText>
