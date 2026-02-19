@@ -4,120 +4,109 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import { toTitleCase } from "../../../../../utils";
 import { Badge, Popover } from "antd";
 
-// Human-readable labels for TASK_BODY field keys (no underscores)
-const FIELD_LABELS = {
-  payment_number:     "Payment Ref",
-  amount:             "Amount",
-  currency:           "Currency",
-  vendor_name:        "Vendor",
-  payment_method:     "Payment Method",
-  payment_date:       "Payment Date",
-  approval_reason:    "Reason",
-  customer_id:        "Customer ID",
-  customer_name:      "Customer",
-  customer_number:    "Customer No",
-  account_number:     "Account No",
-  account_name:       "Account",
-  account_category:   "Account Type",
-  account_segment:    "Segment",
-  effective_date:     "Effective",
-  expiry_date:        "Expiry",
-  submitter_username: "Submitted By",
-  validation_type:    "Validation",
-  sa_number:          "SA Number",
-  contract_value:     "Contract Value",
-  contract_period:    "Period",
-  service_type:       "Service Type",
-  start_date:         "Start Date",
-  end_date:           "End Date",
-  billing_number:     "Billing No",
-  billing_period:     "Billing Period",
-  total_amount:       "Total Amount",
-  pricing_name:       "Pricing",
-  base_price:         "Base Price",
-  product_name:       "Product",
-  name:               "Name",
-  code:               "Code",
-  type:               "Type",
+// ─── TRIGGER_JSON (camelCase) label map ───────────────────────────────────────
+// Source: M_NOTIFICATIONS.ADDITIONAL_DATA via V_TASK_WITH_NOTIFICATION join
+const TRIGGER_LABELS = {
+  accountNumber:    "Account No",
+  accountName:      "Account",
+  accountCategory:  "Account Type",
+  accountSegment:   "Segment",
+  customerId:       "Customer ID",
+  customerName:     "Customer",
+  customerNumber:   "Customer No",
+  subjectId:        "Subject ID",
+  objectId:         "Object ID",
+  startDate:        "Start Date",
+  endDate:          "End Date",
+  validationType:   "Validation Type",
+  submitterUsername:"Submitted By",
+  hierarchyName:    "Approval Hierarchy",
+  category:         "Category",
+  remarks:          "Remarks",
+  description:      "Description",
+  status:           "Status",
+  statusApproval:   "Approval Status",
 };
 
-// Keys that are redundant or not useful in a compact preview
-const SKIP_KEYS = new Set([
-  "category", "entity_id", "message", "status", "description",
-  "subject_id", "object_id",
+// Keys to hide in the detail popover (internal/null-prone/redundant)
+const TRIGGER_SKIP = new Set([
+  "id", "entityId", "updatedBy", "updatedDate", "createdBy", "createdDate",
+  "approvalHierarchy", "appHierId", "submitterId", "action", "priority",
 ]);
 
-// Priority field order per category — most meaningful fields shown first
+// Priority fields per category for the compact preview row (camelCase)
 const PREVIEW_PRIORITY = {
-  PAYMENT_RELATION:         ["account_number", "account_name", "customer_name", "amount", "currency"],
-  INACTIVE_PAYMENT_RELATION:["account_number", "account_name", "customer_name", "amount", "currency"],
-  SERVICE_AGREEMENT:        ["sa_number", "customer_name", "contract_value", "service_type"],
-  UPDATE_SERVICE_AGREEMENT: ["sa_number", "customer_name", "contract_value", "service_type"],
-  BILLING:                  ["billing_number", "customer_name", "total_amount", "billing_period"],
-  PRICING:                  ["pricing_name", "base_price", "currency", "product_name"],
-  PRICING_ADJUSTMENT:       ["adjustment_type", "adjustment_value", "product_name", "effective_date"],
+  PAYMENT_RELATION:          ["accountNumber", "accountName", "customerName", "customerNumber"],
+  INACTIVE_PAYMENT_RELATION: ["accountNumber", "accountName", "customerName", "customerNumber"],
+  SERVICE_AGREEMENT:         ["accountNumber", "customerName", "startDate", "endDate"],
+  UPDATE_SERVICE_AGREEMENT:  ["accountNumber", "customerName", "startDate", "endDate"],
+  BILLING:                   ["accountNumber", "customerName", "startDate", "endDate"],
+  PRICING:                   ["accountNumber", "customerName", "validationType", "startDate"],
 };
 
-const MAX_PREVIEW_FIELDS = 4;
+const MAX_PREVIEW = 4;
+const DATE_FORMAT  = "DD MMM YYYY HH:mm:ss";
+const ISO_RE = /^\d{4}-\d{2}-\d{2}T/;
 
-/**
- * Builds a concise, human-readable preview from TASK_BODY JSON.
- * Returns an array of { label, value } pairs capped at MAX_PREVIEW_FIELDS.
- */
-function buildTaskBodyPreview(taskBody, category) {
-  if (!taskBody) return [];
+const fmtValue = (v) => {
+  if (v === null || v === undefined) return null;
+  const s = String(v).trim();
+  if (!s || s === "null") return null;
+  if (ISO_RE.test(s)) return moment(s).format(DATE_FORMAT);
+  return s;
+};
 
-  let parsed;
-  try {
-    parsed = typeof taskBody === "string" ? JSON.parse(taskBody) : taskBody;
-  } catch {
-    return [];
+/** Parse TRIGGER_JSON (string or object) safely. Returns null on failure. */
+const parseTrigger = (raw) => {
+  if (!raw) return null;
+  try { return typeof raw === "string" ? JSON.parse(raw) : raw; }
+  catch { return null; }
+};
+
+/** Build compact preview fields from TRIGGER_JSON */
+const buildPreview = (data, category) => {
+  if (!data || typeof data !== "object") return [];
+  const priority = PREVIEW_PRIORITY[category] || [];
+  const result = [];
+
+  for (const key of priority) {
+    if (result.length >= MAX_PREVIEW) break;
+    const val = fmtValue(data[key]);
+    if (val) result.push({ label: TRIGGER_LABELS[key] || key, value: val });
   }
 
-  if (typeof parsed !== "object" || parsed === null) return [];
-
-  const priorityKeys = PREVIEW_PRIORITY[category] || [];
-  const selected = [];
-
-  // Add priority keys first (in order), if present and non-null
-  for (const key of priorityKeys) {
-    if (selected.length >= MAX_PREVIEW_FIELDS) break;
-    const val = parsed[key];
-    if (val !== undefined && val !== null && String(val).trim() !== "" && !SKIP_KEYS.has(key)) {
-      selected.push({ label: FIELD_LABELS[key] || key, value: String(val) });
+  if (result.length < MAX_PREVIEW) {
+    const seen = new Set(priority);
+    for (const [key, raw] of Object.entries(data)) {
+      if (result.length >= MAX_PREVIEW) break;
+      if (seen.has(key) || TRIGGER_SKIP.has(key)) continue;
+      const val = fmtValue(raw);
+      if (val) result.push({ label: TRIGGER_LABELS[key] || key, value: val });
     }
   }
 
-  // Fill remaining slots with any other non-skipped, non-priority fields
-  if (selected.length < MAX_PREVIEW_FIELDS) {
-    const prioritySet = new Set(priorityKeys);
-    for (const [key, val] of Object.entries(parsed)) {
-      if (selected.length >= MAX_PREVIEW_FIELDS) break;
-      if (prioritySet.has(key) || SKIP_KEYS.has(key)) continue;
-      if (val !== undefined && val !== null && String(val).trim() !== "") {
-        selected.push({ label: FIELD_LABELS[key] || key.replace(/_/g, " "), value: String(val) });
-      }
-    }
-  }
+  return result;
+};
 
-  return selected;
-}
+/** Build full detail rows for the popover */
+const buildDetail = (data) => {
+  if (!data || typeof data !== "object") return [];
+  return Object.entries(data)
+    .filter(([k, v]) => !TRIGGER_SKIP.has(k) && fmtValue(v) !== null)
+    .map(([k, v]) => ({ label: TRIGGER_LABELS[k] || k, value: fmtValue(v) }));
+};
 
-/**
- * Resolves approval status label and colour from COMPLETION_ACTION + TASK_STATUS.
- */
-function resolveApprovalStatus(completionAction, taskStatus) {
-  if (completionAction === "APPROVE") return { label: "Approved",          colour: "approved" };
-  if (completionAction === "REJECT")  return { label: "Rejected",          colour: "rejected" };
-  if (completionAction === "DELEGATE") return { label: "Delegated",        colour: "pending"  };
-
+/** Resolve approval status label + colour from COMPLETION_ACTION + TASK_STATUS */
+const resolveApprovalStatus = (completionAction, taskStatus) => {
+  if (completionAction === "APPROVE")  return { label: "Approved",         colour: "approved" };
+  if (completionAction === "REJECT")   return { label: "Rejected",          colour: "rejected" };
+  if (completionAction === "DELEGATE") return { label: "Delegated",         colour: "pending"  };
   const s = (taskStatus || "").toUpperCase();
-  if (s === "CANCELLED") return { label: "Cancelled",          colour: "cancelled" };
-  if (s === "EXPIRED")   return { label: "Expired",            colour: "inactive"  };
-  if (s === "COMPLETED") return { label: "Completed",          colour: "completed" };
-
+  if (s === "CANCELLED") return { label: "Cancelled",         colour: "cancelled" };
+  if (s === "EXPIRED")   return { label: "Expired",           colour: "inactive"  };
+  if (s === "COMPLETED") return { label: "Completed",         colour: "completed" };
   return { label: "Awaiting Approval", colour: "pending" };
-}
+};
 
 export const getTasklistColumns = (
   search,
@@ -153,36 +142,28 @@ export const getTasklistColumns = (
   {
     key: "taskBody",
     title: "TASK BODY",
-    dataIndex: "TASK_BODY",
+    dataIndex: "TRIGGER_JSON",
     width: 340,
-    render: (text, record) => {
-      const body     = text || record.TASK_BODY || record.taskBody;
+    render: (triggerRaw, record) => {
+      // Prefer TRIGGER_JSON (full notification data); fall back to TASK_BODY
+      const raw      = triggerRaw || record.TRIGGER_JSON || record.triggerJson;
       const category = record.CATEGORY || record.category || "";
-      const preview  = buildTaskBodyPreview(body, category);
+      const data     = parseTrigger(raw);
+      const preview  = buildPreview(data, category);
+      const detail   = buildDetail(data);
 
       if (preview.length === 0) return <span style={{ color: "#bfbfbf" }}>—</span>;
 
-      // Build full detail list for popover (all non-skipped fields)
-      let allFields = [];
-      try {
-        const parsed = typeof body === "string" ? JSON.parse(body) : body;
-        if (parsed && typeof parsed === "object") {
-          allFields = Object.entries(parsed)
-            .filter(([k, v]) => !SKIP_KEYS.has(k) && v !== null && v !== undefined && String(v).trim() !== "")
-            .map(([k, v]) => ({ label: FIELD_LABELS[k] || k.replace(/_/g, " "), value: String(v) }));
-        }
-      } catch { /* ignore */ }
-
       const popoverContent = (
-        <div style={{ maxWidth: 360, maxHeight: 400, overflowY: "auto" }}>
-          {allFields.length === 0 ? (
+        <div style={{ width: 380, maxHeight: 420, overflowY: "auto" }}>
+          {detail.length === 0 ? (
             <span style={{ color: "#bfbfbf" }}>No details available.</span>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <tbody>
-                {allFields.map((f) => (
-                  <tr key={f.label} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <td style={{ padding: "5px 10px 5px 0", color: "#8c8c8c", whiteSpace: "nowrap", verticalAlign: "top", fontWeight: 500 }}>
+                {detail.map((f) => (
+                  <tr key={f.label} style={{ borderBottom: "1px solid #f5f5f5" }}>
+                    <td style={{ padding: "5px 12px 5px 0", color: "#8c8c8c", whiteSpace: "nowrap", verticalAlign: "top", fontWeight: 500, width: 130 }}>
                       {f.label}
                     </td>
                     <td style={{ padding: "5px 0", color: "#262626", wordBreak: "break-word" }}>
@@ -194,20 +175,6 @@ export const getTasklistColumns = (
             </table>
           )}
         </div>
-      );
-
-      const previewText = (
-        <span style={{ fontSize: 12, color: "#595959", lineHeight: "1.6" }}>
-          {preview.map((f, i) => (
-            <span key={f.label}>
-              <span style={{ color: "#8c8c8c" }}>{f.label}:</span>{" "}
-              <span style={{ color: "#262626" }}>{f.value}</span>
-              {i < preview.length - 1 && (
-                <span style={{ color: "#d9d9d9", margin: "0 6px" }}>·</span>
-              )}
-            </span>
-          ))}
-        </span>
       );
 
       return (
@@ -230,7 +197,15 @@ export const getTasklistColumns = (
             }}
             title="Click to expand"
           >
-            {previewText}
+            {preview.map((f, i) => (
+              <span key={f.label} style={{ fontSize: 12 }}>
+                <span style={{ color: "#8c8c8c" }}>{f.label}:</span>{" "}
+                <span style={{ color: "#262626" }}>{f.value}</span>
+                {i < preview.length - 1 && (
+                  <span style={{ color: "#d9d9d9", margin: "0 6px" }}>·</span>
+                )}
+              </span>
+            ))}
           </span>
         </Popover>
       );
@@ -243,14 +218,12 @@ export const getTasklistColumns = (
     width: 150,
     align: "center",
     render: (text, record) => {
-      const completionAction = text || record.COMPLETION_ACTION || record.completionAction;
-      const taskStatus       = record.TASK_STATUS || record.taskStatus;
-      const { label, colour } = resolveApprovalStatus(completionAction, taskStatus);
+      const action     = text || record.COMPLETION_ACTION || record.completionAction;
+      const taskStatus = record.TASK_STATUS || record.taskStatus;
+      const { label, colour } = resolveApprovalStatus(action, taskStatus);
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={colour} size="small">
-            {label}
-          </StatusComponent>
+          <StatusComponent colour={colour} size="small">{label}</StatusComponent>
         </div>
       );
     },
@@ -324,7 +297,7 @@ export const getTasklistColumns = (
     key: "createdAt",
     title: "RECEIVED",
     dataIndex: "CREATED_AT",
-    width: 150,
+    width: 170,
     sorter: true,
     align: "center",
     filteredValue: [search?.createdAt] || null,
@@ -333,7 +306,7 @@ export const getTasklistColumns = (
     ),
     render: (text, record) => {
       const date = text || record.createdAt;
-      return date ? moment(date).format("DD-MMM-YYYY HH:mm:ss") : "-";
+      return date ? moment(date).format(DATE_FORMAT) : "-";
     },
   },
 ];
