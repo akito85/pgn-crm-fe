@@ -2,7 +2,7 @@ import moment from "moment";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../components/StatusComponent";
 import { toTitleCase } from "../../../../../utils";
-import { Badge } from "antd";
+import { Badge, Popover } from "antd";
 
 // Human-readable labels for TASK_BODY field keys (no underscores)
 const FIELD_LABELS = {
@@ -158,34 +158,81 @@ export const getTasklistColumns = (
     render: (text, record) => {
       const body     = text || record.TASK_BODY || record.taskBody;
       const category = record.CATEGORY || record.category || "";
-      const fields   = buildTaskBodyPreview(body, category);
+      const preview  = buildTaskBodyPreview(body, category);
 
-      if (fields.length === 0) return <span style={{ color: "#bfbfbf" }}>—</span>;
+      if (preview.length === 0) return <span style={{ color: "#bfbfbf" }}>—</span>;
 
-      return (
-        <span
-          style={{
-            fontSize: 12,
-            color: "#595959",
-            lineHeight: "1.6",
-            display: "block",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: 320,
-          }}
-          title={fields.map((f) => `${f.label}: ${f.value}`).join("  ·  ")}
-        >
-          {fields.map((f, i) => (
+      // Build full detail list for popover (all non-skipped fields)
+      let allFields = [];
+      try {
+        const parsed = typeof body === "string" ? JSON.parse(body) : body;
+        if (parsed && typeof parsed === "object") {
+          allFields = Object.entries(parsed)
+            .filter(([k, v]) => !SKIP_KEYS.has(k) && v !== null && v !== undefined && String(v).trim() !== "")
+            .map(([k, v]) => ({ label: FIELD_LABELS[k] || k.replace(/_/g, " "), value: String(v) }));
+        }
+      } catch { /* ignore */ }
+
+      const popoverContent = (
+        <div style={{ maxWidth: 360, maxHeight: 400, overflowY: "auto" }}>
+          {allFields.length === 0 ? (
+            <span style={{ color: "#bfbfbf" }}>No details available.</span>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <tbody>
+                {allFields.map((f) => (
+                  <tr key={f.label} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                    <td style={{ padding: "5px 10px 5px 0", color: "#8c8c8c", whiteSpace: "nowrap", verticalAlign: "top", fontWeight: 500 }}>
+                      {f.label}
+                    </td>
+                    <td style={{ padding: "5px 0", color: "#262626", wordBreak: "break-word" }}>
+                      {f.value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      );
+
+      const previewText = (
+        <span style={{ fontSize: 12, color: "#595959", lineHeight: "1.6" }}>
+          {preview.map((f, i) => (
             <span key={f.label}>
               <span style={{ color: "#8c8c8c" }}>{f.label}:</span>{" "}
               <span style={{ color: "#262626" }}>{f.value}</span>
-              {i < fields.length - 1 && (
+              {i < preview.length - 1 && (
                 <span style={{ color: "#d9d9d9", margin: "0 6px" }}>·</span>
               )}
             </span>
           ))}
         </span>
+      );
+
+      return (
+        <Popover
+          content={popoverContent}
+          title={<span style={{ fontSize: 13, fontWeight: 600 }}>Task Details</span>}
+          trigger="click"
+          placement="bottomLeft"
+          overlayStyle={{ zIndex: 1050 }}
+        >
+          <span
+            style={{
+              display: "block",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: 320,
+              cursor: "pointer",
+              borderBottom: "1px dashed #d9d9d9",
+            }}
+            title="Click to expand"
+          >
+            {previewText}
+          </span>
+        </Popover>
       );
     },
   },
@@ -286,7 +333,7 @@ export const getTasklistColumns = (
     ),
     render: (text, record) => {
       const date = text || record.createdAt;
-      return date ? moment(date).format("DD MMM YYYY HH:mm") : "-";
+      return date ? moment(date).format("DD-MMM-YYYY HH:mm:ss") : "-";
     },
   },
 ];
