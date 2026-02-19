@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BillingItemDetailInformation from "./Detail/BillingItemDetailInformation";
-import BaseContainer from "../../../../../components/BaseContainer";
 import CardContainer from "../../../../../components/CardContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -60,11 +59,15 @@ const BillingItemDetail = () => {
   }, [dispatch, dataRecord]);
 
   useEffect(() => {
-    if (dataRecord && data_BillingItemDetail && data_BillingItemDetail?.billingItemCode === dataRecord) {
+    if (
+      dataRecord &&
+      data_BillingItemDetail &&
+      data_BillingItemDetail?.billingItemCode === dataRecord
+    ) {
       setShowButtonApproval(
         (data_BillingItemDetail.statusApproval === "WAITING APPROVAL" ||
           data_BillingItemDetail.statusApproval === "WAITING_APPROVAL") &&
-          data_BillingItemDetail?.approvalDto?.isApprover
+          data_BillingItemDetail?.approvalDto?.isApprover,
       );
 
       // Mapping Information
@@ -77,7 +80,7 @@ const BillingItemDetail = () => {
             endDate: item.endDate ? moment(item.endDate) : "",
             dataType: "exist",
           };
-        })
+        }),
       );
 
       // Attachment Information
@@ -90,14 +93,15 @@ const BillingItemDetail = () => {
               : "",
             dataType: "exist",
           };
-        })
+        }),
       );
 
       if (
         data_detailDraft &&
-        data_detailDraft?.billingItemCode === data_BillingItemDetail?.billingItemCode &&
+        data_detailDraft?.billingItemCode ===
+          data_BillingItemDetail?.billingItemCode &&
         data_detailDraft?.billingItemCode === dataRecord &&
-        (data_BillingItemDetail?.statusApproval !== "APPROVED")
+        data_BillingItemDetail?.statusApproval !== "APPROVED"
       ) {
         // Mapping Information
         const dataMappingInfoDraft = (
@@ -136,7 +140,7 @@ const BillingItemDetail = () => {
                   ...item,
                   categoryId: item.categoryId,
                 };
-              }
+              },
             ),
           };
         });
@@ -194,7 +198,7 @@ const BillingItemDetail = () => {
     dispatch(
       data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE")
         ? approvalInactiveBillingItem(body)
-        : approvalRejectBillingItem(body)
+        : approvalRejectBillingItem(body),
     )
       .unwrap()
       .then(async (data) => {
@@ -223,7 +227,7 @@ const BillingItemDetail = () => {
   const tabItems = [
     {
       key: "BillingItem",
-      label: "Billing Item",
+      label: "Transaction Mapping",
       children: (
         <div className="my-0">
           <BillingItemDetailInformation
@@ -254,7 +258,7 @@ const BillingItemDetail = () => {
       label: "Attachment",
       children: (
         <div className="my-0">
-          <BaseContainer header={"ATTACHMENT INFORMATION"}>
+          <CardContainer header="ATTACHMENT INFORMATION">
             <AttachmentComponent
               typeSelector={"billing_item"}
               data={listDataAttachment}
@@ -263,7 +267,7 @@ const BillingItemDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         </div>
       ),
     },
@@ -273,58 +277,42 @@ const BillingItemDetail = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        
-        {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") && 
-         data_BillingItemDetail?.approvalDto?.isApprover && (
-          <div className="mt-5">
-            <BaseContainer header={"Inactive Request Information"}>
-              <div className="w-full grid grid-cols-4 gap-5">
-                <DetailText label="Requested Date">
-                  {renderDateTime(data_BillingItemDetail?.approvalDto?.requestedDate)}
-                </DetailText>
-                <DetailText label="Requested By">
-                  {data_BillingItemDetail?.approvalDto?.requestedBy}
-                </DetailText>
-                <DetailText label="Remark">
-                  {data_BillingItemDetail?.approvalDto?.remark}
-                </DetailText>
-              </div>
-            </BaseContainer>
-          </div>
-        )}
+
+        {data_BillingItemDetail?.approvalDto?.approvalType?.includes(
+          "INACTIVE",
+        ) &&
+          data_BillingItemDetail?.approvalDto?.isApprover && (
+            <div className="mt-5">
+              <CardContainer header={"Inactive Request Information"}>
+                <div className="w-full grid grid-cols-4 gap-5">
+                  <DetailText label="Requested Date">
+                    {renderDateTime(
+                      data_BillingItemDetail?.approvalDto?.requestedDate,
+                    )}
+                  </DetailText>
+                  <DetailText label="Requested By">
+                    {data_BillingItemDetail?.approvalDto?.requestedBy}
+                  </DetailText>
+                  <DetailText label="Remark">
+                    {data_BillingItemDetail?.approvalDto?.remark}
+                  </DetailText>
+                </div>
+              </CardContainer>
+            </div>
+          )}
 
         <div className="mt-5">
-          <CardContainer
-            header={
-              <div className="flex -my-4 justify-between items-center">
-                <p className="w-full mt-[15px] text-primary">BILLING ITEM DETAIL</p>
-              </div>
-            }
-          >
-            <Tabs
-              items={tabItems}
-              onChange={onChangeTab}
-              activeKey={valueTab}
-              className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:my-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
-            />
-          </CardContainer>
+          <Tabs
+            items={tabItems}
+            onChange={onChangeTab}
+            activeKey={valueTab}
+            tabBarStyle={{ marginBottom: 0 }}
+          />
         </div>
 
-        <div className="w-full flex justify-between my-10">
-          <div className="flex">
-            <ButtonComponent
-              type="submit"
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
+        <div className="w-full flex justify-between my-2 shadow-md bg-white p-1 rounded-md">
+          <div className="flex w-full bg-white p-3 rounded-md">
+            <ButtonComponent type="submit" onClick={() => navigate(-1)}>
               Back
             </ButtonComponent>
           </div>
