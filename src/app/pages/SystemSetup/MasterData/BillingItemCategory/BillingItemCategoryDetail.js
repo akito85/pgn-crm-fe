@@ -131,7 +131,7 @@ const BillingItemCategoryDetail = () => {
       breadcrumbName: "Master Data",
     },
     {
-      path: SYSTEM_SETUP_ROUTES.BILLING_ITEM_CATEGORY,
+      path: SYSTEM_SETUP_ROUTES.VIEW_BILLING_ITEM_CATEGORY,
       breadcrumbName: "Billing Item Category",
     },
     {
