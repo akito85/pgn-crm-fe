@@ -277,6 +277,7 @@ const FunctionalCriteriaProduct = ({
   checkStartDate = true, //check product has date validation
   excludeRender = null,
   showInactivate = false, // opt-in per consumer
+  statusApproval = undefined,   // used for inactivate logic
 }) => {
   // Selector
   const {
@@ -760,10 +761,14 @@ const FunctionalCriteriaProduct = ({
             // (status === "DRAFT" && statusApproval === "DRAFT") ||
             record?.dataType !== "exist";
 
-          const isUpdateDisabled = !!editingKey || (type === "update" && record?.status === "INACTIVE");
-          const isDeleteEnabled  = record?.dataType !== "exist" && !editingKey;
-          const isInactive       = record?.status === "INACTIVE";
-          const isInactivateEnabled = ["ACTIVE", "INACTIVE"].includes(record?.status) && !editingKey;
+          const isCurrentRecord     = record?.dataType === "exist" && statusApproval !== "DRAFT";
+          const isUpdateDisabled    = !!editingKey || (isCurrentRecord && record?.status === "INACTIVE");
+          const isDeleteEnabled     = record?.dataType !== "exist" && !editingKey;
+          const isInactive          = record?.status === "INACTIVE";
+          const isInactivateEnabled = !editingKey && (
+            (isCurrentRecord && record?.status === "ACTIVE") ||
+            (!isCurrentRecord && ["ACTIVE", "INACTIVE"].includes(record?.status))
+          );
 
           return (
             <Space className="my-3 gap-2">
