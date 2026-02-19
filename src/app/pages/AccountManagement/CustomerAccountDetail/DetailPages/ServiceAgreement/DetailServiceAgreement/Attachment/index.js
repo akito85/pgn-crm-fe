@@ -1,169 +1,103 @@
-import React,{useState, useRef, useEffect} from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination';
-import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
-import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Spin, Tooltip } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
-import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import FileSaver from "file-saver";
-import {  useDispatch } from "react-redux";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+
+import NxTable from '../../../../../../../../components/Nx/NxTable';
+import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../utils/getColumnSearchProps';
+import { hasValue, renderColumn } from '../../../../../../../../utils';
+import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
+import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { getBase64 } from "../../../../../../../../utils/getBase64";
 import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
-import axios from "axios";
 import { configApp } from "../../../../../../../../constants/configApp";
 import accountManagementService from '../../../../../../../../redux/services/account_management/accountManagementService';
 
-const columnAttachmentData = (
-  page,
-  pageSize,
-  searchInput,
-  searchedColumn,
-  searchText,
-  handleSearch = () => {},
-  previewFileAttachment = () => {},
-  handleShow
-) => {
-  const res = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "category",
-      sorter: true,
-      ...getColumnSearchProps(
-        "category",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "FILE NAME",
-      dataIndex: "fileName",
-      sorter: true,
-      ...getColumnSearchProps(
-        "fileName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "UPLOAD BY",
-      dataIndex: "uploadBy",
-      sorter: true,
-      ...getColumnSearchProps(
-        "createdBy",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "UPLOADED DATE",
-      dataIndex: "uploadDate",
-      sorter: true,
-      ...getColumnSearchProps(
-        "uploadDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "FILE SIZE",
-      dataIndex: "fileSize",
-      sorter: true,
-      ...getColumnSearchProps(
-        "fileSize",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "ACTION",
-      align: "center",
-      width: 120,
-      fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex justify-center align-middle gap-2">
-            <Tooltip title="Preview">
-              <span className="flex justify-center">
-                <EyeOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                  onClick={() => handleShow(r)}
-                />
-              </span>
-            </Tooltip>
-          </div>
-        );
-      },
-      key: "action",
-    },
-  ];
-
-  return res;
-};
-
-const Attachment = ({dataSource}) => {
+const Attachment = ({ dataSource }) => {
   const searchInput = useRef(null);
-  const [dataTable, setDataTable] = useState([]);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElement] = useState(0);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("");
-  const [dataAttachment, setDataAttachment] = useState([]);
-  const [loadingDownload, setLoadingDownload] = useState(false);
-  
-  const service = accountManagementService
-  const configApplication = configApp.ACCOUNT_SERVICE
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const urlLink = (id) => `/v1/dbs/api/sa/download/${id}`
-    if(dataSource){
-      setDataAttachment((dataSource || []).map((item) => ({
-        ...item,
-        createdDate: item.uploadDate,
-        fileSize: bytesConverter(item.fileSize || 0),
-        urlFile1: urlLink(item?.id),
-        dataType: "exist",
-      })));
-      setTotalElement(dataSource?.length)
-    }
-  },[dataSource])
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
+  const [fieldSort, setFieldSort] = useState("");
+  const [orderSort, setOrderSort] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+  const [search, setSearch] = useState({});
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [loadingDownload, setLoadingDownload] = useState(false);
 
+  const service = accountManagementService;
+  const configApplication = configApp.ACCOUNT_SERVICE;
+
+  const dataAttachment = useMemo(() => {
+    if (!dataSource) return [];
+    const urlLink = (id) => `/v1/dbs/api/sa/download/${id}`;
+    return dataSource.map((item) => ({
+      ...item,
+      createdDate: item.uploadDate,
+      fileSize: bytesConverter(item.fileSize || 0),
+      urlFile1: urlLink(item?.id),
+      dataType: "exist",
+    }));
+  }, [dataSource]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      let tempData = { ...prevState };
+      if (selectedKeys[0]) {
+        tempData[dataIndex] = selectedKeys[0];
+      } else {
+        delete tempData[dataIndex];
+      }
+      return tempData;
+    });
+    setLoadedCount(20);
   };
 
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+  const processedData = useMemo(() => {
+    let result = [...dataAttachment];
+
+    // Apply FE search filters
+    if (Object.keys(search).length > 0) {
+      result = result.filter(item =>
+        Object.entries(search).every(([key, val]) =>
+          !val || item[key]?.toString()?.toLowerCase()?.includes(val.toLowerCase())
+        )
+      );
+    }
+
+    if (!fieldSort) return result;
+    return [...result].sort((a, b) => {
+      const fa = a[fieldSort]?.toString()?.toLowerCase() || "";
+      const fb = b[fieldSort]?.toString()?.toLowerCase() || "";
+      if (fa < fb) return orderSort === "asc" ? -1 : 1;
+      if (fa > fb) return orderSort === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [dataAttachment, fieldSort, orderSort, search]);
+
+  useEffect(() => {
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -173,6 +107,7 @@ const Attachment = ({dataSource}) => {
       setFieldSort("");
       setOrderSort("");
     }
+    setLoadedCount(20);
   };
 
   const handleShow = async (r) => {
@@ -197,57 +132,109 @@ const Attachment = ({dataSource}) => {
       }
     }
   };
-  const filterDataByPage = () => {
-    let result = [...dataAttachment];
-    if (searchedColumn) {
-      const fixSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
+
+  const columns = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: "CATEGORY",
+      key: "category",
+      dataIndex: "category",
+      sorter: true,
+      filteredValue: search?.["category"] ? [search?.["category"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "category", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("category", hasValue(search["category"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "FILE NAME",
+      key: "fileName",
+      dataIndex: "fileName",
+      sorter: true,
+      filteredValue: search?.["fileName"] ? [search?.["fileName"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "fileName", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("fileName", hasValue(search["fileName"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "UPLOAD BY",
+      key: "uploadBy",
+      dataIndex: "uploadBy",
+      sorter: true,
+      filteredValue: search?.["uploadBy"] ? [search?.["uploadBy"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "uploadBy", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("uploadBy", hasValue(search["uploadBy"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "UPLOADED DATE",
+      key: "uploadDate",
+      dataIndex: "uploadDate",
+      sorter: true,
+      filteredValue: search?.["uploadDate"] ? [search?.["uploadDate"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "uploadDate", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("uploadDate", hasValue(search["uploadDate"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "FILE SIZE",
+      key: "fileSize",
+      dataIndex: "fileSize",
+      sorter: true,
+      filteredValue: search?.["fileSize"] ? [search?.["fileSize"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "fileSize", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("fileSize", hasValue(search["fileSize"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "ACTION",
+      key: "action",
+      align: "center",
+      width: 100,
+      fixed: "right",
+      render: (v, r) => (
+        <div className="flex justify-center align-middle gap-2">
+          <Tooltip title="Preview">
+            <span className="flex justify-center">
+              <EyeOutlined
+                style={{ fontSize: "24px", color: "#0075bf" }}
+                onClick={() => handleShow(r)}
+              />
+            </span>
+          </Tooltip>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <Spin spinning={loadingDownload}>
-      <div className={"w-full py-6"}>
-        <TablePagination
-          pageSize={pageSize}
-          current={page}
-          dataSource={filterDataByPage()}
-          tableScrolled={{y: 525, x: 1600 }}
-          totalData={totalElements}
-          onChange={handleChangeSize}
-          onSort={onSort}
-          columns={columnAttachmentData(
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            previewFileAttachment,
-            handleShow
-          )}
+      <div className="w-full py-6">
+        <NxTable
+          idTable="sa-detail-attachment-table"
+          dataSource={displayData}
+          columns={columns}
+          totalData={processedData.length}
+          tableScrolled={{ x: "max-content", y: 525 }}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={2}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          columnDefinitions={columns.map((col) => ({
+            key: col.key || col.dataIndex || col.title,
+            title: col.title,
+          }))}
+          onChange={onSort}
+          loading={false}
+          showAdvanceSearch={false}
+          showSearchBar={false}
         />
       </div>
     </Spin>
-  )
-}
+  );
+};
 
-export default Attachment
+export default Attachment;

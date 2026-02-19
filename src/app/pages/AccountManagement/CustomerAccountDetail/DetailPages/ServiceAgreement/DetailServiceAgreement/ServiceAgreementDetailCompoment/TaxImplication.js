@@ -1,6 +1,6 @@
-import React,{ useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import moment from 'moment';
-import TablePaginationNew from '../../../../../../../../components/TablePaginationNew';
+import NxTable from '../../../../../../../../components/Nx/NxTable';
 import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../utils/getColumnSearchProps';
 import { hasValue, renderColumn } from '../../../../../../../../utils';
 
@@ -8,24 +8,10 @@ const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
     switch (fieldSort) {
       case "transactionCode":
-        // const tempValue = obj[fieldSort]
-        //   ? (obj[fieldSort] + "").split(".")
-        //   : [];
-        // const thousandSeparator = ".";
-        // const decimalSeparator = ",";
-        // const descimal = tempValue[1]
-        //   ? `${decimalSeparator}${tempValue[1]}`
-        //   : `${decimalSeparator}00`;
-        // const format =
-        //   tempValue.length > 0
-        //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-        //       descimal
-        //     : "";
         return obj[fieldSort];
       case "startDate":
       case "endDate":
         return obj[fieldSort] ? moment(obj[fieldSort]) : "";
-      // return date.toLowerCase();
       case "status":
         const endDate = obj?.endDate;
         const value = endDate
@@ -50,7 +36,7 @@ const sorter = (fieldSort, a, b) => {
           if (a.isAfter(b)) return 1;
           return 0;
         }
-        return 0; // Handle null cases if necessary
+        return 0;
       case "transactionCode":
         return Math.sign(parseFloat(a) - parseFloat(b));
       default:
@@ -60,38 +46,67 @@ const sorter = (fieldSort, a, b) => {
   return handleCompare(fa, fb);
 };
 
-const TaxImplication = ({data}) => {
+const TaxImplication = ({ data }) => {
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
+  const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [dataTaxImpli, setDataTaxImpli] = useState([]);
-  const [search, setSearch] = useState({});
 
-  useEffect(() => {
-    if(data?.saTaxImplication || data?.saTaxImplication !== null){
-      const dataArrayTaxImplication = Object.keys(data?.saTaxImplication).map(key => data?.saTaxImplication[key]);
-      const filteredDataTaxImplication = dataArrayTaxImplication.filter(item => item !== null);
-      setDataTaxImpli(filteredDataTaxImplication)
-    }else{
-      setDataTaxImpli([])
-    }
-  }, [])
-  
-
-  useEffect(() => {
-    setTotalElement(dataTaxImpli?.length)
-  }, [dataTaxImpli])
-  
-  
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      let tempData = { ...prevState };
+      if (selectedKeys[0]) {
+        tempData[dataIndex] = selectedKeys[0];
+      } else {
+        delete tempData[dataIndex];
+      }
+      return tempData;
+    });
+    setLoadedCount(20);
   };
+
+  const processedData = useMemo(() => {
+    if (!data?.saTaxImplication) return [];
+    const dataArray = Object.keys(data.saTaxImplication).map(key => data.saTaxImplication[key]);
+    let result = dataArray.filter(item => item !== null);
+
+    // Apply FE search filters
+    if (Object.keys(search).length > 0) {
+      result = result.filter(item =>
+        Object.entries(search).every(([key, val]) =>
+          !val || item[key]?.toString()?.toLowerCase()?.includes(val.toLowerCase())
+        )
+      );
+    }
+
+    if (!fieldSort) return result;
+    return [...result].sort((a, b) => sorter(fieldSort, a, b));
+  }, [data?.saTaxImplication, fieldSort, orderSort, search]);
+
+  useEffect(() => {
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -101,249 +116,93 @@ const TaxImplication = ({data}) => {
       setFieldSort("");
       setOrderSort("");
     }
+    setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  const filterDataByPage = () => {
-    let result = [...dataTaxImpli];
-    if (searchedColumn) {
-      const fixSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
-
-  const columns = ({
-    search,
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result = [
-      {
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        title: "CATEGORY",
-        dataIndex: "category",
-        width: 150,
-        // sorter: true,
-        // ...getColumnSearchProps("name"),
-        filteredValue: search?.["category"] ? [search?.["category"]] : null,
-        sorter: (a, b) => sorter("category", a, b),
-        ...getColumnSearchPropsUseFilteredValueFE(
-          search,
-          "category",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "input"
-        ),
-        render: (text) =>
-          renderColumn(
-            "category",
-            hasValue(search["category"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        title: "TAX IMPLICATION NAME",
-        dataIndex: "taxImplicationName",
-        width: 150,
-        // sorter: true,
-        // ...getColumnSearchProps("value"),
-        filteredValue: search?.["taxImplicationName"]
-          ? [search?.["taxImplicationName"]]
-          : null,
-        sorter: (a, b) => sorter("taxImplicationName", a, b),
-        ...getColumnSearchPropsUseFilteredValueFE(
-          search,
-          "taxImplicationName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "input"
-        ),
-        render: (text) =>
-          renderColumn(
-            "taxImplicationName",
-            hasValue(search["taxImplicationName"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        title: "SERVICE TYPE",
-        dataIndex: "serviceType",
-        width: 150,
-        // sorter: true,
-        // ...getColumnSearchProps("unit"),
-        filteredValue: search?.["serviceType"]
-          ? [search?.["serviceType"]]
-          : null,
-        sorter: (a, b) => sorter("serviceType", a, b),
-        ...getColumnSearchPropsUseFilteredValueFE(
-          search,
-          "serviceType",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "input"
-        ),
-        render: (text) =>
-          renderColumn(
-            "serviceType",
-            hasValue(search["serviceType"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        title: "IMPLICATION TYPE",
-        dataIndex: "implicationType",
-        width: 150,
-        // sorter: true,
-        // ...getColumnSearchProps("unit"),
-        filteredValue: search?.["implicationType"]
-          ? [search?.["implicationType"]]
-          : null,
-        sorter: (a, b) => sorter("implicationType", a, b),
-        ...getColumnSearchPropsUseFilteredValueFE(
-          search,
-          "implicationType",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "input"
-        ),
-        render: (text) =>
-          renderColumn(
-            "implicationType",
-            hasValue(search["implicationType"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        title: "GUNGGUNG",
-        dataIndex: "gunggung",
-        width: 150,
-        // sorter: true,
-        // render: (gunggung) => (
-        //   <span>{gunggung ? "Yes" : "No"}</span>
-        // ),
-        // ...getColumnSearchProps("unit"),
-        filteredValue: search?.["gunggung"] ? [search?.["gunggung"]] : null,
-        sorter: (a, b) => sorter("gunggung", a, b),
-        ...getColumnSearchPropsUseFilteredValueFE(
-          search,
-          "gunggung",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "yes_or_no"
-        ),
-        render: (text) =>
-          renderColumn(
-            "gunggung",
-            hasValue(search["gunggung"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-    ];
-    return result
-  }
+  const columns = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: "CATEGORY",
+      key: "category",
+      dataIndex: "category",
+      sorter: true,
+      width: 150,
+      filteredValue: search?.["category"] ? [search?.["category"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "category", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("category", hasValue(search["category"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "TAX IMPLICATION NAME",
+      key: "taxImplicationName",
+      dataIndex: "taxImplicationName",
+      sorter: true,
+      width: 200,
+      filteredValue: search?.["taxImplicationName"] ? [search?.["taxImplicationName"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "taxImplicationName", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("taxImplicationName", hasValue(search["taxImplicationName"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "SERVICE TYPE",
+      key: "serviceType",
+      dataIndex: "serviceType",
+      sorter: true,
+      width: 150,
+      filteredValue: search?.["serviceType"] ? [search?.["serviceType"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "serviceType", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("serviceType", hasValue(search["serviceType"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "IMPLICATION TYPE",
+      key: "implicationType",
+      dataIndex: "implicationType",
+      sorter: true,
+      width: 150,
+      filteredValue: search?.["implicationType"] ? [search?.["implicationType"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "implicationType", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("implicationType", hasValue(search["implicationType"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "GUNGGUNG",
+      key: "gunggung",
+      dataIndex: "gunggung",
+      sorter: true,
+      width: 150,
+      filteredValue: search?.["gunggung"] ? [search?.["gunggung"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "gunggung", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("gunggung", hasValue(search["gunggung"]), searchText, text, false, "input", search),
+    },
+  ];
 
   return (
     <div>
-      <div className={"w-full py-6"}>
-        <TablePaginationNew
-          pageSize={pageSize}
-          current={page}
-          dataSource={filterDataByPage()}
-          tableScrolled={{y: 525, x: 1500 }}
-          totalData={totalElement}
-          onChange={handleChangeSize}
-          // onSort={onSort}
-          columns={columns({
-            search,
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-          })}
-        />
-      </div>
+      <NxTable
+        idTable="sa-detail-taximplication-table"
+        dataSource={displayData}
+        columns={columns}
+        totalData={processedData.length}
+        tableScrolled={{ x: "max-content", y: 400 }}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columns.map((col) => ({
+          key: col.key || col.dataIndex || col.title,
+          title: col.title,
+        }))}
+        onChange={onSort}
+        loading={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+      />
     </div>
   )
 }
