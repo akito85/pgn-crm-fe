@@ -45,6 +45,10 @@ const initialState = {
   broadcastNotifications: [], // Notifications for all users
   directNotifications: [], // Notifications for specific user
 
+  // Real-time notification tracking (set only by SSE addNotification, never by API fetch)
+  lastRealtimeNotification: null,
+  lastRealtimeNotificationTime: null,
+
   // UI State
   isLoading: false,
   error: null,
@@ -384,6 +388,10 @@ const notificationsSlice = createSlice({
       if (!notification.read) {
         state.unreadCount += 1;
       }
+
+      // Mark as real-time notification (from SSE) so orchestrator can play sound
+      state.lastRealtimeNotification = notification;
+      state.lastRealtimeNotificationTime = Date.now();
 
       // Enforce max notifications limit
       const maxNotifications = state.settings.maxNotifications;
@@ -925,6 +933,9 @@ export const selectDisplayTypeOptions = (state) =>
 
 // Get current position ID (for position-based filtering)
 export const selectCurrentPositionId = (state) => state.notifications.currentPositionId;
+
+// Get last real-time notification (from SSE, not API fetch)
+export const selectLastRealtimeNotification = (state) => state.notifications.lastRealtimeNotification;
 
 /**
  * Export reducer
