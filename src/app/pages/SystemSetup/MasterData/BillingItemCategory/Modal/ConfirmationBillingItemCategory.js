@@ -34,7 +34,7 @@ const ConfirmationBillingItemCategory = ({
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"BILLING ITEM CATEGORY INFORMATION"}
+              {"TRANSACTION MAPPING CATEGORY INFORMATION"}
             </p>
             <div className="w-full grid grid-cols-4 gap-3 pt-[20px]">
               <DetailText label={"Category Code"}>{data?.code}</DetailText>
@@ -68,7 +68,7 @@ const ConfirmationBillingItemCategory = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (d) => d.value === selectedHierarchy
+                  (d) => d.value === selectedHierarchy,
                 )?.[0]?.name || ""
               }
               dataTable={listDataAppHierDetail}
@@ -93,7 +93,7 @@ const ConfirmationBillingItemCategory = ({
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"BILLING ITEM CATEGORY INFORMATION"}
+              {"TRANSACTION MAPPING CATEGORY INFORMATION"}
             </p>
             <div className="w-full grid grid-cols-4 gap-3 pt-[20px]">
               <DetailText label={"Category Code"}>{data?.code}</DetailText>

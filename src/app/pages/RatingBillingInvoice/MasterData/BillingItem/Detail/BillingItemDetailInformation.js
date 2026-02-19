@@ -1,6 +1,5 @@
 import { Fragment, useRef, useState } from "react";
 import DetailText from "../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import columnsDetail from "../Table/TableDetailMappingInformation";
 import columnsMapping from "../Table/TableMappingInformation";
@@ -10,6 +9,8 @@ import { dateFormatting, hasValue } from "../../../../../../utils";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
+import CardContainer from "../../../../../../components/CardContainer";
+import StatusComponent from "../../../../../../components/StatusComponent";
 
 const BillingItemDetailInformation = ({
   dataBillingItem,
@@ -32,11 +33,11 @@ const BillingItemDetailInformation = ({
   const [searchDetail, setSearchDetail] = useState({});
 
   const [category, setCategory] = useState("");
-  const [dataHistory, setDataHistory] = useState({})
+  const [dataHistory, setDataHistory] = useState({});
   const [dataDetailTable, setDataDetailTable] = useState([]);
 
   const [subHeader, setSubHeader] = useState("");
-  const [modalHistory, setModalHistory] = useState(false)
+  const [modalHistory, setModalHistory] = useState(false);
   const [isDetailMapShown, setIsDetailMapShown] = useState(false);
 
   const handleChange = (pageChange, pageSizeChange) => {
@@ -47,7 +48,7 @@ const BillingItemDetailInformation = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    
+
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
     if (searchedColumn !== tempSearchColumn) {
       setPage(1);
@@ -95,13 +96,13 @@ const BillingItemDetailInformation = ({
     } else {
       setSubHeader(
         dataBillingItem.mappingInformation.filter(
-          (item) => item.categoryId === e.categoryId
-        )[0]?.category
+          (item) => item.categoryId === e.categoryId,
+        )[0]?.category,
       );
       setCategory(e.categoryId);
       if (dataBillingItem) {
         const detailMappingInfo = dataBillingItem?.mappingInformation?.filter(
-          (item) => item.categoryId === e.categoryId
+          (item) => item.categoryId === e.categoryId,
         )[0]?.detailMappingInfo;
         setDataDetailTable(detailMappingInfo);
         setIsDetailMapShown(true);
@@ -142,7 +143,7 @@ const BillingItemDetailInformation = ({
     };
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "startDate":
@@ -176,7 +177,7 @@ const BillingItemDetailInformation = ({
     };
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "startDate":
@@ -215,7 +216,7 @@ const BillingItemDetailInformation = ({
 
   const handleDetailHistory = (r) => {
     // console.log(r);
-    setModalHistory(true)
+    setModalHistory(true);
     setDataHistory({
       recordId: r?.rMappingId,
       createdDate: r?.createdDate,
@@ -223,17 +224,16 @@ const BillingItemDetailInformation = ({
       updatedDate: r?.updatedDate,
       updatedBy: r?.updatedBy,
     });
-  }
+  };
 
   const closeModalHistory = () => {
-    setModalHistory(false)
-
-  }
+    setModalHistory(false);
+  };
 
   return (
     <Fragment>
-      <BaseContainer header={"BILLING ITEM INFORMATION"}>
-        <div className="w-full grid grid-cols-4 gap-3">
+      <CardContainer header="BILLING ITEM INFORMATION">
+        <div className="w-full grid grid-cols-6 gap-3">
           <DetailText label="Billing Item Code">
             {dataBillingItem?.billingItemCode || ""}
           </DetailText>
@@ -264,16 +264,18 @@ const BillingItemDetailInformation = ({
             {dataBillingItem?.glAccount || ""}
           </DetailText>
           <DetailText label="Status">
-            {dataBillingItem.status
-              ? `${dataBillingItem?.status
-                  .charAt(0)
-                  .toUpperCase()}${dataBillingItem?.status
-                  .slice(1)
-                  .toLowerCase()}`
-              : ""}
+            {dataBillingItem?.status && (
+              <StatusComponent colour={dataBillingItem.status}>
+                {dataBillingItem.status}
+              </StatusComponent>
+            )}
           </DetailText>
           <DetailText label="Status Approval">
-            {handleStatusCase(dataBillingItem.statusApproval)}
+            {dataBillingItem?.statusApproval && (
+              <StatusComponent colour={dataBillingItem.statusApproval}>
+                {handleStatusCase(dataBillingItem.statusApproval)}
+              </StatusComponent>
+            )}
           </DetailText>
           <div className="col-span-4">
             <DetailText label="Description">
@@ -281,77 +283,69 @@ const BillingItemDetailInformation = ({
             </DetailText>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"MAPPING INFORMATION"}>
-        <div>
+      <CardContainer header="MAPPING INFORMATION">
+        <TablePaginationNew
+          dataSource={dataMapping}
+          type="FE"
+          totalData={dataMapping.length || 0}
+          columns={columnsMapping(
+            search,
+            false,
+            type,
+            page,
+            pageSize,
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            handleDetail,
+            onFilter,
+            sorter,
+          )}
+          current={page}
+          pageSize={pageSize}
+          onChange={handleChange}
+          tableScrolled={{ y: 525, x: 2000 }}
+        />
+      </CardContainer>
+
+      {isDetailMapShown && (
+        <CardContainer header="DETAIL MAPPING INFORMATION">
+          {subHeader && (
+            <div className="mb-4 text-sm font-medium">
+              Category: <span className="text-primary">{subHeader}</span>
+            </div>
+          )}
           <TablePaginationNew
-            dataSource={dataMapping}
+            dataSource={dataDetailTable || []}
             type="FE"
-            totalData={dataMapping.length || 0}
-            columns={columnsMapping(
-              search,
+            totalData={dataDetailTable?.length || 0}
+            columns={columnsDetail(
+              searchDetail,
               false,
               type,
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDetail,
+              pageDetail,
+              pageSizeDetail,
+              searchInputDetail,
+              searchedColumnDetail,
+              searchTextDetail,
+              handleSearchDetail,
               onFilter,
-              sorter
-              // handleApprovalHistory,
-              // handleOpenModalInactivate
+              sorterDetail,
+              [],
+              handleDetailHistory,
             )}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            //onSort={onSort}
+            current={pageDetail}
+            pageSize={pageSizeDetail}
+            onChange={handleChangeDetail}
             tableScrolled={{ y: 525, x: 2000 }}
           />
-        </div>
-      </BaseContainer>
+        </CardContainer>
+      )}
 
-      {isDetailMapShown ? (
-        <BaseContainer
-          header={"DETAIL MAPPING INFORMATION"}
-          subHeader={`Category: ${subHeader}`}
-        >
-          <div>
-            <TablePaginationNew
-              dataSource={dataDetailTable || []}
-              type="FE"
-              totalData={dataDetailTable?.length || 0}
-              columns={columnsDetail(
-                searchDetail,
-                false,
-                type,
-                pageDetail,
-                pageSizeDetail,
-                searchInputDetail,
-                searchedColumnDetail,
-                searchTextDetail,
-                handleSearchDetail,
-                onFilter,
-                sorterDetail,
-                [],
-                handleDetailHistory
-                // handleApprovalHistory,
-                // handleOpenModalInactivate
-              )}
-              current={pageDetail}
-              pageSize={pageSizeDetail}
-              onChange={handleChangeDetail}
-              //onSort={onSort}
-              tableScrolled={{ y: 525, x: 2000 }}
-            />
-          </div>
-        </BaseContainer>
-      ) : null}
-
-      <BaseContainer header={"History Log Information"}>
+      <CardContainer header="HISTORY LOG INFORMATION">
         <div className="w-full grid grid-cols-5 gap-5">
           <DetailText label="Record ID">{dataBillingItem?.id}</DetailText>
           <DetailText label="Created Date">
@@ -367,7 +361,7 @@ const BillingItemDetailInformation = ({
             {dataBillingItem?.updatedBy}
           </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* Modal History Log */}
       <ModalCustom
@@ -383,9 +377,7 @@ const BillingItemDetailInformation = ({
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">
-            {dataHistory.recordId}
-          </DetailText>
+          <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)
