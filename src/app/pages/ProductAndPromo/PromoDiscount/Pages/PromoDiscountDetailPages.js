@@ -90,7 +90,17 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
             dataCriteria={dataPromo?.criteriaValues} //ddl
             type={"detail"}
             selector="promo"
-            columnsTable={columnsTableCriteriaPromo}
+            columnsTable={(listOption, searchInput, searchedColumn, searchText, handleSearch, search, storedData) =>
+              columnsTableCriteriaPromo(
+                listOption,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                search,
+                storedData
+              )
+            }
             fixedColumn={[
               "ADJUSTMENT TYPE",
               "ADJUSTMENT VALUE",
@@ -99,6 +109,7 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
               "MAX VALUE UOM",
               "FROM ITEM",
               "TIERING",
+              "STATUS",
             ]}
           />
         ) : (
