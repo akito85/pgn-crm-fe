@@ -109,7 +109,7 @@ export const handleDataTypeExist = (
         if (matchingApproved) {
           return {
             dataType: "exist",
-            statusChangedFromApproved: matchingApproved.status !== dataDetail.status,
+            approvedStatus: matchingApproved.status,
           };
         }
         return null;

@@ -760,7 +760,10 @@ const FunctionalCriteriaProduct = ({
             // (status === "DRAFT" && statusApproval === "DRAFT") ||
             record?.dataType !== "exist";
 
-          const isCurrentRecord     = record?.dataType === "exist" && !record?.statusChangedFromApproved;
+          const statusChangedFromApproved = record?.approvedStatus !== undefined
+            ? record.approvedStatus !== record.status
+            : false;
+          const isCurrentRecord     = record?.dataType === "exist" && !statusChangedFromApproved;
           const isUpdateDisabled    = !!editingKey || (isCurrentRecord && record?.status === "INACTIVE");
           const isDeleteEnabled     = record?.dataType !== "exist" && !editingKey;
           const isInactive          = record?.status === "INACTIVE";
