@@ -1082,16 +1082,15 @@ const pointOfSalesSlice = createSlice({
       state.data_approvalListDetail = action.payload;
     },
 
-    [getListApprovalPage.pending]: (state, action) => {
+    [getListApprovalPage.pending]: (state) => {
       state.loading = true;
-      state.dataApprovalListPage = action.payload;
     },
     [getListApprovalPage.fulfilled]: (state, action) => {
-      state.dataApprovalListPage = action.payload;
+      state.dataApprovalListPage = Array.isArray(action.payload) ? action.payload : [];
       state.loading = false;
     },
-    [getListApprovalPage.rejected]: (state, action) => {
-      state.dataApprovalListPage = action.payload;
+    [getListApprovalPage.rejected]: (state) => {
+      state.dataApprovalListPage = [];
       state.loading = false;
     },
 
