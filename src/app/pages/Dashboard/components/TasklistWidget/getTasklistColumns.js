@@ -176,10 +176,14 @@ export const getTasklistColumns = (
     dataIndex: "TRIGGER_JSON",
     width: 340,
     render: (triggerRaw, record) => {
-      // Prefer TRIGGER_JSON (full notification data, camelCase); fall back to TASK_BODY (snake_case)
-      const category     = record.CATEGORY || record.category || "";
-      const triggerData  = parseJson(triggerRaw || record.TRIGGER_JSON || record.triggerJson);
-      const bodyData     = parseJson(record.TASK_BODY || record.taskBody);
+      // Prefer ADDITIONAL_INFO (explicit enriched field from M_NOTIFICATIONS join),
+      // then TRIGGER_JSON (same source, legacy name), then TASK_BODY (snake_case fallback)
+      const category    = record.CATEGORY || record.category || "";
+      const triggerData = parseJson(
+        record.ADDITIONAL_INFO || record.additionalInfo ||
+        triggerRaw || record.TRIGGER_JSON || record.triggerJson
+      );
+      const bodyData    = parseJson(record.TASK_BODY || record.taskBody);
       const [data, labelMap, skipSet, priorityMap] = triggerData
         ? [triggerData, TRIGGER_LABELS, TRIGGER_SKIP, TRIGGER_PRIORITY]
         : [bodyData,    BODY_LABELS,    BODY_SKIP,    BODY_PRIORITY];
