@@ -4,46 +4,6 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import { toTitleCase } from "../../../../../utils";
 import { Badge, Popover } from "antd";
 
-// ─── TRIGGER_JSON (camelCase) label map ───────────────────────────────────────
-// Source: M_NOTIFICATIONS.ADDITIONAL_DATA via V_TASK_WITH_NOTIFICATION join
-const TRIGGER_LABELS = {
-  accountNumber:    "Account No",
-  accountName:      "Account",
-  accountCategory:  "Account Type",
-  accountSegment:   "Segment",
-  customerId:       "Customer ID",
-  customerName:     "Customer",
-  customerNumber:   "Customer No",
-  subjectId:        "Subject ID",
-  objectId:         "Object ID",
-  startDate:        "Start Date",
-  endDate:          "End Date",
-  validationType:   "Validation Type",
-  submitterUsername:"Submitted By",
-  hierarchyName:    "Approval Hierarchy",
-  category:         "Category",
-  remarks:          "Remarks",
-  description:      "Description",
-  status:           "Status",
-  statusApproval:   "Approval Status",
-};
-
-// Keys to hide in the detail popover (internal/null-prone/redundant)
-const TRIGGER_SKIP = new Set([
-  "id", "entityId", "updatedBy", "updatedDate", "createdBy", "createdDate",
-  "approvalHierarchy", "appHierId", "submitterId", "action", "priority",
-]);
-
-// Priority fields per category for the compact preview row (camelCase)
-const PREVIEW_PRIORITY = {
-  PAYMENT_RELATION:          ["accountNumber", "accountName", "customerName", "customerNumber"],
-  INACTIVE_PAYMENT_RELATION: ["accountNumber", "accountName", "customerName", "customerNumber"],
-  SERVICE_AGREEMENT:         ["accountNumber", "customerName", "startDate", "endDate"],
-  UPDATE_SERVICE_AGREEMENT:  ["accountNumber", "customerName", "startDate", "endDate"],
-  BILLING:                   ["accountNumber", "customerName", "startDate", "endDate"],
-  PRICING:                   ["accountNumber", "customerName", "validationType", "startDate"],
-};
-
 const MAX_PREVIEW = 4;
 const DATE_FORMAT  = "DD MMM YYYY HH:mm:ss";
 const ISO_RE = /^\d{4}-\d{2}-\d{2}T/;
@@ -56,44 +16,115 @@ const fmtValue = (v) => {
   return s;
 };
 
-/** Parse TRIGGER_JSON (string or object) safely. Returns null on failure. */
-const parseTrigger = (raw) => {
+const parseJson = (raw) => {
   if (!raw) return null;
   try { return typeof raw === "string" ? JSON.parse(raw) : raw; }
   catch { return null; }
 };
 
-/** Build compact preview fields from TRIGGER_JSON */
-const buildPreview = (data, category) => {
+// ─── SOURCE A: TRIGGER_JSON (camelCase) ──────────────────────────────────────
+// M_NOTIFICATIONS.ADDITIONAL_DATA via V_TASK_WITH_NOTIFICATION join
+const TRIGGER_LABELS = {
+  accountNumber:     "Account No",
+  accountName:       "Account",
+  accountCategory:   "Account Type",
+  accountSegment:    "Segment",
+  customerId:        "Customer ID",
+  customerName:      "Customer",
+  customerNumber:    "Customer No",
+  subjectId:         "Subject ID",
+  objectId:          "Object ID",
+  startDate:         "Start Date",
+  endDate:           "End Date",
+  validationType:    "Validation Type",
+  submitterUsername: "Submitted By",
+  hierarchyName:     "Approval Hierarchy",
+  remarks:           "Remarks",
+  description:       "Description",
+  statusApproval:    "Approval Status",
+};
+const TRIGGER_SKIP = new Set([
+  "id", "entityId", "category", "status", "updatedBy", "updatedDate",
+  "createdBy", "createdDate", "approvalHierarchy", "appHierId",
+  "submitterId", "action", "priority",
+]);
+const TRIGGER_PRIORITY = {
+  PAYMENT_RELATION:          ["accountNumber", "accountName", "customerName", "customerNumber"],
+  INACTIVE_PAYMENT_RELATION: ["accountNumber", "accountName", "customerName", "customerNumber"],
+  SERVICE_AGREEMENT:         ["accountNumber", "customerName", "startDate", "endDate"],
+  UPDATE_SERVICE_AGREEMENT:  ["accountNumber", "customerName", "startDate", "endDate"],
+  BILLING:                   ["accountNumber", "customerName", "startDate", "endDate"],
+  PRICING:                   ["accountNumber", "customerName", "validationType", "startDate"],
+};
+
+// ─── SOURCE B: TASK_BODY (snake_case) ────────────────────────────────────────
+// Extracted subset by TaskBodyBuilderService — used as fallback when TRIGGER_JSON is null
+const BODY_LABELS = {
+  account_number:     "Account No",
+  account_name:       "Account",
+  account_category:   "Account Type",
+  account_segment:    "Segment",
+  customer_id:        "Customer ID",
+  customer_name:      "Customer",
+  customer_number:    "Customer No",
+  subject_id:         "Subject ID",
+  object_id:          "Object ID",
+  effective_date:     "Start Date",
+  expiry_date:        "End Date",
+  payment_number:     "Payment Ref",
+  amount:             "Amount",
+  currency:           "Currency",
+  vendor_name:        "Vendor",
+  payment_method:     "Payment Method",
+  payment_date:       "Payment Date",
+  approval_reason:    "Reason",
+  submitter_username: "Submitted By",
+  validation_type:    "Validation Type",
+  sa_number:          "SA Number",
+  description:        "Description",
+  remarks:            "Remarks",
+};
+const BODY_SKIP = new Set(["category", "entity_id", "message", "status"]);
+const BODY_PRIORITY = {
+  PAYMENT_RELATION:          ["account_number", "account_name", "customer_name", "customer_number"],
+  INACTIVE_PAYMENT_RELATION: ["account_number", "account_name", "customer_name", "customer_number"],
+  SERVICE_AGREEMENT:         ["sa_number", "customer_name", "effective_date", "expiry_date"],
+  UPDATE_SERVICE_AGREEMENT:  ["sa_number", "customer_name", "effective_date", "expiry_date"],
+  BILLING:                   ["account_number", "customer_name", "effective_date", "expiry_date"],
+  PRICING:                   ["account_number", "customer_name", "validation_type", "effective_date"],
+};
+
+/** Build preview from a parsed JSON object using provided label/skip/priority maps. */
+const buildPreview = (data, category, labelMap, skipSet, priorityMap) => {
   if (!data || typeof data !== "object") return [];
-  const priority = PREVIEW_PRIORITY[category] || [];
-  const result = [];
+  const priority = priorityMap[category] || [];
+  const result   = [];
 
   for (const key of priority) {
     if (result.length >= MAX_PREVIEW) break;
     const val = fmtValue(data[key]);
-    if (val) result.push({ label: TRIGGER_LABELS[key] || key, value: val });
+    if (val) result.push({ label: labelMap[key] || key, value: val });
   }
 
   if (result.length < MAX_PREVIEW) {
     const seen = new Set(priority);
     for (const [key, raw] of Object.entries(data)) {
       if (result.length >= MAX_PREVIEW) break;
-      if (seen.has(key) || TRIGGER_SKIP.has(key)) continue;
+      if (seen.has(key) || skipSet.has(key)) continue;
       const val = fmtValue(raw);
-      if (val) result.push({ label: TRIGGER_LABELS[key] || key, value: val });
+      if (val) result.push({ label: labelMap[key] || key.replace(/_/g, " "), value: val });
     }
   }
 
   return result;
 };
 
-/** Build full detail rows for the popover */
-const buildDetail = (data) => {
+/** Build full detail rows for the popover using provided label/skip maps. */
+const buildDetail = (data, labelMap, skipSet) => {
   if (!data || typeof data !== "object") return [];
   return Object.entries(data)
-    .filter(([k, v]) => !TRIGGER_SKIP.has(k) && fmtValue(v) !== null)
-    .map(([k, v]) => ({ label: TRIGGER_LABELS[k] || k, value: fmtValue(v) }));
+    .filter(([k, v]) => !skipSet.has(k) && fmtValue(v) !== null)
+    .map(([k, v]) => ({ label: labelMap[k] || k.replace(/_/g, " "), value: fmtValue(v) }));
 };
 
 /** Resolve approval status label + colour from COMPLETION_ACTION + TASK_STATUS */
@@ -145,12 +176,15 @@ export const getTasklistColumns = (
     dataIndex: "TRIGGER_JSON",
     width: 340,
     render: (triggerRaw, record) => {
-      // Prefer TRIGGER_JSON (full notification data); fall back to TASK_BODY
-      const raw      = triggerRaw || record.TRIGGER_JSON || record.triggerJson;
-      const category = record.CATEGORY || record.category || "";
-      const data     = parseTrigger(raw);
-      const preview  = buildPreview(data, category);
-      const detail   = buildDetail(data);
+      // Prefer TRIGGER_JSON (full notification data, camelCase); fall back to TASK_BODY (snake_case)
+      const category     = record.CATEGORY || record.category || "";
+      const triggerData  = parseJson(triggerRaw || record.TRIGGER_JSON || record.triggerJson);
+      const bodyData     = parseJson(record.TASK_BODY || record.taskBody);
+      const [data, labelMap, skipSet, priorityMap] = triggerData
+        ? [triggerData, TRIGGER_LABELS, TRIGGER_SKIP, TRIGGER_PRIORITY]
+        : [bodyData,    BODY_LABELS,    BODY_SKIP,    BODY_PRIORITY];
+      const preview  = buildPreview(data, category, labelMap, skipSet, priorityMap);
+      const detail   = buildDetail(data, labelMap, skipSet);
 
       if (preview.length === 0) return <span style={{ color: "#bfbfbf" }}>—</span>;
 
