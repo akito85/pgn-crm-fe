@@ -114,7 +114,7 @@ export const handleDataTypeExist = (
         }
         return null;
       } else {
-        return { dataType: "exist" }; // for active & approve
+        return { dataType: "exist", approvedStatus: dataDetail.status }; // for active & approve
       }
     case "DRAFT":
       return null;
