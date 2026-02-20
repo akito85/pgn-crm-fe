@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Tabs } from "antd";
+import moment from "moment";
 import CardContainer from "../../../../../components/CardContainer";
 import BillingItemTab from "./BillingItemTab";
 import RatingSummaryTab from "./RatingSummaryTab";
 import AdjustmentTab from "./AdjustmentTab";
+import DetailText from "../../../../../components/DetailText";
 
 const BillingDetail = ({
   billingCodeId,
   calculationCodeId,
   ratingCodeId,
+  selectedBillingData,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState("1");
@@ -77,6 +80,31 @@ const BillingDetail = ({
           className="billing-detail-tabs"
           style={{ marginTop: -12, marginBottom: 0 }}
         />
+      </CardContainer>
+
+      <CardContainer header={"History Log Information"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <DetailText label={"Created Date"}>
+            {selectedBillingData?.createdDate
+              ? moment(selectedBillingData?.createdDate).format(
+                  "DD MMM YYYY HH:mm:ss",
+                )
+              : "-"}
+          </DetailText>
+          <DetailText label={"Created By"}>
+            {selectedBillingData?.createdBy || "-"}
+          </DetailText>
+          <DetailText label={"Updated Date"}>
+            {selectedBillingData?.updatedDate
+              ? moment(selectedBillingData?.updatedDate).format(
+                  "DD MMM YYYY HH:mm:ss",
+                )
+              : "-"}
+          </DetailText>
+          <DetailText label={"Updated By"}>
+            {selectedBillingData?.updatedBy || "-"}
+          </DetailText>
+        </div>
       </CardContainer>
     </div>
   );
