@@ -45,6 +45,11 @@ const TRIGGER_LABELS = {
   remarks:             "Remarks",
   description:         "Description",
   statusApproval:      "Approval Status",
+  paymentNo:           "Payment No",
+  invoiceNo:           "Invoice No",
+  accountType:         "Classification Type",
+  accountGroupType:    "Account Group Type",
+  costCenter:          "Cost Center",
 };
 const TRIGGER_SKIP = new Set([
   "id", "entityId", "category", "status", "updatedBy", "updatedDate",
@@ -76,7 +81,7 @@ const BODY_LABELS = {
   object_account_name:   "Related Account",
   effective_date:        "Start Date",
   expiry_date:           "End Date",
-  payment_number:        "Payment Ref",
+  payment_number:        "Payment No",
   amount:                "Amount",
   currency:              "Currency",
   vendor_name:           "Vendor",
@@ -88,6 +93,10 @@ const BODY_LABELS = {
   sa_number:             "SA Number",
   description:           "Description",
   remarks:               "Remarks",
+  invoice_number:        "Invoice No",
+  account_type:          "Classification Type",
+  account_group_type:    "Account Group Type",
+  cost_center:           "Cost Center",
 };
 const BODY_SKIP = new Set(["category", "entity_id", "message", "status"]);
 const BODY_PRIORITY = {
@@ -104,18 +113,20 @@ const BODY_PRIORITY = {
 // Categories without an entry fall back to the flat buildDetail() table.
 const TRIGGER_SECTIONS = {
   PAYMENT_RELATION: [
-    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory"] },
-    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
+    { title: "Relation Info",    keys: ["subjectId", "customerId", "objectId", "paymentNo", "invoiceNo"] },
     { title: "Related Account",  keys: ["objectAccountNumber", "objectAccountName"] },
+    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
+    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
     { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
-    { title: "Approval",         keys: ["appHierId", "hierarchyName", "submitterUsername", "statusApproval"] },
+    { title: "Approval",         keys: ["hierarchyName", "statusApproval"] },
   ],
   INACTIVE_PAYMENT_RELATION: [
-    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory"] },
-    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
+    { title: "Relation Info",    keys: ["subjectId", "customerId", "objectId", "paymentNo", "invoiceNo"] },
     { title: "Related Account",  keys: ["objectAccountNumber", "objectAccountName"] },
+    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
+    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
     { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
-    { title: "Approval",         keys: ["appHierId", "hierarchyName", "submitterUsername", "statusApproval"] },
+    { title: "Approval",         keys: ["hierarchyName", "statusApproval"] },
   ],
 };
 
@@ -338,6 +349,20 @@ export const getTasklistColumns = (
           <StatusComponent colour={colour} size="small">{label}</StatusComponent>
         </div>
       );
+    },
+  },
+  {
+    key: "approvalHierarchy",
+    title: "APPROVAL HIERARCHY",
+    dataIndex: "ADDITIONAL_INFO",
+    width: 200,
+    render: (additionalInfo, record) => {
+      const data = parseJson(
+        record.ADDITIONAL_INFO || record.additionalInfo ||
+        record.TRIGGER_JSON || record.triggerJson
+      );
+      const name = data?.hierarchyName || "-";
+      return <span style={{ fontSize: 13 }}>{name}</span>;
     },
   },
   {
