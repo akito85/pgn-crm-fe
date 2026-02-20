@@ -957,12 +957,12 @@ export const PosTableView = (
       ),
   },
   {
-    title: "TOTAL AMOUNT IDR",
-    dataIndex: "totalAmountIdr",
+    title: "TOTAL AMOUNT",
+    dataIndex: "totalAmount",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "totalAmountIdr",
+      "totalAmount",
       searchInput,
       searchedColumn,
       searchText,
@@ -971,8 +971,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "totalAmountIdr",
-        hasValue(search["totalAmountIdr"]),
+        "totalAmount",
+        hasValue(search["totalAmount"]),
         searchText,
         text,
         false,
@@ -981,12 +981,12 @@ export const PosTableView = (
       ),
   },
   {
-    title: "TOTAL AMOUNT USD",
-    dataIndex: "totalAmountUsd",
+    title: "TOTAL AMOUNT EQV",
+    dataIndex: "totalAmountEqv",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "totalAmountUsd",
+      "totalAmountEqv",
       searchInput,
       searchedColumn,
       searchText,
@@ -995,56 +995,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "totalAmountUsd",
-        hasValue(search["totalAmountUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "TOTAL AMOUNT EQV IDR",
-    dataIndex: "totalAmountEqvIdr",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountEqvIdr",
-        hasValue(search["totalAmountEqvIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "TOTAL AMOUNT EQV USD",
-    dataIndex: "totalAmountEqvUsd",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "totalAmountEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountEqvUsd",
-        hasValue(search["totalAmountEqvUsd"]),
+        "totalAmountEqv",
+        hasValue(search["totalAmountEqv"]),
         searchText,
         text,
         false,
@@ -1412,93 +1364,93 @@ export const PosTableView = (
     //   }
     // },
   },
-  {
-    title: "REGISTRATION NUMBER",
-    dataIndex: "registrationNumber",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "registrationNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    // render: (index) => (
-    //   <div className={" flex justify-center"}>
-    //     <StatusComponent colour={index}>{index}</StatusComponent>
-    //   </div>
-    // ),
-    render: (text) =>
-      renderColumn(
-        "registrationNumber",
-        hasValue(search["registrationNumber"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "EMAIL",
-    dataIndex: "email",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "email",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    // render: (index) => (
-    //   <div className={" flex justify-center"}>
-    //     <StatusComponent colour={index}>{index}</StatusComponent>
-    //   </div>
-    // ),
-    render: (text) =>
-      renderColumn(
-        "email",
-        hasValue(search["email"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "ADDRESS",
-    dataIndex: "address",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "address",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    // render: (index) => (
-    //   <div className={" flex justify-center"}>
-    //     <StatusComponent colour={index}>{index}</StatusComponent>
-    //   </div>
-    // ),
-    render: (text) =>
-      renderColumn(
-        "address",
-        hasValue(search["address"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
+  // {
+  //   title: "REGISTRATION NUMBER",
+  //   dataIndex: "registrationNumber",
+  //   sorter: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "registrationNumber",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true,
+  //   ),
+  //   // render: (index) => (
+  //   //   <div className={" flex justify-center"}>
+  //   //     <StatusComponent colour={index}>{index}</StatusComponent>
+  //   //   </div>
+  //   // ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "registrationNumber",
+  //       hasValue(search["registrationNumber"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search,
+  //     ),
+  // },
+  // {
+  //   title: "EMAIL",
+  //   dataIndex: "email",
+  //   sorter: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "email",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true,
+  //   ),
+  //   // render: (index) => (
+  //   //   <div className={" flex justify-center"}>
+  //   //     <StatusComponent colour={index}>{index}</StatusComponent>
+  //   //   </div>
+  //   // ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "email",
+  //       hasValue(search["email"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search,
+  //     ),
+  // },
+  // {
+  //   title: "ADDRESS",
+  //   dataIndex: "address",
+  //   sorter: true,
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "address",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true,
+  //   ),
+  //   // render: (index) => (
+  //   //   <div className={" flex justify-center"}>
+  //   //     <StatusComponent colour={index}>{index}</StatusComponent>
+  //   //   </div>
+  //   // ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "address",
+  //       hasValue(search["address"]),
+  //       searchText,
+  //       text,
+  //       false,
+  //       "input",
+  //       search,
+  //     ),
+  // },
   // {
   //   title: "ACTION",
   //   dataIndex: "action",
