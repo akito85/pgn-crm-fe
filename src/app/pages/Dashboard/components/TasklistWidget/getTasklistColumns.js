@@ -25,32 +25,35 @@ const parseJson = (raw) => {
 // ─── SOURCE A: TRIGGER_JSON (camelCase) ──────────────────────────────────────
 // M_NOTIFICATIONS.ADDITIONAL_DATA via V_TASK_WITH_NOTIFICATION join
 const TRIGGER_LABELS = {
-  accountNumber:     "Account No",
-  accountName:       "Account",
-  accountCategory:   "Account Type",
-  accountSegment:    "Segment",
-  customerId:        "Customer ID",
-  customerName:      "Customer",
-  customerNumber:    "Customer No",
-  subjectId:         "Subject ID",
-  objectId:          "Object ID",
-  startDate:         "Start Date",
-  endDate:           "End Date",
-  validationType:    "Validation Type",
-  submitterUsername: "Submitted By",
-  hierarchyName:     "Approval Hierarchy",
-  remarks:           "Remarks",
-  description:       "Description",
-  statusApproval:    "Approval Status",
+  accountNumber:       "Account No",
+  accountName:         "Account",
+  accountCategory:     "Account Type",
+  accountSegment:      "Segment",
+  customerId:          "Customer ID",
+  customerName:        "Customer",
+  customerNumber:      "Customer No",
+  subjectId:           "Subject ID",
+  objectId:            "Object ID",
+  objectAccountNumber: "Related Account No",
+  objectAccountName:   "Related Account",
+  startDate:           "Start Date",
+  endDate:             "End Date",
+  validationType:      "Validation Type",
+  submitterUsername:   "Submitted By",
+  hierarchyName:       "Approval Hierarchy",
+  appHierId:           "Hierarchy ID",
+  remarks:             "Remarks",
+  description:         "Description",
+  statusApproval:      "Approval Status",
 };
 const TRIGGER_SKIP = new Set([
   "id", "entityId", "category", "status", "updatedBy", "updatedDate",
-  "createdBy", "createdDate", "approvalHierarchy", "appHierId",
+  "createdBy", "createdDate", "approvalHierarchy",
   "submitterId", "action", "priority",
 ]);
 const TRIGGER_PRIORITY = {
-  PAYMENT_RELATION:          ["accountNumber", "accountName", "customerName", "customerNumber"],
-  INACTIVE_PAYMENT_RELATION: ["accountNumber", "accountName", "customerName", "customerNumber"],
+  PAYMENT_RELATION:          ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName"],
+  INACTIVE_PAYMENT_RELATION: ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName"],
   SERVICE_AGREEMENT:         ["accountNumber", "customerName", "startDate", "endDate"],
   UPDATE_SERVICE_AGREEMENT:  ["accountNumber", "customerName", "startDate", "endDate"],
   BILLING:                   ["accountNumber", "customerName", "startDate", "endDate"],
@@ -60,29 +63,31 @@ const TRIGGER_PRIORITY = {
 // ─── SOURCE B: TASK_BODY (snake_case) ────────────────────────────────────────
 // Extracted subset by TaskBodyBuilderService — used as fallback when TRIGGER_JSON is null
 const BODY_LABELS = {
-  account_number:     "Account No",
-  account_name:       "Account",
-  account_category:   "Account Type",
-  account_segment:    "Segment",
-  customer_id:        "Customer ID",
-  customer_name:      "Customer",
-  customer_number:    "Customer No",
-  subject_id:         "Subject ID",
-  object_id:          "Object ID",
-  effective_date:     "Start Date",
-  expiry_date:        "End Date",
-  payment_number:     "Payment Ref",
-  amount:             "Amount",
-  currency:           "Currency",
-  vendor_name:        "Vendor",
-  payment_method:     "Payment Method",
-  payment_date:       "Payment Date",
-  approval_reason:    "Reason",
-  submitter_username: "Submitted By",
-  validation_type:    "Validation Type",
-  sa_number:          "SA Number",
-  description:        "Description",
-  remarks:            "Remarks",
+  account_number:        "Account No",
+  account_name:          "Account",
+  account_category:      "Account Type",
+  account_segment:       "Segment",
+  customer_id:           "Customer ID",
+  customer_name:         "Customer",
+  customer_number:       "Customer No",
+  subject_id:            "Subject ID",
+  object_id:             "Object ID",
+  object_account_number: "Related Account No",
+  object_account_name:   "Related Account",
+  effective_date:        "Start Date",
+  expiry_date:           "End Date",
+  payment_number:        "Payment Ref",
+  amount:                "Amount",
+  currency:              "Currency",
+  vendor_name:           "Vendor",
+  payment_method:        "Payment Method",
+  payment_date:          "Payment Date",
+  approval_reason:       "Reason",
+  submitter_username:    "Submitted By",
+  validation_type:       "Validation Type",
+  sa_number:             "SA Number",
+  description:           "Description",
+  remarks:               "Remarks",
 };
 const BODY_SKIP = new Set(["category", "entity_id", "message", "status"]);
 const BODY_PRIORITY = {
@@ -92,6 +97,39 @@ const BODY_PRIORITY = {
   UPDATE_SERVICE_AGREEMENT:  ["sa_number", "customer_name", "effective_date", "expiry_date"],
   BILLING:                   ["account_number", "customer_name", "effective_date", "expiry_date"],
   PRICING:                   ["account_number", "customer_name", "validation_type", "effective_date"],
+};
+
+// ─── GROUPED SECTIONS (popover detail) ───────────────────────────────────────
+// Only defined for categories that benefit from structured grouping.
+// Categories without an entry fall back to the flat buildDetail() table.
+const TRIGGER_SECTIONS = {
+  PAYMENT_RELATION: [
+    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory"] },
+    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
+    { title: "Related Account",  keys: ["objectAccountNumber", "objectAccountName"] },
+    { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
+    { title: "Approval",         keys: ["appHierId", "hierarchyName", "submitterUsername", "statusApproval"] },
+  ],
+  INACTIVE_PAYMENT_RELATION: [
+    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory"] },
+    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
+    { title: "Related Account",  keys: ["objectAccountNumber", "objectAccountName"] },
+    { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
+    { title: "Approval",         keys: ["appHierId", "hierarchyName", "submitterUsername", "statusApproval"] },
+  ],
+};
+
+/** Build grouped sections array from data for sectioned popover rendering. */
+const buildSectionedDetail = (data, labelMap, sections) => {
+  if (!data || typeof data !== "object") return null;
+  return sections
+    .map(({ title, keys }) => {
+      const rows = keys
+        .map(k => ({ label: labelMap[k] || k, value: fmtValue(data[k]) }))
+        .filter(r => r.value !== null);
+      return rows.length > 0 ? { title, rows } : null;
+    })
+    .filter(Boolean);
 };
 
 /** Build preview from a parsed JSON object using provided label/skip/priority maps. */
@@ -192,9 +230,45 @@ export const getTasklistColumns = (
 
       if (preview.length === 0) return <span style={{ color: "#bfbfbf" }}>—</span>;
 
+      const sections = TRIGGER_SECTIONS[category];
+      const sectionedRows = sections && triggerData
+        ? buildSectionedDetail(triggerData, TRIGGER_LABELS, sections)
+        : null;
+
       const popoverContent = (
         <div style={{ width: 380, maxHeight: 420, overflowY: "auto" }}>
-          {detail.length === 0 ? (
+          {sectionedRows && sectionedRows.length > 0 ? (
+            sectionedRows.map((sec) => (
+              <div key={sec.title} style={{ marginBottom: 10 }}>
+                <div style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#8c8c8c",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  borderBottom: "1px solid #f0f0f0",
+                  paddingBottom: 3,
+                  marginBottom: 5,
+                }}>
+                  {sec.title}
+                </div>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <tbody>
+                    {sec.rows.map((f) => (
+                      <tr key={f.label} style={{ borderBottom: "1px solid #f5f5f5" }}>
+                        <td style={{ padding: "4px 10px 4px 0", color: "#8c8c8c", whiteSpace: "nowrap", verticalAlign: "top", fontWeight: 500, width: 130 }}>
+                          {f.label}
+                        </td>
+                        <td style={{ padding: "4px 0", color: "#262626", wordBreak: "break-word" }}>
+                          {f.value}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))
+          ) : detail.length === 0 ? (
             <span style={{ color: "#bfbfbf" }}>No details available.</span>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
