@@ -609,18 +609,18 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           idCustomer={idCustomer}
           type={"standard"}
         />
-          <Spin
-            spinning={loading}
+        <Spin
+          spinning={loading}
+        >
+          <Form
+            id="paymentRelationForm"
+            form={form}
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            // onFinishFailed={handleErrorSubmit}
+            scrollToFirstError={true}
+            className="flex flex-col gap-y-4"
           >
-            <Form
-              id="paymentRelationForm"
-              form={form}
-              layout={"vertical"}
-              onFinish={handleSubmitForm}
-              // onFinishFailed={handleErrorSubmit}
-              scrollToFirstError={true}
-              className="flex flex-col gap-y-4"
-            >
             {/* Step Contents */}
             <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
