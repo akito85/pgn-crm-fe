@@ -29,6 +29,9 @@ const BillingItemSectionForm = ({
   handleStartDate = () => {},
   handleEndDate = () => {},
   mappingData = 0,
+  // ✅ Prop baru: disable field Criteria saat ada row yang sedang diedit
+  // di tab Criteria Detail, untuk mencegah bug kolom tabel berubah di tengah edit
+  isCriteriaDisabled = false,
 }) => {
   // ============================================================================
   // DATE VALIDATION HANDLERS
@@ -133,12 +136,22 @@ const BillingItemSectionForm = ({
         </Form.Item>
 
         {/* Criteria */}
+        {/* ✅ disabled ketika isCriteriaDisabled=true (ada row yang sedang diedit
+            di Criteria Detail tab), untuk mencegah kolom tabel berubah di tengah edit */}
         <Form.Item
           label="Criteria"
           name="criteria"
           rules={formMessageRequired("Criteria")}
+          tooltip={
+            isCriteriaDisabled
+              ? "Finish editing the Criteria Detail table first before changing criteria type"
+              : undefined
+          }
         >
-          <SelectComponent placeholder="Select">
+          <SelectComponent
+            placeholder="Select"
+            disabled={isCriteriaDisabled}
+          >
             {data_criteriaOptions?.map((data, index) => (
               <Select.Option value={data.id} key={index}>
                 {data.name}
