@@ -44,6 +44,7 @@ import {
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import { WARRANTY_TRANSACTION_NAMES} from "../../../../../../constants/warrantyTypes";
 
 const ModalRefund = ({
   isOpen,
@@ -287,9 +288,8 @@ const ModalRefund = ({
         }
       }
 
-      // 2. Prepare unified submission body
       const submitBody = {
-        warrantyTransTypeId: 12, // 12 = Refund
+        warrantyTransTypeId: WARRANTY_TRANSACTION_NAMES.REFUND, // 12 = Refund
         appHierId: selectedHierarchy,
         customerId: dataCustomerInfoSelect[0]?.id,
         items: dataWarrantyInfoSelect.map((item, index) => ({

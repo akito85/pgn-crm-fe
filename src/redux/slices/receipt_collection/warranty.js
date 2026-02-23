@@ -456,7 +456,10 @@ export const submitWarrantyRequest = createAsyncThunk(
         error?.message ||
         error?.toString();
       
-      if (error?.response?.data?.code === 419) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
         const errorBody = {
@@ -492,7 +495,10 @@ export const submitApproval = createAsyncThunk(
         error?.message ||
         error?.toString();
       
-      if (error?.response?.data?.code === 419) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
         const errorBody = {
@@ -545,23 +551,24 @@ export const deleteWarranty = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
-    } catch (response) {
+    } catch (error) {
       const message =
-        response?.response?.data?.message ||
-        response?.message ||
-        response?.toString();
-      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
-        if (response?.data?.code === 419) {
-          thunkAPI.dispatch(setBodyError(response));
-        } else {
-          const errorBody = {
-            title: "Failed",
-            description: `Your data was not deleted. ${message}. Please try again.`,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
-        return thunkAPI.rejectWithValue(response);
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not deleted. ${message}. Please try again.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );

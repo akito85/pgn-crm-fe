@@ -42,6 +42,7 @@ import {
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import { WARRANTY_TRANSACTION_NAMES} from "../../../../../../constants/warrantyTypes";
 
 const ModalHold = ({
   isOpen,
@@ -313,9 +314,8 @@ const ModalHold = ({
         }
       }
 
-      // 2. Prepare unified submission body
       const submitBody = {
-        warrantyTransTypeId: 10, // 10 = Hold
+        warrantyTransTypeId: WARRANTY_TRANSACTION_NAMES.HOLD, // 10 = Hold
         appHierId: selectedHierarchy,
         items: dataWarrantyInfoSelect.map((item, index) => ({
           payWarrantyId: item.id,
