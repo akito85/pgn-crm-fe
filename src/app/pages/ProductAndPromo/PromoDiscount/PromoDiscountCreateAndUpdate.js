@@ -197,8 +197,8 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             (data) => data?.allCriteria !== true
           ),
           dataCompare: dataCompare,
-          idName: "idPromo",
-          idCompare: "idPromo",
+          idName: "id",
+          idCompare: "id",
           status: dataDetail?.status,
           statusApproval: dataDetail?.statusApproval,
           columnsTable: columnsTableCriteriaPromo(),

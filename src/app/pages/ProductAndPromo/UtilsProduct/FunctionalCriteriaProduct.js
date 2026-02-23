@@ -277,7 +277,6 @@ const FunctionalCriteriaProduct = ({
   checkStartDate = true, //check product has date validation
   excludeRender = null,
   showInactivate = false, // opt-in per consumer
-  statusApproval = undefined,   // used for inactivate logic
 }) => {
   // Selector
   const {
@@ -761,7 +760,10 @@ const FunctionalCriteriaProduct = ({
             // (status === "DRAFT" && statusApproval === "DRAFT") ||
             record?.dataType !== "exist";
 
-          const isCurrentRecord     = record?.dataType === "exist" && statusApproval !== "DRAFT";
+          const statusChangedFromApproved = record?.approvedStatus !== undefined
+            ? record.approvedStatus !== record.status
+            : false;
+          const isCurrentRecord     = record?.dataType === "exist" && !statusChangedFromApproved;
           const isUpdateDisabled    = !!editingKey || (isCurrentRecord && record?.status === "INACTIVE");
           const isDeleteEnabled     = record?.dataType !== "exist" && !editingKey;
           const isInactive          = record?.status === "INACTIVE";
