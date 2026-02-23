@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tooltip, message } from "antd";
+import { Tooltip, message, Spin } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import NxTable from "../../../../../components/Nx/NxTable";
 import { getTasklistColumns } from "./getTasklistColumns";
@@ -22,6 +22,7 @@ const TasklistTable = ({
   searchInput = null,
 }) => {
   const navigate = useNavigate();
+  const [loadingId, setLoadingId] = useState(null);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["taskStatus", "priority", "action"],
@@ -30,14 +31,17 @@ const TasklistTable = ({
 
   const handleViewAction = (record) => {
     const tappId = record.TAPP_ID || record.tappId;
-    
+    const taskId = record.TASK_ID || record.taskId;
+
     if (!tappId) {
       message.error('Cannot view: Missing approval ID');
       return;
     }
-    
+
+    setLoadingId(taskId);
     const route = getApprovalRoute(record.MODULE || record.module, record.CATEGORY || record.category, tappId);
     navigate(route, { state: buildApprovalState(record, null) });
+    setLoadingId(null);
   };
 
   const actionCols = [
@@ -48,16 +52,22 @@ const TasklistTable = ({
       align: "center",
       render: (_, record) => {
         const tappId = record.TAPP_ID || record.tappId;
+        const taskId = record.TASK_ID || record.taskId;
+        const isLoading = loadingId === taskId;
         return (
           <Tooltip title="View">
-            <EyeOutlined
-              onClick={tappId ? () => handleViewAction(record) : undefined}
-              style={{
-                fontSize: 18,
-                color: tappId ? "#0075bf" : "#d9d9d9",
-                cursor: tappId ? "pointer" : "not-allowed",
-              }}
-            />
+            {isLoading ? (
+              <Spin size="small" />
+            ) : (
+              <EyeOutlined
+                onClick={tappId ? () => handleViewAction(record) : undefined}
+                style={{
+                  fontSize: 18,
+                  color: tappId ? "#0075bf" : "#d9d9d9",
+                  cursor: tappId ? "pointer" : "not-allowed",
+                }}
+              />
+            )}
           </Tooltip>
         );
       },

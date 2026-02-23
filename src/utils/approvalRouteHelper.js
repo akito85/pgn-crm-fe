@@ -77,6 +77,7 @@ export const buildApprovalState = (task = null, notification = null) => {
       module: task.MODULE || task.module,
       category: task.CATEGORY || task.category,
       returnTo: '/dashboard',
+      ...parseNavigationState(task.NAVIGATION_STATE || task.navigationState),
     };
   }
 
