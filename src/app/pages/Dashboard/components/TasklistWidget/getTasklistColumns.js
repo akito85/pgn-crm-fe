@@ -42,6 +42,7 @@ const TRIGGER_LABELS = {
   submitterUsername:   "Submitted By",
   hierarchyName:       "Approval Hierarchy",
   appHierId:           "Hierarchy ID",
+  remark:              "Remarks",
   remarks:             "Remarks",
   description:         "Description",
   statusApproval:      "Approval Status",
@@ -92,6 +93,7 @@ const BODY_LABELS = {
   validation_type:       "Validation Type",
   sa_number:             "SA Number",
   description:           "Description",
+  remark:                "Remarks",
   remarks:               "Remarks",
   invoice_number:        "Invoice No",
   account_type:          "Classification Type",
@@ -127,7 +129,7 @@ const TRIGGER_SECTIONS = {
     },
     { title: "Account Info",     keys: ["accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
     { title: "Customer Info",    keys: ["customerName"] },
-    { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
+    { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remark", "remarks", "description"] },
     { title: "Approval",         keys: ["hierarchyName", "statusApproval"] },
   ],
   INACTIVE_PAYMENT_RELATION: [
@@ -138,7 +140,7 @@ const TRIGGER_SECTIONS = {
     },
     { title: "Account Info",     keys: ["accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
     { title: "Customer Info",    keys: ["customerName"] },
-    { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
+    { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remark", "remarks", "description"] },
     { title: "Approval",         keys: ["hierarchyName", "statusApproval"] },
   ],
 };
