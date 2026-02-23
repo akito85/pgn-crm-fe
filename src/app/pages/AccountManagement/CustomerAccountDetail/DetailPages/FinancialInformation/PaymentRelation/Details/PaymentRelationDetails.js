@@ -3,7 +3,6 @@ import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMen
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentRelationDetailTabs from "./PaymentRelationDetailTabs";
@@ -12,7 +11,7 @@ import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation, getDetailDraftPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
@@ -27,11 +26,11 @@ const PaymentRelationDetails = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { detail_paymentRelation } = useSelector(
+  const { detail_paymentRelation, detailDraft_paymentRelation } = useSelector(
     (state) => state.paymentRelation
   );
 
-  const { data_customerDetail, loading, loadingAccount } = useSelector(
+  const { loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
   );
 
@@ -40,6 +39,8 @@ const PaymentRelationDetails = ({
   );
   
   const isLoading = loading || loadingAccount;
+
+  const [draftExist, setDraftExist] = useState(false) 
 
   //declare
   const navigate = useNavigate();
@@ -91,14 +92,6 @@ const PaymentRelationDetails = ({
     },
   ];
 
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
-
   /**
    * @param {boolean} show
    * @param {"approve"|"reject"} action 
@@ -135,6 +128,7 @@ const PaymentRelationDetails = ({
         .unwrap()
         .then(() => {
           dispatch(getDetailPaymentRelation(idPr));
+          dispatch(getDetailDraftPaymentRelation(idPr));
           handleClear();
           handleApprovalModal(false);
         })
@@ -147,6 +141,7 @@ const PaymentRelationDetails = ({
         .unwrap()
         .then(() => {
           dispatch(getDetailPaymentRelation(idPr));
+          dispatch(getDetailDraftPaymentRelation(idPr));
           handleClear();
           handleApprovalModal(false);
         })
@@ -180,7 +175,15 @@ const PaymentRelationDetails = ({
   useEffect(() => {
     if (idPr)
       dispatch(getDetailPaymentRelation(idPr));
+      dispatch(getDetailDraftPaymentRelation(idPr));
   }, [idPr])
+
+  useEffect(() => {
+    if (detail_paymentRelation.result?.status && detail_paymentRelation.result.status !== "DRAFT" && detail_paymentRelation.result?.statusApproval && detail_paymentRelation.result.statusApproval !== "APPROVED")
+      setDraftExist(true);
+    else
+      setDraftExist(false);
+  }, [detail_paymentRelation, idPr])
 
   useEffect(() => {
     if (detail_paymentRelation?.result) {
@@ -206,16 +209,18 @@ const PaymentRelationDetails = ({
             type={"standard"}
           />
           
-          <NxBaseContainer border padding={false}>
-            <NxTabs
-              items={tabOptions}
-              activeKey={activeKey}
-              onChange={handleSetActiveKey}
-            />
-          </NxBaseContainer>
+          {draftExist && (
+            <NxBaseContainer border padding={false}>
+              <NxTabs
+                items={tabOptions}
+                activeKey={activeKey}
+                onChange={handleSetActiveKey}
+              />
+            </NxBaseContainer>
+          )}
 
           <PaymentRelationDetailTabs
-            dataDetail={detail_paymentRelation?.result}
+            dataDetail={activeKey === tabOptions[0]?.key ? detail_paymentRelation?.result : activeKey === tabOptions[0]?.key ? detailDraft_paymentRelation : {}}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
             dispatch={dispatch}
             idPr={idPr}
