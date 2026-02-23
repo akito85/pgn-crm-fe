@@ -16,6 +16,7 @@ const CriteriaDetailTab = ({
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
+  onCancelEdit = null, 
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -56,7 +57,7 @@ const CriteriaDetailTab = ({
           })),
         };
       default:
-        return null; // ALL = tidak ada kolom criteria khusus
+        return null; 
     }
   };
 
@@ -72,7 +73,6 @@ const CriteriaDetailTab = ({
     label: item.name,
   }));
 
-  // Helper: EditableCell menyimpan label bukan value, jadi render harus cek keduanya
   const renderSelectValue = (value, options) => {
     if (!value && value !== 0) return "-";
     const found = options.find((o) => o.label === value || o.value === value);
@@ -86,7 +86,6 @@ const CriteriaDetailTab = ({
       width: 60,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
-    // Kolom dinamis criteria — hanya tampil jika bukan ALL
     ...(criteriaColConfig
       ? [
           {
@@ -141,16 +140,15 @@ const CriteriaDetailTab = ({
     },
   ];
 
-  // Hitung total width kolom + 120 untuk ACTIONS
   const totalColWidth =
-    60 + // NO
-    (criteriaColConfig ? 200 : 0) + // kolom dinamis criteria (jika ada)
-    250 + // GL ACCOUNT
-    220 + // DESCRIPTION ACCOUNT
-    180 + // SPECIAL GL
-    180 + // START DATE
-    180 + // END DATE
-    120;  // ACTIONS
+    60 +
+    (criteriaColConfig ? 200 : 0) +
+    250 +
+    220 +
+    180 +
+    180 +
+    180 +
+    120;
 
   return (
     <DynamicTableInlineBilling
@@ -174,6 +172,7 @@ const CriteriaDetailTab = ({
       startDateLock={startDateLock || "bypass"}
       endDateLock={endDateLock}
       setModalRequired={setModalRequired}
+      onCancelEdit={onCancelEdit} 
     />
   );
 };

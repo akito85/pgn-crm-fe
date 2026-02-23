@@ -56,10 +56,6 @@ import { dateFormatting, hasValue } from "../../../../../utils";
 import { configApp } from "../../../../../constants/configApp";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 const BillingItemForm = (props) => {
   const { type } = props;
   const dispatch = useDispatch();
@@ -67,10 +63,6 @@ const BillingItemForm = (props) => {
   const location = useLocation();
   const id = location?.state?.id;
   const [form] = Form.useForm();
-
-  // ============================================================================
-  // REDUX SELECTORS
-  // ============================================================================
 
   const {
     data_billingItemCategory,
@@ -89,10 +81,6 @@ const BillingItemForm = (props) => {
     data_accountTypeList,
     loading,
   } = useSelector((state) => state.billing_item);
-
-  // ============================================================================
-  // STATE MANAGEMENT
-  // ============================================================================
 
   // Stepper States
   const [current, setCurrent] = useState(0);
@@ -151,6 +139,8 @@ const BillingItemForm = (props) => {
   const [selectedCriteria, setSelectedCriteria] = useState(null);
   const [dataCriteriaTable, setDataCriteriaTable] = useState([]);
 
+  const [isCriteriaEditing, setIsCriteriaEditing] = useState(false);
+
   // Approval States
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -165,10 +155,6 @@ const BillingItemForm = (props) => {
   const [loadingForm, setLoadingForm] = useState(false);
 
   const isLoading = loading || loadingForm;
-
-  // ============================================================================
-  // INITIALIZATION EFFECTS
-  // ============================================================================
 
   useEffect(() => {
     dispatch(getBillingItemCategory());
@@ -195,10 +181,6 @@ const BillingItemForm = (props) => {
   useEffect(() => {
     setValuePage(steps[current].value);
   }, [current]);
-
-  // ============================================================================
-  // APPROVAL EFFECTS
-  // ============================================================================
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
@@ -232,9 +214,6 @@ const BillingItemForm = (props) => {
     }
   }, [dataListAppHierId]);
 
-  // ============================================================================
-  // MAPPING EFFECTS
-  // ============================================================================
 
   const filteringAllDataDetailTable = useCallback(() => {
     Object.keys(allDataDetailTable).forEach((key) => {
@@ -250,10 +229,6 @@ const BillingItemForm = (props) => {
       setDetailMapping((dataTable || [])?.find((item) => item.category === category));
     }
   }, [dataTable, category, filteringAllDataDetailTable]);
-
-  // ============================================================================
-  // UPDATE DATA EFFECT
-  // ============================================================================
 
   const handleDataTypeExist = (status, statusApproval, dataDetail, dataCompare, table = "mapping") => {
     switch (status) {
@@ -289,6 +264,7 @@ const BillingItemForm = (props) => {
         name: dataDetail?.billingItemName,
         billType: dataDetail?.billingTypeId,
         apphierId: dataDetail?.approvalHierarchy,
+        transactionMappingCode: dataDetail?.billingItemCode,
         startDate: dataDetail?.startDate ? moment(dataDetail?.startDate) : null,
         endDate: dataDetail?.endDate ? moment(dataDetail?.endDate) : null,
       });
@@ -357,6 +333,7 @@ const BillingItemForm = (props) => {
       ) {
         const body = {
           ...data_detailDraft,
+          billingItemCode: data_BillingItemDetail?.billingItemCode,
           startDate: data_detailDraft.startDate,
           endDate: data_detailDraft?.endDate,
           approvalHierarchy: data_detailDraft?.approvalHierarchy,
@@ -377,10 +354,6 @@ const BillingItemForm = (props) => {
       }
     }
   }, [data_BillingItemDetail, type, id, handleSetDataUpdate]);
-
-  // ============================================================================
-  // STEPPER NAVIGATION HANDLERS
-  // ============================================================================
 
   const next = () => {
     const fieldsToValidate = listSectionInfo[current]?.paramValue;
@@ -407,10 +380,6 @@ const BillingItemForm = (props) => {
       setCurrent(current - 1);
     }
   };
-
-  // ============================================================================
-  // FORM FIELD HANDLERS
-  // ============================================================================
 
   const handleStartDate = (e) => {
     form.resetFields(["endDate"]);
@@ -457,10 +426,6 @@ const BillingItemForm = (props) => {
     setDataCriteriaTable(e);
   };
 
-  // ============================================================================
-  // MAPPING HANDLERS
-  // ============================================================================
-
   const handleCheckDetailDateConflict = (data) => {
     const index = data_billingItemCategory
       ?.filter((category) => category?.name === data.categoryName)
@@ -485,15 +450,9 @@ const BillingItemForm = (props) => {
   };
 
   const handleChangesMapInformation = (e, newData = {}) => {
-    console.log("🔄 handleChangesMapInformation called");
-    console.log("📥 Received data (e):", e);
-    console.log("📥 newData:", newData);
-
     const hasConflict = handleCheckDetailDateConflict(newData);
-    console.log("⚠️ Date conflict check result:", hasConflict);
 
     if (!hasConflict) {
-      console.log("✅ No conflict - updating dataTable");
       const temp = e.map((item) => ({
         ...item,
         ...(hasValue(item.categoryName)
@@ -506,12 +465,9 @@ const BillingItemForm = (props) => {
           : {}),
       }));
 
-      console.log("📊 Setting dataTable to:", temp);
       setdataTable(temp);
       setStartDateMap(moment(temp?.find((item) => item.category === category)?.startDate));
       setEndDateMap(moment(temp?.find((item) => item.category === category)?.endDate));
-    } else {
-      console.log("❌ Conflict detected - data not updated");
     }
   };
 
@@ -573,10 +529,6 @@ const BillingItemForm = (props) => {
     return dataConflict?.length === 0;
   };
 
-  // ============================================================================
-  // VALIDATION HELPERS
-  // ============================================================================
-
   const handleCheckMissingDetailMap = (data, dataDetail) => {
     return (
       dataDetail.some((detail) => !data.hasOwnProperty(detail.category.toString())) ||
@@ -634,10 +586,6 @@ const BillingItemForm = (props) => {
       return false;
     }
   };
-
-  // ============================================================================
-  // FORM SUBMISSION HANDLERS
-  // ============================================================================
 
   const buildCriteriaPayload = () => {
     const criteriaCodeResolved =
@@ -793,10 +741,6 @@ const BillingItemForm = (props) => {
       });
   };
 
-  // ============================================================================
-  // ACTION HANDLERS
-  // ============================================================================
-
   const handleRetry = () => {
     handleSave(bodyError?.value);
     setModalError(false);
@@ -823,6 +767,7 @@ const BillingItemForm = (props) => {
       setEndDateMap(null);
       setSelectedCriteria(null);
       setDataCriteriaTable([]);
+      setIsCriteriaEditing(false);
     } else {
       setDetailMapping(false);
       setCategory("");
@@ -872,10 +817,6 @@ const BillingItemForm = (props) => {
     }, 0);
   };
 
-  // ============================================================================
-  // BREADCRUMB ROUTES
-  // ============================================================================
-
   const routes = [
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
@@ -885,10 +826,6 @@ const BillingItemForm = (props) => {
       breadcrumbName: `${type === "update" ? "Update Transaction Mapping" : "Create Transaction Mapping"}`,
     },
   ];
-
-  // ============================================================================
-  // RENDER
-  // ============================================================================
 
   return (
     <LayoutMenu>
@@ -934,6 +871,7 @@ const BillingItemForm = (props) => {
               mappingData={dataTable?.length || 0}
               handleEndDate={handleEndDate}
               onCategoryChange={handleCategoryChange}
+              isCriteriaDisabled={isCriteriaEditing}
             />
 
             <MappingInformation
@@ -964,6 +902,7 @@ const BillingItemForm = (props) => {
               detail_mapping_category={detail_mapping_category}
               startDateMap={startDateMap}
               endDateMap={endDateMap}
+              onCriteriaEditingChange={setIsCriteriaEditing}
             />
           </div>
 

@@ -29,11 +29,8 @@ const BillingItemSectionForm = ({
   handleStartDate = () => {},
   handleEndDate = () => {},
   mappingData = 0,
+  isCriteriaDisabled = false,
 }) => {
-  // ============================================================================
-  // DATE VALIDATION HANDLERS
-  // ============================================================================
-
   const disabledStartDate = (current) => {
     return current && current < moment().startOf("day");
   };
@@ -55,10 +52,6 @@ const BillingItemSectionForm = ({
       ),
     );
   };
-
-  // ============================================================================
-  // RENDER
-  // ============================================================================
 
   const isDisabledForUpdate = type === "update" && statusDetail;
 
@@ -132,13 +125,20 @@ const BillingItemSectionForm = ({
           </SelectComponent>
         </Form.Item>
 
-        {/* Criteria */}
         <Form.Item
           label="Criteria"
           name="criteria"
           rules={formMessageRequired("Criteria")}
+          tooltip={
+            isCriteriaDisabled
+              ? "Finish editing the Criteria Detail table first before changing criteria type"
+              : undefined
+          }
         >
-          <SelectComponent placeholder="Select">
+          <SelectComponent
+            placeholder="Select"
+            disabled={isCriteriaDisabled}
+          >
             {data_criteriaOptions?.map((data, index) => (
               <Select.Option value={data.id} key={index}>
                 {data.name}

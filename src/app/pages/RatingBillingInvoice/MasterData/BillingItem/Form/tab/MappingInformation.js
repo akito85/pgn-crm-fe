@@ -1,5 +1,6 @@
-import React, { useEffect, Fragment, useState, useRef } from "react";
+import React, { useEffect, Fragment, useState, useRef, useCallback } from "react";
 import { Tabs } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 import columnsMapping from "../../Table/TableMappingInformation";
 import moment from "moment";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
@@ -7,6 +8,7 @@ import { hasValue } from "../../../../../../../utils";
 import CriteriaDetailTab from "./CriteriaDetailTab";
 import DetailMappingInformation from "./DetailMappingInformation";
 import CardContainer from "../../../../../../../components/CardContainer";
+import { ModalConfirm } from "../../../../../../../components/Modal/ModalPopUp";
 
 const { TabPane } = Tabs;
 
@@ -22,7 +24,6 @@ const MappingInformation = ({
   endDate = null,
   setModalRequired = () => {},
   handleValidateUpdate = () => {},
-  // Props untuk Criteria Detail tab
   criteriaType = null,
   dataCriteriaTable = [],
   handleChangesCriteriaTable = () => {},
@@ -31,7 +32,6 @@ const MappingInformation = ({
   data_classificationTypeList = [],
   data_accountTypeList = [],
   data_criteriaOptions = [],
-  // Props untuk Detail Mapping
   detailMapping = false,
   category = null,
   dataDetailTable = [],
@@ -39,6 +39,7 @@ const MappingInformation = ({
   detail_mapping_category = [],
   startDateMap = null,
   endDateMap = null,
+  onCriteriaEditingChange = () => {},
 }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -47,6 +48,26 @@ const MappingInformation = ({
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
   const [dataCategoryMap, setDataCategoryMap] = useState([]);
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState("mapping");
+  const [pendingTab, setPendingTab] = useState(null);
+  const [showTabWarning, setShowTabWarning] = useState(false);
+
+  const cancelMappingEditRef = useRef(null);
+  const cancelCriteriaEditRef = useRef(null);
+
+  const handleMappingCancelEdit = useCallback((fn) => {
+    cancelMappingEditRef.current = fn;
+  }, []);
+
+  const handleCriteriaCancelEdit = useCallback((fn) => {
+    cancelCriteriaEditRef.current = fn;
+  }, []);
+
+  useEffect(() => {
+    onCriteriaEditingChange(activeTab === "criteria" && isEditabled);
+  }, [activeTab, isEditabled, onCriteriaEditingChange]);
 
   useEffect(() => {
     setDataCategoryMap(
@@ -142,7 +163,33 @@ const MappingInformation = ({
     );
   };
 
-  const [activeTab, setActiveTab] = useState("mapping");
+
+  const handleTabChange = (newTab) => {
+    if (isEditabled) {
+      setPendingTab(newTab);
+      setShowTabWarning(true);
+    } else {
+      setActiveTab(newTab);
+    }
+  };
+
+  const handleConfirmTabChange = () => {
+    if (activeTab === "mapping" && cancelMappingEditRef.current) {
+      cancelMappingEditRef.current();
+    }
+    if (activeTab === "criteria" && cancelCriteriaEditRef.current) {
+      cancelCriteriaEditRef.current();
+    }
+    setIsEditabled(false);
+    setActiveTab(pendingTab);
+    setPendingTab(null);
+    setShowTabWarning(false);
+  };
+
+  const handleCancelTabChange = () => {
+    setPendingTab(null);
+    setShowTabWarning(false);
+  };
 
   return (
     <Fragment>
@@ -152,7 +199,7 @@ const MappingInformation = ({
         element={
           <Tabs
             activeKey={activeTab}
-            onChange={setActiveTab}
+            onChange={handleTabChange}
             tabBarStyle={{ marginBottom: 0 }}
           >
             <TabPane tab="Mapping Detail" key="mapping" />
@@ -198,6 +245,7 @@ const MappingInformation = ({
             endDateLock={endDate}
             setModalRequired={setModalRequired}
             handleValidateUpdate={handleValidateUpdate}
+            onCancelEdit={handleMappingCancelEdit}
           />
         )}
 
@@ -217,6 +265,7 @@ const MappingInformation = ({
             startDateLock={startDate}
             endDateLock={endDate}
             setModalRequired={setModalRequired}
+            onCancelEdit={handleCriteriaCancelEdit}
           />
         )}
       </CardContainer>
@@ -239,6 +288,23 @@ const MappingInformation = ({
           />
         </CardContainer>
       )}
+
+      <ModalConfirm
+        isOpen={showTabWarning}
+        handleCancel={handleCancelTabChange}
+        handleOk={handleConfirmTabChange}
+        width={450}
+      >
+        <div className="flex justify-center mt-5 gap-[20px] px-4">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036", flexShrink: 0 }} />
+          <div>
+            <p className="text-[18px] font-bold mb-1">Unsaved Changes</p>
+            <p className="text-sm text-gray-600">
+              You have a row that is currently being edited. Switching tabs will discard your unsaved changes. Are you sure you want to continue?
+            </p>
+          </div>
+        </div>
+      </ModalConfirm>
     </Fragment>
   );
 };
