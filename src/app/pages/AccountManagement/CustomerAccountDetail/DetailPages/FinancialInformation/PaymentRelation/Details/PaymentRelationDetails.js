@@ -20,6 +20,7 @@ import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
 import HeaderDetail from "../../../../HeaderDetail";
+import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const PaymentRelationDetails = ({
   type = "standard"
@@ -46,6 +47,22 @@ const PaymentRelationDetails = ({
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idPr = location?.state?.id;
+
+  const tabOptions = [
+    {
+      key: "ori",
+      label: "Original",
+    },
+    {
+      key: "cur",
+      label: "Current",
+    }
+  ]
+  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "")
+
+  const handleSetActiveKey = (newActiveKey) => {
+    setActiveKey(newActiveKey)
+  }
 
   const [isApproval, setIsApproval] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -188,6 +205,14 @@ const PaymentRelationDetails = ({
             idCustomer={idCustomer}
             type={"standard"}
           />
+          
+          <NxBaseContainer border padding={false}>
+            <NxTabs
+              items={tabOptions}
+              activeKey={activeKey}
+              onChange={handleSetActiveKey}
+            />
+          </NxBaseContainer>
 
           <PaymentRelationDetailTabs
             dataDetail={detail_paymentRelation?.result}
