@@ -151,6 +151,10 @@ const BillingItemForm = (props) => {
   const [selectedCriteria, setSelectedCriteria] = useState(null);
   const [dataCriteriaTable, setDataCriteriaTable] = useState([]);
 
+  // ✅ State untuk tracking apakah sedang ada row yang diedit di tab Criteria
+  // Digunakan untuk disable field Criteria di form utama agar kolom tabel tidak berubah di tengah edit
+  const [isCriteriaEditing, setIsCriteriaEditing] = useState(false);
+
   // Approval States
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -289,6 +293,7 @@ const BillingItemForm = (props) => {
         name: dataDetail?.billingItemName,
         billType: dataDetail?.billingTypeId,
         apphierId: dataDetail?.approvalHierarchy,
+        transactionMappingCode: dataDetail?.billingItemCode,
         startDate: dataDetail?.startDate ? moment(dataDetail?.startDate) : null,
         endDate: dataDetail?.endDate ? moment(dataDetail?.endDate) : null,
       });
@@ -357,6 +362,7 @@ const BillingItemForm = (props) => {
       ) {
         const body = {
           ...data_detailDraft,
+          billingItemCode: data_BillingItemDetail?.billingItemCode,
           startDate: data_detailDraft.startDate,
           endDate: data_detailDraft?.endDate,
           approvalHierarchy: data_detailDraft?.approvalHierarchy,
@@ -485,15 +491,9 @@ const BillingItemForm = (props) => {
   };
 
   const handleChangesMapInformation = (e, newData = {}) => {
-    console.log("🔄 handleChangesMapInformation called");
-    console.log("📥 Received data (e):", e);
-    console.log("📥 newData:", newData);
-
     const hasConflict = handleCheckDetailDateConflict(newData);
-    console.log("⚠️ Date conflict check result:", hasConflict);
 
     if (!hasConflict) {
-      console.log("✅ No conflict - updating dataTable");
       const temp = e.map((item) => ({
         ...item,
         ...(hasValue(item.categoryName)
@@ -506,12 +506,9 @@ const BillingItemForm = (props) => {
           : {}),
       }));
 
-      console.log("📊 Setting dataTable to:", temp);
       setdataTable(temp);
       setStartDateMap(moment(temp?.find((item) => item.category === category)?.startDate));
       setEndDateMap(moment(temp?.find((item) => item.category === category)?.endDate));
-    } else {
-      console.log("❌ Conflict detected - data not updated");
     }
   };
 
@@ -823,6 +820,7 @@ const BillingItemForm = (props) => {
       setEndDateMap(null);
       setSelectedCriteria(null);
       setDataCriteriaTable([]);
+      setIsCriteriaEditing(false);
     } else {
       setDetailMapping(false);
       setCategory("");
@@ -934,6 +932,7 @@ const BillingItemForm = (props) => {
               mappingData={dataTable?.length || 0}
               handleEndDate={handleEndDate}
               onCategoryChange={handleCategoryChange}
+              isCriteriaDisabled={isCriteriaEditing}
             />
 
             <MappingInformation
@@ -964,6 +963,11 @@ const BillingItemForm = (props) => {
               detail_mapping_category={detail_mapping_category}
               startDateMap={startDateMap}
               endDateMap={endDateMap}
+              onCriteriaEditingChange={setIsCriteriaEditing}
+              onTabChange={() => {
+                setDetailMapping(false);
+                setCategory("");
+              }}
             />
           </div>
 

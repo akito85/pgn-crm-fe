@@ -1,5 +1,6 @@
-import React, { useEffect, Fragment, useState, useRef } from "react";
+import React, { useEffect, Fragment, useState, useRef, useCallback } from "react";
 import { Tabs } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 import columnsMapping from "../../Table/TableMappingInformation";
 import moment from "moment";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
@@ -7,6 +8,7 @@ import { hasValue } from "../../../../../../../utils";
 import CriteriaDetailTab from "./CriteriaDetailTab";
 import DetailMappingInformation from "./DetailMappingInformation";
 import CardContainer from "../../../../../../../components/CardContainer";
+import { ModalConfirm } from "../../../../../../../components/Modal/ModalPopUp";
 
 const { TabPane } = Tabs;
 
@@ -39,6 +41,11 @@ const MappingInformation = ({
   detail_mapping_category = [],
   startDateMap = null,
   endDateMap = null,
+  // Callback ke parent: memberi tahu apakah criteria tab sedang dalam mode edit
+  onCriteriaEditingChange = () => {},
+  // Callback ke parent: dipanggil setiap kali tab benar-benar berpindah
+  // Parent menggunakannya untuk reset detailMapping dan category
+  onTabChange = () => {},
 }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -47,6 +54,31 @@ const MappingInformation = ({
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
   const [dataCategoryMap, setDataCategoryMap] = useState([]);
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState("mapping");
+  const [pendingTab, setPendingTab] = useState(null);
+  const [showTabWarning, setShowTabWarning] = useState(false);
+
+  // Ref untuk menyimpan fungsi cancel dari DynamicTableInlineBilling.
+  // Saat user confirm pindah tab, fungsi ini dipanggil agar row yang sedang
+  // dalam mode "add" (belum di-save) ikut dihapus dari dataTable.
+  const cancelMappingEditRef = useRef(null);
+  const cancelCriteriaEditRef = useRef(null);
+
+  const handleMappingCancelEdit = useCallback((fn) => {
+    cancelMappingEditRef.current = fn;
+  }, []);
+
+  const handleCriteriaCancelEdit = useCallback((fn) => {
+    cancelCriteriaEditRef.current = fn;
+  }, []);
+
+  // Notify parent setiap kali status editing di criteria tab berubah
+  // Parent menggunakannya untuk disable field Criteria di form utama
+  useEffect(() => {
+    onCriteriaEditingChange(activeTab === "criteria" && isEditabled);
+  }, [activeTab, isEditabled, onCriteriaEditingChange]);
 
   useEffect(() => {
     setDataCategoryMap(
@@ -142,7 +174,44 @@ const MappingInformation = ({
     );
   };
 
-  const [activeTab, setActiveTab] = useState("mapping");
+  // ============================================================================
+  // TAB CHANGE HANDLER WITH VALIDATION
+  // ============================================================================
+
+  const handleTabChange = (newTab) => {
+    if (isEditabled) {
+      // Ada row yang sedang dalam mode edit, tampilkan peringatan sebelum pindah tab
+      setPendingTab(newTab);
+      setShowTabWarning(true);
+    } else {
+      setActiveTab(newTab);
+      // Reset detail mapping panel saat pindah tab tanpa ada edit
+      onTabChange();
+    }
+  };
+
+  const handleConfirmTabChange = () => {
+    // Panggil cancel internal tabel yang sedang aktif agar row "add" yang
+    // belum di-save ikut dihapus dari dataTable, bukan hanya di-hide
+    if (activeTab === "mapping" && cancelMappingEditRef.current) {
+      cancelMappingEditRef.current();
+    }
+    if (activeTab === "criteria" && cancelCriteriaEditRef.current) {
+      cancelCriteriaEditRef.current();
+    }
+    setIsEditabled(false);
+    setActiveTab(pendingTab);
+    setPendingTab(null);
+    setShowTabWarning(false);
+    // Reset detail mapping panel saat pindah tab setelah konfirmasi
+    onTabChange();
+  };
+
+  const handleCancelTabChange = () => {
+    // User membatalkan perpindahan tab, tetap di tab saat ini
+    setPendingTab(null);
+    setShowTabWarning(false);
+  };
 
   return (
     <Fragment>
@@ -152,7 +221,7 @@ const MappingInformation = ({
         element={
           <Tabs
             activeKey={activeTab}
-            onChange={setActiveTab}
+            onChange={handleTabChange}
             tabBarStyle={{ marginBottom: 0 }}
           >
             <TabPane tab="Mapping Detail" key="mapping" />
@@ -198,6 +267,7 @@ const MappingInformation = ({
             endDateLock={endDate}
             setModalRequired={setModalRequired}
             handleValidateUpdate={handleValidateUpdate}
+            onCancelEdit={handleMappingCancelEdit}
           />
         )}
 
@@ -217,6 +287,7 @@ const MappingInformation = ({
             startDateLock={startDate}
             endDateLock={endDate}
             setModalRequired={setModalRequired}
+            onCancelEdit={handleCriteriaCancelEdit}
           />
         )}
       </CardContainer>
@@ -239,6 +310,24 @@ const MappingInformation = ({
           />
         </CardContainer>
       )}
+
+      {/* Modal Konfirmasi Pindah Tab saat Ada Row yang Sedang Diedit */}
+      <ModalConfirm
+        isOpen={showTabWarning}
+        handleCancel={handleCancelTabChange}
+        handleOk={handleConfirmTabChange}
+        width={450}
+      >
+        <div className="flex justify-center mt-5 gap-[20px] px-4">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036", flexShrink: 0 }} />
+          <div>
+            <p className="text-[18px] font-bold mb-1">Unsaved Changes</p>
+            <p className="text-sm text-gray-600">
+              You have a row that is currently being edited. Switching tabs will discard your unsaved changes. Are you sure you want to continue?
+            </p>
+          </div>
+        </div>
+      </ModalConfirm>
     </Fragment>
   );
 };

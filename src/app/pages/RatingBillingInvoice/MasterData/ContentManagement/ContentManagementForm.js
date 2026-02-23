@@ -43,7 +43,7 @@ const transformApiDataToForm = (apiData) => {
 
   const contentTemplate = apiData.contentTemplate;
   const contentCriteria = apiData.contentCriteria || [];
-  
+
   return {
     information: {
       id: contentTemplate?.id,
@@ -62,13 +62,13 @@ const transformApiDataToForm = (apiData) => {
       subject: contentTemplate?.contentSubject,
       body: contentTemplate?.contentBody,
     },
-    criteria: contentCriteria.map(item => ({
+    criteria: contentCriteria.map((item) => ({
       contentCriteriaId: item.id,
       criteria: item.criteriaId || null,
     })),
     criteriaData: contentCriteria
-      .filter(item => item.allCriteria !== 'Y')
-      .map(item => ({
+      .filter((item) => item.allCriteria !== "Y")
+      .map((item) => ({
         id: item.id,
         budget: item.budget,
         subDistrict: item.subDistrict,
@@ -90,10 +90,10 @@ const transformApiDataToForm = (apiData) => {
         accountNumber: item.accountNumber,
         startDate: item.startDate,
         endDate: item.endDate,
-        allCriteria: item.allCriteria === 'Y',
+        allCriteria: item.allCriteria === "Y",
       })),
     mattachmentLists: apiData.mattachmentLists || [],
-    listCriteria: contentCriteria.map(item => ({
+    listCriteria: contentCriteria.map((item) => ({
       contentCriteriaId: item.id,
       criteria: item.criteriaId || null,
     })),
@@ -142,8 +142,6 @@ const ContentManagementForm = ({ type }) => {
         "media",
         "criteria",
         "startDate",
-        "subject",
-        "body",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -249,7 +247,7 @@ const ContentManagementForm = ({ type }) => {
     }
   }, [data_criteria]);
 
-  // ✅ useEffect untuk populate form - DENGAN TRANSFORM
+  // ✅ useEffect untuk populate form
   useEffect(() => {
     const transformedDetail = data_detail ? transformApiDataToForm(data_detail) : null;
     const transformedDraft = data_detail_draft ? transformApiDataToForm(data_detail_draft) : null;
@@ -263,28 +261,23 @@ const ContentManagementForm = ({ type }) => {
         contentCriteriaId: item.contentCriteriaId,
         criteria: item.criteria,
       }));
-
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
-      const dataDraftAttachment = (transformedDetail?.mattachmentLists || []).map(
-        (item) => ({
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          uploadBy: item.createdBy,
-          uploadDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        })
-      );
+      const dataDraftAttachment = (transformedDetail?.mattachmentLists || []).map((item) => ({
+        id: item.id,
+        size: item.size,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        fileType: item.fileType,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
+        pathFile: item.pathFile,
+        urlFile1: item.urlFile1,
+        urlFile2: item.urlFile2,
+        uploadBy: item.createdBy,
+        uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
+        dataType: "exist",
+      }));
 
       const dataDraftCriteriaList = (transformedDraft?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
@@ -319,13 +312,9 @@ const ContentManagementForm = ({ type }) => {
         category: transformedDraft?.information?.category,
         media: transformedDraft?.information?.media,
         startDate: moment(transformedDraft?.information?.startDate),
-        endDate: transformedDraft?.information?.endDate
-          ? moment(transformedDraft?.information?.endDate)
-          : undefined,
+        endDate: transformedDraft?.information?.endDate ? moment(transformedDraft?.information?.endDate) : undefined,
         criteria: mappingCriteria,
         description: transformedDraft?.information?.description,
-        subject: transformedDraft?.content?.subject,
-        body: transformedDraft?.content?.body,
         apphierId: transformedDraft?.information?.apphierId,
       });
 
@@ -334,8 +323,10 @@ const ContentManagementForm = ({ type }) => {
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataDraftCriteriaList);
+      // ✅ Set subject & body ke state (bukan form field)
       setSubjectValue(transformedDraft?.content?.subject || "");
       setBodyValue(transformedDraft?.content?.body || "");
+
     } else if (
       id &&
       !transformedDraft?.information?.id &&
@@ -345,28 +336,23 @@ const ContentManagementForm = ({ type }) => {
         contentCriteriaId: item.contentCriteriaId,
         criteria: item.criteria,
       }));
-
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
-      const dataAttachment = (transformedDetail?.mattachmentLists || []).map(
-        (item) => ({
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          uploadBy: item.createdBy,
-          uploadDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        })
-      );
+      const dataAttachment = (transformedDetail?.mattachmentLists || []).map((item) => ({
+        id: item.id,
+        size: item.size,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        fileType: item.fileType,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
+        pathFile: item.pathFile,
+        urlFile1: item.urlFile1,
+        urlFile2: item.urlFile2,
+        uploadBy: item.createdBy,
+        uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
+        dataType: "exist",
+      }));
 
       const dataCriteriaList = (transformedDetail?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
@@ -401,13 +387,9 @@ const ContentManagementForm = ({ type }) => {
         category: transformedDetail?.information?.category,
         media: transformedDetail?.information?.media,
         startDate: moment(transformedDetail?.information?.startDate),
-        endDate: transformedDetail?.information?.endDate
-          ? moment(transformedDetail?.information?.endDate)
-          : undefined,
+        endDate: transformedDetail?.information?.endDate ? moment(transformedDetail?.information?.endDate) : undefined,
         criteria: mappingCriteria,
         description: transformedDetail?.information?.description,
-        subject: transformedDetail?.content?.subject,
-        body: transformedDetail?.content?.body,
         apphierId: transformedDetail?.information?.apphierId,
       });
 
@@ -416,6 +398,7 @@ const ContentManagementForm = ({ type }) => {
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataCriteriaList);
+      // ✅ Set subject & body ke state (bukan form field)
       setSubjectValue(transformedDetail?.content?.subject || "");
       setBodyValue(transformedDetail?.content?.body || "");
     }
@@ -432,10 +415,7 @@ const ContentManagementForm = ({ type }) => {
       const data = dataListAppHierDetail.map((a, index) => ({
         ...a,
         key: index + 1,
-        employeeDetail: a.employeeDetail.map((b, index) => ({
-          ...b,
-          key: index + 1,
-        })),
+        employeeDetail: a.employeeDetail.map((b, index) => ({ ...b, key: index + 1 })),
       }));
       setAppHierDataDetail(data);
     } else {
@@ -455,50 +435,21 @@ const ContentManagementForm = ({ type }) => {
 
   // Breadcrumbs
   const routes = [
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    { path: RBI_ROUTES.CONTENT_MANAGEMENT_VIEW, breadcrumbName: "Content Management" },
     {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
-    {
-      path: RBI_ROUTES.CONTENT_MANAGEMENT_VIEW,
-      breadcrumbName: "Content Management",
-    },
-    {
-      path:
-        type === "create"
-          ? RBI_ROUTES.CONTENT_MANAGEMENT_CREATE
-          : RBI_ROUTES.CONTENT_MANAGEMENT_UPDATE,
-      breadcrumbName:
-        type === "create"
-          ? "Create Content Management"
-          : "Update Content Management",
+      path: type === "create" ? RBI_ROUTES.CONTENT_MANAGEMENT_CREATE : RBI_ROUTES.CONTENT_MANAGEMENT_UPDATE,
+      breadcrumbName: type === "create" ? "Create Content Management" : "Update Content Management",
     },
   ];
 
-  const processData = ({
-    listDataCriteria,
-    bodyData,
-    id,
-    type,
-    dateFormatting,
-    flag,
-    data_detail,
-    data_detail_draft,
-    columnsTableCriteriaBillingBucket,
-  }) => {
+  const processData = ({ listDataCriteria, bodyData, id, type, dateFormatting, flag, data_detail, data_detail_draft, columnsTableCriteriaBillingBucket }) => {
     const mapListDataCriteria = (listDataCriteria, dateFormatting) => {
       return listDataCriteria?.map((item) => ({
         id: item?.id || null,
-        startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
-          : null,
-        endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
-          : null,
+        startDate: item.startDate ? moment(item.startDate).format(dateFormatting.dateFormal) : null,
+        endDate: item.endDate ? moment(item.endDate).format(dateFormatting.dateFormal) : null,
         customer: item.customer?.value || null,
         budget: item.budget?.value || null,
         subDistrict: item.subDistrict?.value || null,
@@ -521,253 +472,154 @@ const ContentManagementForm = ({ type }) => {
       }));
     };
 
-    const dataCriteriaObject = mapListDataCriteria(
-      listDataCriteria,
-      dateFormatting
-    );
-
+    const dataCriteriaObject = mapListDataCriteria(listDataCriteria, dateFormatting);
     const filteredCriteria = columnsTableCriteriaBillingBucket().filter(
-      (item) =>
-        !bodyData.criteria.includes(item.indexValue) &&
-        bodyData.criteria.includes(item.indexValue) === 1
+      (item) => !bodyData.criteria.includes(item.indexValue) && bodyData.criteria.includes(item.indexValue) === 1
     );
-
     const updatedDataCriteriaObject = dataCriteriaObject.map((item) => {
       let obj = { ...item };
-      filteredCriteria.forEach((criteria) => {
-        obj[criteria.dataIndexForm] = null;
-      });
+      filteredCriteria.forEach((criteria) => { obj[criteria.dataIndexForm] = null; });
       return obj;
     });
 
     const includesAll = bodyData.criteria.includes(24);
 
-    const body = {
+    return {
       id: type === "create" ? undefined : id,
       type: flag ? "SUBMIT" : "DRAFT",
       name: bodyData.name,
       format: bodyData.format,
       category: bodyData.category,
       media: bodyData.media,
-      startDate: bodyData.startDate
-        ? moment(bodyData?.startDate).format(dateFormatting.dateFormal)
-        : null,
-      endDate: bodyData.endDate
-        ? moment(bodyData?.endDate).format(dateFormatting.dateFormal)
-        : null,
+      startDate: bodyData.startDate ? moment(bodyData?.startDate).format(dateFormatting.dateFormal) : null,
+      endDate: bodyData.endDate ? moment(bodyData?.endDate).format(dateFormatting.dateFormal) : null,
       description: bodyData.description ? bodyData.description : null,
       content: {
         subject: bodyData.subject || "",
         body: bodyData.body || "",
       },
-      criteriaData: includesAll
-        ? [{ allCriteria: true }]
-        : updatedDataCriteriaObject,
+      criteriaData: includesAll ? [{ allCriteria: true }] : updatedDataCriteriaObject,
       apphierId: bodyData.apphierId,
     };
-
-    return body;
   };
 
   const lowerCaseCheckedCriteria = (name) => {
-    let nameChecked = `${name
-      ?.toString()
-      ?.toLowerCase()
-      ?.replace(/[-\s]/g, "")}`;
+    let nameChecked = `${name?.toString()?.toLowerCase()?.replace(/[-\s]/g, "")}`;
     switch (nameChecked) {
-      case "subdistrict":
-        return "subDistrict";
-      case "budgettype":
-        return "budget";
-      case "industrialsector":
-        return "industrialSector";
-      case "servicetype":
-        return "serviceType";
-      case "costcenter":
-        return "area";
-      case "customersegment":
-        return "customerSegment";
-      case "accountcategory":
-        return "accountCategory";
-      case "accountgrouptype":
-        return "accountGroup";
-      case "account":
-        return "customer";
-      case "gsizes":
-        return "gsizes";
-      default:
-        return nameChecked;
+      case "subdistrict": return "subDistrict";
+      case "budgettype": return "budget";
+      case "industrialsector": return "industrialSector";
+      case "servicetype": return "serviceType";
+      case "costcenter": return "area";
+      case "customersegment": return "customerSegment";
+      case "accountcategory": return "accountCategory";
+      case "accountgrouptype": return "accountGroup";
+      case "account": return "customer";
+      case "gsizes": return "gsizes";
+      default: return nameChecked;
     }
   };
 
   const hasValueCriteria = (value) => {
-    if (
-      value === "" ||
-      value === undefined ||
-      value === null ||
-      value === "-" ||
-      value === "Invalid date"
-    ) {
+    if (value === "" || value === undefined || value === null || value === "-" || value === "Invalid date") {
       return false;
     } else if (typeof value === "object") {
-      return (
-        value.hasOwnProperty("value") &&
-        value.value !== null &&
-        value.value !== undefined &&
-        value.hasOwnProperty("label") &&
-        value.label !== null &&
-        value.label !== undefined
-      );
+      return value.hasOwnProperty("value") && value.value !== null && value.value !== undefined &&
+        value.hasOwnProperty("label") && value.label !== null && value.label !== undefined;
     } else {
       return true;
     }
   };
 
-  const validateCriteriaFields = (
-    criteriaValues,
-    dataCriteria,
-    listDataCriteria = [],
-    setMissingColumn = () => {},
-    minimumData = 0
-  ) => {
+  const validateCriteriaFields = (criteriaValues, dataCriteria, listDataCriteria = [], setMissingColumn = () => {}, minimumData = 0) => {
     let missingColumn = [];
-    const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
-    );
+    const tempArray = criteriaValues.filter((item) => dataCriteria?.includes(item.value));
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
       tempNameCriteria?.forEach((criteriaName) => {
-        if (
-          !item[lowerCaseCheckedCriteria(criteriaName)] ||
-          !hasValueCriteria(item[lowerCaseCheckedCriteria(criteriaName)])
-        ) {
+        if (!item[lowerCaseCheckedCriteria(criteriaName)] || !hasValueCriteria(item[lowerCaseCheckedCriteria(criteriaName)])) {
           missingColumn.push(criteriaName);
         }
       });
     });
-    const uniqueMissingColumn =
-      missingColumn
-        .filter((item, index) => {
-          return missingColumn.indexOf(item) === index;
-        })
-        ?.filter((item) => item !== "All") || [];
+    const uniqueMissingColumn = missingColumn
+      .filter((item, index) => missingColumn.indexOf(item) === index)
+      ?.filter((item) => item !== "All") || [];
     setMissingColumn(uniqueMissingColumn);
-
-    return uniqueMissingColumn?.length > 0 ||
-      !((listDataCriteria?.length || 0) >= minimumData)
-      ? true
-      : false;
+    return uniqueMissingColumn?.length > 0 || !((listDataCriteria?.length || 0) >= minimumData) ? true : false;
   };
 
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
-      ) {
+      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
         dataOverlap?.push(item);
       }
     });
-
-    if (dataOverlap?.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return dataOverlap?.length > 0;
   }, []);
 
+  // ✅ FIXED: handleSave - subjectValue & bodyValue selalu tersedia
+  // karena komponen tidak unmount (display:none)
   const handleSave = async (formValue) => {
-    console.log("Form Values:", formValue);
-    console.log("Subject:", formValue.subject);
-    console.log("Body:", formValue.body);
-    let errorBody = {};
-    
     if (!subjectValue || subjectValue.trim() === "") {
-      errorBody = {
-        title: "Failed",
-        description: "Subject is required. Please input subject.",
-      };
-      dispatch(showModalError(errorBody));
+      dispatch(showModalError({ title: "Failed", description: "Subject is required. Please input subject." }));
       return;
     }
 
     if (!bodyValue || bodyValue.trim() === "") {
-      errorBody = {
-        title: "Failed",
-        description: "Body content is required. Please input body.",
-      };
-      dispatch(showModalError(errorBody));
+      dispatch(showModalError({ title: "Failed", description: "Body content is required. Please input body." }));
       return;
     }
-    
+
+    if (listDataAttachment.length === 0) {
+      setListSectionInfo((prev) =>
+        prev.map((item) => item.value === "Attachment" ? { ...item, errorBadge: 1 } : { ...item, errorBadge: 0 })
+      );
+      dispatch(showModalError({ title: "Failed", description: "Attachment is required. Please upload at least one file." }));
+      return;
+    }
+
+    if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+      dispatch(showModalError({ title: "Failed", description: "Criteria Mandatory. Please insert data." }));
+      return;
+    }
+
+    if (storedDataInline) {
+      dispatch(showModalError({ title: "Failed", description: "Please save data table inline before submit. Please try again." }));
+      return;
+    }
+
+    if (validateCriteriaFields(criteriaOptions, formValue?.criteria, listDataCriteria, () => {}, 0)) {
+      dispatch(showModalError({ title: "Failed", description: "There is missing values in table criteria. Please try again" }));
+      return;
+    }
+
     const hasOverlapping = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
       listDataCriteria
     );
 
-    if (listDataAttachment.length === 0) {
-      handleMandatory(setListSectionInfo, listDataAttachment);
-    } else {
-      handleMandatory(setListSectionInfo, setListSectionInfo);
-      if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
-        errorBody = {
-          title: "Failed",
-          description: "Criteria Mandatory. Please insert data.",
-        };
-        dispatch(showModalError(errorBody));
-      } else if (storedDataInline) {
-        errorBody = {
-          title: "Failed",
-          description: `Please save data table inline before submit. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (
-        validateCriteriaFields(
-          criteriaOptions,
-          formValue?.criteria,
-          listDataCriteria,
-          () => {},
-          0
-        )
-      ) {
-        const errorBody = {
-          title: "Failed",
-          description: `There is missing values in table criteria. Please try again`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (hasOverlapping) {
-        const errorBody = {
-          title: "Failed",
-          description: `You can't add Criteria. Start date and end date can't be overlap`,
-        };
-        dispatch(showModalError(errorBody));
-      } else {
-        setBodyData({
-          ...formValue,
-          subject: subjectValue,
-          body: bodyValue,
-        });
-        setModalConfirm(true);
-        setListSectionInfo([
-          {
-            value: "Content Information",
-            paramValue: [
-              "name",
-              "format",
-              "category",
-              "media",
-              "criteria",
-              "startDate",
-              "subject",
-              "body",
-            ],
-          },
-          { value: "Approval", paramValue: ["apphierId"] },
-          { value: "Attachment" },
-        ]);
-      }
+    if (hasOverlapping) {
+      dispatch(showModalError({ title: "Failed", description: "You can't add Criteria. Start date and end date can't be overlap" }));
+      return;
     }
+
+    // ✅ Semua validasi lolos - gunakan subjectValue & bodyValue dari state
+    const finalBodyData = {
+      ...formValue,
+      subject: subjectValue,
+      body: bodyValue,
+    };
+
+    setBodyData(finalBodyData);
+    setModalConfirm(true);
+
+    setListSectionInfo([
+      { value: "Content Information", paramValue: ["name", "format", "category", "media", "criteria", "startDate"] },
+      { value: "Approval", paramValue: ["apphierId"] },
+      { value: "Attachment" },
+    ]);
   };
 
   const handleConfirm = () => {
@@ -791,99 +643,55 @@ const ContentManagementForm = ({ type }) => {
         .unwrap()
         .then(async (dataForm) => {
           const templateId = dataForm?.createdId || dataForm?.data?.createdId;
-
           if (!templateId) {
-            console.error("Created ID not found in response:", dataForm);
             setModalError(true);
-            setBodyError({
-              message: "Failed to get template ID from response",
-            });
+            setBodyError({ message: "Failed to get template ID from response" });
             setLoadingSave(false);
             return;
           }
 
-          console.log("Template created with ID:", templateId);
-
           setLoadingForm(true);
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
-
-            const attachmentBody = {
-              files: element.file,
-              categoryId: element.fileCategoryId,
-              referenceId: templateId,
-            };
-
             try {
-              await ratingBillingHttpService.uploadAttachment(
-                `/v1/dbs/api/content/create-attachment`,
-                attachmentBody
-              );
-              console.log(`Attachment ${icon + 1} uploaded successfully`);
+              await ratingBillingHttpService.uploadAttachment(`/v1/dbs/api/content/create-attachment`, {
+                files: element.file,
+                categoryId: element.fileCategoryId,
+                referenceId: templateId,
+              });
             } catch (uploadError) {
-              console.error(
-                `Failed to upload attachment ${icon + 1}:`,
-                uploadError
-              );
+              console.error(`Failed to upload attachment ${icon + 1}:`, uploadError);
             }
           }
-
           setLoadingForm(false);
           setLoadingSave(false);
           handleClear();
         })
         .catch((error) => {
           setLoadingSave(false);
-          console.log(error);
           if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            setBodyError({ message });
+            setBodyError({ message: error.response?.data?.message || error.message || error.toString() });
             setModalError(true);
           }
         });
     } else {
       dispatch(updateContentManagement({ body: body, id: id }))
         .unwrap()
-        .then(async (dataForm) => {
-          const templateId = id;
-
-          console.log("Template updated with ID:", templateId);
-
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
-
-          console.log("New attachments to upload:", filterDataAttach.length);
-
+        .then(async () => {
+          const filterDataAttach = listDataAttachment.filter((item) => item.dataType !== "exist");
           setLoadingForm(true);
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
-
-            const attachmentBody = {
-              files: element.file,
-              categoryId: element.fileCategoryId,
-              referenceId: templateId,
-            };
-
             try {
-              await ratingBillingHttpService.uploadAttachment(
-                `/v1/dbs/api/content/create-attachment`,
-                attachmentBody
-              );
-              console.log(`Attachment ${icon + 1} uploaded successfully`);
+              await ratingBillingHttpService.uploadAttachment(`/v1/dbs/api/content/create-attachment`, {
+                files: element.file,
+                categoryId: element.fileCategoryId,
+                referenceId: id,
+              });
             } catch (uploadError) {
-              console.error(
-                `Failed to upload attachment ${icon + 1}:`,
-                uploadError
-              );
+              console.error(`Failed to upload attachment ${icon + 1}:`, uploadError);
             }
           }
-
           setLoadingForm(false);
           setLoadingSave(false);
           handleClear();
@@ -891,50 +699,29 @@ const ContentManagementForm = ({ type }) => {
         .catch((error) => {
           setLoadingSave(false);
           if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            setBodyError({ message });
+            setBodyError({ message: error.response?.data?.message || error.message || error.toString() });
             setModalError(true);
           }
         });
     }
   };
 
-  const handleMandatory = (
-    setListSectionInfo = () => {},
-    listDataAttachment,
-    errorFields
-  ) => {
+  const handleMandatory = (setListSectionInfo = () => {}, listDataAttachment, errorFields) => {
     setListSectionInfo((prevState) => {
-      const res = prevState.map((item) => {
+      return prevState.map((item) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-                (current, next) =>
-                  item.paramValue?.includes(next.name[0])
-                    ? current + 1
-                    : current,
-                0
+                (current, next) => item.paramValue?.includes(next.name[0]) ? current + 1 : current, 0
               )
-            : listDataAttachment?.length < 1
-            ? 1
-            : 0;
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
+            : listDataAttachment?.length < 1 ? 1 : 0;
+        return { value: item.value, paramValue: item.paramValue, errorBadge };
       });
-      return res;
     });
   };
 
   const handleError = ({ values, errorFields, outOfDate }) => {
-    handleMandatory(setListSectionInfo, [], errorFields);
+    handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
   };
 
   const handleClear = () => {
@@ -950,19 +737,7 @@ const ContentManagementForm = ({ type }) => {
       setSubjectValue("");
       setBodyValue("");
       setListSectionInfo([
-        {
-          value: "Content Information",
-          paramValue: [
-            "name",
-            "format",
-            "category",
-            "media",
-            "criteria",
-            "startDate",
-            "subject",
-            "body",
-          ],
-        },
+        { value: "Content Information", paramValue: ["name", "format", "category", "media", "criteria", "startDate"] },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
       ]);
@@ -983,23 +758,17 @@ const ContentManagementForm = ({ type }) => {
     setBodyError({});
   };
 
-  const handleBack = () => {
-    setModalBack(true);
-  };
+  const handleBack = () => setModalBack(true);
 
   const handleSubmit = () => {
     setFlag(true);
-    setTimeout(() => {
-        form.submit();
-    }, 0);
-};
+    setTimeout(() => { form.submit(); }, 0);
+  };
 
   const handleSaveDraft = () => {
     setFlag(false);
-    setTimeout(() => {
-        form.submit();
-    }, 0);
-};
+    setTimeout(() => { form.submit(); }, 0);
+  };
 
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
@@ -1016,18 +785,16 @@ const ContentManagementForm = ({ type }) => {
     <LayoutMenu>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        
-        {/* FormStepper menggantikan RadioTabs */}
+
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
 
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSave}
-          onFinishFailed={handleError}
-        >
-          {/* Step 1: Content Information - Conditional Rendering */}
-          {valuePage === listSectionInfo[0].value && (
+        <Form layout="vertical" form={form} onFinish={handleSave} onFinishFailed={handleError}>
+
+          {/* ✅ FIXED: Gunakan display:none seperti PosForm agar komponen tidak unmount
+              sehingga state subjectValue & bodyValue tetap terjaga saat pindah step */}
+
+          {/* Step 1: Content Information */}
+          <div style={{ display: valuePage !== listSectionInfo[0].value ? "none" : undefined }}>
             <ContentSectionForm
               type={type}
               form={form}
@@ -1049,10 +816,10 @@ const ContentManagementForm = ({ type }) => {
               bodyValue={bodyValue}
               setBodyValue={setBodyValue}
             />
-          )}
+          </div>
 
-          {/* Step 2: Approval - Conditional Rendering */}
-          {valuePage === listSectionInfo[1].value && (
+          {/* Step 2: Approval */}
+          <div style={{ display: valuePage !== listSectionInfo[1].value ? "none" : undefined }}>
             <BaseContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
@@ -1062,10 +829,10 @@ const ContentManagementForm = ({ type }) => {
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
             </BaseContainer>
-          )}
+          </div>
 
-          {/* Step 3: Attachment - Conditional Rendering */}
-          {valuePage === listSectionInfo[2].value && (
+          {/* Step 3: Attachment */}
+          <div style={{ display: valuePage !== listSectionInfo[2].value ? "none" : undefined }}>
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
@@ -1081,9 +848,8 @@ const ContentManagementForm = ({ type }) => {
                 mandatory={true}
               />
             </BaseContainer>
-          )}
+          </div>
 
-          {/* FormFooter menggantikan tombol manual */}
           <FormFooter
             current={current}
             totalSteps={steps.length}
@@ -1107,9 +873,7 @@ const ContentManagementForm = ({ type }) => {
           type={"confirmation"}
           footer={
             <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
-                Cancel
-              </ButtonComponent>
+              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">Cancel</ButtonComponent>
               <ButtonComponent
                 className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
                 isPrimary
@@ -1144,9 +908,7 @@ const ContentManagementForm = ({ type }) => {
         >
           <div className="flex justify-center mt-5 gap-[20px]">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className="text-[18px] font-bold">
-              Are you sure you want to back?
-            </p>
+            <p className="text-[18px] font-bold">Are you sure you want to back?</p>
           </div>
         </ModalConfirm>
 
@@ -1162,9 +924,7 @@ const ContentManagementForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "saved as draft"}. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

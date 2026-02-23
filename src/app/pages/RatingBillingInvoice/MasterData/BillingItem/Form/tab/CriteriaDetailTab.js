@@ -16,6 +16,7 @@ const CriteriaDetailTab = ({
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
+  onCancelEdit = null, // ✅ prop baru: diteruskan ke DynamicTableInlineBilling
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -62,9 +63,11 @@ const CriteriaDetailTab = ({
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
+  // Support dua kemungkinan struktur field dari API:
+  // Lama: { id, account, name } | Baru: { glAccountId, glAccount, glAccountDesc }
   const glAccountOptions = data_glAccountList.map((item) => ({
-    value: item.id,
-    label: `${item.account} - ${item.name}`,
+    value: item.glAccountId ?? item.id,
+    label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
   }));
 
   const specialGlOptions = data_specialGLList.map((item) => ({
@@ -72,7 +75,6 @@ const CriteriaDetailTab = ({
     label: item.name,
   }));
 
-  // Helper: EditableCell menyimpan label bukan value, jadi render harus cek keduanya
   const renderSelectValue = (value, options) => {
     if (!value && value !== 0) return "-";
     const found = options.find((o) => o.label === value || o.value === value);
@@ -86,7 +88,6 @@ const CriteriaDetailTab = ({
       width: 60,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
-    // Kolom dinamis criteria — hanya tampil jika bukan ALL
     ...(criteriaColConfig
       ? [
           {
@@ -108,11 +109,23 @@ const CriteriaDetailTab = ({
       width: 250,
       options: glAccountOptions,
       render: (value) => renderSelectValue(value, glAccountOptions),
+      // ✅ Auto-fill descriptionAccount dari glAccountDesc saat GL Account dipilih
+      onClick: (selectedLabel, form) => {
+        if (!form) return;
+        const found = data_glAccountList?.find((g) => {
+          const label = `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}`;
+          return label === selectedLabel;
+        });
+        form.setFieldsValue({
+          descriptionAccount: found ? (found.glAccountDesc ?? found.name ?? "") : "",
+        });
+      },
     },
     {
       title: "DESCRIPTION ACCOUNT",
       dataIndex: "descriptionAccount",
-      inputType: "description",
+      // ✅ Read-only: diisi otomatis dari glAccountDesc, tidak bisa diedit manual
+      inputType: "description_readonly",
       width: 220,
       render: (value) => value || "-",
     },
@@ -141,16 +154,15 @@ const CriteriaDetailTab = ({
     },
   ];
 
-  // Hitung total width kolom + 120 untuk ACTIONS
   const totalColWidth =
-    60 + // NO
-    (criteriaColConfig ? 200 : 0) + // kolom dinamis criteria (jika ada)
-    250 + // GL ACCOUNT
-    220 + // DESCRIPTION ACCOUNT
-    180 + // SPECIAL GL
-    180 + // START DATE
-    180 + // END DATE
-    120;  // ACTIONS
+    60 +
+    (criteriaColConfig ? 200 : 0) +
+    250 +
+    220 +
+    180 +
+    180 +
+    180 +
+    120;
 
   return (
     <DynamicTableInlineBilling
@@ -174,6 +186,7 @@ const CriteriaDetailTab = ({
       startDateLock={startDateLock || "bypass"}
       endDateLock={endDateLock}
       setModalRequired={setModalRequired}
+      onCancelEdit={onCancelEdit} 
     />
   );
 };
