@@ -500,7 +500,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
       endDate,
       appHierId,
       action: confirmationType,
-      remarks: remark,
+      remark,
     };
 
     // Filter only new attachments (not existing ones)
