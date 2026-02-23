@@ -16,7 +16,7 @@ const CriteriaDetailTab = ({
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
-  onCancelEdit = null, 
+  onCancelEdit = null, // ✅ prop baru: diteruskan ke DynamicTableInlineBilling
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -57,15 +57,17 @@ const CriteriaDetailTab = ({
           })),
         };
       default:
-        return null; 
+        return null; // ALL = tidak ada kolom criteria khusus
     }
   };
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
+  // Support dua kemungkinan struktur field dari API:
+  // Lama: { id, account, name } | Baru: { glAccountId, glAccount, glAccountDesc }
   const glAccountOptions = data_glAccountList.map((item) => ({
-    value: item.id,
-    label: `${item.account} - ${item.name}`,
+    value: item.glAccountId ?? item.id,
+    label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
   }));
 
   const specialGlOptions = data_specialGLList.map((item) => ({
@@ -107,11 +109,23 @@ const CriteriaDetailTab = ({
       width: 250,
       options: glAccountOptions,
       render: (value) => renderSelectValue(value, glAccountOptions),
+      // ✅ Auto-fill descriptionAccount dari glAccountDesc saat GL Account dipilih
+      onClick: (selectedLabel, form) => {
+        if (!form) return;
+        const found = data_glAccountList?.find((g) => {
+          const label = `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}`;
+          return label === selectedLabel;
+        });
+        form.setFieldsValue({
+          descriptionAccount: found ? (found.glAccountDesc ?? found.name ?? "") : "",
+        });
+      },
     },
     {
       title: "DESCRIPTION ACCOUNT",
       dataIndex: "descriptionAccount",
-      inputType: "description",
+      // ✅ Read-only: diisi otomatis dari glAccountDesc, tidak bisa diedit manual
+      inputType: "description_readonly",
       width: 220,
       render: (value) => value || "-",
     },
