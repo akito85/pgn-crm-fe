@@ -164,7 +164,7 @@ const nxGetAccountActions = ({
               <SVGIcon name="IconLogHistory" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
             }
             border={false}
-            onClick={() => handleApprovalHistory(true, record?.id)}
+            onClick={() => handleApprovalHistory(record?.id)}
             type={"action"}
             className="group"
           >
@@ -173,7 +173,7 @@ const nxGetAccountActions = ({
         ) : (
           <Tooltip title="Approval History" key={`table-action-${index}`}>
             <Button
-              onClick={() => handleApprovalHistory(true, record?.id)}
+              onClick={() => handleApprovalHistory(record?.id)}
               type="table-action"
             >
               <SVGIcon
