@@ -38,10 +38,14 @@ const TasklistTable = ({
       return;
     }
 
+    // Set spinner state first, then defer navigation so React can flush the render
+    // before the component unmounts. setLoadingId(null) is intentionally omitted —
+    // the component unmounts when navigate() fires, so cleanup is automatic.
     setLoadingId(taskId);
-    const route = getApprovalRoute(record.MODULE || record.module, record.CATEGORY || record.category, tappId);
-    navigate(route, { state: buildApprovalState(record, null) });
-    setLoadingId(null);
+    setTimeout(() => {
+      const route = getApprovalRoute(record.MODULE || record.module, record.CATEGORY || record.category, tappId);
+      navigate(route, { state: buildApprovalState(record, null) });
+    }, 0);
   };
 
   const actionCols = [
