@@ -111,32 +111,47 @@ const BODY_PRIORITY = {
 // ─── GROUPED SECTIONS (popover detail) ───────────────────────────────────────
 // Only defined for categories that benefit from structured grouping.
 // Categories without an entry fall back to the flat buildDetail() table.
+const RELATION_INFO_LABELS = {
+  accountNumber:       "Subject Account No",
+  accountName:         "Subject Account",
+  objectAccountNumber: "Object Account No",
+  objectAccountName:   "Object Account",
+};
+
 const TRIGGER_SECTIONS = {
   PAYMENT_RELATION: [
-    { title: "Relation Info",    keys: ["subjectId", "customerId", "objectId", "paymentNo", "invoiceNo"] },
-    { title: "Related Account",  keys: ["objectAccountNumber", "objectAccountName"] },
-    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
-    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
+    {
+      title: "Relation Info",
+      keys:   ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName", "customerNumber", "paymentNo", "invoiceNo"],
+      labels: RELATION_INFO_LABELS,
+    },
+    { title: "Account Info",     keys: ["accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
+    { title: "Customer Info",    keys: ["customerName"] },
     { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
     { title: "Approval",         keys: ["hierarchyName", "statusApproval"] },
   ],
   INACTIVE_PAYMENT_RELATION: [
-    { title: "Relation Info",    keys: ["subjectId", "customerId", "objectId", "paymentNo", "invoiceNo"] },
-    { title: "Related Account",  keys: ["objectAccountNumber", "objectAccountName"] },
-    { title: "Account Info",     keys: ["accountNumber", "accountName", "accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
-    { title: "Customer Info",    keys: ["customerNumber", "customerName"] },
+    {
+      title: "Relation Info",
+      keys:   ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName", "customerNumber", "paymentNo", "invoiceNo"],
+      labels: RELATION_INFO_LABELS,
+    },
+    { title: "Account Info",     keys: ["accountSegment", "accountCategory", "accountType", "accountGroupType", "costCenter"] },
+    { title: "Customer Info",    keys: ["customerName"] },
     { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remarks", "description"] },
     { title: "Approval",         keys: ["hierarchyName", "statusApproval"] },
   ],
 };
 
-/** Build grouped sections array from data for sectioned popover rendering. */
+/** Build grouped sections array from data for sectioned popover rendering.
+ *  Sections may declare a `labels` map to override global labelMap for specific keys. */
 const buildSectionedDetail = (data, labelMap, sections) => {
   if (!data || typeof data !== "object") return null;
   return sections
-    .map(({ title, keys }) => {
+    .map(({ title, keys, labels: sectionLabels }) => {
+      const effectiveLabels = sectionLabels ? { ...labelMap, ...sectionLabels } : labelMap;
       const rows = keys
-        .map(k => ({ label: labelMap[k] || k, value: fmtValue(data[k]) }))
+        .map(k => ({ label: effectiveLabels[k] || k, value: fmtValue(data[k]) }))
         .filter(r => r.value !== null);
       return rows.length > 0 ? { title, rows } : null;
     })
