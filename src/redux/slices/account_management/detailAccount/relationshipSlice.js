@@ -164,7 +164,7 @@ export const getApprovalHistory = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-history/${relationshipId}`;
       const response = await accountManagementService.getAll(url);
-      return response?.data;
+      return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "GET_APPROVAL_HISTORY" })

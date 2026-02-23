@@ -283,12 +283,12 @@ const Relationship = ({
     if (data_approvalHistory && data_approvalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_approvalHistory?.dataApprover?.RELATIONSHIP || [],
-          inactive: data_approvalHistory?.dataApprover?.INACTIVE_RELATIONSHIP || [],
+          create: data_approvalHistory?.dataApprover?.ACCOUNT_RELATIONSHIP || [],
+          inactive: data_approvalHistory?.dataApprover?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
         dataHistory: {
-          create: data_approvalHistory?.dataHistory?.RELATIONSHIP || [],
-          inactive: data_approvalHistory?.dataHistory?.INACTIVE_RELATIONSHIP || [],
+          create: data_approvalHistory?.dataHistory?.ACCOUNT_RELATIONSHIP || [],
+          inactive: data_approvalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
       };
 
