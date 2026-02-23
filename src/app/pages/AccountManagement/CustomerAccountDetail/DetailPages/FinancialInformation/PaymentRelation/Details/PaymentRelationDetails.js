@@ -19,6 +19,7 @@ import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
+import HeaderDetail from "../../../../HeaderDetail";
 
 const PaymentRelationDetails = ({
   type = "standard"
@@ -180,48 +181,13 @@ const PaymentRelationDetails = ({
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
-          <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
-            <div className="flex flex-col gap-y-4">
-              <NxBaseContainer border header={"CUSTOMER INFORMATION"}>
-                <div className="w-full grid grid-cols-4 gap-4">
-                  <NxDetailText label="Customer Number">{data_customerDetail?.customerNumber}</NxDetailText>
-                  <NxDetailText label="Identification Type">{data_customerDetail?.identificationType}</NxDetailText>
-                  <NxDetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</NxDetailText>
-                  <NxDetailText label="Customer Name">{data_customerDetail?.customerName}</NxDetailText>
-                  <NxDetailText label="Customer Type">{data_customerDetail?.customerType}</NxDetailText>
-                  <NxDetailText label="Description">{data_customerDetail?.description}</NxDetailText>
-                  <NxDetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate || "")}</NxDetailText>
-                  <NxDetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</NxDetailText>
-                  <NxDetailText label="Sex">{data_customerDetail?.sex}</NxDetailText>
-                  <NxDetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</NxDetailText>
-                  <NxDetailText label="Search Key">{data_customerDetail?.searchKey}</NxDetailText>
-                </div>
-              </NxBaseContainer>
-              <NxBaseContainer border header={"ACCOUNT INFORMATION"}>
-                <div className="w-full grid grid-cols-4 gap-4">
-                  <NxDetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</NxDetailText>
-                  <NxDetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</NxDetailText>
-                  <NxDetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</NxDetailText>
-                  <NxDetailText label="Category">{data_accountDetail?.accountSummary?.category}</NxDetailText>
-                  <NxDetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</NxDetailText>
-                  <NxDetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</NxDetailText>
-                  <NxDetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.meterReadingCodes || "")}</NxDetailText>
-                  <NxDetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</NxDetailText>
-                  <NxDetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</NxDetailText>
-                  <NxDetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</NxDetailText>
-                  <NxDetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</NxDetailText>
-                  <NxDetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</NxDetailText>
-                  <NxDetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</NxDetailText>
-                  <NxDetailText label="District">{data_accountDetail?.accountSummary?.district}</NxDetailText>
-                  <NxDetailText label="City">{data_accountDetail?.accountSummary?.city}</NxDetailText>
-                  <NxDetailText label="Country">{data_accountDetail?.accountSummary?.country}</NxDetailText>
-                  <NxDetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</NxDetailText>
-                  <NxDetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</NxDetailText>
-                  <NxDetailText label="Status">{data_accountDetail?.accountSummary?.status}</NxDetailText>    
-                </div>
-              </NxBaseContainer>
-            </div>
-          </NxCardContainer>
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            type={"standard"}
+          />
 
           <PaymentRelationDetailTabs
             dataDetail={detail_paymentRelation?.result}
