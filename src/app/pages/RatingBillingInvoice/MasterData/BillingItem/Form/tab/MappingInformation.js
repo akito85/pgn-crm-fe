@@ -24,7 +24,6 @@ const MappingInformation = ({
   endDate = null,
   setModalRequired = () => {},
   handleValidateUpdate = () => {},
-  // Props untuk Criteria Detail tab
   criteriaType = null,
   dataCriteriaTable = [],
   handleChangesCriteriaTable = () => {},
@@ -33,7 +32,6 @@ const MappingInformation = ({
   data_classificationTypeList = [],
   data_accountTypeList = [],
   data_criteriaOptions = [],
-  // Props untuk Detail Mapping
   detailMapping = false,
   category = null,
   dataDetailTable = [],
@@ -41,7 +39,6 @@ const MappingInformation = ({
   detail_mapping_category = [],
   startDateMap = null,
   endDateMap = null,
-  // Callback ke parent: memberi tahu apakah criteria tab sedang dalam mode edit
   onCriteriaEditingChange = () => {},
 }) => {
   const searchInput = useRef(null);
@@ -57,9 +54,6 @@ const MappingInformation = ({
   const [pendingTab, setPendingTab] = useState(null);
   const [showTabWarning, setShowTabWarning] = useState(false);
 
-  // Ref untuk menyimpan fungsi cancel dari DynamicTableInlineBilling.
-  // Saat user confirm pindah tab, fungsi ini dipanggil agar row yang sedang
-  // dalam mode "add" (belum di-save) ikut dihapus dari dataTable.
   const cancelMappingEditRef = useRef(null);
   const cancelCriteriaEditRef = useRef(null);
 
@@ -71,8 +65,6 @@ const MappingInformation = ({
     cancelCriteriaEditRef.current = fn;
   }, []);
 
-  // Notify parent setiap kali status editing di criteria tab berubah
-  // Parent menggunakannya untuk disable field Criteria di form utama
   useEffect(() => {
     onCriteriaEditingChange(activeTab === "criteria" && isEditabled);
   }, [activeTab, isEditabled, onCriteriaEditingChange]);
@@ -171,13 +163,9 @@ const MappingInformation = ({
     );
   };
 
-  // ============================================================================
-  // TAB CHANGE HANDLER WITH VALIDATION
-  // ============================================================================
 
   const handleTabChange = (newTab) => {
     if (isEditabled) {
-      // Ada row yang sedang dalam mode edit, tampilkan peringatan sebelum pindah tab
       setPendingTab(newTab);
       setShowTabWarning(true);
     } else {
@@ -186,8 +174,6 @@ const MappingInformation = ({
   };
 
   const handleConfirmTabChange = () => {
-    // Panggil cancel internal tabel yang sedang aktif agar row "add" yang
-    // belum di-save ikut dihapus dari dataTable, bukan hanya di-hide
     if (activeTab === "mapping" && cancelMappingEditRef.current) {
       cancelMappingEditRef.current();
     }
@@ -201,7 +187,6 @@ const MappingInformation = ({
   };
 
   const handleCancelTabChange = () => {
-    // User membatalkan perpindahan tab, tetap di tab saat ini
     setPendingTab(null);
     setShowTabWarning(false);
   };
@@ -304,7 +289,6 @@ const MappingInformation = ({
         </CardContainer>
       )}
 
-      {/* Modal Konfirmasi Pindah Tab saat Ada Row yang Sedang Diedit */}
       <ModalConfirm
         isOpen={showTabWarning}
         handleCancel={handleCancelTabChange}

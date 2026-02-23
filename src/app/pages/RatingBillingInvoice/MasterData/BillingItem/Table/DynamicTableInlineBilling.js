@@ -287,7 +287,6 @@ const DynamicTableInlineBilling = ({
   endDateLock = null,
   setModalRequired = () => {},
   handleValidateUpdate = () => {},
-  // ✅ Prop baru: callback untuk expose fungsi cancel ke parent
   onCancelEdit = null,
 }) => {
   const [form] = Form.useForm();
@@ -308,8 +307,6 @@ const DynamicTableInlineBilling = ({
     }
   }, [isInsert, setInserted]);
 
-  // ✅ Expose fungsi cancel ke parent setiap kali editingKey atau statusAction berubah
-  // Parent bisa memanggil fungsi ini untuk membatalkan edit/add yang sedang berjalan
   useEffect(() => {
     if (onCancelEdit) {
       onCancelEdit(() => {
@@ -337,7 +334,6 @@ const DynamicTableInlineBilling = ({
 
   const cancel = (key) => {
     if (statusAction === "add") {
-      // ✅ Hapus row kosong yang belum pernah di-save
       const newData = tableData.filter((item) => item.key !== key);
       onDataChange(newData);
     }

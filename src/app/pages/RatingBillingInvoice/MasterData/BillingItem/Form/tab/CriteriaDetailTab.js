@@ -16,7 +16,7 @@ const CriteriaDetailTab = ({
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
-  onCancelEdit = null, // ✅ prop baru: diteruskan ke DynamicTableInlineBilling
+  onCancelEdit = null, 
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -57,7 +57,7 @@ const CriteriaDetailTab = ({
           })),
         };
       default:
-        return null; // ALL = tidak ada kolom criteria khusus
+        return null; 
     }
   };
 
