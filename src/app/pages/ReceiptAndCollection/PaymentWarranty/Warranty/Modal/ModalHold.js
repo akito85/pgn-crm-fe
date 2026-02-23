@@ -603,7 +603,6 @@ const ModalHold = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  // Removed useEffect for getAllAttachmentInfoPaginate
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({

@@ -31,10 +31,7 @@ import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllCustomerInfoPaginate,
   getAllWarrantyInfoPaginate,
-  getAllReleaseInfoPaginate,
-  getAllAttachmentInfoPaginate,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
@@ -605,7 +602,6 @@ const ModalRelease = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  // Removed useEffect for getAllAttachmentInfoPaginate
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({

@@ -34,8 +34,6 @@ import receiptCollectionHttpService from "../../../../../../redux/services/recei
 import {
   getAllCustomerInfoPaginate,
   getAllWarrantyInfoPaginate,
-  getAllRefundInfoPaginate,
-  getAllAttachmentInfoPaginate,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
@@ -605,7 +603,6 @@ const ModalRefund = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  // Removed useEffect for getAllAttachmentInfoPaginate
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({

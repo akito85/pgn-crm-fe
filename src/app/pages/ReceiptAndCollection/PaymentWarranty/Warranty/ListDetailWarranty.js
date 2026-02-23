@@ -5,7 +5,6 @@ import { Tabs, Spin } from "antd";
 import {
   getDetailWarranty,
   getApprovalListPaginate,
-  getAllAttachmentInfoPaginate,
   getListCategory,
   getListApprovalById,
   getAllApprovalList,
