@@ -129,7 +129,8 @@ const getInvoiceRelationColumns = (
         "waitingApproval": "Waiting Approval",
         "pending": "Pending",
         "rejected": "Rejected",
-        "WAITING_APPROVAL": "Waiting Approval"
+        "WAITING_APPROVAL": "Waiting Approval",
+        "WAITING_FOR_APPROVAL": "Waiting Approval"
       };
       return (
         <div className="flex justify-center">
