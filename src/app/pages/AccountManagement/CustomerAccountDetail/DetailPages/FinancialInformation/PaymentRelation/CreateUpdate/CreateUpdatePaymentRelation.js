@@ -312,6 +312,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               setAccount={setAccount}
               accountId={idAccount}
               isUpdate={isUpdate}
+              isDraft={isDraft}
               key={`payment-relation-tab-0`}
             />
           ),
