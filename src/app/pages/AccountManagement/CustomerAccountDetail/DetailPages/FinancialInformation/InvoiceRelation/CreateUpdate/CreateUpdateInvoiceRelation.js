@@ -212,7 +212,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
             startDate,
             endDate,
             appHierId,
-          } = formCreate.getFieldsValue();
+          } = formCreate.getFieldsValue(true);
 
           const body = {
             stepNumber: current + 1,
@@ -246,7 +246,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
         startDate,
         endDate,
         appHierId,
-      } = formCreate.getFieldsValue();
+      } = formCreate.getFieldsValue(true);
 
       const body = {
         id: isUpdate ? idIr : undefined,
@@ -436,7 +436,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
             startDate,
             endDate,
             appHierId,
-          } = formCreate.getFieldsValue();
+          } = formCreate.getFieldsValue(true);
 
           const body = {
             stepNumber: i + 1,
@@ -493,7 +493,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
       endDate,
       appHierId,
       remark,
-    } = formCreate.getFieldsValue();
+    } = formCreate.getFieldsValue(true);
 
     const body = {
       id: idIr,
@@ -698,7 +698,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
               hieararchyOptionData={data_irApprovalHierarchy}
               type={confirmationType}
               dataAttachment={dataAttachment}
-              data={formCreate.getFieldsValue()}
+              data={formCreate.getFieldsValue(true)}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
             />
