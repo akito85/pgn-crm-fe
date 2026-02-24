@@ -136,17 +136,16 @@ const PointOfSalesPage = ({
             </div>
           }
         >
-          <div className="w-full grid grid-cols-5 gap-1">
+          <div className="w-full grid grid-cols-4 gap-1">
             {/* Row 1 */}
             <Form.Item
-              name="customerName"
-              label="Customer Name"
-              rules={[
-                { message: requiredMessage("Customer Name"), required: true },
-              ]}
+              label="Customer Type"
               style={{ marginBottom: 0 }}
             >
-              <InputComponent placeholder="Enter Customer Name" />
+              <InputComponent
+                disabled
+                value={customerType === "customer" ? "Customer" : "Prospective Customer"}
+              />
             </Form.Item>
 
             <Form.Item
@@ -167,14 +166,39 @@ const PointOfSalesPage = ({
             </Form.Item>
 
             <Form.Item
-              name="accountName"
-              label="Account Name"
+              name="accountNumber"
+              label="Account Number"
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled value={accountNumber || "-"} />
+            </Form.Item>
+
+            <Form.Item
+              name="customerNumber"
+              label="Customer Number"
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled value="-" />
+            </Form.Item>
+
+            {/* Row 2 */}
+            <Form.Item
+              name="customerName"
+              label="Customer Name"
               rules={[
-                { message: requiredMessage("Account Name"), required: true },
+                { message: requiredMessage("Customer Name"), required: true },
               ]}
               style={{ marginBottom: 0 }}
             >
-              <InputComponent placeholder="Enter Account Name" />
+              <InputComponent placeholder="Enter Customer Name" />
+            </Form.Item>
+
+            <Form.Item
+              name="accountName"
+              label="Account Name"
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled value="-" />
             </Form.Item>
 
             <div>
@@ -357,6 +381,15 @@ const PointOfSalesPage = ({
           }
         >
           <div className="w-full grid grid-cols-5 gap-1">
+            <Form.Item
+              label={"Customer Type"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent
+                disabled
+                value={customerType === "customer" ? "Customer" : "Prospective Customer"}
+              />
+            </Form.Item>
             <Form.Item
               name={"accountNumber"}
               label={"Account Number"}

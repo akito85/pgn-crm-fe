@@ -151,15 +151,17 @@ const PointOfSalesPageDetailPOS = ({
   useEffect(() => {
     if (type === 2144 && hasValue(item)) {
       const requestData = {
-        ...(customerType === "customer" && hasValue(dataPriority[0]?.data)
-          ? { account: dataPriority[0]?.data }
-          : {}),
         itemId: item,
         qty: hasValue(quantity) || quantity > 0 ? parseInt(quantity) : null,
         transactionDate: moment(dataPriority[2]?.data).format(
           dateFormatting.dateFormal
         ),
+        headerCurrency: currency,
       };
+      // Hanya kirim account jika customerType bukan prospective (calon pelanggan)
+      if (customerType !== "prospective" && dataPriority[0]?.data) {
+        requestData.account = dataPriority[0]?.data;
+      }
       dispatch(getCalculate({ ...requestData }));
       formCreate.resetFields([
         "price",
@@ -183,12 +185,17 @@ const PointOfSalesPageDetailPOS = ({
     if (type === 2145 && item && amount && amount > 0) {
       const requestData = {
         currency: dataPriority[1]?.data,
+        headerCurrency: currency,
         itemCode: item,
         amount: parseInt(amount),
         transactionDate: moment(dataPriority[2]?.data).format(
           dateFormatting.dateFormal
         ),
       };
+      // Hanya kirim account jika customerType bukan prospective (calon pelanggan)
+      if (customerType !== "prospective" && dataPriority[0]?.data) {
+        requestData.account = dataPriority[0]?.data;
+      }
       dispatch(getCalculateBilling({ ...requestData }));
       formCreate.resetFields([
         "reference",

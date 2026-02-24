@@ -206,6 +206,52 @@ const PosForm = ({ type }) => {
 
   const handleMeterReadingCodeChange = () => {};
 
+  useEffect(() => {
+    if (data_approvalList) {
+      const tempAppHier = (data_approvalList || []).map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+
+      setDataApproval(tempAppHier);
+    }
+  }, [data_approvalList]);
+
+  useEffect(() => {
+    if (data_approvalListDetail && data_approvalListDetail.length > 0) {
+      const data = data_approvalListDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setDataListDetailApproval(data);
+    } else {
+      setDataListDetailApproval([]);
+    }
+  }, [data_approvalListDetail]);
+
+  useEffect(() => {
+    if (accountNumber) {
+      setDataAccount(
+        data_globalAccountNumber?.find(
+          (item) => item.accountNumber === accountNumber,
+        ),
+      );
+    }
+  }, [accountNumber]);
+
+  useEffect(() => {
+    if (dataAccount) {
+      form.setFieldsValue({
+        ...dataAccount,
+        costCenter: dataAccount.costcenter || dataAccount.costCenter,
+      });
+    }
+  }, [dataAccount]);
+
   const handleValueDdlSet = (value) => {
     if (!hasValue(value)) {
       return null;
