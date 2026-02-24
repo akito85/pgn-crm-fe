@@ -5,7 +5,6 @@ import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardC
 const ApprovalSectionForm = ({
   dataTable,
   dataOption,
-  selectedAppHierId = 0,
   handleSelectHiararchy = () => {},
   showSelect = true,
   disableSelect = false,
@@ -26,7 +25,6 @@ const ApprovalSectionForm = ({
         dataTable={dataTable}
         dataOption={dataOption}
         handleSelectHiararchy={handleSelectHiararchy}
-        selectedAppHierId={selectedAppHierId}
         searchInput={searchInput}
         searchedColumn={searchedColumn}
         searchText={searchText}

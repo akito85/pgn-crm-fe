@@ -3,7 +3,6 @@ import ApprovalInvoiceRelation from "./ApprovalInvoiceRelation";
 export default function ApprovalForm({
   dataTable,
   dataOption,
-  selectedAppHierId,
   handleSelectHiararchy,
   className,
 }){
@@ -11,7 +10,6 @@ export default function ApprovalForm({
     <ApprovalInvoiceRelation
       dataTable={dataTable}
       dataOption={dataOption}
-      selectedAppHierId={selectedAppHierId}
       handleSelectHiararchy={handleSelectHiararchy}
       className={className}
     />

@@ -72,8 +72,6 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
 
-  const [selectedAppHierId, setSelectedAppHierId] = useState();
-  const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
@@ -298,8 +296,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
     dispatch(getDetailIrApprovalHierarchy({id: appHierId}));
-    setSelectedAppHierId(appHierId);
-    setSelectedApprovalName(approvalName);
+    formCreate.setFieldValue("appHierName", approvalName);
   }
 
   const steps = [
@@ -329,7 +326,6 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
             key: `detail-detail-${index}`,
           }))}
           dataOption={data_irApprovalHierarchy}
-          selectedAppHierId={selectedAppHierId}
           handleSelectHiararchy={handleSelectHiararchy}
           className={`${current !== 1 ? "hidden" : ""}`}
           key={`invoice-relation-tab-1`}
@@ -549,8 +545,6 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   const handleClear = () => {
     if (isCreate) {
       setDataAttachment([]);
-      setSelectedAppHierId();
-      setSelectedApprovalName();
       formCreate.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
@@ -690,8 +684,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
               form={"invoiceRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              selectedAppHierId={selectedAppHierId}
-              selectedApprovalName={selectedApprovalName}
+              selectedAppHierId={formCreate.getFieldValue("appHierId")}
+              selectedApprovalName={formCreate.getFieldValue("appHierName")}
               hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
                 ...detail,
                 employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
