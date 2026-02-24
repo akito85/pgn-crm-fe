@@ -57,7 +57,7 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
                             current={current}
                             labelPlacement="vertical"
                             size="small"
-                            style={{ width: "100%" }}
+                            style={{ width: steps.length < 5 ? `${steps.length * 180}px` : "100%", }}
                             items={steps.map((s, i) => ({
                                 title: <span style={{ whiteSpace: "nowrap", fontSize: "12px" }}>{s.title}</span>,
                                 icon: (
@@ -115,6 +115,8 @@ export const FormFooter = ({
     onSaveDraft,
     type,
     onSubmit,
+    useClearData = true,
+    useSaveDraft = true,
 }) => {
     return (
         <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
@@ -126,40 +128,44 @@ export const FormFooter = ({
                     Cancel
                 </ButtonComponent>
                 <div className="flex items-center gap-3">
-                    <Button
-                        icon={
-                            <SVGIcon
-                                name={type === "update" ? `IconButtonReset` : `IconButtonClear`}
-                                width={18}
-                            />
-                        }
-                        onClick={onClear}
-                        style={{
-                            backgroundColor: "#BE3036",
-                            borderColor: "#BE3036",
-                            color: "#fff",
-                            borderRadius: "6px",
-                            height: "32px",
-                            display: "flex",
-                            alignItems: "center",
-                            fontSize: "12px",
-                        }}
-                    >
-                        {type === "update" ? "Reset Data" : "Clear Data"}
-                    </Button>
-                    <Button
-                        onClick={onSaveDraft}
-                        style={{
-                            backgroundColor: "#E6F1F9",
-                            borderColor: "#E6F1F9",
-                            color: "#0075BF",
-                            borderRadius: "6px",
-                            height: "32px",
-                            fontSize: "12px",
-                        }}
-                    >
-                        Save as Draft
-                    </Button>
+                    {useClearData && (
+                        <Button
+                            icon={
+                                <SVGIcon
+                                    name={type === "update" ? `IconButtonReset` : `IconButtonClear`}
+                                    width={18}
+                                />
+                            }
+                            onClick={onClear}
+                            style={{
+                                backgroundColor: "#BE3036",
+                                borderColor: "#BE3036",
+                                color: "#fff",
+                                borderRadius: "6px",
+                                height: "32px",
+                                display: "flex",
+                                alignItems: "center",
+                                fontSize: "12px",
+                            }}
+                        >
+                            {type === "update" ? "Reset Data" : "Clear Data"}
+                        </Button>
+                    )}
+                    {useSaveDraft && (
+                        <Button
+                            onClick={onSaveDraft}
+                            style={{
+                                backgroundColor: "#E6F1F9",
+                                borderColor: "#E6F1F9",
+                                color: "#0075BF",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                            }}
+                        >
+                            Save as Draft
+                        </Button>
+                    )}
                     <Button
                         disabled={current === 0}
                         onClick={onPrev}

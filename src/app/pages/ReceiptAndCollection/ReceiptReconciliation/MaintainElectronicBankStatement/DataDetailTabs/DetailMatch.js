@@ -266,58 +266,58 @@ const columns = (
           ""
         ),
     },
-    {
-      key: "statusApproval",
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      align: "center",
-      sorter: true,
-      fixed: "right",
-      ...getColumnSearchPropsPaging(
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (approvalStatus) => {
-        let text;
-        switch (approvalStatus) {
-          case "WAITING APPROVAL":
-            text = "Waiting Approval";
-            break;
-          case "APPROVED":
-            text = "Approved";
-            break;
-          default:
-            text = approvalStatus
-              ? approvalStatus.charAt(0).toUpperCase() +
-              approvalStatus.slice(1).toLowerCase()
-              : approvalStatus;
-            break;
-        }
+    // {
+    //   key: "statusApproval",
+    //   title: "STATUS APPROVAL",
+    //   dataIndex: "statusApproval",
+    //   align: "center",
+    //   sorter: true,
+    //   fixed: "right",
+    //   ...getColumnSearchPropsPaging(
+    //     "statusApproval",
+    //     searchInput,
+    //     searchedColumn,
+    //     searchText,
+    //     handleSearch,
+    //     true
+    //   ),
+    //   render: (approvalStatus) => {
+    //     let text;
+    //     switch (approvalStatus) {
+    //       case "WAITING APPROVAL":
+    //         text = "Waiting Approval";
+    //         break;
+    //       case "APPROVED":
+    //         text = "Approved";
+    //         break;
+    //       default:
+    //         text = approvalStatus
+    //           ? approvalStatus.charAt(0).toUpperCase() +
+    //           approvalStatus.slice(1).toLowerCase()
+    //           : approvalStatus;
+    //         break;
+    //     }
 
-        if (searchedColumn === "statusApproval") {
-          return (
-            <Highlighter
-              highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          );
-        }
+    //     if (searchedColumn === "statusApproval") {
+    //       return (
+    //         <Highlighter
+    //           highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+    //           searchWords={[searchText]}
+    //           autoEscape
+    //           textToHighlight={text ? text.toString() : ""}
+    //         />
+    //       );
+    //     }
 
-        return text ? (
-          <div className="flex justify-center">
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          text
-        );
-      },
-    },
+    //     return text ? (
+    //       <div className="flex justify-center">
+    //         <StatusComponent colour={text}>{text}</StatusComponent>
+    //       </div>
+    //     ) : (
+    //       text
+    //     );
+    //   },
+    // },
   ];
 
 

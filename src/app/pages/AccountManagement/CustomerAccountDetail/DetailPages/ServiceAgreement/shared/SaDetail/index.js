@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
+  Badge,
   Button,
   Form,
   Input,
@@ -87,11 +88,123 @@ const SaDetail = ({
   valuePage,
   setValuePage,
   tabPagesSaDetail,
-  setTabPagesSaDetail
+  setTabPagesSaDetail,
+  dataSaChildType = []
 }) => {
   const dispatch = useDispatch();
-  const { data_product, data_price_code, data_price_rule, loading } =
+  const { data_product, data_price_code, data_price_rule, data_sa_child_type, loading } =
     useSelector((state) => state.accountServiceAgreement);
+
+  /**
+   * Helper: Determine Create From value based on SA Type (for Child SA only)
+   * Returns: 1 (Product) for ADDON, 2 (Others) for OTHERS, null otherwise
+   */
+  const getCreateFromValue = () => {
+    // Only for Child SA (addon)
+    if (saRecordData?.typeSa !== "addon") {
+      return null;
+    }
+
+    // Get SA Type VALUE (string like "ADDON" or "OTHERS")
+    const saTypeValue = saInfoObj?.serviceAgreementTypeValue;
+
+    // Map SA Type to Create From value
+    if (saTypeValue === "ADDON") {
+      return 1; // Lock to Product
+    } else if (saTypeValue === "OTHERS") {
+      return 2; // Lock to Others/Custom
+    }
+
+    return null;
+  };
+
+  /**
+   * Helper: Check if Create From should be locked/disabled
+   * Locked for Child SA (addon), enabled for Main and Amendment
+   */
+  const isCreateFromLocked = () => {
+    return saRecordData?.typeSa === "addon";
+  };
+
+  /**
+   * Render SA Child Type field dynamically based on SA Type
+   * Only for Child SA (typeSa === "addon")
+   */
+  const renderSaChildTypeField = () => {
+    // Only for Child SA, not for Main or Amendment
+    if (saRecordData?.typeSa !== "addon") {
+      return null;
+    }
+
+    // Get SA Type VALUE (string like "ADDON" or "OTHERS")
+    const saTypeValue = saInfoObj?.serviceAgreementTypeValue;
+    console.log("saTypeValue", saTypeValue);
+    // Case 1: SA Type = ADDON → Input (disabled, auto-filled from product)
+    if (saTypeValue === "ADDON") {
+      return (
+        <Form.Item
+          label="Service Agreement Child Type"
+          name="serviceAgreementChildType"
+          tooltip="Auto-populated from selected product"
+        >
+          <InputComponent
+            disabled={true}
+            value={saDetailObj?.productName || ""}
+            placeholder="Select product to auto-populate"
+            style={{ backgroundColor: "#f5f5f5" }}
+            rules={[
+              {
+                message: "Please select product",
+                required: true,
+              },
+            ]}
+          />
+        </Form.Item>
+      );
+    }
+
+    // Case 2: SA Type = OTHERS → Dropdown (enabled, manual select)
+    if (saTypeValue === "OTHERS") {
+      return (
+        <Form.Item
+          label="Service Agreement Child Type"
+          name="serviceAgreementChildType"
+          getValueFromEvent={(e) => handleSaDetailObj(e, "serviceAgreementChildType")}
+          rules={[
+            {
+              required: true,
+              message: "Please select Service Agreement Child Type"
+            }
+          ]}
+        >
+          <SelectComponent
+            placeholder="Select SA Child Type"
+            onChange={(e) => handleSaDetailObj(e, "serviceAgreementChildType")}
+          >
+            {(dataSaChildType || data_sa_child_type)?.map((item, index) => (
+              <Select.Option value={item.id} key={index}>
+                {item.value}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+        </Form.Item>
+      );
+    }
+
+    // Case 3: SA Type not selected yet → Show placeholder
+    return (
+      <Form.Item
+        label="Service Agreement Child Type"
+        name="serviceAgreementChildType"
+      >
+        <InputComponent
+          disabled={true}
+          placeholder="Select Service Agreement Type first"
+          style={{ backgroundColor: "#f5f5f5" }}
+        />
+      </Form.Item>
+    );
+  };
 
   const [isIdChoose, setIsIdChoose] = useState([]);
 
@@ -151,8 +264,8 @@ const SaDetail = ({
       ...prevState,
       priceCodeText: selectedPriceCode
         ? `${selectedPriceCode.priceCode || ""}${selectedPriceCode.mpricingDetail
-            ?.map((item) => `/${item.currency}/${item.value}/${item.uomName}`)
-            .join("") || ""
+          ?.map((item) => `/${item.currency}/${item.value}/${item.uomName}`)
+          .join("") || ""
           }`.replace(/\n/g, "")
         : "",
       pricingRuleText: selectedPriceRule && selectedPriceRule.name
@@ -168,6 +281,28 @@ const SaDetail = ({
     saDetailObj?.pricingRule,
     setSaDetailObj,
   ]);
+
+  // Auto-set Create From when SA Type changes (for Child SA only)
+  useEffect(() => {
+    if (saInfoObj?.serviceAgreementType && saRecordData?.typeSa === "addon") {
+      const createFromValue = getCreateFromValue();
+
+      // Only update if the value needs to change (not on initial load if already set correctly)
+      if (createFromValue && createFromValue !== saDetailObj?.createFrom) {
+        // Update form field
+        form.setFieldsValue({
+          createFrom: createFromValue
+        });
+
+        // Update state
+        handleSaDetailObj(createFromValue, "createFrom");
+        setSaDetailObj(prev => ({
+          ...prev,
+          createFrom: createFromValue
+        }));
+      }
+    }
+  }, [saInfoObj?.serviceAgreementType]);
 
   // Handle Change Radio Tabs
   const onChange = (e) => {
@@ -407,6 +542,39 @@ const SaDetail = ({
   const handleLabelAdjustment = (e) => {
     setPriceAdjustment(e);
   };
+
+  // Helper function to get badge count for a specific tab
+  const getBadgeCount = (value) => {
+    if (!tabPagesSaDetail) return 0;
+    const tabObj = tabPagesSaDetail.find((item) => item.value === value);
+    return tabObj ? tabObj.errorBadge : 0;
+  };
+
+  const BadgeLabel = ({ label, count }) => (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      {label}
+      {count > 0 && (
+        <span
+          style={{
+            marginLeft: 8,
+            backgroundColor: '#ff4d4f',
+            color: 'white',
+            borderRadius: '10px',
+            padding: '0 6px',
+            fontSize: '10px',
+            lineHeight: '16px',
+            height: '16px',
+            minWidth: '16px',
+            textAlign: 'center',
+            fontWeight: 'bold'
+          }}
+        >
+          {count}
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <Fragment>
       <NxCardContainer header={"SERVICE AGREEMENT DETAIL"}>
@@ -434,7 +602,7 @@ const SaDetail = ({
                     setSaDetailObj({ createFrom: e });
                     form.setFieldsValue({ createFrom: e });
                   }}
-                  disabled={false}
+                  disabled={isCreateFromLocked()}
                 >
                   <Select.Option key={1} value={1}>
                     PRODUCT
@@ -444,6 +612,8 @@ const SaDetail = ({
                   </Select.Option>
                 </SelectComponent>
               </Form.Item>
+              {/* SA Child Type field - dynamic rendering based on SA Type */}
+              {renderSaChildTypeField()}
               {saDetailObj?.createFrom === 1 && (
                 <Form.Item
                   label={
@@ -461,7 +631,7 @@ const SaDetail = ({
                         name={"chooseProduct"}
                         rules={[
                           {
-                            message: "Please input your Choose Product",
+                            message: "Please Choose Product",
                             required: true,
                           },
                         ]}
@@ -522,7 +692,7 @@ const SaDetail = ({
                   }
                   rules={[
                     {
-                      message: "Please input your Product Version",
+                      message: "Please input Product Version",
                       required: true,
                     },
                   ]}
@@ -624,196 +794,201 @@ const SaDetail = ({
             />
           ) : null}
         </div>
-      </NxCardContainer>
-      {(isCreateFromTwo || isCreateFromOneWithData || isDataAddon) && (
-        <>
-          <div className="flex flex-col gap-y-4 py-4">
-            <NxCardContainer
-              header={"Pricing Information"}
-              type="tabs"
-              element={
-                <div className="py-4">
-                  <NxTabs
-                    items={[
-                      {
-                        key: "pricing",
-                        label: "Pricing",
-                        children: (
-                          <NxBaseContainer border header={"Pricing Information"}>
-                            <div className={"grid grid-cols-2 w-full gap-x-6"}>
-                              {/* DDL PRICE CODE */}
-                              <div>
-                                <Form.Item
-                                  name={"priceCode"}
-                                  label={"Price Code"}
-                                  rules={[
-                                    {
-                                      message: "Please input your Price Code",
-                                      required: true,
-                                    },
-                                  ]}
-                                  getValueFromEvent={(e) =>
-                                    handleSaDetailObj(e, "priceCode")
-                                  }
-                                >
-                                  <SelectComponent
-                                    onChange={(e) => {
+      </NxCardContainer >
+
+
+
+      {
+        (isCreateFromTwo || isCreateFromOneWithData || isDataAddon) && (
+          <>
+            <div className="flex flex-col gap-y-4 py-4">
+              <NxCardContainer
+                header={"Pricing Information"}
+                type="tabs"
+                element={
+                  <div className="py-4">
+                    <NxTabs
+                      items={[
+                        {
+                          key: "pricing",
+                          label: <BadgeLabel label="Pricing" count={getBadgeCount("Pricing")} />,
+                          children: (
+                            <NxBaseContainer border header={"Pricing Information"}>
+                              <div className={"grid grid-cols-2 w-full gap-x-6"}>
+                                {/* DDL PRICE CODE */}
+                                <div>
+                                  <Form.Item
+                                    name={"priceCode"}
+                                    label={"Price Code"}
+                                    rules={[
                                       {
-                                        e !== undefined && getLateCharge(e);
-                                      }
-                                      handleLabelAdjustment(e);
-                                    }}
+                                        message: "Please input your Price Code",
+                                        required: true,
+                                      },
+                                    ]}
+                                    getValueFromEvent={(e) =>
+                                      handleSaDetailObj(e, "priceCode")
+                                    }
                                   >
-                                    {ddlPriceCode?.map((item) => (
-                                      <Select.Option key={item.id} value={item.id}>
-                                        {item.priceCode}
-                                        {item?.mpricingDetail?.map((val) => (
-                                          <>
-                                            <span>
-                                              /{val.currency}/{val.value}/{val.uomName}
-                                            </span>
-                                          </>
-                                        ))}
-                                      </Select.Option>
-                                    ))}
-                                  </SelectComponent>
-                                </Form.Item>
-                              </div>
+                                    <SelectComponent
+                                      onChange={(e) => {
+                                        {
+                                          e !== undefined && getLateCharge(e);
+                                        }
+                                        handleLabelAdjustment(e);
+                                      }}
+                                    >
+                                      {ddlPriceCode?.map((item) => (
+                                        <Select.Option key={item.id} value={item.id}>
+                                          {item.priceCode}
+                                          {item?.mpricingDetail?.map((val) => (
+                                            <>
+                                              <span>
+                                                /{val.currency}/{val.value}/{val.uomName}
+                                              </span>
+                                            </>
+                                          ))}
+                                        </Select.Option>
+                                      ))}
+                                    </SelectComponent>
+                                  </Form.Item>
+                                </div>
 
-                              {/* LABEL PRICE ADJUSTMENT */}
-                              <div>
-                                <Form.Item
-                                  name={"priceAdjustment"}
-                                  label={"Price Adjustment"}
-                                  getValueFromEvent={(e) =>
-                                    handleSaDetailObj(e, "priceAdjustment")
-                                  }
-                                >
-                                  <InputComponent disabled={true} />
-                                </Form.Item>
-                              </div>
-                            </div>
-
-                            <div className={"grid grid-cols-1 w-full gap-x-6"}>
-                              {/* DDL PRICE RULE */}
-                              <div>
-
-                                <Form.Item
-                                  name={"pricingRule"}
-                                  label={"Pricing Rule"}
-                                  getValueFromEvent={(e) =>
-                                    handleSaDetailObj(e, "pricingRule")
-                                  }
-                                >
-                                  <SelectComponent
-                                    onChange={(e) => {
-                                      if (e !== undefined) {
-                                        handleGetDetailPricing(e);
-                                        setIsCustomTiering(e === -1 ? true : false);
-                                      } else {
-                                        setDataPricing([]);
-                                      }
-                                    }}
+                                {/* LABEL PRICE ADJUSTMENT */}
+                                <div>
+                                  <Form.Item
+                                    name={"priceAdjustment"}
+                                    label={"Price Adjustment"}
+                                    getValueFromEvent={(e) =>
+                                      handleSaDetailObj(e, "priceAdjustment")
+                                    }
                                   >
-                                    {ddlPriceRule?.map((item) => (
-                                      <Select.Option
-                                        key={item.pricingRuleId}
-                                        value={item.pricingRuleId}
-                                      >
-                                        {item.name}
-                                      </Select.Option>
-                                    ))}
-                                  </SelectComponent>
-                                </Form.Item>
+                                    <InputComponent disabled={true} />
+                                  </Form.Item>
+                                </div>
                               </div>
-                            </div>
 
-                            <TablePricing
-                              setData={setDataPricing}
-                              data={dataPricing}
-                              setValueOrUnlimited={setValueOrUnlimited}
-                              valueOrUnlimited={valueOrUnlimited}
-                              type={type}
-                              isProduct={saDetailObj?.createFrom}
-                              dataFromApi={dataPricingTable}
-                              ddlPriceCode={ddlPriceCode}
-                              isCustomTiering={isCustomTiering}
-                              idCreateFrom={idCreateFrom}
-                            />
-                          </NxBaseContainer>
-                        ),
-                      },
-                      {
-                        key: "calculationRule",
-                        label: "Calculation Rule",
-                        children: (
-                          <NxBaseContainer border header={"Calculation Rule"}>
-                            <TableCalcRule
-                              dispatch={dispatch}
-                              dataTable={dataTableCalcRule}
-                              updateTable={setDataTableCalcRule}
-                              isProduct={saDetailObj?.createFrom}
-                              handleSaDetailObj={handleSaDetailObj}
-                              setSaDetailObj={setSaDetailObj}
-                              saDetailObj={saDetailObj}
-                            />
-                          </NxBaseContainer>
-                        ),
-                      },
-                      {
-                        key: "termOfService",
-                        label: "Term of Service",
-                        children: (
-                          <NxBaseContainer border header={"Term of Service"}>
-                            <TableTos
-                              isProduct={saDetailObj?.createFrom}
-                              dataTermOfService={dataTermOfService}
-                              setDataTermOfService={setDataTermOfService}
-                              setModalFormTos={setModalFormTos}
-                              openModalFormTos={openModalFormTos}
-                              setModalChooseTos={setModalChooseTos}
-                              dataTableDetailProduct={dataTableDetailProduct}
-                            />
-                          </NxBaseContainer>
-                        ),
-                      },
-                      {
-                        key: "lateCharge",
-                        label: "Late Charge",
-                        children: (
-                          <NxBaseContainer border header={"Late Charge"}>
-                            <TableLateCharge
-                              dataTableLateCharge={dataTableLateCharge}
-                              setDataTableLateCharge={setDataTableLateCharge}
-                            />
-                          </NxBaseContainer>
-                        ),
-                      },
-                      {
-                        key: "taxImplication",
-                        label: "Tax Implication",
-                        children: (
-                          <NxBaseContainer border header={"Tax Implication"}>
-                            <TableTaxImplication
-                              dataTaxImplication={dataTaxImplication}
-                              setDataTaxImplication={setDataTaxImplication}
-                            />
-                          </NxBaseContainer>
-                        ),
-                      },
-                    ]}
-                    activeKey={valuePage}
-                    onChange={(key) => setValuePage(key)}
-                  />
-                </div>
-              }
-              hideChildren
-              withoutPadding
-            />
-          </div>
-        </>
-      )}
-    </Fragment>
+                              <div className={"grid grid-cols-1 w-full gap-x-6"}>
+                                {/* DDL PRICE RULE */}
+                                <div>
+
+                                  <Form.Item
+                                    name={"pricingRule"}
+                                    label={"Pricing Rule"}
+                                    getValueFromEvent={(e) =>
+                                      handleSaDetailObj(e, "pricingRule")
+                                    }
+                                  >
+                                    <SelectComponent
+                                      onChange={(e) => {
+                                        if (e !== undefined) {
+                                          handleGetDetailPricing(e);
+                                          setIsCustomTiering(e === -1 ? true : false);
+                                        } else {
+                                          setDataPricing([]);
+                                        }
+                                      }}
+                                    >
+                                      {ddlPriceRule?.map((item) => (
+                                        <Select.Option
+                                          key={item.pricingRuleId}
+                                          value={item.pricingRuleId}
+                                        >
+                                          {item.name}
+                                        </Select.Option>
+                                      ))}
+                                    </SelectComponent>
+                                  </Form.Item>
+                                </div>
+                              </div>
+
+                              <TablePricing
+                                setData={setDataPricing}
+                                data={dataPricing}
+                                setValueOrUnlimited={setValueOrUnlimited}
+                                valueOrUnlimited={valueOrUnlimited}
+                                type={type}
+                                isProduct={saDetailObj?.createFrom}
+                                dataFromApi={dataPricingTable}
+                                ddlPriceCode={ddlPriceCode}
+                                isCustomTiering={isCustomTiering}
+                                idCreateFrom={idCreateFrom}
+                              />
+                            </NxBaseContainer>
+                          ),
+                        },
+                        {
+                          key: "calculationRule",
+                          label: <BadgeLabel label="Calculation Rule" count={getBadgeCount("Calculation Rule")} />,
+                          children: (
+                            <NxBaseContainer border header={"Calculation Rule"}>
+                              <TableCalcRule
+                                dispatch={dispatch}
+                                dataTable={dataTableCalcRule}
+                                updateTable={setDataTableCalcRule}
+                                isProduct={saDetailObj?.createFrom}
+                                handleSaDetailObj={handleSaDetailObj}
+                                setSaDetailObj={setSaDetailObj}
+                                saDetailObj={saDetailObj}
+                              />
+                            </NxBaseContainer>
+                          ),
+                        },
+                        {
+                          key: "termOfService",
+                          label: <BadgeLabel label="Term of Service" count={getBadgeCount("Term of Service")} />,
+                          children: (
+                            <NxBaseContainer border header={"Term of Service"}>
+                              <TableTos
+                                isProduct={saDetailObj?.createFrom}
+                                dataTermOfService={dataTermOfService}
+                                setDataTermOfService={setDataTermOfService}
+                                setModalFormTos={setModalFormTos}
+                                openModalFormTos={openModalFormTos}
+                                setModalChooseTos={setModalChooseTos}
+                                dataTableDetailProduct={dataTableDetailProduct}
+                              />
+                            </NxBaseContainer>
+                          ),
+                        },
+                        {
+                          key: "lateCharge",
+                          label: <BadgeLabel label="Late Charge" count={getBadgeCount("Late Charge")} />,
+                          children: (
+                            <NxBaseContainer border header={"Late Charge"}>
+                              <TableLateCharge
+                                dataTableLateCharge={dataTableLateCharge}
+                                setDataTableLateCharge={setDataTableLateCharge}
+                              />
+                            </NxBaseContainer>
+                          ),
+                        },
+                        {
+                          key: "taxImplication",
+                          label: <BadgeLabel label="Tax Implication" count={getBadgeCount("Tax Implication")} />,
+                          children: (
+                            <NxBaseContainer border header={"Tax Implication"}>
+                              <TableTaxImplication
+                                dataTaxImplication={dataTaxImplication}
+                                setDataTaxImplication={setDataTaxImplication}
+                              />
+                            </NxBaseContainer>
+                          ),
+                        },
+                      ]}
+                      activeKey={valuePage}
+                      onChange={(key) => setValuePage(key)}
+                    />
+                  </div>
+                }
+                hideChildren
+                withoutPadding
+              />
+            </div>
+          </>
+        )
+      }
+    </Fragment >
   );
 };
 

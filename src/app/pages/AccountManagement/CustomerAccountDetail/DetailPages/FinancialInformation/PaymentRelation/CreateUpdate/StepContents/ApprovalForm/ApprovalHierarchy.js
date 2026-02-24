@@ -1,5 +1,5 @@
 import { Form, Select } from "antd";
-import { Fragment, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import SelectComponent from "../../../../../../../../../../components/SelectComponent";
 import TablePagination from "../../../../../../../../../../components/TablePagination";
 import { requiredMessage } from "../../../../../../../../../../utils";
@@ -136,7 +136,6 @@ const ApprovalHierarchy = ({
         >
           <SelectComponent
             onChange={(appHierId, option) => handleSelectHiararchy(appHierId, option.children)}
-            value={selectedAppHierId}
           >
             {dataOption.map((data, index) => (
               <Select.Option key={index} value={data.appHierId}>

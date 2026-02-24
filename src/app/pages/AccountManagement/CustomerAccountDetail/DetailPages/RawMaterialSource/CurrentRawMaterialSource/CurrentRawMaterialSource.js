@@ -1,78 +1,122 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
-import DetailText from "../../../../../../../components/DetailText";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
-import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
 import { getCurrentRaw } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
-import { dateFormatting, hasValue, renderColumn } from "../../../../../../../utils";
+import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
+import { dateFormatting, renderColumn } from "../../../../../../../utils";
 import moment from "moment";
+import NxTable from '../../../../../../../components/Nx/NxTable'
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import { NavLink, useLocation } from "react-router-dom";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../../../assets/Icon/index";
+import Toolbar from "../../../../../../../components/Toolbar";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import { sorterFunction } from "../../../../../../../utils/sorterFunction";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const columns = (
   search,
-  page = 1,
-  pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  onFilter = () => {},
-  sorter = () => {}
+  handleSearch,
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "country",
       title: "COUNTRY",
       dataIndex: "country",
-      sorter: true,
       width: 150,
-      onFilter: (value, record) => onFilter("country", value, record),
-      sorter: (a, b) => sorter("country", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("country", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "country",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('country', hasValue(search['country']), searchText, text, false, 'input', search)
+      render: (text) => {
+        return renderColumn('country', searchedColumn, searchText, text, false, 'input', search)
+      }
     },
     {
+      key: "percentage",
       title: "PERCENTAGE (%)",
       dataIndex: "percentage",
       align: "right",
       sorter: true,
       width: 150,
-      onFilter: (value, record) => onFilter("percentage", value, record),
-      sorter: (a, b) => sorter("percentage", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("percentage", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "percentage",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('percentage', hasValue(search['percentage']), searchText, text, false, 'input', search)
+      render: (text) => {
+        return renderColumn('percentage', searchedColumn, searchText, text, false, 'input', search)
+      },
     },
   ];
 };
 
 const CurrentRawMaterialSource = ({ id, idCustomer }) => {
+  const location = useLocation();
+  const itemGrantAccess = [
+    {
+      action: "Create",
+      render: (
+        <NavLink
+          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_RAW_MATERIAL_SOURCE}
+          state={{
+            accountId: id,
+            idCustomer: idCustomer,
+          }}
+        >
+          <ButtonComponent
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            type="submit"
+          >
+            Create
+          </ButtonComponent>
+        </NavLink>
+      ),
+    }
+  ];
+  
   // Selector
   const { data_current } = useSelector((state) => state.rawMaterialSource);
+
+  const listData = data_current?.srcDistDtl || [];
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!listData?.length) return [];
+
+    return listData.map((item, index) => ({
+      ...item,
+      key: `raw-material-source-current-${item.id || index}`,
+    }));
+  }, [listData]);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_current?.srcDistDtl;
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
@@ -80,7 +124,16 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
   // Use Effect
   useEffect(() => {
     dispatch(getCurrentRaw(id));
-  }, [dispatch]);
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    // fetch granted access detail for raw-material-source so Toolbar can render actions (e.g. Create)
+    if (location?.pathname?.includes("account-standard")) {
+      dispatch(getGrantedAccessAccount('/account-management/account-standard/raw-material-source'));
+    } else {
+      dispatch(getGrantedAccessAccount('/account-management/account-onetime/raw-material-source'));
+    }
+  }, [dispatch, location]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -88,9 +141,6 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -98,80 +148,79 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
     });
   };
 
-  // Handle Change Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
-  const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = value.toLowerCase();
-    const recordValue = record[dataIndex];
+  const baseColumns = useMemo(() =>
+    columns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ), [search, searchText, searchedColumn]
+  );
 
-    if (recordValue != null) {
-      return recordValue.toString().toLowerCase().includes(fixSearchText);
-    }
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+  
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
 
-    return false;
-  };
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns, fixedColumns]);
 
-  const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
-      const value = obj[fieldSort];
-      return value != null ? value.toString().toLowerCase() : "";
-    };
-
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-
-    return fa.localeCompare(fb);
-  };
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        Raw Material Source Information
-      </div>
+    <>
+      <div className="flex flex-col gap-4">
+        <NxBaseContainer border header={"RAW MATERIAL SOURCE INFORMATION"}>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Effective Date"}>
+              {data_current?.effectiveDate
+                ? moment(data_current.effectiveDate).format(dateFormatting.date)
+                : ""}
+            </NxDetailText>
+            <NxDetailText label={"Local (%)"}>{data_current?.value1}</NxDetailText>
+            <NxDetailText label={"Import (%)"}>{data_current?.value2}</NxDetailText>
+            <div className="col-span-3">
+              <NxDetailText label={"Description"}>
+                {data_current?.description}
+              </NxDetailText>
+            </div>
+          </div>
+        </NxBaseContainer>
+        <NxBaseContainer border header={"RAW MATERIAL SOURCE DETAIL"}>
+          <div className="flex flex-col gap-y-4">
+            <Toolbar items={itemGrantAccess} type="detail" />
 
-      <div className="w-full grid grid-cols-3 gap-4 pt-4">
-        <DetailText label={"Effective Date"}>
-          {data_current?.effectiveDate
-            ? moment(data_current.effectiveDate).format(dateFormatting.date)
-            : ""}
-        </DetailText>
-        <DetailText label={"Local (%)"}>{data_current?.value1}</DetailText>
-        <DetailText label={"Import (%)"}>{data_current?.value2}</DetailText>
-        <div className="col-span-3">
-          <DetailText label={"Description"}>
-            {data_current?.description}
-          </DetailText>
-        </div>
+            <NxTable
+              idTable="table-current-raw-material-source"
+              dataSource={dataSourceWithKeys}
+              tableScrolled={{ y: 400, x: dataSourceWithKeys?.length ? "max-content" : "100%" }}
+              columns={processedColumns}
+              usePagination={false}
+              useInfiniteScroll={false}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              columnDefinitions={columnDefinitions}
+              showAdvanceSearch={false}
+            />
+          </div>
+        </NxBaseContainer>
       </div>
-
-      <div className="text-primary text-xs font-bold uppercase pt-4">
-        Raw Material Source Detail
-      </div>
-
-      <TablePaginationNew
-        type="FE"
-        dataSource={dataSource}
-        totalData={dataSource?.srcDistDtl?.length}
-        current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: "auto" }}
-        onChange={handleChange}
-        columns={columns(
-          search,
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          onFilter,
-          sorter
-        )}
-      />
-    </Fragment>
+    </>
   );
 };
 

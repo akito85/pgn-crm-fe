@@ -21,6 +21,13 @@ const initialState = {
   data_attachmentList: [],
   data_accountList: {},
   data_relatedObjectList: {},
+  list_relatedObject: [],
+  pagination_relatedObject: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 20,
+  },
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
   data_globalTypeColumn: [],
@@ -157,7 +164,7 @@ export const getApprovalHistory = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-history/${relationshipId}`;
       const response = await accountManagementService.getAll(url);
-      return response?.data;
+      return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "GET_APPROVAL_HISTORY" })
@@ -525,21 +532,33 @@ export const getAllAccounts = createAsyncThunk(
 // Get Related Object Data (Customer or Account based on relationship type)
 export const getRelatedObjectData = createAsyncThunk(
   "GET_RELATED_OBJECT_DATA",
-  async ({ idAccount, page, size, relationshipType, relationshipCategory }, thunkAPI) => {
+  async ({ idAccount, page, size, relationshipType, relationshipCategory, sort, searchs, isLoadMore }, thunkAPI) => {
     try {
-      const pageParam = page ? page - 1 : 0; // Convert to 0-based
-      const sizeParam = size || 10;
-      const typeParam = relationshipType
-        ? `&relationshipType=${relationshipType
-          .trim()
-          .toUpperCase()
-          .replace(/\s+/g, "_")}`
-        : "";
-      const categoryParam = relationshipCategory ? `&relationshipCategory=${relationshipCategory?.toUpperCase()}` : "";
+      const queryParams = new URLSearchParams();
 
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/related-object-data?page=${pageParam}&size=${sizeParam}${typeParam}${categoryParam}`;
+      if (Number.isSafeInteger(page) && page >= 0) queryParams.append("page", page);
+      if (size) queryParams.append("size", size);
+      if (sort) queryParams.append("sort", sort);
+      if (searchs) queryParams.append("searchs", searchs);
+
+      const typeParam = relationshipType
+        ? relationshipType.trim().toUpperCase().replace(/\s+/g, "_")
+        : "";
+      if (typeParam) queryParams.append("relationshipType", typeParam);
+
+      const categoryParam = relationshipCategory
+        ? relationshipCategory.toUpperCase()
+        : "";
+      if (categoryParam) queryParams.append("relationshipCategory", categoryParam);
+
+      let url = `/v1/dbs/api/accounts/${idAccount}/relationships/related-object-data`;
+      if (queryParams.toString().length) url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getPagination(url);
-      return response?.data;
+      return {
+        ...response?.data,
+        isLoadMore,
+      };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "GET_RELATED_OBJECT_DATA" })
@@ -897,15 +916,49 @@ const relationshipSlice = createSlice({
     },
 
     // Get Related Object Data
-    [getRelatedObjectData.pending]: (state) => {
-      state.loadingRelatedObject = true;
+    [getRelatedObjectData.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingRelatedObject = true;
+      }
     },
     [getRelatedObjectData.fulfilled]: (state, action) => {
-      state.data_relatedObjectList = action.payload;
       state.loadingRelatedObject = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_relatedObject.map((item) => item.id || item.relatedObjectId));
+          const filteredResult = result.filter(
+            (resultItem) => !currentIds.has(resultItem.id || resultItem.relatedObjectId)
+          );
+          state.list_relatedObject = [
+            ...state.list_relatedObject,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_relatedObject = result;
+        }
+      }
+
+      state.pagination_relatedObject = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 20,
+      };
     },
-    [getRelatedObjectData.rejected]: (state) => {
+    [getRelatedObjectData.rejected]: (state, action) => {
       state.loadingRelatedObject = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_relatedObject = [];
+        state.pagination_relatedObject = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 20,
+        };
+      }
     },
 
     // Download Attachment

@@ -1,12 +1,12 @@
 import moment from "moment";
-import { Spin, Form } from "antd";
+import { Spin, Tabs } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
 import BillingItemDetailInformation from "./Detail/BillingItemDetailInformation";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -33,15 +33,13 @@ const BillingItemDetail = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const dataRecord = useLocation().state?.id;
-  const [form] = Form.useForm();
 
-  const [valuePage, setValuePage] = useState("Billing Item");
+  const [valueTab, setValueTab] = useState("BillingItem");
   const [approveOrReject, setApproveOrReject] = useState("");
   const [remark, setRemark] = useState("");
 
   const [modalError, setModalError] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
-  // const [modalErrorServer, setModalErrorServer] = useState(false);
 
   const [dataMapping, setDataMapping] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -51,12 +49,8 @@ const BillingItemDetail = () => {
 
   const [bodyError, setBodyError] = useState({});
 
-  const [billingItemDetail, setBillingItemDetail] = useState([
-    { value: "Billing Item" },
-    { value: "Attachment" },
-  ]);
-
   const [showButtonApproval, setShowButtonApproval] = useState(false);
+  const [showDraftTab, setShowDraftTab] = useState(false);
 
   useEffect(() => {
     if (dataRecord) {
@@ -100,13 +94,10 @@ const BillingItemDetail = () => {
       );
 
       if (
-        // dataRecord &&
-        // data_BillingItemDetail &&
         data_detailDraft &&
         data_detailDraft?.billingItemCode === data_BillingItemDetail?.billingItemCode &&
         data_detailDraft?.billingItemCode === dataRecord &&
         (data_BillingItemDetail?.statusApproval !== "APPROVED")
-        //   data_BillingItemDetail?.approvalDto?.approvalType !== "INACTIVE_BILLING_ITEM")
       ) {
         // Mapping Information
         const dataMappingInfoDraft = (
@@ -124,7 +115,7 @@ const BillingItemDetail = () => {
         setDataDraft((prev) => {
           return {
             id: data_BillingItemDetail?.id,
-            billingItemCode: data_BillingItemDetail?.billingItemCode, // for detail draft from detail
+            billingItemCode: data_BillingItemDetail?.billingItemCode,
             billingItemCategory: data_detailDraft.billingItemCategory,
             billingItemName: data_detailDraft.billingItemName,
             billingType: data_detailDraft.billingType,
@@ -137,25 +128,22 @@ const BillingItemDetail = () => {
             createdDate: data_BillingItemDetail.createdDate,
             updatedBy: data_BillingItemDetail.updatedBy,
             updatedDate: data_BillingItemDetail.updatedDate,
-            status: data_BillingItemDetail?.status,// for detail draft from detail
-            statusApproval: data_BillingItemDetail?.statusApproval,// for detail draft from detail
+            status: data_BillingItemDetail?.status,
+            statusApproval: data_BillingItemDetail?.statusApproval,
             mappingInformation: data_detailDraft?.mappingInformation?.map(
               (item) => {
                 return {
                   ...item,
                   categoryId: item.categoryId,
-                  // detailMappingInfo : item.detailMappingInfo
                 };
               }
             ),
           };
         });
         setDataMappingDraft(dataMappingInfoDraft);
-        setBillingItemDetail([
-          { value: "Billing Item" },
-          { value: "Draft" },
-          { value: "Attachment" },
-        ]);
+        setShowDraftTab(true);
+      } else {
+        setShowDraftTab(false);
       }
     }
   }, [dataRecord, data_BillingItemDetail, data_detailDraft]);
@@ -171,11 +159,11 @@ const BillingItemDetail = () => {
     },
     {
       path: RBI_ROUTES.BILLING_ITEM_VIEW,
-      breadcrumbName: "Billing Item",
+      breadcrumbName: "Transation Mapping",
     },
     {
       path: "",
-      breadcrumbName: "Detail Billing Item",
+      breadcrumbName: "Detail Transaction Mapping",
     },
   ];
 
@@ -192,11 +180,9 @@ const BillingItemDetail = () => {
 
   const handleCancel = () => {
     setRemark("");
-    form.resetFields();
     setModalConfirm(false);
   };
 
-  // handle Confirm
   const handleConfirm = (e, handleClear = () => {}) => {
     const body = {
       id: data_BillingItemDetail?.id,
@@ -230,26 +216,44 @@ const BillingItemDetail = () => {
     setModalConfirm(false);
   };
 
-  const renderSection = () => {
-    switch (valuePage) {
-      case "Billing Item":
-        return (
+  const onChangeTab = (key) => {
+    setValueTab(key);
+  };
+
+  const tabItems = [
+    {
+      key: "BillingItem",
+      label: "Billing Item",
+      children: (
+        <div className="my-0">
           <BillingItemDetailInformation
             dataMapping={dataMapping}
-            key={"Detail"}
             dataBillingItem={data_BillingItemDetail}
           />
-        );
-      case "Draft":
-        return (
-          <BillingItemDetailInformation
-            dataBillingItem={dataDraft}
-            key={"Draft"}
-            dataMapping={dataMappingDraft}
-          />
-        );
-      case "Attachment":
-        return (
+        </div>
+      ),
+    },
+    ...(showDraftTab
+      ? [
+          {
+            key: "Draft",
+            label: "Draft",
+            children: (
+              <div className="my-0">
+                <BillingItemDetailInformation
+                  dataBillingItem={dataDraft}
+                  dataMapping={dataMappingDraft}
+                />
+              </div>
+            ),
+          },
+        ]
+      : []),
+    {
+      key: "Attachment",
+      label: "Attachment",
+      children: (
+        <div className="my-0">
           <BaseContainer header={"ATTACHMENT INFORMATION"}>
             <AttachmentComponent
               typeSelector={"billing_item"}
@@ -260,26 +264,23 @@ const BillingItemDetail = () => {
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
           </BaseContainer>
-        );
-      default:
-        return <></>;
-    }
-  };
+        </div>
+      ),
+    },
+  ];
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        {data_BillingItemDetail?.approvalDto?.approvalType?.includes(
-          "INACTIVE"
-        ) && data_BillingItemDetail?.approvalDto?.isApprover ? (
+        
+        {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") && 
+         data_BillingItemDetail?.approvalDto?.isApprover && (
           <div className="mt-5">
             <BaseContainer header={"Inactive Request Information"}>
               <div className="w-full grid grid-cols-4 gap-5">
                 <DetailText label="Requested Date">
-                  {renderDateTime(
-                    data_BillingItemDetail?.approvalDto?.requestedDate
-                  )}
+                  {renderDateTime(data_BillingItemDetail?.approvalDto?.requestedDate)}
                 </DetailText>
                 <DetailText label="Requested By">
                   {data_BillingItemDetail?.approvalDto?.requestedBy}
@@ -290,19 +291,29 @@ const BillingItemDetail = () => {
               </div>
             </BaseContainer>
           </div>
-        ) : null}
+        )}
+
         <div className="mt-5">
-          <RadioTabs
-            data={billingItemDetail}
-            onChange={(e) => setValuePage(e.target.value)}
-            currentPosition={valuePage}
-          />
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="w-full mt-[15px] text-primary">BILLING ITEM DETAIL</p>
+              </div>
+            }
+          >
+            <Tabs
+              items={tabItems}
+              onChange={onChangeTab}
+              activeKey={valueTab}
+              className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:my-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+            />
+          </CardContainer>
         </div>
-        <div className={"w-full"}>{renderSection()}</div>
-        <div className={"w-full flex justify-between my-10"}>
-          <div className=" flex">
+
+        <div className="w-full flex justify-between my-10">
+          <div className="flex">
             <ButtonComponent
-              type={"submit"}
+              type="submit"
               onClick={() => navigate(-1)}
               icon={
                 <LeftOutlined
@@ -318,8 +329,8 @@ const BillingItemDetail = () => {
             </ButtonComponent>
           </div>
 
-          {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
+          {showButtonApproval && (
+            <div className="w-full flex justify-end gap-5">
               <ButtonComponent
                 type="reject"
                 onClick={() => {
@@ -339,12 +350,11 @@ const BillingItemDetail = () => {
                 Approve
               </ButtonComponent>
             </div>
-          ) : null}
+          )}
         </div>
       </Spin>
 
-      {/* Modal Approve/Reject*/}
-      {modalConfirm ? (
+      {modalConfirm && (
         <ModalApproveOrReject
           isOpen={modalConfirm}
           handleCloseModal={handleCancel}
@@ -354,29 +364,8 @@ const BillingItemDetail = () => {
           menu={"Billing Item"}
           named={`${data_BillingItemDetail.billingItemName}`}
         />
-      ) : null}
+      )}
 
-      {/* <ModalApproveOrRejectBillingItem
-        isOpen={modalConfirm}
-        header={approveOrReject}
-        approveOrReject={approveOrReject}
-        handleCancel={() => handleCancel()}
-        handleConfirm={() => handleConfirm()}
-        remark={remark}
-        onChange={(e) => setRemark(e.target.value)}
-        form={form}
-      /> */}
-
-      {/* Modal Error Approve/Reject
-      <ModalErrorApproveOrRejectBillingItem
-        isOpen={modalError}
-        handleOk={() => setModalError(false)}
-        handleCancel={() => setModalError(false)}
-        approveOrReject={approveOrReject}
-        message={message}
-      /> */}
-
-      {/* Modal Retry */}
       <ModalError
         isOpen={modalError}
         handleOk={handleRetry}
@@ -397,4 +386,5 @@ const BillingItemDetail = () => {
     </LayoutMenu>
   );
 };
+
 export default BillingItemDetail;

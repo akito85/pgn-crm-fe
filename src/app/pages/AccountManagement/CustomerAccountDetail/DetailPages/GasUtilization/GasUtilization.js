@@ -1,6 +1,6 @@
 import React,{ useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Spin } from 'antd'
+import { Spin, Tabs } from 'antd'
 
 import BaseContainer from '../../../../../../components/BaseContainer'
 import RadioTabs from '../../../../../../components/RadioTabs'
@@ -8,6 +8,7 @@ import TableGasUtilCurrent from './TableGasUtilCurrent'
 import TableGasUtilHistory from './TableGasUtilHistory'
 import { getGrantedAccessAccount } from '../../../../../../redux/slices/account_management/accountManagement'
 import { useLocation } from 'react-router-dom'
+import NxCardContainer from '../../../../../../components/Nx/NxCardContainer'
 
 
 const listSegmentedPage = [
@@ -16,7 +17,6 @@ const listSegmentedPage = [
 ];
 
 const GasUtilization = ({idAccount, idCustomer, type}) => {
-  
   const {loading } = useSelector(
     (state) =>  state.accountGasUtilization
   );
@@ -39,25 +39,47 @@ const GasUtilization = ({idAccount, idCustomer, type}) => {
     setSegmentedPage(e.target.value);
   };
 
+  const tabOptions = [
+    {
+      key: "current",
+      label: "Current Gas Utilization",
+      children: (
+        <TableGasUtilCurrent idAccount={idAccount} idCustomer={idCustomer}/>
+      )
+    },
+    {
+      key: "history",
+      label: "Gas Utilization History",
+      children: (
+        <TableGasUtilHistory access={access_account} idAccount={idAccount} idCustomer={idCustomer}/>
+      )
+    },
+  ];
+
+  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
+
+  if (!access_account || Object.keys(access_account).length === 0) {
+    return <Spin spinning />;
+  }
+
   return (
     <>
       <Spin spinning={loading}>
-        <BaseContainer header="GAS UTILIZATION INFORMATION">
-          <div className="pt-[20px]">
-            <RadioTabs
-              data={listSegmentedPage}
-              onChange={handleSegmentedPage}
-              currentPosition={segmentedPage}
+        <NxCardContainer
+          header={"GAS UTILIZATION INFORMATION"}
+          type={"tabs"}
+          element={
+            <Tabs
+              items={tabOptions}
+              onChange={setActiveKey}
+              activeKey={activeKey}
+              className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-tab]:py-4 [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0" 
             />
-          </div>
-          <div className={"w-full pt-4"}>
-            {segmentedPage === listSegmentedPage[0].value ? (
-              <TableGasUtilCurrent idAccount={idAccount} idCustomer={idCustomer}/>
-            ) : (
-              <TableGasUtilHistory access={access_account} idAccount={idAccount} idCustomer={idCustomer}/>
-            )}
-          </div>
-        </BaseContainer>
+          }
+          hideChildren
+          withoutTopPadding
+        >
+        </NxCardContainer>
       </Spin>
     </>
   )

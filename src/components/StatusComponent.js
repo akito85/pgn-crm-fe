@@ -88,6 +88,7 @@ const StatusComponent = ({
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
+      case "waiting_for_approval":
       case "waiting_cancellation_approval":
       case "waiting cancellation approval":
       case "waiting_upload_approval":

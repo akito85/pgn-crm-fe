@@ -11,6 +11,7 @@ const nxGetAccountActions = ({
   handleDownload = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
+  handleDelete = () => {},
 }) => [
   {
     action: "Download",
@@ -56,13 +57,11 @@ const nxGetAccountActions = ({
       return (
         <Tooltip
           title="View"
-          onClick={() => handleView(record.id)}
           key={`table-action-${index}`}
-        >
+          >
           <Button
-            onClick={() => handleUpdate(record.id)}
+            onClick={() => handleView(record.id)}
             type="table-action"
-            directChildren
           >
             <SVGIcon name="IconDetail" width={20} />
           </Button>
@@ -75,8 +74,9 @@ const nxGetAccountActions = ({
     type: 'table',
     render: (record, actionLength, index) => {
       const isEditable =
-        record.statusApproval === "DRAFT" ||
-        record.statusApproval === "REJECTED";
+        record.status !== "INACTIVE" &&
+        record.statusApproval !== "WAITING_APPROVAL" &&
+        record.statusApproval !== "WAITING_FOR_APPROVAL";
 
       const content = actionLength > 3 ?
         (
@@ -91,7 +91,7 @@ const nxGetAccountActions = ({
             <span className={"text-black ml-3"}>Update</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title={isEditable ? "Update" : ""} className="group">
+          <Tooltip title={isEditable ? "Update" : ""} key={`table-action-${index}`}>
             <Button
               onClick={() => handleUpdate(record.id)}
               disabled={!isEditable}
@@ -138,6 +138,7 @@ const nxGetAccountActions = ({
         ) : (
           <Tooltip
             title={isActive ? "Inactivate" : ""}
+            key={`table-action-${index}`}
           >
             <Checkbox
               className="action-checkbox"
@@ -163,19 +164,17 @@ const nxGetAccountActions = ({
               <SVGIcon name="IconLogHistory" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
             }
             border={false}
-            onClick={() => handleApprovalHistory(true, record?.id)}
+            onClick={() => handleApprovalHistory(record?.id)}
             type={"action"}
             className="group"
           >
             <span className={"text-black ml-3"}>Approval History</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Approval History">
+          <Tooltip title="Approval History" key={`table-action-${index}`}>
             <Button
-              className="flex items-center h-full p-0 b-0 disabled:border-0 bg-transparent cursor-pointer disabled:cursor-not-allowed group"
-              onClick={() => handleApprovalHistory(true, record?.id)}
+              onClick={() => handleApprovalHistory(record?.id)}
               type="table-action"
-              directChildren
             >
               <SVGIcon
                 name="IconLogHistory"
@@ -187,7 +186,26 @@ const nxGetAccountActions = ({
 
       return <Fragment key={`table-action-${index}`}>{content}</Fragment>
     }
-  }
+  },
+  {
+    action: 'Delete',
+    type: 'table',
+    render: (record, _, index) => {
+      return (
+        <Tooltip
+          title="Delete"
+          key={`table-action-${index}`}
+        >
+          <Button
+            onClick={() => handleDelete(record.id)}
+            type="table-action"
+          >
+            <SVGIcon name="IconDelete" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
+          </Button>
+        </Tooltip>
+      )
+    }
+  },
 ];
 
 export {

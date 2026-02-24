@@ -1,5 +1,4 @@
 import ViewReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ViewReceipt";
-import ListDetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ListDetailReceipt";
 import DetailReceiptApproval from "../../app/pages/ReceiptAndCollection/Receipt/DetailReceiptApproval";
 import CreateAccounting from "../../app/pages/ReceiptAndCollection/Receipt/CreateAccounting";
 import ViewSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/ViewSynchronizeReceipt";
@@ -73,7 +72,7 @@ import ListDetailTransferToCustomer from "../../app/pages/ReceiptAndCollection/P
 import ListFormTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ListFormTransferToCustomer";
 
 import ViewWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
-import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListDetailWarranty";
 import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
 
 import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/History/ListHistoryPaymentWarranty";
