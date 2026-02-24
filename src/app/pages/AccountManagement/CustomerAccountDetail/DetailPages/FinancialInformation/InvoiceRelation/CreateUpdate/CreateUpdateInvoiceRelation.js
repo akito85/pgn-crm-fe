@@ -32,6 +32,7 @@ import { showModalError, validateCreateUpdate } from "../../../../../../../../re
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
@@ -302,54 +303,68 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   const steps = [
     {
       title: "Invoice Relation",
-      content: (
-        <InformationForm
-          setAccount={setAccount}
-          className={`${current !== 0 ? "hidden" : ""}`}
-          key={`invoice-relation-tab-0`}
-          accountId={idAccount}
-          isUpdate={isUpdate}
-          isDraft={isDraft}
-        />
-      ),
+      cards: [
+        {
+          header: "Invoice Relation Information",
+          content: (
+            <InformationForm
+              form={formCreate}
+              setAccount={setAccount}
+              key={`invoice-relation-tab-0`}
+              accountId={idAccount}
+              isUpdate={isUpdate}
+              isDraft={isDraft}
+            />
+          ),
+        },
+      ],
       disabled: false
     },
     {
       title: "Approval",
-      content: (
-        <ApprovalForm
-          dataTable={detail_irApprovalHierarchy.map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          dataOption={data_irApprovalHierarchy}
-          handleSelectHiararchy={handleSelectHiararchy}
-          className={`${current !== 1 ? "hidden" : ""}`}
-          key={`invoice-relation-tab-1`}
-        />
-      ),
+      cards: [
+        {
+          header: "Approval",
+          content: (
+            <ApprovalForm
+              form={formCreate}
+              dataTable={detail_irApprovalHierarchy.map((detail, index) => ({
+                ...detail,
+                employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                  ...employeeDetail,
+                  key: `employee-detail-${index}`
+                })),
+                key: `detail-detail-${index}`,
+              }))}
+              dataOption={data_irApprovalHierarchy}
+              handleSelectHiararchy={handleSelectHiararchy}
+              key={`invoice-relation-tab-1`}
+            />
+          ),
+        },
+      ],
       disabled: false
     },
     {
       title: "Attachment",
-      content: (
-        <AttachmentForm
-          type={formType}
-          data={dataAttachment}
-          updateData={setDataAttachment}
-          dispatch={dispatch}
-          className={`${current !== 2 ? "hidden" : ""}`}
-          key={`invoice-relation-tab-2`}
-          getAPICategory={getIrAttachmentCategory}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-          mandatory={attachmentIsRequired}
-        />
-      ),
+      cards: [
+        {
+          header: "Attachment",
+          content: (
+            <AttachmentForm
+              type={formType}
+              data={dataAttachment}
+              updateData={setDataAttachment}
+              dispatch={dispatch}
+              key={`invoice-relation-tab-2`}
+              getAPICategory={getIrAttachmentCategory}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+              mandatory={attachmentIsRequired}
+            />
+          ),
+        },
+      ],
       disabled: false
     },
   ];
@@ -623,7 +638,17 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           {/* Step Contents */}
           <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
-          {steps.map((step) => step.content)}
+          {steps.map((step, stepIndex) =>
+            step.cards.map((card, cardIndex) => (
+              <NxCardContainer
+                header={card.header}
+                className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                key={`${stepIndex}-${cardIndex}`}
+              >
+                <NxBaseContainer border>{card.content}</NxBaseContainer>
+              </NxCardContainer>
+            ))
+          )}
 
           {/* Section Action Steps */}
           <NxBaseContainer border>
@@ -682,12 +707,11 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
             </div>
           </NxBaseContainer>
             <ConfirmationModal
-              form={"invoiceRelationForm"}
+              form={formCreate}
+              formId={"invoiceRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              selectedAppHierId={formCreate.getFieldValue("appHierId")}
-              selectedApprovalName={formCreate.getFieldValue("appHierName")}
-              hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
+              approvalData={detail_irApprovalHierarchy.map((detail, index) => ({
                 ...detail,
                 employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                   ...employeeDetail,
@@ -695,10 +719,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
                 })),
                 key: `detail-detail-${index}`,
               }))}
-              hieararchyOptionData={data_irApprovalHierarchy}
               type={confirmationType}
               dataAttachment={dataAttachment}
-              data={formCreate.getFieldsValue(true)}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
             />

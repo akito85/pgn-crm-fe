@@ -1,17 +1,17 @@
 import ApprovalInvoiceRelation from "./ApprovalInvoiceRelation";
 
 export default function ApprovalForm({
+  form,
   dataTable,
   dataOption,
   handleSelectHiararchy,
-  className,
 }){
   return (
     <ApprovalInvoiceRelation
+      form={form}
       dataTable={dataTable}
       dataOption={dataOption}
       handleSelectHiararchy={handleSelectHiararchy}
-      className={className}
     />
   )
 }

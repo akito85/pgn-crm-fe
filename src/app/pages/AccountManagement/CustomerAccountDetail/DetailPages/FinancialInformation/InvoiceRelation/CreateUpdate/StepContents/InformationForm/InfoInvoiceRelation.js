@@ -10,19 +10,26 @@ import DateComponent from "../../../../../../../../../../components/DateComponen
 import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
-import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../../../../../../components/Nx/NxDetailText";
 
 export default function InfoInvoiceRelation({
   setAccount,
-  className,
   accountId,
   isUpdate,
   isDraft,
+  form,
+  formView = true,
 }) {
   const dispatch = useDispatch();
+
+  const accountNumber = Form.useWatch("accountNumber", form);
+  const accountName = Form.useWatch("accountName", form);
+  const startDate = Form.useWatch("startDate", form);
+  const endDate = Form.useWatch("endDate", form);
+  const description = Form.useWatch("description", form);
 
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
@@ -146,94 +153,108 @@ export default function InfoInvoiceRelation({
     }));
   }, [currentData]);
   
-  return(
-    <div className={className}>
-      <NxCardContainer header={"INVOICE RELATION INFORMATION"}>
+  if (!formView) {
+    return (
+      <div className="w-full flex flex-col gap-4">
         <div className="w-full grid grid-cols-3 gap-4">
-          <div className="flex gap-2 items-end">
-            <Form.Item
-              label={"Account Number"}
-              required
-              className="no-margin-form"
-            >
-              <Input.Group compact className="flex gap-x-1">
-                <Form.Item
-                  key="accountNumber"
-                  name={"accountNumber"}
-                  rules={[
-                    {
-                      message: requiredMessage("Account Number"),
-                      required: true,
-                    }
-                  ]}
-                  noStyle
-                >
-                  <InputComponent disabled />
-                </Form.Item>
-                <Button
-                  type="primary"
-                  className="w-[120px]"
-                  onClick={() => {
-                    setIsOpen(true)
-                  }}
-                  disabled={!isDraft && isUpdate}
-                >
-                  Select
-                </Button>
-              </Input.Group>
-            </Form.Item>
-          </div>
+          <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
+          <NxDetailText label="Account Name">{accountName}</NxDetailText>
+          <NxDetailText label="Start Date">{startDate ? moment(startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+          <NxDetailText label="End Date">{endDate ? moment(endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+        </div>
+        <div className="w-full">
+          <NxDetailText label="Description">{description}</NxDetailText>
+        </div>
+      </div>
+    );
+  }
 
+  return(
+    <div className="flex flex-col gap-y-4">
+      <div className="w-full grid grid-cols-3 gap-4">
+        <div className="flex gap-2 items-end">
           <Form.Item
-            key="accountName"
-            name={"accountName"}
-            label={"Account Name"}
+            label={"Account Number"}
+            required
             className="no-margin-form"
           >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="startDate"
-            name={"startDate"}
-            label={"Start Date"}
-            rules={[
-              {
-                message: requiredMessage("Start Date"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <DateComponent disabled={!isDraft && isUpdate} />
-          </Form.Item>
-
-          <Form.Item
-            key="endDate"
-            name={"endDate"}
-            label={"End Date"}
-            className="no-margin-form"
-          >
-            <DateComponent />
+            <Input.Group compact className="flex gap-x-1">
+              <Form.Item
+                key="accountNumber"
+                name={"accountNumber"}
+                rules={[
+                  {
+                    message: requiredMessage("Account Number"),
+                    required: true,
+                  }
+                ]}
+                noStyle
+              >
+                <InputComponent disabled />
+              </Form.Item>
+              <Button
+                type="primary"
+                className="w-[120px]"
+                onClick={() => {
+                  setIsOpen(true)
+                }}
+                disabled={!isDraft && isUpdate}
+              >
+                Select
+              </Button>
+            </Input.Group>
           </Form.Item>
         </div>
 
-        <div className="w-full my-5">
-          <Form.Item
-            key="description"
-            name={"description"}
-            label={"Description"}
-            className="no-margin-form"
-          >
-            <InputComponent
-              disabled={!isDraft && isUpdate}
-              type={"textarea"}
-              rows={4}
-              maxLength={255}
-            />
-          </Form.Item>
-        </div>
-      </NxCardContainer>
+        <Form.Item
+          key="accountName"
+          name={"accountName"}
+          label={"Account Name"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="startDate"
+          name={"startDate"}
+          label={"Start Date"}
+          rules={[
+            {
+              message: requiredMessage("Start Date"),
+              required: true,
+            },
+          ]}
+          className="no-margin-form"
+        >
+          <DateComponent disabled={!isDraft && isUpdate} />
+        </Form.Item>
+
+        <Form.Item
+          key="endDate"
+          name={"endDate"}
+          label={"End Date"}
+          className="no-margin-form"
+        >
+          <DateComponent />
+        </Form.Item>
+      </div>
+
+      <div className="w-full my-5">
+        <Form.Item
+          key="description"
+          name={"description"}
+          label={"Description"}
+          className="no-margin-form"
+        >
+          <InputComponent
+            disabled={!isDraft && isUpdate}
+            type={"textarea"}
+            rows={4}
+            maxLength={255}
+          />
+        </Form.Item>
+      </div>
 
       <NxModal
         isOpen={isOpen}

@@ -1,4 +1,3 @@
-import { Form } from "antd";
 import AttachmentInvoiceRelation from "./AttachmentInvoiceRelation";
 
 export default function AttachmentForm({
@@ -9,7 +8,6 @@ export default function AttachmentForm({
   dispatch,
   getAPICategory,
   mandatory,
-  className,
   service,
   configApplication,
 }){
@@ -20,7 +18,6 @@ export default function AttachmentForm({
       updateData={updateData}
       dispatch={dispatch}
       mandatory={mandatory}
-      className={className}
       getAPICategory={getAPICategory}
       data={data}
       service={service}
