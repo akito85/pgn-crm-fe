@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 
 const CriteriaDetailTab = ({
-  criteriaType = null,
+  criteriaType = null,   
   dataTable = [],
   onDataChange = () => {},
   data_specialGLList = [],
   data_glAccountList = [],
   data_classificationTypeList = [],
   data_accountTypeList = [],
-  data_criteriaOptions = [],
+  data_criteriaOptions = [], 
   type = "create",
   isEditabled = false,
   setIsEditabled = () => {},
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
-  onCancelEdit = null, // ✅ prop baru: diteruskan ke DynamicTableInlineBilling
+  onCancelEdit = null,
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -26,15 +26,24 @@ const CriteriaDetailTab = ({
     setPageSize(pageSizeChange);
   };
 
-  // Resolve criteriaType — bisa berupa ID number atau string code
-  const criteriaCode =
-    typeof criteriaType === "number" ||
-    (typeof criteriaType === "string" && !isNaN(Number(criteriaType)))
-      ? data_criteriaOptions?.find(
-          (item) =>
-            item.id === criteriaType || item.id === Number(criteriaType)
-        )?.code
-      : criteriaType;
+  const resolveCriteriaCode = () => {
+    if (criteriaType === null || criteriaType === undefined) return null;
+
+    const isNumericId =
+      typeof criteriaType === "number" ||
+      (typeof criteriaType === "string" && !isNaN(Number(criteriaType)));
+
+    if (isNumericId) {
+      return (
+        data_criteriaOptions?.find(
+          (item) => item.id === criteriaType || item.id === Number(criteriaType),
+        )?.code || null
+      );
+    }
+    return criteriaType;
+  };
+
+  const criteriaCode = resolveCriteriaCode();
 
   const getCriteriaColumnConfig = () => {
     switch (criteriaCode) {
@@ -57,14 +66,12 @@ const CriteriaDetailTab = ({
           })),
         };
       default:
-        return null; // ALL = tidak ada kolom criteria khusus
+        return null;
     }
   };
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
-  // Support dua kemungkinan struktur field dari API:
-  // Lama: { id, account, name } | Baru: { glAccountId, glAccount, glAccountDesc }
   const glAccountOptions = data_glAccountList.map((item) => ({
     value: item.glAccountId ?? item.id,
     label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
@@ -109,7 +116,6 @@ const CriteriaDetailTab = ({
       width: 250,
       options: glAccountOptions,
       render: (value) => renderSelectValue(value, glAccountOptions),
-      // ✅ Auto-fill descriptionAccount dari glAccountDesc saat GL Account dipilih
       onClick: (selectedLabel, form) => {
         if (!form) return;
         const found = data_glAccountList?.find((g) => {
@@ -124,7 +130,6 @@ const CriteriaDetailTab = ({
     {
       title: "DESCRIPTION ACCOUNT",
       dataIndex: "descriptionAccount",
-      // ✅ Read-only: diisi otomatis dari glAccountDesc, tidak bisa diedit manual
       inputType: "description_readonly",
       width: 220,
       render: (value) => value || "-",
@@ -162,7 +167,7 @@ const CriteriaDetailTab = ({
     180 +
     180 +
     180 +
-    120;
+    120; // kolom ACTIONS
 
   return (
     <DynamicTableInlineBilling
@@ -186,7 +191,7 @@ const CriteriaDetailTab = ({
       startDateLock={startDateLock || "bypass"}
       endDateLock={endDateLock}
       setModalRequired={setModalRequired}
-      onCancelEdit={onCancelEdit} 
+      onCancelEdit={onCancelEdit}
     />
   );
 };
