@@ -41,10 +41,7 @@ const MappingInformation = ({
   detail_mapping_category = [],
   startDateMap = null,
   endDateMap = null,
-  // Callback ke parent: memberi tahu apakah criteria tab sedang dalam mode edit
   onCriteriaEditingChange = () => {},
-  // Callback ke parent: dipanggil setiap kali tab benar-benar berpindah
-  // Parent menggunakannya untuk reset detailMapping dan category
   onTabChange = () => {},
 }) => {
   const searchInput = useRef(null);
@@ -60,9 +57,6 @@ const MappingInformation = ({
   const [pendingTab, setPendingTab] = useState(null);
   const [showTabWarning, setShowTabWarning] = useState(false);
 
-  // Ref untuk menyimpan fungsi cancel dari DynamicTableInlineBilling.
-  // Saat user confirm pindah tab, fungsi ini dipanggil agar row yang sedang
-  // dalam mode "add" (belum di-save) ikut dihapus dari dataTable.
   const cancelMappingEditRef = useRef(null);
   const cancelCriteriaEditRef = useRef(null);
 
@@ -74,8 +68,6 @@ const MappingInformation = ({
     cancelCriteriaEditRef.current = fn;
   }, []);
 
-  // Notify parent setiap kali status editing di criteria tab berubah
-  // Parent menggunakannya untuk disable field Criteria di form utama
   useEffect(() => {
     onCriteriaEditingChange(activeTab === "criteria" && isEditabled);
   }, [activeTab, isEditabled, onCriteriaEditingChange]);
@@ -174,25 +166,17 @@ const MappingInformation = ({
     );
   };
 
-  // ============================================================================
-  // TAB CHANGE HANDLER WITH VALIDATION
-  // ============================================================================
-
   const handleTabChange = (newTab) => {
     if (isEditabled) {
-      // Ada row yang sedang dalam mode edit, tampilkan peringatan sebelum pindah tab
       setPendingTab(newTab);
       setShowTabWarning(true);
     } else {
       setActiveTab(newTab);
-      // Reset detail mapping panel saat pindah tab tanpa ada edit
       onTabChange();
     }
   };
 
   const handleConfirmTabChange = () => {
-    // Panggil cancel internal tabel yang sedang aktif agar row "add" yang
-    // belum di-save ikut dihapus dari dataTable, bukan hanya di-hide
     if (activeTab === "mapping" && cancelMappingEditRef.current) {
       cancelMappingEditRef.current();
     }
@@ -203,12 +187,10 @@ const MappingInformation = ({
     setActiveTab(pendingTab);
     setPendingTab(null);
     setShowTabWarning(false);
-    // Reset detail mapping panel saat pindah tab setelah konfirmasi
     onTabChange();
   };
 
   const handleCancelTabChange = () => {
-    // User membatalkan perpindahan tab, tetap di tab saat ini
     setPendingTab(null);
     setShowTabWarning(false);
   };

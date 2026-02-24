@@ -203,7 +203,6 @@ const EditableCell = ({
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
       case "description_readonly":
-        // ✅ Read-only: auto-filled dari GL Account, tidak bisa diedit manual
         return <Input.TextArea rows={1} disabled style={{ backgroundColor: "#f5f5f5", color: "#595959", cursor: "not-allowed" }} />;
       default:
         return <InputComponent />;
@@ -290,7 +289,6 @@ const DynamicTableInlineBilling = ({
   endDateLock = null,
   setModalRequired = () => {},
   handleValidateUpdate = () => {},
-  // ✅ Prop baru: callback untuk expose fungsi cancel ke parent
   onCancelEdit = null,
 }) => {
   const [form] = Form.useForm();
@@ -311,18 +309,14 @@ const DynamicTableInlineBilling = ({
     }
   }, [isInsert, setInserted]);
 
-  // ✅ Expose fungsi cancel ke parent setiap kali editingKey atau statusAction berubah
-  // Parent bisa memanggil fungsi ini untuk membatalkan edit/add yang sedang berjalan
   useEffect(() => {
     if (onCancelEdit) {
       onCancelEdit(() => {
-        // Fungsi yang akan dipanggil parent saat perlu cancel
         if (editingKey !== "") {
           cancel(editingKey);
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingKey, statusAction]);
 
   const edit = (record, field) => {
@@ -340,7 +334,6 @@ const DynamicTableInlineBilling = ({
 
   const cancel = (key) => {
     if (statusAction === "add") {
-      // ✅ Hapus row kosong yang belum pernah di-save
       const newData = tableData.filter((item) => item.key !== key);
       onDataChange(newData);
     }
