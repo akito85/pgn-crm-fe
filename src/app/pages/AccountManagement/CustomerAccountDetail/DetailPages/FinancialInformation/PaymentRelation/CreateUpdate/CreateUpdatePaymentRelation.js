@@ -1,9 +1,11 @@
-import { useEffect,  useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Form, Spin } from "antd";
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
-import StepContents from "./StepContents";
+import InfoPaymentRelation from "./StepContents/InformationForm/InfoPaymentRelation";
+import ApprovalSectionForm from "./StepContents/ApprovalForm/ApprovalPaymentRelation";
+import AttachmentSectionForm from "./StepContents/AttachmentForm/AttachmentPaymentRelation";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import moment from "moment";
@@ -30,6 +32,7 @@ import { showModalError, validateCreateUpdate } from "../../../../../../../../re
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
@@ -66,7 +69,6 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
 
-  const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
@@ -88,8 +90,6 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   ];
 
   const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
- 
-  const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
   useEffect(() => {
     if (idCustomer)
@@ -186,7 +186,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   ];
 
   /**
-   * @param {boolean} show 
+   * @param {boolean} show
    * @param {"draft" | "submit"} submitType
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
@@ -199,7 +199,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               description: `Please upload at least one attachment`,
             };
             dispatch(showModalError(errorBody));
-            
+
             throw new Error("There was no file attached");
           }
         }
@@ -209,18 +209,18 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           const {
             objectId,
             priority,
-            description, 
+            description,
             startDate,
             endDate,
             appHierId,
-          } = form.getFieldsValue();
+          } = form.getFieldsValue(true);
 
           const body = {
             id: isUpdate ? idPr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            subjectId: data_accountDetail?.accountInformation?.accountId,
             objectId,
             priority,
-            description, 
+            description,
             startDate,
             endDate,
             appHierId,
@@ -242,18 +242,18 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       const {
         objectId,
         priority,
-        description, 
+        description,
         startDate,
         endDate,
         appHierId,
-      } = form.getFieldsValue();
+      } = form.getFieldsValue(true);
 
       const body = {
         id: isUpdate ? idPr : undefined,
-        subjectId: data_accountDetail?.accountInformation?.accountId, 
+        subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
         priority,
-        description, 
+        description,
         startDate,
         endDate,
         appHierId,
@@ -297,65 +297,78 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
     dispatch(getDetailPrApprovalHierarchy({id: appHierId}));
-    setSelectedApprovalName(approvalName);
+    form.setFieldValue("appHierName", approvalName);
   }
 
   const steps = [
     {
       title: "Payment Relation",
-      content: (
-        <InformationForm
-          setAccount={setAccount}
-          className={`${current !== 0 ? "hidden" : ""}`}
-          accountId={idAccount}
-          isUpdate={isUpdate}
-          key={`payment-relation-tab-0`}
-        />
-      ),
-      disabled: false
+      cards: [
+        {
+          header: "Payment Relation Information",
+          content: (
+            <InfoPaymentRelation
+              form={form}
+              setAccount={setAccount}
+              accountId={idAccount}
+              isUpdate={isUpdate}
+              key={`payment-relation-tab-0`}
+            />
+          ),
+        },
+      ],
+      disabled: false,
     },
     {
       title: "Approval",
-      content: (
-        <ApprovalForm
-          dataTable={(detail_prApprovalHierarchy || []).map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          dataOption={data_prApprovalHierarchy}
-          selectedAppHierId={form.getFieldValue("appHierId")}
-          handleSelectHiararchy={handleSelectHiararchy}
-          className={`${current !== 1 ? "hidden" : ""}`}
-          key={`payment-relation-tab-1`}
-        />
-      ),
-      disabled: false
+      cards: [
+        {
+          header: "Approval",
+          content: (
+            <ApprovalSectionForm
+              form={form}
+              dataTable={(detail_prApprovalHierarchy || []).map((detail, index) => ({
+                ...detail,
+                employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                  ...employeeDetail,
+                  key: `employee-detail-${index}`
+                })),
+                key: `detail-detail-${index}`,
+              }))}
+              dataOption={data_prApprovalHierarchy}
+              handleSelectHiararchy={handleSelectHiararchy}
+              key={`payment-relation-tab-1`}
+            />
+          ),
+        },
+      ],
+      disabled: false,
     },
     {
       title: "Attachment",
-      content: (
-        <AttachmentForm
-          data={dataAttachment}
-          updateData={setDataAttachment}
-          dispatch={dispatch}
-          className={`${current !== 2 ? "hidden" : ""}`}
-          key={`payment-relation-tab-2`}
-          getAPICategory={getPrAttachmentCategory}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-          mandatory={attachmentIsRequired}
-        />
-      ),
-      disabled: false
+      cards: [
+        {
+          header: "Attachment",
+          content: (
+            <AttachmentSectionForm
+              data={dataAttachment}
+              updateData={setDataAttachment}
+              dispatch={dispatch}
+              key={`payment-relation-tab-2`}
+              getAPICategory={getPrAttachmentCategory}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+              mandatory={attachmentIsRequired}
+            />
+          ),
+        },
+      ],
+      disabled: false,
     },
   ];
 
   const navigate = useNavigate();
-  
+
   const next = async () => {
     try {
       if (current === 2) {
@@ -365,7 +378,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               description: `Please upload at least one attachment`,
             };
             dispatch(showModalError(errorBody));
-            
+
             throw new Error("There was no file attached");
         }
       }
@@ -375,24 +388,24 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
         const {
           objectId,
           priority,
-          description, 
+          description,
           startDate,
           endDate,
           appHierId,
-        } = form.getFieldsValue();
+        } = form.getFieldsValue(true);
 
         const body = {
           id: isUpdate ? idPr : undefined,
-          subjectId: data_accountDetail?.accountInformation?.accountId, 
+          subjectId: data_accountDetail?.accountInformation?.accountId,
           objectId,
           priority,
-          description, 
+          description,
           startDate,
           endDate,
           appHierId,
           validationType: validationTypes[current],
         };
-        
+
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
@@ -404,7 +417,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
     } catch (err) {
       return;
     }
-    
+
     setCurrent(current + 1);
   };
   const prev = () => {
@@ -421,7 +434,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               description: `Please upload at least one attachment`,
             };
             dispatch(showModalError(errorBody));
-            
+
             throw new Error("There was no file attached");
           }
         }
@@ -431,24 +444,24 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           const {
             objectId,
             priority,
-            description, 
+            description,
             startDate,
             endDate,
             appHierId,
-          } = form.getFieldsValue();
+          } = form.getFieldsValue(true);
 
           const body = {
             id: isUpdate ? idPr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            subjectId: data_accountDetail?.accountInformation?.accountId,
             objectId,
             priority,
-            description, 
+            description,
             startDate,
             endDate,
             appHierId,
             validationType: validationTypes[i],
           };
-          
+
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
@@ -486,19 +499,19 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
     const {
       objectId,
       priority,
-      description, 
+      description,
       startDate,
       endDate,
       appHierId,
       remark,
-    } = form.getFieldsValue();
+    } = form.getFieldsValue(true);
 
     const body = {
       id: idPr,
-      subjectId: data_accountDetail?.accountInformation?.accountId, 
+      subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
       priority,
-      description, 
+      description,
       startDate,
       endDate,
       appHierId,
@@ -548,7 +561,6 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   const handleClear = () => {
     if (isCreate) {
       setDataAttachment([]);
-      setSelectedApprovalName();
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
@@ -620,14 +632,23 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             form={form}
             layout={"vertical"}
             onFinish={handleSubmitForm}
-            // onFinishFailed={handleErrorSubmit}
             scrollToFirstError={true}
             className="flex flex-col gap-y-4"
           >
             {/* Step Contents */}
             <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
-            {steps.map((step) => step.content)}
+            {steps.map((step, stepIndex) =>
+              step.cards.map((card, cardIndex) => (
+                <NxCardContainer
+                  header={card.header}
+                  className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                  key={`${stepIndex}-${cardIndex}`}
+                >
+                  <NxBaseContainer border>{card.content}</NxBaseContainer>
+                </NxCardContainer>
+              ))
+            )}
 
             {/* Section Action Steps */}
             <NxBaseContainer border>
@@ -686,12 +707,11 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               </div>
             </NxBaseContainer>
             <ConfirmationModal
-              form={"paymentRelationForm"}
+              form={form}
+              formId={"paymentRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              selectedAppHierId={form.getFieldValue("appHierId")}
-              selectedApprovalName={selectedApprovalName}
-              hierarchyTableData={(detail_prApprovalHierarchy || []).map((detail, index) => ({
+              approvalData={(detail_prApprovalHierarchy || []).map((detail, index) => ({
                 ...detail,
                 employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                   ...employeeDetail,
@@ -701,7 +721,6 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               }))}
               type={confirmationType}
               dataAttachment={dataAttachment}
-              data={form.getFieldsValue()}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
             />

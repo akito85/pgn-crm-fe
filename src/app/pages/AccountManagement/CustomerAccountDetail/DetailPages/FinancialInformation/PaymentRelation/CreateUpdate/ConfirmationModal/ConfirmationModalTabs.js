@@ -5,12 +5,10 @@ import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
 
 const ConfirmationModalTabs = ({
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
+  form,
+  approvalData,
   dispatch,
   dataAttachment,
-  data = {},
   service,
   type = "",
   configApplication,
@@ -21,16 +19,15 @@ const ConfirmationModalTabs = ({
     {
       key: 0,
       label: "Payment Relation Information",
-      children: <ConfirmationModalInfo data={data} />
+      children: <ConfirmationModalInfo form={form} />
     },
     {
       key: 1,
       label: "Approval",
       children: (
         <ConfirmationModalApproval
-          dataTable={hierarchyTableData}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
+          dataTable={approvalData}
+          form={form}
         />
       )
     },

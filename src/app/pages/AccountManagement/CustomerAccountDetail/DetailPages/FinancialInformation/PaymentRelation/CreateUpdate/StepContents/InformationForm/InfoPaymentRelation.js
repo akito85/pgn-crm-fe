@@ -10,19 +10,26 @@ import DateComponent from "../../../../../../../../../../components/DateComponen
 import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
-import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
-import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
+import NxDetailText from "../../../../../../../../../../components/Nx/NxDetailText";
 
 export default function InfoPaymentRelation({
   accountId,
   setAccount,
-  className,
   isUpdate,
+  form,
+  formView = true,
 }) {
   const dispatch = useDispatch();
+
+  const accountNumber = Form.useWatch("accountNumber", form);
+  const accountName = Form.useWatch("accountName", form);
+  const priority = Form.useWatch("priority", form);
+  const startDate = Form.useWatch("startDate", form);
+  const endDate = Form.useWatch("endDate", form);
+  const description = Form.useWatch("description", form);
 
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
@@ -31,7 +38,7 @@ export default function InfoPaymentRelation({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
-                                                                                                                                                                                                                                                                                                                                      
+
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -40,11 +47,11 @@ export default function InfoPaymentRelation({
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const { list_prAccountStandard, pagination_prAccountStandard } = useSelector(
     (state) => state.paymentRelation
   );
-  
+
   const handleOk = () => {
     console.log("ok")
   }
@@ -113,7 +120,7 @@ export default function InfoPaymentRelation({
       setIsOpen
     ),
   [search, searchText, searchedColumn]);
-  
+
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns].map((col) => ({
       ...col,
@@ -128,7 +135,7 @@ export default function InfoPaymentRelation({
       title: col.title,
     }));
   }, [allColumns]);
-  
+
   const currentData = useMemo(() => list_prAccountStandard, [list_prAccountStandard]);
 
   const hasMore = currentData.length < (pagination_prAccountStandard?.totalElements || 0);
@@ -146,115 +153,128 @@ export default function InfoPaymentRelation({
     }));
   }, [currentData]);
 
+  if (!formView) {
+    return (
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full grid grid-cols-3 gap-4">
+          <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
+          <NxDetailText label="Account Name">{accountName}</NxDetailText>
+          <NxDetailText label="Priority">{priority}</NxDetailText>
+          <NxDetailText label="Start Date">{startDate ? moment(startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+          <NxDetailText label="End Date">{endDate ? moment(endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+        </div>
+        <div className="w-full">
+          <NxDetailText label="Description">{description}</NxDetailText>
+        </div>
+      </div>
+    );
+  }
+
   return(
-    <div className={className}>
-      <NxCardContainer header={"PAYMENT RELATION INFORMATION"}>
-        <div className="flex flex-col gap-y-4">
-          <div className="w-full grid grid-cols-3 gap-4">
-            <div className="flex gap-2 items-end">
-              <Form.Item
-                label={"Account Number"}
-                required
-                className="no-margin-form w-full"
-              >
-                <Input.Group compact className="flex gap-x-1">
-                  <Form.Item
-                    key="accountNumber"
-                    name={"accountNumber"}
-                    rules={[
-                      {
-                        message: requiredMessage("Account Number"),
-                        required: true,
-                      }
-                    ]}
-                    noStyle
-                  >
-                    <InputComponent disabled />
-                  </Form.Item>
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      setIsOpen(true)
-                    }}
-                    className="w-[120px]"
-                    disabled={isUpdate}
-                  >
-                    Select
-                  </Button>
-                </Input.Group>
-              </Form.Item>
-            </div>
-
-            <Form.Item
-              key="accountName"
-              name={"accountName"}
-              label={"Account Name"}
-              className="no-margin-form"
-            >
-              <InputComponent disabled />
-            </Form.Item>
-
-            <Form.Item
-              key="priority"
-              name={"priority"}
-              label={"Priority"}
-              rules={[
-                {
-                  message: requiredMessage("Priority"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
-            >
-              <InputComponent disabled={isUpdate} />
-            </Form.Item>
-
-            <Form.Item
-              key="startDate"
-              name={"startDate"}
-              label={"Start Date"}
-              rules={[
-                {
-                  message: requiredMessage("Start Date"),
-                  required: true,
-                },
-              ]}
-              getValueProps={(dateString) => ({
-                value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-              })}
-              disabled={isUpdate}
-              className="no-margin-form"
-            >
-              <DateComponent disabled={isUpdate} />
-            </Form.Item>
-
-            <Form.Item
-              key="endDate"
-              name={"endDate"}
-              label={"End Date"}
-              className="no-margin-form"
-              getValueProps={(dateString) => ({
-                value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-              })}
-            >
-              <DateComponent />
-            </Form.Item>
-          </div>
+    <div className="flex flex-col gap-y-4">
+      <div className="w-full grid grid-cols-3 gap-4">
+        <div className="flex gap-2 items-end">
           <Form.Item
-            key="description"
-            name={"description"}
-            label={"Description"}
-            className="no-margin-form"
+            label={"Account Number"}
+            required
+            className="no-margin-form w-full"
           >
-            <InputComponent
-              disabled={isUpdate}
-              type={"textarea"}
-              rows={4}
-              maxLength={255}
-            />
+            <Input.Group compact className="flex gap-x-1">
+              <Form.Item
+                key="accountNumber"
+                name={"accountNumber"}
+                rules={[
+                  {
+                    message: requiredMessage("Account Number"),
+                    required: true,
+                  }
+                ]}
+                noStyle
+              >
+                <InputComponent disabled />
+              </Form.Item>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setIsOpen(true)
+                }}
+                className="w-[120px]"
+                disabled={isUpdate}
+              >
+                Select
+              </Button>
+            </Input.Group>
           </Form.Item>
         </div>
-      </NxCardContainer>
+
+        <Form.Item
+          key="accountName"
+          name={"accountName"}
+          label={"Account Name"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="priority"
+          name={"priority"}
+          label={"Priority"}
+          rules={[
+            {
+              message: requiredMessage("Priority"),
+              required: true,
+            },
+          ]}
+          className="no-margin-form"
+        >
+          <InputComponent disabled={isUpdate} />
+        </Form.Item>
+
+        <Form.Item
+          key="startDate"
+          name={"startDate"}
+          label={"Start Date"}
+          rules={[
+            {
+              message: requiredMessage("Start Date"),
+              required: true,
+            },
+          ]}
+          getValueProps={(dateString) => ({
+            value: dateString ? moment(dateString, dateFormatting.dateForm) : null
+          })}
+          disabled={isUpdate}
+          className="no-margin-form"
+        >
+          <DateComponent disabled={isUpdate} />
+        </Form.Item>
+
+        <Form.Item
+          key="endDate"
+          name={"endDate"}
+          label={"End Date"}
+          className="no-margin-form"
+          getValueProps={(dateString) => ({
+            value: dateString ? moment(dateString, dateFormatting.dateForm) : null
+          })}
+        >
+          <DateComponent />
+        </Form.Item>
+      </div>
+      <Form.Item
+        key="description"
+        name={"description"}
+        label={"Description"}
+        className="no-margin-form"
+      >
+        <InputComponent
+          disabled={isUpdate}
+          type={"textarea"}
+          rows={4}
+          maxLength={255}
+        />
+      </Form.Item>
 
       <NxModal
         isOpen={isOpen}
