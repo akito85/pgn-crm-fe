@@ -465,8 +465,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/payment-relation/validate-${isUpdate}`,
-            type: isUpdate,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+            type: formType,
           }))
           .unwrap();
         }
