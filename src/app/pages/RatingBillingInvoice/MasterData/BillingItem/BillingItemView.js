@@ -60,7 +60,6 @@ const BillingItemView = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
-  // ─── Infinite Scroll: initial fetch & re-fetch on filter/sort change ───────
   useEffect(() => {
     dispatch(
       getBillingItemList({
@@ -74,7 +73,6 @@ const BillingItemView = () => {
     setPage(1);
   }, [dispatch, search, sort]);
 
-  // trigger modal try again from general slice
   useEffect(() => {
     if (bodyErrorGeneral?.response?.data?.code === 500) {
       setModalError(true);
@@ -122,7 +120,6 @@ const BillingItemView = () => {
     });
   };
 
-  // ─── Infinite Scroll: load more handler ──────────────────────────────────
   const currentList = useMemo(
     () => data_view?.result || [],
     [data_view],
@@ -147,7 +144,6 @@ const BillingItemView = () => {
     setPage(nextPage);
   };
 
-  // ─── Refresh ──────────────────────────────────────────────────────────────
   const handleRefresh = () => {
     dispatch(
       getBillingItemList({
@@ -229,7 +225,6 @@ const BillingItemView = () => {
       .then(() => {
         handleClear();
         handleCancel();
-        // Refresh list after inactivate
         dispatch(
           getBillingItemList({
             search: encodeURIComponent(JSON.stringify(search)),

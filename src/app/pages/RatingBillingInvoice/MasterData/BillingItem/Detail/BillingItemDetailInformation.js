@@ -15,7 +15,6 @@ import StatusComponent from "../../../../../../components/StatusComponent";
 
 const { TabPane } = Tabs;
 
-// ─── Criteria Detail read-only columns ───────────────────────────────────────
 const buildCriteriaColumns = () => [
   {
     title: "NO",
@@ -62,7 +61,6 @@ const buildCriteriaColumns = () => [
   },
 ];
 
-// ─── Label resolvers ──────────────────────────────────────────────────────────
 const resolveTypeName = (transMappingType, data_typeList = []) => {
   if (!transMappingType) return "-";
   const found = data_typeList?.find(
@@ -93,12 +91,10 @@ const handleStatusCase = (index) => {
   }
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 const BillingItemDetailInformation = ({
   dataBillingItem,
   dataMapping = [],
   type = "detail",
-  // ✅ untuk resolve transMappingType & criteriaCode → label
   data_typeList = [],
   data_criteriaList = [],
 }) => {
@@ -125,10 +121,7 @@ const BillingItemDetailInformation = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [isDetailMapShown, setIsDetailMapShown] = useState(false);
 
-  // ✅ Tab: "mapping" | "criteria"
   const [mappingTab, setMappingTab] = useState("mapping");
-
-  // ─── Handlers ────────────────────────────────────────────────────────────────
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -238,21 +231,15 @@ const BillingItemDetailInformation = ({
     });
   };
 
-  // ✅ Criteria rows langsung dari response API field "criteria"
   const criteriaTableData = (dataBillingItem?.criteria || []).map(
     (item, idx) => ({ ...item, key: idx }),
   );
 
   return (
     <Fragment>
-      {/* ================================================================
-          TRANSACTION MAPPING INFORMATION
-          Layout: 4 kolom × N baris, sesuai desain UI/UX
-      ================================================================ */}
       <CardContainer header="TRANSACTION MAPPING INFORMATION">
         <div className="w-full grid grid-cols-4 gap-x-8 gap-y-5">
 
-          {/* Row 1: Type | Mapping Code | Mapping Category | Name */}
           <DetailText label="Type">
             {resolveTypeName(dataBillingItem?.transMappingType, data_typeList)}
           </DetailText>
@@ -266,7 +253,6 @@ const BillingItemDetailInformation = ({
             {dataBillingItem?.billingItemName || "-"}
           </DetailText>
 
-          {/* Row 2: Bill Type | Start Date | End Date | Late Charge */}
           <DetailText label="Bill Type">
             {dataBillingItem?.billingType || "-"}
           </DetailText>
@@ -284,23 +270,19 @@ const BillingItemDetailInformation = ({
             {dataBillingItem?.lateCharge ? "Yes" : "No"}
           </DetailText>
 
-          {/* Row 3: Payment Warranty | Installment/Restructure | Criteria | Description */}
           <DetailText label="Payment Warranty">
             {dataBillingItem?.paymentWarranty ? "Yes" : "No"}
           </DetailText>
           <DetailText label="Installment / Restructure">
-            {/* ✅ field API: "installment" */}
             {dataBillingItem?.installment ? "Yes" : "No"}
           </DetailText>
           <DetailText label="Criteria">
-            {/* ✅ resolve criteria[0].criteriaCode → label */}
             {resolveCriteriaName(dataBillingItem?.criteria, data_criteriaList)}
           </DetailText>
           <DetailText label="Description">
             {dataBillingItem?.description || "-"}
           </DetailText>
 
-          {/* Row 4: Status | Status Approval */}
           <DetailText label="Status">
             {dataBillingItem?.status ? (
               <StatusComponent colour={dataBillingItem.status}>
@@ -318,10 +300,6 @@ const BillingItemDetailInformation = ({
         </div>
       </CardContainer>
 
-      {/* ================================================================
-          MAPPING INFORMATION
-          Tab: Mapping Detail | Criteria Detail
-      ================================================================ */}
       <CardContainer
         type="tabs"
         header="MAPPING INFORMATION"
@@ -330,7 +308,6 @@ const BillingItemDetailInformation = ({
             activeKey={mappingTab}
             onChange={(key) => {
               setMappingTab(key);
-              // Reset detail panel saat pindah tab
               if (key !== "mapping") {
                 setIsDetailMapShown(false);
                 setCategory("");
@@ -343,8 +320,6 @@ const BillingItemDetailInformation = ({
           </Tabs>
         }
       >
-
-        {/* ── Tab: Mapping Detail ── */}
         {mappingTab === "mapping" && (
           <>
             <TablePaginationNew
@@ -371,7 +346,6 @@ const BillingItemDetailInformation = ({
               tableScrolled={{ y: 525, x: 2000 }}
             />
 
-            {/* Detail Mapping panel – tampil saat baris di-klik */}
             {isDetailMapShown && (
               <div className="mt-4">
                 <CardContainer header="DETAIL MAPPING INFORMATION">
@@ -426,9 +400,6 @@ const BillingItemDetailInformation = ({
         )}
       </CardContainer>
 
-      {/* ================================================================
-          HISTORY LOG INFORMATION
-      ================================================================ */}
       <CardContainer header="HISTORY LOG INFORMATION">
         <div className="w-full grid grid-cols-5 gap-5">
           <DetailText label="Record ID">{dataBillingItem?.id || "-"}</DetailText>

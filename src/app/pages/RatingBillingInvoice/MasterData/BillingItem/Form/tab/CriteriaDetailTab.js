@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 
 const CriteriaDetailTab = ({
-  criteriaType = null,           // id dari form Select (bisa berupa number atau string angka)
+  criteriaType = null,   
   dataTable = [],
   onDataChange = () => {},
   data_specialGLList = [],
   data_glAccountList = [],
   data_classificationTypeList = [],
   data_accountTypeList = [],
-  data_criteriaOptions = [],     // [{ id, name, code }]
+  data_criteriaOptions = [], 
   type = "create",
   isEditabled = false,
   setIsEditabled = () => {},
@@ -26,10 +26,6 @@ const CriteriaDetailTab = ({
     setPageSize(pageSizeChange);
   };
 
-  // ✅ Resolve criteriaType (id atau code) → criteriaCode (string)
-  // criteriaType bisa berupa:
-  //   - number/string angka  → id dari form Select, perlu di-resolve ke code
-  //   - string non-angka     → sudah berupa code langsung (misal saat dari response)
   const resolveCriteriaCode = () => {
     if (criteriaType === null || criteriaType === undefined) return null;
 
@@ -38,24 +34,17 @@ const CriteriaDetailTab = ({
       (typeof criteriaType === "string" && !isNaN(Number(criteriaType)));
 
     if (isNumericId) {
-      // Cari berdasarkan id
       return (
         data_criteriaOptions?.find(
           (item) => item.id === criteriaType || item.id === Number(criteriaType),
         )?.code || null
       );
     }
-
-    // Sudah berupa code string
     return criteriaType;
   };
 
   const criteriaCode = resolveCriteriaCode();
 
-  // ✅ Tentukan konfigurasi kolom berdasarkan criteriaCode
-  // - "CLASSIFICATION_TYPE" → tampilkan kolom Classification Type
-  // - "ACCOUNT_TYPE"        → tampilkan kolom Account Type
-  // - "ALL" / null / lainnya → tidak ada kolom criteria khusus
   const getCriteriaColumnConfig = () => {
     switch (criteriaCode) {
       case "CLASSIFICATION_TYPE":
@@ -77,15 +66,12 @@ const CriteriaDetailTab = ({
           })),
         };
       default:
-        // "ALL" atau belum dipilih → tidak ada kolom criteria khusus
         return null;
     }
   };
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
-  // Support dua kemungkinan struktur field dari API:
-  // Lama: { id, account, name } | Baru: { glAccountId, glAccount, glAccountDesc }
   const glAccountOptions = data_glAccountList.map((item) => ({
     value: item.glAccountId ?? item.id,
     label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
@@ -96,7 +82,6 @@ const CriteriaDetailTab = ({
     label: item.name,
   }));
 
-  // Helper render nilai select: cari label dari options, fallback ke value itu sendiri
   const renderSelectValue = (value, options) => {
     if (!value && value !== 0) return "-";
     const found = options.find((o) => o.label === value || o.value === value);
@@ -110,7 +95,6 @@ const CriteriaDetailTab = ({
       width: 60,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
-    // ✅ Kolom criteria hanya muncul jika criteriaCode bukan "ALL"
     ...(criteriaColConfig
       ? [
           {
@@ -132,7 +116,6 @@ const CriteriaDetailTab = ({
       width: 250,
       options: glAccountOptions,
       render: (value) => renderSelectValue(value, glAccountOptions),
-      // ✅ Auto-fill descriptionAccount dari glAccountDesc saat GL Account dipilih
       onClick: (selectedLabel, form) => {
         if (!form) return;
         const found = data_glAccountList?.find((g) => {

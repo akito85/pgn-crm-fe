@@ -49,16 +49,11 @@ import {
   showModalSuccess,
   validateCreateUpdate,
 } from "../../../../../redux/slices/general_slice";
-
-// Utils
 import { handleMandatory } from "./Utils/Utils";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import { configApp } from "../../../../../constants/configApp";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
 
 const BillingItemForm = (props) => {
   const { type } = props;
@@ -67,10 +62,6 @@ const BillingItemForm = (props) => {
   const location = useLocation();
   const id = location?.state?.id;
   const [form] = Form.useForm();
-
-  // ============================================================================
-  // REDUX SELECTORS
-  // ============================================================================
 
   const {
     data_billingItemCategory,
@@ -89,10 +80,6 @@ const BillingItemForm = (props) => {
     data_accountTypeList,
     loading,
   } = useSelector((state) => state.billing_item);
-
-  // ============================================================================
-  // STATE MANAGEMENT
-  // ============================================================================
 
   // Stepper States
   const [current, setCurrent] = useState(0);
@@ -148,11 +135,8 @@ const BillingItemForm = (props) => {
   const [isEditable, setIsEditable] = useState(false);
 
   // Criteria States
-  // ✅ selectedCriteria menyimpan criteriaCode (string: "ALL", "CLASSIFICATION_TYPE", "ACCOUNT_TYPE")
   const [selectedCriteria, setSelectedCriteria] = useState(null);
   const [dataCriteriaTable, setDataCriteriaTable] = useState([]);
-
-  // ✅ State untuk tracking apakah sedang ada row yang diedit di tab Criteria
   const [isCriteriaEditing, setIsCriteriaEditing] = useState(false);
 
   // Approval States
@@ -169,10 +153,6 @@ const BillingItemForm = (props) => {
   const [loadingForm, setLoadingForm] = useState(false);
 
   const isLoading = loading || loadingForm;
-
-  // ============================================================================
-  // INITIALIZATION EFFECTS
-  // ============================================================================
 
   useEffect(() => {
     dispatch(getBillingItemCategory());
@@ -199,10 +179,6 @@ const BillingItemForm = (props) => {
   useEffect(() => {
     setValuePage(steps[current].value);
   }, [current]);
-
-  // ============================================================================
-  // APPROVAL EFFECTS
-  // ============================================================================
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
@@ -236,9 +212,6 @@ const BillingItemForm = (props) => {
     }
   }, [dataListAppHierId]);
 
-  // ============================================================================
-  // MAPPING EFFECTS
-  // ============================================================================
 
   const filteringAllDataDetailTable = useCallback(() => {
     Object.keys(allDataDetailTable).forEach((key) => {
@@ -255,9 +228,6 @@ const BillingItemForm = (props) => {
     }
   }, [dataTable, category, filteringAllDataDetailTable]);
 
-  // ============================================================================
-  // UPDATE DATA EFFECT
-  // ============================================================================
 
   const handleDataTypeExist = (status, statusApproval, dataDetail, dataCompare, table = "mapping") => {
     switch (status) {
@@ -282,9 +252,6 @@ const BillingItemForm = (props) => {
     }
   };
 
-  // ✅ Helper: resolve transMappingType dari response ke id di data_typeList
-  // Response menyimpan transMappingType sebagai code (mis. "BILLING_ITEM"),
-  // form membutuhkan id agar <Select> bisa menampilkan label yang benar.
   const resolveTypeId = useCallback(
     (transMappingType) => {
       if (!transMappingType) return undefined;
@@ -296,9 +263,6 @@ const BillingItemForm = (props) => {
     [data_typeList],
   );
 
-  // ✅ Helper: resolve criteriaCode dari response ke id di data_criteriaList
-  // Response menyimpan criteriaCode sebagai code (mis. "ALL"),
-  // form menyimpan value sebagai id agar konsisten dengan flow create.
   const resolveCriteriaId = useCallback(
     (criteriaCode) => {
       if (!criteriaCode) return undefined;
@@ -310,18 +274,12 @@ const BillingItemForm = (props) => {
     [data_criteriaList],
   );
 
-  // ✅ Populate criteria table dari response API
-  // Response criteria: [{ criteriaCode, criteriaValue, paramCriteriaId, startDate, endDate, glAccount, specialGl, descriptionAccount }]
-  // State dataCriteriaTable: [{ criteriaValue (id/label), glAccountId (label), specialGlId (label), startDate, endDate, descriptionAccount }]
   const buildCriteriaTableFromResponse = useCallback(
     (criteriaList) => {
       if (!criteriaList || criteriaList.length === 0) return [];
 
       return criteriaList.map((item, index) => {
-        // Resolve criteriaValue: paramCriteriaId → id di classification/account list
         const criteriaValueResolved = item.paramCriteriaId || item.criteriaValue || null;
-
-        // Resolve glAccountId: glAccount (name from API) → label "account - name"
         const glAccountResolved = (() => {
           if (!item.glAccount) return null;
           const found = data_glAccountList?.find(
@@ -334,7 +292,6 @@ const BillingItemForm = (props) => {
             : item.glAccount;
         })();
 
-        // Resolve specialGlId: specialGl (value/code from API) → name label
         const specialGlResolved = (() => {
           if (!item.specialGl) return null;
           const found = data_specialGLList?.find(
@@ -366,11 +323,8 @@ const BillingItemForm = (props) => {
     (dataDetail, dataCompare = null) => {
       setStartDate(moment(dataDetail?.startDate));
       setSelectedHierarchy(dataDetail?.approvalHierarchy);
-
-      // ✅ Resolve transMappingType (code) → id untuk form Select
       const typeId = resolveTypeId(dataDetail?.transMappingType);
 
-      // ✅ Resolve criteriaCode dari criteria[0] → id untuk form Select
       const firstCriteriaCode = dataDetail?.criteria?.[0]?.criteriaCode;
       const criteriaId = resolveCriteriaId(firstCriteriaCode);
 
@@ -381,20 +335,16 @@ const BillingItemForm = (props) => {
         billType: dataDetail?.billingTypeId,
         apphierId: dataDetail?.approvalHierarchy,
         transactionMappingCode: dataDetail?.billingItemCode,
-        // ✅ type field menggunakan transMappingType yang sudah di-resolve ke id
         type: typeId,
-        // ✅ criteria field menggunakan criteriaCode yang sudah di-resolve ke id
         criteria: criteriaId,
         startDate: dataDetail?.startDate ? moment(dataDetail?.startDate) : null,
         endDate: dataDetail?.endDate ? moment(dataDetail?.endDate) : null,
       });
 
-      // ✅ Set selectedCriteria agar CriteriaDetailTab tahu kolom apa yang harus ditampilkan
       setSelectedCriteria(criteriaId);
 
       setCheckedLateCharge(dataDetail?.lateCharge || false);
       setCheckedPaymentWarranty(dataDetail?.paymentWarranty || false);
-      // ✅ Response menggunakan field "installment" (bukan "installmentRestructure")
       setCheckedInstallmentRestructure(dataDetail?.installment || false);
 
       setListDataAttachment(
@@ -447,10 +397,7 @@ const BillingItemForm = (props) => {
         }));
       });
 
-      // ✅ Populate criteria table dari response
       if (dataDetail?.criteria && dataDetail.criteria.length > 0) {
-        // Delay agar data_glAccountList & data_specialGLList sudah tersedia
-        // (dipanggil setelah redux state terupdate)
         const criteriaRows = buildCriteriaTableFromResponse(dataDetail.criteria);
         setDataCriteriaTable(criteriaRows);
       } else {
@@ -480,11 +427,8 @@ const BillingItemForm = (props) => {
           attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
           lateCharge: data_detailDraft?.lateCharge,
           paymentWarranty: data_detailDraft?.paymentWarranty,
-          // ✅ installment (bukan installmentRestructure)
           installment: data_detailDraft?.installment || false,
-          // ✅ transMappingType (bukan type)
           transMappingType: data_detailDraft?.transMappingType,
-          // ✅ criteria dari detailDraft
           criteria: data_detailDraft?.criteria,
           status: data_BillingItemDetail?.status,
           statusApproval: data_BillingItemDetail?.statusApproval,
@@ -496,8 +440,6 @@ const BillingItemForm = (props) => {
     }
   }, [data_BillingItemDetail, type, id, handleSetDataUpdate]);
 
-  // ✅ Re-populate criteria table jika LOV (glAccount/specialGl) baru tersedia
-  // setelah data_BillingItemDetail sudah ada tapi LOV belum selesai load
   useEffect(() => {
     if (
       type === "update" &&
@@ -508,10 +450,6 @@ const BillingItemForm = (props) => {
       setDataCriteriaTable(criteriaRows);
     }
   }, [data_glAccountList, data_specialGLList, data_BillingItemDetail, type, buildCriteriaTableFromResponse]);
-
-  // ============================================================================
-  // STEPPER NAVIGATION HANDLERS
-  // ============================================================================
 
   const next = () => {
     const fieldsToValidate = listSectionInfo[current]?.paramValue;
@@ -538,10 +476,6 @@ const BillingItemForm = (props) => {
       setCurrent(current - 1);
     }
   };
-
-  // ============================================================================
-  // FORM FIELD HANDLERS
-  // ============================================================================
 
   const handleStartDate = (e) => {
     form.resetFields(["endDate"]);
@@ -587,10 +521,6 @@ const BillingItemForm = (props) => {
   const handleChangesCriteriaTable = (e) => {
     setDataCriteriaTable(e);
   };
-
-  // ============================================================================
-  // MAPPING HANDLERS
-  // ============================================================================
 
   const handleCheckDetailDateConflict = (data) => {
     const index = data_billingItemCategory
@@ -697,10 +627,6 @@ const BillingItemForm = (props) => {
     return dataConflict?.length === 0;
   };
 
-  // ============================================================================
-  // VALIDATION HELPERS
-  // ============================================================================
-
   const handleCheckMissingDetailMap = (data, dataDetail) => {
     return (
       dataDetail.some((detail) => !data.hasOwnProperty(detail.category.toString())) ||
@@ -759,12 +685,7 @@ const BillingItemForm = (props) => {
     }
   };
 
-  // ============================================================================
-  // FORM SUBMISSION HANDLERS
-  // ============================================================================
-
   const buildCriteriaPayload = () => {
-    // ✅ Resolve criteriaCode dari id → code untuk payload API
     const criteriaCodeResolved =
       data_criteriaList?.find(
         (c) => c.id === selectedCriteria || c.id === Number(selectedCriteria),
@@ -815,7 +736,6 @@ const BillingItemForm = (props) => {
 
   const buildRequestBody = (allValues, criteriaPayload) => {
     return {
-      // ✅ transMappingType: resolve dari id (form value) → code (API field)
       transMappingType:
         data_typeList?.find((t) => t.id === allValues.type)?.code || allValues.type,
       ...(type === "update" && { id: data_BillingItemDetail?.id }),
@@ -827,7 +747,6 @@ const BillingItemForm = (props) => {
       endDate: allValues.endDate ? moment(allValues.endDate).format(dateFormatting.date) : null,
       description: allValues.description,
       lateCharge: checkedLateCharge || false,
-      // ✅ "installment" sesuai field name di API (bukan "installmentRestructure")
       installment: checkedInstallmentRestructure || false,
       paymentWarranty: checkedPaymentWarranty || false,
       mappingInfo: handleMappingInfo(allDataDetailTable),
@@ -932,10 +851,6 @@ const BillingItemForm = (props) => {
       });
   };
 
-  // ============================================================================
-  // ACTION HANDLERS
-  // ============================================================================
-
   const handleRetry = () => {
     handleSave(bodyError?.value);
     setModalError(false);
@@ -983,7 +898,6 @@ const BillingItemForm = (props) => {
           attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
           lateCharge: data_detailDraft?.lateCharge,
           paymentWarranty: data_detailDraft?.paymentWarranty,
-          // ✅ installment (bukan installmentRestructure)
           installment: data_detailDraft?.installment || false,
           transMappingType: data_detailDraft?.transMappingType,
           criteria: data_detailDraft?.criteria,
@@ -1016,10 +930,6 @@ const BillingItemForm = (props) => {
     }, 0);
   };
 
-  // ============================================================================
-  // BREADCRUMB ROUTES
-  // ============================================================================
-
   const routes = [
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
@@ -1029,10 +939,6 @@ const BillingItemForm = (props) => {
       breadcrumbName: `${type === "update" ? "Update Transaction Mapping" : "Create Transaction Mapping"}`,
     },
   ];
-
-  // ============================================================================
-  // RENDER
-  // ============================================================================
 
   return (
     <LayoutMenu>
@@ -1049,8 +955,6 @@ const BillingItemForm = (props) => {
           onFinishFailed={onFinishFailed}
           scrollToFirstError={true}
           onValuesChange={(changedValues) => {
-            // ✅ Field "criteria" di form menyimpan id,
-            // setSelectedCriteria juga menerima id (bukan code)
             if (changedValues.criteria !== undefined) {
               setSelectedCriteria(changedValues.criteria);
               setDataCriteriaTable([]);

@@ -52,18 +52,15 @@ const BillingItemDetail = () => {
   const [showButtonApproval, setShowButtonApproval] = useState(false);
   const [showDraftTab, setShowDraftTab] = useState(false);
 
-  // ─── Initial fetch ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (dataRecord) {
       dispatch(getBillingItemDetail({ id: dataRecord }));
       dispatch(getDetailDraft({ id: dataRecord }));
     }
-    // ✅ Load LOV untuk resolve transMappingType & criteriaCode → label
     dispatch(getBillingItemTypeList());
     dispatch(getBillingItemCriteriaList());
   }, [dispatch, dataRecord]);
 
-  // ─── Populate state dari API response ──────────────────────────────────────
   useEffect(() => {
     if (
       dataRecord &&
@@ -99,7 +96,6 @@ const BillingItemDetail = () => {
         })),
       );
 
-      // ✅ Draft tab: muncul jika ada draft yang berbeda dan status bukan APPROVED
       if (
         data_detailDraft &&
         data_detailDraft?.billingItemCode ===
@@ -127,11 +123,8 @@ const BillingItemDetail = () => {
           endDate: data_detailDraft?.endDate,
           lateCharge: data_detailDraft.lateCharge,
           paymentWarranty: data_detailDraft.paymentWarranty,
-          // ✅ "installment" (bukan installmentRestructure)
           installment: data_detailDraft?.installment || false,
-          // ✅ transMappingType dari detailDraft
           transMappingType: data_detailDraft?.transMappingType,
-          // ✅ criteria dari detailDraft
           criteria: data_detailDraft?.criteria || [],
           description: data_detailDraft.description,
           createdBy: data_BillingItemDetail?.createdBy,
@@ -152,7 +145,6 @@ const BillingItemDetail = () => {
     }
   }, [dataRecord, data_BillingItemDetail, data_detailDraft]);
 
-  // ─── Breadcrumb ─────────────────────────────────────────────────────────────
   const routes = [
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
@@ -160,7 +152,6 @@ const BillingItemDetail = () => {
     { path: "", breadcrumbName: "Detail Transaction Mapping" },
   ];
 
-  // ─── Approval handlers ───────────────────────────────────────────────────────
   const handleRetry = () => {
     handleConfirm(bodyError.value);
     setModalError(false);
@@ -193,7 +184,6 @@ const BillingItemDetail = () => {
       .then(() => {
         handleClear();
         handleCancel();
-        // Refresh detail setelah approve/reject
         dispatch(getBillingItemDetail({ id: dataRecord }));
       })
       .catch((error) => {
@@ -211,7 +201,6 @@ const BillingItemDetail = () => {
     setModalConfirm(false);
   };
 
-  // ─── Tab items ───────────────────────────────────────────────────────────────
   const tabItems = [
     {
       key: "BillingItem",
@@ -221,7 +210,6 @@ const BillingItemDetail = () => {
           <BillingItemDetailInformation
             dataMapping={dataMapping}
             dataBillingItem={data_BillingItemDetail}
-            // ✅ pass LOV untuk resolve label
             data_typeList={data_typeList || []}
             data_criteriaList={data_criteriaList || []}
           />
@@ -269,11 +257,8 @@ const BillingItemDetail = () => {
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <LayoutMenu>
-      {/* ✅ Spin wrapping seluruh halaman untuk loading indicator */}
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-
-        {/* Inactive Request Information – hanya untuk approver inactive */}
         {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") &&
           data_BillingItemDetail?.approvalDto?.isApprover && (
             <div className="mt-5">
