@@ -20,6 +20,7 @@ export default function InfoInvoiceRelation({
   className,
   accountId,
   isUpdate,
+  isDraft,
 }) {
   const dispatch = useDispatch();
 
@@ -175,7 +176,7 @@ export default function InfoInvoiceRelation({
                   onClick={() => {
                     setIsOpen(true)
                   }}
-                  disabled={isUpdate}
+                  disabled={!isDraft && isUpdate}
                 >
                   Select
                 </Button>
@@ -207,7 +208,7 @@ export default function InfoInvoiceRelation({
             })}
             className="no-margin-form"
           >
-            <DateComponent disabled={isUpdate} />
+            <DateComponent disabled={!isDraft && isUpdate} />
           </Form.Item>
 
           <Form.Item
@@ -231,7 +232,7 @@ export default function InfoInvoiceRelation({
             className="no-margin-form"
           >
             <InputComponent
-              disabled={isUpdate}
+              disabled={!isDraft && isUpdate}
               type={"textarea"}
               rows={4}
               maxLength={255}

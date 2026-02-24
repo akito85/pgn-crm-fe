@@ -9,9 +9,6 @@ import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 
-// you fucking nasty using bulky moment lazy as fuck
-import moment from "moment";
-
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 
 import {
@@ -68,6 +65,10 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   const idCustomer = location?.state?.idCustomer;
   const idIr = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
+  
+  const status = detail_invoiceRelation.status || "DRAFT";
+
+  const isDraft = status === "DRAFT";
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
@@ -309,6 +310,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           key={`invoice-relation-tab-0`}
           accountId={idAccount}
           isUpdate={isUpdate}
+          isDraft={isDraft}
         />
       ),
       disabled: false
