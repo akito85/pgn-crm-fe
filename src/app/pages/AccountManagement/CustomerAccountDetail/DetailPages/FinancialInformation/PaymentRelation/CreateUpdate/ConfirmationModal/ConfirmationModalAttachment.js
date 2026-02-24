@@ -4,7 +4,6 @@ import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseCont
 const ConfirmationModalAttachment = ({
   data = [],
   type,
-  dispatch,
   service,
   configApplication,
 }) => {
@@ -13,7 +12,6 @@ const ConfirmationModalAttachment = ({
       <ConfirmationModalAttachmentTable
         type={type}
         data={data}
-        dispatch={dispatch}
         service={service}
         configApplication={configApplication}
       />

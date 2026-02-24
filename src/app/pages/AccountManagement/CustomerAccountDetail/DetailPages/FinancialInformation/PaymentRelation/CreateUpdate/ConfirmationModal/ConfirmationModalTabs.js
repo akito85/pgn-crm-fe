@@ -7,7 +7,6 @@ import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
 const ConfirmationModalTabs = ({
   form,
   approvalData,
-  dispatch,
   dataAttachment,
   service,
   type = "",
@@ -37,7 +36,6 @@ const ConfirmationModalTabs = ({
       children: (
         <ConfirmationModalAttachment
           data={dataAttachment}
-          dispatch={dispatch}
           service={service}
           configApplication={configApplication}
         />

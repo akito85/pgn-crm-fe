@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
 import { Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { previewFileAttachment } from "../../../../../../../../../utils/previewFileAttachment";
@@ -199,11 +200,11 @@ const columnAttachmentData = (
 const ConfirmationModalAttachmentTable = ({
   data = [],
   type,
-  dispatch = () => { },
   service = productPromoHttpService,
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
 }) => {
+  const dispatch = useDispatch();
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");

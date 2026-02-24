@@ -21,11 +21,11 @@ const ConfirmationModal = ({
   /**
    * @param {"next" | "prev"} type
    */
-  const handleChangeTab = (type) => {
-    if (type === "next" && activeTab < tabLength - 1) {
+  const handleChangeTab = (direction) => {
+    if (direction === "next" && activeTab < tabLength - 1) {
       setActiveTab((prev) => prev + 1);
     }
-    else if (type === "prev" && activeTab >= 0) {
+    else if (direction === "prev" && activeTab >= 0) {
       setActiveTab((prev) => prev - 1);
     }
   }
