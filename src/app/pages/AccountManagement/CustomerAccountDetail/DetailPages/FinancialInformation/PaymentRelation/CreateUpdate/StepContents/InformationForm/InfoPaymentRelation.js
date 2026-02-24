@@ -19,6 +19,7 @@ export default function InfoPaymentRelation({
   accountId,
   setAccount,
   isUpdate,
+  isDraft,
   form,
   formView = true,
 }) {
@@ -195,7 +196,7 @@ export default function InfoPaymentRelation({
                   setIsOpen(true)
                 }}
                 className="w-[120px]"
-                disabled={isUpdate}
+                disabled={!isDraft && isUpdate}
               >
                 Select
               </Button>
@@ -224,7 +225,7 @@ export default function InfoPaymentRelation({
           ]}
           className="no-margin-form"
         >
-          <InputComponent disabled={isUpdate} />
+          <InputComponent disabled={!isDraft && isUpdate} />
         </Form.Item>
 
         <Form.Item
@@ -242,7 +243,7 @@ export default function InfoPaymentRelation({
           })}
           className="no-margin-form"
         >
-          <DateComponent disabled={isUpdate} />
+          <DateComponent disabled={!isDraft && isUpdate} />
         </Form.Item>
 
         <Form.Item
@@ -264,7 +265,7 @@ export default function InfoPaymentRelation({
         className="no-margin-form"
       >
         <InputComponent
-          disabled={isUpdate}
+          disabled={!isDraft && isUpdate}
           type={"textarea"}
           rows={4}
           maxLength={255}
