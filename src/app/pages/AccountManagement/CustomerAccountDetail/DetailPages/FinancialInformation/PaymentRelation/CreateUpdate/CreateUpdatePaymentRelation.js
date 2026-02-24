@@ -8,7 +8,6 @@ import ApprovalSectionForm from "./StepContents/ApprovalForm/ApprovalPaymentRela
 import AttachmentSectionForm from "./StepContents/AttachmentForm/AttachmentPaymentRelation";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
-import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import {
   getCustomerDetail,
@@ -17,7 +16,6 @@ import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createPaymentRelation,
@@ -65,6 +63,9 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   const idCustomer = location?.state?.idCustomer;
   const idPr = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
+
+  const status = detail_paymentRelation.result?.status || "DRAFT";
+  const isDraft = status === "DRAFT";
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);

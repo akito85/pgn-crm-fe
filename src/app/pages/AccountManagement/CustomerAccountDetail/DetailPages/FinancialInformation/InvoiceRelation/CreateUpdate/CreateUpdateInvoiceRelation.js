@@ -18,7 +18,6 @@ import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createInvoiceRelation,
@@ -67,7 +66,6 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   const accountType = location?.state?.type; // "standard" or "onetime"
   
   const status = detail_invoiceRelation.status || "DRAFT";
-
   const isDraft = status === "DRAFT";
 
   //state
