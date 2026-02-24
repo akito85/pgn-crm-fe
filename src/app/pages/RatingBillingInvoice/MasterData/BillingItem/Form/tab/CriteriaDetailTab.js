@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 
 const CriteriaDetailTab = ({
-  criteriaType = null,
+  criteriaType = null,           // id dari form Select (bisa berupa number atau string angka)
   dataTable = [],
   onDataChange = () => {},
   data_specialGLList = [],
   data_glAccountList = [],
   data_classificationTypeList = [],
   data_accountTypeList = [],
-  data_criteriaOptions = [],
+  data_criteriaOptions = [],     // [{ id, name, code }]
   type = "create",
   isEditabled = false,
   setIsEditabled = () => {},
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
-  onCancelEdit = null, // ✅ prop baru: diteruskan ke DynamicTableInlineBilling
+  onCancelEdit = null,
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -26,16 +26,36 @@ const CriteriaDetailTab = ({
     setPageSize(pageSizeChange);
   };
 
-  // Resolve criteriaType — bisa berupa ID number atau string code
-  const criteriaCode =
-    typeof criteriaType === "number" ||
-    (typeof criteriaType === "string" && !isNaN(Number(criteriaType)))
-      ? data_criteriaOptions?.find(
-          (item) =>
-            item.id === criteriaType || item.id === Number(criteriaType)
-        )?.code
-      : criteriaType;
+  // ✅ Resolve criteriaType (id atau code) → criteriaCode (string)
+  // criteriaType bisa berupa:
+  //   - number/string angka  → id dari form Select, perlu di-resolve ke code
+  //   - string non-angka     → sudah berupa code langsung (misal saat dari response)
+  const resolveCriteriaCode = () => {
+    if (criteriaType === null || criteriaType === undefined) return null;
 
+    const isNumericId =
+      typeof criteriaType === "number" ||
+      (typeof criteriaType === "string" && !isNaN(Number(criteriaType)));
+
+    if (isNumericId) {
+      // Cari berdasarkan id
+      return (
+        data_criteriaOptions?.find(
+          (item) => item.id === criteriaType || item.id === Number(criteriaType),
+        )?.code || null
+      );
+    }
+
+    // Sudah berupa code string
+    return criteriaType;
+  };
+
+  const criteriaCode = resolveCriteriaCode();
+
+  // ✅ Tentukan konfigurasi kolom berdasarkan criteriaCode
+  // - "CLASSIFICATION_TYPE" → tampilkan kolom Classification Type
+  // - "ACCOUNT_TYPE"        → tampilkan kolom Account Type
+  // - "ALL" / null / lainnya → tidak ada kolom criteria khusus
   const getCriteriaColumnConfig = () => {
     switch (criteriaCode) {
       case "CLASSIFICATION_TYPE":
@@ -57,7 +77,8 @@ const CriteriaDetailTab = ({
           })),
         };
       default:
-        return null; // ALL = tidak ada kolom criteria khusus
+        // "ALL" atau belum dipilih → tidak ada kolom criteria khusus
+        return null;
     }
   };
 
@@ -75,6 +96,7 @@ const CriteriaDetailTab = ({
     label: item.name,
   }));
 
+  // Helper render nilai select: cari label dari options, fallback ke value itu sendiri
   const renderSelectValue = (value, options) => {
     if (!value && value !== 0) return "-";
     const found = options.find((o) => o.label === value || o.value === value);
@@ -88,6 +110,7 @@ const CriteriaDetailTab = ({
       width: 60,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
+    // ✅ Kolom criteria hanya muncul jika criteriaCode bukan "ALL"
     ...(criteriaColConfig
       ? [
           {
@@ -124,7 +147,6 @@ const CriteriaDetailTab = ({
     {
       title: "DESCRIPTION ACCOUNT",
       dataIndex: "descriptionAccount",
-      // ✅ Read-only: diisi otomatis dari glAccountDesc, tidak bisa diedit manual
       inputType: "description_readonly",
       width: 220,
       render: (value) => value || "-",
@@ -162,7 +184,7 @@ const CriteriaDetailTab = ({
     180 +
     180 +
     180 +
-    120;
+    120; // kolom ACTIONS
 
   return (
     <DynamicTableInlineBilling
@@ -186,7 +208,7 @@ const CriteriaDetailTab = ({
       startDateLock={startDateLock || "bypass"}
       endDateLock={endDateLock}
       setModalRequired={setModalRequired}
-      onCancelEdit={onCancelEdit} 
+      onCancelEdit={onCancelEdit}
     />
   );
 };

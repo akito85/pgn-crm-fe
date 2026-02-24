@@ -1,4 +1,5 @@
 import { Fragment, useRef, useState } from "react";
+import { Tabs } from "antd";
 import DetailText from "../../../../../../components/DetailText";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import columnsDetail from "../Table/TableDetailMappingInformation";
@@ -12,12 +13,96 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import CardContainer from "../../../../../../components/CardContainer";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
+const { TabPane } = Tabs;
+
+// ─── Criteria Detail read-only columns ───────────────────────────────────────
+const buildCriteriaColumns = () => [
+  {
+    title: "NO",
+    dataIndex: "no",
+    width: 60,
+    align: "center",
+    render: (_, __, index) => index + 1,
+  },
+  {
+    title: "CRITERIA VALUE",
+    dataIndex: "criteriaValue",
+    width: 180,
+    render: (val) => val || "-",
+  },
+  {
+    title: "GL ACCOUNT",
+    dataIndex: "glAccount",
+    width: 280,
+    render: (val) => val || "-",
+  },
+  {
+    title: "DESCRIPTION ACCOUNT",
+    dataIndex: "descriptionAccount",
+    width: 220,
+    render: (val) => val || "-",
+  },
+  {
+    title: "SPECIAL GL",
+    dataIndex: "specialGl",
+    width: 140,
+    render: (val) => val || "-",
+  },
+  {
+    title: "START DATE",
+    dataIndex: "startDate",
+    width: 150,
+    render: (val) => (val ? moment(val).format(dateFormatting.date) : "-"),
+  },
+  {
+    title: "END DATE",
+    dataIndex: "endDate",
+    width: 150,
+    render: (val) => (val ? moment(val).format(dateFormatting.date) : "-"),
+  },
+];
+
+// ─── Label resolvers ──────────────────────────────────────────────────────────
+const resolveTypeName = (transMappingType, data_typeList = []) => {
+  if (!transMappingType) return "-";
+  const found = data_typeList?.find(
+    (t) => t.code === transMappingType || t.id === transMappingType,
+  );
+  return found ? found.name : transMappingType;
+};
+
+const resolveCriteriaName = (criteriaList, data_criteriaList = []) => {
+  if (!criteriaList || criteriaList.length === 0) return "-";
+  const firstCode = criteriaList[0]?.criteriaCode;
+  if (!firstCode) return "-";
+  const found = data_criteriaList?.find(
+    (c) => c.code === firstCode || c.id === firstCode,
+  );
+  return found ? found.name : firstCode;
+};
+
+const handleStatusCase = (index) => {
+  switch (index) {
+    case "WAITING APPROVAL":
+    case "WAITING_APPROVAL":
+      return "Waiting Approval";
+    default:
+      return index
+        ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+        : index;
+  }
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 const BillingItemDetailInformation = ({
   dataBillingItem,
   dataMapping = [],
-  // dataDetailMapping = [],
   type = "detail",
+  // ✅ untuk resolve transMappingType & criteriaCode → label
+  data_typeList = [],
+  data_criteriaList = [],
 }) => {
+  // Mapping Detail state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -25,6 +110,7 @@ const BillingItemDetailInformation = ({
   const searchInput = useRef(null);
   const [search, setSearch] = useState({});
 
+  // Detail Mapping state
   const [pageDetail, setPageDetail] = useState(1);
   const [pageSizeDetail, setPageSizeDetail] = useState(10);
   const [searchedColumnDetail, setSearchedColumnDetail] = useState("");
@@ -35,11 +121,14 @@ const BillingItemDetailInformation = ({
   const [category, setCategory] = useState("");
   const [dataHistory, setDataHistory] = useState({});
   const [dataDetailTable, setDataDetailTable] = useState([]);
-
   const [subHeader, setSubHeader] = useState("");
   const [modalHistory, setModalHistory] = useState(false);
   const [isDetailMapShown, setIsDetailMapShown] = useState(false);
 
+  // ✅ Tab: "mapping" | "criteria"
+  const [mappingTab, setMappingTab] = useState("mapping");
+
+  // ─── Handlers ────────────────────────────────────────────────────────────────
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -48,20 +137,12 @@ const BillingItemDetailInformation = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
+    if (searchedColumn !== tempSearchColumn) setPage(1);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
+      return { ...prevState, [dataIndex]: selectedKeys[0] };
     });
   };
 
@@ -74,18 +155,11 @@ const BillingItemDetailInformation = ({
     confirm();
     setSearchTextDetail(selectedKeys[0]);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumnDetail !== tempSearchColumn) {
-      setPage(1);
-    }
+    if (searchedColumnDetail !== tempSearchColumn) setPage(1);
     setSearchedColumnDetail(dataIndex);
     setSearchDetail((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
+      return { ...prevState, [dataIndex]: selectedKeys[0] };
     });
   };
 
@@ -95,127 +169,65 @@ const BillingItemDetailInformation = ({
       setCategory("");
     } else {
       setSubHeader(
-        dataBillingItem.mappingInformation.filter(
+        dataBillingItem?.mappingInformation?.find(
           (item) => item.categoryId === e.categoryId,
-        )[0]?.category,
+        )?.category,
       );
       setCategory(e.categoryId);
-      if (dataBillingItem) {
-        const detailMappingInfo = dataBillingItem?.mappingInformation?.filter(
-          (item) => item.categoryId === e.categoryId,
-        )[0]?.detailMappingInfo;
-        setDataDetailTable(detailMappingInfo);
-        setIsDetailMapShown(true);
-      }
+      const detailMappingInfo = dataBillingItem?.mappingInformation?.find(
+        (item) => item.categoryId === e.categoryId,
+      )?.detailMappingInfo;
+      setDataDetailTable(detailMappingInfo || []);
+      setIsDetailMapShown(true);
     }
   };
 
   const onFilter = (dataIndex, value, record) => {
-    const search =
-      // moment(value, dateFormatting.dateFormal, true).isValid() //adjust for date
-      //   ? moment(value).format(dateFormatting.date).toLowerCase()
-      //   :
-      value.toLowerCase();
+    const searchVal = value.toLowerCase();
     switch (dataIndex) {
       case "startDate":
       case "endDate":
         const date = record[dataIndex]
           ? moment(record[dataIndex]).format("DD MMM YYYY")
           : "";
-        return date.toString().toLowerCase().includes(search);
+        return date.toString().toLowerCase().includes(searchVal);
       case "fileSize":
-        return record.size.includes(search);
+        return record.size.includes(searchVal);
       default:
-        return record[dataIndex]?.toLowerCase().includes(search);
+        return record[dataIndex]?.toLowerCase().includes(searchVal);
     }
   };
 
   const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
+    const getData = (obj) => {
       switch (fieldSort) {
         case "startDate":
         case "endDate":
           return obj[fieldSort] ? moment(obj[fieldSort]) : null;
-        // return date.toLowerCase();
         default:
           return `${obj[fieldSort]}`.toLowerCase();
       }
     };
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-
-    const handleCompare = (a, b) => {
-      switch (fieldSort) {
-        case "startDate":
-        case "endDate":
-          if (a === null && b === null) return 0; // Both are null, consider equal
-          if (a === null) return 1; // `a` is null, place it as greater (bottom)
-          if (b === null) return -1; // `b` is null, place it as greater (bottom)
-          if (hasValue(a) && hasValue(b)) {
-            if (a.isBefore(b)) return -1;
-            if (a.isAfter(b)) return 1;
-            return 0;
-          }
-          return 0; // Handle null cases if necessary
-        default:
-          return a.localeCompare(b);
-      }
-    };
-    return handleCompare(fa, fb);
-  };
-
-  const sorterDetail = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
-      switch (fieldSort) {
-        case "startDate":
-        case "endDate":
-          return obj[fieldSort] ? moment(obj[fieldSort]) : null;
-        // return date.toLowerCase();
-        default:
-          return `${obj[fieldSort]}`.toLowerCase();
-      }
-    };
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-
-    const handleCompare = (a, b) => {
-      switch (fieldSort) {
-        case "startDate":
-        case "endDate":
-          if (a === null && b === null) return 0; // Both are null, consider equal
-          if (a === null) return 1; // `a` is null, place it as greater (bottom)
-          if (b === null) return -1; // `b` is null, place it as greater (bottom)
-          if (hasValue(a) && hasValue(b)) {
-            if (a.isBefore(b)) return -1;
-            if (a.isAfter(b)) return 1;
-            return 0;
-          }
-          return 0; // Handle null cases if necessary
-        default:
-          return a.localeCompare(b);
-      }
-    };
-    return handleCompare(fa, fb);
-  };
-
-  const handleStatusCase = (index) => {
-    let text;
-    switch (index) {
-      case "WAITING APPROVAL":
-      case "WAITING_APPROVAL":
-        text = "Waiting Approval";
-        break;
+    const fa = getData(a);
+    const fb = getData(b);
+    switch (fieldSort) {
+      case "startDate":
+      case "endDate":
+        if (fa === null && fb === null) return 0;
+        if (fa === null) return 1;
+        if (fb === null) return -1;
+        if (hasValue(fa) && hasValue(fb)) {
+          if (fa.isBefore(fb)) return -1;
+          if (fa.isAfter(fb)) return 1;
+          return 0;
+        }
+        return 0;
       default:
-        text = index
-          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-          : index;
-        break;
+        return fa.localeCompare(fb);
     }
-    return text;
   };
 
   const handleDetailHistory = (r) => {
-    // console.log(r);
     setModalHistory(true);
     setDataHistory({
       recordId: r?.rMappingId,
@@ -226,157 +238,232 @@ const BillingItemDetailInformation = ({
     });
   };
 
-  const closeModalHistory = () => {
-    setModalHistory(false);
-  };
+  // ✅ Criteria rows langsung dari response API field "criteria"
+  const criteriaTableData = (dataBillingItem?.criteria || []).map(
+    (item, idx) => ({ ...item, key: idx }),
+  );
 
   return (
     <Fragment>
-      <CardContainer header="BILLING ITEM INFORMATION">
-        <div className="w-full grid grid-cols-6 gap-3">
-          <DetailText label="Billing Item Code">
-            {dataBillingItem?.billingItemCode || ""}
+      {/* ================================================================
+          TRANSACTION MAPPING INFORMATION
+          Layout: 4 kolom × N baris, sesuai desain UI/UX
+      ================================================================ */}
+      <CardContainer header="TRANSACTION MAPPING INFORMATION">
+        <div className="w-full grid grid-cols-4 gap-x-8 gap-y-5">
+
+          {/* Row 1: Type | Mapping Code | Mapping Category | Name */}
+          <DetailText label="Type">
+            {resolveTypeName(dataBillingItem?.transMappingType, data_typeList)}
           </DetailText>
-          <DetailText label="Billing Item Category">
-            {dataBillingItem?.billingItemCategory || ""}
+          <DetailText label="Transaction Mapping Code">
+            {dataBillingItem?.billingItemCode || "-"}
+          </DetailText>
+          <DetailText label="Transaction Mapping Category">
+            {dataBillingItem?.billingItemCategory || "-"}
           </DetailText>
           <DetailText label="Name">
-            {dataBillingItem?.billingItemName}
+            {dataBillingItem?.billingItemName || "-"}
           </DetailText>
+
+          {/* Row 2: Bill Type | Start Date | End Date | Late Charge */}
           <DetailText label="Bill Type">
-            {dataBillingItem?.billingType}
+            {dataBillingItem?.billingType || "-"}
           </DetailText>
           <DetailText label="Start Date">
-            {moment(dataBillingItem?.startDate).format(dateFormatting.date)}
+            {dataBillingItem?.startDate
+              ? moment(dataBillingItem.startDate).format(dateFormatting.date)
+              : "-"}
           </DetailText>
           <DetailText label="End Date">
-            {dataBillingItem.endDate
-              ? moment(dataBillingItem?.endDate).format(dateFormatting.date)
-              : ""}
+            {dataBillingItem?.endDate
+              ? moment(dataBillingItem.endDate).format(dateFormatting.date)
+              : "-"}
           </DetailText>
           <DetailText label="Late Charge">
             {dataBillingItem?.lateCharge ? "Yes" : "No"}
           </DetailText>
+
+          {/* Row 3: Payment Warranty | Installment/Restructure | Criteria | Description */}
           <DetailText label="Payment Warranty">
             {dataBillingItem?.paymentWarranty ? "Yes" : "No"}
           </DetailText>
-          <DetailText label="GL account">
-            {dataBillingItem?.glAccount || ""}
+          <DetailText label="Installment / Restructure">
+            {/* ✅ field API: "installment" */}
+            {dataBillingItem?.installment ? "Yes" : "No"}
           </DetailText>
+          <DetailText label="Criteria">
+            {/* ✅ resolve criteria[0].criteriaCode → label */}
+            {resolveCriteriaName(dataBillingItem?.criteria, data_criteriaList)}
+          </DetailText>
+          <DetailText label="Description">
+            {dataBillingItem?.description || "-"}
+          </DetailText>
+
+          {/* Row 4: Status | Status Approval */}
           <DetailText label="Status">
-            {dataBillingItem?.status && (
+            {dataBillingItem?.status ? (
               <StatusComponent colour={dataBillingItem.status}>
                 {dataBillingItem.status}
               </StatusComponent>
-            )}
+            ) : "-"}
           </DetailText>
           <DetailText label="Status Approval">
-            {dataBillingItem?.statusApproval && (
+            {dataBillingItem?.statusApproval ? (
               <StatusComponent colour={dataBillingItem.statusApproval}>
                 {handleStatusCase(dataBillingItem.statusApproval)}
               </StatusComponent>
-            )}
+            ) : "-"}
           </DetailText>
-          <div className="col-span-4">
-            <DetailText label="Description">
-              {dataBillingItem?.description || ""}
-            </DetailText>
-          </div>
         </div>
       </CardContainer>
 
-      <CardContainer header="MAPPING INFORMATION">
-        <TablePaginationNew
-          dataSource={dataMapping}
-          type="FE"
-          totalData={dataMapping.length || 0}
-          columns={columnsMapping(
-            search,
-            false,
-            type,
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDetail,
-            onFilter,
-            sorter,
-          )}
-          current={page}
-          pageSize={pageSize}
-          onChange={handleChange}
-          tableScrolled={{ y: 525, x: 2000 }}
-        />
+      {/* ================================================================
+          MAPPING INFORMATION
+          Tab: Mapping Detail | Criteria Detail
+      ================================================================ */}
+      <CardContainer
+        type="tabs"
+        header="MAPPING INFORMATION"
+        element={
+          <Tabs
+            activeKey={mappingTab}
+            onChange={(key) => {
+              setMappingTab(key);
+              // Reset detail panel saat pindah tab
+              if (key !== "mapping") {
+                setIsDetailMapShown(false);
+                setCategory("");
+              }
+            }}
+            tabBarStyle={{ marginBottom: 0 }}
+          >
+            <TabPane tab="Mapping Detail" key="mapping" />
+            <TabPane tab="Criteria Detail" key="criteria" />
+          </Tabs>
+        }
+      >
+
+        {/* ── Tab: Mapping Detail ── */}
+        {mappingTab === "mapping" && (
+          <>
+            <TablePaginationNew
+              dataSource={dataMapping}
+              type="FE"
+              totalData={dataMapping.length || 0}
+              columns={columnsMapping(
+                search,
+                false,
+                type,
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                handleDetail,
+                onFilter,
+                sorter,
+              )}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              tableScrolled={{ y: 525, x: 2000 }}
+            />
+
+            {/* Detail Mapping panel – tampil saat baris di-klik */}
+            {isDetailMapShown && (
+              <div className="mt-4">
+                <CardContainer header="DETAIL MAPPING INFORMATION">
+                  {subHeader && (
+                    <div className="mb-4 text-sm font-medium">
+                      Category:{" "}
+                      <span className="text-primary">{subHeader}</span>
+                    </div>
+                  )}
+                  <TablePaginationNew
+                    dataSource={dataDetailTable || []}
+                    type="FE"
+                    totalData={dataDetailTable?.length || 0}
+                    columns={columnsDetail(
+                      searchDetail,
+                      false,
+                      type,
+                      pageDetail,
+                      pageSizeDetail,
+                      searchInputDetail,
+                      searchedColumnDetail,
+                      searchTextDetail,
+                      handleSearchDetail,
+                      onFilter,
+                      sorter,
+                      [],
+                      handleDetailHistory,
+                    )}
+                    current={pageDetail}
+                    pageSize={pageSizeDetail}
+                    onChange={handleChangeDetail}
+                    tableScrolled={{ y: 525, x: 2000 }}
+                  />
+                </CardContainer>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Tab: Criteria Detail ── */}
+        {mappingTab === "criteria" && (
+          <TablePaginationNew
+            dataSource={criteriaTableData}
+            type="FE"
+            totalData={criteriaTableData.length || 0}
+            columns={buildCriteriaColumns()}
+            current={1}
+            pageSize={10}
+            onChange={() => {}}
+            tableScrolled={{ y: 525, x: 1300 }}
+          />
+        )}
       </CardContainer>
 
-      {isDetailMapShown && (
-        <CardContainer header="DETAIL MAPPING INFORMATION">
-          {subHeader && (
-            <div className="mb-4 text-sm font-medium">
-              Category: <span className="text-primary">{subHeader}</span>
-            </div>
-          )}
-          <TablePaginationNew
-            dataSource={dataDetailTable || []}
-            type="FE"
-            totalData={dataDetailTable?.length || 0}
-            columns={columnsDetail(
-              searchDetail,
-              false,
-              type,
-              pageDetail,
-              pageSizeDetail,
-              searchInputDetail,
-              searchedColumnDetail,
-              searchTextDetail,
-              handleSearchDetail,
-              onFilter,
-              sorterDetail,
-              [],
-              handleDetailHistory,
-            )}
-            current={pageDetail}
-            pageSize={pageSizeDetail}
-            onChange={handleChangeDetail}
-            tableScrolled={{ y: 525, x: 2000 }}
-          />
-        </CardContainer>
-      )}
-
+      {/* ================================================================
+          HISTORY LOG INFORMATION
+      ================================================================ */}
       <CardContainer header="HISTORY LOG INFORMATION">
         <div className="w-full grid grid-cols-5 gap-5">
-          <DetailText label="Record ID">{dataBillingItem?.id}</DetailText>
+          <DetailText label="Record ID">{dataBillingItem?.id || "-"}</DetailText>
           <DetailText label="Created Date">
             {renderDateTime(dataBillingItem?.createdDate)}
           </DetailText>
           <DetailText label="Created By">
-            {dataBillingItem?.createdBy}
+            {dataBillingItem?.createdBy || "-"}
           </DetailText>
           <DetailText label="Update Date">
             {renderDateTime(dataBillingItem?.updatedDate)}
           </DetailText>
           <DetailText label="Updated By">
-            {dataBillingItem?.updatedBy}
+            {dataBillingItem?.updatedBy || "-"}
           </DetailText>
         </div>
       </CardContainer>
 
-      {/* Modal History Log */}
+      {/* Modal History Log detail mapping */}
       <ModalCustom
         isOpen={modalHistory}
-        handleCancel={closeModalHistory}
+        handleCancel={() => setModalHistory(false)}
         type="detail"
         header="DETAIL INFORMATION"
         width={800}
         footer={
-          <ButtonComponent type={"default"} onClick={closeModalHistory}>
+          <ButtonComponent
+            type="default"
+            onClick={() => setModalHistory(false)}
+          >
             Back
           </ButtonComponent>
         }
       >
-        <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
+        <CardComponent header="HISTORY LOG INFORMATION" cols={5}>
           <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
@@ -395,4 +482,5 @@ const BillingItemDetailInformation = ({
     </Fragment>
   );
 };
+
 export default BillingItemDetailInformation;

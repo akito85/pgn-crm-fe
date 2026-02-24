@@ -1,4 +1,4 @@
-import { Checkbox, Spin, Tooltip } from "antd";
+import { Checkbox, Tooltip } from "antd";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -26,6 +26,9 @@ import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../../components/CardContainer";
 import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 
+const INITIAL_PAGE_SIZE = 100;
+const LOAD_MORE_SIZE = 20;
+
 const BillingItemView = () => {
   // Selector
   const { data_view, data_ApprovalHistory, loading } = useSelector(
@@ -41,7 +44,6 @@ const BillingItemView = () => {
 
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
@@ -58,16 +60,19 @@ const BillingItemView = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
+  // ─── Infinite Scroll: initial fetch & re-fetch on filter/sort change ───────
   useEffect(() => {
     dispatch(
       getBillingItemList({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: INITIAL_PAGE_SIZE,
         sort,
+        isLoadMore: false,
       }),
     );
-  }, [dispatch, search, page, pageSize, sort]);
+    setPage(1);
+  }, [dispatch, search, sort]);
 
   // trigger modal try again from general slice
   useEffect(() => {
@@ -77,18 +82,9 @@ const BillingItemView = () => {
   }, [bodyErrorGeneral]);
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
-    {
-      path: "",
-      breadcrumbName: "Transaction Mapping",
-    },
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    { path: "", breadcrumbName: "Transaction Mapping" },
   ];
 
   useEffect(() => {
@@ -126,10 +122,43 @@ const BillingItemView = () => {
     });
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // ─── Infinite Scroll: load more handler ──────────────────────────────────
+  const currentList = useMemo(
+    () => data_view?.result || [],
+    [data_view],
+  );
+  const totalElements = data_view?.page?.totalElements || 0;
+  const hasMore = currentList.length < totalElements;
+
+  const handleLoadMore = async () => {
+    if (!hasMore) return;
+
+    const nextPage = Math.floor(currentList.length / LOAD_MORE_SIZE) + 1;
+
+    await dispatch(
+      getBillingItemList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: LOAD_MORE_SIZE,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+    setPage(nextPage);
+  };
+
+  // ─── Refresh ──────────────────────────────────────────────────────────────
+  const handleRefresh = () => {
+    dispatch(
+      getBillingItemList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: INITIAL_PAGE_SIZE,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+    setPage(1);
   };
 
   const handleOptions = () => {
@@ -147,7 +176,7 @@ const BillingItemView = () => {
 
   const onSort = (_, __, sorter) => {
     const dataSort =
-      sorter.order !== undefined
+      sorter && sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
@@ -158,7 +187,7 @@ const BillingItemView = () => {
       downloadBillingItem({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
-        pageSize,
+        pageSize: LOAD_MORE_SIZE,
         sort,
       }),
     );
@@ -200,14 +229,17 @@ const BillingItemView = () => {
       .then(() => {
         handleClear();
         handleCancel();
+        // Refresh list after inactivate
         dispatch(
           getBillingItemList({
             search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: INITIAL_PAGE_SIZE,
             sort,
+            isLoadMore: false,
           }),
         );
+        setPage(1);
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -296,7 +328,9 @@ const BillingItemView = () => {
                 <span className="pointer-events-none">
                   <SVGIcon name="IconEdit" color="#8D91A0" width={24} />
                 </span>
-                <span className="text-[#8D91A0] ml-4 pointer-events-none">Update</span>
+                <span className="text-[#8D91A0] ml-4 pointer-events-none">
+                  Update
+                </span>
               </div>
             )
           ) : (
@@ -424,13 +458,13 @@ const BillingItemView = () => {
     return columns(
       search,
       page,
-      pageSize,
+      LOAD_MORE_SIZE,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
     );
-  }, [search, page, pageSize, searchedColumn, searchText]);
+  }, [search, page, searchedColumn, searchText]);
 
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
@@ -462,7 +496,6 @@ const BillingItemView = () => {
 
   return (
     <LayoutMenu>
-      {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -477,20 +510,25 @@ const BillingItemView = () => {
       >
         <div className="my-0">
           <TableRBI
-            dataSource={data_view?.result}
+            dataSource={currentList}
             columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={data_view?.page?.totalElements || 0}
+            totalData={totalElements}
             tableScrolled={{ x: 2300, y: 525 }}
             onSort={onSort}
+            showExport={true}
             columnDefinitions={columnDefinitions}
             handleDownload={handleDownload}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            loadMoreThreshold={20}
+            enableRowClick={false}
           />
         </div>
       </CardContainer>
@@ -522,7 +560,7 @@ const BillingItemView = () => {
         dataHistory={dataApprovalHistory?.dataHistory}
       />
 
-      {/* Modal Modal Error Inactive */}
+      {/* Modal Error Inactive */}
       <ModalError
         isOpen={modalError}
         handleOk={handleRetry}
@@ -541,7 +579,6 @@ const BillingItemView = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-      {/* </Spin> */}
     </LayoutMenu>
   );
 };
