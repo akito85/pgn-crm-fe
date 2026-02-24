@@ -6,7 +6,8 @@ export default function InformationForm({
   page,
   pageSize,
   accountId,
+  isUpdate,
 }) {
 
-  return <InfoInvoiceRelation setAccount={setAccount} className={className} accountId={accountId} />;
+  return <InfoInvoiceRelation setAccount={setAccount} className={className} accountId={accountId} isUpdate={isUpdate} />;
 }

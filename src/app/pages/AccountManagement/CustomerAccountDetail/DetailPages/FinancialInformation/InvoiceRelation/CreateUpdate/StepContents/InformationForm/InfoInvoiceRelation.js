@@ -19,6 +19,7 @@ export default function InfoInvoiceRelation({
   setAccount,
   className,
   accountId,
+  isUpdate,
 }) {
   const dispatch = useDispatch();
 
@@ -149,16 +150,12 @@ export default function InfoInvoiceRelation({
       <NxCardContainer header={"INVOICE RELATION INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           <div className="flex gap-2 items-end">
-            <Form.Item name={"objectId"} hidden>
-              <Input />
-            </Form.Item>
-
             <Form.Item
               label={"Account Number"}
               required
               className="no-margin-form"
             >
-              <Input.Group compact>
+              <Input.Group compact className="flex gap-x-1">
                 <Form.Item
                   key="accountNumber"
                   name={"accountNumber"}
@@ -174,17 +171,11 @@ export default function InfoInvoiceRelation({
                 </Form.Item>
                 <Button
                   type="primary"
-                  className="h-9 px-4 justify-center items-center"
-                  style={{
-                    backgroundColor: "#0075bf",
-                    borderColor: "#0075bf",
-                    borderRadius: "5px",
-                    minWidth: "112px",
-                  }}
+                  className="w-[120px]"
                   onClick={() => {
-                    // Add your select logic here
                     setIsOpen(true)
                   }}
+                  disabled={isUpdate}
                 >
                   Select
                 </Button>
@@ -216,7 +207,7 @@ export default function InfoInvoiceRelation({
             })}
             className="no-margin-form"
           >
-            <DateComponent />
+            <DateComponent disabled={isUpdate} />
           </Form.Item>
 
           <Form.Item
@@ -240,6 +231,7 @@ export default function InfoInvoiceRelation({
             className="no-margin-form"
           >
             <InputComponent
+              disabled={isUpdate}
               type={"textarea"}
               rows={4}
               maxLength={255}

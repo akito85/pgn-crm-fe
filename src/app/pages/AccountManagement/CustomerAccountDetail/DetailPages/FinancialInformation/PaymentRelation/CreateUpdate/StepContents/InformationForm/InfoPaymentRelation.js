@@ -140,10 +140,6 @@ export default function InfoPaymentRelation({
 
   const hasMore = currentData.length < (pagination_prAccountStandard?.totalElements || 0);
 
-  useEffect(() => {
-    console.log("hasMore", hasMore);
-  }, [hasMore])
-
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
 
@@ -244,7 +240,6 @@ export default function InfoPaymentRelation({
           getValueProps={(dateString) => ({
             value: dateString ? moment(dateString, dateFormatting.dateForm) : null
           })}
-          disabled={isUpdate}
           className="no-margin-form"
         >
           <DateComponent disabled={isUpdate} />

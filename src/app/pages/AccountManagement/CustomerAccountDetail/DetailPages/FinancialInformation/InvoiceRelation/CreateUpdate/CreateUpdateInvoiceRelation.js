@@ -40,11 +40,14 @@ import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
 
-const CreateUpdateInvoiceRelation = ({ type }) => {
+const CreateUpdateInvoiceRelation = ({ formType }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
   const dispatch = useDispatch();
+
+  const isCreate = formType === "create";
+  const isUpdate = formType === "update";
 
   const {
     data_accountDetail,
@@ -103,15 +106,15 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   }, [idAccount]);
 
   useEffect(() => {
-    if (type === "update" && idIr) {
+    if (isUpdate && idIr) {
       dispatch(getDetailInvoiceRelation(idIr));
       dispatch(getInvoiceRelationAttachment({ id: idIr }))
     }
-  }, [type, idIr]);
+  }, [formType, idIr]);
 
   useEffect(() => {
     if (
-      type === "update" &&
+      isUpdate &&
       detail_invoiceRelation &&
       data_irApprovalHierarchy?.length
     ) {
@@ -145,7 +148,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   }, [detail_invoiceRelation, data_irApprovalHierarchy]);
 
   useEffect(() => {
-    if (type === "update" && list_irDetailAttachment) {
+    if (isUpdate && list_irDetailAttachment) {
       const result = list_irDetailAttachment.map((item, index) => ({
         ...item,
         key: `invoice-relation-attachment-${item.id}`,
@@ -180,17 +183,9 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create Invoice Relation" : (type === "update") ? "Update Invoice Relation" : "",
+      breadcrumbName: isCreate ? "Create Invoice Relation" : isUpdate ? "Update Invoice Relation" : "",
     },
   ];
-
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
 
   /**
    * @param {boolean} show 
@@ -223,7 +218,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
           const body = {
             stepNumber: current + 1,
-            type: type.toUpperCase(),
+            type: formType.toUpperCase(),
             id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
@@ -239,7 +234,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             body,
             services: accountManagementService,
             endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-            type,
+            type: formType,
           }))
           .unwrap();
         }  
@@ -256,7 +251,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       } = formCreate.getFieldsValue();
 
       const body = {
-        id: type === "update" ? idIr : undefined,
+        id: isUpdate ? idIr : undefined,
         subjectId: data_accountDetail?.accountInformation?.accountId, 
         objectId,
         description, 
@@ -269,8 +264,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       dispatch(validateCreateUpdate({
         body,
         services: accountManagementService,
-        endPoint: `/v1/dbs/api/invoice-relation/validate-${type}`,
-        type,
+        endPoint: `/v1/dbs/api/invoice-relation/validate-${formType}`,
+        type: formType,
       }))
       .unwrap()
       .then((data) => {
@@ -316,6 +311,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           className={`${current !== 0 ? "hidden" : ""}`}
           key={`invoice-relation-tab-0`}
           accountId={idAccount}
+          isUpdate={isUpdate}
         />
       ),
       disabled: false
@@ -345,7 +341,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       title: "Attachment",
       content: (
         <AttachmentForm
-          type={type}
+          type={formType}
           data={dataAttachment}
           updateData={setDataAttachment}
           dispatch={dispatch}
@@ -385,11 +381,11 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           startDate,
           endDate,
           appHierId,
-        } = formCreate.getFieldsValue();
+        } = formCreate.getFieldsValue(true);
 
         const body = {
           stepNumber: current + 1,
-          type: type.toUpperCase(),
+          type: formType.toUpperCase(),
           id: idIr,
           data : {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
@@ -405,7 +401,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           body,
           services: accountManagementService,
           endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-          type,
+          type: formType,
         }))
         .unwrap()
       }
@@ -447,7 +443,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
           const body = {
             stepNumber: i + 1,
-            type: type.toUpperCase(),
+            type: formType.toUpperCase(),
             id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
@@ -463,7 +459,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             body,
             services: accountManagementService,
             endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-            type,
+            type: formType,
           }))
           .unwrap()
         }
@@ -514,7 +510,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       remark,
     };
 
-    if (type === "create")
+    if (isCreate)
       dispatch(createInvoiceRelation({ body, attachments: dataAttachment }))
       .unwrap()
       .then((data) => {
@@ -531,7 +527,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         }, 2000)
       })
       .catch((error) => {});
-    else if (type === "update")
+    else if (isCreate)
       dispatch(updateInvoiceRelation({ id: idIr, body, attachments: dataAttachment.filter((attachment => attachment.dataType !== "exist")) }))
       .unwrap()
         .then((data) => {
@@ -551,13 +547,13 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   };
 
   const handleClear = () => {
-    if (type === "create") {
+    if (isCreate) {
       setDataAttachment([]);
       setSelectedAppHierId();
       setSelectedApprovalName();
       formCreate.resetFields();
       setCurrent(0);
-    } else if (type === "update") {
+    } else if (isUpdate) {
       if (
         detail_invoiceRelation &&
         data_irApprovalHierarchy?.length
@@ -649,7 +645,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
                   type={"reject"}
                   icon={<SVGIcon name="IconButtonClear" width={24} />}
                 >
-                  { type === "update" ? "Reset" : "Clear" }
+                  { isUpdate ? "Reset" : "Clear" }
                 </ButtonComponent>
                 <ButtonComponent
                   onClick={() => handleSetShowConfirmationModal(true, "draft")}

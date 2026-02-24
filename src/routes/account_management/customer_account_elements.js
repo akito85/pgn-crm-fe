@@ -117,8 +117,8 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Payment Relation Detail
   VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
-  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"create"} />,
-  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"update"} />,
+  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"create"} />,
+  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"update"} />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,
