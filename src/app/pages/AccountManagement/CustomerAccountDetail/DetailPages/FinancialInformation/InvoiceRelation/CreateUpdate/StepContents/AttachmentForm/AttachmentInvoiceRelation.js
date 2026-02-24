@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
-import { Spin, Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import { Spin, Tooltip, Button } from "antd";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachmentInvoiceRelation";
 import { useSelector } from "react-redux";
@@ -174,29 +173,23 @@ const columnAttachmentData = (
         return (
           <div className="flex justify-center align-middle gap-2 py-1">
             <Tooltip title="Preview">
-              <span className="flex justify-center">
-                <EyeOutlined
-                  style={{ fontSize: "20px", color: "#0075bf" }}
-                  onClick={() => handleShow(r)}
-                />
-              </span>
+              <Button
+                onClick={() => handleShow(r)}
+                disabled={r.dataType !== "exist"}
+                type="table-action"
+              >
+                <SVGIcon name="IconEye" width={20} />
+              </Button>
             </Tooltip>
-            {type !== "detail" ? (
+            {type !== "detail" && type !== "confirmation" ? (
               <Tooltip title="Delete">
-                <span
-                  className={`flex justify-center${r.dataType === "exist" ? " cursor-not-allowed" : ""
-                    }`}
+                <Button
+                  onClick={() => handleDelete(r)}
+                  disabled={r.dataType === "exist"}
+                  type="table-action"
                 >
-                  <SVGIcon
-                    name="IconDelete"
-                    color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
-                    width={20}
-                    className={r.dataType === "exist" ? "disabled" : undefined}
-                    onClick={
-                      r.dataType !== "exist" ? () => handleDelete(r) : undefined
-                    }
-                  />
-                </span>
+                  <SVGIcon name="IconDelete" width={20} />
+                </Button>
               </Tooltip>
             ) : null}
           </div>
@@ -233,8 +226,6 @@ const AttachmentSectionForm = ({
 
 
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [modalUpload, setModalUpload] = useState(false);
@@ -261,9 +252,6 @@ const AttachmentSectionForm = ({
     confirm();
     setSearchText(selectedKeys[0]);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
     setSearchedColumn(tempSearchColumn);
   };
   
@@ -311,30 +299,21 @@ const AttachmentSectionForm = ({
     <>
       <Spin spinning={loadingDownload}>
         <div className="flex flex-col gap-y-4">
-          {type !== "detail" && type !== "preview" ? (
-            <div className="flex flex-col w-full gap-2 items-end">
-              <div className="flex flex-col gap-y-1 justify-start">
-                <p className="text-[13px] mb-0 text-dg-grey-dark">
-                  Attach File:
-                  {mandatory ? (
-                  <span className={"pl-1"} style={{ color: "red" }}>
-                    *
-                  </span>
+          {type !== "detail" && type !== "preview" && type !== "confirmation" ? (
+            <div className="flex flex-col gap-y-2">
+              <span className="text-sm">
+                Attach File:
+                {mandatory ? (
+                  <span className={"pl-1"} style={{ color: "red" }}>*</span>
                 ) : null}
-                </p>
-                <div className="flex flex-row gap-2 items-center">
-                  <ButtonComponent
-                    fontSizeClassname="text-[11px]"
-                    size="small"
-                    type="default"
-                    onClick={handleOpenModal}
-                  >
-                    Choose File
-                  </ButtonComponent>
-                  <p className="text-[11px] text-dg-grey-dark mb-0">
-                    No file choosen
-                  </p>
-                </div>
+              </span>
+              <div className="flex gap-x-2 items-center">
+                <ButtonComponent type="menu" onClick={handleOpenModal}>
+                  Choose File
+                </ButtonComponent>
+                {!data.length && (
+                  <span className="text-sm text-dg-grey-dark">No file choosen</span>
+                )}
               </div>
             </div>
           ) : null}
