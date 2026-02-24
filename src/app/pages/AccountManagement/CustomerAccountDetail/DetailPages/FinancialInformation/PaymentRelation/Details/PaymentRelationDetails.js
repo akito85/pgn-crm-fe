@@ -40,8 +40,6 @@ const PaymentRelationDetails = ({
   
   const isLoading = loading || loadingAccount;
 
-  const [draftExist, setDraftExist] = useState(false) 
-
   //declare
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,7 +63,6 @@ const PaymentRelationDetails = ({
     setActiveKey(newActiveKey)
   }
 
-  const [isApproval, setIsApproval] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
 
@@ -110,50 +107,52 @@ const PaymentRelationDetails = ({
    * @param {"approve"|"reject"} action 
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    if (detail_paymentRelation?.result) {
-      const { result } = detail_paymentRelation;
+    const {
+      id,
+      approvalType,
+      tappId
+    } = detail_paymentRelation;
 
-      const body = [{
-        id: result.id,
-        approvalId: result.tappId,
-        action: action.toUpperCase(),
-        description,
-      }];
+    const body = [{
+      id,
+      approvalId: tappId,
+      action: action.toUpperCase(),
+      description,
+    }];
 
-      if (result.approvalType === "PAYMENT_RELATION") {
-        dispatch(approveOrRejectPaymentRelation({
-          body,
-          action,
-        }))
-        .unwrap()
-        .then(() => {
-          dispatch(getDetailPaymentRelation(idPr));
-          dispatch(getDetailDraftPaymentRelation(idPr));
-          handleClear();
-          handleApprovalModal(false);
-        })
-        .catch(() => {});
-      } else if (result.approvalType === "INACTIVE_PAYMENT_RELATION") {
-        dispatch(approveOrRejectInactivePaymentRelation({
-          body,
-          action,
-        }))
-        .unwrap()
-        .then(() => {
-          dispatch(getDetailPaymentRelation(idPr));
-          dispatch(getDetailDraftPaymentRelation(idPr));
-          handleClear();
-          handleApprovalModal(false);
-        })
-        .catch(() => {});
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `The approval type is invalid.`,
-        };
+    if (approvalType === "PAYMENT_RELATION") {
+      dispatch(approveOrRejectPaymentRelation({
+        body,
+        action,
+      }))
+      .unwrap()
+      .then(() => {
+        dispatch(getDetailPaymentRelation(idPr));
+        dispatch(getDetailDraftPaymentRelation(idPr));
+        handleClear();
+        handleApprovalModal(false);
+      })
+      .catch(() => {});
+    } else if (approvalType === "INACTIVE_PAYMENT_RELATION") {
+      dispatch(approveOrRejectInactivePaymentRelation({
+        body,
+        action,
+      }))
+      .unwrap()
+      .then(() => {
+        dispatch(getDetailPaymentRelation(idPr));
+        dispatch(getDetailDraftPaymentRelation(idPr));
+        handleClear();
+        handleApprovalModal(false);
+      })
+      .catch(() => {});
+    } else {
+      const errorBody = {
+        title: "Failed",
+        description: `The approval type is invalid.`,
+      };
 
-        dispatch(showModalError(errorBody));
-      }
+      dispatch(showModalError(errorBody));
     }
   }
 
@@ -178,23 +177,20 @@ const PaymentRelationDetails = ({
       dispatch(getDetailDraftPaymentRelation(idPr));
   }, [idPr])
 
-  useEffect(() => {
-    if (detail_paymentRelation.result?.status && detail_paymentRelation.result.status !== "DRAFT" && detail_paymentRelation.result?.statusApproval && detail_paymentRelation.result.statusApproval !== "APPROVED")
-      setDraftExist(true);
-    else
-      setDraftExist(false);
-  }, [detail_paymentRelation, idPr])
+  const {
+    status,
+    statusApproval,
+    approvalType,
+    relatedAccountNumber,
+    id,
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy,
+  } = detail_paymentRelation;
 
-  useEffect(() => {
-    if (detail_paymentRelation?.result) {
-      const { approvalType } = detail_paymentRelation.result;
-
-      if (approvalType === "PAYMENT_RELATION" || approvalType === "INACTIVE_PAYMENT_RELATION")
-        setIsApproval(true);
-      else
-        setIsApproval(false);
-    }
-  }, [detail_paymentRelation]);
+  const draftExist = status !== "DRAFT" && statusApproval !== "APPROVED"
+  const isApproval = ["PAYMENT_RELATION", "INACTIVE_PAYMENT_RELATION"].includes(approvalType);
 
   return (
     <LayoutMenu>
@@ -220,7 +216,7 @@ const PaymentRelationDetails = ({
           )}
 
           <PaymentRelationDetailTabs
-            dataDetail={activeKey === tabOptions[0]?.key ? detail_paymentRelation?.result : activeKey === tabOptions[0]?.key ? detailDraft_paymentRelation : {}}
+            dataDetail={activeKey === tabOptions[0]?.key ? detail_paymentRelation : activeKey === tabOptions[0]?.key ? detailDraft_paymentRelation : {}}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
             dispatch={dispatch}
             idPr={idPr}
@@ -230,11 +226,11 @@ const PaymentRelationDetails = ({
             <NxBaseContainer border>
               <div className="w-full grid grid-cols-5 gap-4">
                 {/* History Log Information */}
-                <NxDetailText label="Record Id">{detail_paymentRelation?.result?.id}</NxDetailText>
-                <NxDetailText label="Created Date">{detail_paymentRelation?.result?.createdDate ? moment(detail_paymentRelation?.result.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
-                <NxDetailText label="Created By">{detail_paymentRelation?.result?.createdBy}</NxDetailText>
-                <NxDetailText label="Updated Date">{detail_paymentRelation?.result?.updatedDate ? moment(detail_paymentRelation?.result.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
-                <NxDetailText label="Updated By">{detail_paymentRelation?.result?.updatedBy}</NxDetailText>
+                <NxDetailText label="Record Id">{id}</NxDetailText>
+                <NxDetailText label="Created Date">{createdDate ? moment(createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Created By">{createdBy}</NxDetailText>
+                <NxDetailText label="Updated Date">{updatedDate ? moment(updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Updated By">{updatedBy}</NxDetailText>
               </div>
             </NxBaseContainer>
           </NxCardContainer>
@@ -271,7 +267,7 @@ const PaymentRelationDetails = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${detail_paymentRelation?.result?.relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
     </LayoutMenu>

@@ -419,7 +419,7 @@ const paymentRelationSlice = createSlice({
       state.loading = true;
     },
     [getDetailPaymentRelation.fulfilled]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
+      state.detail_paymentRelation = action.payload?.result;
       state.loading = false;
     },
     [getDetailPaymentRelation.rejected]: (state, action) => {
