@@ -3,10 +3,9 @@ import InfoPaymentRelation from "./InfoPaymentRelation";
 export default function InformationForm({
   setAccount,
   className,
-  page,
-  pageSize,
   accountId,
+  isUpdate,
 }) {
 
-  return <InfoPaymentRelation setAccount={setAccount} className={className} accountId={accountId} />;
+  return <InfoPaymentRelation setAccount={setAccount} className={className} accountId={accountId} isUpdate={isUpdate} />;
 }

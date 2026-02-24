@@ -2,7 +2,6 @@ import { Form } from "antd";
 import AttachmentPaymentRelation from "./AttachmentPaymentRelation";
 
 export default function AttachmentForm({
-  type,
   value,
   data,
   updateData,
@@ -15,7 +14,6 @@ export default function AttachmentForm({
 }){
   return(
     <AttachmentPaymentRelation
-      type={type}
       value={value}
       updateData={updateData}
       dispatch={dispatch}

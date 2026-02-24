@@ -34,11 +34,14 @@ import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
 
-const CreateUpdatePaymentRelation = ({ type }) => {
+const CreateUpdatePaymentRelation = ({ formType }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
   const dispatch = useDispatch();
+
+  const isCreate = formType === "create";
+  const isUpdate = formType === "update";
 
   const {
     data_accountDetail,
@@ -99,15 +102,15 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   }, [idAccount]);
 
   useEffect(() => {
-    if (type === "update" && idPr) {
+    if (formType === "update" && idPr) {
       dispatch(getDetailPaymentRelation(idPr));
       dispatch(getPaymentRelationAttachment({ id: idPr }))
     }
-  }, [type, idPr]);
+  }, [formType, idPr]);
 
   useEffect(() => {
     if (
-      type === "update" &&
+      formType === "update" &&
       detail_paymentRelation?.result &&
       data_prApprovalHierarchy?.length
     ) {
@@ -143,7 +146,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   }, [detail_paymentRelation, data_prApprovalHierarchy]);
 
   useEffect(() => {
-    if (type === "update" && data_paymentRelationAttachment?.result) {
+    if (formType === "update" && data_paymentRelationAttachment?.result) {
       const result = data_paymentRelationAttachment.result?.map((item, index) => ({
         ...item,
         key: `payment-relation-attachment-${item.id}`,
@@ -178,7 +181,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create Payment Relation" : (type === "update") ? "Update Payment Relation" : "",
+      breadcrumbName: (formType === "create") ? "Create Payment Relation" : (formType === "update") ? "Update Payment Relation" : "",
     },
   ];
 
@@ -213,7 +216,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           } = form.getFieldsValue();
 
           const body = {
-            id: type === "update" ? idPr : undefined,
+            id: isUpdate ? idPr : undefined,
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
             priority,
@@ -227,8 +230,8 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-            type,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+            type: formType,
           }))
           .unwrap();
         }
@@ -246,7 +249,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
       } = form.getFieldsValue();
 
       const body = {
-        id: type === "update" ? idPr : undefined,
+        id: isUpdate ? idPr : undefined,
         subjectId: data_accountDetail?.accountInformation?.accountId, 
         objectId,
         priority,
@@ -260,8 +263,8 @@ const CreateUpdatePaymentRelation = ({ type }) => {
       dispatch(validateCreateUpdate({
         body,
         services: accountManagementService,
-        endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-        type,
+        endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+        type: formType,
       }))
       .unwrap()
       .then((data) => {
@@ -305,6 +308,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           setAccount={setAccount}
           className={`${current !== 0 ? "hidden" : ""}`}
           accountId={idAccount}
+          isUpdate={isUpdate}
           key={`payment-relation-tab-0`}
         />
       ),
@@ -335,7 +339,6 @@ const CreateUpdatePaymentRelation = ({ type }) => {
       title: "Attachment",
       content: (
         <AttachmentForm
-          type={type}
           data={dataAttachment}
           updateData={setDataAttachment}
           dispatch={dispatch}
@@ -379,7 +382,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
         } = form.getFieldsValue();
 
         const body = {
-          id: type === "update" ? idPr : undefined,
+          id: isUpdate ? idPr : undefined,
           subjectId: data_accountDetail?.accountInformation?.accountId, 
           objectId,
           priority,
@@ -393,8 +396,8 @@ const CreateUpdatePaymentRelation = ({ type }) => {
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-          type,
+          endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+          type: formType,
         }))
         .unwrap();
       }
@@ -435,7 +438,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           } = form.getFieldsValue();
 
           const body = {
-            id: type === "update" ? idPr : undefined,
+            id: isUpdate ? idPr : undefined,
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
             priority,
@@ -449,8 +452,8 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-            type,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${isUpdate}`,
+            type: isUpdate,
           }))
           .unwrap();
         }
@@ -506,7 +509,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
     // Filter only new attachments (not existing ones)
     const newAttachments = dataAttachment.filter(a => a.dataType !== "exist");
 
-    if (type === "create")
+    if (isCreate)
       dispatch(createPaymentRelation({ body, attachments: newAttachments }))
       .unwrap()
       .then((data) => {
@@ -523,7 +526,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
         }, 2000)
       })
       .catch((error) => {});
-    else if (type === "update")
+    else if (isUpdate)
       dispatch(updatePaymentRelation({ id: idPr, body, attachments: dataAttachment.filter((attachment => attachment.dataType !== "exist")) }))
       .unwrap()
         .then((data) => {
@@ -543,12 +546,12 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   };
 
   const handleClear = () => {
-    if (type === "create") {
+    if (isCreate) {
       setDataAttachment([]);
       setSelectedApprovalName();
       form.resetFields();
       setCurrent(0);
-    } else if (type === "update") {
+    } else if (isUpdate) {
       if (
         detail_paymentRelation?.result &&
         data_prApprovalHierarchy?.length
@@ -641,7 +644,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
                     type={"reject"}
                     icon={<SVGIcon name="IconButtonClear" width={24} />}
                   >
-                    { type === "update" ? "Reset" : "Clear" }
+                    { isUpdate ? "Reset" : "Clear" }
                   </ButtonComponent>
                   <ButtonComponent
                     onClick={() => handleSetShowConfirmationModal(true, "draft")}

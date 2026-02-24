@@ -14,11 +14,13 @@ import NxCardContainer from "../../../../../../../../../../components/Nx/NxCardC
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
+import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
 
 export default function InfoPaymentRelation({
   accountId,
   setAccount,
   className,
+  isUpdate,
 }) {
   const dispatch = useDispatch();
 
@@ -147,107 +149,97 @@ export default function InfoPaymentRelation({
   return(
     <div className={className}>
       <NxCardContainer header={"PAYMENT RELATION INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-4">
-          <div className="flex gap-2 items-end">
-            <Form.Item name={"objectId"} hidden>
-              <Input />
+        <div className="flex flex-col gap-y-4">
+          <div className="w-full grid grid-cols-3 gap-4">
+            <div className="flex gap-2 items-end">
+              <Form.Item
+                label={"Account Number"}
+                required
+                className="no-margin-form w-full"
+              >
+                <Input.Group compact className="flex gap-x-1">
+                  <Form.Item
+                    key="accountNumber"
+                    name={"accountNumber"}
+                    rules={[
+                      {
+                        message: requiredMessage("Account Number"),
+                        required: true,
+                      }
+                    ]}
+                    noStyle
+                  >
+                    <InputComponent disabled />
+                  </Form.Item>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      setIsOpen(true)
+                    }}
+                    className="w-[120px]"
+                    disabled={isUpdate}
+                  >
+                    Select
+                  </Button>
+                </Input.Group>
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              key="accountName"
+              name={"accountName"}
+              label={"Account Name"}
+              className="no-margin-form"
+            >
+              <InputComponent disabled />
             </Form.Item>
 
             <Form.Item
-              label={"Account Number"}
-              required
+              key="priority"
+              name={"priority"}
+              label={"Priority"}
+              rules={[
+                {
+                  message: requiredMessage("Priority"),
+                  required: true,
+                },
+              ]}
               className="no-margin-form"
             >
-              <Input.Group compact>
-                <Form.Item
-                  key="accountNumber"
-                  name={"accountNumber"}
-                  rules={[
-                    {
-                      message: requiredMessage("Account Number"),
-                      required: true,
-                    }
-                  ]}
-                  noStyle
-                >
-                  <InputComponent disabled />
-                </Form.Item>
-                <Button
-                  type="primary"
-                  className="h-9 px-4 justify-center items-center"
-                  style={{
-                    backgroundColor: "#0075bf",
-                    borderColor: "#0075bf",
-                    borderRadius: "5px",
-                    minWidth: "112px",
-                  }}
-                  onClick={() => {
-                    // Add your select logic here
-                    setIsOpen(true)
-                  }}
-                >
-                  Select
-                </Button>
-              </Input.Group>
+              <InputComponent disabled={isUpdate} />
+            </Form.Item>
+
+            <Form.Item
+              key="startDate"
+              name={"startDate"}
+              label={"Start Date"}
+              rules={[
+                {
+                  message: requiredMessage("Start Date"),
+                  required: true,
+                },
+              ]}
+              getValueProps={(dateString) => ({
+                value: dateString ? moment(dateString, dateFormatting.dateForm) : null
+              })}
+              disabled={isUpdate}
+              className="no-margin-form"
+            >
+              <DateComponent disabled={isUpdate} />
+            </Form.Item>
+
+            <Form.Item
+              key="endDate"
+              name={"endDate"}
+              label={"End Date"}
+              className="no-margin-form"
+              getValueProps={(dateString) => ({
+                value: dateString ? moment(dateString, dateFormatting.dateForm) : null
+              })}
+            >
+              <DateComponent />
             </Form.Item>
           </div>
-
-          <Form.Item
-            key="accountName"
-            name={"accountName"}
-            label={"Account Name"}
-            className="no-margin-form"
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="priority"
-            name={"priority"}
-            label={"Priority"}
-            rules={[
-              {
-                message: requiredMessage("Priority"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <InputComponent />
-          </Form.Item>
-
-          <Form.Item
-            key="startDate"
-            name={"startDate"}
-            label={"Start Date"}
-            rules={[
-              {
-                message: requiredMessage("Start Date"),
-                required: true,
-              },
-            ]}
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-            })}
-            className="no-margin-form"
-          >
-            <DateComponent />
-          </Form.Item>
-
-          <Form.Item
-            key="endDate"
-            name={"endDate"}
-            label={"End Date"}
-            className="no-margin-form"
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-            })}
-          >
-            <DateComponent />
-          </Form.Item>
-        </div>
-
-        <div className="w-full my-5">
           <Form.Item
             key="description"
             name={"description"}
@@ -255,6 +247,7 @@ export default function InfoPaymentRelation({
             className="no-margin-form"
           >
             <InputComponent
+              disabled={isUpdate}
               type={"textarea"}
               rows={4}
               maxLength={255}
