@@ -35,6 +35,7 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
 const CreateUpdateInvoiceRelation = ({ formType }) => {
   const containerRef = useRef(null);
@@ -499,8 +500,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
       subjectId: data_accountDetail?.accountInformation?.accountId, 
       objectId,
       description, 
-      startDate,
-      endDate,
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark,

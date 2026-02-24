@@ -203,9 +203,6 @@ export default function InfoInvoiceRelation({
                 required: true,
               },
             ]}
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-            })}
             className="no-margin-form"
           >
             <DateComponent disabled={!isDraft && isUpdate} />
@@ -216,9 +213,6 @@ export default function InfoInvoiceRelation({
             name={"endDate"}
             label={"End Date"}
             className="no-margin-form"
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-            })}
           >
             <DateComponent />
           </Form.Item>
