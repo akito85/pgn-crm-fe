@@ -1,16 +1,14 @@
-import { Form, Modal, Progress, Select, Typography } from "antd";
-import React, { useState, useCallback, useEffect } from "react";
+import { Button, Form, Modal, Progress, Select, Typography } from "antd";
+import { useState, useCallback, useEffect } from "react";
 import SelectComponent from "../../../../../../../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import {
   CloseOutlined,
   FileOutlined,
-  InboxOutlined,
   UndoOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import InputComponent from "../../../../../../../../../../components/InputComponent";
-import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
 import { bytesConverter } from "../../../../../../../../../../utils/bytesConverter";
 import { getBase64 } from "../../../../../../../../../../utils/getBase64";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
@@ -276,7 +274,7 @@ const ModalAttachment = ({
                           onClick={(e) => e.stopPropagation()}
                           disabled={!category}
                         />
-                        <ButtonComponent
+                        <Button
                           onClick={handleUploadLink}
                           icon={<UploadOutlined />}
                           type={"submit"}
@@ -316,7 +314,7 @@ const ModalAttachment = ({
                   <Typography className={"text-red-500"}>
                     {file.fileName}
                   </Typography>
-                  <ButtonComponent
+                  <Button
                     icon={<CloseOutlined style={{ color: "#58804D" }} />}
                     border={false}
                     onClick={() => handleRemove(index)}
@@ -326,10 +324,10 @@ const ModalAttachment = ({
                 {file.fileStatus === "error" ? (
                   <div className="flex w-full justify-between">
                     <span className={"text-red-700"}>Failed to Upload</span>
-                    <ButtonComponent border={false}>
+                    <Button border={false}>
                       <span className={"text-green-800 mr-2"}>Re-upload</span>
                       <UndoOutlined style={{ color: "#58804D" }} />
-                    </ButtonComponent>
+                    </Button>
                   </div>
                 ) : file.size <= dataGuard.size ? (
                   <Progress
@@ -345,15 +343,15 @@ const ModalAttachment = ({
             </div>
           ))}
           <div className="w-full flex justify-end gap-2">
-            <ButtonComponent onClick={handleClose}>Cancel</ButtonComponent>
-            <ButtonComponent
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button
               type={"submit"}
               border={false}
               htmlType={"submit"}
               disabled={!submit || errorMessage}
             >
               Save
-            </ButtonComponent>
+            </Button>
           </div>
         </div>
       </Form>
