@@ -186,7 +186,7 @@ export default function InfoInvoiceRelation({
                 <InputComponent disabled />
               </Form.Item>
               <Button
-                type="primary"
+                type="submit"
                 className="w-[120px]"
                 onClick={() => {
                   setIsOpen(true)
