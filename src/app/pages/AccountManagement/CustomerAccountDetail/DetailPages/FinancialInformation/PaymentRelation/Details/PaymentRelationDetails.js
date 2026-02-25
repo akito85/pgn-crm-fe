@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
-import { Spin } from "antd";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
+import { Button, Spin } from "antd";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentRelationDetailTabs from "./PaymentRelationDetailTabs";
@@ -238,25 +237,25 @@ const PaymentRelationDetails = ({
           {isApproval && (
             <NxBaseContainer border>
               <div className="flex justify-between">
-                <ButtonComponent
+                <Button
                   type={"menu"}
                   onClick={() => navigate(-1)}
                 >
                   Cancel
-                </ButtonComponent>
+                </Button>
                 <div className={"w-full flex justify-end gap-5"}>
-                  <ButtonComponent
+                  <Button
                     type="reject"
                     onClick={() => handleApprovalModal(true, "reject")}
                   >
                     Reject
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     type="approve"
                     onClick={() => handleApprovalModal(true, "approve")}
                   >
                     Approve
-                  </ButtonComponent>
+                  </Button>
                 </div>
               </div>
             </NxBaseContainer>

@@ -1,13 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import InfoPaymentRelation from "./StepContents/InformationForm/InfoPaymentRelation";
 import ApprovalSectionForm from "./StepContents/ApprovalForm/ApprovalPaymentRelation";
 import AttachmentSectionForm from "./StepContents/AttachmentForm/AttachmentPaymentRelation";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import {
@@ -654,23 +653,23 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             {/* Section Action Steps */}
             <NxBaseContainer border>
               <div className="flex justify-between">
-                <ButtonComponent
+                <Button
                   type={"menu"}
                   onClick={() => {
                     navigate(-1);
                   }}
                 >
                   Cancel
-                </ButtonComponent>
+                </Button>
                 <div className="flex w-full justify-end gap-x-2">
-                  <ButtonComponent
+                  <Button
                     onClick={handleClear}
                     type={"reject"}
-                    icon={<SVGIcon name="IconButtonClear" width={24} />}
+                    icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
                     {isUpdate ? "Reset" : "Clear"}
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     onClick={() =>
                       handleSetShowConfirmationModal(true, "draft")
                     }
@@ -678,8 +677,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
                     disabled={current !== steps.length - 1}
                   >
                     Save as Draft
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     onClick={() => {
                       prev();
                       scrollLeftHandler();
@@ -688,26 +687,26 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
                     disabled={current < 1}
                   >
                     Previous
-                  </ButtonComponent>
+                  </Button>
                   {current < steps.length - 1 && (
-                    <ButtonComponent
+                    <Button
                       onClick={handleButtonNext}
                       type={"submit"}
                       disabled={steps[current].disabled}
                     >
                       Next
-                    </ButtonComponent>
+                    </Button>
                   )}
                   {current === steps.length - 1 && (
                     <>
-                      <ButtonComponent
+                      <Button
                         onClick={() =>
                           handleSetShowConfirmationModal(true, "submit")
                         }
                         type={"submit"}
                       >
                         Save & Submit
-                      </ButtonComponent>
+                      </Button>
                     </>
                   )}
                 </div>

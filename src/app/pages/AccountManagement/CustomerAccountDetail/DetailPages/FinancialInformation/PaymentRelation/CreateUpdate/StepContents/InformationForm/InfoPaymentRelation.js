@@ -173,7 +173,7 @@ export default function InfoPaymentRelation({
             required
             className="no-margin-form w-full"
           >
-            <Input.Group compact className="flex gap-x-1">
+            <div className="flex gap-x-1">
               <Form.Item
                 key="accountNumber"
                 name={"accountNumber"}
@@ -188,7 +188,7 @@ export default function InfoPaymentRelation({
                 <InputComponent disabled />
               </Form.Item>
               <Button
-                type="primary"
+                type="submit"
                 onClick={() => {
                   setIsOpen(true)
                 }}
@@ -197,7 +197,7 @@ export default function InfoPaymentRelation({
               >
                 Select
               </Button>
-            </Input.Group>
+            </div>
           </Form.Item>
         </div>
 

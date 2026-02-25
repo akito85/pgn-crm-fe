@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
 import { Spin, Tooltip, Button } from "antd";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachmentPaymentRelation";
@@ -306,9 +305,9 @@ const AttachmentSectionForm = ({
                 ) : null}
               </span>
               <div className="flex gap-x-2 items-center">
-                <ButtonComponent type="menu" onClick={handleOpenModal}>
+                <Button type="menu" onClick={handleOpenModal}>
                   Choose File
-                </ButtonComponent>
+                </Button>
                 {!data.length && (
                   <span className="text-sm text-dg-grey-dark">No file choosen</span>
                 )}
