@@ -34,6 +34,7 @@ import NxCardContainer from "../../../../../../../../components/Nx/NxCardContain
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
 const CreateUpdatePaymentRelation = ({ formType }) => {
   const containerRef = useRef(null);
@@ -219,8 +220,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             objectId,
             priority,
             description,
-            startDate,
-            endDate,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
             validationType: validationTypes[current]
           };
@@ -247,8 +248,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
         objectId,
         priority,
         description,
-        startDate,
-        endDate,
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
@@ -399,8 +400,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           objectId,
           priority,
           description,
-          startDate,
-          endDate,
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           appHierId,
           validationType: validationTypes[current]
         };
@@ -455,8 +456,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             objectId,
             priority,
             description,
-            startDate,
-            endDate,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
             validationType: validationTypes[i]
           };
@@ -512,8 +513,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       objectId,
       priority,
       description,
-      startDate,
-      endDate,
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark
