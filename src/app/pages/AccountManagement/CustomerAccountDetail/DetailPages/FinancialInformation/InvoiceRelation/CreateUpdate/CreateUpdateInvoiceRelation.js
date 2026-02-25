@@ -35,6 +35,7 @@ import NxCardContainer from "../../../../../../../../components/Nx/NxCardContain
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
 const CreateUpdateInvoiceRelation = ({ formType }) => {
   const containerRef = useRef(null);
@@ -210,8 +211,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate,
-              endDate,
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
           }
@@ -237,8 +238,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
         subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
         description,
-        startDate,
-        endDate,
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
@@ -390,8 +391,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
             description, 
-            startDate,
-            endDate,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
           }
         }
@@ -448,8 +449,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate,
-              endDate,
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
           }
@@ -503,8 +504,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
       subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
       description,
-      startDate,
-      endDate,
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark
@@ -574,8 +575,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           objectId,
           accountName: relatedAccountName,
           accountNumber: relatedAccountNumber,
-          startDate,
-          endDate,
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           description,
           appHierId
         });
