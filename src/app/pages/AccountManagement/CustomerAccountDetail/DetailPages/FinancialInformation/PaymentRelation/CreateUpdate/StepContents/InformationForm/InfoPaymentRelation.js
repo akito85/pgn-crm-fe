@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
 import { Form, Button, Input } from "antd";
-
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
-
 import moment from "moment";
-import DateComponent from "../../../../../../../../../../components/DateComponent";
 import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
@@ -14,6 +10,7 @@ import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
 import NxDetailText from "../../../../../../../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../../../../../../../components/Nx/NxDatePicker";
 
 export default function InfoPaymentRelation({
   accountId,
@@ -238,24 +235,25 @@ export default function InfoPaymentRelation({
               required: true,
             },
           ]}
-          getValueProps={(dateString) => ({
-            value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-          })}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
           className="no-margin-form"
         >
-          <DateComponent disabled={!isDraft && isUpdate} />
+          <NxDate
+            placeholder="Select date"
+            disabled={!isDraft && isUpdate}
+          />
         </Form.Item>
 
         <Form.Item
           key="endDate"
           name={"endDate"}
           label={"End Date"}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
           className="no-margin-form"
-          getValueProps={(dateString) => ({
-            value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-          })}
         >
-          <DateComponent />
+          <NxDate
+            placeholder="Select date"
+          />
         </Form.Item>
       </div>
       <Form.Item
