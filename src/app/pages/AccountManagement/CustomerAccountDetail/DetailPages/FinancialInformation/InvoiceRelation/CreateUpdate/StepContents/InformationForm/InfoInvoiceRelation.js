@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Form, Button, Input } from "antd";
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
-import DateComponent from "../../../../../../../../../../components/DateComponent";
 import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
@@ -172,7 +171,7 @@ export default function InfoInvoiceRelation({
             required
             className="no-margin-form"
           >
-            <Input.Group compact className="flex gap-x-1">
+            <div className="flex gap-x-1">
               <Form.Item
                 key="accountNumber"
                 name={"accountNumber"}
@@ -196,7 +195,7 @@ export default function InfoInvoiceRelation({
               >
                 Select
               </Button>
-            </Input.Group>
+            </div>
           </Form.Item>
         </div>
 

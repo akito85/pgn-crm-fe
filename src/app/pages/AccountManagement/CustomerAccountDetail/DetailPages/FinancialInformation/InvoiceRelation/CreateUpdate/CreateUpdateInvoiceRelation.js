@@ -656,7 +656,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
                   <Button
                     onClick={handleClear}
                     type={"reject"}
-                    icon={<SVGIcon name="IconButtonClear" width={24} />}
+                    icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
                     {isUpdate ? "Reset" : "Clear"}
                   </Button>
