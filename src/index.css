@@ -205,14 +205,25 @@ code {
   color: #09a92a;
 }
 
+button.ant-btn {
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: 4px;
+  padding: 7px 9px 7px 9px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+button.ant-btn > span {
+  line-height: 150%;
+}
+
 button.ant-btn.ant-btn-approve {
   background: #388E3C;
-  border-radius: 8px;
   color: #ffffff;
-  height: auto;
-  width: auto;
   align-items: center;
-  display: inline-flex;
   box-shadow: 0 0 #0000;
   border-width: 1px;
   border-color: #388E3C !important;
@@ -223,7 +234,6 @@ button.ant-btn-primary {
   background: #0075bf;
   border-radius: 6px !important;
   align-items: center;
-  display: inline-flex;
 }
 
 span.ant-input-affix-wrapper.text-right {
@@ -236,15 +246,11 @@ div.flex.flex-col.w-auto {
 
 button.ant-btn.ant-btn-reject {
   background: #D32F2F;
-  border-radius: 8px;
   color: #ffffff;
-  height: auto;
-  width: auto;
   align-items: center;
-  display: inline-flex;
   box-shadow: 0 0 #0000;
   border-width: 1px;
-  border-color: #D32F2F !important;
+  border-color: #D32F2F;
 }
 
 button.ant-btn:hover {
@@ -253,68 +259,38 @@ button.ant-btn:hover {
 
 button.ant-btn.ant-btn-submit {
   background: #0075bf;
-  border-radius: 8px;
   color: #ffffff;
-  height: auto;
-  width: auto;
-  align-items: center;
-  display: inline-flex;
-  border: none;
-}
-
-button.ant-btn.ant-btn-submit:disabled {
-  background: #E0E0E0;
-  border-radius: 8px;
-  color: #BDBDBD;
-  height: auto;
-  width: auto;
-  align-items: center;
-  display: inline-flex;
+  border-color: #0075bf;
 }
 
 button.ant-btn.ant-btn-secondary {
   background: #E6F4FA;
-  border-radius: 8px;
   color: #0075BF;
-  height: auto;
-  width: auto;
-  align-items: center;
-  display: inline-flex;
-  border: none;
-  padding: 8px;
-}
-
-button.ant-btn.ant-btn-secondary:disabled {
-  background: #E0E0E0;
-  color: #BDBDBD;
+  border-color: #E6F4FA;
 }
 
 button.ant-btn.ant-btn-menu {
   background: #FFFFFF;
-  border-radius: 8px;
-  border: 1px solid #C8CDD4 !important;
+  border: 1px solid #C8CDD4;
   color: #000000;
-  height: auto;
-  width: auto;
   align-items: center;
-  display: inline-flex;
-  padding: 8px;
 }
 
-button.ant-btn.ant-btn-menu:disabled {
+button.ant-btn.ant-btn-submit:disabled,
+button.ant-btn.ant-btn-secondary:disabled,
+button.ant-btn.ant-btn-menu:disabled,
+button.ant-btn.ant-btn-approve:disabled,
+button.ant-btn.ant-btn-reject:disabled {
+  border-color: #E0E0E0;
   background: #E0E0E0;
   color: #BDBDBD;
-  border: none !important;
 }
 
 button.ant-btn.ant-btn-action {
+  width: fit-content;
   background: transparent;
-  border-radius: 8px;
   color: #000000;
-  height: auto;
-  width: auto;
   align-items: center;
-  display: inline-flex;
   border: none;
   padding: 8px;
 }
@@ -359,10 +335,7 @@ button.ant-btn.ant-btn-table-action {
 
 button.ant-btn.ant-btn-default {
   border-width: 1px;
-  border-radius: 8px;
   color: #0075bf;
-  height: auto;
-  width: auto;
   align-items: center;
   display: inline-flex;
   background: transparent;
@@ -372,10 +345,7 @@ button.ant-btn.ant-btn-default {
 
 button.ant-btn.ant-btn-default:disabled {
   background: #E0E0E0;
-  border-radius: 8px;
   color: #BDBDBD;
-  height: auto;
-  width: auto;
   align-items: center;
   display: inline-flex;
   border: none;
@@ -385,7 +355,6 @@ button.ant-btn.ant-btn-grey {
   color: #ffffff;
   border-width: 1px;
   border-radius: 5px;
-  height: auto;
   width: auto;
   align-items: center;
   display: inline-flex;
