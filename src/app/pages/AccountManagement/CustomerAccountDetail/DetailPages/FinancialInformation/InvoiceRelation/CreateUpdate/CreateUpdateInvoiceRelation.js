@@ -205,21 +205,24 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           } = form.getFieldsValue(true);
 
           const body = {
-            id: isUpdate ? idIr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId,
-            objectId,
-            description,
-            startDate,
-            endDate,
-            appHierId,
-            validationType: validationTypes[current]
-          };
+            stepNumber: current + 1,
+            type: formType.toUpperCase(),
+            id: idIr,
+            data : {
+              subjectId: data_accountDetail?.accountInformation?.accountId, 
+              objectId,
+              description, 
+              startDate,
+              endDate,
+              appHierId,
+            }
+          }
 
           await dispatch(
             validateCreateUpdate({
               body,
               services: accountManagementService,
-              endPoint: `/v1/dbs/api/invoice-relation/validate-${formType}`,
+              endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
               type: formType
             })
           ).unwrap();
@@ -382,21 +385,24 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
         } = form.getFieldsValue(true);
 
         const body = {
-          id: isUpdate ? idIr : undefined,
-          subjectId: data_accountDetail?.accountInformation?.accountId,
-          objectId,
-          description,
-          startDate,
-          endDate,
-          appHierId,
-          validationType: validationTypes[current]
-        };
+          stepNumber: current + 1,
+          type: formType.toUpperCase(),
+          id: idIr,
+          data : {
+            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            objectId,
+            description, 
+            startDate,
+            endDate,
+            appHierId,
+          }
+        }
 
         await dispatch(
           validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/invoice-relation/validate-${formType}`,
+            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
             type: formType
           })
         ).unwrap();
@@ -437,21 +443,24 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           } = form.getFieldsValue(true);
 
           const body = {
-            id: isUpdate ? idIr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId,
-            objectId,
-            description,
-            startDate,
-            endDate,
-            appHierId,
-            validationType: validationTypes[i]
-          };
+            stepNumber: current + 1,
+            type: formType.toUpperCase(),
+            id: idIr,
+            data : {
+              subjectId: data_accountDetail?.accountInformation?.accountId, 
+              objectId,
+              description, 
+              startDate,
+              endDate,
+              appHierId,
+            }
+          }
 
           await dispatch(
             validateCreateUpdate({
               body,
               services: accountManagementService,
-              endPoint: `/v1/dbs/api/invoice-relation/validate-${formType}`,
+              endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
               type: formType
             })
           ).unwrap();
