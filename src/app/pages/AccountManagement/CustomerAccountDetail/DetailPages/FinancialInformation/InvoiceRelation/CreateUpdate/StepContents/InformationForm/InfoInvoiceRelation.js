@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
 import { Form, Button, Input } from "antd";
-
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
-
-import moment from "moment";
 import DateComponent from "../../../../../../../../../../components/DateComponent";
 import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,6 +10,8 @@ import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
 import NxDetailText from "../../../../../../../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../../../../../../../components/Nx/NxDatePicker";
+import moment from "moment";
 
 export default function InfoInvoiceRelation({
   setAccount,
@@ -140,10 +138,6 @@ export default function InfoInvoiceRelation({
   
   const hasMore = currentData.length < (pagination_irAccountStandard?.totalElements || 0);
 
-  useEffect(() => {
-    console.log("hasMore", hasMore);
-  }, [hasMore])
-
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
 
@@ -159,8 +153,8 @@ export default function InfoInvoiceRelation({
         <div className="w-full grid grid-cols-3 gap-4">
           <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
           <NxDetailText label="Account Name">{accountName}</NxDetailText>
-          <NxDetailText label="Start Date">{startDate ? moment(startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
-          <NxDetailText label="End Date">{endDate ? moment(endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+          <NxDetailText label="Start Date">{NxDate.formatDate(startDate)}</NxDetailText>
+          <NxDetailText label="End Date">{NxDate.formatDate(endDate)}</NxDetailText>
         </div>
         <div className="w-full">
           <NxDetailText label="Description">{description}</NxDetailText>
@@ -225,18 +219,20 @@ export default function InfoInvoiceRelation({
               required: true,
             },
           ]}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
           className="no-margin-form"
         >
-          <DateComponent disabled={!isDraft && isUpdate} />
+          <NxDate disabled={!isDraft && isUpdate} />
         </Form.Item>
 
         <Form.Item
           key="endDate"
           name={"endDate"}
           label={"End Date"}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
           className="no-margin-form"
         >
-          <DateComponent />
+          <NxDate />
         </Form.Item>
       </div>
 

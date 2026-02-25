@@ -82,8 +82,6 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
     []
   ];
 
-  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
-
   useEffect(() => {
     if (idCustomer) dispatch(getCustomerDetail(idCustomer));
   }, [idCustomer]);
