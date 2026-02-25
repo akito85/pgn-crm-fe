@@ -239,7 +239,6 @@ export default function InfoPaymentRelation({
           className="no-margin-form"
         >
           <NxDate
-            placeholder="Select date"
             disabled={!isDraft && isUpdate}
           />
         </Form.Item>
