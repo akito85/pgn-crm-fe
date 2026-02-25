@@ -40,8 +40,6 @@ const InvoiceRelationDetails = ({
   
   const isLoading = loading || loadingAccount;
 
-  const [draftExist, setDraftExist] = useState(false)
-
   //declare
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,7 +64,6 @@ const InvoiceRelationDetails = ({
   }
 
   //state
-  const [isApproval, setIsApproval] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
 
@@ -114,49 +111,46 @@ const InvoiceRelationDetails = ({
    * @param {"approve"|"reject"} action 
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    if (detail_invoiceRelation) {
+    const body = [{
+      id,
+      approvalId: tappId,
+      action: action.toUpperCase(),
+      description,
+    }];
 
-      const body = [{
-        id: detail_invoiceRelation.id,
-        approvalId: detail_invoiceRelation.tappId,
-        action: action.toUpperCase(),
-        description,
-      }];
+    if (approvalType === "INVOICE_RELATION") {
+      dispatch(approveOrRejectInvoiceRelation({
+        body,
+        action,
+      }))
+      .unwrap()
+      .then(() => {
+        dispatch(getDetailInvoiceRelation(idIr));
+        dispatch(getDetailDraftInvoiceRelation(idIr));
+        handleClear();
+        handleApprovalModal(false);
+      })
+      .catch(() => {});
+    } else if (approvalType === "INACTIVE_INVOICE_RELATION") {
+      dispatch(approveOrRejectInactiveInvoiceRelation({
+        body,
+        action,
+      }))
+      .unwrap()
+      .then(() => {
+        dispatch(getDetailInvoiceRelation(idIr));
+        dispatch(getDetailDraftInvoiceRelation(idIr));
+        handleClear();
+        handleApprovalModal(false);
+      })
+      .catch(() => {});
+    } else {
+      const errorBody = {
+        title: "Failed",
+        description: `The approval type is invalid.`,
+      };
 
-      if (detail_invoiceRelation.approvalType === "INVOICE_RELATION") {
-        dispatch(approveOrRejectInvoiceRelation({
-          body,
-          action,
-        }))
-        .unwrap()
-        .then(() => {
-          dispatch(getDetailInvoiceRelation(idIr));
-          dispatch(getDetailDraftInvoiceRelation(idIr));
-          handleClear();
-          handleApprovalModal(false);
-        })
-        .catch(() => {});
-      } else if (detail_invoiceRelation.approvalType === "INACTIVE_INVOICE_RELATION") {
-        dispatch(approveOrRejectInactiveInvoiceRelation({
-          body,
-          action,
-        }))
-        .unwrap()
-        .then(() => {
-          dispatch(getDetailInvoiceRelation(idIr));
-          dispatch(getDetailDraftInvoiceRelation(idIr));
-          handleClear();
-          handleApprovalModal(false);
-        })
-        .catch(() => {});
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `The approval type is invalid.`,
-        };
-
-        dispatch(showModalError(errorBody));
-      }
+      dispatch(showModalError(errorBody));
     }
   }
 
@@ -182,23 +176,21 @@ const InvoiceRelationDetails = ({
     }
   }, [idIr])
 
-  useEffect(() => {
-    if (detail_invoiceRelation?.status && detail_invoiceRelation.status !== "DRAFT" && detail_invoiceRelation?.statusApproval && detail_invoiceRelation.statusApproval !== "APPROVED")
-      setDraftExist(true);
-    else
-      setDraftExist(false);
-  }, [detail_invoiceRelation, idIr])
+  const {
+    status,
+    statusApproval,
+    approvalType,
+    relatedAccountNumber,
+    id,
+    tappId,
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy,
+  } = detail_invoiceRelation;
 
-  useEffect(() => {
-    if (detail_invoiceRelation) {
-      const { approvalType } = detail_invoiceRelation;
-
-      if (approvalType === "INVOICE_RELATION" || approvalType === "INACTIVE_INVOICE_RELATION")
-        setIsApproval(true);
-      else
-        setIsApproval(false);
-    }
-  }, [detail_invoiceRelation]);
+  const draftExist = status !== "DRAFT" && statusApproval !== "APPROVED";
+  const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
 
   return (
     <LayoutMenu>
@@ -234,11 +226,11 @@ const InvoiceRelationDetails = ({
             <NxBaseContainer border>
               <div className="w-full grid grid-cols-5 gap-4">
                 {/* History Log Information */}
-                <NxDetailText label="Record Id">{detail_invoiceRelation?.id}</NxDetailText>
-                <NxDetailText label="Created Date">{detail_invoiceRelation?.createdDate ? moment(detail_invoiceRelation.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
-                <NxDetailText label="Created By">{detail_invoiceRelation?.createdBy}</NxDetailText>
-                <NxDetailText label="Updated Date">{detail_invoiceRelation?.updatedDate ? moment(detail_invoiceRelation.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
-                <NxDetailText label="Updated By">{detail_invoiceRelation?.updatedBy}</NxDetailText>
+                <NxDetailText label="Record Id">{id}</NxDetailText>
+                <NxDetailText label="Created Date">{createdDate ? moment(createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Created By">{createdBy}</NxDetailText>
+                <NxDetailText label="Updated Date">{updatedDate ? moment(updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Updated By">{updatedBy}</NxDetailText>
               </div>
             </NxBaseContainer>
           </NxCardContainer>
@@ -275,7 +267,7 @@ const InvoiceRelationDetails = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${detail_invoiceRelation?.relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
     </LayoutMenu>
