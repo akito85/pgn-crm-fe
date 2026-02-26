@@ -20,7 +20,7 @@ const onFilter = (dataIndex, value, record) => {
   switch (dataIndex) {
     case "startDate":
     case "endDate":
-      const date = NxDate.formatDate(record[dataIndex]) || "";
+      const date = NxDate.formatDate(record[dataIndex], "DD MMM YYYY") || "";
       return date.toString().toLowerCase().includes(search);
     case "fileSize":
       return record.size.includes(search);
@@ -47,7 +47,7 @@ const sorter = (fieldSort, a, b) => {
     switch (fieldSort) {
       case "startDate":
       case "endDate":
-        const date = NxDate.formatDate(obj[fieldSort]) || "";
+        const date = NxDate.formatDate(obj[fieldSort], "DD MMM YYYY") || "";
         return date.toString().toLowerCase();
       case "fileSize":
         return extractSize(obj[fieldSort]);

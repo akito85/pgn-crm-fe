@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Form, Button, Input } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
 import moment from "moment";
@@ -155,8 +155,8 @@ export default function InfoPaymentRelation({
           <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
           <NxDetailText label="Account Name">{accountName}</NxDetailText>
           <NxDetailText label="Priority">{priority}</NxDetailText>
-          <NxDetailText label="Start Date">{startDate ? moment(startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
-          <NxDetailText label="End Date">{endDate ? moment(endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
+          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
         </div>
         <div className="w-full">
           <NxDetailText label="Description">{description}</NxDetailText>

@@ -5,7 +5,6 @@ import ModalAttachment from "./ModalAttachmentPaymentRelation";
 import { useSelector } from "react-redux";
 import { previewFileAttachment } from "../../../../../../../../../../utils/previewFileAttachment";
 import { getColumnSearchPropsPaging } from "../../../../../../../../../../utils/getColumnSearchProps";
-import moment from "moment";
 import productPromoHttpService from "../../../../../../../../../../redux/services/productPromoHttpService";
 import { getBase64 } from "../../../../../../../../../../utils/getBase64";
 import { tokenHeader } from "../../../../../../../../../../utils/tokenHeader";
@@ -14,15 +13,14 @@ import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
+import NxDate from "../../../../../../../../../../components/Nx/NxDatePicker";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
   switch (dataIndex) {
     case "startDate":
     case "endDate":
-      const date = record[dataIndex]
-        ? moment(record[dataIndex]).format("DD MMM YYYY")
-        : "";
+      const date = NxDate.formatDate(record[dataIndex], "DD MMM YYYY") || "";
       return date.toString().toLowerCase().includes(search);
     case "fileSize":
       return record.size.includes(search);
@@ -49,9 +47,7 @@ const sorter = (fieldSort, a, b) => {
     switch (fieldSort) {
       case "startDate":
       case "endDate":
-        const date = obj[fieldSort]
-          ? moment(obj[fieldSort]).format("DD MMM YYYY")
-          : "";
+        const date = NxDate.formatDate(obj[fieldSort], "DD MMM YYYY");
         return date.toString().toLowerCase();
       case "fileSize":
         return extractSize(obj[fieldSort]);
