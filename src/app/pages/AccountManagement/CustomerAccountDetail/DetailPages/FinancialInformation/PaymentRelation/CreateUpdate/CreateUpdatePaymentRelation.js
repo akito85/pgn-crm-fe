@@ -16,6 +16,7 @@ import {
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createPaymentRelation,
+  getDetailDraftPaymentRelation,
   getDetailPaymentRelation,
   getDetailPrApprovalHierarchy,
   getPaymentRelationAttachment,
@@ -54,6 +55,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
     data_prApprovalHierarchy,
     detail_prApprovalHierarchy,
     detail_paymentRelation,
+    detailDraft_paymentRelation,
     list_prDetailAttachment
   } = useSelector((state) => state.paymentRelation);
 
@@ -66,7 +68,13 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   const accountType = location?.state?.type; // "standard" or "onetime"
 
   const status = detail_paymentRelation.status || "DRAFT";
+  const statusApproval = detail_paymentRelation.statusApproval || "DRAFT";
+
   const isDraft = status === "DRAFT";
+  const isActive = status === "ACTIVE";
+
+  const isDraftApproval = statusApproval === "DRAFT";
+  const isRejectApproval = statusApproval === "REJECT";
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
@@ -75,6 +83,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   const [confirmationType, setConfirmationType] = useState("");
 
   const attachmentIsRequired = true;
+
+  const detail = (isActive && statusApproval && isDraftApproval && isRejectApproval) ? detailDraft_paymentRelation : detail_paymentRelation;
 
   const formFields = [
     [
@@ -101,14 +111,15 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   }, [idAccount]);
 
   useEffect(() => {
-    if (formType === "update" && idPr) {
+    if (isUpdate && idPr) {
       dispatch(getDetailPaymentRelation(idPr));
+      dispatch(getDetailDraftPaymentRelation(idPr));
       dispatch(getPaymentRelationAttachment({ id: idPr }));
     }
   }, [formType, idPr]);
 
   useEffect(() => {
-    if (formType === "update" && data_prApprovalHierarchy?.length) {
+    if (isUpdate && data_prApprovalHierarchy.length) {
       const {
         subjectId,
         objectId,
@@ -119,7 +130,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
         appHierId,
         relatedAccountNumber,
         relatedAccountName
-      } = detail_paymentRelation;
+      } = detail;
 
       form.setFieldsValue({
         subjectId,
@@ -140,10 +151,10 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail_paymentRelation, data_prApprovalHierarchy]);
+  }, [detail, data_prApprovalHierarchy]);
 
   useEffect(() => {
-    if (formType === "update" && list_prDetailAttachment) {
+    if (isUpdate && list_prDetailAttachment) {
       const result = list_prDetailAttachment.map((item, index) => ({
         ...item,
         key: `payment-relation-attachment-${item.id}`,
@@ -177,9 +188,9 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
     {
       path: "",
       breadcrumbName:
-        formType === "create"
+        isCreate
           ? "Create Payment Relation"
-          : formType === "update"
+          : isUpdate
             ? "Update Payment Relation"
             : ""
     }
@@ -567,7 +578,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      if (detail_paymentRelation && data_prApprovalHierarchy?.length) {
+      if (data_prApprovalHierarchy?.length) {
         const {
           subjectId,
           objectId,
@@ -578,7 +589,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           appHierId,
           relatedAccountNumber,
           relatedAccountName
-        } = detail_paymentRelation;
+        } = detail;
 
         form.setFieldsValue({
           subjectId,

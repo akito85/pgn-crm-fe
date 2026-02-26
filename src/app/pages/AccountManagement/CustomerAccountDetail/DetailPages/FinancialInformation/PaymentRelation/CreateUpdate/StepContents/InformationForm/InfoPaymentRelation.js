@@ -97,14 +97,15 @@ export default function InfoPaymentRelation({
   };
 
   useEffect(() => {
-    dispatch(getPrAccountStandard({
-      page,
-      size: loadMoreSize,
-      sort,
-      searchs: JSON.stringify(search),
-      id: accountId,
-      isLoadMore: false,
-    }));
+    if (formView)
+      dispatch(getPrAccountStandard({
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        id: accountId,
+        isLoadMore: false,
+      }));
   }, [ sort, search ]);
 
   const baseColumns = useMemo(() =>
