@@ -16,38 +16,38 @@ const nxGetAccountActions = ({
   {
     action: "Download",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconButtonDownload" width={20} />}
+      <Button
+        icon={<SVGIcon name="IconButtonDownload" width={14} />}
         type="submit"
         onClick={handleDownload}
       >
         Download List
-      </ButtonComponent>
+      </Button>
     )
   },
   {
     action: "Approve",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
+      <Button
+        icon={<SVGIcon name="IconRequestApproval" width={14} />}
         type="submit"
         onClick={() => handleApproval(true)}
       >
         Approval
-      </ButtonComponent>
+      </Button>
     )
   },
   {
     action: "Create",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconButtonCreate" width={20} />}
+      <Button
+        icon={<SVGIcon name="IconButtonCreate" width={14} />}
         type={"submit"}
         border={false}
         onClick={handleCreate}
       >
         Create
-      </ButtonComponent>
+      </Button>
     )
   },
   {
@@ -164,7 +164,7 @@ const nxGetAccountActions = ({
               <SVGIcon name="IconLogHistory" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
             }
             border={false}
-            onClick={() => handleApprovalHistory(true, record?.id)}
+            onClick={() => handleApprovalHistory(record?.id)}
             type={"action"}
             className="group"
           >
@@ -173,7 +173,7 @@ const nxGetAccountActions = ({
         ) : (
           <Tooltip title="Approval History" key={`table-action-${index}`}>
             <Button
-              onClick={() => handleApprovalHistory(true, record?.id)}
+              onClick={() => handleApprovalHistory(record?.id)}
               type="table-action"
             >
               <SVGIcon

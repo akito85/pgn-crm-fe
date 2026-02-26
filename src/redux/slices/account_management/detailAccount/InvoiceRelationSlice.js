@@ -22,6 +22,7 @@ const initialState = {
     pageSize: 10,
   },
   detail_invoiceRelation: {},
+  detailDraft_invoiceRelation: {},
   data_irApprovalHistory: {},
 };
 
@@ -162,6 +163,19 @@ export const getDetailInvoiceRelation = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/detail/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDetailDraftInvoiceRelation = createAsyncThunk(
+  "GET_DETAIL_DRAFT_INVOICE_RELATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/invoice-relation/detail-draft/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -410,6 +424,19 @@ const invoiceRelationSlice = createSlice({
     },
     [getDetailInvoiceRelation.rejected]: (state, action) => {
       state.detail_invoiceRelation = {};
+      state.loading = false;
+    },
+
+    /** Get Detail Draft Invoice Relation */
+    [getDetailDraftInvoiceRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailDraftInvoiceRelation.fulfilled]: (state, action) => {
+      state.detailDraft_invoiceRelation = action.payload?.result || {};
+      state.loading = false;
+    },
+    [getDetailDraftInvoiceRelation.rejected]: (state) => {
+      state.detailDraft_invoiceRelation = {};
       state.loading = false;
     },
 

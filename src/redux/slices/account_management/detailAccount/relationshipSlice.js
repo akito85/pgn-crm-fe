@@ -15,6 +15,7 @@ const initialState = {
     pageSize: 20,
   },
   data_relationshipDetail: {},
+  detailDraft_relationshipDetail: {},
   data_relationshipType: [],
   data_relationshipCategory: [],
   data_attachmentCategory: [],
@@ -85,6 +86,20 @@ export const getRelationshipDetail = createAsyncThunk(
         validateError({ error: error, action: "GET_RELATIONSHIP_DETAIL" })
       );
       return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// Get Relationship Detail Draft
+export const getDetailDraftRelationship = createAsyncThunk(
+  "GET_DETAIL_DRAFT_RELATIONSHIP",
+  async ({ idAccount, idRelationship }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/detail-draft/${idRelationship}`;
+      const response = await accountManagementService.getDetail(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -164,7 +179,7 @@ export const getApprovalHistory = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-history/${relationshipId}`;
       const response = await accountManagementService.getAll(url);
-      return response?.data;
+      return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "GET_APPROVAL_HISTORY" })
@@ -725,6 +740,19 @@ const relationshipSlice = createSlice({
       state.loadingDetail = false;
     },
     [getRelationshipDetail.rejected]: (state) => {
+      state.loadingDetail = false;
+    },
+
+    // Get Relationship Detail Draft
+    [getDetailDraftRelationship.pending]: (state) => {
+      state.loadingDetail = true;
+    },
+    [getDetailDraftRelationship.fulfilled]: (state, action) => {
+      state.detailDraft_relationshipDetail = action.payload;
+      state.loadingDetail = false;
+    },
+    [getDetailDraftRelationship.rejected]: (state) => {
+      state.detailDraft_relationshipDetail = {};
       state.loadingDetail = false;
     },
 

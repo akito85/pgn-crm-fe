@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import { getRelatedObjectData } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import { getCustomerColumns } from "./getCustomerColumns";
 import { getAccountColumns } from "./getAccountColumns";
+import { Button } from "antd";
 
 const ModalChooseRelated = ({
   isOpen = false,
@@ -154,9 +154,9 @@ const ModalChooseRelated = ({
       width={1100}
       footer={
         <div className="flex justify-end">
-          <ButtonComponent type="menu" onClick={handleCancel}>
+          <Button type="menu" onClick={handleCancel}>
             Back
-          </ButtonComponent>
+          </Button>
         </div>
       }
     >
