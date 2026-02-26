@@ -48,10 +48,6 @@ export default function InfoInvoiceRelation({
   const { list_irAccountStandard, pagination_irAccountStandard } = useSelector(
     (state) => state.invoiceRelation
   );
-  
-  const handleOk = () => {
-    console.log("ok")
-  }
 
   const handleCancel = () => {
     setIsOpen(false)
@@ -96,14 +92,15 @@ export default function InfoInvoiceRelation({
   };
 
   useEffect(() => {
-    dispatch(getIrAccountStandard({
-      page,
-      size: loadMoreSize,
-      sort,
-      searchs: JSON.stringify(search),
-      id: accountId,
-      isLoadMore: false,
-    }));
+    if (formView)
+      dispatch(getIrAccountStandard({
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        id: accountId,
+        isLoadMore: false,
+      }));
   }, [ sort, search ]);
 
   const baseColumns = useMemo(() =>
@@ -254,7 +251,6 @@ export default function InfoInvoiceRelation({
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        handleOk={handleOk}
         header={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}

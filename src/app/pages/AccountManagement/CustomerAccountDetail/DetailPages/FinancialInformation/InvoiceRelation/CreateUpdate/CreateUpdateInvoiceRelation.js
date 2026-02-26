@@ -16,6 +16,7 @@ import {
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createInvoiceRelation,
+  getDetailDraftInvoiceRelation,
   getDetailInvoiceRelation,
   getDetailIrApprovalHierarchy,
   getInvoiceRelationAttachment,
@@ -54,6 +55,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
     data_irApprovalHierarchy,
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
+    detailDraft_invoiceRelation,
     list_irDetailAttachment
   } = useSelector((state) => state.invoiceRelation);
 
@@ -66,7 +68,12 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   const accountType = location?.state?.type; // "standard" or "onetime"
 
   const status = detail_invoiceRelation.status || "DRAFT";
+  const statusApproval = detail_invoiceRelation.statusApproval || "DRAFT";
+
   const isDraft = status === "DRAFT";
+  const isActive = status === "ACTIVE";
+
+  const isDraftApproval = statusApproval === "DRAFT";
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
@@ -75,6 +82,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   const [confirmationType, setConfirmationType] = useState("");
 
   const attachmentIsRequired = true;
+
+  const detail = (isActive && statusApproval && isDraftApproval) ? detailDraft_invoiceRelation : detail_invoiceRelation;
 
   const formFields = [
     ["accountNumber", "accountName", "startDate", "endDate", "description"],
@@ -94,12 +103,13 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   useEffect(() => {
     if (isUpdate && idIr) {
       dispatch(getDetailInvoiceRelation(idIr));
+      dispatch(getDetailDraftInvoiceRelation(idIr));
       dispatch(getInvoiceRelationAttachment({ id: idIr }));
     }
   }, [formType, idIr]);
 
   useEffect(() => {
-    if (isUpdate && detail_invoiceRelation && data_irApprovalHierarchy?.length) {
+    if (isUpdate && data_irApprovalHierarchy.length) {
       const {
         subjectId,
         objectId,
@@ -109,7 +119,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
         appHierId,
         relatedAccountNumber,
         relatedAccountName
-      } = detail_invoiceRelation;
+      } = detail;
 
       form.setFieldsValue({
         subjectId,
@@ -129,7 +139,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail_invoiceRelation, data_irApprovalHierarchy]);
+  }, [detail, data_irApprovalHierarchy]);
 
   useEffect(() => {
     if (isUpdate && list_irDetailAttachment) {
@@ -557,7 +567,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      if (detail_invoiceRelation && data_irApprovalHierarchy?.length) {
+      if (data_irApprovalHierarchy?.length) {
         const {
           subjectId,
           objectId,
@@ -567,7 +577,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           appHierId,
           relatedAccountNumber,
           relatedAccountName
-        } = detail_invoiceRelation;
+        } = detail;
 
         form.setFieldsValue({
           subjectId,
