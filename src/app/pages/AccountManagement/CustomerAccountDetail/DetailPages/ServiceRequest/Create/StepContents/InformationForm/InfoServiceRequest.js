@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { Form, Select, Button, Tooltip, Spin, Tag, Input } from "antd"; // Added Input import
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
@@ -36,8 +35,6 @@ export default function InfoServiceRequest({
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedRowKey, setSelectedRowKey] = useState(null);
   const [serviceRequestRef, setServiceRequestRef] = useState("");
-  const navigate = useNavigate();
-
   // Debug: Log form values when they change
   useEffect(() => {
     const values = form?.getFieldsValue();
@@ -335,6 +332,7 @@ export default function InfoServiceRequest({
       },
     },
     {
+      key: "action",
       title: "ACTION",
       align: "center",
       width: 120,
@@ -342,26 +340,14 @@ export default function InfoServiceRequest({
       render: (v, r, i) => {
         return (
           <div className="flex w-full justify-center gap-4">
-            <Tooltip title="Detail">
+            <Tooltip title="Select">
               <div className="pt-1 cursor-pointer">
                 <SVGIcon
-                  name="IconDetail"
+                  name="IconActionCreate"
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    navigate("/account-management/account-standard/service-requests/details");
-                  }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip title="Update">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEdit"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => {
-                    // Handle update action
+                    handleRowClick(r);
                   }}
                 />
               </div>
@@ -413,11 +399,12 @@ export default function InfoServiceRequest({
     }
   ];
 
-  // Handle row click
+  // Handle row click — auto select & close modal (like PaymentRelation pattern)
   const handleRowClick = (record) => {
-    console.log('Row clicked:', record);
+    form.setFieldsValue({ srr: record.serviceRequestReference });
     setSelectedRow(record);
     setSelectedRowKey(record.key);
+    setIsOpen(false);
   };
 
   const handleTableRowClick = (record, rowIndex, event) => {
@@ -649,67 +636,38 @@ export default function InfoServiceRequest({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        title="CHOOSE SERVICE REQUEST REFERENCE"
+        header={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
-        type="custom"
         footer={[
-          <div className="flex justify-end items-end w-full">
-            <div className="flex flex-row gap-2">
-              <Button onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                type="primary"
-                className="h-9 px-5 justify-center items-center"
-                style={{
-                  backgroundColor: "#0075bf",
-                  borderColor: "#0075bf",
-                  borderRadius: "5px",
-                  minWidth: "112px",
-                  color: "#ffffff"
-                }}
-                onClick={handleOk}
-                disabled={!selectedRow}
-              >
-                Select
-              </Button>
-            </div>
-          </div>
+          <Button key="close" onClick={handleClose}>
+            Close
+          </Button>,
         ]}
       >
-        <div className="mb-4">
-          {selectedRow ? (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-              <span className="font-medium">Selected Service Request:</span> 
-              <span className="ml-2 font-bold">{selectedRow.serviceRequestNumber}</span>
-              <span className="ml-2">({selectedRow.serviceRequestReference})</span>
-            </div>
-          ) : (
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded text-gray-500">
-              Click on a Service Request Number or Reference to select
-            </div>
-          )}
+        <div className="p-4">
+          <NxBaseContainer border>
+            <NxTable
+              className="border-[0.5px] border-[#c8cdd4] border-solid"
+              usePagination={true}
+              useSelect={true}
+              dataMain={ServiceRequestData}
+              columnMain={columnMain}
+              tablePadding="small"
+              fontSize="small"
+              tableScrolled={{ x: "max-content" }}
+              onRowClicked={handleTableRowClick}
+              // rowSelection={{
+              //   type: 'radio',
+              //   selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
+              //   onChange: (selectedRowKeys, selectedRows) => {
+              //     if (selectedRows.length > 0) {
+              //       handleRowClick(selectedRows[0]);
+              //     }
+              //   },
+              // }}
+            />
+          </NxBaseContainer>
         </div>
-        
-        <NxTable
-          className="border-[0.5px] border-[#c8cdd4] border-solid"
-          usePagination={true}
-          useSelect={true}
-          dataMain={ServiceRequestData}
-          columnMain={columnMain}
-          tablePadding="small"
-          fontSize="small"
-          onRowClicked={handleTableRowClick}
-          rowSelection={{
-            type: 'radio',
-            selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
-            onChange: (selectedRowKeys, selectedRows) => {
-              if (selectedRows.length > 0) {
-                handleRowClick(selectedRows[0]);
-              }
-            },
-          }}
-        />
       </NxModal>
     </Fragment>
   )
