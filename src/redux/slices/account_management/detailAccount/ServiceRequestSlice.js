@@ -23,6 +23,7 @@ const initialState = {
   data_prerequisite_types: [],
   data_activity_statuses: [],
   data_data_requirement_types: [],
+  data_data_requirement_values: {},
   // Payment related
   data_payment_plans: [],
   data_installments: [],
@@ -35,6 +36,8 @@ const initialState = {
   loading_work_orders: false,
   loading_activities: false,
   loading_data_requirements: false,
+  loading_data_requirement_values: false,
+  error_data_requirement_values: null,
   loading_dropdowns: false,
   isFailed: false,
   isSuccess: false,
@@ -376,6 +379,20 @@ export const getServiceRequestDataRequirements = createAsyncThunk(
       const url = `/v1/dbs/api/dropdowns/servicerequests/datarequirements`;
       const response = await accountManagementService.getAll(url);
       return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Data Requirement Values by Type and Account
+export const getDataRequirementValuesByType = createAsyncThunk(
+  "GET_DATA_REQUIREMENT_VALUES_BY_TYPE",
+  async ({ typeValue, accountId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/datarequirements/values/${typeValue}`;
+      const response = await accountManagementService.getAll(url);
+      return { typeValue, data: response.data };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -872,6 +889,19 @@ const serviceRequestSlice = createSlice({
 
     [getServiceRequestDataRequirements.fulfilled]: (state, action) => {
       state.data_data_requirement_types = action.payload;
+    },
+
+    [getDataRequirementValuesByType.pending]: (state) => {
+      state.loading_data_requirement_values = true;
+      state.error_data_requirement_values = null;
+    },
+    [getDataRequirementValuesByType.fulfilled]: (state, action) => {
+      state.loading_data_requirement_values = false;
+      state.data_data_requirement_values[action.payload.typeValue] = action.payload.data;
+    },
+    [getDataRequirementValuesByType.rejected]: (state, action) => {
+      state.loading_data_requirement_values = false;
+      state.error_data_requirement_values = action.payload;
     },
 
     [getActivityStatuses.fulfilled]: (state, action) => {
