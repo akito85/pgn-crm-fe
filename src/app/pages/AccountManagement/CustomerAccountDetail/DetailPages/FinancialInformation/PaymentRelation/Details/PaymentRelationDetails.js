@@ -193,7 +193,7 @@ const PaymentRelationDetails = ({
     updatedBy,
   } = detail;
 
-  const draftExist = status !== "DRAFT" && statusApproval !== "APPROVED"
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED"
   const isApproval = ["PAYMENT_RELATION", "INACTIVE_PAYMENT_RELATION"].includes(approvalType);
 
   return (
