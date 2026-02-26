@@ -34,7 +34,6 @@ const ButtonComponent = ({
         htmlType={htmlType}
         size={size || "small"}
         style={{
-          borderColor: `${border === false ? "#0075bf00" : "var(--primary)"}`,
           ...(fullButton ? { width: "100%" } : {}),
           backgroundColor: isPrimary && "var(--primary)",
           color: isPrimary && "#fff",
