@@ -113,7 +113,7 @@ const RelationshipInfo = ({
             required
             className="no-margin-form"
           >
-            <Input.Group compact>
+            <div className="flex gap-x-1">
               <Form.Item
                 name="relatedName"
                 rules={[
@@ -128,12 +128,12 @@ const RelationshipInfo = ({
               <Button
                 type="submit"
                 onClick={() => setModalChoose(true)}
-                size="small"
                 disabled={!relationshipType || !relationshipCategory}
+                className="w-[120px]"
               >
                 Select
               </Button>
-            </Input.Group>
+            </div>
           </Form.Item>
 
           {/* Row 2 - Col 1: Related Number */}
