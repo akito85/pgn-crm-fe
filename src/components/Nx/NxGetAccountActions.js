@@ -16,38 +16,38 @@ const nxGetAccountActions = ({
   {
     action: "Download",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconButtonDownload" width={20} />}
+      <Button
+        icon={<SVGIcon name="IconButtonDownload" width={14} />}
         type="submit"
         onClick={handleDownload}
       >
         Download List
-      </ButtonComponent>
+      </Button>
     )
   },
   {
     action: "Approve",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
+      <Button
+        icon={<SVGIcon name="IconRequestApproval" width={14} />}
         type="submit"
         onClick={() => handleApproval(true)}
       >
         Approval
-      </ButtonComponent>
+      </Button>
     )
   },
   {
     action: "Create",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconButtonCreate" width={20} />}
+      <Button
+        icon={<SVGIcon name="IconButtonCreate" width={14} />}
         type={"submit"}
         border={false}
         onClick={handleCreate}
       >
         Create
-      </ButtonComponent>
+      </Button>
     )
   },
   {
