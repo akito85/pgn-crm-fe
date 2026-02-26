@@ -6,9 +6,8 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import InvoiceRelationDetailTabs from "./InvoiceRelationDetailTabs";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import moment from "moment";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import { getDetailInvoiceRelation, getDetailDraftInvoiceRelation, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
@@ -56,16 +55,34 @@ const InvoiceRelationDetails = ({
       label: "Current",
     }
   ]
-  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "")
+  const originalKey = tabOptions[0]?.key;
+  const [activeKey, setActiveKey] = useState(originalKey || "")
+  const detail = (activeKey === originalKey ? detail_invoiceRelation : detailDraft_invoiceRelation) || {}
 
   const handleSetActiveKey = (newActiveKey) => {
     setActiveKey(newActiveKey)
   }
-
+  
   //state
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
 
+  const {
+    status,
+    statusApproval,
+  } = detail_invoiceRelation;
+
+  const {
+    approvalType,
+    relatedAccountNumber,
+    id,
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy,
+    tappId,
+  } = detail;
+  
   const routes = [
     {
       path: "",
@@ -175,20 +192,7 @@ const InvoiceRelationDetails = ({
     }
   }, [idIr])
 
-  const {
-    status,
-    statusApproval,
-    approvalType,
-    relatedAccountNumber,
-    id,
-    tappId,
-    createdDate,
-    createdBy,
-    updatedDate,
-    updatedBy,
-  } = detail_invoiceRelation;
-
-  const draftExist = status !== "DRAFT" && statusApproval !== "APPROVED";
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
 
   return (
@@ -215,7 +219,7 @@ const InvoiceRelationDetails = ({
           )}
 
           <InvoiceRelationDetailTabs
-            dataDetail={activeKey === tabOptions[0]?.key ? detail_invoiceRelation : activeKey === tabOptions[1]?.key ? detailDraft_invoiceRelation : {}}
+            dataDetail={detail}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
             dispatch={dispatch}
             idIr={idIr}
@@ -226,9 +230,9 @@ const InvoiceRelationDetails = ({
               <div className="w-full grid grid-cols-5 gap-4">
                 {/* History Log Information */}
                 <NxDetailText label="Record Id">{id}</NxDetailText>
-                <NxDetailText label="Created Date">{createdDate ? moment(createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Created Date">{NxDate.formatDate(createdDate)}</NxDetailText>
                 <NxDetailText label="Created By">{createdBy}</NxDetailText>
-                <NxDetailText label="Updated Date">{updatedDate ? moment(updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Updated Date">{NxDate.formatDate(updatedDate)}</NxDetailText>
                 <NxDetailText label="Updated By">{updatedBy}</NxDetailText>
               </div>
             </NxBaseContainer>
