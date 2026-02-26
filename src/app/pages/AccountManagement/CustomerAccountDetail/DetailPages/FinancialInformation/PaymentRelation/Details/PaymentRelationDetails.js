@@ -181,9 +181,9 @@ const PaymentRelationDetails = ({
     }
   }, [idPr])
 
+  const { status, statusApproval } = detail_paymentRelation;
+
   const {
-    status,
-    statusApproval,
     approvalType,
     relatedAccountNumber,
     id,
