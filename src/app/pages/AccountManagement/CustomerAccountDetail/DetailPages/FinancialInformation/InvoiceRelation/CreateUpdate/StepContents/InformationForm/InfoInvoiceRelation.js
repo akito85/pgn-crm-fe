@@ -149,8 +149,8 @@ export default function InfoInvoiceRelation({
         <div className="w-full grid grid-cols-3 gap-4">
           <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
           <NxDetailText label="Account Name">{accountName}</NxDetailText>
-          <NxDetailText label="Start Date">{NxDate.formatDate(startDate)}</NxDetailText>
-          <NxDetailText label="End Date">{NxDate.formatDate(endDate)}</NxDetailText>
+          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
         </div>
         <div className="w-full">
           <NxDetailText label="Description">{description}</NxDetailText>

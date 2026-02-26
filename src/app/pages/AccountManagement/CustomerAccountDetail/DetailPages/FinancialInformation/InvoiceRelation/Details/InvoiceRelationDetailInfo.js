@@ -24,8 +24,8 @@ const InvoiceRelationDetailInfo = ({
           {/* Invoice Relation Information */}
           <NxDetailText label="Account Number">{subjectAccountNumber === accountNumber ? relatedAccountNumber : accountNumber}</NxDetailText>
           <NxDetailText label="Account Name">{subjectAccountNumber === accountNumber ? relatedAccountName : accountName}</NxDetailText>
-          <NxDetailText label="Start Date">{NxDate.formatDate(startDate)}</NxDetailText>
-          <NxDetailText label="End Date">{NxDate.formatDate(endDate)}</NxDetailText>
+          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
           <NxDetailText label="Status">{status}</NxDetailText>
         </div>
         <div className="w-full">

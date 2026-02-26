@@ -86,7 +86,7 @@ const getInvoiceRelationColumns = (
       handleSearch,
       true
     ),
-    render: (startDate) => NxDate.formatDate(startDate),
+    render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
   {
     key: "endDate",
@@ -104,7 +104,7 @@ const getInvoiceRelationColumns = (
       handleSearch,
       true
     ),
-    render: (endDate) => NxDate.formatDate(endDate),
+    render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
   {
     key: "statusApproval",
