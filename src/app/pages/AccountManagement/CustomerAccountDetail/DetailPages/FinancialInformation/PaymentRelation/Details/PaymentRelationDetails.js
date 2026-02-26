@@ -6,9 +6,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentRelationDetailTabs from "./PaymentRelationDetailTabs";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation, getDetailDraftPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
@@ -19,6 +17,7 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
 import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
 const PaymentRelationDetails = ({
   type = "standard"
@@ -56,7 +55,12 @@ const PaymentRelationDetails = ({
       label: "Current",
     }
   ]
-  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "")
+
+  const originalKey = tabOptions[0]?.key;
+
+  const [activeKey, setActiveKey] = useState(originalKey || "")
+
+  const detail = (activeKey === originalKey ? detail_paymentRelation : detailDraft_paymentRelation) || {}
 
   const handleSetActiveKey = (newActiveKey) => {
     setActiveKey(newActiveKey)
@@ -171,9 +175,10 @@ const PaymentRelationDetails = ({
   }, [idAccount, idCustomer]);
 
   useEffect(() => {
-    if (idPr)
+    if (idPr) {
       dispatch(getDetailPaymentRelation(idPr));
       dispatch(getDetailDraftPaymentRelation(idPr));
+    }
   }, [idPr])
 
   const {
@@ -186,7 +191,7 @@ const PaymentRelationDetails = ({
     createdBy,
     updatedDate,
     updatedBy,
-  } = detail_paymentRelation;
+  } = detail;
 
   const draftExist = status !== "DRAFT" && statusApproval !== "APPROVED"
   const isApproval = ["PAYMENT_RELATION", "INACTIVE_PAYMENT_RELATION"].includes(approvalType);
@@ -215,7 +220,7 @@ const PaymentRelationDetails = ({
           )}
 
           <PaymentRelationDetailTabs
-            dataDetail={activeKey === tabOptions[0]?.key ? detail_paymentRelation : activeKey === tabOptions[0]?.key ? detailDraft_paymentRelation : {}}
+            dataDetail={detail}
             subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
             dispatch={dispatch}
             idPr={idPr}
@@ -226,9 +231,9 @@ const PaymentRelationDetails = ({
               <div className="w-full grid grid-cols-5 gap-4">
                 {/* History Log Information */}
                 <NxDetailText label="Record Id">{id}</NxDetailText>
-                <NxDetailText label="Created Date">{createdDate ? moment(createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Created Date">{NxDate.formatDate(createdDate)}</NxDetailText>
                 <NxDetailText label="Created By">{createdBy}</NxDetailText>
-                <NxDetailText label="Updated Date">{updatedDate ? moment(updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</NxDetailText>
+                <NxDetailText label="Updated Date">{NxDate.formatDate(updatedDate)}</NxDetailText>
                 <NxDetailText label="Updated By">{updatedBy}</NxDetailText>
               </div>
             </NxBaseContainer>
