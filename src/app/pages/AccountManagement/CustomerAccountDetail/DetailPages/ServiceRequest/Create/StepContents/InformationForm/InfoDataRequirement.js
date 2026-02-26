@@ -321,26 +321,28 @@ export default function InfoDataRequirement({
         handleCancel={handleCancel}
         handleOk={handleOk}
         header={"ADD DATA REQUIREMENT"}
-        width={600}
-        footer={[
-          <Button key="cancel" onClick={handleCancel}>
-            Cancel
-          </Button>,
-          <Button
-            key="save"
-            type="primary"
-            className="h-9 px-5 justify-center items-center"
-            style={{
-              backgroundColor: "#0075bf",
-              borderColor: "#0075bf",
-              borderRadius: "5px",
-              color: "#ffffff"
-            }}
-            onClick={handleOk}
-          >
-            Save
-          </Button>,
-        ]}
+        width={800}
+        footer={
+          <div className="w-full flex justify-end gap-5">
+            <Button key="cancel" className="" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              key="save"
+              type="primary"
+              className=""
+              style={{
+                backgroundColor: "#0075bf",
+                borderColor: "#0075bf",
+                borderRadius: "5px",
+                color: "#ffffff"
+              }}
+              onClick={handleOk}
+            >
+              Save
+            </Button>
+          </div>
+        }
       >
         <div className="p-4">
           <NxBaseContainer border>
