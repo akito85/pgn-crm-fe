@@ -1,6 +1,7 @@
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
+import StatusComponent from "../../../../../../../../components/StatusComponent";
 
 const InvoiceRelationDetailInfo = ({
   subjectAccountNumber,
@@ -26,7 +27,11 @@ const InvoiceRelationDetailInfo = ({
           <NxDetailText label="Account Name">{subjectAccountNumber === accountNumber ? relatedAccountName : accountName}</NxDetailText>
           <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
           <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
-          <NxDetailText label="Status">{status}</NxDetailText>
+          <NxDetailText label="Status">
+            <StatusComponent colour={status} margin={false}>
+              {status}
+            </StatusComponent>
+          </NxDetailText>
         </div>
         <div className="w-full">
           <NxDetailText label="Description">{description}</NxDetailText>
