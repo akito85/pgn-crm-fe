@@ -36,6 +36,8 @@ const TRIGGER_LABELS = {
   objectId:            "Object ID",
   objectAccountNumber: "Related Account No",
   objectAccountName:   "Related Account",
+  objectCustomerId:    "Related Customer ID",
+  objectCustomerName:  "Related Customer",
   startDate:           "Start Date",
   endDate:             "End Date",
   validationType:      "Validation Type",
@@ -60,6 +62,8 @@ const TRIGGER_SKIP = new Set([
 const TRIGGER_PRIORITY = {
   PAYMENT_RELATION:          ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName"],
   INACTIVE_PAYMENT_RELATION: ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName"],
+  INVOICE_RELATION:          ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName"],
+  INACTIVE_INVOICE_RELATION: ["accountNumber", "accountName", "objectAccountNumber", "objectAccountName"],
   SERVICE_AGREEMENT:         ["accountNumber", "customerName", "startDate", "endDate"],
   UPDATE_SERVICE_AGREEMENT:  ["accountNumber", "customerName", "startDate", "endDate"],
   BILLING:                   ["accountNumber", "customerName", "startDate", "endDate"],
@@ -80,6 +84,8 @@ const BODY_LABELS = {
   object_id:             "Object ID",
   object_account_number: "Related Account No",
   object_account_name:   "Related Account",
+  object_customer_id:    "Related Customer ID",
+  object_customer_name:  "Related Customer",
   effective_date:        "Start Date",
   expiry_date:           "End Date",
   payment_number:        "Payment No",
@@ -104,6 +110,8 @@ const BODY_SKIP = new Set(["category", "entity_id", "message", "status"]);
 const BODY_PRIORITY = {
   PAYMENT_RELATION:          ["account_number", "account_name", "customer_name", "customer_number"],
   INACTIVE_PAYMENT_RELATION: ["account_number", "account_name", "customer_name", "customer_number"],
+  INVOICE_RELATION:          ["account_number", "account_name", "customer_name", "customer_number"],
+  INACTIVE_INVOICE_RELATION: ["account_number", "account_name", "customer_name", "customer_number"],
   SERVICE_AGREEMENT:         ["sa_number", "customer_name", "effective_date", "expiry_date"],
   UPDATE_SERVICE_AGREEMENT:  ["sa_number", "customer_name", "effective_date", "expiry_date"],
   BILLING:                   ["account_number", "customer_name", "effective_date", "expiry_date"],
@@ -142,6 +150,40 @@ const TRIGGER_SECTIONS = {
     { title: "Customer Info",    keys: ["customerName"] },
     { title: "Period & Details", keys: ["startDate", "endDate", "validationType", "remark", "remarks", "description"] },
     { title: "Approval",         keys: ["hierarchyName", "statusApproval"] },
+  ],
+  INVOICE_RELATION: [
+    {
+      title: "Relation Info",
+      keys:   ["accountNumber", "accountName", "customerName", "customerNumber",
+               "objectAccountNumber", "objectAccountName", "objectCustomerName", "objectCustomerId"],
+      labels: {
+        ...RELATION_INFO_LABELS,
+        customerName:       "Subject Customer",
+        customerNumber:     "Subject Customer No",
+        objectCustomerName: "Object Customer",
+        objectCustomerId:   "Object Customer ID",
+      },
+    },
+    { title: "Account Info",     keys: ["accountSegment", "accountCategory"] },
+    { title: "Period & Details", keys: ["startDate", "endDate", "description", "remark", "remarks"] },
+    { title: "Approval",         keys: ["hierarchyName", "appHierId", "statusApproval"] },
+  ],
+  INACTIVE_INVOICE_RELATION: [
+    {
+      title: "Relation Info",
+      keys:   ["accountNumber", "accountName", "customerName", "customerNumber",
+               "objectAccountNumber", "objectAccountName", "objectCustomerName", "objectCustomerId"],
+      labels: {
+        ...RELATION_INFO_LABELS,
+        customerName:       "Subject Customer",
+        customerNumber:     "Subject Customer No",
+        objectCustomerName: "Object Customer",
+        objectCustomerId:   "Object Customer ID",
+      },
+    },
+    { title: "Account Info",     keys: ["accountSegment", "accountCategory"] },
+    { title: "Period & Details", keys: ["startDate", "endDate", "description", "remark", "remarks"] },
+    { title: "Approval",         keys: ["hierarchyName", "appHierId", "statusApproval"] },
   ],
 };
 
