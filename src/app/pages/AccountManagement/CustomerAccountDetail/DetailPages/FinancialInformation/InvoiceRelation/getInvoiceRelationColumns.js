@@ -1,7 +1,7 @@
-import moment from "moment";
-import { dateFormatting, toTitleCase } from "../../../../../../../utils";
+import { toTitleCase } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../../components/StatusComponent";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 const getInvoiceRelationColumns = (
   search,
@@ -86,7 +86,7 @@ const getInvoiceRelationColumns = (
       handleSearch,
       true
     ),
-    render: (startDate) => startDate ? moment(startDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
+    render: (startDate) => NxDate.formatDate(startDate),
   },
   {
     key: "endDate",
@@ -104,7 +104,7 @@ const getInvoiceRelationColumns = (
       handleSearch,
       true
     ),
-    render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
+    render: (endDate) => NxDate.formatDate(endDate),
   },
   {
     key: "statusApproval",
