@@ -29,6 +29,7 @@ const initialState = {
     pageSize: 10,
   },
   detail_multiDestination: {},
+  detailDraft_multiDestination: {},
   list_mdDetailAttachment: [],
   pagination_mdDetailAttachment: {
     totalPages: 0,
@@ -209,6 +210,19 @@ export const getDetailMultiDestination = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDetailDraftMultiDestination = createAsyncThunk(
+  "GET_DETAIL_DRAFT_MULTI_DESTINATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -619,16 +633,30 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Detail Multi Destination */
-    [getDetailMultiDestination.pending]: (state, action) => {
-      state.detail_multiDestination = action.payload;
+    [getDetailMultiDestination.pending]: (state) => {
+      state.detail_multiDestination = {};
       state.loading = true;
     },
     [getDetailMultiDestination.fulfilled]: (state, action) => {
-      state.detail_multiDestination = action.payload;
+      state.detail_multiDestination = action.payload || {};
       state.loading = false;
     },
-    [getDetailMultiDestination.rejected]: (state, action) => {
-      state.detail_multiDestination = action.payload;
+    [getDetailMultiDestination.rejected]: (state) => {
+      state.detail_multiDestination = {};
+      state.loading = false;
+    },
+
+    /** Get Detail Draft Multi Destination */
+    [getDetailDraftMultiDestination.pending]: (state) => {
+      state.detailDraft_multiDestination = {};
+      state.loading = true;
+    },
+    [getDetailDraftMultiDestination.fulfilled]: (state, action) => {
+      state.detailDraft_multiDestination = action.payload || {};
+      state.loading = false;
+    },
+    [getDetailDraftMultiDestination.rejected]: (state) => {
+      state.detailDraft_multiDestination = {};
       state.loading = false;
     },
 
