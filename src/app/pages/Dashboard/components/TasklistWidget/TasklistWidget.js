@@ -17,6 +17,7 @@ const TasklistWidget = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [accumulatedData, setAccumulatedData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0); // Force refetch on refresh
 
   // RTK Query
   const {
@@ -33,23 +34,37 @@ const TasklistWidget = () => {
       sort,
       filters,
       search,
+      refreshKey, // Force refetch when refreshKey changes
     },
     {
-      refetchOnMountOrArgChange: false, // Prevent double render
+      refetchOnMountOrArgChange: true, // Refetch when component mounts or args change
     }
   );
 
   // Update accumulated data when new data arrives
   useEffect(() => {
     if (tasklistData?.TASKS) {
-      setAccumulatedData(tasklistData.TASKS);
+      // If page is 1, replace data; otherwise append (for load more)
+      if (page === 1) {
+        setAccumulatedData(tasklistData.TASKS);
+      } else {
+        setAccumulatedData((prev) => {
+          // Avoid duplicates by checking if data already exists
+          const existingIds = new Set(prev.map((item) => item.TASK_ID));
+          const newTasks = tasklistData.TASKS.filter(
+            (task) => !existingIds.has(task.TASK_ID)
+          );
+          return [...prev, ...newTasks];
+        });
+      }
     }
-  }, [tasklistData]);
+  }, [tasklistData, page]);
 
   // Reset accumulated data when filters or search change
   useEffect(() => {
     setPage(1);
     setAccumulatedData([]);
+    setRefreshKey((prev) => prev + 1); // Force refetch
   }, [sort, search, filters]);
 
   // Memoized data transformation
@@ -98,8 +113,11 @@ const TasklistWidget = () => {
   };
 
   const handleRefresh = () => {
+    // Reset to first page and clear accumulated data
     setPage(1);
-    refetch();
+    setAccumulatedData([]);
+    // Force refetch by incrementing refreshKey
+    setRefreshKey((prev) => prev + 1);
   };
 
   // Error handling

@@ -1,8 +1,7 @@
-import { Form, Select, Input } from "antd";
+import { Form, Select, Input, Button } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import DateComponent from "../../../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
@@ -114,7 +113,7 @@ const RelationshipInfo = ({
             required
             className="no-margin-form"
           >
-            <Input.Group compact>
+            <div className="flex gap-x-1">
               <Form.Item
                 name="relatedName"
                 rules={[
@@ -126,15 +125,15 @@ const RelationshipInfo = ({
                   disabled
                 />
               </Form.Item>
-              <ButtonComponent
+              <Button
                 type="submit"
                 onClick={() => setModalChoose(true)}
-                size="small"
                 disabled={!relationshipType || !relationshipCategory}
+                className="w-[120px]"
               >
                 Select
-              </ButtonComponent>
-            </Input.Group>
+              </Button>
+            </div>
           </Form.Item>
 
           {/* Row 2 - Col 1: Related Number */}

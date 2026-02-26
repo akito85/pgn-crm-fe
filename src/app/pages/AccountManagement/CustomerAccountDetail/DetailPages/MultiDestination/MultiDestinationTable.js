@@ -63,7 +63,7 @@ const MultiDestinationTable = ({
       }
     ),
     handleApproval,
-    handleApprovalHistory: handleApprovalHistoryModal,
+    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
     handleInactivate: handleInactivateModal,
     idKey: "idMd",

@@ -32,8 +32,14 @@ const choosePosition = async (id) => {
     { positionId: id },
     { headers: tokenHeader() }
   );
+  // Preserve notification-related localStorage items before clearing
+  const notificationUserId = localStorage.getItem("notification_userId");
+  const notificationPositionId = localStorage.getItem("notification_positionId");
   localStorage.clear();
   window.sessionStorage.clear();
+  // Restore notification-related items
+  if (notificationUserId) localStorage.setItem("notification_userId", notificationUserId);
+  if (notificationPositionId) localStorage.setItem("notification_positionId", notificationPositionId);
   return response.data;
 };
 const chooseEntity = async (id) => {
@@ -42,8 +48,14 @@ const chooseEntity = async (id) => {
     { entityId: id },
     { headers: tokenHeader() }
   );
+  // Preserve notification-related localStorage items before clearing
+  const notificationUserId = localStorage.getItem("notification_userId");
+  const notificationPositionId = localStorage.getItem("notification_positionId");
   localStorage.clear();
   window.sessionStorage.clear();
+  // Restore notification-related items
+  if (notificationUserId) localStorage.setItem("notification_userId", notificationUserId);
+  if (notificationPositionId) localStorage.setItem("notification_positionId", notificationPositionId);
   return response.data;
 };
 const checkGrantedAccess = async (body) => {

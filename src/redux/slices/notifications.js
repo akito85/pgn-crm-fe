@@ -45,6 +45,10 @@ const initialState = {
   broadcastNotifications: [], // Notifications for all users
   directNotifications: [], // Notifications for specific user
 
+  // Real-time notification tracking (set only by SSE addNotification, never by API fetch)
+  lastRealtimeNotification: null,
+  lastRealtimeNotificationTime: null,
+
   // UI State
   isLoading: false,
   error: null,
@@ -61,7 +65,7 @@ const initialState = {
 
   // Settings
   settings: {
-    soundEnabled: true,
+    soundEnabled: false,
     desktopNotificationsEnabled: false,
     maxNotifications: 100, // Maximum notifications to keep in state
     displayType: "standard",
@@ -351,11 +355,12 @@ const notificationsSlice = createSlice({
       }
 
       // Position-based filter: skip notifications targeted at a different position
+      // Only filter when user has an active position set (after switch-pos API call)
+      // When currentPositionId is not set, allow all notifications through to avoid
+      // silently dropping notifications before user selects a position
       const notifPositionId = notification.toPositionId;
-      if (notifPositionId) {
-        // If notification has a position ID, only accept if user's current position matches exactly
-        // This prevents users from seeing notifications for other positions they hold
-        if (!state.currentPositionId || Number(notifPositionId) !== Number(state.currentPositionId)) {
+      if (notifPositionId && state.currentPositionId) {
+        if (Number(notifPositionId) !== Number(state.currentPositionId)) {
           return;
         }
       }
@@ -383,6 +388,10 @@ const notificationsSlice = createSlice({
       if (!notification.read) {
         state.unreadCount += 1;
       }
+
+      // Mark as real-time notification (from SSE) so orchestrator can play sound
+      state.lastRealtimeNotification = notification;
+      state.lastRealtimeNotificationTime = Date.now();
 
       // Enforce max notifications limit
       const maxNotifications = state.settings.maxNotifications;
@@ -924,6 +933,9 @@ export const selectDisplayTypeOptions = (state) =>
 
 // Get current position ID (for position-based filtering)
 export const selectCurrentPositionId = (state) => state.notifications.currentPositionId;
+
+// Get last real-time notification (from SSE, not API fetch)
+export const selectLastRealtimeNotification = (state) => state.notifications.lastRealtimeNotification;
 
 /**
  * Export reducer

@@ -260,6 +260,13 @@ const CreateCustomerServiceRequest = (props) => {
     );
 
     dispatch(getDetailAccountContact(idCustomer));
+    dispatch(getListDetailAccountAddress({
+        id: idAccount,
+        search: "",
+        sort: "createdDate~desc",
+        page: 1,
+        pageSize: 999,
+      }));
     // dispatch(getServiceRequestById(idAccount));
   }, [dispatch, idAccount]);
 
@@ -366,7 +373,7 @@ const CreateCustomerServiceRequest = (props) => {
       const accountSums = data_accountDetail.accountSummary;
 
       const premiseAddress = data_account_address?.result?.find(
-        (item) => item?.premise?.bool === false
+        (item) => item?.premise?.bool === true
       );
 
       formCreate.setFieldsValue({
@@ -383,10 +390,8 @@ const CreateCustomerServiceRequest = (props) => {
         srFormSubdistrict: premiseAddress?.subDistrict?.name || "",
         srFormCity: premiseAddress?.city?.name || "",
         srFormCountry: premiseAddress?.country?.name || "",
-        // srFormLatitude: premiseAddress?.latitude || "",
-        // srFormLongitude: premiseAddress?.longitude || "",
-        srFormLatitude: premiseAddress?.country?.name || "",
-        srFormLongitude: premiseAddress?.country?.name || "",
+        srFormLatitude: premiseAddress?.latitude || "",
+        srFormLongitude: premiseAddress?.longitude || "",
       });
     }
 
@@ -492,9 +497,9 @@ const CreateCustomerServiceRequest = (props) => {
       containerRef.current.scrollLeft += 250;
     }
   };
-  const handleButtonNext = () => {
+  const handleButtonNext = async () => {
     if (current === 0) {
-      formCreate
+      await formCreate
         .validateFields()
         .then(() => {
           next();
@@ -503,6 +508,9 @@ const CreateCustomerServiceRequest = (props) => {
         .catch((info) => {
           console.log("Validate Failed:", info);
         });
+
+        const values = formCreate.getFieldsValue();
+        console.log("Form Values at Step 1:", values);
     } else {
       next();
       scrollRightHandler();

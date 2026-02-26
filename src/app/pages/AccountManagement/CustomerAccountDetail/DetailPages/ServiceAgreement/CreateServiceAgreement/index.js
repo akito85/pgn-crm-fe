@@ -29,6 +29,7 @@ import {
   getListTermOfPayment,
   getPjbg,
   getSaType,
+  getSaChildType,
   getServiceType,
   getListBillingCycle,
   getInvoiceTemplate,
@@ -127,6 +128,7 @@ const CreateServiceAgreement = ({ saType }) => {
   const {
     data_service_type,
     data_sa_type = [],
+    data_sa_child_type = [],
     data_pjbg = [],
     data_term_of_payment,
     data_billing_cycle,
@@ -194,37 +196,117 @@ const CreateServiceAgreement = ({ saType }) => {
     if (saInfoObj.serviceType !== undefined) {
       dispatch(getSaType({ type: typeSa, id: saInfoObj.serviceType }));
     }
+    if (saRecordData?.typeSa === "addon") {
+      dispatch(getSaChildType());
+    }
   }, [saRecordData?.typeSa, saInfoObj?.serviceType]);
 
+  // listen isReset state
+  // listen isReset state
   useEffect(() => {
-    if (saReferenceNumber) {
-      setSaInfoObj({
-        ...saInfoObj,
-        serviceAgreementReferenceNumber: saReferenceNumber,
-        saReferenceNumber: saRecordData?.saReferenceNumber,
-        serviceType: saRecordData?.serviceType,
-        serviceAgreementType: saRecordData?.typeSa === "addon" ? 92 : 91,
-        pjbgType: saRecordData?.pjbgType,
-        billingCycle: saRecordData?.billingCycle,
-        // startDate: moment(saRecordData?.startDate).clone(),
-        // endDate: moment(saRecordData?.endDate).clone(),
-        termOfPayment: saRecordData?.termOfPayment,
-        invoiceTemplate: saRecordData?.invoiceTemplate,
-        // serviceAgreementDate: moment(saRecordData?.saDate).clone()
-      });
-      form.setFieldsValue({
-        serviceAgreementReferenceNumber: saReferenceNumber,
-        saReferenceNumber: saRecordData?.saReferenceNumber,
-        serviceType: saRecordData?.serviceType,
-        serviceAgreementType: saRecordData?.typeSa === "addon" ? 92 : 91,
-        pjbgType: saRecordData?.pjbgType,
-        billingCycle: saRecordData?.billingCycle,
-        // startDate: moment(saRecordData?.startDate).clone(),
-        // endDate: moment(saRecordData?.endDate).clone(),
-        termOfPayment: saRecordData?.termOfPayment,
-        invoiceTemplate: saRecordData?.invoiceTemplate,
-        // serviceAgreementDate: moment(saRecordData?.saDate).clone()
-      });
+    // Logic runs on mount (Initial Load) AND on Reset toggle
+    if (current === 0) {
+      // Step 0: Restore SA Information from initial record
+      if (saReferenceNumber) {
+        // Base object with Contextual Defaults (Always restored)
+        const partialState = {
+          serviceAgreementReferenceNumber: saReferenceNumber,
+          saReferenceNumber: saRecordData?.saReferenceNumber,
+          serviceType: saRecordData?.serviceType,
+          serviceAgreementType: saRecordData?.typeSa === "addon" ? 92 : 91,
+          serviceAgreementTypeValue: saRecordData?.typeSa === "addon" ? "ADDON" : "MAIN",
+          pjbgType: saRecordData?.pjbgType,
+          billingCycle: saRecordData?.billingCycle,
+          serviceAgreementChildType: saRecordData?.serviceAgreementChildType,
+          termOfPayment: saRecordData?.termOfPayment,
+          invoiceTemplate: saRecordData?.invoiceTemplate,
+        };
+
+        console.log('isReset = ', isReset)
+        // If Reset Action: Explicitly CLEAR user inputs
+        setSaInfoObj({
+          ...saInfoObj,
+          ...partialState,
+          // Explicitly clear inputs
+          serviceAgreementNumber: null,
+          startDate: null,
+          endDate: null,
+          serviceAgreementDate: null,
+          description: null,
+          gasInPlanDate: null,
+          commitmentDate: null,
+        });
+        form.setFieldsValue({
+          ...partialState,
+          serviceAgreementNumber: null,
+          startDate: null,
+          endDate: null,
+          serviceAgreementDate: null,
+          description: null,
+          gasInPlanDate: null,
+          commitmentDate: null,
+        });
+        // if (isReset) {
+        // }
+        // If Initial Load: Only populate if empty (or just populate defaults)
+        // else {
+        //   setSaInfoObj(prev => ({
+        //     ...prev,
+        //     ...partialState
+        //   }));
+        //   form.setFieldsValue(partialState);
+        // }
+      }
+    } else if (current === 1) {
+      // Step 1: SA Detail
+      if (saRecordData?.typeSa === "Amendment") {
+        // Amendment: Re-fetch original data handled by separate useEffect dependent on [isReset]
+      } else if (saRecordData?.typeSa === "addon") {
+        // Addon: Clear fields only on RESET action
+        setDataTableProduct([]);
+        setDataPricing([]);
+        setDdlPriceCode([]);
+        setDdlPriceRule([]);
+        setDataTableCalcRule([]);
+        setDataTermOfService([]);
+        setDataTableLateCharge([]);
+
+        form.resetFields([
+          "createFrom",
+          "productType",
+          "productClass",
+          "serviceTypeProduct",
+          "productVersionId",
+          "chooseProduct",
+          "serviceAgreementChildType"
+        ]);
+        dispatch(resetDataDetail());
+
+        // Restore locked Create From if applicable
+        const isAddonType = saInfoObj?.serviceAgreementTypeValue === "ADDON";
+        const isOthersType = saInfoObj?.serviceAgreementTypeValue === "OTHERS";
+        let createFromVal = 1;
+
+        if (isAddonType) createFromVal = 1;
+        else if (isOthersType) createFromVal = 2;
+
+        setSaDetailObj({
+          createFrom: createFromVal,
+        });
+
+        form.setFieldsValue({
+          createFrom: createFromVal,
+        });
+      }
+    } else if (current === 2) {
+      // Step 2: Approval - Only on Reset
+      setSaApprovalObj({});
+      form.resetFields(["appHierId"]);
+      setAppHierDataDetail([]);
+      setDataTableApproval([]);
+    } else {
+      // Step 3: Attachment & others - Only on Reset
+      setListDataAttachment([]);
     }
   }, [isReset]);
 
@@ -236,7 +318,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
   // get data for Create Amandemen
   useEffect(() => {
-    if (idSa && saRecordData?.typeSa === "Amendment") {
+    if (idSa && saRecordData?.typeSa === "Amendment" && current === 1) {
       dispatch(getDetailServiceAgreement(idSa))
         .unwrap()
         .then((data) => {
@@ -546,6 +628,33 @@ const CreateServiceAgreement = ({ saType }) => {
     return result;
   };
 
+  // HANDLE SA TYPE CHANGE (QoL Reset)
+  const handleServiceAgreementTypeChange = (selectedId, selectedValue) => {
+    // 1. Update saInfoObj with new Type
+    setSaInfoObj(prev => ({
+      ...prev,
+      serviceAgreementType: selectedId,
+      serviceAgreementTypeValue: selectedValue || null
+    }));
+
+    // 2. Reset SA Child Type in saDetailObj
+    setSaDetailObj(prev => ({
+      ...prev,
+      serviceAgreementChildType: null,
+      productId: null,
+      productName: null, // Also reset product details if switching from ADDON
+      createFrom: selectedValue === "OTHERS" ? 2 : 1 // Default to Custom (or logic based on type)
+    }));
+
+    // 3. Reset Form Fields
+    form.setFieldsValue({
+      serviceAgreementChildType: null,
+      productId: null,
+      productName: null,
+      createFrom: selectedValue === "OTHERS" ? 2 : 1
+    });
+  };
+
   // HANDLE SA DETAIL OBJECT
   const handleSaDetailObj = (e, type) => {
     let result;
@@ -827,6 +936,11 @@ const CreateServiceAgreement = ({ saType }) => {
             priceAdjustmentId:
               mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null,
             priceAdjustmentText: cleanedString,
+            // Auto-populate SA Child Type for ADDON type Child SA
+            ...(saRecordData?.typeSa === "addon" &&
+              saInfoObj?.serviceAgreementTypeValue === "ADDON"
+              ? { serviceAgreementChildType: data.product.productName }
+              : {}),
           });
           form.setFieldsValue({
             productClass: data.product.productClass,
@@ -848,6 +962,11 @@ const CreateServiceAgreement = ({ saType }) => {
             priceAdjustment: cleanedString,
             descriptionProduct: data.product.description || null,
             chooseProduct: data.product.productName,
+            // Auto-populate SA Child Type for ADDON type Child SA
+            ...(saRecordData?.typeSa === "addon" &&
+              saInfoObj?.serviceAgreementTypeValue === "ADDON"
+              ? { serviceAgreementChildType: data.product.productName }
+              : {}),
           });
           setDdlPriceCode(data?.product?.productPricing?.priceCodeList);
           let cstmTiering = {
@@ -1087,6 +1206,11 @@ const CreateServiceAgreement = ({ saType }) => {
             calculationType: parseInt(hasIdCalcTypeId[0].uom),
             priceAdjustment: cleanedString,
             descriptionProduct: data.description || null,
+            // Auto-populate SA Child Type for ADDON type Child SA
+            ...(saRecordData?.typeSa === "addon" &&
+              saInfoObj?.serviceAgreementTypeValue === "ADDON"
+              ? { serviceAgreementChildType: data?.productName }
+              : {}),
           });
           setDdlPriceCode(data?.productPricing?.priceCodeList);
           let cstmTiering = {
@@ -1225,6 +1349,7 @@ const CreateServiceAgreement = ({ saType }) => {
       title: "Service Agreement Information",
       content: (
         <SaInformation
+          handleServiceAgreementTypeChange={handleServiceAgreementTypeChange}
           saType={saType}
           handleSaInformationObj={handleSaInformationObj}
           setStartDate={setStartDate}
@@ -1237,6 +1362,7 @@ const CreateServiceAgreement = ({ saType }) => {
             return { id: item.id, value: item.name };
           })}
           dataSaType={data_sa_type}
+          dataSaChildType={data_sa_child_type}
           dataPjbg={data_pjbg}
           dataTermOfPayment={data_term_of_payment}
           dataBillingCycle={data_billing_cycle}
@@ -1311,6 +1437,7 @@ const CreateServiceAgreement = ({ saType }) => {
           setValuePage={setValuePageSaDetail}
           tabPagesSaDetail={tabPagesSaDetail}
           setTabPagesSaDetail={setTabPagesSaDetail}
+          dataSaChildType={data_sa_child_type}
         />
       ),
       // disabled: !saDetailObj.createFrom || (saDetailObj.createFrom === 1 && !saDetailObj.productName || !saDetailObj.productVersionId),
@@ -1402,7 +1529,7 @@ const CreateServiceAgreement = ({ saType }) => {
       dispatch(checkValidateCreateSa({ body }))
         .unwrap()
         .then((data) => {
-          if (data?.data?.isCreated === true) {
+          if (data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
             if (data?.isCreated === true) {
@@ -1438,7 +1565,7 @@ const CreateServiceAgreement = ({ saType }) => {
       dispatch(checkValidateCreateSa({ body }))
         .unwrap()
         .then((data) => {
-          if (data?.data?.isCreated === true) {
+          if (data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
             setModalValidateSa(true);
@@ -1497,19 +1624,27 @@ const CreateServiceAgreement = ({ saType }) => {
   };
 
   // Fields for SA Information step
-  const saInformationFields = [
+  let saInformationFields = [
     'serviceType',
-    'saType',
+    'serviceAgreementNumber',
+    'serviceAgreementDate',
     'saReferenceNumber',
-    'pjbgNumber',
-    'saStartDate',
-    'saEndDate',
-    'gasInPlanDate',
-    'commitmentDate',
+    'serviceAgreementDate',
+    'startDate',
+    'endDate',
     'termOfPayment',
     'billingCycle',
     'invoiceTemplate',
   ];
+
+  if (saRecordData?.typeSa === "addon") {
+
+    saInformationFields = [
+      ...saInformationFields,
+      'saReferenceNumber'
+    ];
+  }
+
 
   const functionCheckSaInformation = () => {
     form
@@ -1541,7 +1676,7 @@ const CreateServiceAgreement = ({ saType }) => {
   };
 
   // Fields for SA Detail step
-  const saDetailFields = [
+  let saDetailFields = [
     'createFrom',
     'chooseProduct',
     'productVersionId',
@@ -1550,16 +1685,30 @@ const CreateServiceAgreement = ({ saType }) => {
     'calculationType',
   ];
 
+  if (saRecordData?.typeSa === "addon") {
+
+    saDetailFields = [
+      ...saDetailFields,
+      'serviceAgreementChildType'
+    ];
+  }
+
   const funtionCheckSaDetail = () => {
     form
       .validateFields(saDetailFields)
       .then((values) => {
-        handleMandatory(setTabPagesSaDetail, listDataAttachment);
-        // console.log(saDetailObj?.pricingRule);
+        console.log("Validation passed:", values);
+        handleMandatory(setTabPagesSaDetail, listDataAttachment); // Removed incorrect call
 
-        if (dataPricing?.length < 2 && hasValue(saDetailObj?.pricingRule)) {
+
+        console.log('dataPricing?.length', dataPricing?.length)
+        console.log('saDetailObj?.pricingRule', saDetailObj?.pricingRule)
+        console.log('hasValue(saDetailObj?.pricingRule)', hasValue(saDetailObj?.pricingRule))
+        if (dataPricing?.length < 2 && !hasValue(saDetailObj?.pricingRule)) {
+          console.log('setModalSaDetail(true)')
           setModalSaDetail(true);
         } else {
+          console.log('seharusnya ga kesini')
           next();
           scrollRightHandler();
         }
@@ -1735,6 +1884,10 @@ const CreateServiceAgreement = ({ saType }) => {
             saDetailObj.productVersionId !== undefined
               ? saDetailObj.productVersionId
               : null,
+          // Add SA Child Type to payload
+          saChildType: saInfoObj?.serviceAgreementTypeValue === "ADDON"
+            ? saDetailObj?.productId : saInfoObj?.serviceAgreementTypeValue === "OTHERS"
+              ? saDetailObj?.serviceAgreementChildType : null,
           isCustom: saDetailObj.createFrom === 1 ? "Y" : "N",
           productDetail: tempArrayProduct.map((item) => {
             return {

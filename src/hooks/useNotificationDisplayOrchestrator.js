@@ -11,17 +11,9 @@ import { showToastNotification } from '../components/Notifications/NotificationT
  * Notification Display Orchestrator Hook
  * Central routing logic for directing notifications to appropriate display components
  *
- * Flow:
- * 1. Subscribe to latest notification from Redux
- * 2. Get user's notification settings
- * 3. Determine display type based on settings
- * 4. Route to appropriate display component:
- *    - standard → NotificationDropdown (no action needed)
- *    - toast → showToastNotification()
- *    - popup → onPopupNotification callback
- *    - inline → onInlineNotification callback
- * 5. Play sound if enabled
- * 6. Track processed notifications to prevent duplicates
+ * Sound/display routing triggers ONLY for real-time SSE notifications that arrive
+ * AFTER this hook mounts. Notifications from API fetches or Redux state that existed
+ * before mount are silently ignored.
  *
  * @param {Object} options - Configuration options
  * @param {Function} options.onPopupNotification - Callback for popup notifications
@@ -39,25 +31,29 @@ const useNotificationDisplayOrchestrator = ({
   // Track processed notification IDs to prevent duplicates
   const processedNotificationsRef = useRef(new Set());
 
-  // Get latest notification from Redux
-  const latestNotification = useSelector((state) => {
-    const notifications = state.notifications?.notifications || [];
-    return notifications.length > 0 ? notifications[0] : null;
-  });
+  // Record mount time — only SSE notifications arriving AFTER this timestamp trigger sound.
+  // This prevents replaying stale lastRealtimeNotification from Redux on LayoutMenu remount.
+  const mountTimeRef = useRef(Date.now());
+
+  // Watch real-time notification + its timestamp from Redux (set only by SSE addNotification)
+  const lastRealtimeNotification = useSelector(
+    (state) => state.notifications?.lastRealtimeNotification
+  );
+  const lastRealtimeNotificationTime = useSelector(
+    (state) => state.notifications?.lastRealtimeNotificationTime
+  );
 
   // Get user settings from Redux
   const settings = useSelector((state) => state.notifications?.settings || {});
 
   // Sound enabled flag
-  const soundEnabled = settings.soundEnabled !== false; // Default to true
+  const soundEnabled = settings.soundEnabled !== false;
 
   // Play notification sound
   const playNotificationSound = useCallback(() => {
     if (!soundEnabled) return;
 
     try {
-      // Use browser's notification sound or a custom audio file
-      // For now, using a simple beep (can be replaced with a custom sound file)
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -99,7 +95,6 @@ const useNotificationDisplayOrchestrator = ({
 
       // Check if notification should be shown based on settings
       if (!shouldShowNotification(notification, settings)) {
-        console.log('Notification filtered by settings:', notification.id);
         return;
       }
 
@@ -107,44 +102,32 @@ const useNotificationDisplayOrchestrator = ({
       const displayType = getDisplayTypeForNotification(notification, settings);
 
       if (!displayType) {
-        console.log('No display type for notification:', notification.id);
         return;
       }
-
-      console.log(`Routing notification ${notification.id} to display type: ${displayType}`);
 
       // Route based on display type
       switch (displayType) {
         case DISPLAY_TYPES.TOAST:
-          // Show as toast notification
           showToastNotification(notification, onNavigate);
           playNotificationSound();
           break;
 
         case DISPLAY_TYPES.POPUP:
-          // Show as popup modal
           if (onPopupNotification && typeof onPopupNotification === 'function') {
             onPopupNotification(notification);
             playNotificationSound();
-          } else {
-            console.warn('onPopupNotification callback not provided');
           }
           break;
 
         case DISPLAY_TYPES.INLINE:
-          // Show as inline banner
           if (onInlineNotification && typeof onInlineNotification === 'function') {
             onInlineNotification(notification);
             playNotificationSound();
-          } else {
-            console.warn('onInlineNotification callback not provided');
           }
           break;
 
         case DISPLAY_TYPES.STANDARD:
         default:
-          // Standard dropdown - no action needed, NotificationDropdown handles it
-          // Still play sound if enabled
           if (soundEnabled) {
             playNotificationSound();
           }
@@ -154,26 +137,28 @@ const useNotificationDisplayOrchestrator = ({
     [settings, onPopupNotification, onInlineNotification, onNavigate, playNotificationSound, soundEnabled]
   );
 
-  // Effect to process new notifications
+  // Process only real-time SSE notifications that arrived AFTER this hook mounted.
+  // On LayoutMenu remount (page navigation):
+  //   - lastRealtimeNotificationTime is from BEFORE mount → skip (stale)
+  //   - processedNotificationsRef is fresh but we never reach processNotification
+  // When a new SSE notification arrives:
+  //   - lastRealtimeNotificationTime is set to Date.now() > mountTimeRef → process → sound plays
   useEffect(() => {
     if (!enabled) return;
+    if (!lastRealtimeNotification) return;
+    if (!lastRealtimeNotificationTime || lastRealtimeNotificationTime <= mountTimeRef.current) return;
 
-    if (latestNotification) {
-      processNotification(latestNotification);
-    }
-  }, [latestNotification, enabled, processNotification]);
+    processNotification(lastRealtimeNotification);
+  }, [lastRealtimeNotification, lastRealtimeNotificationTime, enabled, processNotification]);
 
-  // Clear processed notifications (useful for testing or reset)
   const clearProcessedNotifications = useCallback(() => {
     processedNotificationsRef.current.clear();
   }, []);
 
-  // Get count of processed notifications
   const getProcessedCount = useCallback(() => {
     return processedNotificationsRef.current.size;
   }, []);
 
-  // Check if a notification was processed
   const isNotificationProcessed = useCallback((notificationId) => {
     return processedNotificationsRef.current.has(notificationId);
   }, []);

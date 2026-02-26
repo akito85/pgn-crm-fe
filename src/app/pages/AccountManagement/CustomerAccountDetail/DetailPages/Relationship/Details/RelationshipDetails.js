@@ -1,21 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
-import { Spin } from "antd";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { useState } from "react";
+import { Button, Spin } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import RelationshipDetailTabs from "./RelationshipDetailTabs";
 import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import { dateFormatting } from "../../../../../../../utils";
 import {
   getAccountStandardDetail,
   getGrantedAccessAccount,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 import {
   getRelationshipDetail,
+  getDetailDraftRelationship,
   getAttachmentList,
   approveOrRejectRelationship,
   approveOrRejectInactiveRelationship,
@@ -27,11 +24,13 @@ import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
 import HeaderDetail from "../../../HeaderDetail";
+import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 const RelationshipDetails = ({ type = "standard" }) => {
   const dispatch = useDispatch();
 
-  const { data_relationshipDetail, loadingDetail } = useSelector(
+  const { data_relationshipDetail, detailDraft_relationshipDetail, loadingDetail } = useSelector(
     (state) => state.relationship
   );
 
@@ -50,7 +49,33 @@ const RelationshipDetails = ({ type = "standard" }) => {
   const idCustomer = location?.state?.idCustomer;
   const idRelationship = location?.state?.idRelationship || location?.state?.id;
 
-  const [isApproval, setIsApproval] = useState(false);
+  const tabOptions = [
+    { key: "ori", label: "Original" },
+    { key: "cur", label: "Current" },
+  ];
+  const originalKey = tabOptions[0]?.key;
+  const [activeKey, setActiveKey] = useState(originalKey || "");
+  const detail = (activeKey === originalKey ? data_relationshipDetail : detailDraft_relationshipDetail) || {};
+
+  const handleSetActiveKey = (newActiveKey) => setActiveKey(newActiveKey);
+
+  const {
+    id,
+    status,
+    statusApproval,
+    approvalType,
+    subjectName,
+    objectName,
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy,
+    tappId,
+  } = detail;
+
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
+  const isApproval = ["ACCOUNT_RELATIONSHIP", "INACTIVE_ACCOUNT_RELATIONSHIP"].includes(approvalType);
+
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
 
@@ -95,56 +120,55 @@ const RelationshipDetails = ({ type = "standard" }) => {
    * @param {"approve"|"reject"} action
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    if (data_relationshipDetail) {
-      const body = [
-        {
-          id: data_relationshipDetail.id,
-          approvalId: data_relationshipDetail.tappId,
+    const { id, approvalType, tappId } = data_relationshipDetail;
+    const body = [
+      {
+        id,
+        approvalId: tappId,
+        action: action.toUpperCase(),
+        description,
+      },
+    ];
+
+    if (approvalType === "ACCOUNT_RELATIONSHIP") {
+      dispatch(
+        approveOrRejectRelationship({
+          idAccount,
+          body,
           action: action.toUpperCase(),
-          description,
-        },
-      ];
+        })
+      )
+        .unwrap()
+        .then(() => {
+          dispatch(getRelationshipDetail({ idAccount, idRelationship }));
+          dispatch(getDetailDraftRelationship({ idAccount, idRelationship }));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+    } else if (approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP") {
+      dispatch(
+        approveOrRejectInactiveRelationship({
+          idAccount,
+          body,
+          action: action.toUpperCase(),
+        })
+      )
+        .unwrap()
+        .then(() => {
+          dispatch(getRelationshipDetail({ idAccount, idRelationship }));
+          dispatch(getDetailDraftRelationship({ idAccount, idRelationship }));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+    } else {
+      const errorBody = {
+        title: "Failed",
+        description: `The approval type is invalid.`,
+      };
 
-      if (data_relationshipDetail.approvalType === "ACCOUNT_RELATIONSHIP") {
-        dispatch(
-          approveOrRejectRelationship({
-            idAccount,
-            body,
-            action: action.toUpperCase(),
-          })
-        )
-          .unwrap()
-          .then(() => {
-            dispatch(getRelationshipDetail({ idAccount, idRelationship }));
-            handleClear();
-            handleApprovalModal(false);
-          })
-          .catch(() => {});
-      } else if (
-        data_relationshipDetail.approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP"
-      ) {
-        dispatch(
-          approveOrRejectInactiveRelationship({
-            idAccount,
-            body,
-            action: action.toUpperCase(),
-          })
-        )
-          .unwrap()
-          .then(() => {
-            dispatch(getRelationshipDetail({ idAccount, idRelationship }));
-            handleClear();
-            handleApprovalModal(false);
-          })
-          .catch(() => {});
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `The approval type is invalid.`,
-        };
-
-        dispatch(showModalError(errorBody));
-      }
+      dispatch(showModalError(errorBody));
     }
   };
 
@@ -169,22 +193,10 @@ const RelationshipDetails = ({ type = "standard" }) => {
   useEffect(() => {
     if (idAccount && idRelationship) {
       dispatch(getRelationshipDetail({ idAccount, idRelationship }));
+      dispatch(getDetailDraftRelationship({ idAccount, idRelationship }));
       dispatch(getAttachmentList({ idAccount, idRelationship }));
     }
   }, [idAccount, idRelationship]);
-
-  useEffect(() => {
-    if (data_relationshipDetail) {
-      const { approvalType } = data_relationshipDetail;
-
-      if (
-        approvalType === "ACCOUNT_RELATIONSHIP" ||
-        approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP"
-      )
-        setIsApproval(true);
-      else setIsApproval(false);
-    }
-  }, [data_relationshipDetail]);
 
   return (
     <LayoutMenu>
@@ -199,8 +211,18 @@ const RelationshipDetails = ({ type = "standard" }) => {
             type={type}
           />
 
+          {draftExist && (
+            <NxBaseContainer border padding={false}>
+              <NxTabs
+                items={tabOptions}
+                activeKey={activeKey}
+                onChange={handleSetActiveKey}
+              />
+            </NxBaseContainer>
+          )}
+
           <RelationshipDetailTabs
-            dataDetail={data_relationshipDetail}
+            dataDetail={detail}
             dispatch={dispatch}
             idAccount={idAccount}
             idRelationship={idRelationship}
@@ -209,31 +231,11 @@ const RelationshipDetails = ({ type = "standard" }) => {
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
             <NxBaseContainer border>
               <div className="w-full grid grid-cols-5 gap-4">
-                <NxDetailText label="Record Id">
-                  {data_relationshipDetail?.id}
-                </NxDetailText>
-                <NxDetailText label="Created Date">
-                  {data_relationshipDetail?.createdDate
-                    ? moment(
-                        data_relationshipDetail.createdDate,
-                        dateFormatting.meas_date
-                      ).format(dateFormatting.dateTime)
-                    : ""}
-                </NxDetailText>
-                <NxDetailText label="Created By">
-                  {data_relationshipDetail?.createdBy}
-                </NxDetailText>
-                <NxDetailText label="Updated Date">
-                  {data_relationshipDetail?.updatedDate
-                    ? moment(
-                        data_relationshipDetail.updatedDate,
-                        dateFormatting.meas_date
-                      ).format(dateFormatting.dateTime)
-                    : ""}
-                </NxDetailText>
-                <NxDetailText label="Updated By">
-                  {data_relationshipDetail?.updatedBy}
-                </NxDetailText>
+                <NxDetailText label="Record Id">{id}</NxDetailText>
+                <NxDetailText label="Created Date">{NxDate.formatDate(createdDate)}</NxDetailText>
+                <NxDetailText label="Created By">{createdBy}</NxDetailText>
+                <NxDetailText label="Updated Date">{NxDate.formatDate(updatedDate)}</NxDetailText>
+                <NxDetailText label="Updated By">{updatedBy}</NxDetailText>
               </div>
             </NxBaseContainer>
           </NxCardContainer>
@@ -241,22 +243,22 @@ const RelationshipDetails = ({ type = "standard" }) => {
           {isApproval && (
             <NxBaseContainer border>
               <div className="flex justify-between">
-                <ButtonComponent type={"menu"} onClick={() => navigate(-1)}>
+                <Button type={"menu"} onClick={() => navigate(-1)}>
                   Cancel
-                </ButtonComponent>
+                </Button>
                 <div className={"w-full flex justify-end gap-5"}>
-                  <ButtonComponent
+                  <Button
                     type="reject"
                     onClick={() => handleApprovalModal(true, "reject")}
                   >
                     Reject
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     type="approve"
                     onClick={() => handleApprovalModal(true, "approve")}
                   >
                     Approve
-                  </ButtonComponent>
+                  </Button>
                 </div>
               </div>
             </NxBaseContainer>

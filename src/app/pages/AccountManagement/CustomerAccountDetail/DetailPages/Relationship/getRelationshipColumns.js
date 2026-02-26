@@ -148,6 +148,7 @@ const getRelationshipColumns = (
         "APPROVED": "Approved",
         "WAITING_APPROVAL": "Waiting Approval",
         "WAITING APPROVAL": "Waiting Approval",
+        "WAITING_FOR_APPROVAL": "Waiting Approval",
         "WAITING FOR APPROVAL": "Waiting Approval",
         "PENDING": "Pending",
         "REJECTED": "Rejected",

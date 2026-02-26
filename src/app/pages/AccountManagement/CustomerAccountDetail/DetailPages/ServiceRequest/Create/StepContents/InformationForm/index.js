@@ -15,7 +15,7 @@ export default function InformationForm(props) {
     <Fragment>
       <InfoAccount form={form} account={account} customer={customer} />
       <InfoServiceRequest form={form} account={account} customer={customer} dropdowns={dropdowns}/>
-      <InfoDataRequirement form={form} dropdowns={dropdowns} />
+      <InfoDataRequirement form={form} dropdowns={dropdowns} accountId={account?.accountInformation?.accountId} />
     </Fragment>
   );
 }
