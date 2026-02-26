@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
-import { Spin, Tooltip } from "antd";
+import { Button, Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachmentMultiDestination";
@@ -320,14 +319,14 @@ const AttachmentSectionForm = ({
                   ) : null}
                   </p>
                   <div className="flex flex-row gap-2 items-center">
-                    <ButtonComponent
+                    <Button
                       fontSizeClassname="text-[11px]"
                       size="small"
                       type="default"
                       onClick={handleOpenModal}
                     >
                       Choose File
-                    </ButtonComponent>
+                    </Button>
                     <p className="text-[11px] text-dg-grey-dark mb-0">
                       No file choosen
                     </p>

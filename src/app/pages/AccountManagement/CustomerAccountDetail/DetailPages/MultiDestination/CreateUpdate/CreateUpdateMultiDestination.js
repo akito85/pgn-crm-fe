@@ -2,12 +2,11 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 
 // you fucking nasty using bulky moment lazy as fuck
 import moment from "moment";
@@ -717,28 +716,28 @@ const CreateUpdateMultiDestination = ({ type }) => {
             {/* Section Action Steps */}
             <NxBaseContainer border>
               <div className="flex justify-between">
-                <ButtonComponent
+                <Button
                   type={"menu"}
                   onClick={()=>{navigate(-1)}}
                 >
                   Cancel
-                </ButtonComponent>
+                </Button>
                 <div className="flex w-full justify-end gap-x-2">
-                  <ButtonComponent
+                  <Button
                     onClick={handleClear}
                     type={"reject"}
-                    icon={<SVGIcon name="IconButtonClear" width={24} />}
+                    icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
                     { type === "update" ? "Reset" : "Clear" }
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     onClick={() => handleSetShowConfirmationModal(true, "draft")}
                     type={"secondary"}
                     disabled={current !== steps.length - 1}
                   >
                     Save as Draft
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     onClick={() => {
                       prev();
                       scrollLeftHandler();
@@ -747,24 +746,24 @@ const CreateUpdateMultiDestination = ({ type }) => {
                     disabled={current < 1}
                   >
                     Previous
-                  </ButtonComponent>
+                  </Button>
                   {current < steps.length - 1 && (
-                    <ButtonComponent
+                    <Button
                       onClick={handleButtonNext}
                       type={"submit"}
                       disabled={steps[current].disabled}
                     >
                       Next
-                    </ButtonComponent>
+                    </Button>
                   )}
                   {current === steps.length - 1 && (
                     <>
-                      <ButtonComponent
+                      <Button
                         onClick={() => handleSetShowConfirmationModal(true, "submit")}
                         type={"submit"}
                       >
                         Save & Submit
-                      </ButtonComponent>
+                      </Button>
                     </>
                   )}
                 </div>

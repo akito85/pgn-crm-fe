@@ -160,7 +160,7 @@ export default function InfoMultiDestination({
               required
               className="no-margin-form"
             >
-              <Input.Group compact>
+              <div className="flex gap-x-1">
                 <Form.Item
                   key="account"
                   name={"account"}
@@ -190,7 +190,7 @@ export default function InfoMultiDestination({
                 >
                   Select
                 </Button>
-              </Input.Group>
+              </div>
             </Form.Item>
           </div>
 
