@@ -1,8 +1,7 @@
-import { Form, Select, Input } from "antd";
+import { Form, Select, Input, Button } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import DateComponent from "../../../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
@@ -126,14 +125,14 @@ const RelationshipInfo = ({
                   disabled
                 />
               </Form.Item>
-              <ButtonComponent
+              <Button
                 type="submit"
                 onClick={() => setModalChoose(true)}
                 size="small"
                 disabled={!relationshipType || !relationshipCategory}
               >
                 Select
-              </ButtonComponent>
+              </Button>
             </Input.Group>
           </Form.Item>
 

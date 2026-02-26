@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import { Button, Spin, Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachmentRelationship";
 import { useSelector } from "react-redux";
@@ -316,12 +314,12 @@ const RelationshipAttachment = ({
               ) : null}
               </span>
               <div className="flex gap-x-2 items-center">
-                <ButtonComponent
+                <Button
                   type="menu"
                   onClick={handleOpenModal}
                 >
                   Choose File
-                </ButtonComponent>
+                </Button>
                 {!data.length && (
                   <span className="text-sm text-dg-grey-dark">
                     No file choosen
