@@ -432,7 +432,7 @@ const invoiceRelationSlice = createSlice({
       state.loading = true;
     },
     [getDetailDraftInvoiceRelation.fulfilled]: (state, action) => {
-      state.detailDraft_invoiceRelation = action.payload;
+      state.detailDraft_invoiceRelation = action.payload?.result || {};
       state.loading = false;
     },
     [getDetailDraftInvoiceRelation.rejected]: (state) => {

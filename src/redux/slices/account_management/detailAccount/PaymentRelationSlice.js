@@ -419,7 +419,7 @@ const paymentRelationSlice = createSlice({
       state.loading = true;
     },
     [getDetailPaymentRelation.fulfilled]: (state, action) => {
-      state.detail_paymentRelation = action.payload?.result;
+      state.detail_paymentRelation = action.payload?.result || {};
       state.loading = false;
     },
     [getDetailPaymentRelation.rejected]: (state, action) => {
@@ -432,7 +432,7 @@ const paymentRelationSlice = createSlice({
       state.loading = true;
     },
     [getDetailDraftPaymentRelation.fulfilled]: (state, action) => {
-      state.detailDraft_paymentRelation = action.payload;
+      state.detailDraft_paymentRelation = action.payload?.result || {};
       state.loading = false;
     },
     [getDetailDraftPaymentRelation.rejected]: (state, action) => {
