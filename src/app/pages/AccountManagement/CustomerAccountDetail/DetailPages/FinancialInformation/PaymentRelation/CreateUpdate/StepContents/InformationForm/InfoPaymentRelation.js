@@ -236,7 +236,7 @@ export default function InfoPaymentRelation({
               required: true,
             },
           ]}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
           className="no-margin-form"
         >
           <NxDate
@@ -248,7 +248,7 @@ export default function InfoPaymentRelation({
           key="endDate"
           name={"endDate"}
           label={"End Date"}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
           className="no-margin-form"
         >
           <NxDate
