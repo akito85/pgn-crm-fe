@@ -302,12 +302,10 @@ const AttachmentSectionForm = ({
     }
   };
 
-  return (
-    <div className={`${className}`}>
-      <NxCardContainer header={"ATTACHMENT"}>
-        <Spin spinning={loadingDownload}>
-          <div className="flex flex-col gap-y-4">
-            {type !== "detail" && type !== "preview" ? (
+  const content = (
+    <Spin spinning={loadingDownload}>
+      <div className="flex flex-col gap-y-4">
+        {type !== "detail" && type !== "preview" && type !== "confirmation" ? (
               <div className="flex flex-col w-full gap-2 items-end">
                 <div className="flex flex-col gap-y-1 justify-start">
                   <p className="text-[13px] mb-0 text-dg-grey-dark">
@@ -350,21 +348,40 @@ const AttachmentSectionForm = ({
               usePagination={false}
             />
           </div>
-        </Spin>
-        <ModalAttachment
-          openUpload={modalUpload}
-          updateData={updateData}
-          categoryOptions={categoryOptions}
-          handleCancel={() => setModalUpload(false)}
-          valueGuard={
-            configApplication === configApp.MASTER_MANAGEMENT
-              ? dataGlobalPropAttachment
-              : {}
-          }
-          withLink
-        />
+    </Spin>
+  );
+
+  const modalAttachment = (
+    <ModalAttachment
+      openUpload={modalUpload}
+      updateData={updateData}
+      categoryOptions={categoryOptions}
+      handleCancel={() => setModalUpload(false)}
+      valueGuard={
+        configApplication === configApp.MASTER_MANAGEMENT
+          ? dataGlobalPropAttachment
+          : {}
+      }
+      withLink
+    />
+  );
+
+  if (type === "confirmation") {
+    return (
+      <div className={`${className}`}>
+        {content}
+        {modalAttachment}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${className}`}>
+      <NxCardContainer header={"ATTACHMENT"}>
+        {content}
+        {modalAttachment}
       </NxCardContainer>
-    </div>  
+    </div>
   );
 };
 
