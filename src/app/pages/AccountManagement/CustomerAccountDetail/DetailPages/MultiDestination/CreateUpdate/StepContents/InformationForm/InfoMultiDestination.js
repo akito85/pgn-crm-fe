@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from "react-redux";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
 import { getMdAccountStandard } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 
@@ -20,7 +22,25 @@ export default function InfoMultiDestination({
   form,
   isUpdate,
   isDraft,
+  formView = true,
 }) {
+  const account = Form.useWatch("account", form);
+  const accountSor = Form.useWatch("accountSor", form);
+  const accountCostCenter = Form.useWatch("accountCostCenter", form);
+  const meterReadingCode = Form.useWatch("meterReadingCode", form);
+  const accountSegment = Form.useWatch("accountSegment", form);
+  const accountGroupType = Form.useWatch("accountGroupType", form);
+  const accountType = Form.useWatch("accountType", form);
+  const premiseAddress = Form.useWatch("premiseAddress", form);
+  const subDistrict = Form.useWatch("subDistrict", form);
+  const district = Form.useWatch("district", form);
+  const city = Form.useWatch("city", form);
+  const country = Form.useWatch("country", form);
+  const longitude = Form.useWatch("longitude", form);
+  const latitude = Form.useWatch("latitude", form);
+  const startDate = Form.useWatch("startDate", form);
+  const endDate = Form.useWatch("endDate", form);
+  const description = Form.useWatch("description", form);
   const dispatch = useDispatch();
 
   const [page, setPage] = useState(1);
@@ -91,14 +111,15 @@ export default function InfoMultiDestination({
   };
 
   useEffect(() => {
-    dispatch(getMdAccountStandard({
-      page,
-      size: loadMoreSize,
-      sort,
-      searchs: JSON.stringify(search),
-      id: accountId,
-      isLoadMore: false,
-    }));
+    if (formView)
+      dispatch(getMdAccountStandard({
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        id: accountId,
+        isLoadMore: false,
+      }));
   }, [ sort, search ]);
 
   const baseColumns = useMemo(() =>
@@ -140,6 +161,34 @@ export default function InfoMultiDestination({
       key: `${item.id}-${index}`,
     }));
   }, [currentData]);
+
+  if (!formView) {
+    return (
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full grid grid-cols-3 gap-4">
+          <NxDetailText label="Account">{account}</NxDetailText>
+          <NxDetailText label="Account SOR">{accountSor}</NxDetailText>
+          <NxDetailText label="Account Cost Center">{accountCostCenter}</NxDetailText>
+          <NxDetailText label="Meter Reading Code">{meterReadingCode}</NxDetailText>
+          <NxDetailText label="Account Segment">{accountSegment}</NxDetailText>
+          <NxDetailText label="Account Group Type">{accountGroupType}</NxDetailText>
+          <NxDetailText label="Account Type">{accountType}</NxDetailText>
+          <NxDetailText label="Premise Address">{premiseAddress}</NxDetailText>
+          <NxDetailText label="Subdistrict">{subDistrict}</NxDetailText>
+          <NxDetailText label="District">{district}</NxDetailText>
+          <NxDetailText label="City">{city}</NxDetailText>
+          <NxDetailText label="Country">{country}</NxDetailText>
+          <NxDetailText label="Longitude">{longitude}</NxDetailText>
+          <NxDetailText label="Latitude">{latitude}</NxDetailText>
+          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
+        </div>
+        <div className="w-full">
+          <NxDetailText label="Description">{description}</NxDetailText>
+        </div>
+      </div>
+    );
+  }
 
   return(
     <div className="flex flex-col gap-y-4">

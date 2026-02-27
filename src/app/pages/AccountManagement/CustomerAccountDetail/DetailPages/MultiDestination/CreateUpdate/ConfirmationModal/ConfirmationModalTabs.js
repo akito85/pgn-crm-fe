@@ -5,12 +5,9 @@ import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const ConfirmationModalTabs = ({
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
-  dispatch,
+  form,
+  approvalData,
   dataAttachment,
-  data = {},
   service,
   type = "",
   configApplication,
@@ -21,17 +18,13 @@ const ConfirmationModalTabs = ({
     {
       key: 0,
       label: "Multi Destination Information",
-      children: <ConfirmationModalInfo data={data} />
+      children: <ConfirmationModalInfo form={form} />
     },
     {
       key: 1,
       label: "Approval",
       children: (
-        <ConfirmationModalApproval
-          dataTable={hierarchyTableData}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-        />
+        <ConfirmationModalApproval dataTable={approvalData} form={form} />
       )
     },
     {
@@ -40,7 +33,6 @@ const ConfirmationModalTabs = ({
       children: (
         <ConfirmationModalAttachment
           data={dataAttachment}
-          dispatch={dispatch}
           service={service}
           configApplication={configApplication}
         />

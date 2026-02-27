@@ -797,12 +797,11 @@ const CreateUpdateMultiDestination = ({ type }) => {
               </div>
             </NxBaseContainer>
             <ConfirmationModal
-              form={"multiDestinationForm"}
+              form={form}
+              formId={"multiDestinationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              selectedAppHierId={form.getFieldValue("appHierId")}
-              selectedApprovalName={form.getFieldValue("appHierName")}
-              hierarchyTableData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
+              approvalData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
                 ...detail,
                 employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                   ...employeeDetail,
@@ -810,10 +809,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
                 })),
                 key: `detail-detail-${index}`,
               }))}
-              hieararchyOptionData={data_mdApprovalHierarchy}
               type={confirmationType}
               dataAttachment={dataAttachment}
-              data={form.getFieldsValue()}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
             />

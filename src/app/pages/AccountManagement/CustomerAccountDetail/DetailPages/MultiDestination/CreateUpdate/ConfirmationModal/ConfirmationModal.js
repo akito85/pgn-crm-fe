@@ -5,14 +5,12 @@ import { Button } from "antd";
 
 const ConfirmationModal = ({
   form,
+  formId,
   isOpen,
   handleCancel = () => {},
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
+  approvalData,
   dataAttachment,
   type = "",
-  data = {},
   service,
   configApplication,
 }) => {
@@ -21,13 +19,13 @@ const ConfirmationModal = ({
   const [activeTab, setActiveTab] = useState(0);
 
   /**
-   * @param {"next" | "prev"} type
+   * @param {"next" | "prev"} direction
    */
-  const handleChangeTab = (type) => {
-    if (type === "next" && activeTab < tabLength - 1) {
+  const handleChangeTab = (direction) => {
+    if (direction === "next" && activeTab < tabLength - 1) {
       setActiveTab((prev) => prev + 1);
     }
-    else if (type === "prev" && activeTab >= 0) {
+    else if (direction === "prev" && activeTab >= 0) {
       setActiveTab((prev) => prev - 1);
     }
   }
@@ -56,13 +54,13 @@ const ConfirmationModal = ({
             <Button type={"menu"} disabled={activeTab < 1} onClick={() => handleChangeTab("prev")}>
               Previous
             </Button>
-            {activeTab < (tabLength - 1)  && (
+            {activeTab < (tabLength - 1) && (
               <Button type={"submit"} onClick={() => handleChangeTab("next")}>
                 Next
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} form={form} htmlType={"submit"} >
+              <Button type={"submit"} form={formId} htmlType={"submit"}>
                 {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
               </Button>
             )}
@@ -71,11 +69,9 @@ const ConfirmationModal = ({
       ]}
     >
       <ConfirmationModalTabs
-        selectedAppHierId={selectedAppHierId}
-        selectedApprovalName={selectedApprovalName}
-        hierarchyTableData={hierarchyTableData}
+        form={form}
+        approvalData={approvalData}
         dataAttachment={dataAttachment}
-        data={data}
         service={service}
         type={type}
         configApplication={configApplication}
