@@ -1,4 +1,4 @@
-import InformationForm from "./InformationForm";
+import InformationForm from "./InformationForm/InfoMultiDestination";
 import AttachmentForm from "./AttachmentForm";
 import ApprovalForm from "./ApprovalForm";
 

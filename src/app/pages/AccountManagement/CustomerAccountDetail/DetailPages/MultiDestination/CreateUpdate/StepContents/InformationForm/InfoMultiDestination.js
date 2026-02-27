@@ -6,7 +6,6 @@ import InputComponent from "../../../../../../../../../components/InputComponent
 import { dateFormatting, requiredMessage } from "../../../../../../../../../utils";
 
 import moment from "moment";
-import DateComponent from "../../../../../../../../../components/DateComponent";
 import { useDispatch, useSelector } from "react-redux";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
@@ -192,50 +191,36 @@ export default function InfoMultiDestination({
 
   return(
     <div className="flex flex-col gap-y-4">
-      <div className="w-full grid grid-cols-3 gap-4 mb-4">
-        <div className="flex gap-2 items-end">
-          <Form.Item name={"objectId"} hidden>
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label={"Account"}
-            required
-            className="no-margin-form"
-          >
-            <div className="flex gap-x-1">
-              <Form.Item
-                key="account"
-                name={"account"}
-                rules={[
-                  {
-                    message: requiredMessage("Account"),
-                    required: true,
-                  }
-                ]}
-                noStyle
-              >
-                <InputComponent disabled />
-              </Form.Item>
-              <Button
-                type="primary"
-                className="h-9 px-4 justify-center items-center"
-                style={{
-                  backgroundColor: "#0075bf",
-                  borderColor: "#0075bf",
-                  borderRadius: "5px",
-                  minWidth: "112px",
-                }}
-                disabled={!isDraft && isUpdate}
-                onClick={() => {
-                  setIsOpen(true)
-                }}
-              >
-                Select
-              </Button>
-            </div>
-          </Form.Item>
-        </div>
+      <div className="w-full grid grid-cols-3 gap-4">
+        <Form.Item
+          label={"Account"}
+          required
+          className="no-margin-form"
+        >
+          <div className="flex gap-x-1">
+            <Form.Item
+              key="account"
+              name={"account"}
+              rules={[
+                {
+                  message: requiredMessage("Account"),
+                  required: true,
+                }
+              ]}
+              noStyle
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Button
+              type="submit"
+              onClick={() => { setIsOpen(true) }}
+              className="w-[120px]"
+              disabled={!isDraft && isUpdate}
+            >
+              Select
+            </Button>
+          </div>
+        </Form.Item>
 
         <Form.Item
           key="accountSor"
@@ -445,11 +430,9 @@ export default function InfoMultiDestination({
             },
           ]}
           className="no-margin-form"
-          getValueProps={(dateString) => ({
-            value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-          })}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
         >
-          <DateComponent disabled={!isDraft && isUpdate} />
+          <NxDate disabled={!isDraft && isUpdate} />
         </Form.Item>
 
         <Form.Item
@@ -457,11 +440,9 @@ export default function InfoMultiDestination({
           name={"endDate"}
           label={"End Date"}
           className="no-margin-form"
-          getValueProps={(dateString) => ({
-            value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-          })}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
         >
-          <DateComponent disabled={!isDraft && isUpdate} />
+          <NxDate disabled={!isDraft && isUpdate} />
         </Form.Item>
       </div>
 
@@ -490,9 +471,7 @@ export default function InfoMultiDestination({
         width={1100}
         type={"confirmation"}
         footer={[
-          <Button key="close" onClick={handleClose} type="menu">
-            Close
-          </Button>,
+          <Button key="close" onClick={handleClose}>Close</Button>,
         ]}
       >
         <div className="p-4">
