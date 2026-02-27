@@ -170,7 +170,6 @@ const columnAttachmentData = (
             <Tooltip title="Preview">
               <Button
                 onClick={() => handleShow(r)}
-                disabled={r.dataType !== "exist"}
                 type="table-action"
               >
                 <SVGIcon name="IconEye" width={20} />

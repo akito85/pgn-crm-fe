@@ -84,7 +84,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
 
   const attachmentIsRequired = true;
 
-  const detail = (isActive && statusApproval && isDraftApproval && isRejectApproval) ? detailDraft_invoiceRelation : detail_invoiceRelation;
+  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_invoiceRelation : detail_invoiceRelation;
 
   const formFields = [
     ["accountNumber", "accountName", "startDate", "endDate", "description"],
