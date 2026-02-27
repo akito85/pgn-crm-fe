@@ -63,6 +63,14 @@ export const buildApprovalState = (task = null, notification = null) => {
   }
 
   if (task) {
+    // Parse TRIGGER_JSON / ADDITIONAL_INFO (camelCase fields from M_NOTIFICATIONS.ADDITIONAL_DATA)
+    const triggerData = parseNavigationState(
+      task.ADDITIONAL_INFO || task.additionalInfo ||
+      task.TRIGGER_JSON || task.triggerJson
+    );
+    // Parse TASK_BODY as snake_case fallback (from TaskBodyBuilderService)
+    const bodyData = parseNavigationState(task.TASK_BODY || task.taskBody);
+
     return {
       id: task.ENTITY_ID || task.entityId || task.TAPP_ID || task.tappId,
       type: task.CATEGORY || task.category || task.MODULE || task.module,
@@ -77,6 +85,12 @@ export const buildApprovalState = (task = null, notification = null) => {
       module: task.MODULE || task.module,
       category: task.CATEGORY || task.category,
       returnTo: '/dashboard',
+      // Extract routing context from TRIGGER_JSON: subjectId = account standard ID (idAccount),
+      // customerId = customer ID (idCustomer). These match what destination view pages expect.
+      idAccount: triggerData?.subjectId || bodyData?.subject_id || undefined,
+      idCustomer: triggerData?.customerId || bodyData?.customer_id || undefined,
+      // NAVIGATION_STATE (when present) is the most authoritative source — overrides all above
+      ...parseNavigationState(task.NAVIGATION_STATE || task.navigationState),
     };
   }
 
