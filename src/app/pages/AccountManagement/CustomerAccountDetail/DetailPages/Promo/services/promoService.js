@@ -232,11 +232,11 @@ export const promoService = {
   /**
    * Get list of promo history with pagination and advanced search
    */
-  async getListPromoHistory(params, advancedSearch = null) {
+  async getListPromoHistory(accountId, payload = null) {
     try {
       const response = await promoRepository.getListPromoHistory(
-        params,
-        advancedSearch,
+        accountId,
+        payload,
       );
       return response;
     } catch (error) {

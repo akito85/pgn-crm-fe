@@ -8,9 +8,9 @@ const formatDate = (date) => (date ? moment(date).format("DD MMM YYYY") : "-");
 const formatDateTime = (date) => (date ? moment(date).format("DD MMM YYYY HH:mm") : "-");
 
 export const transformPromoCriteriaList = (responseData) => {
-  if (!responseData?.data?.content) return [];
+  if (!responseData?.data?.result) return [];
 
-  return responseData.data.content.map((item, index) => ({
+  return responseData.data.result.map((item, index) => ({
     key: item.id || item.criteriaId || `criteria-${index}`,
     no: index + 1,
     id: item.id || item.criteriaId,
@@ -111,9 +111,9 @@ const promoCriteriaRepository = {
       // Return dalam format yang diharapkan oleh komponen
       return {
         data: transformedData,
-        total: response?.data?.totalElements || transformedData.length,
-        page: response?.data?.number || 1,
-        size: response?.data?.size || transformedData.length,
+        total: response?.data?.page?.totalElements || transformedData.length,
+        page: response?.data?.page?.number || 1,
+        size: response?.data?.page?.size || transformedData.length,
       };
     } catch (error) {
       console.error("Error fetching promo criteria list:", error);
