@@ -1,4 +1,4 @@
-import { useEffect,  useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -8,20 +8,17 @@ import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 
-// you fucking nasty using bulky moment lazy as fuck
-import moment from "moment";
-
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
-import { dateFormatting } from "../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createMultiDestination,
   getDetailMultiDestination,
+  getDetailDraftMultiDestination,
   getDetailMdApprovalHierarchy,
   getMultiDestinationAttachment,
   getMdApprovalHierarchy,
@@ -35,43 +32,54 @@ import HeaderDetail from "../../../HeaderDetail";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 const CreateUpdateMultiDestination = ({ type }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
 
   const dispatch = useDispatch();
 
   const {
     data_accountDetail,
   } = useSelector((state) => state.accountManagement);
-  
+
   const {
     loading,
     data_mdApprovalHierarchy,
     detail_mdApprovalHierarchy,
     detail_multiDestination,
+    detailDraft_multiDestination,
     list_mdDetailAttachment,
   } = useSelector((state) => state.multiDestination);
 
   //declare
   const location = useLocation();
-  const [formCreate] = Form.useForm();
+  const [form] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idMd = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
 
-  useEffect(() => {
-    console.log("idAccount", idAccount)
-  }, [idAccount])
+  const isCreate = type === "create";
+  const isUpdate = type === "update";
+
+  const status = detail_multiDestination.status || "DRAFT";
+  const statusApproval = detail_multiDestination.statusApproval || "DRAFT";
+
+  const isDraft = status === "DRAFT";
+  const isActive = status === "ACTIVE";
+  const isDraftApproval = statusApproval === "DRAFT";
+  const isRejectApproval = statusApproval === "REJECT";
+
+  const detail = (isActive && (isDraftApproval || isRejectApproval))
+    ? detailDraft_multiDestination
+    : detail_multiDestination;
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
 
-  const [selectedAppHierId, setSelectedAppHierId] = useState();
-  const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
@@ -104,20 +112,21 @@ const CreateUpdateMultiDestination = ({ type }) => {
   ];
 
   const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
- 
+
   const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
   useEffect(() => {
-    if (type === "update" && idMd) {
+    if (isUpdate && idMd) {
       dispatch(getDetailMultiDestination(idMd));
-      dispatch(getMultiDestinationAttachment({ id: idMd }))
+      dispatch(getDetailDraftMultiDestination(idMd));
+      dispatch(getMultiDestinationAttachment({ id: idMd }));
     }
   }, [type, idMd]);
 
   useEffect(() => {
     if (
-      type === "update" &&
-      detail_multiDestination &&
+      isUpdate &&
+      detail &&
       data_mdApprovalHierarchy?.length
     ) {
       const {
@@ -142,9 +151,9 @@ const CreateUpdateMultiDestination = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_multiDestination;
+      } = detail;
 
-      formCreate.setFieldsValue({
+      form.setFieldsValue({
         subjectId,
         objectId,
         account: `${accountNumber}-${accountName}`,
@@ -167,15 +176,15 @@ const CreateUpdateMultiDestination = ({ type }) => {
         appHierId,
       });
 
-      const appHierOption = data_mdApprovalHierarchy.find((option) => option.appHierId === appHierId)
+      const appHierOption = data_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail_multiDestination, data_mdApprovalHierarchy]);
+  }, [detail, data_mdApprovalHierarchy]);
 
   useEffect(() => {
-    if (type === "update") {
+    if (isUpdate) {
       const result = list_mdDetailAttachment?.map((item, index) => ({
         ...item,
         key: `multi-destination-attachment-${item.id}`,
@@ -183,9 +192,9 @@ const CreateUpdateMultiDestination = ({ type }) => {
       }));
       setDataAttachment([
         ...result,
-      ])
+      ]);
     }
-  }, [list_mdDetailAttachment])
+  }, [list_mdDetailAttachment]);
 
   useEffect(() => {
     dispatch(getMdApprovalHierarchy());
@@ -210,20 +219,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create Multi Destination" : (type === "update") ? "Update Multi Destination" : "",
+      breadcrumbName: isCreate ? "Create Multi Destination" : isUpdate ? "Update Multi Destination" : "",
     },
   ];
 
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
-
   /**
-   * @param {boolean} show 
+   * @param {boolean} show
    * @param {"draft" | "submit"} submitType
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
@@ -242,23 +243,23 @@ const CreateUpdateMultiDestination = ({ type }) => {
           }
         }
         else {
-          await formCreate.validateFields(formFields[current]);
+          await form.validateFields(formFields[current]);
 
           const {
             objectId,
-            description, 
+            description,
             startDate,
             endDate,
             appHierId,
-          } = formCreate.getFieldsValue();
+          } = form.getFieldsValue(true);
 
           const body = {
-            id: type === "update" ? idMd : undefined,
+            id: isUpdate ? idMd : undefined,
             subjectId: data_accountDetail?.accountInformation?.accountId,
             objectId,
-            description, 
-            startDate,
-            endDate,
+            description,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
             validationType: validationTypes[current],
           };
@@ -277,19 +278,19 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
       const {
         objectId,
-        description, 
+        description,
         startDate,
         endDate,
         appHierId,
-      } = formCreate.getFieldsValue();
+      } = form.getFieldsValue(true);
 
       const body = {
-        id: type === "update" ? idMd : undefined,
+        id: isUpdate ? idMd : undefined,
         subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
-        description, 
-        startDate,
-        endDate,
+        description,
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType,
       };
@@ -310,7 +311,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       setShowConfirmationModal(show);
       setConfirmationType("");
     }
-  }
+  };
 
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
@@ -343,7 +344,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       latitude,
     }
   ) => {
-    formCreate.setFieldsValue({
+    form.setFieldsValue({
       objectId,
       account: `${accountNumber}-${accountName}`,
       accountSor,
@@ -359,71 +360,79 @@ const CreateUpdateMultiDestination = ({ type }) => {
       country,
       longitude,
       latitude,
-    })
-  }
+    });
+  };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailMdApprovalHierarchy({id: appHierId}));
-    setSelectedAppHierId(appHierId);
-    setSelectedApprovalName(approvalName);
-  }
+    dispatch(getDetailMdApprovalHierarchy({ id: appHierId }));
+    form.setFieldValue("appHierName", approvalName);
+  };
 
   const steps = [
     {
       title: "Multi Destination",
-      content: (
-        <InformationForm
-          setAccount={setAccount}
-          className={`${current !== 0 ? "hidden" : ""}`}
-          accountId={idAccount}
-          key={`multi-destination-tab-0`}
-        />
-      ),
+      cards: [{
+        header: "Multi Destination Information",
+        content: (
+          <InformationForm
+            form={form}
+            isUpdate={isUpdate}
+            isDraft={isDraft}
+            setAccount={setAccount}
+            accountId={idAccount}
+            key={`multi-destination-tab-0`}
+          />
+        )
+      }],
       disabled: false
     },
     {
       title: "Approval",
-      content: (
-        <ApprovalForm
-          dataTable={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          dataOption={data_mdApprovalHierarchy}
-          selectedAppHierId={selectedAppHierId}
-          handleSelectHiararchy={handleSelectHiararchy}
-          className={`${current !== 1 ? "hidden" : ""}`}
-          key={`multi-destination-tab-1`}
-        />
-      ),
+      cards: [{
+        header: "Approval",
+        content: (
+          <ApprovalForm
+            form={form}
+            dataTable={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
+              ...detail,
+              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                ...employeeDetail,
+                key: `employee-detail-${index}`
+              })),
+              key: `detail-detail-${index}`,
+            }))}
+            dataOption={data_mdApprovalHierarchy}
+            handleSelectHiararchy={handleSelectHiararchy}
+            key={`multi-destination-tab-1`}
+          />
+        )
+      }],
       disabled: false
     },
     {
       title: "Attachment",
-      content: (
-        <AttachmentForm
-          type={type}
-          data={dataAttachment}
-          updateData={setDataAttachment}
-          dispatch={dispatch}
-          className={`${current !== 2 ? "hidden" : ""}`}
-          key={`multi-destination-tab-2`}
-          getAPICategory={getMdAttachmentCategory}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-          mandatory={attachmentIsRequired}
-        />
-      ),
+      cards: [{
+        directRender: true,
+        content: (
+          <AttachmentForm
+            type={type}
+            data={dataAttachment}
+            updateData={setDataAttachment}
+            dispatch={dispatch}
+            key={`multi-destination-tab-2`}
+            getAPICategory={getMdAttachmentCategory}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
+            mandatory={attachmentIsRequired}
+          />
+        )
+      }],
       disabled: false
     },
   ];
 
   const navigate = useNavigate();
-  
+
   const next = async () => {
     try {
       if (current === 2) {
@@ -438,23 +447,23 @@ const CreateUpdateMultiDestination = ({ type }) => {
           throw new Error("There was no file attached");
         }
       } else {
-        await formCreate.validateFields(formFields[current]);
+        await form.validateFields(formFields[current]);
 
         const {
           objectId,
-          description, 
+          description,
           startDate,
           endDate,
           appHierId,
-        } = formCreate.getFieldsValue();
+        } = form.getFieldsValue(true);
 
         const body = {
-          id: type === "update" ? idMd : undefined,
+          id: isUpdate ? idMd : undefined,
           subjectId: data_accountDetail?.accountInformation?.accountId,
           objectId,
-          description, 
-          startDate,
-          endDate,
+          description,
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           appHierId,
           validationType: validationTypes[current],
         };
@@ -470,10 +479,10 @@ const CreateUpdateMultiDestination = ({ type }) => {
     } catch (err) {
       return;
     }
-    
-    
+
     setCurrent(current + 1);
   };
+
   const prev = () => {
     setCurrent(current - 1);
   };
@@ -493,23 +502,23 @@ const CreateUpdateMultiDestination = ({ type }) => {
             throw new Error("There was no file attached");
           }
         } else {
-          await formCreate.validateFields(formFields[i]);
+          await form.validateFields(formFields[i]);
 
           const {
             objectId,
-            description, 
+            description,
             startDate,
             endDate,
             appHierId,
-          } = formCreate.getFieldsValue();
+          } = form.getFieldsValue(true);
 
           const body = {
-            id: type === "update" ? idMd : undefined,
+            id: isUpdate ? idMd : undefined,
             subjectId: data_accountDetail?.accountInformation?.accountId,
             objectId,
-            description, 
-            startDate,
-            endDate,
+            description,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
             validationType: validationTypes[i],
           };
@@ -529,7 +538,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
     }
 
     setCurrent(newCurrent);
-  }
+  };
 
   const scrollRightHandler = () => {
     if (containerRef.current) {
@@ -538,8 +547,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
   };
   const handleButtonNext = async () => {
     await next();
-    scrollRightHandler()
-  }
+    scrollRightHandler();
+  };
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -551,28 +560,30 @@ const CreateUpdateMultiDestination = ({ type }) => {
     const {
       objectId,
       priority,
-      description, 
+      description,
       startDate,
       endDate,
       appHierId,
       remark,
-    } = formCreate.getFieldsValue();
+    } = form.getFieldsValue(true);
 
     const body = {
       id: idMd,
-      subjectId: data_accountDetail?.accountInformation?.accountId, 
+      subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
       priority,
-      description, 
-      startDate,
-      endDate,
+      description,
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark,
     };
 
-    if (type === "create")
-      dispatch(createMultiDestination({ body, attachments: dataAttachment }))
+    const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
+
+    if (isCreate)
+      dispatch(createMultiDestination({ body, attachments: newAttachments }))
       .unwrap()
       .then((data) => {
         setTimeout(() => {
@@ -585,11 +596,11 @@ const CreateUpdateMultiDestination = ({ type }) => {
               }
             }
           );
-        }, 2000)
+        }, 2000);
       })
       .catch((error) => {});
-    else if (type === "update")
-      dispatch(updateMultiDestination({ id: idMd, body, attachments: dataAttachment.filter((attachment => attachment.dataType !== "exist")) }))
+    else if (isUpdate)
+      dispatch(updateMultiDestination({ id: idMd, body, attachments: dataAttachment.filter((attachment) => attachment.dataType !== "exist") }))
       .unwrap()
         .then((data) => {
           setTimeout(() => {
@@ -602,21 +613,19 @@ const CreateUpdateMultiDestination = ({ type }) => {
                 }
               }
             );
-          }, 2000)
+          }, 2000);
         })
-        .catch((error) => {});;
+        .catch((error) => {});
   };
 
   const handleClear = () => {
-    if (type === "create") {
+    if (isCreate) {
       setDataAttachment([]);
-      setSelectedAppHierId();
-      setSelectedApprovalName();
-      formCreate.resetFields();
+      form.resetFields();
       setCurrent(0);
-    } else if (type === "update") {
+    } else if (isUpdate) {
       if (
-        detail_multiDestination &&
+        detail &&
         data_mdApprovalHierarchy?.length
       ) {
         const {
@@ -641,9 +650,9 @@ const CreateUpdateMultiDestination = ({ type }) => {
           endDate,
           description,
           appHierId,
-        } = detail_multiDestination;
+        } = detail;
 
-        formCreate.setFieldsValue({
+        form.setFieldsValue({
           subjectId,
           objectId,
           account: `${accountNumber}-${accountName}`,
@@ -666,7 +675,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
           appHierId,
         });
 
-        const appHierOption = data_mdApprovalHierarchy.find((option) => option.appHierId === appHierId)
+        const appHierOption = data_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
 
         if (appHierOption)
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
@@ -679,11 +688,11 @@ const CreateUpdateMultiDestination = ({ type }) => {
       }));
       setDataAttachment([
         ...result,
-      ])
+      ]);
 
       setCurrent(0);
     }
-  }
+  };
 
   return (
     <LayoutMenu>
@@ -701,24 +710,42 @@ const CreateUpdateMultiDestination = ({ type }) => {
         >
           <Form
             id="multiDestinationForm"
-            form={formCreate}
+            form={form}
             layout={"vertical"}
             onFinish={handleSubmitForm}
-            // onFinishFailed={handleErrorSubmit}
             scrollToFirstError={true}
             className="flex flex-col gap-y-4"
           >
             {/* Step Contents */}
             <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
-            
-            {steps.map((step) => step.content)}
+
+            {steps.map((step, stepIndex) =>
+              step.cards.map((card, cardIndex) =>
+                card.directRender ? (
+                  <div
+                    key={`${stepIndex}-${cardIndex}`}
+                    className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                  >
+                    {card.content}
+                  </div>
+                ) : (
+                  <NxCardContainer
+                    header={card.header}
+                    className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                    key={`${stepIndex}-${cardIndex}`}
+                  >
+                    <NxBaseContainer border>{card.content}</NxBaseContainer>
+                  </NxCardContainer>
+                )
+              )
+            )}
 
             {/* Section Action Steps */}
             <NxBaseContainer border>
               <div className="flex justify-between">
                 <Button
                   type={"menu"}
-                  onClick={()=>{navigate(-1)}}
+                  onClick={() => { navigate(-1); }}
                 >
                   Cancel
                 </Button>
@@ -728,7 +755,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
                     type={"reject"}
                     icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    { type === "update" ? "Reset" : "Clear" }
+                    { isUpdate ? "Reset" : "Clear" }
                   </Button>
                   <Button
                     onClick={() => handleSetShowConfirmationModal(true, "draft")}
@@ -769,26 +796,26 @@ const CreateUpdateMultiDestination = ({ type }) => {
                 </div>
               </div>
             </NxBaseContainer>
-          <ConfirmationModal
-            form={"multiDestinationForm"}
-            isOpen={showConfirmationModal}
-            handleCancel={() => handleSetShowConfirmationModal(false)}
-            selectedAppHierId={selectedAppHierId}
-            selectedApprovalName={selectedApprovalName}
-            hierarchyTableData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
-              ...detail,
-              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-                ...employeeDetail,
-                key: `employee-detail-${index}`
-              })),
-              key: `detail-detail-${index}`,
-            }))}
-            hieararchyOptionData={data_mdApprovalHierarchy}
-            type={confirmationType}
-            dataAttachment={dataAttachment}
-            data={formCreate.getFieldsValue()}
-            service={accountManagementService}
-            configApplication={configApp.ACCOUNT_SERVICE}
+            <ConfirmationModal
+              form={"multiDestinationForm"}
+              isOpen={showConfirmationModal}
+              handleCancel={() => handleSetShowConfirmationModal(false)}
+              selectedAppHierId={form.getFieldValue("appHierId")}
+              selectedApprovalName={form.getFieldValue("appHierName")}
+              hierarchyTableData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
+                ...detail,
+                employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                  ...employeeDetail,
+                  key: `employee-detail-${index}`
+                })),
+                key: `detail-detail-${index}`,
+              }))}
+              hieararchyOptionData={data_mdApprovalHierarchy}
+              type={confirmationType}
+              dataAttachment={dataAttachment}
+              data={form.getFieldsValue()}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
             />
           </Form>
         </Spin>

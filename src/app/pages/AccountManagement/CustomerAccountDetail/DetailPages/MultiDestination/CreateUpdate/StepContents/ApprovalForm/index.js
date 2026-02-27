@@ -1,19 +1,12 @@
-import ApprovalPaymentRelation from "./ApprovalMultiDestination";
+import ApprovalMultiDestination from "./ApprovalMultiDestination";
 
-export default function ApprovalForm({
-  dataTable,
-  dataOption,
-  selectedAppHierId,
-  handleSelectHiararchy,
-  className,
-}){
+export default function ApprovalForm({ form, dataTable, dataOption, handleSelectHiararchy }) {
   return (
-    <ApprovalPaymentRelation
+    <ApprovalMultiDestination
+      form={form}
       dataTable={dataTable}
       dataOption={dataOption}
-      selectedAppHierId={selectedAppHierId}
       handleSelectHiararchy={handleSelectHiararchy}
-      className={className}
     />
-  )
+  );
 }

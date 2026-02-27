@@ -1,41 +1,47 @@
+import { Form, Input } from "antd";
 import { useRef, useState } from "react";
 import ApprovalHierarchy from "./ApprovalHierarchy";
-import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 
 const ApprovalSectionForm = ({
+  form,
   dataTable,
   dataOption,
-  selectedAppHierId = 0,
   handleSelectHiararchy = () => {},
   showSelect = true,
   disableSelect = false,
-  approvalName = "",
-  className,
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+
+  const appHierId = Form.useWatch("appHierId", { form });
+  const appHierName = Form.useWatch("appHierName", { form, preserve: true });
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
+
   return (
-    <NxCardContainer header={"APPROVAL"} className={`${className}`}>
+    <div className="flex flex-col gap-y-4">
+      <Form.Item name={"appHierName"} hidden>
+        <Input />
+      </Form.Item>
       <ApprovalHierarchy
         dataTable={dataTable}
         dataOption={dataOption}
         handleSelectHiararchy={handleSelectHiararchy}
-        selectedAppHierId={selectedAppHierId}
+        selectedAppHierId={appHierId}
         searchInput={searchInput}
         searchedColumn={searchedColumn}
         searchText={searchText}
         handleSearch={handleSearch}
         showSelect={showSelect}
         disableSelect={disableSelect}
-        approvalName={approvalName}
+        approvalName={appHierName}
       />
-    </NxCardContainer>
+    </div>
   );
 };
 
