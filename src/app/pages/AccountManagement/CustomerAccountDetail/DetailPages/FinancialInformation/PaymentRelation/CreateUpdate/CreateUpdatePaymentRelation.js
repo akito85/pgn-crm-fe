@@ -365,7 +365,6 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             <AttachmentSectionForm
               data={dataAttachment}
               updateData={setDataAttachment}
-              dispatch={dispatch}
               key={`payment-relation-tab-2`}
               getAPICategory={getPrAttachmentCategory}
               service={accountManagementService}
