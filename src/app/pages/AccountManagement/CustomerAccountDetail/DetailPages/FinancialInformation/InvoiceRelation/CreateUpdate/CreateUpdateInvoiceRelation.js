@@ -221,8 +221,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate: NxDate.formatForAPI(startDate),
-              endDate: NxDate.formatForAPI(endDate),
+              startDate: NxDate.formatForAPI(startDate, false),
+              endDate: NxDate.formatForAPI(endDate, false),
               appHierId,
             }
           }
@@ -248,8 +248,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
         subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
         description,
-        startDate: NxDate.formatForAPI(startDate),
-        endDate: NxDate.formatForAPI(endDate),
+        startDate: NxDate.formatForAPI(startDate, false),
+        endDate: NxDate.formatForAPI(endDate, false),
         appHierId,
         action: submitType
       };
@@ -401,8 +401,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
             description, 
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
+            startDate: NxDate.formatForAPI(startDate, false),
+            endDate: NxDate.formatForAPI(endDate, false),
             appHierId,
           }
         }
@@ -459,8 +459,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate: NxDate.formatForAPI(startDate),
-              endDate: NxDate.formatForAPI(endDate),
+              startDate: NxDate.formatForAPI(startDate, false),
+              endDate: NxDate.formatForAPI(endDate, false),
               appHierId,
             }
           }
@@ -514,8 +514,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
       subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
       description,
-      startDate: NxDate.formatForAPI(startDate),
-      endDate: NxDate.formatForAPI(endDate),
+      startDate: NxDate.formatForAPI(startDate, false),
+      endDate: NxDate.formatForAPI(endDate, false),
       appHierId,
       action: confirmationType,
       remark
@@ -585,8 +585,8 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           objectId,
           accountName: relatedAccountName,
           accountNumber: relatedAccountNumber,
-          startDate: NxDate.formatForAPI(startDate),
-          endDate: NxDate.formatForAPI(endDate),
+          startDate: NxDate.formatForAPI(startDate, false),
+          endDate: NxDate.formatForAPI(endDate, false),
           description,
           appHierId
         });
