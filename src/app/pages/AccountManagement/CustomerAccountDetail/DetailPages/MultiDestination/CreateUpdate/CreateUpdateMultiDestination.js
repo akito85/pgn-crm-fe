@@ -5,7 +5,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
-import StepContents from "./StepContents";
+import InformationForm from "./StepContents/InformationForm/InfoMultiDestination";
+import AttachmentForm from "./StepContents/AttachmentForm/AttachmentMultiDestination";
+import ApprovalForm from "./StepContents/ApprovalForm/ApprovalMultiDestination";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
@@ -112,8 +114,6 @@ const CreateUpdateMultiDestination = ({ type }) => {
   ];
 
   const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
-
-  const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
   useEffect(() => {
     if (isUpdate && idMd) {
