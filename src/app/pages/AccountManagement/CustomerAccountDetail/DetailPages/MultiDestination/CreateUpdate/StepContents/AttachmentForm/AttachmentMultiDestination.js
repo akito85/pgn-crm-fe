@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Spin, Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachmentMultiDestination";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { previewFileAttachment } from "../../../../../../../../../utils/previewFileAttachment";
 import { getColumnSearchPropsPaging } from "../../../../../../../../../utils/getColumnSearchProps";
-import moment from "moment";
+import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
 import productPromoHttpService from "../../../../../../../../../redux/services/productPromoHttpService";
 import { getBase64 } from "../../../../../../../../../utils/getBase64";
 import { tokenHeader } from "../../../../../../../../../utils/tokenHeader";
@@ -23,9 +22,7 @@ const onFilter = (dataIndex, value, record) => {
   switch (dataIndex) {
     case "startDate":
     case "endDate":
-      const date = record[dataIndex]
-        ? moment(record[dataIndex]).format("DD MMM YYYY")
-        : "";
+      const date = NxDate.formatDate(record[dataIndex], "DD MMM YYYY") || "";
       return date.toString().toLowerCase().includes(search);
     case "fileSize":
       return record.size.includes(search);
@@ -35,7 +32,7 @@ const onFilter = (dataIndex, value, record) => {
 };
 
 
-// extracting size 
+// extracting size
 const extractSize = (fileSize) => {
   if (fileSize.includes('KB')) {
     return parseFloat(fileSize.replace(' KB', '')) * 1024;
@@ -52,9 +49,7 @@ const sorter = (fieldSort, a, b) => {
     switch (fieldSort) {
       case "startDate":
       case "endDate":
-        const date = obj[fieldSort]
-          ? moment(obj[fieldSort]).format("DD MMM YYYY")
-          : "";
+        const date = NxDate.formatDate(obj[fieldSort], "DD MMM YYYY");
         return date.toString().toLowerCase();
       case "fileSize":
         return extractSize(obj[fieldSort]);
@@ -175,29 +170,15 @@ const columnAttachmentData = (
         return (
           <div className="flex justify-center align-middle gap-2 py-1">
             <Tooltip title="Preview">
-              <span className="flex justify-center">
-                <EyeOutlined
-                  style={{ fontSize: "20px", color: "#0075bf" }}
-                  onClick={() => handleShow(r)}
-                />
-              </span>
+              <Button onClick={() => handleShow(r)} type="table-action">
+                <SVGIcon name="IconEye" width={20} />
+              </Button>
             </Tooltip>
-            {type !== "detail" ? (
+            {type !== "detail" && type !== "confirmation" ? (
               <Tooltip title="Delete">
-                <span
-                  className={`flex justify-center${r.dataType === "exist" ? " cursor-not-allowed" : ""
-                    }`}
-                >
-                  <SVGIcon
-                    name="IconDelete"
-                    color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
-                    width={20}
-                    className={r.dataType === "exist" ? "disabled" : undefined}
-                    onClick={
-                      r.dataType !== "exist" ? () => handleDelete(r) : undefined
-                    }
-                  />
-                </span>
+                <Button onClick={() => handleDelete(r)} type="table-action" disabled={r.dataType !== "exist"}>
+                  <SVGIcon name="IconDelete" width={20} />
+                </Button>
               </Tooltip>
             ) : null}
           </div>
@@ -224,14 +205,13 @@ const AttachmentSectionForm = ({
   data = [],
   updateData = () => { },
   type,
-  dispatch = () => { },
   getAPICategory = () => { },
   service = productPromoHttpService,
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
-  className,
 }) => {
+  const dispatch = useDispatch();
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -292,7 +272,7 @@ const AttachmentSectionForm = ({
             responseType: "blob",
           });
           const base64 = await getBase64(response.data);
-          previewFileAttachment(base64);  
+          previewFileAttachment(base64);
         } catch (error) {
           console.error("Failed to download file", error);
         } finally {
@@ -308,26 +288,21 @@ const AttachmentSectionForm = ({
         {type !== "detail" && type !== "preview" && type !== "confirmation" ? (
               <div className="flex flex-col w-full gap-2 items-end">
                 <div className="flex flex-col gap-y-1 justify-start">
-                  <p className="text-[13px] mb-0 text-dg-grey-dark">
+                  <span className="text-sm mb-0 text-dg-grey-dark">
                     Attach File:
                     {mandatory ? (
                     <span className={"pl-1"} style={{ color: "red" }}>
                       *
                     </span>
                   ) : null}
-                  </p>
+                  </span>
                   <div className="flex flex-row gap-2 items-center">
-                    <Button
-                      fontSizeClassname="text-[11px]"
-                      size="small"
-                      type="default"
-                      onClick={handleOpenModal}
-                    >
+                    <Button type="menu" onClick={handleOpenModal}>
                       Choose File
                     </Button>
-                    <p className="text-[11px] text-dg-grey-dark mb-0">
-                      No file choosen
-                    </p>
+                    {!data.length && (
+                      <span className="text-sm text-dg-grey-dark">No file choosen</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -368,20 +343,18 @@ const AttachmentSectionForm = ({
 
   if (type === "confirmation") {
     return (
-      <div className={`${className}`}>
+      <>
         {content}
         {modalAttachment}
-      </div>
+      </>
     );
   }
 
   return (
-    <div className={`${className}`}>
-      <NxCardContainer header={"ATTACHMENT"}>
-        {content}
-        {modalAttachment}
-      </NxCardContainer>
-    </div>
+    <NxCardContainer header={"ATTACHMENT"}>
+      {content}
+      {modalAttachment}
+    </NxCardContainer>
   );
 };
 

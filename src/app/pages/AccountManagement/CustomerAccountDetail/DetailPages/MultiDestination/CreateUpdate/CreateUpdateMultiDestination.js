@@ -418,7 +418,6 @@ const CreateUpdateMultiDestination = ({ type }) => {
             type={type}
             data={dataAttachment}
             updateData={setDataAttachment}
-            dispatch={dispatch}
             key={`multi-destination-tab-2`}
             getAPICategory={getMdAttachmentCategory}
             service={accountManagementService}
