@@ -84,7 +84,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
 
   const attachmentIsRequired = true;
 
-  const detail = (isActive && statusApproval && isDraftApproval && isRejectApproval) ? detailDraft_paymentRelation : detail_paymentRelation;
+  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
 
   const formFields = [
     [
