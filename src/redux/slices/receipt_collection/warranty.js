@@ -37,10 +37,10 @@ export const getAllWarrantyListPaginate = createAsyncThunk(
       // Default sort
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
       const [orderBy, order] = sortValue.split("~");
-      
-      
+
+
       const url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
-      
+
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -126,9 +126,9 @@ export const getAllWarrantyInfoPaginate = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
       const [orderBy, order] = sortValue.split("~");
-      
+
       let url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
-      
+
       if (transTypeName) {
         url += `&transTypeName=${transTypeName}`;
       }
@@ -269,6 +269,43 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
+export const createPaymentWarranty = createAsyncThunk(
+  "CREATE_PAYMENT_WARRANTY",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-warranty/create";
+      const response = await receiptCollectionHttpService.createData(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: "Your request has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.toString();
+
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Submission failed. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 export const submitWarrantyRequest = createAsyncThunk(
   "SUBMIT_WARRANTY_REQUEST",
   async ({ body }, thunkAPI) => {
@@ -288,7 +325,7 @@ export const submitWarrantyRequest = createAsyncThunk(
         error?.response?.data?.message ||
         error?.message ||
         error?.toString();
-      
+
       if (
         error?.response?.data?.code === 500 ||
         error?.response?.data?.code === 419
@@ -315,9 +352,8 @@ export const submitApproval = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
         return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -327,7 +363,7 @@ export const submitApproval = createAsyncThunk(
         error?.response?.data?.message ||
         error?.message ||
         error?.toString();
-      
+
       if (
         error?.response?.data?.code === 500 ||
         error?.response?.data?.code === 419
@@ -336,9 +372,8 @@ export const submitApproval = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -495,6 +530,20 @@ const warrantySlice = createSlice({
     },
     [downloadWarrantyList.rejected]: (state) => {
       state.loading = false;
+    },
+
+    // Create Payment Warranty
+    [createPaymentWarranty.pending]: (state) => {
+      state.loading = true;
+    },
+    [createPaymentWarranty.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [createPaymentWarranty.rejected]: (state, action) => {
+      state.loading = false;
+      state.isFailed = true;
+      state.result = action.payload;
     },
 
     // Submit Warranty Request (Unified Hold, Release, Refund)
