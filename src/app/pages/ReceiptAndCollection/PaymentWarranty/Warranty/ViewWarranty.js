@@ -102,11 +102,11 @@ const ViewWarranty = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_WARRANTY,
-      breadcrumbName: "Warranty List",
+      breadcrumbName: "Guarantee List",
     }
   ];
 
@@ -546,7 +546,7 @@ const ViewWarranty = () => {
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px] font-bold uppercase text-[#0075BF]">
-              warranty list
+              Guarantee list
             </p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
