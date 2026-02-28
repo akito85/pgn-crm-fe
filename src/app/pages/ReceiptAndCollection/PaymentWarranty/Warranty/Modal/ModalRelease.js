@@ -137,7 +137,7 @@ const ModalRelease = ({
   // Define Wizard Step
   const steps = [
     {
-      title: "Warranty Information",
+      title: "Guarantee Information",
       key: "warrantyInfo",
     },
     {
@@ -160,7 +160,7 @@ const ModalRelease = ({
 
   const next = () => {
     if (current === 0 && selectedWarrantyInfoRowKeys.length === 0) {
-      return message.warning("Please select Warranty Information!");
+      return message.warning("Please select Guarantee Information!");
     }
     if (current === 1) {
       if (!remarkReleaseInformation) {
@@ -230,7 +230,7 @@ const ModalRelease = ({
       const rowKey = preSelectedRow.billingCode || preSelectedRow.invoiceNumber || preSelectedRow.id;
       setSelectedWarrantyInfoRowKeys([rowKey]);
       setDataWarrantyInfoSelect([{ ...preSelectedRow, key: rowKey }]);
-      setCurrent(0); // Start at Step 1 (Warranty Info selection)
+      setCurrent(0); // Start at Step 1 (Guarantee Info selection)
     } else {
       setSelectedWarrantyInfoRowKeys([]);
       setDataWarrantyInfoSelect([]);
@@ -342,7 +342,7 @@ const ModalRelease = ({
   };
 
 
-  // Warranty Information Step
+  // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
       const finalSearch = Object.keys(search).length > 0 
@@ -679,7 +679,7 @@ const ModalRelease = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Release"
+        header="Guarantee Release"
         handleCancel={handleBackForm}
         width={1000}
         footer={null}

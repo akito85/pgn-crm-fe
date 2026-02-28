@@ -61,7 +61,7 @@ const ListDetailWarranty = () => {
   const items = [
     {
       key: "warranty",
-      label: "Warranty",
+      label: "Guarantee",
       children: <DetailWarranty data_detail={data_detail} />,
     },
     {
@@ -153,11 +153,11 @@ const ListDetailWarranty = () => {
     },
     {
         path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_WARRANTY,
-        breadcrumbName: "Payment Warranty",
+        breadcrumbName: "Payment Guarantee",
     },
     {
         path: "",
-        breadcrumbName: "Detail Warranty",
+        breadcrumbName: "Detail Guarantee",
     },
     ];
 
@@ -187,7 +187,7 @@ const ListDetailWarranty = () => {
               onFinish={onFinishApproval}
               header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
               approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
-              menu="Payment Warranty"
+              menu="Payment Guarantee"
               named={data_detail?.customerName || "-"}
             />
         </Spin>

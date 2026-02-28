@@ -145,7 +145,7 @@ const ModalRefund = ({
       key: "customerInfo",
     },
     {
-      title: "Warranty Information",
+      title: "Guarantee Information",
       key: "warrantyInfo",
     },
     {
@@ -172,7 +172,7 @@ const ModalRefund = ({
       return message.warning("Please select Customer Information!");
     }
     if (current === 1 && selectedWarrantyInfoRowKeys.length === 0) {
-      return message.warning("Please select Warranty Information!");
+      return message.warning("Please select Guarantee Information!");
     }
     if (current === 2) {
       if (!remarkRefundInformation) {
@@ -339,11 +339,11 @@ const ModalRefund = ({
     }
   }, [dispatch, isOpen, search, page, pageSize, sort, current]);
 
-  // Warranty Information Step
+  // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 1) {
       // NOTE: For Refund, we currently don't filter warranties by the selected customer Number.
-      // Customer selection is done in Step 1, but Warranty selection in Step 2 fetches all available warranties.
+      // Customer selection is done in Step 1, but Guarantee selection in Step 2 fetches all available warranties.
       // This is as per current requirement, but might change in the future (e.g., adding back customerNumber filter).
       
       let finalSearch = "";
@@ -680,7 +680,7 @@ const ModalRefund = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Refund"
+        header="Guarantee Refund"
         handleCancel={handleBackForm}
         width={1000}
         footer={null}
