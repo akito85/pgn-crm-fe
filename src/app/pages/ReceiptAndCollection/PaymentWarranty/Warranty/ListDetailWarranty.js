@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, Spin } from "antd";
 import {
   getDetailWarranty,
-  getApprovalListPaginate,
   getListCategory,
   getListApprovalById,
   getAllApprovalList,
@@ -48,8 +47,6 @@ const ListDetailWarranty = () => {
     if (activeTab === "approval") {
       if (data_detail?.appHierId) {
         dispatch(getListApprovalById({ id: data_detail?.appHierId }));
-      } else {
-        dispatch(getApprovalListPaginate({ page: 1, pageSize: 10 }));
       }
     } else if (activeTab === "attachment") {
       dispatch(getListCategory());
@@ -80,7 +77,7 @@ const ListDetailWarranty = () => {
                       key: index + 1,
                     })),
                   }))
-                : (data_approval_info?.result || data_approval_info || [])
+                : (data_approval_info?.result || [])
             }
             approvalName={approvalName} 
             showSelect={false}
