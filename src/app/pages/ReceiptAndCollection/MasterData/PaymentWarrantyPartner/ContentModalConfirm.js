@@ -3,7 +3,7 @@ import { Fragment, useState } from "react";
 import { Tabs } from "antd";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
-import { dateFormatting } from "../../../../../utils";
+import { renderDateConverter } from "../../../../../utils";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import { UpOutlined, DownOutlined } from "@ant-design/icons";
 
@@ -17,8 +17,6 @@ const ContentModalConfirm = ({
 }) => {
   const [valuePage, setValuePage] = useState(tabData[0].value);
   const [expandedInfo, setExpandedInfo] = useState(true);
-  const [expandedAddress, setExpandedAddress] = useState(true);
-  const [expandedContact, setExpandedContact] = useState(true);
 
   const items = [
     {
@@ -33,63 +31,20 @@ const ContentModalConfirm = ({
               onClick={() => setExpandedInfo(!expandedInfo)}
             >
               <div className="text-[#0075bf] text-sm font-semibold uppercase">
-                WARRANTY PARTNER INFORMATION
+                PAYMENT GUARANTEE PARTNER INFORMATION
               </div>
               <div>{expandedInfo ? <UpOutlined /> : <DownOutlined />}</div>
             </div>
             {expandedInfo && (
               <div className="grid grid-cols-5 gap-y-4 gap-x-2 w-full">
-                <DetailText label={"Partner Name"}>{data?.partnerName}</DetailText>
+                <DetailText label={"Partner Code"}>{data?.partnerCode}</DetailText>
+                <DetailText label={"Partner Guarantee Issuer"}>{data?.partnerGuaranteeIssuer}</DetailText>
                 <DetailText label={"Partner Type"}>{data?.partnerType}</DetailText>
-                <DetailText label={"Swift Code"}>{data?.swiftCode}</DetailText>
-                <DetailText label={"NPWP"}>{data?.npwp}</DetailText>
-                <DetailText label={"License Number"}>{data?.licenseNum}</DetailText>
-                <DetailText label={"Parent ID"}>{data?.parentId || "-"}</DetailText>
-              </div>
-            )}
-          </div>
-
-          {/* Address Information */}
-          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
-            <div
-              className="flex justify-between items-center cursor-pointer mb-4"
-              onClick={() => setExpandedAddress(!expandedAddress)}
-            >
-              <div className="text-[#0075bf] text-sm font-semibold uppercase">
-                ADDRESS INFORMATION
-              </div>
-              <div>{expandedAddress ? <UpOutlined /> : <DownOutlined />}</div>
-            </div>
-            {expandedAddress && (
-              <div className="grid grid-cols-5 gap-y-4 gap-x-2 w-full">
-                <DetailText label={"Street"}>{data?.address?.street}</DetailText>
-                <DetailText label={"Building"}>{data?.address?.building}</DetailText>
-                <DetailText label={"Address Num"}>{data?.address?.addressNum}</DetailText>
-                <DetailText label={"District"}>{data?.address?.district}</DetailText>
-                <DetailText label={"City"}>{data?.address?.city}</DetailText>
-                <DetailText label={"Province"}>{data?.address?.province}</DetailText>
-                <DetailText label={"Country"}>{data?.address?.country}</DetailText>
-                <DetailText label={"Zip Code"}>{data?.address?.zipCode}</DetailText>
-              </div>
-            )}
-          </div>
-
-          {/* Contact Information */}
-          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
-            <div
-              className="flex justify-between items-center cursor-pointer mb-4"
-              onClick={() => setExpandedContact(!expandedContact)}
-            >
-              <div className="text-[#0075bf] text-sm font-semibold uppercase">
-                CONTACT INFORMATION
-              </div>
-              <div>{expandedContact ? <UpOutlined /> : <DownOutlined />}</div>
-            </div>
-            {expandedContact && (
-              <div className="grid grid-cols-5 gap-y-4 gap-x-2 w-full">
-                <DetailText label={"Contact Person"}>{data?.contact?.contactPerson}</DetailText>
-                <DetailText label={"Phone Number"}>{data?.contact?.phoneNum}</DetailText>
-                <DetailText label={"Email"}>{data?.contact?.email}</DetailText>
+                <DetailText label={"Rating"}>{data?.rating || data?.ratings?.[0]?.rating || "-"}</DetailText>
+                <DetailText label={"Criteria"}>{data?.criteria || data?.ratings?.[0]?.criteria || "-"}</DetailText>
+                <DetailText label={"Rating date"}>{data?.ratingDate ? renderDateConverter(data.ratingDate) : "-"}</DetailText>
+                <DetailText label={"Start date"}>{data?.startDate ? renderDateConverter(data.startDate) : data?.ratings?.[0]?.startDate ? renderDateConverter(data?.ratings?.[0]?.startDate) : "-"}</DetailText>
+                <DetailText label={"End date"}>{data?.endDate ? renderDateConverter(data.endDate) : data?.ratings?.[0]?.endDate ? renderDateConverter(data?.ratings?.[0]?.endDate) : "-"}</DetailText>
               </div>
             )}
           </div>
