@@ -23,11 +23,55 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: null,
 
+  dataPaymentWarrantyPartner: [],
+  loadingPaymentWarrantyPartner: false,
+
+  dataPaymentWarrantyPartnerBranch: [],
+  loadingPaymentWarrantyPartnerBranch: false,
+
   loading: false,
   isFailed: false,
   isSuccess: false,
   message: "",
 };
+
+export const getPaymentWarrantyPartnerList = createAsyncThunk(
+  "GET_PAYMENT_WARRANTY_PARTNER_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return error;
+    }
+  }
+);
+
+export const getPaymentWarrantyPartnerBranchList = createAsyncThunk(
+  "GET_PAYMENT_WARRANTY_PARTNER_BRANCH_LIST",
+  async (partnerId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partner-branches/list/${partnerId}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return error;
+    }
+  }
+);
 
 export const getAllWarrantyListPaginate = createAsyncThunk(
   "GET_ALL_WARRANTY_LIST_PAGINATE",
@@ -505,6 +549,32 @@ const warrantySlice = createSlice({
     [getListCategory.rejected]: (state, action) => {
       state.dataListCategory = action.payload;
       state.loadingProduct = false;
+    },
+
+    // Get Payment Warranty Partner List
+    [getPaymentWarrantyPartnerList.pending]: (state) => {
+      state.loadingPaymentWarrantyPartner = true;
+    },
+    [getPaymentWarrantyPartnerList.fulfilled]: (state, action) => {
+      state.loadingPaymentWarrantyPartner = false;
+      state.dataPaymentWarrantyPartner = action.payload;
+    },
+    [getPaymentWarrantyPartnerList.rejected]: (state) => {
+      state.loadingPaymentWarrantyPartner = false;
+      state.dataPaymentWarrantyPartner = [];
+    },
+
+    // Get Payment Warranty Partner Branch List
+    [getPaymentWarrantyPartnerBranchList.pending]: (state) => {
+      state.loadingPaymentWarrantyPartnerBranch = true;
+    },
+    [getPaymentWarrantyPartnerBranchList.fulfilled]: (state, action) => {
+      state.loadingPaymentWarrantyPartnerBranch = false;
+      state.dataPaymentWarrantyPartnerBranch = action.payload;
+    },
+    [getPaymentWarrantyPartnerBranchList.rejected]: (state) => {
+      state.loadingPaymentWarrantyPartnerBranch = false;
+      state.dataPaymentWarrantyPartnerBranch = [];
     },
 
     /** Get Approval History */

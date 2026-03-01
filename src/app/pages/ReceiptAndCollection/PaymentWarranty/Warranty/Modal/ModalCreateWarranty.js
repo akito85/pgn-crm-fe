@@ -16,6 +16,8 @@ import {
     createPaymentWarranty,
     getAllApprovalList,
     getListApprovalById,
+    getPaymentWarrantyPartnerList,
+    getPaymentWarrantyPartnerBranchList,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import {
@@ -43,7 +45,7 @@ const ModalCreateWarranty = ({
     const dispatch = useDispatch();
 
     // Redux Warranty state
-    const { dataListAppHierId, dataListAppHierDetail, loading } = useSelector((state) => state.warranty);
+    const { dataListAppHierId, dataListAppHierDetail, loading, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
 
     // Redux Receipt state (reusing master data)
     const {
@@ -75,7 +77,8 @@ const ModalCreateWarranty = ({
     useEffect(() => {
         if (isOpen) {
             dispatch(getAllAccountNumberDDL());
-            dispatch(getUnifiedCreateReceiptDdl({})); // Fetches Partners (payGatewayDDL)
+            dispatch(getUnifiedCreateReceiptDdl({})); // Fetches other DDL data
+            dispatch(getPaymentWarrantyPartnerList()); // Fetches Warranty Partners
             dispatch(getCurrencyDDL());
             dispatch(getRateTypeDDL());
             dispatch(getAllApprovalList());
@@ -228,48 +231,15 @@ const ModalCreateWarranty = ({
 
             // Format Term of Claim Period
             let claimValue = values.claimPeriodTermValue;
-            if (values.claimPeriodTermType === "Date" && claimValue) {
-                // Formatting as "YYYYMMDD" to comply with Backend Integer type
-                claimValue = moment(claimValue).format("YYYYMMDD");
+            if (claimValue) {
+                claimValue = parseInt(claimValue, 10);
             }
 
             // Format Amount Rate
             let parsedRateAmount = 0;
             if (values.rateAmount) {
                 const cleaned = values.rateAmount.toString().replace(/,/g, "");
-                parsedRateAmount = parsedRateAmount = parseFloat(cleaned);
-            }
-
-            // Execute Warranty Creation First to get the warrantyId (to bind attachments if backend requires RefId, but wait, Receipt logic uploads after generating the Receipt, but in Warranty, we pass attachmentIds inside the body)
-            // Wait, looking at Receipt Form: it creates the Receipt, gets the ID, and then passes the Receipt ID as "refId"
-            // However, Warranty DTO PaymentWarrantyCreateRequest says `private List<Integer> attachmentIds;` is passed INTO the create payload.
-            // But `/upload-attachment-receipt` requires a `refId`. If we pass `null` or `0`, it might still generate an attachment ID.
-            // Let's modify the flow to match Warranty's `attachmentIds` expectation by uploading them first, or if it requires a refId, we can pass 0 for now. Let's upload them and collect their IDs.
-
-            let uploadedAttachmentIds = [];
-
-            for (let icon = 0; icon < listDataAttachment.length; icon++) {
-                const element = listDataAttachment[icon];
-
-                const formData = new FormData();
-                formData.append("files", element.file);
-                formData.append("fileCategoryId", element.fileCategoryId);
-                formData.append("category", "PAYMENT_WARRANTY");
-                formData.append("referensiId", 0);
-
-                const uploadResponse = await receiptCollectionHttpService.uploadImage(
-                    `/v1/dbs/api/attachment/upload/v1`,
-                    formData
-                );
-
-                // Assuming the backend returns the generated attachment ID in the response (e.g. data.id)
-                if (uploadResponse?.data?.data?.id) {
-                    uploadedAttachmentIds.push(uploadResponse.data.data.id);
-                } else if (uploadResponse?.data?.id) {
-                    uploadedAttachmentIds.push(uploadResponse.data.id);
-                } else if (uploadResponse?.data?.[0]?.id) {
-                    uploadedAttachmentIds.push(uploadResponse.data[0].id);
-                }
+                parsedRateAmount = parseFloat(cleaned);
             }
 
             const submitBody = {
@@ -283,7 +253,7 @@ const ModalCreateWarranty = ({
                 rateDate: moment(values.rateDate).format("YYYY-MM-DD"),
                 effectiveStartDate: moment(values.effStartDate).format("YYYY-MM-DD"),
                 effectiveEndDate: moment(values.effEndDate).format("YYYY-MM-DD"),
-                claimPeriodTermType: values.claimPeriodTermType,
+                claimPeriodTermType: (values.claimPeriodTermType || "Date").toUpperCase(),
                 claimPeriodTermValue: claimValue,
                 description: values.description,
                 isDraft: isDraft,
@@ -293,10 +263,29 @@ const ModalCreateWarranty = ({
                         amount: parsedRateAmount
                     }
                 ],
-                attachmentIds: uploadedAttachmentIds.length > 0 ? uploadedAttachmentIds : [],
+                attachmentIds: [], // Passing empty since endpoint doesnt require it if we upload afterwards
             };
 
-            await dispatch(createPaymentWarranty({ body: submitBody })).unwrap();
+            const res = await dispatch(createPaymentWarranty({ body: submitBody })).unwrap();
+            const warrantyId = res?.data;
+
+            // Upload attachments if Warranty is successfully created
+            if (warrantyId && listDataAttachment?.length > 0) {
+                for (let icon = 0; icon < listDataAttachment.length; icon++) {
+                    const element = listDataAttachment[icon];
+
+                    const formData = new FormData();
+                    formData.append("files", element.file);
+                    formData.append("fileCategoryId", element.fileCategoryId);
+                    formData.append("category", "PAYMENT_WARRANTY");
+                    formData.append("referensiId", warrantyId);
+
+                    await receiptCollectionHttpService.uploadImage(
+                        `/v1/dbs/api/attachment/upload/v1`,
+                        formData
+                    );
+                }
+            }
 
             handleRefresh();
             handleBackForm();
@@ -425,9 +414,15 @@ const ModalCreateWarranty = ({
                             </Col>
                             <Col span={8}>
                                 <Form.Item name="issuerBank" label="Issuer" rules={[{ required: true }]}>
-                                    <Select placeholder="Select Issuer (Partner)">
-                                        {payGatewayDDL?.data?.map((item) => (
-                                            <Option key={item.id} value={item.id}>{item.name}</Option>
+                                    <Select
+                                        placeholder="Select Issuer (Partner)"
+                                        onChange={(value) => {
+                                            dispatch(getPaymentWarrantyPartnerBranchList(value));
+                                            form.setFieldsValue({ issuerBranch: null });
+                                        }}
+                                    >
+                                        {(dataPaymentWarrantyPartner?.data || dataPaymentWarrantyPartner || []).map((item) => (
+                                            <Option key={item.id} value={item.id}>{item.partnerName}</Option>
                                         ))}
                                     </Select>
                                 </Form.Item>
@@ -435,7 +430,9 @@ const ModalCreateWarranty = ({
                             <Col span={8}>
                                 <Form.Item name="issuerBranch" label="Issuer Branch">
                                     <Select placeholder="Select Issuer Branch">
-                                        <Option value="JKT">Jakarta</Option>
+                                        {(dataPaymentWarrantyPartnerBranch?.data || dataPaymentWarrantyPartnerBranch || []).map((item) => (
+                                            <Option key={item.id} value={item.id}>{item.branchName}</Option>
+                                        ))}
                                     </Select>
                                 </Form.Item>
                             </Col>
@@ -500,7 +497,7 @@ const ModalCreateWarranty = ({
                                             </Select>
                                         </Form.Item>
                                         <Form.Item name="claimPeriodTermValue" style={{ width: '60%', marginBottom: 0 }}>
-                                            <DatePicker className="w-full" style={{ borderRadius: '8px' }} />
+                                            <Input maxLength={2} placeholder="Input Value" onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} className="w-full" style={{ borderRadius: '8px', padding: '8px 12px' }} />
                                         </Form.Item>
                                     </Input.Group>
                                 </Form.Item>
