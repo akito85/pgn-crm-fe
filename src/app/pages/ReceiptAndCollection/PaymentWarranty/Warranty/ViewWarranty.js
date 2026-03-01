@@ -35,6 +35,7 @@ import {
 import ModalRefund from "./Modal/ModalRefund";
 import ModalHold from "./Modal/ModalHold";
 import ModalRelease from "./Modal/ModalRelease";
+import ModalCreateWarranty from "./Modal/ModalCreateWarranty";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { deleteWarranty } from "../../../../../redux/slices/receipt_collection/warranty";
@@ -60,6 +61,7 @@ const ViewWarranty = () => {
   const [modalHold, setModalHold] = useState(false);
   const [modalRelease, setModalRelease] = useState(false);
   const [modalRefund, setModalRefund] = useState(false);
+  const [modalCreate, setModalCreate] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -214,12 +216,13 @@ const ViewWarranty = () => {
   const handleConfirmDelete = () => {
     // console.log("Deleting record:", selectedRecordDelete);
     dispatch(deleteWarranty(selectedRecordDelete.id)).unwrap().then(() => {
-        setModalDelete(false);
-        handleRefresh();
+      setModalDelete(false);
+      handleRefresh();
     });
   };
 
   const itemActions = [
+
     {
       action: "Download",
       render: (
@@ -282,6 +285,19 @@ const ViewWarranty = () => {
       ),
     },
     {
+      action: "Create",
+      render: (
+        <ButtonComponent
+          onClick={() => setModalCreate(true)}
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+        >
+          Create
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "View",
       type: "table",
       render: (record, data_length) => (
@@ -317,9 +333,9 @@ const ViewWarranty = () => {
       action: "Refund",
       type: "table",
       render: (record, data_length) => {
-        const isDisabled = record?.statusApproval !== "Approved" || 
+        const isDisabled = record?.statusApproval !== "Approved" ||
           (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0);
-        
+
         return data_length > 3 ? (
           <ButtonComponent
             border={false}
@@ -360,7 +376,7 @@ const ViewWarranty = () => {
       type: "table",
       render: (record, data_length) => {
         const isDisabled = !(record?.statusApproval === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED");
-        
+
         return data_length > 3 ? (
           <ButtonComponent
             border={false}
@@ -401,7 +417,7 @@ const ViewWarranty = () => {
       type: "table",
       render: (record, data_length) => {
         const isDisabled = !(record?.status === "Hold" && record?.statusApproval === "Approved");
-        
+
         return data_length > 3 ? (
           <ButtonComponent
             border={false}
@@ -422,7 +438,7 @@ const ViewWarranty = () => {
         ) : (
           <Tooltip title="Release">
             <div
-               onClick={() => {
+              onClick={() => {
                 if (!isDisabled) {
                   setActiveRowKey(record.id);
                   setSelectedRecord(record);
@@ -542,97 +558,103 @@ const ViewWarranty = () => {
   return (
     <LayoutMenu>
       {/* <Spin spinning={loading}> */}
-        <BreadCrumb routes={routes} />
-        <CardContainer header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold uppercase text-[#0075BF]">
-              Guarantee list
-            </p>
-            <div className="flex gap-2">
-              <Toolbar items={itemActions} />
-            </div>
+      <BreadCrumb routes={routes} />
+      <CardContainer header={
+        <div className="flex -my-4 justify-between items-center">
+          <p className="mt-[15px] font-bold uppercase text-[#0075BF]">
+            Guarantee list
+          </p>
+          <div className="flex gap-2">
+            <Toolbar items={itemActions} />
           </div>
-        }>
-          <div className="my-5">
-            <TableRBI
-              dataSource={dataSourceWithKeys}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              showExport={true}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: "max-content", y: 525 }}
-              onSort={onSort}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              onRow={(record) => ({
-                onClick: () => handleDetail(record),
-                style: {
-                  cursor: "pointer",
-                  backgroundColor:
-                    activeRowKey === (record.billingCode || record.invoiceNumber || record.id)
-                      ? "#bae7ff"
-                      : "transparent",
-                  transition: "background-color 0.2s ease",
-                },
-              })}
-            />
-          </div>
-        </CardContainer>
+        </div>
+      }>
+        <div className="my-5">
+          <TableRBI
+            dataSource={dataSourceWithKeys}
+            columns={processedColumns}
+            current={page}
+            pageSize={pageSize}
+            showExport={true}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={data?.page?.totalElements || 0}
+            tableScrolled={{ x: "max-content", y: 525 }}
+            onSort={onSort}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            onRow={(record) => ({
+              onClick: () => handleDetail(record),
+              style: {
+                cursor: "pointer",
+                backgroundColor:
+                  activeRowKey === (record.billingCode || record.invoiceNumber || record.id)
+                    ? "#bae7ff"
+                    : "transparent",
+                transition: "background-color 0.2s ease",
+              },
+            })}
+          />
+        </div>
+      </CardContainer>
 
-        <ModalRefund
-          isOpen={modalRefund}
-          handleBack={() => setModalRefund(false)}
-          handleRefresh={handleRefresh}
-          handleOpenModal={() => setModalRefund(true)}
-          selectedRow={selectedRecord}
-        />
+      <ModalCreateWarranty
+        isOpen={modalCreate}
+        handleBack={() => setModalCreate(false)}
+        handleRefresh={handleRefresh}
+      />
 
-        <ModalHold
-          isOpen={modalHold}
-          handleBack={() => setModalHold(false)}
-          handleRefresh={handleRefresh}
-          handleOpenModal={() => setModalHold(true)}
-          selectedRow={selectedRecord}
-        />
+      <ModalRefund
+        isOpen={modalRefund}
+        handleBack={() => setModalRefund(false)}
+        handleRefresh={handleRefresh}
+        handleOpenModal={() => setModalRefund(true)}
+        selectedRow={selectedRecord}
+      />
 
-        <ModalRelease
-          isOpen={modalRelease}
-          handleBack={() => setModalRelease(false)}
-          handleRefresh={handleRefresh}
-          handleOpenModal={() => setModalRelease(true)}
-          selectedRow={selectedRecord}
-        />
-        
-        <ModalHistory
-          isOpen={openModalHistory && dataApprovalHistoryFix}
-          handleClose={() => setOpenModalHistory(false)}
-          header={"Approval History"}
-          width={850}
-          tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistoryFix?.dataApprover}
-          dataHistory={dataApprovalHistoryFix?.dataHistory}
-        />
+      <ModalHold
+        isOpen={modalHold}
+        handleBack={() => setModalHold(false)}
+        handleRefresh={handleRefresh}
+        handleOpenModal={() => setModalHold(true)}
+        selectedRow={selectedRecord}
+      />
 
-        <ModalConfirm
-          isOpen={modalDelete}
-          handleCancel={() => setModalDelete(false)}
-          handleOk={handleConfirmDelete}
-          width={500}
-        >
-          <div className="flex flex-col justify-center items-center gap-4">
-            <span className="text-lg font-bold">Confirmation</span>
-            <span className="text-center">
-              Are you sure want to delete this data ? <br />
-              <b>{selectedRecordDelete?.billingCode || selectedRecordDelete?.invoiceNumber || selectedRecordDelete?.id}</b>
-            </span>
-          </div>
-        </ModalConfirm>
+      <ModalRelease
+        isOpen={modalRelease}
+        handleBack={() => setModalRelease(false)}
+        handleRefresh={handleRefresh}
+        handleOpenModal={() => setModalRelease(true)}
+        selectedRow={selectedRecord}
+      />
+
+      <ModalHistory
+        isOpen={openModalHistory && dataApprovalHistoryFix}
+        handleClose={() => setOpenModalHistory(false)}
+        header={"Approval History"}
+        width={850}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
+
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleConfirmDelete}
+        width={500}
+      >
+        <div className="flex flex-col justify-center items-center gap-4">
+          <span className="text-lg font-bold">Confirmation</span>
+          <span className="text-center">
+            Are you sure want to delete this data ? <br />
+            <b>{selectedRecordDelete?.billingCode || selectedRecordDelete?.invoiceNumber || selectedRecordDelete?.id}</b>
+          </span>
+        </div>
+      </ModalConfirm>
 
       {/* </Spin> */}
     </LayoutMenu>
