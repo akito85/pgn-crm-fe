@@ -222,19 +222,7 @@ const ViewWarranty = () => {
   };
 
   const itemActions = [
-    {
-      action: "Create",
-      render: (
-        <ButtonComponent
-          onClick={() => setModalCreate(true)}
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
-        >
-          Create
-        </ButtonComponent>
-      ),
-    },
+
     {
       action: "Download",
       render: (
@@ -293,6 +281,19 @@ const ViewWarranty = () => {
           }}
         >
           Refund
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Create",
+      render: (
+        <ButtonComponent
+          onClick={() => setModalCreate(true)}
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+        >
+          Create
         </ButtonComponent>
       ),
     },
