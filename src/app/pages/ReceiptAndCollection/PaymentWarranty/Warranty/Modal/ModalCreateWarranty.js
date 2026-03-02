@@ -267,7 +267,7 @@ const ModalCreateWarranty = ({
             };
 
             const res = await dispatch(createPaymentWarranty({ body: submitBody })).unwrap();
-            const warrantyId = res?.data;
+            const warrantyId = res;
 
             // Upload attachments if Warranty is successfully created
             if (warrantyId && listDataAttachment?.length > 0) {
