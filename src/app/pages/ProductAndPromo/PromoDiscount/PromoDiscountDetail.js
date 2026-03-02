@@ -25,6 +25,8 @@ import {
 } from "../../../../redux/slices/product_promo/promoSlice";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import { dateFormatting } from "../../../../utils";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxTabs from "../../../../components/Nx/NxTabs";
 
 const PromoDiscountDetail = () => {
   const {
@@ -39,7 +41,7 @@ const PromoDiscountDetail = () => {
   const navigate = useNavigate();
   const id = useLocation().state?.id;
 
-  const [valuePage, setValuePage] = useState("Promo Discount");
+  const [activeKey, setActiveKey] = useState("ori");
   const [approveOrReject, setApproveOrReject] = useState(false);
 
   const [modalError, setModalError] = useState(false);
@@ -51,15 +53,18 @@ const PromoDiscountDetail = () => {
 
   const [bodyError, setBodyError] = useState({});
 
-  const [promoDiscountDetail, setPromoDiscountDetail] = useState([
-    { value: "Promo Discount" },
-    { value: "Attachment" },
-  ]);
+  const tabOptions = [
+    {
+      key: "ori",
+      label: "Original",
+    },
+    {
+      key: "cur",
+      label: "Current",
+    }
+  ];
 
   const [showButtonApproval, setShowButtonApproval] = useState(false);
-
-  const [dataDetail, setDataDetail] = useState({});
-  const [dataDetailDraft, setDataDetailDraft] = useState({});
 
   useEffect(() => {
     if (id) {
@@ -100,6 +105,12 @@ const PromoDiscountDetail = () => {
     };
   };
 
+  const { status, statusApproval } = data_promoDiscountDetail;
+
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
+
+  const detail = handleAssertData(activeKey === "ori" ? data_promoDiscountDetail : data_promoDiscountDetailDraft);
+
   useEffect(() => {
     if (id && data_promoDiscountDetail && data_promoDiscountDetail?.id === id) {
       setShowButtonApproval(
@@ -118,36 +129,8 @@ const PromoDiscountDetail = () => {
           };
         })
       );
-      setDataDetail(handleAssertData(data_promoDiscountDetail));
-      if (
-        // dataRecord &&
-        // data_BillingItemDetail &&
-        data_promoDiscountDetailDraft &&
-        data_promoDiscountDetailDraft?.id === data_promoDiscountDetail?.id &&
-        data_promoDiscountDetailDraft?.id === id &&
-        data_promoDiscountDetail?.statusApproval !== "APPROVED"
-        //   data_BillingItemDetail?.approvalDto?.approvalType !== "INACTIVE_BILLING_ITEM")
-      ) {
-        setDataDetailDraft(
-          handleAssertData({
-            ...data_promoDiscountDetailDraft,
-            status: data_promoDiscountDetail?.status,
-            statusApproval: data_promoDiscountDetail?.statusApproval,
-          })
-        );
-        setPromoDiscountDetail([
-          { value: "Promo Discount" },
-          { value: "Draft" },
-          { value: "Attachment" },
-        ]);
-      } else {
-        setPromoDiscountDetail([
-          { value: "Promo Discount" },
-          { value: "Attachment" },
-        ]);
-      }
     }
-  }, [id, data_promoDiscountDetail, data_promoDiscountDetailDraft]);
+  }, [id, data_promoDiscountDetail]);
 
   const routes = [
     {
@@ -210,30 +193,6 @@ const PromoDiscountDetail = () => {
       });
   };
 
-  const renderSection = () => {
-    switch (valuePage) {
-      case "Promo Discount":
-        return <PromoDiscountDetailPages dataPromo={dataDetail} />;
-      case "Draft":
-        return <PromoDiscountDetailPages dataPromo={dataDetailDraft} />;
-      case "Attachment":
-        return (
-          <BaseContainer header={"ATTACHMENT INFORMATION"}>
-            <AttachmentComponent
-              typeSelector={"promo"}
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
-              type={"detail"}
-              service={productPromoHttpService}
-              configApplication={configApp.PRODUCT_SERVICE}
-            />
-          </BaseContainer>
-        );
-      default:
-        return <></>;
-    }
-  };
-
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -256,14 +215,20 @@ const PromoDiscountDetail = () => {
             </BaseContainer>
           </div>
         ) : null}
-        <div className="mt-5">
-          <RadioTabs
-            data={promoDiscountDetail}
-            onChange={(e) => setValuePage(e.target.value)}
-            currentPosition={valuePage}
-          />
+        {
+          draftExist && (
+            <NxBaseContainer border padding={false}>
+              <NxTabs
+                items={tabOptions}
+                activeKey={activeKey}
+                onChange={setActiveKey}
+              />
+            </NxBaseContainer>
+          )
+        }
+        <div className={"w-full"}>
+          <PromoDiscountDetailPages dataPromo={detail} />
         </div>
-        <div className={"w-full"}>{renderSection()}</div>
         <div className={"w-full flex justify-between my-10"}>
           <div className=" flex">
             <ButtonComponent
