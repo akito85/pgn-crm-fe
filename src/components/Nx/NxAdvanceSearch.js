@@ -252,7 +252,7 @@ const NxAdvanceSearch = ({
               <div key={filter.id} className="mb-4">
                 <div className="mb-3">
                   <Dropdown
-                    overlay={getLogicMenu(filter.logic, (logic) =>
+                    menu={getLogicMenu(filter.logic, (logic) =>
                       updateFilter(filter.id, "logic", logic)
                     )}
                     trigger={["click"]}
@@ -341,7 +341,7 @@ const NxAdvanceSearch = ({
             <div className="flex gap-5">
               <div className="mb-4">
                 <Dropdown
-                  overlay={getLogicMenu(rule.groupLogic, (logic) =>
+                  menu={getLogicMenu(rule.groupLogic, (logic) =>
                     updateRuleLogic(rule.id, logic)
                   )}
                   trigger={["click"]}
@@ -364,7 +364,7 @@ const NxAdvanceSearch = ({
                     {filterIndex > 0 && (
                       <div className="mb-3">
                         <Dropdown
-                          overlay={getLogicMenu(filter.logic, (logic) =>
+                          menu={getLogicMenu(filter.logic, (logic) =>
                             updateRuleFilter(rule.id, filter.id, "logic", logic)
                           )}
                           trigger={["click"]}
