@@ -3,6 +3,7 @@ import { configApp } from "../../../constants/configApp";
 import { showModalError, validateError } from "../general_slice";
 import { notificationTokenHeader } from "../../../utils/notificationTokenHeader";
 import axios from "axios";
+import NxDate from "../../../components/Nx/NxDatePicker";
 
 export const tasklistSlice = createApi({
   reducerPath: "tasklistSlice",
@@ -45,14 +46,53 @@ export const tasklistSlice = createApi({
             sortOrder,
           });
 
-          // Add filters
-          if (filters.status) {
+          // Task status: column search overrides widget-level default filter
+          if (search.taskStatus) {
+            params.append("taskStatus", search.taskStatus);
+            // Include completed/expired if user explicitly selects those statuses
+            if (search.taskStatus === "COMPLETED") {
+              params.append("includeCompleted", "true");
+            }
+            if (search.taskStatus === "EXPIRED") {
+              params.append("includeExpired", "true");
+            }
+          } else if (filters.status) {
             params.append("taskStatus", filters.status);
           }
 
-          // Add search parameters
+          // Full-text search on task subject
           if (search.taskSubject) {
             params.append("search", search.taskSubject);
+          }
+
+          // Priority filter (exact match via min/max range)
+          if (search.priority) {
+            params.append("minPriority", search.priority);
+            params.append("maxPriority", search.priority);
+          }
+
+          // Sender filter
+          if (search.taskSender) {
+            params.append("taskSender", search.taskSender);
+          }
+
+          // Created date filter — convert display format to backend ISO format
+          // DatePicker sends "DD MMM YYYY HH:mm:ss", backend expects "yyyy-MM-dd'T'HH:mm:ss"
+          if (search.createdAt) {
+            const parsed = new Date(search.createdAt);
+            if (!isNaN(parsed.getTime())) {
+              // Start of day
+              const startOfDay = new Date(parsed);
+              startOfDay.setHours(0, 0, 0, 0);
+              // End of day
+              const endOfDay = new Date(parsed);
+              endOfDay.setHours(23, 59, 59, 999);
+              // NxDate.formatForAPI returns "YYYY-MM-DD HH:mm:ss", replace space with T for backend
+              const fromStr = NxDate.formatForAPI(startOfDay, true);
+              const toStr = NxDate.formatForAPI(endOfDay, true);
+              if (fromStr) params.append("createdFrom", fromStr.replace(" ", "T"));
+              if (toStr) params.append("createdTo", toStr.replace(" ", "T"));
+            }
           }
 
           const url = `${configApp.NOTIFICATION_SERVICE}/v1/api/tasklist?${params.toString()}`;
