@@ -165,10 +165,6 @@ const PromoDiscountDetailPages = ({ detail, attachments = [] }) => {
     }
   ]
 
-  useEffect(() => {
-    console.log("activeKey", activeKey);
-  }, [activeKey])
-
   return (
     <>
       <NxCardContainer header={"Detail Information"} withoutPadding>
