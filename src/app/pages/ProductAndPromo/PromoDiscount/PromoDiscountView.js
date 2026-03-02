@@ -238,76 +238,78 @@ const PromoDiscountView = () => {
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-        <NxBreadCrumb routes={routes} />
-        <NxCardContainer header={"PROMO LIST"}>
-          <NxBaseContainer border>
-            <PromoDiscountTable
-              data={dataSourceWithKeys}
-              totalElement={pagination_promo?.totalElements || 0}
-              page={page}
-              onSort={onSort}
-              handleInactive={handleInactivateModal}
-              handleApprovalHistory={handleApprovalHistory}
-              handleDownload={handleDownload}
-              handleLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              searchText={searchText}
-              search={search}
-              searchedColumn={searchedColumn}
-              searchInput={searchInput}
-              handleSearch={handleSearch}
-              loading={loading}
-            />
-          </NxBaseContainer>
-        </NxCardContainer>
-
-        {/* Modal Inactive */}
-        <NxInactivateModal
-          isOpen={modalInactive}
-          header={"INACTIVATE"}
-          handleCloseModal={() => handleInactivateModal(false)}
-          customMessage={`Are you sure you want to inactivate this promo "${
-            chooseId || ""
-          }"?`}
-          onFinish={({ remark, appHierId }, handleClear) => handleOk({ remark, appHierId }, handleClear)}
-          named={chooseId}
-          menu="promo"
-          sliceName="promo"
-          approvalHierarchtDetailsStateName="dataListAppHierDetail"
-          approvalOptionsStateName="dataListAppHierId"
-          getApprovalOptions={getAvailableApprovalPromo}
-          getApprovalHierarchyDetails={getSelectedApprovalPromo}
-        />
-
-        {/* Modal Approval History */}
-        <NxHistoryModal
-          isOpen={modalApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
-        />
-
-        {/* Modal Modal Error Inactive */}
-        {modalError ? (
-          <ModalError
-            isOpen={modalError}
-            handleOk={handleRetry}
-            handleCancel={handleCloseModalError}
-            customText={"Try Again"}
-          >
-            <div className="px-5 pt-5 pb-[10px] justify-center">
-              <div className="w-full flex gap-[20px]">
-                <SVGIcon name="IconFailed" width={48} />
-                <p className="text-[18px] font-bold">{"Failed"}</p>
-              </div>
-              <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
-              <p className="pl-[70px]">Please try again.</p>
-            </div>
-          </ModalError>
-        ) : null}
+        <div className="flex flex-col gap-y-4">
+          <NxBreadCrumb routes={routes} />
+          <NxCardContainer header={"PROMO LIST"}>
+            <NxBaseContainer border>
+              <PromoDiscountTable
+                data={dataSourceWithKeys}
+                totalElement={pagination_promo?.totalElements || 0}
+                page={page}
+                onSort={onSort}
+                handleInactive={handleInactivateModal}
+                handleApprovalHistory={handleApprovalHistory}
+                handleDownload={handleDownload}
+                handleLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                searchText={searchText}
+                search={search}
+                searchedColumn={searchedColumn}
+                searchInput={searchInput}
+                handleSearch={handleSearch}
+                loading={loading}
+              />
+            </NxBaseContainer>
+          </NxCardContainer>
+        </div>
       </Spin>
+      
+      {/* Modal Inactive */}
+      <NxInactivateModal
+        isOpen={modalInactive}
+        header={"INACTIVATE"}
+        handleCloseModal={() => handleInactivateModal(false)}
+        customMessage={`Are you sure you want to inactivate this promo "${
+          chooseId || ""
+        }"?`}
+        onFinish={({ remark, appHierId }, handleClear) => handleOk({ remark, appHierId }, handleClear)}
+        named={chooseId}
+        menu="promo"
+        sliceName="promo"
+        approvalHierarchtDetailsStateName="dataListAppHierDetail"
+        approvalOptionsStateName="dataListAppHierId"
+        getApprovalOptions={getAvailableApprovalPromo}
+        getApprovalHierarchyDetails={getSelectedApprovalPromo}
+      />
+
+      {/* Modal Approval History */}
+      <NxHistoryModal
+        isOpen={modalApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
+
+      {/* Modal Modal Error Inactive */}
+      {modalError ? (
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+      ) : null}
     </LayoutMenu>
   );
 };
