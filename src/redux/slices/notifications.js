@@ -36,11 +36,18 @@ const initialState = {
   reconnectAttempts: 0,
   lastConnected: null,
 
+  // Position context
+  currentPositionId: null,
+
   // Notifications
   notifications: [], // All notifications
   unreadCount: 0,
   broadcastNotifications: [], // Notifications for all users
   directNotifications: [], // Notifications for specific user
+
+  // Real-time notification tracking (set only by SSE addNotification, never by API fetch)
+  lastRealtimeNotification: null,
+  lastRealtimeNotificationTime: null,
 
   // UI State
   isLoading: false,
@@ -58,7 +65,7 @@ const initialState = {
 
   // Settings
   settings: {
-    soundEnabled: true,
+    soundEnabled: false,
     desktopNotificationsEnabled: false,
     maxNotifications: 100, // Maximum notifications to keep in state
     displayType: "standard",
@@ -91,12 +98,13 @@ const initialState = {
  */
 export const connectNotifications = createAsyncThunk(
   "notifications/connect",
-  async ({ userId }, { dispatch, rejectWithValue }) => {
+  async ({ userId, positionId = null }, { dispatch, rejectWithValue }) => {
     try {
 
       return new Promise((resolve, reject) => {
 
         notificationService.connect(userId, {
+          positionId,
           onMessage: (notification) => {
             dispatch(addNotification(notification));
           },
@@ -146,9 +154,9 @@ export const fetchUserNotifications = createAsyncThunk(
  */
 export const fetchAllUserNotifications = createAsyncThunk(
   "notifications/fetchAllUserNotifications",
-  async ({ userId, params = {} }, { rejectWithValue }) => {
+  async ({ userId, positionId = null, params = {} }, { rejectWithValue }) => {
     try {
-      const response = await notificationApi.getAllUserNotifications(userId, params);
+      const response = await notificationApi.getAllUserNotifications(userId, params, positionId);
       return response;
     } catch (error) {
       return rejectWithValue({
@@ -164,9 +172,9 @@ export const fetchAllUserNotifications = createAsyncThunk(
  */
 export const fetchUnreadCount = createAsyncThunk(
   "notifications/fetchUnreadCount",
-  async (_, { rejectWithValue }) => {
+  async (positionId = null, { rejectWithValue }) => {
     try {
-      const response = await notificationApi.getUnreadNotificationsCount();
+      const response = await notificationApi.getUnreadNotificationsCount(positionId);
       return response;
     } catch (error) {
       return rejectWithValue({
@@ -346,6 +354,17 @@ const notificationsSlice = createSlice({
         return;
       }
 
+      // Position-based filter: skip notifications targeted at a different position
+      // Only filter when user has an active position set (after switch-pos API call)
+      // When currentPositionId is not set, allow all notifications through to avoid
+      // silently dropping notifications before user selects a position
+      const notifPositionId = notification.toPositionId;
+      if (notifPositionId && state.currentPositionId) {
+        if (Number(notifPositionId) !== Number(state.currentPositionId)) {
+          return;
+        }
+      }
+
       // Ensure status properties are set for UI compatibility
       if (notification.read) {
         notification.STATUS = "read";
@@ -369,6 +388,10 @@ const notificationsSlice = createSlice({
       if (!notification.read) {
         state.unreadCount += 1;
       }
+
+      // Mark as real-time notification (from SSE) so orchestrator can play sound
+      state.lastRealtimeNotification = notification;
+      state.lastRealtimeNotificationTime = Date.now();
 
       // Enforce max notifications limit
       const maxNotifications = state.settings.maxNotifications;
@@ -527,6 +550,13 @@ const notificationsSlice = createSlice({
     resetFilters: (state) => {
       state.filters = initialState.filters;
 
+    },
+
+    /**
+     * Set current position ID for position-based filtering
+     */
+    setCurrentPositionId: (state, action) => {
+      state.currentPositionId = action.payload;
     },
 
     /**
@@ -781,6 +811,7 @@ export const {
   clearNotificationsByDirection,
   setConnectionStatus,
   setConnectionError,
+  setCurrentPositionId,
   updateFilters,
   resetFilters,
   updateSettings,
@@ -899,6 +930,12 @@ export const selectAvailableTypes = (state) =>
 // Get display type options from global settings
 export const selectDisplayTypeOptions = (state) =>
   state.notifications.globalSettings?.displayTypeOptions || ["standard", "toast", "popup", "inline"];
+
+// Get current position ID (for position-based filtering)
+export const selectCurrentPositionId = (state) => state.notifications.currentPositionId;
+
+// Get last real-time notification (from SSE, not API fetch)
+export const selectLastRealtimeNotification = (state) => state.notifications.lastRealtimeNotification;
 
 /**
  * Export reducer

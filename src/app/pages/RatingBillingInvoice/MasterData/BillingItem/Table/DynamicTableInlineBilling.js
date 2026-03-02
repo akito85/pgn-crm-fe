@@ -24,6 +24,7 @@ import { useEffect } from "react";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { dateFormatting, hasValue } from "../../../../../../utils";
 import InputComponent from "../../../../../../components/InputComponent";
+
 const EditableCell = ({
   editing,
   dataIndex,
@@ -46,8 +47,6 @@ const EditableCell = ({
   endDateLock,
   ...restProps
 }) => {
-  // const [form] = Form.useForm();
-  // const [visiblePassword, setVisiblePassword] = useState(false);
   const key = record?.key || 0;
   const encrypt = record?.encrypt;
   const rules = () => {
@@ -154,7 +153,7 @@ const EditableCell = ({
         return (
           <Select
             disabled={handleDisabledColumn(dataIndex, record)}
-            onChange={onCellClicked}
+            onChange={(val) => onCellClicked && onCellClicked(val, form)}
             showSearch
             optionFilterProp="children"
             allowClear
@@ -203,6 +202,8 @@ const EditableCell = ({
         return <Input type={showPassword[key] ? "password" : "text"} />;
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
+      case "description_readonly":
+        return <Input.TextArea rows={1} disabled style={{ backgroundColor: "#f5f5f5", color: "#595959", cursor: "not-allowed" }} />;
       default:
         return <InputComponent />;
     }
@@ -260,7 +261,6 @@ const DynamicTableInlineBilling = ({
   subHeader,
   header,
   regex,
-  // required,
   useDynamicAction = false,
   action,
   useSelect = false,
@@ -283,15 +283,15 @@ const DynamicTableInlineBilling = ({
   messageValidate,
   actionFix,
   setInserted = () => {},
-  isDynamicEditable = false, // for dependency action
+  isDynamicEditable = false,
   unFilterUpdatedlist = () => {},
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
   handleValidateUpdate = () => {},
+  onCancelEdit = null,
 }) => {
   const [form] = Form.useForm();
-  // const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
   const [storedDate, setStoredData] = useState(false);
   const [isInsert, setIsInsert] = useState(false);
@@ -301,16 +301,6 @@ const DynamicTableInlineBilling = ({
   const [isSame, setIsSame] = useState(false);
   const [isValid, setIsValid] = useState(true);
 
-  // useEffect(() => {
-  //   if (mode === "update") {
-  //     setData(
-  //       tableData?.map((row, index) => ({ ...row, key: index.toString() }))
-  //     );
-  //   } else {
-  //     setData(tableData);
-  //   }
-  // }, [mode, tableData]);
-
   useEffect(() => {
     if (isInsert === true) {
       setInserted(true);
@@ -318,6 +308,16 @@ const DynamicTableInlineBilling = ({
       setInserted(false);
     }
   }, [isInsert, setInserted]);
+
+  useEffect(() => {
+    if (onCancelEdit) {
+      onCancelEdit(() => {
+        if (editingKey !== "") {
+          cancel(editingKey);
+        }
+      });
+    }
+  }, [editingKey, statusAction]);
 
   const edit = (record, field) => {
     unFilterUpdatedlist(record);
@@ -331,10 +331,10 @@ const DynamicTableInlineBilling = ({
     setStatusAction("edit");
     setIsInsert(true);
   };
+
   const cancel = (key) => {
     if (statusAction === "add") {
       const newData = tableData.filter((item) => item.key !== key);
-      onDataChange(newData);
       onDataChange(newData);
     }
     setEditingKey("");
@@ -392,52 +392,14 @@ const DynamicTableInlineBilling = ({
           form.resetFields();
           setIsValid(true);
         }
-        // else if (
-        //   newData.filter((item) => item[checkInputBy] === row[checkInputBy])
-        //     .length > 0 &&
-        //   statusAction === "add"
-        // ) {
-        //   // setIsSame(true);
-        // }
-        // else {
-        //   //new data
-        //   if (index > -1) {
-        //     const item = newData[index];
-        //     const updatedRow = { ...item, ...row };
-        //     newData.splice(index, 1, updatedRow);
-        //     // setData(newData);
-        //     setEditingKey("");
-        //     onDataChange(newData, row);
-        //   } else {
-        //     //update
-        //     newData.push(row);
-        //     // setData(newData);
-        //     onDataChange(newData, row);
-        //     setEditingKey("");
-        //   }
-        //   setStoredData(false);
-        //   // onDataChange([...newData]);
-        //   form.resetFields();
-        //   setStatusAction("");
-        //   setIsSame(false);
-        //   setIsValid(true);
-        // }
         setIsInsert(false);
       }
-      // else {
-      //   setIsValid(false);
-      // }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
   };
-  const addRow = () => {
-    console.log("🔵 addRow called");
-    console.log("📊 Current tableData:", tableData);
-    console.log("📝 Header:", header);
-    console.log("🔒 storedDate:", storedDate);
-    console.log("📅 startDateLock:", startDateLock);
 
+  const addRow = () => {
     form.resetFields();
     setStoredData(true);
     setIsInsert(true);
@@ -447,17 +409,10 @@ const DynamicTableInlineBilling = ({
       ...(header.includes("DETAIL")
         ? { rMappingId: null }
         : { rCategoryId: null }),
-      // status: "ACTIVE",
     };
-
-    console.log("✨ New row created:", newRow);
     const newData = [...tableData, newRow];
-    console.log("📤 Calling onDataChange with:", newData);
-
     onDataChange(newData, newRow);
     setEditingKey(newRow.key);
-
-    console.log("✅ addRow completed");
   };
 
   const deleteRow = (key) => {
@@ -469,13 +424,12 @@ const DynamicTableInlineBilling = ({
           key: (index + 1).toString(),
         };
       });
-    // onDataChange(newData);
     onDataChange(newData);
     setStoredData(false);
     setIsInsert(false);
   };
+
   const renderDelete = (record) => {
-    // return record.status === "ACTIVE" || record.status === "INACTIVE" ? (
     return record.id ? (
       <ButtonComponent
         disabled
@@ -502,7 +456,6 @@ const DynamicTableInlineBilling = ({
                 ? "#8D91A0"
                 : "#D90000"
             }
-            width={24}
             className={
               editingKey !== "" ||
               isDynamicEditable ||
@@ -510,6 +463,7 @@ const DynamicTableInlineBilling = ({
                 ? "disabled"
                 : undefined
             }
+            width={24}
             onClick={
               (editingKey === "" || !isDynamicEditable) &&
               record?.dataType !== "exist"
@@ -519,23 +473,9 @@ const DynamicTableInlineBilling = ({
           />
         </div>
       </Tooltip>
-      // <ButtonComponent
-      //   onClick={() => deleteRow(record.key)}
-      //   disabled={editingKey !== "" || isDynamicEditable}
-      //   icon={
-      //     <SVGIcon
-      //       name="IconDelete"
-      //       width={24}
-      //       color={
-      //         editingKey !== "" || isDynamicEditable ? "#8D91A0" : "#D90000"
-      //       }
-      //     />
-      //     // <DeleteOutlined style={{ fontSize: "24px", color: "#c81912" }} />
-      //   }
-      //   border={false}
-      // />
     );
   };
+
   const columns = [
     ...cols,
     {
@@ -546,7 +486,6 @@ const DynamicTableInlineBilling = ({
       render: (_, record) => {
         const editable = record.key === editingKey;
         return (
-          // rendering button
           <Space className="my-2 gap-2">
             {useDynamicAction ? (
               action(record, editable)
@@ -586,7 +525,6 @@ const DynamicTableInlineBilling = ({
                             />
                           }
                           border={false}
-                          // onClick={() => onDetail(record?.id)}
                         >
                           <span className={"text-[#C0BEC6]"}> Detail</span>
                         </ButtonComponent>
@@ -621,7 +559,6 @@ const DynamicTableInlineBilling = ({
                     border={false}
                   />
                 </Popover>
-                {/* {record.status === "ACTIVE" || record.status === "INACTIVE" ? ( */}
                 {record.id ? (
                   <ButtonComponent
                     disabled
@@ -653,8 +590,7 @@ const DynamicTableInlineBilling = ({
                     <div
                       className={`flex justify-center${
                         editingKey !== "" || isDynamicEditable
-                          ? // || record?.dataType === "exist"
-                            " cursor-not-allowed"
+                          ? " cursor-not-allowed"
                           : ""
                       }`}
                     >
@@ -662,43 +598,23 @@ const DynamicTableInlineBilling = ({
                         name="IconEdit"
                         color={
                           editingKey !== "" || isDynamicEditable
-                            ? // ||record?.dataType === "exist"
-                              "#8D91A0"
+                            ? "#8D91A0"
                             : "#ACC424"
                         }
                         className={
                           editingKey !== "" || isDynamicEditable
-                            ? // ||record?.dataType === "exist"
-                              "disabled"
+                            ? "disabled"
                             : undefined
                         }
                         width={24}
                         onClick={
                           editingKey === "" || !isDynamicEditable
-                            ? // (editingKey === "" || !isDynamicEditable)
-                              // && record?.dataType !== "exist"
-                              () => edit(record)
+                            ? () => edit(record)
                             : undefined
                         }
                       />
                     </div>
                   </Tooltip>
-                  // <ButtonComponent
-                  //   onClick={() => edit(record)}
-                  //   disabled={editingKey !== "" || isDynamicEditable}
-                  //   icon={
-                  //     <SVGIcon
-                  //       name="IconEdit"
-                  //       width={24}
-                  //       color={
-                  //         editingKey !== "" || isDynamicEditable
-                  //           ? "#8D91A0"
-                  //           : "#ACC424"
-                  //       }
-                  //     />
-                  //   }
-                  //   border={false}
-                  // />
                 )}
 
                 {actionButton?.includes("inactive") && (
@@ -719,7 +635,6 @@ const DynamicTableInlineBilling = ({
 
                 {actionButton?.includes("delete") && renderDelete(record)}
 
-                {/* create detail */}
                 {actionButton?.includes("create") && (
                   <Tooltip title="Create Detail">
                     <div
@@ -745,22 +660,6 @@ const DynamicTableInlineBilling = ({
                       />
                     </div>
                   </Tooltip>
-                  // <ButtonComponent
-                  //   onClick={() => onCreate(record)}
-                  //   icon={
-                  //     <SVGIcon
-                  //       name="IconActionCreate"
-                  //       color={
-                  //         editingKey !== "" || isDynamicEditable
-                  //           ? "#8D91A0"
-                  //           : "#0075bf"
-                  //       }
-                  //       width={24}
-                  //     />
-                  //   }
-                  //   border={false}
-                  //   disabled={editingKey !== "" || isDynamicEditable}
-                  // />
                 )}
               </div>
             )}
@@ -787,25 +686,15 @@ const DynamicTableInlineBilling = ({
   };
 
   return useContainer === true ? (
-    // <BaseContainer header={header} subHeader={subHeader}>
     <div className={"w-full flex flex-col gap-4"}>
       <div className={"w-full flex justify-end"}>
         {showCreateButton && (
           <ButtonComponent
             onClick={() => {
-              console.log("🎯 Create button clicked!");
-              console.log("📅 startDateLock:", startDateLock);
-              console.log("🔒 storedDate:", storedDate);
-              console.log("🚫 isDynamicEditable:", isDynamicEditable);
-
               if (!startDateLock) {
-                console.log("❌ No startDateLock - showing modal");
                 setModalRequired(true);
               } else if (storedDate === false) {
-                console.log("✅ Conditions met - calling addRow");
                 addRow();
-              } else {
-                console.log("⚠️ storedDate is true - cannot add row");
               }
             }}
             type={"submit"}
@@ -846,20 +735,6 @@ const DynamicTableInlineBilling = ({
                 .splice(1)}
             </Select>
           ) : null}
-          {/* {usePagination ? (
-              <Pagination
-                total={totalData}
-                className={"pr-1"}
-                showSizeChanger
-                current={current}
-                pageSize={pageSize}
-                onChange={onChangePage}
-                onShowSizeChange={onSizeChanger}
-                showTotal={(total, range) =>
-                  `Showing ${range[0]} to ${range[1]} of ${total} records`
-                }
-              />
-            ) : null} */}
         </div>
       ) : null}
       <Form form={form} component={false}>
@@ -911,8 +786,6 @@ const DynamicTableInlineBilling = ({
           scroll={scrollTable}
           tableLayout="fixed"
           bordered
-          // onChange={onSort}
-          // pagination={false}
         />
       </Form>
       {isSame && (
@@ -931,7 +804,6 @@ const DynamicTableInlineBilling = ({
       ) : null}
     </div>
   ) : (
-    // </BaseContainer>
     <>
       {useSelect || usePagination ? (
         <div className={"w-full flex mb-5 gap-2 justify-between"}>

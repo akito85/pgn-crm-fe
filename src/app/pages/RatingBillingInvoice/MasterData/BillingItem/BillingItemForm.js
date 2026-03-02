@@ -49,16 +49,11 @@ import {
   showModalSuccess,
   validateCreateUpdate,
 } from "../../../../../redux/slices/general_slice";
-
-// Utils
 import { handleMandatory } from "./Utils/Utils";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import { configApp } from "../../../../../constants/configApp";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
 
 const BillingItemForm = (props) => {
   const { type } = props;
@@ -67,10 +62,6 @@ const BillingItemForm = (props) => {
   const location = useLocation();
   const id = location?.state?.id;
   const [form] = Form.useForm();
-
-  // ============================================================================
-  // REDUX SELECTORS
-  // ============================================================================
 
   const {
     data_billingItemCategory,
@@ -89,10 +80,6 @@ const BillingItemForm = (props) => {
     data_accountTypeList,
     loading,
   } = useSelector((state) => state.billing_item);
-
-  // ============================================================================
-  // STATE MANAGEMENT
-  // ============================================================================
 
   // Stepper States
   const [current, setCurrent] = useState(0);
@@ -150,6 +137,7 @@ const BillingItemForm = (props) => {
   // Criteria States
   const [selectedCriteria, setSelectedCriteria] = useState(null);
   const [dataCriteriaTable, setDataCriteriaTable] = useState([]);
+  const [isCriteriaEditing, setIsCriteriaEditing] = useState(false);
 
   // Approval States
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
@@ -165,10 +153,6 @@ const BillingItemForm = (props) => {
   const [loadingForm, setLoadingForm] = useState(false);
 
   const isLoading = loading || loadingForm;
-
-  // ============================================================================
-  // INITIALIZATION EFFECTS
-  // ============================================================================
 
   useEffect(() => {
     dispatch(getBillingItemCategory());
@@ -195,10 +179,6 @@ const BillingItemForm = (props) => {
   useEffect(() => {
     setValuePage(steps[current].value);
   }, [current]);
-
-  // ============================================================================
-  // APPROVAL EFFECTS
-  // ============================================================================
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
@@ -232,9 +212,6 @@ const BillingItemForm = (props) => {
     }
   }, [dataListAppHierId]);
 
-  // ============================================================================
-  // MAPPING EFFECTS
-  // ============================================================================
 
   const filteringAllDataDetailTable = useCallback(() => {
     Object.keys(allDataDetailTable).forEach((key) => {
@@ -251,9 +228,6 @@ const BillingItemForm = (props) => {
     }
   }, [dataTable, category, filteringAllDataDetailTable]);
 
-  // ============================================================================
-  // UPDATE DATA EFFECT
-  // ============================================================================
 
   const handleDataTypeExist = (status, statusApproval, dataDetail, dataCompare, table = "mapping") => {
     switch (status) {
@@ -278,10 +252,81 @@ const BillingItemForm = (props) => {
     }
   };
 
+  const resolveTypeId = useCallback(
+    (transMappingType) => {
+      if (!transMappingType) return undefined;
+      const found = data_typeList?.find(
+        (t) => t.code === transMappingType || t.id === transMappingType,
+      );
+      return found ? found.id : transMappingType;
+    },
+    [data_typeList],
+  );
+
+  const resolveCriteriaId = useCallback(
+    (criteriaCode) => {
+      if (!criteriaCode) return undefined;
+      const found = data_criteriaList?.find(
+        (c) => c.code === criteriaCode || c.id === criteriaCode,
+      );
+      return found ? found.id : criteriaCode;
+    },
+    [data_criteriaList],
+  );
+
+  const buildCriteriaTableFromResponse = useCallback(
+    (criteriaList) => {
+      if (!criteriaList || criteriaList.length === 0) return [];
+
+      return criteriaList.map((item, index) => {
+        const criteriaValueResolved = item.paramCriteriaId || item.criteriaValue || null;
+        const glAccountResolved = (() => {
+          if (!item.glAccount) return null;
+          const found = data_glAccountList?.find(
+            (g) =>
+              (g.glAccountDesc ?? g.name) === item.glAccount ||
+              `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}` === item.glAccount,
+          );
+          return found
+            ? `${found.glAccount ?? found.account} - ${found.glAccountDesc ?? found.name}`
+            : item.glAccount;
+        })();
+
+        const specialGlResolved = (() => {
+          if (!item.specialGl) return null;
+          const found = data_specialGLList?.find(
+            (s) => s.value === item.specialGl || s.name === item.specialGl,
+          );
+          return found ? found.name : item.specialGl;
+        })();
+
+        return {
+          key: `${index + 1}`,
+          criteriaValue: criteriaValueResolved,
+          glAccountId: glAccountResolved,
+          specialGlId: specialGlResolved,
+          descriptionAccount: item.descriptionAccount || null,
+          startDate: item.startDate
+            ? moment(item.startDate).format(dateFormatting.date)
+            : null,
+          endDate: item.endDate
+            ? moment(item.endDate).format(dateFormatting.date)
+            : null,
+          dataType: "exist",
+        };
+      });
+    },
+    [data_glAccountList, data_specialGLList],
+  );
+
   const handleSetDataUpdate = useCallback(
     (dataDetail, dataCompare = null) => {
       setStartDate(moment(dataDetail?.startDate));
       setSelectedHierarchy(dataDetail?.approvalHierarchy);
+      const typeId = resolveTypeId(dataDetail?.transMappingType);
+
+      const firstCriteriaCode = dataDetail?.criteria?.[0]?.criteriaCode;
+      const criteriaId = resolveCriteriaId(firstCriteriaCode);
 
       form.setFieldsValue({
         ...dataDetail,
@@ -289,13 +334,18 @@ const BillingItemForm = (props) => {
         name: dataDetail?.billingItemName,
         billType: dataDetail?.billingTypeId,
         apphierId: dataDetail?.approvalHierarchy,
+        transactionMappingCode: dataDetail?.billingItemCode,
+        type: typeId,
+        criteria: criteriaId,
         startDate: dataDetail?.startDate ? moment(dataDetail?.startDate) : null,
         endDate: dataDetail?.endDate ? moment(dataDetail?.endDate) : null,
       });
 
-      setCheckedLateCharge(dataDetail?.lateCharge);
-      setCheckedPaymentWarranty(dataDetail?.paymentWarranty);
-      setCheckedInstallmentRestructure(dataDetail?.installmentRestructure);
+      setSelectedCriteria(criteriaId);
+
+      setCheckedLateCharge(dataDetail?.lateCharge || false);
+      setCheckedPaymentWarranty(dataDetail?.paymentWarranty || false);
+      setCheckedInstallmentRestructure(dataDetail?.installment || false);
 
       setListDataAttachment(
         dataDetail?.attachmentDtoList
@@ -304,7 +354,7 @@ const BillingItemForm = (props) => {
               createdDate: moment(item.createdDate).format(dateFormatting.date),
               dataType: "exist",
             }))
-          : []
+          : [],
       );
 
       setdataTable(
@@ -317,7 +367,7 @@ const BillingItemForm = (props) => {
           endDate: item?.endDate ? moment(item?.endDate).format(dateFormatting.date) : null,
           description: item?.description,
           ...handleDataTypeExist(dataDetail?.status, dataDetail?.statusApproval, item, dataCompare),
-        })) || []
+        })) || [],
       );
 
       (dataDetail?.mappingInformation || [])?.map((item) => {
@@ -332,20 +382,29 @@ const BillingItemForm = (props) => {
               startDate: detail?.startDate
                 ? moment(detail?.startDate).format(dateFormatting.date)
                 : null,
-              endDate: detail?.endDate ? moment(detail?.endDate).format(dateFormatting.date) : null,
+              endDate: detail?.endDate
+                ? moment(detail?.endDate).format(dateFormatting.date)
+                : null,
               description: detail?.description,
               ...handleDataTypeExist(
                 dataDetail?.status,
                 dataDetail?.statusApproval,
                 detail,
                 dataCompare,
-                "detailMap"
+                "detailMap",
               ),
             })) || [],
         }));
       });
+
+      if (dataDetail?.criteria && dataDetail.criteria.length > 0) {
+        const criteriaRows = buildCriteriaTableFromResponse(dataDetail.criteria);
+        setDataCriteriaTable(criteriaRows);
+      } else {
+        setDataCriteriaTable([]);
+      }
     },
-    [form]
+    [form, resolveTypeId, resolveCriteriaId, buildCriteriaTableFromResponse],
   );
 
   useEffect(() => {
@@ -357,6 +416,7 @@ const BillingItemForm = (props) => {
       ) {
         const body = {
           ...data_detailDraft,
+          billingItemCode: data_BillingItemDetail?.billingItemCode,
           startDate: data_detailDraft.startDate,
           endDate: data_detailDraft?.endDate,
           approvalHierarchy: data_detailDraft?.approvalHierarchy,
@@ -367,7 +427,9 @@ const BillingItemForm = (props) => {
           attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
           lateCharge: data_detailDraft?.lateCharge,
           paymentWarranty: data_detailDraft?.paymentWarranty,
-          installmentRestructure: checkedInstallmentRestructure || false,
+          installment: data_detailDraft?.installment || false,
+          transMappingType: data_detailDraft?.transMappingType,
+          criteria: data_detailDraft?.criteria,
           status: data_BillingItemDetail?.status,
           statusApproval: data_BillingItemDetail?.statusApproval,
         };
@@ -378,9 +440,16 @@ const BillingItemForm = (props) => {
     }
   }, [data_BillingItemDetail, type, id, handleSetDataUpdate]);
 
-  // ============================================================================
-  // STEPPER NAVIGATION HANDLERS
-  // ============================================================================
+  useEffect(() => {
+    if (
+      type === "update" &&
+      data_BillingItemDetail?.criteria?.length > 0 &&
+      (data_glAccountList?.length > 0 || data_specialGLList?.length > 0)
+    ) {
+      const criteriaRows = buildCriteriaTableFromResponse(data_BillingItemDetail.criteria);
+      setDataCriteriaTable(criteriaRows);
+    }
+  }, [data_glAccountList, data_specialGLList, data_BillingItemDetail, type, buildCriteriaTableFromResponse]);
 
   const next = () => {
     const fieldsToValidate = listSectionInfo[current]?.paramValue;
@@ -407,10 +476,6 @@ const BillingItemForm = (props) => {
       setCurrent(current - 1);
     }
   };
-
-  // ============================================================================
-  // FORM FIELD HANDLERS
-  // ============================================================================
 
   const handleStartDate = (e) => {
     form.resetFields(["endDate"]);
@@ -445,7 +510,7 @@ const BillingItemForm = (props) => {
         generateTransactionMappingCode({
           id: categoryId,
           prefix: selectedCat.code,
-        })
+        }),
       ).unwrap();
       form.setFieldsValue({ transactionMappingCode: result });
     } catch (error) {
@@ -456,10 +521,6 @@ const BillingItemForm = (props) => {
   const handleChangesCriteriaTable = (e) => {
     setDataCriteriaTable(e);
   };
-
-  // ============================================================================
-  // MAPPING HANDLERS
-  // ============================================================================
 
   const handleCheckDetailDateConflict = (data) => {
     const index = data_billingItemCategory
@@ -485,15 +546,9 @@ const BillingItemForm = (props) => {
   };
 
   const handleChangesMapInformation = (e, newData = {}) => {
-    console.log("🔄 handleChangesMapInformation called");
-    console.log("📥 Received data (e):", e);
-    console.log("📥 newData:", newData);
-
     const hasConflict = handleCheckDetailDateConflict(newData);
-    console.log("⚠️ Date conflict check result:", hasConflict);
 
     if (!hasConflict) {
-      console.log("✅ No conflict - updating dataTable");
       const temp = e.map((item) => ({
         ...item,
         ...(hasValue(item.categoryName)
@@ -506,12 +561,9 @@ const BillingItemForm = (props) => {
           : {}),
       }));
 
-      console.log("📊 Setting dataTable to:", temp);
       setdataTable(temp);
       setStartDateMap(moment(temp?.find((item) => item.category === category)?.startDate));
       setEndDateMap(moment(temp?.find((item) => item.category === category)?.endDate));
-    } else {
-      console.log("❌ Conflict detected - data not updated");
     }
   };
 
@@ -521,8 +573,9 @@ const BillingItemForm = (props) => {
       ...(hasValue(item.itemName)
         ? {
             item:
-              detail_mapping_category?.filter((category) => category?.name === item.itemName).find((item) => item?.id)
-                ?.id || item?.item,
+              detail_mapping_category
+                ?.filter((category) => category?.name === item.itemName)
+                .find((item) => item?.id)?.id || item?.item,
           }
         : {}),
     }));
@@ -564,7 +617,8 @@ const BillingItemForm = (props) => {
 
     const dataConflict = temp?.filter(
       (item) =>
-        moment(item?.startDate) < moment(bodyData?.startDate) || moment(item?.endDate) > moment(bodyData?.endDate)
+        moment(item?.startDate) < moment(bodyData?.startDate) ||
+        moment(item?.endDate) > moment(bodyData?.endDate),
     );
 
     if (dataConflict?.length > 0) {
@@ -572,10 +626,6 @@ const BillingItemForm = (props) => {
     }
     return dataConflict?.length === 0;
   };
-
-  // ============================================================================
-  // VALIDATION HELPERS
-  // ============================================================================
 
   const handleCheckMissingDetailMap = (data, dataDetail) => {
     return (
@@ -627,7 +677,7 @@ const BillingItemForm = (props) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -635,20 +685,18 @@ const BillingItemForm = (props) => {
     }
   };
 
-  // ============================================================================
-  // FORM SUBMISSION HANDLERS
-  // ============================================================================
-
   const buildCriteriaPayload = () => {
     const criteriaCodeResolved =
-      data_criteriaList?.find((c) => c.id === selectedCriteria || c.id === Number(selectedCriteria))?.code || null;
+      data_criteriaList?.find(
+        (c) => c.id === selectedCriteria || c.id === Number(selectedCriteria),
+      )?.code || null;
 
     return dataCriteriaTable.map((item) => {
       const fromClassification = data_classificationTypeList?.find(
-        (c) => c.name === item.criteriaValue || c.id === item.criteriaValue
+        (c) => c.name === item.criteriaValue || c.id === item.criteriaValue,
       );
       const fromAccount = data_accountTypeList?.find(
-        (c) => c.name === item.criteriaValue || c.id === item.criteriaValue
+        (c) => c.name === item.criteriaValue || c.id === item.criteriaValue,
       );
       const criteriaSource = fromClassification || fromAccount;
 
@@ -658,14 +706,18 @@ const BillingItemForm = (props) => {
       const glAccountResolved = (() => {
         if (!item.glAccountId) return null;
         const found = data_glAccountList?.find(
-          (g) => `${g.account} - ${g.name}` === item.glAccountId || g.id === item.glAccountId
+          (g) =>
+            `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}` === item.glAccountId ||
+            g.id === item.glAccountId,
         );
-        return found ? found.name : item.glAccountId;
+        return found ? (found.glAccountDesc ?? found.name) : item.glAccountId;
       })();
 
       const specialGlResolved = (() => {
         if (!item.specialGlId) return null;
-        const found = data_specialGLList?.find((s) => s.name === item.specialGlId || s.id === item.specialGlId);
+        const found = data_specialGLList?.find(
+          (s) => s.name === item.specialGlId || s.id === item.specialGlId,
+        );
         return found ? found.value : item.specialGlId;
       })();
 
@@ -684,7 +736,8 @@ const BillingItemForm = (props) => {
 
   const buildRequestBody = (allValues, criteriaPayload) => {
     return {
-      transMappingType: data_typeList?.find((t) => t.id === allValues.type)?.code || allValues.type,
+      transMappingType:
+        data_typeList?.find((t) => t.id === allValues.type)?.code || allValues.type,
       ...(type === "update" && { id: data_BillingItemDetail?.id }),
       billingItemCategory: allValues.billingItemCategory,
       billingItemCode: allValues.transactionMappingCode,
@@ -749,14 +802,16 @@ const BillingItemForm = (props) => {
 
   const handleDescriptionSuccess = useCallback(
     (data, type) => {
-      const text = `Your data has been ${data.action === "DRAFT" ? (type === "create" ? "created" : "updated") : "submitted"}.`;
+      const text = `Your data has been ${
+        data.action === "DRAFT" ? (type === "create" ? "created" : "updated") : "submitted"
+      }.`;
       const successMessage = {
         title: "Successful",
         description: text,
       };
       dispatch(showModalSuccess(successMessage));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleSave = (e) => {
@@ -774,7 +829,10 @@ const BillingItemForm = (props) => {
             referensiId: recordId,
             fileCategoryId: element.fileCategoryId,
           };
-          await ratingBillingHttpService.uploadAttachment(`/v1/dbs/api/billingitem/attachment-upload`, body);
+          await ratingBillingHttpService.uploadAttachment(
+            `/v1/dbs/api/billingitem/attachment-upload`,
+            body,
+          );
         }
 
         setLoadingForm(false);
@@ -792,10 +850,6 @@ const BillingItemForm = (props) => {
         }
       });
   };
-
-  // ============================================================================
-  // ACTION HANDLERS
-  // ============================================================================
 
   const handleRetry = () => {
     handleSave(bodyError?.value);
@@ -823,6 +877,7 @@ const BillingItemForm = (props) => {
       setEndDateMap(null);
       setSelectedCriteria(null);
       setDataCriteriaTable([]);
+      setIsCriteriaEditing(false);
     } else {
       setDetailMapping(false);
       setCategory("");
@@ -843,6 +898,9 @@ const BillingItemForm = (props) => {
           attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
           lateCharge: data_detailDraft?.lateCharge,
           paymentWarranty: data_detailDraft?.paymentWarranty,
+          installment: data_detailDraft?.installment || false,
+          transMappingType: data_detailDraft?.transMappingType,
+          criteria: data_detailDraft?.criteria,
           status: data_BillingItemDetail?.status,
           statusApproval: data_BillingItemDetail?.statusApproval,
         };
@@ -872,10 +930,6 @@ const BillingItemForm = (props) => {
     }, 0);
   };
 
-  // ============================================================================
-  // BREADCRUMB ROUTES
-  // ============================================================================
-
   const routes = [
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
@@ -885,10 +939,6 @@ const BillingItemForm = (props) => {
       breadcrumbName: `${type === "update" ? "Update Transaction Mapping" : "Create Transaction Mapping"}`,
     },
   ];
-
-  // ============================================================================
-  // RENDER
-  // ============================================================================
 
   return (
     <LayoutMenu>
@@ -934,6 +984,7 @@ const BillingItemForm = (props) => {
               mappingData={dataTable?.length || 0}
               handleEndDate={handleEndDate}
               onCategoryChange={handleCategoryChange}
+              isCriteriaDisabled={isCriteriaEditing}
             />
 
             <MappingInformation
@@ -964,6 +1015,11 @@ const BillingItemForm = (props) => {
               detail_mapping_category={detail_mapping_category}
               startDateMap={startDateMap}
               endDateMap={endDateMap}
+              onCriteriaEditingChange={setIsCriteriaEditing}
+              onTabChange={() => {
+                setDetailMapping(false);
+                setCategory("");
+              }}
             />
           </div>
 
@@ -1026,7 +1082,11 @@ const BillingItemForm = (props) => {
                 <ButtonComponent type="default" onClick={() => setOpenModal(false)}>
                   Cancel
                 </ButtonComponent>
-                <ButtonComponent type="submit" onClick={() => handleSave(dataSend)} disabled={isLoading}>
+                <ButtonComponent
+                  type="submit"
+                  onClick={() => handleSave(dataSend)}
+                  disabled={isLoading}
+                >
                   Confirm
                 </ButtonComponent>
               </div>
@@ -1057,14 +1117,21 @@ const BillingItemForm = (props) => {
                 <SVGIcon name="IconFailed" width={48} />
                 <p className="text-[18px] font-bold">Failed</p>
               </div>
-              <p className="pl-[70px]">{`Your data was not ${type === "create" ? "Created." : "Updated."} ${bodyError?.message}`}</p>
+              <p className="pl-[70px]">{`Your data was not ${
+                type === "create" ? "Created." : "Updated."
+              } ${bodyError?.message}`}</p>
               <p className="pl-[70px]">Please try again.</p>
             </div>
           </ModalError>
         )}
 
         {/* Modal Back */}
-        <ModalConfirm isOpen={modalBack} handleCancel={() => setModalBack(false)} handleOk={() => navigate(-1)} width={400}>
+        <ModalConfirm
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+          width={400}
+        >
           <div className="flex justify-center mt-5 gap-[20px]">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
             <p className="text-[18px] font-bold">Are you sure you want to back?</p>
@@ -1072,13 +1139,19 @@ const BillingItemForm = (props) => {
         </ModalConfirm>
 
         {/* Modal Start Date Required */}
-        <ModalError isOpen={modalRequired} handleOk={() => setModalRequired(false)} handleCancel={() => setModalRequired(false)}>
+        <ModalError
+          isOpen={modalRequired}
+          handleOk={() => setModalRequired(false)}
+          handleCancel={() => setModalRequired(false)}
+        >
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">Failed</p>
             </div>
-            <p className="pl-[70px]">You can't create Mapping Information. Please fill out the start date first</p>
+            <p className="pl-[70px]">
+              You can't create Mapping Information. Please fill out the start date first
+            </p>
           </div>
         </ModalError>
 
@@ -1094,7 +1167,9 @@ const BillingItemForm = (props) => {
                 <SVGIcon name="IconFailed" width={48} />
                 <p className="text-[18px] font-bold">Failed</p>
               </div>
-              <p className="pl-[70px]">You can't update Mapping Information. Start date and end date can't be overlap</p>
+              <p className="pl-[70px]">
+                You can't update Mapping Information. Start date and end date can't be overlap
+              </p>
             </div>
           </ModalError>
         )}

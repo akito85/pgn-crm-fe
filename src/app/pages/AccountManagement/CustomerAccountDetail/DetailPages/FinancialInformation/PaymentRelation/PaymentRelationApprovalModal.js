@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect, useMemo, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";
+import { Steps, Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
@@ -324,12 +323,12 @@ const PaymentRelationApprovalModal = ({
         hidePadding={true}
         footer={
           <div className="flex justify-between">
-            <ButtonComponent type={"default"} onClick={handleCancelForm}>
+            <Button type={"default"} onClick={handleCancelForm}>
               Cancel
-            </ButtonComponent>
+            </Button>
 
             <div className="flex gap-x-4">
-              <ButtonComponent
+              <Button
                 onClick={() => {
                   prev();
                   scrollLeftHandler();
@@ -338,33 +337,33 @@ const PaymentRelationApprovalModal = ({
                 disabled={current < 1}
               >
                 Previous
-              </ButtonComponent>
+              </Button>
 
               { current < steps.length - 1 && (
-                <ButtonComponent
+                <Button
                   onClick={() => handleButtonNext()}
                   type={"submit"}
                   disabled={current > steps.length - 1 || steps[current].disabled}
                 >
                   Next
-                </ButtonComponent>
+                </Button>
               )}
               {current === steps.length - 1 && (
                 <>
-                  <ButtonComponent
+                  <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
                     loading={loading}
                   >
                     Reject
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
                     loading={loading}
                   >
                     Approve
-                  </ButtonComponent>
+                  </Button>
                 </>
               )}
             </div>

@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import moment from "moment";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
   createPaymentWarrantyPartner,
@@ -109,24 +110,16 @@ const ListFormPaymentWarrantyPartner = (props) => {
   useEffect(() => {
     if (id && data_detail) {
       const partner = data_detail?.partner || {};
+      const ratingData = data_detail?.ratings?.[0] || {};
+      
       const formattedData = {
         ...partner,
         apphierId: partner.appHierId,
-        address: {
-          street: partner.streetName,
-          building: partner.building,
-          addressNum: partner.addressNum,
-          district: partner.district,
-          city: partner.city,
-          province: partner.province,
-          country: partner.country,
-          zipCode: partner.zipCode,
-        },
-        contact: {
-          contactPerson: partner.contactPerson,
-          phoneNum: partner.phoneNum,
-          email: partner.email,
-        }
+        rating: ratingData?.rating || partner?.rating,
+        criteria: ratingData?.criteria || partner?.criteria,
+        ratingDate: partner?.ratingDate ? moment(partner.ratingDate) : null,
+        startDate: ratingData?.startDate ? moment(ratingData.startDate) : (partner?.startDate ? moment(partner.startDate) : null),
+        endDate: ratingData?.endDate ? moment(ratingData.endDate) : (partner?.endDate ? moment(partner.endDate) : null),
       };
       
       form.setFieldsValue(formattedData);
@@ -145,10 +138,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
     {
       value: "Partner", 
       paramValue: [
-        "partnerName", "partnerType", "swiftCode", "npwp", "licenseNum", "parentId",
-        ["address", "street"], ["address", "building"], ["address", "addressNum"], ["address", "district"], 
-        ["address", "city"], ["address", "province"], ["address", "country"], ["address", "zipCode"],
-        ["contact", "contactPerson"], ["contact", "phoneNum"], ["contact", "email"]
+        "partnerCode", "partnerGuaranteeIssuer", "partnerType", "rating", "criteria", "ratingDate", "startDate", "endDate"
       ]
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -192,10 +182,16 @@ const ListFormPaymentWarrantyPartner = (props) => {
       }));
       return;
     }
+    const { startDate, endDate, rating, criteria, ratingDate, ...restForm } = formValue;
     const dataValue = {
-      ...formValue,
+      ...restForm,
       appHierId: selectedHierarchy,
-      attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id)
+      attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id),
+      ratingDate: ratingDate ? moment(ratingDate).format("YYYY-MM-DD") : null,
+      rating,
+      criteria,
+      startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : null,
+      endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : null,
     };
     if (id) dataValue.id = id;
     setSendBody(dataValue);
@@ -204,9 +200,16 @@ const ListFormPaymentWarrantyPartner = (props) => {
 
   const handleSaveDraft = () => {
     const values = form.getFieldsValue();
+    const { startDate, endDate, rating, criteria, ratingDate, ...restValues } = values;
     const dataValue = {
-      ...values,
+      ...restValues,
       id: id,
+      appHierId: selectedHierarchy,
+      ratingDate: ratingDate ? moment(ratingDate).format("YYYY-MM-DD") : null,
+      rating,
+      criteria,
+      startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : null,
+      endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : null,
     };
     dispatch(saveDraftPaymentWarrantyPartner(dataValue))
       .unwrap()
@@ -224,7 +227,13 @@ const ListFormPaymentWarrantyPartner = (props) => {
   };
 
   const handleClear = () => {
+    const currentPartnerCode = form.getFieldValue("partnerCode");
     form.resetFields();
+    
+    if (currentPartnerCode) {
+      form.setFieldsValue({ partnerCode: currentPartnerCode });
+    }
+    
     setSelectedHierarchy("");
     setListDataAttachment([]);
   };
@@ -288,7 +297,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         <Form layout="vertical" form={form} onFinish={handleSubmitForm}>
           <div style={{ display: current !== 0 ? "none" : undefined }}>
-            <PaymentWarrantyPartnerForm dataType={dataType} form={form} />
+            <PaymentWarrantyPartnerForm dataType={dataType} form={form} isApprover={data_detail?.isApprover} />
           </div>
           <div style={{ display: current !== 1 ? "none" : undefined }}>
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -297,13 +306,14 @@ const ListFormPaymentWarrantyPartner = (props) => {
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
+                disabled={data_detail?.isApprover || type === "view"}
               />
             </BaseContainer>
           </div>
           <div style={{ display: current !== 2 ? "none" : undefined }}>
             <BaseContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
-                type={type}
+                type={data_detail?.isApprover ? "detail" : type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 typeSelector="paymentWarrantyPartner"
@@ -312,7 +322,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
-                mandatory={true}
+                mandatory={!data_detail?.isApprover}
               />
             </BaseContainer>
           </div>
@@ -326,6 +336,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={() => form.submit()}
             type={type}
+            isApprover={data_detail?.isApprover}
           />
         </Form>
       </Spin>

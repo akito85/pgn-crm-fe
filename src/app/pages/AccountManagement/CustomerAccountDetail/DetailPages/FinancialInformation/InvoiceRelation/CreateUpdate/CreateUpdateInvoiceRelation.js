@@ -1,120 +1,116 @@
-import { useEffect,  useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-
-import { Form, Spin } from "antd";
-
+import { Button, Form, Spin } from "antd";
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
-import StepContents from "./StepContents";
+import InfoInvoiceRelation from "./StepContents/InformationForm/InfoInvoiceRelation";
+import ApprovalInvoiceRelation from "./StepContents/ApprovalForm/ApprovalInvoiceRelation";
+import AttachmentInvoiceRelation from "./StepContents/AttachmentForm/AttachmentInvoiceRelation";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
-
-// you fucking nasty using bulky moment lazy as fuck
-import moment from "moment";
-
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-
-import {
-  getCustomerDetail,
-} from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
+import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import {
   getAccountStandardDetail,
-  getAccountOneTimeDetail,
+  getAccountOneTimeDetail
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createInvoiceRelation,
+  getDetailDraftInvoiceRelation,
   getDetailInvoiceRelation,
   getDetailIrApprovalHierarchy,
   getInvoiceRelationAttachment,
   getIrApprovalHierarchy,
   getIrAttachmentCategory,
-  updateInvoiceRelation,
+  updateInvoiceRelation
 } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
-import { showModalError, validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate
+} from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
-const CreateUpdateInvoiceRelation = ({ type }) => {
+const CreateUpdateInvoiceRelation = ({ formType }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
   const dispatch = useDispatch();
 
-  const {
-    data_accountDetail,
-  } = useSelector((state) => state.accountManagement);
+  const isCreate = formType === "create";
+  const isUpdate = formType === "update";
+
+  const { data_accountDetail } = useSelector(
+    (state) => state.accountManagement
+  );
 
   const {
     loading,
     data_irApprovalHierarchy,
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
-    list_irDetailAttachment,
+    detailDraft_invoiceRelation,
+    list_irDetailAttachment
   } = useSelector((state) => state.invoiceRelation);
 
   //declare
   const location = useLocation();
-  const [formCreate] = Form.useForm();
+  const [form] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idIr = location?.state?.id;
   const accountType = location?.state?.type; // "standard" or "onetime"
 
+  const status = detail_invoiceRelation.status || "DRAFT";
+  const statusApproval = detail_invoiceRelation.statusApproval || "DRAFT";
+
+  const isDraft = status === "DRAFT";
+  const isActive = status === "ACTIVE";
+
+  const isDraftApproval = statusApproval === "DRAFT";
+  const isRejectApproval = statusApproval === "REJECT";
+
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
 
-  const [selectedAppHierId, setSelectedAppHierId] = useState();
-  const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
   const attachmentIsRequired = true;
 
+  const detail = (isActive && statusApproval && isDraftApproval && isRejectApproval) ? detailDraft_invoiceRelation : detail_invoiceRelation;
+
   const formFields = [
-    [
-      "accountNumber",
-      "accountName",
-      "startDate",
-      "endDate",
-      "description",
-    ],
-    [
-      "appHierId",
-    ],
+    ["accountNumber", "accountName", "startDate", "endDate", "description"],
+    ["appHierId"],
     []
   ];
- 
-  const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
   useEffect(() => {
-    if (idCustomer)
-      dispatch(getCustomerDetail(idCustomer));
+    if (idCustomer) dispatch(getCustomerDetail(idCustomer));
   }, [idCustomer]);
 
   useEffect(() => {
     if (idAccount)
-      dispatch(getAccountStandardDetail({idAccount, idCustomer}));
+      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
   }, [idAccount]);
 
   useEffect(() => {
-    if (type === "update" && idIr) {
+    if (isUpdate && idIr) {
       dispatch(getDetailInvoiceRelation(idIr));
-      dispatch(getInvoiceRelationAttachment({ id: idIr }))
+      dispatch(getDetailDraftInvoiceRelation(idIr));
+      dispatch(getInvoiceRelationAttachment({ id: idIr }));
     }
-  }, [type, idIr]);
+  }, [formType, idIr]);
 
   useEffect(() => {
-    if (
-      type === "update" &&
-      detail_invoiceRelation &&
-      data_irApprovalHierarchy?.length
-    ) {
+    if (isUpdate && data_irApprovalHierarchy.length) {
       const {
         subjectId,
         objectId,
@@ -122,11 +118,11 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_invoiceRelation;
+        relatedAccountNumber,
+        relatedAccountName
+      } = detail;
 
-      const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation;
-
-      formCreate.setFieldsValue({
+      form.setFieldsValue({
         subjectId,
         objectId,
         accountName: relatedAccountName,
@@ -134,28 +130,28 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         startDate,
         endDate,
         description,
-        appHierId,
+        appHierId
       });
 
-      const appHierOption = data_irApprovalHierarchy.find((option) => option.appHierId === appHierId)
+      const appHierOption = data_irApprovalHierarchy.find(
+        (option) => option.appHierId === appHierId
+      );
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail_invoiceRelation, data_irApprovalHierarchy]);
+  }, [detail, data_irApprovalHierarchy]);
 
   useEffect(() => {
-    if (type === "update" && list_irDetailAttachment) {
+    if (isUpdate && list_irDetailAttachment) {
       const result = list_irDetailAttachment.map((item, index) => ({
         ...item,
         key: `invoice-relation-attachment-${item.id}`,
         dataType: "exist"
       }));
-      setDataAttachment(prev => ([
-        ...result,
-      ]))
+      setDataAttachment([...result]);
     }
-  }, [list_irDetailAttachment])
+  }, [list_irDetailAttachment]);
 
   useEffect(() => {
     dispatch(getIrApprovalHierarchy());
@@ -164,36 +160,33 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Account",
+      breadcrumbName: "Account"
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
-      breadcrumbName: "Account - Standard",
+      breadcrumbName: "Account - Standard"
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Detail Account",
       state: {
         idAccount,
-        idCustomer,
+        idCustomer
       }
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create Invoice Relation" : (type === "update") ? "Update Invoice Relation" : "",
-    },
+      breadcrumbName:
+        formType === "create"
+          ? "Create Invoice Relation"
+          : formType === "update"
+            ? "Update Invoice Relation"
+            : ""
+    }
   ];
 
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
-
   /**
-   * @param {boolean} show 
+   * @param {boolean} show
    * @param {"draft" | "submit"} submitType
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
@@ -203,86 +196,83 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length) {
             const errorBody = {
               title: "Failed",
-              description: `Please upload at least one attachment`,
+              description: `Please upload at least one attachment`
             };
             dispatch(showModalError(errorBody));
 
             throw new Error("There was no file attached");
           }
-        }
-        else {
-          await formCreate.validateFields(formFields[current]);
+        } else {
+          await form.validateFields(formFields[current]);
 
           const {
             objectId,
-            description, 
+            description,
             startDate,
             endDate,
-            appHierId,
-          } = formCreate.getFieldsValue();
+            appHierId
+          } = form.getFieldsValue(true);
 
           const body = {
             stepNumber: current + 1,
-            type: type.toUpperCase(),
+            type: formType.toUpperCase(),
             id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate,
-              endDate,
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
-          };
+          }
 
-          await dispatch(validateCreateUpdate({
-            body,
-            services: accountManagementService,
-            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-            type,
-          }))
-          .unwrap();
-        }  
+          await dispatch(
+            validateCreateUpdate({
+              body,
+              services: accountManagementService,
+              endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+              type: formType
+            })
+          ).unwrap();
+        }
       } catch (err) {
         return;
       }
 
-      const {
-        objectId,
-        description, 
-        startDate,
-        endDate,
-        appHierId,
-      } = formCreate.getFieldsValue();
+      const { objectId, description, startDate, endDate, appHierId } =
+        form.getFieldsValue(true);
 
       const body = {
-        id: type === "update" ? idIr : undefined,
-        subjectId: data_accountDetail?.accountInformation?.accountId, 
+        id: isUpdate ? idIr : undefined,
+        subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
-        description, 
-        startDate,
-        endDate,
+        description,
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
 
-      dispatch(validateCreateUpdate({
-        body,
-        services: accountManagementService,
-        endPoint: `/v1/dbs/api/invoice-relation/validate-${type}`,
-        type,
-      }))
-      .unwrap()
-      .then((data) => {
-        setShowConfirmationModal(show);
-        setConfirmationType(submitType);
-      }).catch(() => {});
-    }
-    else {
+      dispatch(
+        validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/invoice-relation/validate-${formType}`,
+          type: formType
+        })
+      )
+        .unwrap()
+        .then((data) => {
+          setShowConfirmationModal(show);
+          setConfirmationType(submitType);
+        })
+        .catch(() => {});
+    } else {
       setShowConfirmationModal(show);
       setConfirmationType("");
     }
-  }
+  };
 
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
@@ -296,118 +286,135 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   }, [dispatch, idAccount, idCustomer, accountType]);
 
   const setAccount = (objectId, accountNumber, accountName) => {
-    formCreate.setFieldValue("objectId", objectId)
-    formCreate.setFieldValue("accountNumber", accountNumber);
-    formCreate.setFieldValue("accountName", accountName);
-  }
+    form.setFieldValue("objectId", objectId);
+    form.setFieldValue("accountNumber", accountNumber);
+    form.setFieldValue("accountName", accountName);
+  };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailIrApprovalHierarchy({id: appHierId}));
-    setSelectedAppHierId(appHierId);
-    setSelectedApprovalName(approvalName);
-  }
+    dispatch(getDetailIrApprovalHierarchy({ id: appHierId }));
+    form.setFieldValue("appHierName", approvalName);
+  };
 
   const steps = [
     {
       title: "Invoice Relation",
-      content: (
-        <InformationForm
-          setAccount={setAccount}
-          className={`${current !== 0 ? "hidden" : ""}`}
-          key={`invoice-relation-tab-0`}
-          accountId={idAccount}
-        />
-      ),
+      cards: [
+        {
+          header: "Invoice Relation Information",
+          content: (
+            <InfoInvoiceRelation
+              form={form}
+              setAccount={setAccount}
+              accountId={idAccount}
+              isUpdate={isUpdate}
+              isDraft={isDraft}
+              key={`invoice-relation-tab-0`}
+            />
+          )
+        }
+      ],
       disabled: false
     },
     {
       title: "Approval",
-      content: (
-        <ApprovalForm
-          dataTable={detail_irApprovalHierarchy.map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          dataOption={data_irApprovalHierarchy}
-          selectedAppHierId={selectedAppHierId}
-          handleSelectHiararchy={handleSelectHiararchy}
-          className={`${current !== 1 ? "hidden" : ""}`}
-          key={`invoice-relation-tab-1`}
-        />
-      ),
+      cards: [
+        {
+          header: "Approval",
+          content: (
+            <ApprovalInvoiceRelation
+              form={form}
+              dataTable={(detail_irApprovalHierarchy || []).map(
+                (detail, index) => ({
+                  ...detail,
+                  employeeDetail: detail.employeeDetail.map(
+                    (employeeDetail, index) => ({
+                      ...employeeDetail,
+                      key: `employee-detail-${index}`
+                    })
+                  ),
+                  key: `detail-detail-${index}`
+                })
+              )}
+              dataOption={data_irApprovalHierarchy}
+              handleSelectHiararchy={handleSelectHiararchy}
+              key={`invoice-relation-tab-1`}
+            />
+          )
+        }
+      ],
       disabled: false
     },
     {
       title: "Attachment",
-      content: (
-        <AttachmentForm
-          type={type}
-          data={dataAttachment}
-          updateData={setDataAttachment}
-          dispatch={dispatch}
-          className={`${current !== 2 ? "hidden" : ""}`}
-          key={`invoice-relation-tab-2`}
-          getAPICategory={getIrAttachmentCategory}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-          mandatory={attachmentIsRequired}
-        />
-      ),
+      cards: [
+        {
+          header: "Attachment",
+          content: (
+            <AttachmentInvoiceRelation
+              data={dataAttachment}
+              updateData={setDataAttachment}
+              dispatch={dispatch}
+              key={`invoice-relation-tab-2`}
+              getAPICategory={getIrAttachmentCategory}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+              mandatory={attachmentIsRequired}
+            />
+          )
+        }
+      ],
       disabled: false
-    },
+    }
   ];
 
   const navigate = useNavigate();
-  
+
   const next = async () => {
     try {
       if (current === 2) {
         if (attachmentIsRequired && !dataAttachment.length) {
           const errorBody = {
             title: "Failed",
-            description: `Please upload at least one attachment`,
+            description: `Please upload at least one attachment`
           };
           dispatch(showModalError(errorBody));
 
           throw new Error("There was no file attached");
         }
-      }
-      else {
-        await formCreate.validateFields(formFields[current]);
+      } else {
+        await form.validateFields(formFields[current]);
 
         const {
           objectId,
-          description, 
+          description,
           startDate,
           endDate,
-          appHierId,
-        } = formCreate.getFieldsValue();
+          appHierId
+        } = form.getFieldsValue(true);
 
         const body = {
           stepNumber: current + 1,
-          type: type.toUpperCase(),
+          type: formType.toUpperCase(),
           id: idIr,
           data : {
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
             description, 
-            startDate,
-            endDate,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
           }
-        };
+        }
 
-        await dispatch(validateCreateUpdate({
-          body,
-          services: accountManagementService,
-          endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-          type,
-        }))
-        .unwrap()
+        await dispatch(
+          validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+            type: formType
+          })
+        ).unwrap();
       }
     } catch (err) {
       return;
@@ -427,45 +434,45 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length) {
             const errorBody = {
               title: "Failed",
-              description: `Please upload at least one attachment`,
+              description: `Please upload at least one attachment`
             };
             dispatch(showModalError(errorBody));
 
             throw new Error("There was no file attached");
           }
-        }
-        else {
-          await formCreate.validateFields(formFields[i]);
-          
+        } else {
+          await form.validateFields(formFields[i]);
+
           const {
             objectId,
-            description, 
+            description,
             startDate,
             endDate,
-            appHierId,
-          } = formCreate.getFieldsValue();
+            appHierId
+          } = form.getFieldsValue(true);
 
           const body = {
-            stepNumber: i + 1,
-            type: type.toUpperCase(),
+            stepNumber: current + 1,
+            type: formType.toUpperCase(),
             id: idIr,
             data : {
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate,
-              endDate,
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
-          };
+          }
 
-          await dispatch(validateCreateUpdate({
-            body,
-            services: accountManagementService,
-            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-            type,
-          }))
-          .unwrap()
+          await dispatch(
+            validateCreateUpdate({
+              body,
+              services: accountManagementService,
+              endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+              type: formType
+            })
+          ).unwrap();
         }
       } catch (err) {
         setCurrent(i);
@@ -474,7 +481,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
     }
 
     setCurrent(newCurrent);
-  }
+  };
 
   const scrollRightHandler = () => {
     if (containerRef.current) {
@@ -483,8 +490,8 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   };
   const handleButtonNext = async () => {
     await next();
-    scrollRightHandler()
-  }
+    scrollRightHandler();
+  };
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -495,73 +502,73 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   const handleSubmitForm = () => {
     const {
       objectId,
-      description, 
+      description,
       startDate,
       endDate,
       appHierId,
-      remark,
-    } = formCreate.getFieldsValue();
+      remark
+    } = form.getFieldsValue(true);
 
     const body = {
       id: idIr,
-      subjectId: data_accountDetail?.accountInformation?.accountId, 
+      subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
-      description, 
-      startDate,
-      endDate,
+      description,
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
-      remark,
+      remark
     };
 
-    if (type === "create")
-      dispatch(createInvoiceRelation({ body, attachments: dataAttachment }))
-      .unwrap()
-      .then((data) => {
-        setTimeout(() => {
-          navigate(
-            ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-            {
-              state: {
-                idAccount,
-                idCustomer,
-              }
-            }
-          );
-        }, 2000)
-      })
-      .catch((error) => {});
-    else if (type === "update")
-      dispatch(updateInvoiceRelation({ id: idIr, body, attachments: dataAttachment.filter((attachment => attachment.dataType !== "exist")) }))
-      .unwrap()
+    // Filter only new attachments (not existing ones)
+    const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
+
+    if (isCreate)
+      dispatch(createInvoiceRelation({ body, attachments: newAttachments }))
+        .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(
-              ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-              {
-                state: {
-                  idAccount,
-                  idCustomer,
-                }
+            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+              state: {
+                idAccount,
+                idCustomer
               }
-            );
-          }, 2000)
+            });
+          }, 2000);
         })
-        .catch((error) => {});;
+        .catch((error) => {});
+    else if (isUpdate)
+      dispatch(
+        updateInvoiceRelation({
+          id: idIr,
+          body,
+          attachments: dataAttachment.filter(
+            (attachment) => attachment.dataType !== "exist"
+          )
+        })
+      )
+        .unwrap()
+        .then((data) => {
+          setTimeout(() => {
+            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+              state: {
+                idAccount,
+                idCustomer
+              }
+            });
+          }, 2000);
+        })
+        .catch((error) => {});
   };
 
   const handleClear = () => {
-    if (type === "create") {
+    if (isCreate) {
       setDataAttachment([]);
-      setSelectedAppHierId();
-      setSelectedApprovalName();
-      formCreate.resetFields();
+      form.resetFields();
       setCurrent(0);
-    } else if (type === "update") {
-      if (
-        detail_invoiceRelation &&
-        data_irApprovalHierarchy?.length
-      ) {
+    } else if (isUpdate) {
+      if (data_irApprovalHierarchy?.length) {
         const {
           subjectId,
           objectId,
@@ -569,41 +576,41 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           endDate,
           description,
           appHierId,
-        } = detail_invoiceRelation;
+          relatedAccountNumber,
+          relatedAccountName
+        } = detail;
 
-        const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation;
-
-        formCreate.setFieldsValue({
+        form.setFieldsValue({
           subjectId,
           objectId,
           accountName: relatedAccountName,
           accountNumber: relatedAccountNumber,
-          startDate,
-          endDate,
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           description,
-          appHierId,
+          appHierId
         });
 
-        const appHierOption = data_irApprovalHierarchy.find((option) => option.appHierId === appHierId)
+        const appHierOption = data_irApprovalHierarchy.find(
+          (option) => option.appHierId === appHierId
+        );
 
         if (appHierOption)
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
       }
 
       if (list_irDetailAttachment) {
-        const result = list_irDetailAttachment?.map((item, index) => ({
+        const result = list_irDetailAttachment.map((item, index) => ({
           ...item,
           key: `invoice-relation-attachment-${item.id}`,
           dataType: "exist"
         }));
-        setDataAttachment([
-          ...result,
-        ])
+        setDataAttachment([...result]);
       }
 
       setCurrent(0);
     }
-  }
+  };
 
   return (
     <LayoutMenu>
@@ -616,98 +623,116 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           idCustomer={idCustomer}
           type={"standard"}
         />
-
-        <Spin
-          spinning={loading}
-        >
+        <Spin spinning={loading}>
           <Form
             id="invoiceRelationForm"
-            form={formCreate}
+            form={form}
             layout={"vertical"}
             onFinish={handleSubmitForm}
-            // onFinishFailed={handleErrorSubmit}
             scrollToFirstError={true}
             className="flex flex-col gap-y-4"
           >
-          {/* Step Contents */}
-          <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
+            {/* Step Contents */}
+            <NxFormStepper
+              steps={steps}
+              current={current}
+              onPrev={prev}
+              onNext={handleButtonNext}
+            />
 
-          {steps.map((step) => step.content)}
+            {steps.map((step, stepIndex) =>
+              step.cards.map((card, cardIndex) => (
+                <NxCardContainer
+                  header={card.header}
+                  className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                  key={`${stepIndex}-${cardIndex}`}
+                >
+                  <NxBaseContainer border>{card.content}</NxBaseContainer>
+                </NxCardContainer>
+              ))
+            )}
 
-          {/* Section Action Steps */}
-          <NxBaseContainer border>
-            <div className="flex justify-between">
-              <ButtonComponent
-                type={"menu"}
-                onClick={()=>{navigate(-1)}}
-              >
-                Cancel
-              </ButtonComponent>
-              <div className="flex w-full justify-end gap-x-2">
-                <ButtonComponent
-                  onClick={handleClear}
-                  type={"reject"}
-                  icon={<SVGIcon name="IconButtonClear" width={24} />}
-                >
-                  { type === "update" ? "Reset" : "Clear" }
-                </ButtonComponent>
-                <ButtonComponent
-                  onClick={() => handleSetShowConfirmationModal(true, "draft")}
-                  type={"secondary"}
-                  disabled={current !== steps.length - 1}
-                >
-                  Save as Draft
-                </ButtonComponent>
-                <ButtonComponent
-                  onClick={() => {
-                    prev();
-                    scrollLeftHandler();
-                  }}
+            {/* Section Action Steps */}
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <Button
                   type={"menu"}
-                  disabled={current < 1}
+                  onClick={() => {
+                    navigate(-1);
+                  }}
                 >
-                  Previous
-                </ButtonComponent>
-                {current < steps.length - 1 && (
-                  <ButtonComponent
-                    onClick={handleButtonNext}
-                    type={"submit"}
-                    disabled={steps[current].disabled}
+                  Cancel
+                </Button>
+                <div className="flex w-full justify-end gap-x-2">
+                  <Button
+                    onClick={handleClear}
+                    type={"reject"}
+                    icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    Next
-                  </ButtonComponent>
-                )}
-                {current === steps.length - 1 && (
-                  <>
-                    <ButtonComponent
-                      onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                    {isUpdate ? "Reset" : "Clear"}
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      handleSetShowConfirmationModal(true, "draft")
+                    }
+                    type={"secondary"}
+                    disabled={current !== steps.length - 1}
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
+                    type={"menu"}
+                    disabled={current < 1}
+                  >
+                    Previous
+                  </Button>
+                  {current < steps.length - 1 && (
+                    <Button
+                      onClick={handleButtonNext}
                       type={"submit"}
+                      disabled={steps[current].disabled}
                     >
-                      Save & Submit
-                    </ButtonComponent>
-                  </>
-                )}
+                      Next
+                    </Button>
+                  )}
+                  {current === steps.length - 1 && (
+                    <>
+                      <Button
+                        onClick={() =>
+                          handleSetShowConfirmationModal(true, "submit")
+                        }
+                        type={"submit"}
+                      >
+                        Save & Submit
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          </NxBaseContainer>
+            </NxBaseContainer>
             <ConfirmationModal
-              form={"invoiceRelationForm"}
+              form={form}
+              formId={"invoiceRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              selectedAppHierId={selectedAppHierId}
-              selectedApprovalName={selectedApprovalName}
-              hierarchyTableData={detail_irApprovalHierarchy.map((detail, index) => ({
-                ...detail,
-                employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-                  ...employeeDetail,
-                  key: `employee-detail-${index}`
-                })),
-                key: `detail-detail-${index}`,
-              }))}
-              hieararchyOptionData={data_irApprovalHierarchy}
+              approvalData={(detail_irApprovalHierarchy || []).map(
+                (detail, index) => ({
+                  ...detail,
+                  employeeDetail: detail.employeeDetail.map(
+                    (employeeDetail, index) => ({
+                      ...employeeDetail,
+                      key: `employee-detail-${index}`
+                    })
+                  ),
+                  key: `detail-detail-${index}`
+                })
+              )}
               type={confirmationType}
               dataAttachment={dataAttachment}
-              data={formCreate.getFieldsValue()}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
             />

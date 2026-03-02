@@ -6,6 +6,7 @@ import {
 } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import { separatorCurrency } from "../../UtilsProduct/UtilsAllProduct";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
@@ -1100,5 +1101,39 @@ export const columnsTableCriteriaPromo = (
     //     return "";
     //   }
     // },
+  },
+  {
+    title: "STATUS",
+    dataIndex: "status",
+    width: 180,
+    align: "center",
+    indexValue: -1,
+    filteredValue: search?.["status"] ? [search?.["status"]] : null,
+    sorter: (a, b) => {
+      const statusA = (a.status || "").toLowerCase();
+      const statusB = (b.status || "").toLowerCase();
+      return statusA.localeCompare(statusB);
+    },
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) => {
+      if (!text) return "-";
+      return (
+        <div className={" flex justify-center"}>
+          <StatusComponent colour={text}>
+            {text}
+          </StatusComponent>
+        </div>
+      );
+    },
   },
 ];

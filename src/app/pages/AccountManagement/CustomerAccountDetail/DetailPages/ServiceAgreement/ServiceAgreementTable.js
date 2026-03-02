@@ -141,6 +141,7 @@ const ServiceAgreementTable = ({
                         endDate: record?.endDate,
                         termOfPayment: record?.termOfPayment?.id,
                         invoiceTemplate: record?.invoiceTemplate?.id,
+                        // harusnya child
                         typeSa: "addon",
                         idAccount,
                         idCustomer,
@@ -158,7 +159,7 @@ const ServiceAgreementTable = ({
                                         icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#0075BF" }} />}
                                         border={false}
                                     >
-                                        <span className="text-black ml-3">Create Add-on</span>
+                                        <span className="text-black ml-3">Create Child</span>
                                     </ButtonComponent>
                                 </Link>
                             ) : (
@@ -167,17 +168,17 @@ const ServiceAgreementTable = ({
                                     border={false}
                                     disabled
                                 >
-                                    <span className="text-black ml-3">Create Add-on</span>
+                                    <span className="text-black ml-3">Create Child</span>
                                 </ButtonComponent>
                             )
                         ) : isCreate ? (
-                            <Tooltip title="Create Add-On">
+                            <Tooltip title="Create Child">
                                 <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_ADDON} state={linkState}>
                                     <PlusCircleOutlined style={{ fontSize: "20px", color: "#bbce4b" }} />
                                 </Link>
                             </Tooltip>
                         ) : (
-                            <Tooltip title="Create Add-On">
+                            <Tooltip title="Create Child">
                                 <PlusCircleOutlined style={{ fontSize: "20px", color: "#c2cad2" }} className="cursor-not-allowed" />
                             </Tooltip>
                         );
@@ -389,7 +390,6 @@ const ServiceAgreementTable = ({
         [idAccount, idCustomer, type, handleOpenDeleteDraft, handleOpenInactivate, handleApprovalHistory]
     );
 
-    console.log("FilteredArray = ", filteredArray)
     const actionCols = useColumnActionPermissionAccount(
         ["Delete", "View", "CreateAddon", "CreateAmendment", "Update", "Activate", "History"],
         itemActions,
@@ -446,7 +446,7 @@ const ServiceAgreementTable = ({
             useInfiniteScroll={true}
             hasMore={hasMore}
             onLoadMore={handleLoadMore}
-            loadMoreThreshold={20}
+            loadMoreThreshold={2}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             columnDefinitions={columnDefinitions}

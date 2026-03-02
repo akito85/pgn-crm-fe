@@ -2,20 +2,21 @@ import React, { useState } from "react";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 
 const CriteriaDetailTab = ({
-  criteriaType = null,
+  criteriaType = null,   
   dataTable = [],
   onDataChange = () => {},
   data_specialGLList = [],
   data_glAccountList = [],
   data_classificationTypeList = [],
   data_accountTypeList = [],
-  data_criteriaOptions = [],
+  data_criteriaOptions = [], 
   type = "create",
   isEditabled = false,
   setIsEditabled = () => {},
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
+  onCancelEdit = null,
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -25,15 +26,24 @@ const CriteriaDetailTab = ({
     setPageSize(pageSizeChange);
   };
 
-  // Resolve criteriaType — bisa berupa ID number atau string code
-  const criteriaCode =
-    typeof criteriaType === "number" ||
-    (typeof criteriaType === "string" && !isNaN(Number(criteriaType)))
-      ? data_criteriaOptions?.find(
-          (item) =>
-            item.id === criteriaType || item.id === Number(criteriaType)
-        )?.code
-      : criteriaType;
+  const resolveCriteriaCode = () => {
+    if (criteriaType === null || criteriaType === undefined) return null;
+
+    const isNumericId =
+      typeof criteriaType === "number" ||
+      (typeof criteriaType === "string" && !isNaN(Number(criteriaType)));
+
+    if (isNumericId) {
+      return (
+        data_criteriaOptions?.find(
+          (item) => item.id === criteriaType || item.id === Number(criteriaType),
+        )?.code || null
+      );
+    }
+    return criteriaType;
+  };
+
+  const criteriaCode = resolveCriteriaCode();
 
   const getCriteriaColumnConfig = () => {
     switch (criteriaCode) {
@@ -56,15 +66,15 @@ const CriteriaDetailTab = ({
           })),
         };
       default:
-        return null; // ALL = tidak ada kolom criteria khusus
+        return null;
     }
   };
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
   const glAccountOptions = data_glAccountList.map((item) => ({
-    value: item.id,
-    label: `${item.account} - ${item.name}`,
+    value: item.glAccountId ?? item.id,
+    label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
   }));
 
   const specialGlOptions = data_specialGLList.map((item) => ({
@@ -72,7 +82,6 @@ const CriteriaDetailTab = ({
     label: item.name,
   }));
 
-  // Helper: EditableCell menyimpan label bukan value, jadi render harus cek keduanya
   const renderSelectValue = (value, options) => {
     if (!value && value !== 0) return "-";
     const found = options.find((o) => o.label === value || o.value === value);
@@ -86,7 +95,6 @@ const CriteriaDetailTab = ({
       width: 60,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
-    // Kolom dinamis criteria — hanya tampil jika bukan ALL
     ...(criteriaColConfig
       ? [
           {
@@ -108,11 +116,21 @@ const CriteriaDetailTab = ({
       width: 250,
       options: glAccountOptions,
       render: (value) => renderSelectValue(value, glAccountOptions),
+      onClick: (selectedLabel, form) => {
+        if (!form) return;
+        const found = data_glAccountList?.find((g) => {
+          const label = `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}`;
+          return label === selectedLabel;
+        });
+        form.setFieldsValue({
+          descriptionAccount: found ? (found.glAccountDesc ?? found.name ?? "") : "",
+        });
+      },
     },
     {
       title: "DESCRIPTION ACCOUNT",
       dataIndex: "descriptionAccount",
-      inputType: "description",
+      inputType: "description_readonly",
       width: 220,
       render: (value) => value || "-",
     },
@@ -141,16 +159,15 @@ const CriteriaDetailTab = ({
     },
   ];
 
-  // Hitung total width kolom + 120 untuk ACTIONS
   const totalColWidth =
-    60 + // NO
-    (criteriaColConfig ? 200 : 0) + // kolom dinamis criteria (jika ada)
-    250 + // GL ACCOUNT
-    220 + // DESCRIPTION ACCOUNT
-    180 + // SPECIAL GL
-    180 + // START DATE
-    180 + // END DATE
-    120;  // ACTIONS
+    60 +
+    (criteriaColConfig ? 200 : 0) +
+    250 +
+    220 +
+    180 +
+    180 +
+    180 +
+    120; // kolom ACTIONS
 
   return (
     <DynamicTableInlineBilling
@@ -174,6 +191,7 @@ const CriteriaDetailTab = ({
       startDateLock={startDateLock || "bypass"}
       endDateLock={endDateLock}
       setModalRequired={setModalRequired}
+      onCancelEdit={onCancelEdit}
     />
   );
 };

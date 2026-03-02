@@ -4,8 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, Spin } from "antd";
 import {
   getDetailWarranty,
-  getApprovalListPaginate,
-  getAllAttachmentInfoPaginate,
   getListCategory,
   getListApprovalById,
   getAllApprovalList,
@@ -49,8 +47,6 @@ const ListDetailWarranty = () => {
     if (activeTab === "approval") {
       if (data_detail?.appHierId) {
         dispatch(getListApprovalById({ id: data_detail?.appHierId }));
-      } else {
-        dispatch(getApprovalListPaginate({ page: 1, pageSize: 10 }));
       }
     } else if (activeTab === "attachment") {
       dispatch(getListCategory());
@@ -62,7 +58,7 @@ const ListDetailWarranty = () => {
   const items = [
     {
       key: "warranty",
-      label: "Warranty",
+      label: "Guarantee",
       children: <DetailWarranty data_detail={data_detail} />,
     },
     {
@@ -81,7 +77,7 @@ const ListDetailWarranty = () => {
                       key: index + 1,
                     })),
                   }))
-                : (data_approval_info?.result || data_approval_info || [])
+                : (data_approval_info?.result || [])
             }
             approvalName={approvalName} 
             showSelect={false}
@@ -154,11 +150,11 @@ const ListDetailWarranty = () => {
     },
     {
         path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_WARRANTY,
-        breadcrumbName: "Payment Warranty",
+        breadcrumbName: "Payment Guarantee",
     },
     {
         path: "",
-        breadcrumbName: "Detail Warranty",
+        breadcrumbName: "Detail Guarantee",
     },
     ];
 
@@ -188,7 +184,7 @@ const ListDetailWarranty = () => {
               onFinish={onFinishApproval}
               header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
               approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
-              menu="Payment Warranty"
+              menu="Payment Guarantee"
               named={data_detail?.customerName || "-"}
             />
         </Spin>

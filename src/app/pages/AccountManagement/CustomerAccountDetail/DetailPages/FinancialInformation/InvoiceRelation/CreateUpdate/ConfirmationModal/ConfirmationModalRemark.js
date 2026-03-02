@@ -20,6 +20,7 @@ const ConfirmationModalRemark = () => {
         name={"remark"}
         rules={[{ message: requiredMessage("Remark"), required: true }]}
         labelCol={{ span: 24 }}
+        className="no-margin-form"
       >
         <InputComponent
           group

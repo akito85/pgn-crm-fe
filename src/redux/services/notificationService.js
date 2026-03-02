@@ -33,6 +33,7 @@ class NotificationService {
     const sseBaseUrl = NOTIFICATION_CONFIG.SSE_BASE_URL;
 
     this.userId = userId;
+    this.positionId = callbacks.positionId || null;
     this.onMessageCallback = callbacks.onMessage;
     this.onErrorCallback = callbacks.onError;
     this.onConnectCallback = callbacks.onConnect;
@@ -64,6 +65,11 @@ class NotificationService {
       // Based on server implementation, userId might be derived from session/authorization
       if (userId) {
         url += `?userId=${encodeURIComponent(userId)}`;
+      }
+
+      // Add positionId for position-based SSE filtering (EventSource can't send custom headers)
+      if (this.positionId) {
+        url += `${userId ? '&' : '?'}positionId=${encodeURIComponent(this.positionId)}`;
       }
 
 
@@ -335,6 +341,7 @@ class NotificationService {
       // User identification
       fromUserId: raw.FROM_USER_ID || raw.fromUserId,
       toUserId: raw.TO_USER_ID || raw.toUserId,
+      toPositionId: raw.TO_POSITION_ID || raw.toPositionId,
 
       // Navigation fields
       module: raw.MODULE || raw.module,

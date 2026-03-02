@@ -3,7 +3,8 @@ import { PlusOutlined } from "@ant-design/icons"
 
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent"
 import NxTable from "../../../../../../../../../components/Nx/NxTable"
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel"
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer"
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer"
 
 import ModalInformationContactDetail from "./ModalInformationContactDetail"
 import ModalListContact from "./ModalListContact"
@@ -140,7 +141,8 @@ export default function ContactForm({ form }) {
   // --------------------------------------------------------------------------
   return (
     <Fragment>
-      <NxPanel title={"CONTACT LIST"}>
+      <NxCardContainer header={"CONTACT LIST"}>
+        <NxBaseContainer border>
         {/* Create Contact Button */}
         <div className="w-full flex justify-end items-center gap-2.5 mb-5">
           <ButtonComponent
@@ -175,6 +177,8 @@ export default function ContactForm({ form }) {
           dataMain={contactList}
           columnMain={columnMain}
         />
+        </NxBaseContainer>
+      </NxCardContainer>
 
         <ModalInformationContactDetail
           isOpen={isOpen}
@@ -196,7 +200,6 @@ export default function ContactForm({ form }) {
           onBack={handleCloseConfirmation}
           onConfirm={handleConfirmContact}
         />
-      </NxPanel>
     </Fragment>
   )
 }

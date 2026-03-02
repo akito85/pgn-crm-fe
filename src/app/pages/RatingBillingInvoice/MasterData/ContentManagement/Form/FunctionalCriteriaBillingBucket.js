@@ -84,17 +84,21 @@ const EditableCell = ({
       const startDate = moment(validateStartDate).startOf("day");
       const endDate = moment(validateEndDate).endOf("day");
       return current.isBefore(startDate) || current.isAfter(endDate);
+    } else if (validateStartDate && !validateEndDate) {
+      // ✅ Jika hanya ada startDate di header, hanya batasi dari startDate ke atas
+      const startDate = moment(validateStartDate).startOf("day");
+      return current.isBefore(startDate);
     } else {
-      return true; // Disable all dates if start or end date is not defined
+      return false; // ✅ Jangan disable semua tanggal jika tidak ada batasan
     }
   };
 
   // Validation Handle Start Date from Header Data
   const handleDisableDateBefore = (current) => {
-    if (validateStartDate !== null) {
-      return moment(validateStartDate) > current;
+    if (validateStartDate !== null && validateStartDate !== undefined) {
+      return moment(validateStartDate).startOf("day") > current;
     }
-    return moment().add(-1, "days") >= current;
+    return false; // ✅ Jangan disable jika tidak ada startDate
   };
 
   const getInputNode = (inputType) => {
@@ -128,7 +132,7 @@ const EditableCell = ({
                 ? handleDisableDateBefore
                 : handleDisableDateBetween
             }
-            disabled={validateStartDate === null}
+            disabled={validateStartDate === null || validateStartDate === undefined}
           />
         );
 
@@ -253,8 +257,6 @@ const FunctionalCriteriaBillingBucket = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [modalValidationTable, setModalValidationTable] = useState(false);
 
-
-
   // Use Effect
   useEffect(() => {
     setTotalData(data.length);
@@ -275,92 +277,63 @@ const FunctionalCriteriaBillingBucket = ({
     }
   }, [type]);
 
-
   // Data Select Criteria
-  const budget = (data_budget || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.text,
-    };
-  });
-  const province = (data_province || []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
-  const city = (data_city || []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
-  const industrialSector = (data_industrial_sector || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.text,
-    };
-  });
-  const district = (data_district || []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
-  const subDistrict = (data_sub_district || []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
-  const accountCategory = (data_account_Category || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.text,
-    };
-  });
-  const serviceType = (data_service_type || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.text,
-    };
-  });
-  const accountGroup = (data_account_group || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
-  const sor = (data_sor || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
-  const costCenter = (data_cost_center || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
-  const gsizes = (data_Gsizes || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.text,
-    };
-  });
-  const customerSegment = (data_customer_segment || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.text,
-    };
-  });
-  const customer = (data_customer || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
+  const budget = (data_budget || []).map((item) => ({
+    value: item.id,
+    label: item.text,
+  }));
+  const province = (data_province || []).map((item) => ({
+    value: item.value,
+    label: item.name,
+  }));
+  const city = (data_city || []).map((item) => ({
+    value: item.value,
+    label: item.name,
+  }));
+  const industrialSector = (data_industrial_sector || []).map((item) => ({
+    value: item.id,
+    label: item.text,
+  }));
+  const district = (data_district || []).map((item) => ({
+    value: item.value,
+    label: item.name,
+  }));
+  const subDistrict = (data_sub_district || []).map((item) => ({
+    value: item.value,
+    label: item.name,
+  }));
+  const accountCategory = (data_account_Category || []).map((item) => ({
+    value: item.id,
+    label: item.text,
+  }));
+  const serviceType = (data_service_type || []).map((item) => ({
+    value: item.id,
+    label: item.text,
+  }));
+  const accountGroup = (data_account_group || []).map((item) => ({
+    value: item.id,
+    label: item.name,
+  }));
+  const sor = (data_sor || []).map((item) => ({
+    value: item.id,
+    label: item.name,
+  }));
+  const costCenter = (data_cost_center || []).map((item) => ({
+    value: item.id,
+    label: item.name,
+  }));
+  const gsizes = (data_Gsizes || []).map((item) => ({
+    value: item.id,
+    label: item.text,
+  }));
+  const customerSegment = (data_customer_segment || []).map((item) => ({
+    value: item.id,
+    label: item.text,
+  }));
+  const customer = (data_customer || []).map((item) => ({
+    value: item.id,
+    label: item.name,
+  }));
 
   // Declare data list option
   const listOption = {
@@ -383,54 +356,44 @@ const FunctionalCriteriaBillingBucket = ({
   // Handle Edit Data Record
   const handleEditDataRecord = (data, key, index) => {
     const keyName = key + index;
-    setEditDataRecord((prevState) => {
-      return {
-        ...prevState,
-        [keyName]: data,
-      };
-    });
+    setEditDataRecord((prevState) => ({
+      ...prevState,
+      [keyName]: data,
+    }));
     if (index === `province`) {
       dispatch(getCity(data?.value));
       formTableCriteria.resetFields(["city", "district", "subDistrict"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "city"]: undefined,
-          [key + "district"]: undefined,
-          [key + "subDistrict"]: undefined,
-        };
-      });
+      setEditDataRecord((prevState) => ({
+        ...prevState,
+        [key + "city"]: undefined,
+        [key + "district"]: undefined,
+        [key + "subDistrict"]: undefined,
+      }));
     }
     if (index === `city`) {
       dispatch(getDistrict(data?.value));
       formTableCriteria.resetFields(["district", "subDistrict"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "district"]: undefined,
-          [key + "subDistrict"]: undefined,
-        };
-      });
+      setEditDataRecord((prevState) => ({
+        ...prevState,
+        [key + "district"]: undefined,
+        [key + "subDistrict"]: undefined,
+      }));
     }
     if (index === `district`) {
       dispatch(getSubDistrict(data?.value));
       formTableCriteria.resetFields(["subDistrict"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "subDistrict"]: undefined,
-        };
-      });
+      setEditDataRecord((prevState) => ({
+        ...prevState,
+        [key + "subDistrict"]: undefined,
+      }));
     }
     if (index === `customerSegment`) {
       dispatch(getAccountGroup(data?.value));
       formTableCriteria.resetFields(["accountGroup"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "accountGroup"]: undefined,
-        };
-      });
+      setEditDataRecord((prevState) => ({
+        ...prevState,
+        [key + "accountGroup"]: undefined,
+      }));
     }
     return data;
   };
@@ -466,12 +429,10 @@ const FunctionalCriteriaBillingBucket = ({
     for (const attribute in tempValue) {
       if (Object.hasOwnProperty.call(tempValue, attribute)) {
         const tempData = tempValue[attribute];
-        setEditDataRecord((prevState) => {
-          return {
-            ...prevState,
-            [`${key}${attribute}`]: tempData,
-          };
-        });
+        setEditDataRecord((prevState) => ({
+          ...prevState,
+          [`${key}${attribute}`]: tempData,
+        }));
       }
     }
     setEditingKey(record.key);
@@ -516,18 +477,73 @@ const FunctionalCriteriaBillingBucket = ({
     setDataHistory({});
   };
 
+  // ✅ FIXED: checkOverlappingDate - untuk validasi saat save row
   const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-    // if (hasValue(formHeaderValue?.endDate)) {
-    if (moment(rowValue?.startDate) < moment(formHeaderValue?.startDate)) {
-      return true
-    } else if (moment(rowValue?.endDate) > moment(formHeaderValue?.endDate)?.add(1, 'days') && hasValue(formHeaderValue?.endDate)) {
-      return true
-    } else {
-      return false
+    const headerStart = formHeaderValue?.startDate
+      ? moment(formHeaderValue.startDate).startOf("day")
+      : null;
+    const headerEnd = formHeaderValue?.endDate
+      ? moment(formHeaderValue.endDate).endOf("day")
+      : null;
+    const rowStart = rowValue?.startDate
+      ? moment(rowValue.startDate).startOf("day")
+      : null;
+    const rowEnd = rowValue?.endDate
+      ? moment(rowValue.endDate).endOf("day")
+      : null;
+
+    // Cek start date criteria tidak boleh sebelum start date header
+    if (rowStart && headerStart && rowStart.isBefore(headerStart)) {
+      return true;
     }
-    // }
+
+    // Cek end date criteria tidak boleh melebihi end date header
+    // Hanya jika header end date ada nilainya
+    if (rowEnd && headerEnd && rowEnd.isAfter(headerEnd)) {
+      return true;
+    }
+
+    return false;
   }, []);
 
+  // ✅ FIXED: checkOverlappingData - untuk validasi sebelum add row baru
+  const checkOverlappingData = useCallback((formHeader, dataTable) => {
+    // Jika tidak ada data di tabel, tidak perlu cek overlap
+    if (!dataTable || dataTable.length === 0) {
+      return false;
+    }
+
+    const headerStart = formHeader?.startDate
+      ? moment(formHeader.startDate).startOf("day")
+      : null;
+    const headerEnd = formHeader?.endDate
+      ? moment(formHeader.endDate).endOf("day")
+      : null;
+
+    const dataOverlap = [];
+
+    dataTable.forEach((item) => {
+      const itemStart = item?.startDate
+        ? moment(item.startDate).startOf("day")
+        : null;
+      const itemEnd = item?.endDate
+        ? moment(item.endDate).endOf("day")
+        : null;
+
+      // Cek apakah start date item sebelum header start date
+      if (itemStart && headerStart && itemStart.isBefore(headerStart)) {
+        dataOverlap.push(item);
+        return;
+      }
+
+      // Cek end date hanya jika header end date ada nilainya
+      if (itemEnd && headerEnd && itemEnd.isAfter(headerEnd)) {
+        dataOverlap.push(item);
+      }
+    });
+
+    return dataOverlap.length > 0;
+  }, []);
 
   // Function Save Data
   const save = async (key) => {
@@ -535,16 +551,19 @@ const FunctionalCriteriaBillingBucket = ({
       const row = await formTableCriteria.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
-      const isOverlappingDate = checkOverlappingDate({ startDate: validStartDate, endDate: validEndDate }, row);
+      const isOverlappingDate = checkOverlappingDate(
+        { startDate: validStartDate, endDate: validEndDate },
+        row
+      );
       if (isOverlappingDate) {
         formTableCriteria.setFields([
           {
-            name: 'startDate',
-            errors: [`Overlapping date found`],
+            name: "startDate",
+            errors: [`Date is out of range from header date`],
           },
           {
-            name: 'endDate',
-            errors: [`Overlapping date found`],
+            name: "endDate",
+            errors: [`Date is out of range from header date`],
           },
         ]);
       } else {
@@ -558,36 +577,20 @@ const FunctionalCriteriaBillingBucket = ({
         setStoredData(false);
         setStatusAction("");
         formTableCriteria.resetFields();
-
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
   };
-  // check has overlapping data
-  const checkOverlappingData = useCallback((formHeader, dataTable) => {
-    const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, 'days')) {
-        dataOverlap?.push(item)
-      }
-    });
-
-    if (dataOverlap?.length > 0) {
-      return true
-    } else {
-      return false
-    }
-    // }
-
-  }, []);
 
   // Function Add Row Data
   const addRow = () => {
-    const hasOverlapping = checkOverlappingData({ startDate: validStartDate, endDate: validEndDate }, data);
+    const hasOverlapping = checkOverlappingData(
+      { startDate: validStartDate, endDate: validEndDate },
+      data
+    );
     if (hasOverlapping) {
-      setModalValidationTable(true)
+      setModalValidationTable(true);
     } else {
       formTableCriteria.resetFields();
       setStoredData(true);
@@ -680,12 +683,9 @@ const FunctionalCriteriaBillingBucket = ({
                           <SVGIcon
                             name="IconEdit"
                             color={editingKey ? "#8D91A0" : "#ACC424"}
-                            className={`${editingKey ? "cursor-not-allowed" : ""
-                              }`}
+                            className={`${editingKey ? "cursor-not-allowed" : ""}`}
                             width={24}
-                            onClick={
-                              !editingKey ? () => edit(record) : undefined
-                            }
+                            onClick={!editingKey ? () => edit(record) : undefined}
                           />
                         </div>
                       </Tooltip>
@@ -693,9 +693,7 @@ const FunctionalCriteriaBillingBucket = ({
                         <div>
                           <SVGIcon
                             name="IconDelete"
-                            color={
-                              isDelete && !editingKey ? "#D90000" : "#8D91A0"
-                            }
+                            color={isDelete && !editingKey ? "#D90000" : "#8D91A0"}
                             width={24}
                             className={
                               isDelete && !editingKey
@@ -785,8 +783,7 @@ const FunctionalCriteriaBillingBucket = ({
       ) : null}
       <div className="relative flex flex-col w-full">
         <div
-          className={`${totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-            } w-1/4 flex`}
+          className={`${totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"} w-1/4 flex`}
         >
           <Select
             mode="multiple"
@@ -893,6 +890,8 @@ const FunctionalCriteriaBillingBucket = ({
           <DetailText label="Updated By">{dataHistory?.updatedBy}</DetailText>
         </CardComponent>
       </ModalCustom>
+
+      {/* Modal Validation Error */}
       <ModalError
         isOpen={modalValidationTable}
         handleOk={() => setModalValidationTable(false)}
@@ -903,7 +902,7 @@ const FunctionalCriteriaBillingBucket = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`You can't add Criteria. Start date and enda date can't be overlap`}</p>
+          <p className="pl-[70px]">{`You can't add Criteria. Start date and end date can't be overlap`}</p>
         </div>
       </ModalError>
     </div>
