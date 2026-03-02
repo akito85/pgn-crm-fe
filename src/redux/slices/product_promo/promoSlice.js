@@ -1264,27 +1264,27 @@ const promoSlice = createSlice({
     // Get Detail Promo
     [getDetailPromo.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
     },
     [getDetailPromo.fulfilled]: (state, action) => {
       state.data_promoDiscountDetail = action.payload;
       state.loading = false;
     },
     [getDetailPromo.rejected]: (state, action) => {
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
       state.loading = false;
     },
 
     [getDetailPromoDraft.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
     },
     [getDetailPromoDraft.fulfilled]: (state, action) => {
       state.data_promoDiscountDetailDraft = action.payload;
       state.loading = false;
     },
     [getDetailPromoDraft.rejected]: (state, action) => {
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
       state.loading = false;
     },
 
