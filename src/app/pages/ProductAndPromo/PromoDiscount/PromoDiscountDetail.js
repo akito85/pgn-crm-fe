@@ -193,80 +193,80 @@ const PromoDiscountDetail = () => {
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        {data_promoDiscountDetail?.approvalType?.includes("INACTIVE") &&
-        data_promoDiscountDetail?.approvalDto?.isApprover ? (
-          <div className="mt-5">
-            <BaseContainer header={"Inactive Request Information"}>
-              <div className="w-full grid grid-cols-4 gap-5">
-                <DetailText label="Requested Date">
-                  {data_promoDiscountDetail?.approvalDetail?.requestedDate}
-                </DetailText>
-                <DetailText label="Requested By">
-                  {data_promoDiscountDetail?.approvalDetail?.requestedBy}
-                </DetailText>
-                <DetailText label="Remark">
-                  {data_promoDiscountDetail?.approvalDetail?.remarks}
-                </DetailText>
-              </div>
-            </BaseContainer>
-          </div>
-        ) : null}
-        {
-          draftExist && (
-            <NxBaseContainer border padding={false}>
-              <NxTabs
-                items={tabOptions}
-                activeKey={activeKey}
-                onChange={setActiveKey}
-              />
-            </NxBaseContainer>
-          )
-        }
-        <div className={"w-full"}>
-          <PromoDiscountDetailPages dataPromo={detail} />
-        </div>
-        <div className={"w-full flex justify-between my-10"}>
-          <div className=" flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-          </div>
-
-          {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                type="reject"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject(false);
-                }}
-              >
-                Reject
-              </ButtonComponent>
-              <ButtonComponent
-                type="approve"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject(true);
-                }}
-              >
-                Approve
-              </ButtonComponent>
+        <div className="flex flex-col gap-y-4">
+          <BreadCrumb routes={routes} />
+          {data_promoDiscountDetail?.approvalType?.includes("INACTIVE") &&
+          data_promoDiscountDetail?.approvalDto?.isApprover ? (
+            <div className="mt-5">
+              <BaseContainer header={"Inactive Request Information"}>
+                <div className="w-full grid grid-cols-4 gap-5">
+                  <DetailText label="Requested Date">
+                    {data_promoDiscountDetail?.approvalDetail?.requestedDate}
+                  </DetailText>
+                  <DetailText label="Requested By">
+                    {data_promoDiscountDetail?.approvalDetail?.requestedBy}
+                  </DetailText>
+                  <DetailText label="Remark">
+                    {data_promoDiscountDetail?.approvalDetail?.remarks}
+                  </DetailText>
+                </div>
+              </BaseContainer>
             </div>
           ) : null}
+          {
+            draftExist && (
+              <NxBaseContainer border padding={false}>
+                <NxTabs
+                  items={tabOptions}
+                  activeKey={activeKey}
+                  onChange={setActiveKey}
+                />
+              </NxBaseContainer>
+            )
+          }
+          <PromoDiscountDetailPages dataPromo={detail} />
+          <div className={"w-full flex justify-between"}>
+            <div className=" flex">
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => navigate(-1)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
+                  />
+                }
+              >
+                Back
+              </ButtonComponent>
+            </div>
+
+            {showButtonApproval ? (
+              <div className={"w-full flex justify-end gap-5"}>
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject(false);
+                  }}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject(true);
+                  }}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            ) : null}
+          </div>
         </div>
       </Spin>
 

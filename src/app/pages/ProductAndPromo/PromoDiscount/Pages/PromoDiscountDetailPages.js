@@ -7,6 +7,11 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaPromo } from "../Table/TableCriteriaPromo";
 import ConditionPromo from "../Form/ConditionsPromo";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../components/Nx/NxDetailText";
+import StatusComponent from "../../../../../components/StatusComponent";
+import NxDate from "../../../../../components/Nx/NxDatePicker";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 
 const PromoDiscountDetailPages = ({ dataPromo }) => {
   const [valuePage, setValuePage] = useState("Criteria");
@@ -31,47 +36,56 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
     }
     return text;
   };
-  // console.log(dataPromo, "promo detail");
+
+  const {
+    id,
+    name,
+    categoryName,
+    typeName,
+    promotionTypeName,
+    startDate,
+    endDate,
+    status,
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy,
+  } = dataPromo;
+
   return (
-    <Fragment>
-      <BaseContainer header={"PROMO DISCOUNT INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Name">{dataPromo?.name || ""}</DetailText>
-          <DetailText label="Category">{dataPromo?.categoryName}</DetailText>
-          <DetailText label="Type">{dataPromo?.typeName}</DetailText>
-          <DetailText label="Promotion Type">{dataPromo?.promotionTypeName}</DetailText>
-          <DetailText label="Start Date">
-            {dataPromo?.startDate
-              ? moment(dataPromo?.startDate).format(dateFormatting.date)
-              : ""}
-          </DetailText>
-          <DetailText label="End Date">
-            {dataPromo.endDate
-              ? moment(dataPromo?.endDate).format(dateFormatting.date)
-              : ""}
-          </DetailText>
-          <DetailText label="Status">
-            {dataPromo.status
-              ? `${dataPromo?.status.charAt(0).toUpperCase()}${dataPromo?.status
-                  .slice(1)
-                  .toLowerCase()}`
-              : ""}
-          </DetailText>
-          <DetailText label="Status Approval">
-            {handleStatusCase(dataPromo.statusApproval)}
-          </DetailText>
-          <div className="col-span-4">
-            <DetailText label="Criteria">
+    <>
+      <NxCardContainer header={"Detail Information"}>
+        <NxBaseContainer header={"PROMO INFORMATION"} border>
+          <div className="flex flex-col gap-y-4">
+            <div className="w-full grid grid-cols-3 gap-4">
+              <NxDetailText label="Name">{name || ""}</NxDetailText>
+              <NxDetailText label="Category">{categoryName}</NxDetailText>
+              <NxDetailText label="Type">{typeName}</NxDetailText>
+              <NxDetailText label="Promotion Type">{promotionTypeName}</NxDetailText>
+              <NxDetailText label="Start Date">
+                {NxDate.formatDate(startDate, "DD MMM YYYY")}
+              </NxDetailText>
+              <NxDetailText label="End Date">
+                {NxDate.formatDate(endDate, "DD MMM YYYY")}
+              </NxDetailText>
+              <NxDetailText label="Status">
+                <StatusComponent colour={status}>
+                  {status}
+                </StatusComponent>
+              </NxDetailText>
+              <NxDetailText label="Status Approval">
+                {handleStatusCase(dataPromo.statusApproval)}
+              </NxDetailText>
+            </div>
+            <NxDetailText label="Criteria">
               {dataPromo?.criteria || ""}
-            </DetailText>
-          </div>
-          <div className="col-span-4">
-            <DetailText label="Description">
+            </NxDetailText>
+            <NxDetailText label="Description">
               {dataPromo?.description || ""}
-            </DetailText>
+            </NxDetailText>
           </div>
-        </div>
-      </BaseContainer>
+        </NxBaseContainer>
+      </NxCardContainer>
 
       <BaseContainer
         header={"Criteria Information"}
@@ -122,24 +136,19 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
         )}
       </BaseContainer>
 
-      <BaseContainer header={"History Log Information"}>
-        <div className="w-full grid grid-cols-5 gap-5">
-          <DetailText label="Record ID">{dataPromo?.id}</DetailText>
-          <DetailText label="Created Date">
-            {dataPromo?.createdDate
-              ? moment(dataPromo?.createDate).format(dateFormatting.date)
-              : ""}
-          </DetailText>
-          <DetailText label="Created By">{dataPromo?.createdBy}</DetailText>
-          <DetailText label="Update Date">
-            {dataPromo?.updatedDate
-              ? moment(dataPromo?.updateDate).format(dateFormatting.date)
-              : ""}
-          </DetailText>
-          <DetailText label="Updated By">{dataPromo?.updatedBy}</DetailText>
-        </div>
-      </BaseContainer>
-    </Fragment>
+      <NxCardContainer header={"HISTORY LOG INFORMATION"}>
+        <NxBaseContainer border>
+          <div className="w-full grid grid-cols-5 gap-4">
+            {/* History Log Information */}
+            <NxDetailText label="Record Id">{id}</NxDetailText>
+            <NxDetailText label="Created Date">{NxDate.formatDate(createdDate)}</NxDetailText>
+            <NxDetailText label="Created By">{createdBy}</NxDetailText>
+            <NxDetailText label="Updated Date">{NxDate.formatDate(updatedDate)}</NxDetailText>
+            <NxDetailText label="Updated By">{updatedBy}</NxDetailText>
+          </div>
+        </NxBaseContainer>
+      </NxCardContainer>
+    </>
   );
 };
 
