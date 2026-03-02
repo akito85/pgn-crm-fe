@@ -92,6 +92,9 @@ const PosForm = ({ type }) => {
   const idPos = type === "create" ? undefined : location?.state?.idPos;
   const customerTypeFromNav = location?.state?.customerType;
 
+  const [selectedTransactionDate, setSelectedTransactionDate] = useState(null);
+  const [selectedInvoiceDate, setSelectedInvoiceDate] = useState(null);
+
   const [customerType, setCustomerType] = useState(customerTypeFromNav || null);
   const [defaultData, setDefaultData] = useState({});
   const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
@@ -479,6 +482,12 @@ const PosForm = ({ type }) => {
       data_globalBillingCycle
     ) {
       const isProspective = data_detailPos.customerType === 2;
+
+      const transDate = moment(data_detailPos?.transactionDate);
+      const invDate = moment(data_detailPos?.invoiceDate);
+
+      setSelectedTransactionDate(transDate);
+      setSelectedInvoiceDate(invDate);
 
       setValueDdl({
         action: "setData",
@@ -1570,6 +1579,10 @@ const PosForm = ({ type }) => {
               data_cost_center_list={data_cost_center_list}
               data_uom_codes={data_uom_codes}
               mergedArrayMrc={mergedArrayMrc}
+              selectedTransactionDate={selectedTransactionDate}
+              setSelectedTransactionDate={setSelectedTransactionDate}
+              selectedInvoiceDate={selectedInvoiceDate}
+              setSelectedInvoiceDate={setSelectedInvoiceDate}
             />
           </div>
 

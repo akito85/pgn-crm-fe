@@ -54,6 +54,7 @@ const BillingPage = () => {
   const [calculationCodeId, setCalculationCodeId] = useState("");
   const [accountNumberId, setAccountNumberId] = useState("");
   const [activeRowKey, setActiveRowKey] = useState(null);
+  const [selectedBillingData, setSelectedBillingData] = useState(null);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -195,6 +196,7 @@ const BillingPage = () => {
       setAccountNumberId("");
       setSANumberId("");
       setCalculationCodeId("");
+      setSelectedBillingData(null);
     } else {
       setBillingCode(recordKey);
       setRatingCode(record.ratingCode);
@@ -202,6 +204,7 @@ const BillingPage = () => {
       setSANumberId(record.saNumber);
       setCalculationCodeId(record.calculationCode);
       setActiveRowKey(recordKey);
+      setSelectedBillingData(record);
       setPageDetail(true);
     }
   };
@@ -422,7 +425,7 @@ const BillingPage = () => {
         {pageDetail && (
           <div
             ref={detailRef}
-            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
+            className="mt-0 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-0"
           >
             <BillingDetail
               billingCodeId={billingCode}
@@ -430,6 +433,7 @@ const BillingPage = () => {
               saNumberId={saNumberId}
               accountNumberId={accountNumberId}
               calculationCodeId={calculationCodeId}
+              selectedBillingData={selectedBillingData}
               onClose={() => {
                 setPageDetail(false);
                 setActiveRowKey(null);
@@ -438,6 +442,7 @@ const BillingPage = () => {
                 setAccountNumberId("");
                 setSANumberId("");
                 setCalculationCodeId("");
+                setSelectedBillingData(null);
               }}
             />
           </div>
