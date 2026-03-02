@@ -33,13 +33,9 @@ export const RenderContentActions = (
             </Space>
           }
         >
-          <div>
+          <div className="group">
             <MoreOutlined
-              style={{
-                fontSize: "20px",
-                color: "#0075bf",
-                cursor: "pointer",
-              }}
+              className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out"
             />
           </div>
         </Popover>

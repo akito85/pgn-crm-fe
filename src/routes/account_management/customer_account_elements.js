@@ -16,8 +16,7 @@ import PremiseDetail from "../../app/pages/AccountManagement/CustomerAccountDeta
 import ServicePoint from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServicePoint/ServicePoint";
 import ServicePointAssetAssign from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServicePoint/ServicePointAssetAssign";
 import UpdateAccountInformation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/AccountInformation/UpdateAccountInformation";
-import RelationshipCreateAndUpdate from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipCreateAndUpdate";
-import RelationshipDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipDetail";
+import RelationshipDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/Details/RelationshipDetails";
 import ApproveOrRejectTOS from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/DetailServiceAgreement/TosSubmission/ApproveOrRejectTos/ApproveOrRejectTOS";
 import CustomerDetail from "../../app/pages/AccountManagement/Customer/CustomerDetail";
 import UpdateCustomer from "../../app/pages/AccountManagement/Customer/Update/UpdateCustomer";
@@ -59,6 +58,7 @@ import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAc
 import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
 import MultiDestinationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/Details/MultiDestinationDetails";
 import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/CreateUpdate/CreateUpdateMultiDestination";
+import CreateUpdateRelationship from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/CreateUpdate/CreateUpdateRelationship";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -112,13 +112,13 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Payment Relation Detail
   VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails />,
-  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"create"} />,
-  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"update"} />,
+  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"create"} />,
+  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"update"} />,
 
   // Payment Relation Detail
   VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
-  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"create"} />,
-  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"update"} />,
+  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"create"} />,
+  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"update"} />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,
@@ -143,9 +143,9 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_ACCOUNT_STANDARD_PAGE: <UpdateAccountInformation />,
 
   //RELATIONSHIP
-  CREATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"create"} />,
-  UPDATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"update"} />,
-  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetail />,
+  CREATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship type={"create"} />,
+  UPDATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship type={"update"} />,
+  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetails />,
 
   //SA-APPROVE-REJECT-TOS
   APPROVE_OR_REJECT_TOS_PAGE: <ApproveOrRejectTOS />,

@@ -18,6 +18,7 @@ const StatusComponent = ({
   colour,
   type = "status",
   size = "default",
+  margin = true,
 }) => {
   const { bgcolor, textColor } = useMemo(() => {
     if (!colour || typeof colour !== "string") {
@@ -88,6 +89,7 @@ const StatusComponent = ({
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
+      case "waiting_for_approval":
       case "waiting_cancellation_approval":
       case "waiting cancellation approval":
       case "waiting_upload_approval":
@@ -314,7 +316,7 @@ const StatusComponent = ({
   if (!children) return null;
 
   const sizeClasses =
-    size === "small" ? "px-2 py-0 text-xs my-0.5" : "px-3 py-0 my-1";
+    size === "small" ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}` : `px-3 py-0 ${margin ? "my-1" : ""}`;
 
   return (
     <div

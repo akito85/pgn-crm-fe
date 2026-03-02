@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import { Form, Input, Select, Space, Table, Tooltip } from "antd";
+import { Button, Checkbox, Form, Input, Select, Space, Table, Tooltip } from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
 import DateComponent from "../../../../components/DateComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -31,6 +31,7 @@ const EditableCell = ({
   endDate,
   requiredDate,
   indexValue,
+  type,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -38,6 +39,20 @@ const EditableCell = ({
   const key = record?.key || 0;
 
   const disabledCondition = (dependDataIndex, dataIndex, record) => {
+    // Status-based field disabling for update type
+    if (type === "update" && record?.status) {
+      const status = record.status;
+      // INACTIVE: all fields disabled (shouldn't happen since edit icon is disabled)
+      if (status === "INACTIVE") {
+        return true;
+      }
+      // ACTIVE: only endDate is editable
+      if (status === "ACTIVE") {
+        return dataIndex !== "endDate";
+      }
+      // DRAFT: all fields editable (fall through to normal logic)
+    }
+
     return dataDependAdvanced(dependDataIndex, key, dataEditRecord);
     // ||
     // record[dataIndex]?.disabled ||
@@ -129,7 +144,10 @@ const EditableCell = ({
             allowClear
             optionFilterProp="children"
             labelInValue
-            disabled={dataDepended(dependDataIndex, dataIndex, record, dataEditRecord)}
+            disabled={
+              disabledCondition(dependDataIndex, dataIndex, record) ||
+              dataDepended(dependDataIndex, dataIndex, record, dataEditRecord)
+            }
             filterOption={(input, option) =>
               (option?.children ?? "")
                 .toLowerCase()
@@ -149,6 +167,7 @@ const EditableCell = ({
             onChange={(e) => {
               formTableCriteria.resetFields(["endDate"]);
             }}
+            disabled={disabledCondition(dependDataIndex, dataIndex, record)}
             dateDisable={handleDisableDate}
           />
         );
@@ -157,8 +176,9 @@ const EditableCell = ({
         return (
           <DateComponent
             disabled={
-              formTableCriteria.getFieldValue().startDate === null ||
-              formTableCriteria.getFieldValue().startDate === undefined
+              (formTableCriteria.getFieldValue().startDate === null ||
+               formTableCriteria.getFieldValue().startDate === undefined) ||
+              (type === "update" && record?.status === "INACTIVE")
             }
             dateDisable={handleDisableDate}
           />
@@ -256,6 +276,7 @@ const FunctionalCriteriaProduct = ({
   dataListExternal = {},
   checkStartDate = true, //check product has date validation
   excludeRender = null,
+  showInactivate = false, // opt-in per consumer
 }) => {
   // Selector
   const {
@@ -542,6 +563,8 @@ const FunctionalCriteriaProduct = ({
       const dataOverlap = [];
       // if (hasValue(formHeader?.endDate)) {
       dataTable?.forEach(item => {
+        console.log("startDate val:", moment(item?.startDate).startOf('day') < moment(formHeader?.startDate).startOf('day'))
+        console.log("endDate val:", moment(item?.endDate).startOf('day') > moment(formHeader?.endDate).startOf('day'))
         if (moment(item?.startDate).startOf('day') < moment(formHeader?.startDate).startOf('day') || moment(item?.endDate).startOf('day') > moment(formHeader?.endDate).startOf('day')) {
           dataOverlap?.push(item)
         }
@@ -683,6 +706,16 @@ const FunctionalCriteriaProduct = ({
     }
   };
 
+  // Function Inactivate Row
+  const inactivateRow = (record) => {
+    const newStatus = record.status === "INACTIVE" ? "ACTIVE" : "INACTIVE";
+    updateData((prevData) =>
+      prevData.map((row) =>
+        row.key === record.key ? { ...row, status: newStatus } : row
+      )
+    );
+  };
+
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
@@ -718,7 +751,7 @@ const FunctionalCriteriaProduct = ({
       {
         title: "ACTION",
         dataIndex: "operation",
-        width: storedData ? 240 : 120,
+        width: storedData ? 240 : showInactivate ? 160 : 120,
         fixed: "right",
         align: "center",
         render: (_, record) => {
@@ -726,6 +759,18 @@ const FunctionalCriteriaProduct = ({
           const isDelete =
             // (status === "DRAFT" && statusApproval === "DRAFT") ||
             record?.dataType !== "exist";
+
+          const statusChangedFromApproved = record?.approvedStatus !== undefined
+            ? record.approvedStatus !== record.status
+            : false;
+          const isCurrentRecord     = record?.dataType === "exist" && !statusChangedFromApproved;
+          const isUpdateDisabled    = !!editingKey || (isCurrentRecord && record?.status === "INACTIVE");
+          const isDeleteEnabled     = record?.dataType !== "exist" && !editingKey;
+          const isInactive          = record?.status === "INACTIVE";
+          const isInactivateEnabled = !editingKey && (
+            (isCurrentRecord && record?.status === "ACTIVE") ||
+            (!isCurrentRecord && ["ACTIVE", "INACTIVE"].includes(record?.status))
+          );
 
           return (
             <Space className="my-3 gap-2">
@@ -758,42 +803,40 @@ const FunctionalCriteriaProduct = ({
                     </Tooltip>
                   ) : (
                     <>
-                      <Tooltip title="Update">
-                        <div>
-                          <SVGIcon
-                            name="IconEdit"
-                            color={editingKey ? "#8D91A0" : "#ACC424"}
-                            className={
-                              editingKey ? "cursor-not-allowed" : undefined
-                            }
-                            width={24}
-                            onClick={
-                              !editingKey ? () => edit(record) : undefined
-                            }
-                          />
-                        </div>
+                      {/* Update */}
+                      <Tooltip title={isUpdateDisabled ? "" : "Update"}>
+                        <Button
+                          type="table-action"
+                          disabled={isUpdateDisabled}
+                          onClick={() => edit(record)}
+                        >
+                          <SVGIcon name="IconEdit" width={20} />
+                        </Button>
                       </Tooltip>
+
+                      {/* Delete */}
                       <Tooltip title="Delete">
-                        <div>
-                          <SVGIcon
-                            name="IconDelete"
-                            color={
-                              isDelete && !editingKey ? "#D90000" : "#8D91A0"
-                            }
-                            width={24}
-                            className={
-                              isDelete && !editingKey
-                                ? undefined
-                                : "disabled cursor-not-allowed"
-                            }
-                            onClick={
-                              isDelete && !editingKey
-                                ? () => deleteRow(record)
-                                : undefined
-                            }
-                          />
-                        </div>
+                        <Button
+                          type="table-action"
+                          disabled={!isDeleteEnabled}
+                          onClick={() => deleteRow(record)}
+                        >
+                          <SVGIcon name="IconDelete" width={20} />
+                        </Button>
                       </Tooltip>
+
+                      {/* Inactivate — only rendered when showInactivate=true */}
+                      {showInactivate && (
+                        <Tooltip title={isInactivateEnabled ? (isInactive ? "Activate" : "Inactivate") : ""}>
+                          <Checkbox
+                            className="action-checkbox"
+                            disabled={!isInactivateEnabled || !!editingKey}
+                            checked={isInactive}
+                            onClick={() => inactivateRow(record)}
+                            style={{ transform: "scale(0.9)" }}
+                          />
+                        </Tooltip>
+                      )}
                     </>
                   )}
                 </div>
@@ -948,6 +991,7 @@ const FunctionalCriteriaProduct = ({
                       required: col.required,
                       endDate: endDate,
                       requiredDate:checkStartDate,
+                      type: type,
                       // disableDate,
                       formTableCriteria: formTableCriteria,
                     }),

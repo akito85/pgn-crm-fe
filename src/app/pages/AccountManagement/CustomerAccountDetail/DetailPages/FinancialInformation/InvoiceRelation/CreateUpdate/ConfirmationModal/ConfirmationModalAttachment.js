@@ -1,21 +1,17 @@
-import ConfirmationModalAttachmentTable from "./ConfirmationModalAttachmentTable";
+import { useDispatch } from "react-redux";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import AttachmentInvoiceRelation from "../StepContents/AttachmentForm/AttachmentInvoiceRelation";
 
-const ConfirmationModalAttachment = ({
-  data = [],
-  type,
-  dispatch,
-  service,
-  configApplication,
-}) => {
+const ConfirmationModalAttachment = ({ data = [], service, configApplication }) => {
+  const dispatch = useDispatch();
   return (
-    <NxBaseContainer border header={"ATTACHMENT INFORMATION"}>
-      <ConfirmationModalAttachmentTable
-        type={type}
+    <NxBaseContainer border header={"ATTACHMENT"}>
+      <AttachmentInvoiceRelation
         data={data}
         dispatch={dispatch}
         service={service}
         configApplication={configApplication}
+        type={"confirmation"}
       />
     </NxBaseContainer>
   );

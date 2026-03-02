@@ -1,6 +1,7 @@
 import { useState } from "react";
 import RadioTabs from "../../../../../../../../../components/RadioTabs";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import DetailText from "../../../../../../../../../components/DetailText";
 import moment from "moment";
 
@@ -43,136 +44,150 @@ export default function ApprovalForm({
 
   const renderServiceRequestSummary = () => (
     <>
-      <NxPanel title="ACCOUNT INFORMATION">
-        <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Account ID">
-            {formData?.srFormAccountId || accountInfo?.accountId || "-"}
-          </DetailText>
-          <DetailText label="Account SOR">
-            {formData?.srFormAccountSor || accountInfo?.sor || "-"}
-          </DetailText>
-          <DetailText label="Cost Center">
-            {formData?.srFormAccountCostCenter ||
-              accountSummary?.costCenter ||
-              "-"}
-          </DetailText>
-          <DetailText label="Meter Reading Code">
-            {formData?.srFormMeterReadingCode ||
-              accountSummary?.meterReadingCodes ||
-              "-"}
-          </DetailText>
-          <DetailText label="Account Segment">
-            {formData?.srFormAccountSegment || accountInfo?.segment || "-"}
-          </DetailText>
-          <DetailText label="Account Group Type">
-            {formData?.srFormAccountGroupType ||
-              accountInfo?.accountGroupType ||
-              "-"}
-          </DetailText>
-          <DetailText label="Account Type">
-            {formData?.srFormAccountType || accountInfo?.accountType || "-"}
-          </DetailText>
-          <DetailText label="Premise Address">
-            {formData?.srFormPremiseAddress || "-"}
-          </DetailText>
-        </div>
-      </NxPanel>
+      <NxCardContainer header="ACCOUNT INFORMATION">
+        <NxBaseContainer border>
+          <div className="w-full grid grid-cols-3 gap-3">
+            <DetailText label="Account ID">
+              {formData?.srFormAccountId || accountInfo?.accountId || "-"}
+            </DetailText>
+            <DetailText label="Account SOR">
+              {formData?.srFormAccountSor || accountInfo?.sor || "-"}
+            </DetailText>
+            <DetailText label="Cost Center">
+              {formData?.srFormAccountCostCenter ||
+                accountSummary?.costCenter ||
+                "-"}
+            </DetailText>
+            <DetailText label="Meter Reading Code">
+              {formData?.srFormMeterReadingCode ||
+                accountSummary?.meterReadingCodes ||
+                "-"}
+            </DetailText>
+            <DetailText label="Account Segment">
+              {formData?.srFormAccountSegment || accountInfo?.segment || "-"}
+            </DetailText>
+            <DetailText label="Account Group Type">
+              {formData?.srFormAccountGroupType ||
+                accountInfo?.accountGroupType ||
+                "-"}
+            </DetailText>
+            <DetailText label="Account Type">
+              {formData?.srFormAccountType || accountInfo?.accountType || "-"}
+            </DetailText>
+            <DetailText label="Premise Address">
+              {formData?.srFormPremiseAddress || "-"}
+            </DetailText>
+          </div>
+        </NxBaseContainer>
+      </NxCardContainer>
 
-      <NxPanel title="SERVICE REQUEST INFORMATION" className="mt-4">
-        <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Service Request Reference">
-            {formData?.srr || "-"}
-          </DetailText>
-          <DetailText label="Type">
-            {getDropdownLabel("serviceRequestTypes", formData?.type)}
-          </DetailText>
-          <DetailText label="Category">
-            {getDropdownLabel("serviceRequestCategories", formData?.category)}
-          </DetailText>
-          <DetailText label="Sub Category">
-            {getDropdownLabel(
-              "serviceRequestSubcategories",
-              formData?.subCategory,
-            )}
-          </DetailText>
-          <DetailText label="Channel">
-            {getDropdownLabel("serviceRequestChannels", formData?.channel)}
-          </DetailText>
-          <DetailText label="Priority">
-            {getDropdownLabel("serviceRequestPriorities", formData?.priority)}
-          </DetailText>
-          <DetailText label="Request Source">
-            {getDropdownLabel("serviceRequestSources", formData?.requestSource)}
-          </DetailText>
-          <DetailText label="Request Date">
-            {formData?.requestDate
-              ? moment(formData.requestDate).format("DD MMM YYYY HH:mm:ss")
-              : "-"}
-          </DetailText>
-        </div>
-        <div className="w-full mt-3">
-          <DetailText label="Description">
-            {formData?.description || "-"}
-          </DetailText>
-        </div>
-      </NxPanel>
+      <div className="mt-4">
+        <NxCardContainer header="SERVICE REQUEST INFORMATION">
+          <NxBaseContainer border>
+            <div className="w-full grid grid-cols-3 gap-3">
+              <DetailText label="Service Request Reference">
+                {formData?.srr || "-"}
+              </DetailText>
+              <DetailText label="Type">
+                {getDropdownLabel("serviceRequestTypes", formData?.type)}
+              </DetailText>
+              <DetailText label="Category">
+                {getDropdownLabel("serviceRequestCategories", formData?.category)}
+              </DetailText>
+              <DetailText label="Sub Category">
+                {getDropdownLabel(
+                  "serviceRequestSubcategories",
+                  formData?.subCategory,
+                )}
+              </DetailText>
+              <DetailText label="Channel">
+                {getDropdownLabel("serviceRequestChannels", formData?.channel)}
+              </DetailText>
+              <DetailText label="Priority">
+                {getDropdownLabel("serviceRequestPriorities", formData?.priority)}
+              </DetailText>
+              <DetailText label="Request Source">
+                {getDropdownLabel("serviceRequestSources", formData?.requestSource)}
+              </DetailText>
+              <DetailText label="Request Date">
+                {formData?.requestDate
+                  ? moment(formData.requestDate).format("DD MMM YYYY HH:mm:ss")
+                  : "-"}
+              </DetailText>
+            </div>
+            <div className="w-full mt-3">
+              <DetailText label="Description">
+                {formData?.description || "-"}
+              </DetailText>
+            </div>
+          </NxBaseContainer>
+        </NxCardContainer>
+      </div>
 
       {formData?.srFormDataRequirements?.length > 0 && (
-        <NxPanel title="DATA REQUIREMENTS" className="mt-4">
-          <div className="w-full">
-            {formData.srFormDataRequirements.map((req, index) => (
-              <div key={index} className="grid grid-cols-2 gap-3 mb-2">
-                <DetailText label="Type">{req.type || "-"}</DetailText>
-                <DetailText label="Value">{req.value || "-"}</DetailText>
+        <div className="mt-4">
+          <NxCardContainer header="DATA REQUIREMENTS">
+            <NxBaseContainer border>
+              <div className="w-full">
+                {formData.srFormDataRequirements.map((req, index) => (
+                  <div key={index} className="grid grid-cols-2 gap-3 mb-2">
+                    <DetailText label="Type">{req.type || "-"}</DetailText>
+                    <DetailText label="Value">{req.value || "-"}</DetailText>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </NxPanel>
+            </NxBaseContainer>
+          </NxCardContainer>
+        </div>
       )}
     </>
   );
 
   const renderContactSummary = () => (
-    <NxPanel title="CONTACTS">
-      {contactsData.length > 0 ? (
-        <div className="w-full">
-          {contactsData.map((contact, index) => (
-            <div key={index} className="border-b pb-3 mb-3">
-              <div className="grid grid-cols-3 gap-3">
-                <DetailText label="Name">{contact.name || "-"}</DetailText>
-                <DetailText label="Type">{contact.type || "-"}</DetailText>
-                <DetailText label="Phone">{contact.phone || "-"}</DetailText>
-                <DetailText label="Email">{contact.email || "-"}</DetailText>
+    <NxCardContainer header="CONTACTS">
+      <NxBaseContainer border>
+        {contactsData.length > 0 ? (
+          <div className="w-full">
+            {contactsData.map((contact, index) => (
+              <div key={index} className="border-b pb-3 mb-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <DetailText label="Name">{contact.name || "-"}</DetailText>
+                  <DetailText label="Type">{contact.type || "-"}</DetailText>
+                  <DetailText label="Phone">{contact.phone || "-"}</DetailText>
+                  <DetailText label="Email">{contact.email || "-"}</DetailText>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500">No contacts added</p>
-      )}
-    </NxPanel>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No contacts added</p>
+        )}
+      </NxBaseContainer>
+    </NxCardContainer>
   );
 
   const renderPrerequisiteSummary = () => (
-    <NxPanel title="PRE-REQUISITES">
-      {prerequisitesData.length > 0 ? (
-        <div className="w-full">
-          {prerequisitesData.map((prereq, index) => (
-            <div key={index} className="border-b pb-3 mb-3">
-              <div className="grid grid-cols-3 gap-3">
-                <DetailText label="Type">{prereq.type || "-"}</DetailText>
-                <DetailText label="Name">{prereq.name || "-"}</DetailText>
-                <DetailText label="Description">
-                  {prereq.description || "-"}
-                </DetailText>
+    <NxCardContainer header="PRE-REQUISITES">
+      <NxBaseContainer border>
+        {prerequisitesData.length > 0 ? (
+          <div className="w-full">
+            {prerequisitesData.map((prereq, index) => (
+              <div key={index} className="border-b pb-3 mb-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <DetailText label="Type">{prereq.type || "-"}</DetailText>
+                  <DetailText label="Name">{prereq.name || "-"}</DetailText>
+                  <DetailText label="Description">
+                    {prereq.description || "-"}
+                  </DetailText>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500">No pre-requisites added</p>
-      )}
-    </NxPanel>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No pre-requisites added</p>
+        )}
+      </NxBaseContainer>
+    </NxCardContainer>
   );
 
   const renderContent = () => {

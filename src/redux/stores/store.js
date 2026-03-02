@@ -90,6 +90,7 @@ import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
+import { tasklistSlice } from "../slices/tasklist/tasklistSlice";
 import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog";
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
@@ -295,6 +296,9 @@ const reducer = combineReducers({
   [reportCustomerAgreementSlice.reducerPath]:
     reportCustomerAgreementSlice.reducer,
 
+  // tasklist
+  [tasklistSlice.reducerPath]: tasklistSlice.reducer,
+
   // debt and collection
   gracePeriod: gracePeriodReducer,
   activityName: activityNameReducer,
@@ -317,7 +321,10 @@ const store = configureStore({
   reducer: reducer,
   devTools: true,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(reportCustomerSlice.middleware),
+    getDefaultMiddleware()
+      .concat(reportCustomerSlice.middleware)
+      .concat(reportCustomerAgreementSlice.middleware)
+      .concat(tasklistSlice.middleware),
 });
 
 setupListeners(store.dispatch);

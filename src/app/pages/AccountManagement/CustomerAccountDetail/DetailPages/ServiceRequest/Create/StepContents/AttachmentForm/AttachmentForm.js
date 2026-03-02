@@ -13,6 +13,8 @@ import { getColumnSearchProps } from "../../../../../../../../../utils/getColumn
 import { previewFileAttachment } from "../../../../../../../../../utils/previewFileAttachment";
 import ModalAttachment from "./ModalAttachment";
 import axios from "axios";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import { getCategoryAttachment } from "../../../../../../../../../redux/slices/account_management/Account/accountSlice";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../redux/slices/product_promo/product";
 
@@ -288,10 +290,9 @@ const AttachmentForm = ({
 
   return (
     <Spin spinning={loadingDownload}>
-      <span className="text-primary uppercase font-bold">
-        ATTACHMENT INFORMATION
-      </span>
-      <div className="flex flex-col w-full gap-3 pt-[30px]">
+      <NxCardContainer header="ATTACHMENT INFORMATION">
+        <NxBaseContainer border>
+        <div className="flex flex-col w-full gap-3">
         {type !== "detail" && type !== "preview" ? (
           <div className="flex flex-col w-full gap-2">
             <p className="text-[13px] mb-0 text-dg-grey-dark">
@@ -343,7 +344,9 @@ const AttachmentForm = ({
           withLink
           valueGuard={dataGlobalPropAttachment}
         />
-      </div>
+        </div>
+        </NxBaseContainer>
+      </NxCardContainer>
     </Spin>
   );
 };
