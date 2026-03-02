@@ -1,4 +1,4 @@
-import { Spin } from "antd";
+import { Button, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -60,8 +60,14 @@ const PromoDiscountDetail = () => {
       label: "Current",
     }
   ];
+  
+  const { status, statusApproval, isApprover } = data_promoDiscountDetail;
 
-  const [showButtonApproval, setShowButtonApproval] = useState(false);
+  const isApproval =
+    (statusApproval === "WAITING APPROVAL" || statusApproval === "WAITING_APPROVAL") &&
+    isApprover;
+
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
 
   useEffect(() => {
     if (id) {
@@ -102,19 +108,10 @@ const PromoDiscountDetail = () => {
     };
   };
 
-  const { status, statusApproval } = data_promoDiscountDetail;
-
-  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
-
   const detail = handleAssertData(activeKey === "ori" ? data_promoDiscountDetail : data_promoDiscountDetailDraft);
 
   useEffect(() => {
     if (id && data_promoDiscountDetail && data_promoDiscountDetail?.id === id) {
-      setShowButtonApproval(
-        (data_promoDiscountDetail?.statusApproval === "WAITING APPROVAL" ||
-          data_promoDiscountDetail?.statusApproval === "WAITING_APPROVAL") &&
-          data_promoDiscountDetail?.isApprover
-      );
       setListDataAttachment(
         (data_promoDiscountDetail?.attachmentListDto || []).map((item) => {
           return {
@@ -195,24 +192,6 @@ const PromoDiscountDetail = () => {
       <Spin spinning={loading}>
         <div className="flex flex-col gap-y-4">
           <BreadCrumb routes={routes} />
-          {data_promoDiscountDetail?.approvalType?.includes("INACTIVE") &&
-          data_promoDiscountDetail?.approvalDto?.isApprover ? (
-            <div className="mt-5">
-              <BaseContainer header={"Inactive Request Information"}>
-                <div className="w-full grid grid-cols-4 gap-5">
-                  <DetailText label="Requested Date">
-                    {data_promoDiscountDetail?.approvalDetail?.requestedDate}
-                  </DetailText>
-                  <DetailText label="Requested By">
-                    {data_promoDiscountDetail?.approvalDetail?.requestedBy}
-                  </DetailText>
-                  <DetailText label="Remark">
-                    {data_promoDiscountDetail?.approvalDetail?.remarks}
-                  </DetailText>
-                </div>
-              </BaseContainer>
-            </div>
-          ) : null}
           {
             draftExist && (
               <NxBaseContainer border padding={false}>
@@ -225,48 +204,38 @@ const PromoDiscountDetail = () => {
             )
           }
           <PromoDiscountDetailPages dataPromo={detail} />
-          <div className={"w-full flex justify-between"}>
-            <div className=" flex">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => navigate(-1)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
+          {
+            isApproval && (
+              <div className={"w-full flex justify-between"}>
+                <Button
+                  type={"menu"}
+                  onClick={() => navigate(-1)}
+                >
+                  Back
+                </Button>
+                <div className={"flex gap-x-4"}>
+                  <Button
+                    type="reject"
+                    onClick={() => {
+                      setModalConfirm(true);
+                      setApproveOrReject(false);
                     }}
-                  />
-                }
-              >
-                Back
-              </ButtonComponent>
-            </div>
-
-            {showButtonApproval ? (
-              <div className={"w-full flex justify-end gap-5"}>
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => {
-                    setModalConfirm(true);
-                    setApproveOrReject(false);
-                  }}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => {
-                    setModalConfirm(true);
-                    setApproveOrReject(true);
-                  }}
-                >
-                  Approve
-                </ButtonComponent>
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    type="approve"
+                    onClick={() => {
+                      setModalConfirm(true);
+                      setApproveOrReject(true);
+                    }}
+                  >
+                    Approve
+                  </Button>
+                </div>
               </div>
-            ) : null}
-          </div>
+            )
+          }
         </div>
       </Spin>
 
