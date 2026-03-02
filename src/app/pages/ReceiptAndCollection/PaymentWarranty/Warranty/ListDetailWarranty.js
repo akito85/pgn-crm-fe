@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, Spin } from "antd";
+import moment from "moment";
 import {
   getDetailWarranty,
   getListCategory,
@@ -70,16 +71,16 @@ const ListDetailWarranty = () => {
             dataTable={
               dataListAppHierDetail?.length > 0
                 ? dataListAppHierDetail.map((a, index) => ({
-                    ...a,
+                  ...a,
+                  key: index + 1,
+                  employeeDetail: a.employeeDetail.map((b, index) => ({
+                    ...b,
                     key: index + 1,
-                    employeeDetail: a.employeeDetail.map((b, index) => ({
-                      ...b,
-                      key: index + 1,
-                    })),
-                  }))
+                  })),
+                }))
                 : (data_approval_info?.result || [])
             }
-            approvalName={approvalName} 
+            approvalName={approvalName}
             showSelect={false}
             disableSelect={true}
             selectedHierarchy={data_detail?.appHierId}
@@ -93,7 +94,23 @@ const ListDetailWarranty = () => {
       children: (
         <BaseContainer header={"ATTACHMENT INFORMATION"}>
           <AttachmentComponent
-            data={data_detail?.attachments || []}
+            data={
+              data_detail?.attachmentDtoList
+                ? data_detail.attachmentDtoList.map((item) => ({
+                  id: item.id,
+                  uid: item.uid || item.id,
+                  fileName: item.fileName,
+                  fileSize: item.fileSize,
+                  fileCategoryName: item.fileCategoryName,
+                  urlFile1: item.urlFile1,
+                  urlFile2: item.urlFile2,
+                  createdBy: item.createdBy,
+                  createdDate: item.createdDate ? moment(item.createdDate).format("YYYY-MM-DD HH:mm:ss") : null,
+                  dataType: "exist",
+                  fileType: item.fileType || "application/pdf"
+                }))
+                : []
+            }
             type="detail"
             typeSelector="warranty"
             service={receiptCollectionHttpService}
@@ -145,49 +162,49 @@ const ListDetailWarranty = () => {
 
   const routes = [
     {
-        path: "",
-        breadcrumbName: "Receipt & Collection",
+      path: "",
+      breadcrumbName: "Receipt & Collection",
     },
     {
-        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_WARRANTY,
-        breadcrumbName: "Payment Guarantee",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_WARRANTY,
+      breadcrumbName: "Payment Guarantee",
     },
     {
-        path: "",
-        breadcrumbName: "Detail Guarantee",
+      path: "",
+      breadcrumbName: "Detail Guarantee",
     },
-    ];
+  ];
 
   return (
     <LayoutMenu>
-        <Spin spinning={loading}>
-            <BreadCrumb routes={routes} />
-            <div>
-                <Tabs 
-                    activeKey={activeTab} 
-                    items={items} 
-                    onChange={handleTabChange}
-                    tabBarStyle={{ marginBottom: 24 }}
-                />
-            </div>
+      <Spin spinning={loading}>
+        <BreadCrumb routes={routes} />
+        <div>
+          <Tabs
+            activeKey={activeTab}
+            items={items}
+            onChange={handleTabChange}
+            tabBarStyle={{ marginBottom: 24 }}
+          />
+        </div>
 
-            <FooterDetail
-                onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.WARRANTY)}
-                showApproval={isShowButton === true}
-                onApprove={handleApprove}
-                onReject={handleReject}
-            />
+        <FooterDetail
+          onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.WARRANTY)}
+          showApproval={isShowButton === true}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
 
-            <ModalApproveOrReject
-              isOpen={isModalOpen}
-              handleCloseModal={() => setIsModalOpen(false)}
-              onFinish={onFinishApproval}
-              header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
-              approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
-              menu="Payment Guarantee"
-              named={data_detail?.customerName || "-"}
-            />
-        </Spin>
+        <ModalApproveOrReject
+          isOpen={isModalOpen}
+          handleCloseModal={() => setIsModalOpen(false)}
+          onFinish={onFinishApproval}
+          header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
+          approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
+          menu="Payment Guarantee"
+          named={data_detail?.customerName || "-"}
+        />
+      </Spin>
     </LayoutMenu>
   );
 };
