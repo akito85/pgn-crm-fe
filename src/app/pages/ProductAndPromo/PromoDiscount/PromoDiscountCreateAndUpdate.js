@@ -282,7 +282,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   useEffect(() => {
     //get table
     if (dataApprovalId && dataApprovalId !== undefined) {
-      dispatch(getSelectedApprovalPromo({ id: dataApprovalId }));
+      dispatch(getSelectedApprovalPromo(dataApprovalId));
     }
   }, [dispatch, dataApprovalId]);
 

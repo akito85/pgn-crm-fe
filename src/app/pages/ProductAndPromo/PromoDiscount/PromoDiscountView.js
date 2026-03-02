@@ -16,9 +16,9 @@ import {
 } from "../../../../redux/slices/product_promo/promoSlice";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import NxHistoryModal from "../../../../components/Nx/NxHistoryModal";
-import NxApproveOrRejectModal from "../../../../components/Nx/NxApproveOrRejectModal";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxInactivateModal from "../../../../components/Nx/NxInactivateModal";
 
 const PromoDiscountView = () => {
   // Selector
@@ -176,9 +176,14 @@ const PromoDiscountView = () => {
     }
   };
 
-  const handleCancel = () => {
-    setChooseId();
-    setModalInactive(false);
+  const handleInactivateModal = (show, newId) => {
+    if (show) {
+      setChooseId(newId);
+      setModalInactive(true);
+    } else {
+      setChooseId();
+      setModalInactive(false);
+    }
   };
 
   const handleRetry = () => {
@@ -192,23 +197,19 @@ const PromoDiscountView = () => {
     setBodyError({});
   };
 
-  const handleInactive = (data) => {
-    setChooseId(data);
-    setModalInactive(true);
-  };
-
   const handleOk = (res, handleClear) => {
     const dataValue = {
-      id: chooseId.id,
-      appHierId: res.approvalHierarchy,
+      id: chooseId,
+      appHierId: res.appHierId,
       remark: res.remark,
     };
+    
     dispatch(inactivePromo(dataValue))
       .unwrap()
       .then(() => {
         // setModalInactive(true);
         handleClear();
-        handleCancel();
+        handleInactivateModal(false);
         dispatch(
           getAllPromoPaginate({
             search: encodeURIComponent(JSON.stringify(search)),
@@ -245,7 +246,7 @@ const PromoDiscountView = () => {
               totalElement={pagination_promo?.totalElements || 0}
               page={page}
               onSort={onSort}
-              handleInactive={handleInactive}
+              handleInactive={handleInactivateModal}
               handleApprovalHistory={handleApprovalHistory}
               handleDownload={handleDownload}
               handleLoadMore={handleLoadMore}
@@ -261,18 +262,21 @@ const PromoDiscountView = () => {
         </NxCardContainer>
 
         {/* Modal Inactive */}
-        <NxApproveOrRejectModal
+        <NxInactivateModal
           isOpen={modalInactive}
           header={"INACTIVATE"}
-          handleCloseModal={handleCancel}
-          customMessage={`Are you sure you want to inactivate this promo with name ${
-            chooseId?.name || ""
-          }?`}
-          onFinish={({ remark }, handleClear) => handleOk({ remark }, handleClear)}
-          selector="promo"
-          dispatch={dispatch}
-          getAPIOption={getAvailableApprovalPromo}
-          getAPIDetail={getSelectedApprovalPromo}
+          handleCloseModal={() => handleInactivateModal(false)}
+          customMessage={`Are you sure you want to inactivate this promo "${
+            chooseId || ""
+          }"?`}
+          onFinish={({ remark, appHierId }, handleClear) => handleOk({ remark, appHierId }, handleClear)}
+          named={chooseId}
+          menu="promo"
+          sliceName="promo"
+          approvalHierarchtDetailsStateName="dataListAppHierDetail"
+          approvalOptionsStateName="dataListAppHierId"
+          getApprovalOptions={getAvailableApprovalPromo}
+          getApprovalHierarchyDetails={getSelectedApprovalPromo}
         />
 
         {/* Modal Approval History */}

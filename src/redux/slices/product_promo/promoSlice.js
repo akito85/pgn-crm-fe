@@ -338,7 +338,7 @@ export const getAvailableApprovalPromo = createAsyncThunk(
 
 export const getSelectedApprovalPromo = createAsyncThunk(
   "GET_SELECTED_APPROVAL_PROMO",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/list-apphier/${id}`;
       const response = await productPromoHttpService.getDetail(url);
@@ -1304,6 +1304,7 @@ const promoSlice = createSlice({
     //GET AVAILABLE APPROVAL
     [getAvailableApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierId = [];
     },
     [getAvailableApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1311,10 +1312,12 @@ const promoSlice = createSlice({
     },
     [getAvailableApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierId = [];
     },
     //GET SELECTED APPROVAL
     [getSelectedApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierDetail = [];
     },
     [getSelectedApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1322,6 +1325,7 @@ const promoSlice = createSlice({
     },
     [getSelectedApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierDetail = [];
     },
 
     //LIST ATTAHCHMENT
