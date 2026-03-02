@@ -9,7 +9,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import DetailText from "../../../../components/DetailText";
-import RadioTabs from "../../../../components/RadioTabs";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
@@ -32,9 +31,7 @@ const PromoDiscountDetail = () => {
   const {
     data_promoDiscountDetail,
     data_promoDiscountDetailDraft,
-    data_listAttachment,
     loading,
-    message,
   } = useSelector((state) => state.promo);
 
   const dispatch = useDispatch();
