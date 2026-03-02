@@ -89,6 +89,12 @@ export const SYSTEM_SETUP_ROUTES = {
   CREATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/create",
   UPDATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/update",
 
+  // Payment Period
+  VIEW_PAYMENT_PERIOD: "/system-setup/payment-period",
+  DETAIL_PAYMENT_PERIOD: "/system-setup/payment-period/view",
+  CREATE_PAYMENT_PERIOD: "/system-setup/payment-period/create",
+  UPDATE_PAYMENT_PERIOD: "/system-setup/payment-period/update",
+
   // Billing Item Category
   VIEW_BILLING_ITEM_CATEGORY: "/system-setup/transaction-mapping-category",
   DETAIL_BILLING_ITEM_CATEGORY:
