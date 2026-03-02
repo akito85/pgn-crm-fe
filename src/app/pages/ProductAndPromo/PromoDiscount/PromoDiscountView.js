@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useMemo, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -19,6 +18,7 @@ import NxHistoryModal from "../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxInactivateModal from "../../../../components/Nx/NxInactivateModal";
+import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 
 const PromoDiscountView = () => {
   // Selector
@@ -238,7 +238,7 @@ const PromoDiscountView = () => {
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+        <NxBreadCrumb routes={routes} />
         <NxCardContainer header={"PROMO LIST"}>
           <NxBaseContainer border>
             <PromoDiscountTable

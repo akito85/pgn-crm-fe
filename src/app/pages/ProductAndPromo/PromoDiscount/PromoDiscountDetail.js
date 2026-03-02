@@ -1,16 +1,8 @@
 import { Button, Spin } from "antd";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
-import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
-import { configApp } from "../../../../constants/configApp";
-import BaseContainer from "../../../../components/BaseContainer";
-import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import DetailText from "../../../../components/DetailText";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -26,6 +18,7 @@ import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes
 import { dateFormatting } from "../../../../utils";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxTabs from "../../../../components/Nx/NxTabs";
+import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 
 const PromoDiscountDetail = () => {
   const {
@@ -191,7 +184,7 @@ const PromoDiscountDetail = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <div className="flex flex-col gap-y-4">
-          <BreadCrumb routes={routes} />
+          <NxBreadCrumb routes={routes} />
           {
             draftExist && (
               <NxBaseContainer border padding={false}>
