@@ -103,6 +103,11 @@ const PromoDiscountDetail = () => {
 
   const detail = handleAssertData(activeKey === "ori" ? data_promoDiscountDetail : data_promoDiscountDetailDraft);
 
+  const attachments = (data_promoDiscountDetail.attachmentListDto || []).map((attachment) => ({
+    ...attachment,
+    dataType: "exist",
+  }))
+
   useEffect(() => {
     if (id && data_promoDiscountDetail && data_promoDiscountDetail?.id === id) {
       setListDataAttachment(
@@ -196,7 +201,7 @@ const PromoDiscountDetail = () => {
               </NxBaseContainer>
             )
           }
-          <PromoDiscountDetailPages dataPromo={detail} />
+          <PromoDiscountDetailPages detail={detail} attachments={attachments} />
           {
             isApproval && (
               <div className={"w-full flex justify-between"}>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaPromo } from "../Table/TableCriteriaPromo";
 import ConditionPromo from "../Form/ConditionsPromo";
@@ -8,9 +8,13 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import NxDate from "../../../../../components/Nx/NxDatePicker";
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../components/Nx/NxTabs";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import productPromoHttpService from "../../../../../redux/services/productPromoHttpService";
+import { configApp } from "../../../../../constants/configApp";
 
-const PromoDiscountDetailPages = ({ dataPromo }) => {
+const PromoDiscountDetailPages = ({ detail, attachments = [] }) => {
   const [activeKey, setActiveKey] = useState(0);
+  const [childActiveKey, setChildActiveKey] = useState(0);
 
   const handleStatusCase = (index) => {
     let text;
@@ -28,14 +32,14 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
     return text;
   };
 
-  const tabOptions = [
+  const childTabOptions = [
     {
       key: 0,
       label: "Criteria",
       children: (
         <FunctionalCriteriaProduct
-          data={dataPromo?.dataCriteria} //data
-          dataCriteria={dataPromo?.criteriaValues} //ddl
+          data={detail?.dataCriteria} //data
+          dataCriteria={detail?.criteriaValues} //ddl
           type={"detail"}
           selector="promo"
           columnsTable={(listOption, searchInput, searchedColumn, searchText, handleSearch, search, storedData) =>
@@ -68,7 +72,7 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
       children: (
         <ConditionPromo
           type={"detail"}
-          data={dataPromo?.dataCondition}
+          data={detail?.dataCondition}
           setStoredData={() => {}}
           storedData={false}
         />
@@ -89,12 +93,17 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
     createdBy,
     updatedDate,
     updatedBy,
-  } = dataPromo;
+    statusApproval,
+    criteria,
+    description,
+  } = detail;
 
-  return (
-    <>
-      <NxCardContainer header={"Detail Information"}>
-        <div className="flex flex-col gap-y-4">
+  const tabObtions = [
+    {
+      key: 0,
+      label: "Promo Information",
+      children: (
+        <>
           <NxBaseContainer header={"PROMO DETAIL"} border>
             <div className="flex flex-col gap-y-4">
               <div className="w-full grid grid-cols-3 gap-4">
@@ -114,14 +123,14 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
                   </StatusComponent>
                 </NxDetailText>
                 <NxDetailText label="Status Approval">
-                  {handleStatusCase(dataPromo.statusApproval)}
+                  {handleStatusCase(statusApproval)}
                 </NxDetailText>
               </div>
               <NxDetailText label="Criteria">
-                {dataPromo?.criteria || ""}
+                {criteria}
               </NxDetailText>
               <NxDetailText label="Description">
-                {dataPromo?.description || ""}
+                {description}
               </NxDetailText>
             </div>
           </NxBaseContainer>
@@ -131,12 +140,43 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
             padding={false}
           >
             <NxTabs
-              items={tabOptions}
-              activeKey={activeKey}
-              onChange={setActiveKey}
+              items={childTabOptions}
+              activeKey={childActiveKey}
+              onChange={setChildActiveKey}
             />
           </NxBaseContainer>
-        </div>
+        </>
+      )
+    },
+    {
+      key: 1,
+      label: "Attachment",
+      children: (
+        <>
+          <AttachmentComponent 
+            typeSelector={"promo"}
+            data={attachments}
+            type={"detail"}
+            service={productPromoHttpService}
+            configApplication={configApp.PRODUCT_SERVICE}
+          />
+        </>
+      )
+    }
+  ]
+
+  useEffect(() => {
+    console.log("activeKey", activeKey);
+  }, [activeKey])
+
+  return (
+    <>
+      <NxCardContainer header={"Detail Information"} withoutPadding>
+        <NxTabs
+          items={tabObtions}
+          activeKey={activeKey}
+          onChange={setActiveKey}
+        />
       </NxCardContainer>
 
       <NxCardContainer header={"HISTORY LOG INFORMATION"}>
