@@ -1,9 +1,6 @@
 const NxBaseContainer = ({
   header,
-  subHeader,
   children,
-  type,
-  element,
   border = false,
   className="",
   rounded = true,
@@ -11,8 +8,8 @@ const NxBaseContainer = ({
 }) => {
   // Determine class based on border prop
   const containerClass = border
-    ? `flex flex-col gap-y-4 bg-white ${rounded ? "rounded-lg" : ""} w-full ${padding ? "p-4" : ""} ${className}`
-    : `drop-shadow-md bg-white rounded-lg w-full ${padding ? "p-4" : ""}`;
+    ? `flex flex-col gap-y-4 bg-white ${rounded ? "rounded-lg" : ""} w-full ${className}`
+    : `drop-shadow-md bg-white rounded-lg w-full`;
 
   // Use inline style for border to ensure visibility
   const containerStyle = border ? {
@@ -26,24 +23,12 @@ const NxBaseContainer = ({
 
   return (
     <div className={containerClass} style={containerStyle}>
-      {type === "profile" || type === "tab" ? (
-        <>
-          <div className="p-0">{element}</div>
-        </>
-      ) : (header || subHeader) && (
-        <>
-          <div className="p-0">
-            <div className="text-primary text-sm uppercase">
-              {header}
-            </div>
-            <div className="text-primary text-xs font-bold">
-              {subHeader}
-            </div>
-          </div>
-        </>
+      {header && (
+        <div className="text-primary text-sm uppercase pt-4 px-4">
+          {header}
+        </div>
       )}
-      {type === "tabs" && <div className="p-0">{element}</div>}
-      <div className="p-0">{children}</div>
+      <div className={`${padding ? "p-4" : ""}`}>{children}</div>
     </div>
   );
 };

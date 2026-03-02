@@ -1,9 +1,4 @@
-import React, { Fragment, useState } from "react";
-import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
-import DetailText from "../../../../../components/DetailText";
-import { dateFormatting } from "../../../../../utils";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { useState } from "react";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaPromo } from "../Table/TableCriteriaPromo";
 import ConditionPromo from "../Form/ConditionsPromo";
@@ -12,14 +7,10 @@ import NxDetailText from "../../../../../components/Nx/NxDetailText";
 import StatusComponent from "../../../../../components/StatusComponent";
 import NxDate from "../../../../../components/Nx/NxDatePicker";
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
+import NxTabs from "../../../../../components/Nx/NxTabs";
 
 const PromoDiscountDetailPages = ({ dataPromo }) => {
-  const [valuePage, setValuePage] = useState("Criteria");
-
-  const [tabDetailPromo, setTabDetailPromo] = useState([
-    { value: "Criteria" },
-    { value: "Condition" },
-  ]);
+  const [activeKey, setActiveKey] = useState(0);
 
   const handleStatusCase = (index) => {
     let text;
@@ -36,6 +27,54 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
     }
     return text;
   };
+
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Criteria",
+      children: (
+        <FunctionalCriteriaProduct
+          data={dataPromo?.dataCriteria} //data
+          dataCriteria={dataPromo?.criteriaValues} //ddl
+          type={"detail"}
+          selector="promo"
+          columnsTable={(listOption, searchInput, searchedColumn, searchText, handleSearch, search, storedData) =>
+            columnsTableCriteriaPromo(
+              listOption,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              search,
+              storedData
+            )
+          }
+          fixedColumn={[
+            "ADJUSTMENT TYPE",
+            "ADJUSTMENT VALUE",
+            "UOM",
+            "DESCRIPTION",
+            "MAX VALUE UOM",
+            "FROM ITEM",
+            "TIERING",
+            "STATUS",
+          ]}
+        />
+      )
+    },
+    {
+      key: 1,
+      label: "Condition",
+      children: (
+        <ConditionPromo
+          type={"detail"}
+          data={dataPromo?.dataCondition}
+          setStoredData={() => {}}
+          storedData={false}
+        />
+      )
+    }
+  ];
 
   const {
     id,
@@ -55,86 +94,50 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
   return (
     <>
       <NxCardContainer header={"Detail Information"}>
-        <NxBaseContainer header={"PROMO INFORMATION"} border>
-          <div className="flex flex-col gap-y-4">
-            <div className="w-full grid grid-cols-3 gap-4">
-              <NxDetailText label="Name">{name || ""}</NxDetailText>
-              <NxDetailText label="Category">{categoryName}</NxDetailText>
-              <NxDetailText label="Type">{typeName}</NxDetailText>
-              <NxDetailText label="Promotion Type">{promotionTypeName}</NxDetailText>
-              <NxDetailText label="Start Date">
-                {NxDate.formatDate(startDate, "DD MMM YYYY")}
+        <div className="flex flex-col gap-y-4">
+          <NxBaseContainer header={"PROMO DETAIL"} border>
+            <div className="flex flex-col gap-y-4">
+              <div className="w-full grid grid-cols-3 gap-4">
+                <NxDetailText label="Name">{name || ""}</NxDetailText>
+                <NxDetailText label="Category">{categoryName}</NxDetailText>
+                <NxDetailText label="Type">{typeName}</NxDetailText>
+                <NxDetailText label="Promotion Type">{promotionTypeName}</NxDetailText>
+                <NxDetailText label="Start Date">
+                  {NxDate.formatDate(startDate, "DD MMM YYYY")}
+                </NxDetailText>
+                <NxDetailText label="End Date">
+                  {NxDate.formatDate(endDate, "DD MMM YYYY")}
+                </NxDetailText>
+                <NxDetailText label="Status">
+                  <StatusComponent colour={status}>
+                    {status}
+                  </StatusComponent>
+                </NxDetailText>
+                <NxDetailText label="Status Approval">
+                  {handleStatusCase(dataPromo.statusApproval)}
+                </NxDetailText>
+              </div>
+              <NxDetailText label="Criteria">
+                {dataPromo?.criteria || ""}
               </NxDetailText>
-              <NxDetailText label="End Date">
-                {NxDate.formatDate(endDate, "DD MMM YYYY")}
-              </NxDetailText>
-              <NxDetailText label="Status">
-                <StatusComponent colour={status}>
-                  {status}
-                </StatusComponent>
-              </NxDetailText>
-              <NxDetailText label="Status Approval">
-                {handleStatusCase(dataPromo.statusApproval)}
+              <NxDetailText label="Description">
+                {dataPromo?.description || ""}
               </NxDetailText>
             </div>
-            <NxDetailText label="Criteria">
-              {dataPromo?.criteria || ""}
-            </NxDetailText>
-            <NxDetailText label="Description">
-              {dataPromo?.description || ""}
-            </NxDetailText>
-          </div>
-        </NxBaseContainer>
+          </NxBaseContainer>
+          <NxBaseContainer
+            header={"Criteria Information"}
+            border
+            padding={false}
+          >
+            <NxTabs
+              items={tabOptions}
+              activeKey={activeKey}
+              onChange={setActiveKey}
+            />
+          </NxBaseContainer>
+        </div>
       </NxCardContainer>
-
-      <BaseContainer
-        header={"Criteria Information"}
-        type={"tabs"}
-        element={
-          <RadioTabs
-            data={tabDetailPromo}
-            onChange={(e) => setValuePage(e.target.value)}
-            currentPosition={valuePage}
-          />
-        }
-      >
-        {valuePage === "Criteria" ? (
-          <FunctionalCriteriaProduct
-            data={dataPromo?.dataCriteria} //data
-            dataCriteria={dataPromo?.criteriaValues} //ddl
-            type={"detail"}
-            selector="promo"
-            columnsTable={(listOption, searchInput, searchedColumn, searchText, handleSearch, search, storedData) =>
-              columnsTableCriteriaPromo(
-                listOption,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                search,
-                storedData
-              )
-            }
-            fixedColumn={[
-              "ADJUSTMENT TYPE",
-              "ADJUSTMENT VALUE",
-              "UOM",
-              "DESCRIPTION",
-              "MAX VALUE UOM",
-              "FROM ITEM",
-              "TIERING",
-              "STATUS",
-            ]}
-          />
-        ) : (
-          <ConditionPromo
-            type={"detail"}
-            data={dataPromo?.dataCondition}
-            setStoredData={() => {}}
-            storedData={false}
-          />
-        )}
-      </BaseContainer>
 
       <NxCardContainer header={"HISTORY LOG INFORMATION"}>
         <NxBaseContainer border>
