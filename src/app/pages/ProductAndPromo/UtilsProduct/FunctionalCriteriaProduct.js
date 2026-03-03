@@ -9,12 +9,13 @@ import DateComponent from "../../../../components/DateComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { NumericFormat } from "react-number-format";
 import { columnsTableCriteriaPromo } from "../PromoDiscount/Table/TableCriteriaPromo";
-import { dateFormatting, hasValue } from "../../../../utils";
+import { hasValue } from "../../../../utils";
 import { dataDependAdvanced, dataDepended, handleMappingBodyTiering } from "./UtilsAllProduct";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
-import CardComponent from "../../../../components/Card/CardComponent";
-import DetailText from "../../../../components/DetailText";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
+import NxModal from "../../../../components/Nx/NxModal";
+import NxDetailText from "../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../components/Nx/NxDatePicker";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const EditableCell = ({
   editing,
@@ -1004,49 +1005,46 @@ const FunctionalCriteriaProduct = ({
             />
           </Form>
           {/* Modal History Log */}
-          <ModalCustom
+          <NxModal
             isOpen={modalHistory}
             handleCancel={() => {
               setModalHistory(false);
             }}
-            type="detail"
             header="DETAIL INFORMATION"
-            width={800}
+            width={1000}
             footer={
-              <ButtonComponent
-                type={"default"}
-                onClick={() => {
-                  setModalHistory(false);
-                }}
-              >
-                Back
-              </ButtonComponent>
+              <div className="flex justify-end">
+                <Button
+                  type={"menu"}
+                  onClick={() => {
+                    setModalHistory(false);
+                  }}
+                >
+                  Back
+                </Button>
+              </div>
             }
           >
-            <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-              <DetailText label="Record ID">{dataHistory.id}</DetailText>
-              <DetailText label="Created Date">
-                {dataHistory?.createdDate
-                  ? moment(dataHistory.createdDate).format(
-                      dateFormatting.dateTime
-                    )
-                  : ""}
-              </DetailText>
-              <DetailText label="Created By">
-                {dataHistory?.createdBy}
-              </DetailText>
-              <DetailText label="Updated Date">
-                {dataHistory?.updatedDate
-                  ? moment(dataHistory.updatedDate).format(
-                      dateFormatting.dateTime
-                    )
-                  : ""}
-              </DetailText>
-              <DetailText label="Updated By">
-                {dataHistory?.updatedBy}
-              </DetailText>
-            </CardComponent>
-          </ModalCustom>
+            <div className="p-4">
+              <NxBaseContainer border>
+                <div className="grid grid-cols-5 gap-x-4">
+                  <NxDetailText label="Record ID">{dataHistory.id}</NxDetailText>
+                  <NxDetailText label="Created Date">
+                    {NxDate.formatDate(dataHistory?.createdDate)}
+                  </NxDetailText>
+                  <NxDetailText label="Created By">
+                    {dataHistory?.createdBy}
+                  </NxDetailText>
+                  <NxDetailText label="Updated Date">
+                    {NxDate.formatDate(dataHistory?.updatedDate)}
+                  </NxDetailText>
+                  <NxDetailText label="Updated By">
+                    {dataHistory?.updatedBy}
+                  </NxDetailText>
+                </div>
+              </NxBaseContainer>
+            </div>
+          </NxModal>
 
           {/* modal error no startDate */}
           {ModalError ? (
