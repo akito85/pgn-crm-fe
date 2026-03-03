@@ -23,12 +23,14 @@ export const tableConditionPromo = (
   storedData,
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "name",
     title: "NAME",
     dataIndex: "name",
     // sorter: true,
@@ -67,6 +69,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "operator",
     title: "OPERATOR",
     dataIndex: "operator",
     // sorter: true,
@@ -106,6 +109,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "dataType",
     title: "DATA TYPE",
     dataIndex: "dataType",
     align: "center",
@@ -145,6 +149,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "value",
     title: "VALUE",
     dataIndex: "value",
     // sorter: true,
@@ -213,6 +218,7 @@ export const tableConditionPromo = (
     // },
   },
   {
+    key: "startDate",
     title: "START DATE",
     // sorter: true,
     align: "center",
@@ -272,6 +278,7 @@ export const tableConditionPromo = (
     //   ),
   },
   {
+    key: "endDate",
     title: "END DATE",
     // sorter: true,
     align: "center",
@@ -329,6 +336,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
     filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -386,6 +394,7 @@ export const tableConditionPromo = (
     //   ),
   },
   {
+    key: "actions",
     title: "ACTION",
     fixed: "right",
     align: "center",
