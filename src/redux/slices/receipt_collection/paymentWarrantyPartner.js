@@ -27,9 +27,14 @@ const initialState = {
   data_detail_branch: null,
   data_history_rating: [],
   data_history_branch: [],
+  loading_detail: false,
+  loading_rating: false,
+  loading_branch: false,
+  loading_history_rating: false,
+  loading_history_branch: false,
 };
 
-const BASE_URL = "/v1/dbs/api/payment-warranty-partners";
+// BASE_URL removed as per request to use full strings in thunks
 
 // --- RATING THUNKS ---
 export const getPaginatePaymentWarrantyPartnerRating = createAsyncThunk(
@@ -38,7 +43,7 @@ export const getPaginatePaymentWarrantyPartnerRating = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/rating/get-list/${partnerId}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/get-list/${partnerId}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -62,7 +67,7 @@ export const createPaymentWarrantyPartnerRating = createAsyncThunk(
   "CREATE_PAYMENT_WARRANTY_PARTNER_RATING",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/rating/create-update`;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
@@ -81,7 +86,7 @@ export const getDetailPaymentWarrantyPartnerRating = createAsyncThunk(
   "GET_DETAIL_PAYMENT_WARRANTY_PARTNER_RATING",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/rating/detail-get/${id}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -100,7 +105,7 @@ export const approveOrRejectPaymentWarrantyPartnerRating = createAsyncThunk(
   "APPROVE_OR_REJECT_PAYMENT_WARRANTY_PARTNER_RATING",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/rating/approve-reject`;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/approve-reject`;
       const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: false }));
       return response.data;
@@ -120,7 +125,7 @@ export const getHistoryPaymentWarrantyPartnerRating = createAsyncThunk(
   "GET_HISTORY_PAYMENT_WARRANTY_PARTNER_RATING",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/rating/approval-history-get/${id}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -144,7 +149,7 @@ export const inactivatePaymentWarrantyPartnerRating = createAsyncThunk(
   "INACTIVATE_PAYMENT_WARRANTY_PARTNER_RATING",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/rating/inactivate`;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/inactivate`;
       const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: "Your inactivation request has been submitted.", return: false }));
       return response.data;
@@ -167,7 +172,7 @@ export const getPaginatePaymentWarrantyPartnerBranch = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/branch/get-list/${partnerId}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/get-list/${partnerId}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -191,7 +196,7 @@ export const createPaymentWarrantyPartnerBranch = createAsyncThunk(
   "CREATE_PAYMENT_WARRANTY_PARTNER_BRANCH",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/branch/create-update`;
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
@@ -210,7 +215,7 @@ export const getDetailPaymentWarrantyPartnerBranch = createAsyncThunk(
   "GET_DETAIL_PAYMENT_WARRANTY_PARTNER_BRANCH",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/branch/detail-get/${id}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -229,7 +234,7 @@ export const approveOrRejectPaymentWarrantyPartnerBranch = createAsyncThunk(
   "APPROVE_OR_REJECT_PAYMENT_WARRANTY_PARTNER_BRANCH",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/branch/approve-reject`;
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/approve-reject`;
       const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: false }));
       return response.data;
@@ -249,7 +254,7 @@ export const getHistoryPaymentWarrantyPartnerBranch = createAsyncThunk(
   "GET_HISTORY_PAYMENT_WARRANTY_PARTNER_BRANCH",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/branch/approval-history-get/${id}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -273,7 +278,7 @@ export const inactivatePaymentWarrantyPartnerBranch = createAsyncThunk(
   "INACTIVATE_PAYMENT_WARRANTY_PARTNER_BRANCH",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/branch/inactivate`;
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/inactivate`;
       const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: "Your inactivation request has been submitted.", return: false }));
       return response.data;
@@ -297,7 +302,7 @@ export const getPaginatePaymentWarrantyPartner = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -324,7 +329,7 @@ export const getDownloadPaymentWarrantyPartner = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
     } catch (response) {
@@ -348,7 +353,7 @@ export const createPaymentWarrantyPartner = createAsyncThunk(
   "CREATE_PAYMENT_WARRANTY_PARTNER",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/create-update`;
+      const url = `/v1/dbs/api/payment-warranty-partners/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
@@ -377,7 +382,7 @@ export const updatePaymentWarrantyPartner = createAsyncThunk(
   "UPDATE_PAYMENT_WARRANTY_PARTNER",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/create-update`;
+      const url = `/v1/dbs/api/payment-warranty-partners/create-update`;
       const data = await receiptCollectionHttpService.updateDataPost(url, body);
       return data.data;
     } catch (error) {
@@ -407,7 +412,7 @@ export const getDetailPaymentWarrantyPartner = createAsyncThunk(
   "GET_DETAIL_PAYMENT_WARRANTY_PARTNER",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/detail-get/${id}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -431,7 +436,7 @@ export const approveOrRejectPaymentWarrantyPartner = createAsyncThunk(
   "APPROVE_OR_REJECT_PAYMENT_WARRANTY_PARTNER",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approve-reject`;
+      const url = `/v1/dbs/api/payment-warranty-partners/approve-reject`;
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -471,7 +476,7 @@ export const approveOrRejectInactivePaymentWarrantyPartner = createAsyncThunk(
   "APPROVE_OR_REJECT_FOR_INACTIVE_PAYMENT_WARRANTY_PARTNER",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approve-inactive`;
+      const url = `/v1/dbs/api/payment-warranty-partners/approve-inactive`;
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -512,7 +517,7 @@ export const inactivePaymentWarrantyPartner = createAsyncThunk(
   async ({ body }, thunkAPI) => {
     let status = body?.status === "Active" ? "Inactivate" : "Activate";
     try {
-      const url = `${BASE_URL}/active-inactive`;
+      const url = `/v1/dbs/api/payment-warranty-partners/active-inactive`;
       const response = await receiptCollectionHttpService.activationWithRemarkPost(
         url,
         body
@@ -545,7 +550,7 @@ export const saveDraftPaymentWarrantyPartner = createAsyncThunk(
   "SAVE_DRAFT_PAYMENT_WARRANTY_PARTNER",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/save-draft`;
+      const url = `/v1/dbs/api/payment-warranty-partners/save-draft`;
       const data = await receiptCollectionHttpService.createData(url, body);
       const successBody = {
         title: "Successfull",
@@ -580,7 +585,7 @@ export const approveOrRejectGlobal = createAsyncThunk(
   "APPROVE_OR_REJECT_GLOBAL",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/global/approve-reject`;
+      const url = `/v1/dbs/api/payment-warranty-partners/global/approve-reject`;
       const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: false }));
       return response.data;
@@ -600,7 +605,7 @@ export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY_PAYMENT_WARRANTY_PARTNER",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approval-history-get/${id}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -625,7 +630,7 @@ export const getListParent = createAsyncThunk(
   "GET_LIST_PARENT_PAYMENT_WARRANTY_PARTNER",
   async (thunkAPI) => {
     try {
-      const url = `${BASE_URL}/get-list-parent`;
+      const url = `/v1/dbs/api/payment-warranty-partners/get-list-parent`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -649,7 +654,7 @@ export const getListPartnerType = createAsyncThunk(
   "GET_LIST_PARTNER_TYPE_PAYMENT_WARRANTY_PARTNER",
   async (thunkAPI) => {
     try {
-      const url = `${BASE_URL}/partner-type`;
+      const url = `/v1/dbs/api/payment-warranty-partners/partner-type`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -673,7 +678,7 @@ export const getPartnerCode = createAsyncThunk(
   "GET_PARTNER_CODE_PAYMENT_WARRANTY_PARTNER",
   async (thunkAPI) => {
     try {
-      const url = `${BASE_URL}/partner-code`;
+      const url = `/v1/dbs/api/payment-warranty-partners/partner-code`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data?.partnerCode || "";
     } catch (error) {
@@ -697,7 +702,7 @@ export const getListRating = createAsyncThunk(
   "GET_LIST_RATING_PAYMENT_WARRANTY_PARTNER",
   async (thunkAPI) => {
     try {
-      const url = `${BASE_URL}/rating`;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -721,7 +726,7 @@ export const getListCriteria = createAsyncThunk(
   "GET_LIST_CRITERIA_PAYMENT_WARRANTY_PARTNER",
   async (thunkAPI) => {
     try {
-      const url = `${BASE_URL}/criteria`;
+      const url = `/v1/dbs/api/payment-warranty-partners/criteria`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -844,14 +849,14 @@ const paymentWarrantyPartnerSlice = createSlice({
     },
 
     [getDetailPaymentWarrantyPartner.pending]: (state) => {
-      state.loading = true;
+      state.loading_detail = true;
     },
     [getDetailPaymentWarrantyPartner.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
-      state.loading = false;
+      state.loading_detail = false;
     },
     [getDetailPaymentWarrantyPartner.rejected]: (state) => {
-      state.loading = false;
+      state.loading_detail = false;
     },
 
     [getAllApprovalList.pending]: (state) => {
@@ -991,14 +996,14 @@ const paymentWarrantyPartnerSlice = createSlice({
     },
 
     [getPaginatePaymentWarrantyPartnerRating.pending]: (state) => {
-      state.loading = true;
+      state.loading_rating = true;
     },
     [getPaginatePaymentWarrantyPartnerRating.fulfilled]: (state, action) => {
       state.data_rating = action.payload;
-      state.loading = false;
+      state.loading_rating = false;
     },
     [getPaginatePaymentWarrantyPartnerRating.rejected]: (state) => {
-      state.loading = false;
+      state.loading_rating = false;
     },
     [createPaymentWarrantyPartnerRating.pending]: (state) => {
       state.loading = true;
@@ -1031,14 +1036,14 @@ const paymentWarrantyPartnerSlice = createSlice({
     },
 
     [getPaginatePaymentWarrantyPartnerBranch.pending]: (state) => {
-      state.loading = true;
+      state.loading_branch = true;
     },
     [getPaginatePaymentWarrantyPartnerBranch.fulfilled]: (state, action) => {
       state.data_branch = action.payload;
-      state.loading = false;
+      state.loading_branch = false;
     },
     [getPaginatePaymentWarrantyPartnerBranch.rejected]: (state) => {
-      state.loading = false;
+      state.loading_branch = false;
     },
     [createPaymentWarrantyPartnerBranch.pending]: (state) => {
       state.loading = true;
@@ -1080,24 +1085,24 @@ const paymentWarrantyPartnerSlice = createSlice({
       state.loading = false;
     },
     [getHistoryPaymentWarrantyPartnerRating.pending]: (state) => {
-      state.loading = true;
+      state.loading_history_rating = true;
     },
     [getHistoryPaymentWarrantyPartnerRating.fulfilled]: (state, action) => {
       state.data_history_rating = action.payload;
-      state.loading = false;
+      state.loading_history_rating = false;
     },
     [getHistoryPaymentWarrantyPartnerRating.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_history_rating = false;
     },
     [getHistoryPaymentWarrantyPartnerBranch.pending]: (state) => {
-      state.loading = true;
+      state.loading_history_branch = true;
     },
     [getHistoryPaymentWarrantyPartnerBranch.fulfilled]: (state, action) => {
       state.data_history_branch = action.payload;
-      state.loading = false;
+      state.loading_history_branch = false;
     },
     [getHistoryPaymentWarrantyPartnerBranch.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_history_branch = false;
     },
     [inactivatePaymentWarrantyPartnerRating.pending]: (state) => {
       state.loading = true;
