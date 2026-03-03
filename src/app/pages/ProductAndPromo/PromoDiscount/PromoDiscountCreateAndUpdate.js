@@ -46,6 +46,7 @@ import {
 } from "../UtilsProduct/UtilsAllProduct";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const PromoDiscountCreateAndUpdate = ({ type }) => {
   // Selector
@@ -761,18 +762,18 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             </div>
 
             <div className={`flex flex-col gap-y-4 ${current !== 1 ? "hidden" : ""}`}>
-              <BaseContainer header={"APPROVAL INFORMATION"}>
+              <NxCardContainer header={"APPROVAL INFORMATION"}>
                 <ApprovalComponentGeneral
                   dataTable={dataListDetailApproval}
                   dataOption={dataApproval}
                   selectedHierarchy={dataApprovalId}
                   updateSelectedHierarchy={setDataApprovalId}
                 />
-              </BaseContainer>
+              </NxCardContainer>
             </div>
 
             <div className={`flex flex-col gap-y-4 ${current !== 2 ? "hidden" : ""}`}>
-              <BaseContainer header={"Attachment Information"}>
+              <NxCardContainer header={"Attachment Information"}>
                 <AttachmentComponent
                   type={type}
                   data={listDataAttachment}
@@ -783,7 +784,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
                   typeSelector={"promo"}
                   mandatory={true}
                 />
-              </BaseContainer>
+              </NxCardContainer>
             </div>
           </Form>
           <NxBaseContainer border>

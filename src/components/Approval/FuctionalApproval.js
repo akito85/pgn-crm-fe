@@ -100,7 +100,6 @@ const DataExpand = ({ list = [] }) => {
         usePagination={false}
         dataSource={list}
         columns={columns}
-        className={"mb-4"}
       />
     </div>
   );
