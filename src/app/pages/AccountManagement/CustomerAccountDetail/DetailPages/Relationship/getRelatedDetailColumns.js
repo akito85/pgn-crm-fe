@@ -53,6 +53,8 @@ const getRelatedDetailColumns = (
     render: (text) => {
       return renderColumn("accountName", searchedColumn, searchText, text, false, "input", search)
     },
+  },
+  {
     title: "CATEGORY",
     dataIndex: "accountCategory",
     width: 120,
