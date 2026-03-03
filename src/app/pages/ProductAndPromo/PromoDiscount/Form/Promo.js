@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Form, Select } from "antd";
+import { Empty, Form, Select } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import InputComponent from "../../../../../components/InputComponent";
 import DateComponent from "../../../../../components/DateComponent";
 import moment from "moment";
 import SelectComponent from "../../../../../components/SelectComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
+import NxTabs from "../../../../../components/Nx/NxTabs";
 import {
   getAccountCategoryList,
   getBudgetList,
@@ -63,9 +63,9 @@ const Promo = ({
 }) => {
   // State
   const [valuePage, setValuePage] = useState("Criteria");
-  const [tabPagesDetail, setTabPagesDetail] = useState([
-    { value: "Criteria" },
-    { value: "Conditions" },
+  const [tabPagesDetail] = useState([
+    { key: "Criteria", label: "Criteria" },
+    { key: "Conditions", label: "Conditions" },
   ]);
 
   const handleDisableEndDate = (current) => {
@@ -205,86 +205,92 @@ const Promo = ({
       <NxCardContainer
         header={"Promo Detail"}
         type={"tabs"}
-        element={
-          <RadioTabs
-            data={tabPagesDetail}
-            onChange={(e) => setValuePage(e.target.value)}
-            currentPosition={valuePage}
-          />
-        }
+        withoutPadding
       >
-        <div className={`${valuePage !== "Criteria" ? "hidden" : ""}`}>
-          <FunctionalCriteriaProduct
-            type={type}
-            data={listDataCriteria || []} //data
-            dataCriteria={criteriaValues || []} //ddl
-            updateData={(updater) => {
-              setListDataCriteria((prev) => {
-                const next = typeof updater === "function" ? updater(prev) : updater;
-                return next.map((row) =>
-                  row.status === undefined ? { ...row, status: "DRAFT" } : row
-                );
-              });
-            }}
-            setStoredData={setStoredDataInline}
-            storedData={storedDataInline}
-            startDate={startDate}
-            selector="promo"
-            getApi={{
-              getBudgetList,
-              getCountryList,
-              getProvinceList,
-              getIndustrialSectorList,
-              getAccountCategoryList,
-              getServiceTypeList,
-              getSorList,
-              getCostCenterList,
-              getGsizesList,
-              getCustomerSegmentList,
-              getCustomerList,
-              getCityList,
-              getSubDistrictList,
-              getAccountGroupList,
-              getDistrictList,
-              getAdjustmentTypeList,
-              getUomList,
-              getFromItemList,
-              getTieringList,
-              getProductList,
-              getProductVersionList,
-            }}
-            columnsTable={columnsTableCriteriaPromo}
-            fixedColumn={[
-              "ADJUSTMENT TYPE",
-              "ADJUSTMENT VALUE",
-              "UOM",
-              "DESCRIPTION",
-              "MAX VALUE UOM",
-              "FROM ITEM",
-              "TIERING",
-              "STATUS",
-            ]}
-            endDate={endDate}
-            showInactivate={type !== "detail" && type !== "preview"}
-          />
-        </div>
-        <div className={`${valuePage !== "Conditions" ? "hidden" : ""}`}>
-          <ConditionPromo
-            type={type}
-            header={"Promo"}
-            data={listDataCondition || []}
-            updateData={setListDataCondition}
-            status={status}
-            statusApproval={statusApproval}
-            selector="promo"
-            getApi={{
-              getConditionName,
-              getConditionOperator,
-              getConditionType,
-            }}
-            setStoredData={setStoredDataInline}
-            storedData={storedDataInline}
-          />
+        <NxTabs
+          items={tabPagesDetail}
+          activeKey={valuePage}
+          onChange={setValuePage}
+        />
+        <div className="p-4">
+          <NxBaseContainer border>
+            {valuePage == "Criteria" ? (
+              criteriaValues.length
+               ? (
+                <FunctionalCriteriaProduct
+                  type={type}
+                  data={listDataCriteria || []} //data
+                  dataCriteria={criteriaValues || []} //ddl
+                  updateData={(updater) => {
+                    setListDataCriteria((prev) => {
+                      const next = typeof updater === "function" ? updater(prev) : updater;
+                      return next.map((row) =>
+                        row.status === undefined ? { ...row, status: "DRAFT" } : row
+                      );
+                    });
+                  }}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  startDate={startDate}
+                  selector="promo"
+                  getApi={{
+                    getBudgetList,
+                    getCountryList,
+                    getProvinceList,
+                    getIndustrialSectorList,
+                    getAccountCategoryList,
+                    getServiceTypeList,
+                    getSorList,
+                    getCostCenterList,
+                    getGsizesList,
+                    getCustomerSegmentList,
+                    getCustomerList,
+                    getCityList,
+                    getSubDistrictList,
+                    getAccountGroupList,
+                    getDistrictList,
+                    getAdjustmentTypeList,
+                    getUomList,
+                    getFromItemList,
+                    getTieringList,
+                    getProductList,
+                    getProductVersionList,
+                  }}
+                  columnsTable={columnsTableCriteriaPromo}
+                  fixedColumn={[
+                    "ADJUSTMENT TYPE",
+                    "ADJUSTMENT VALUE",
+                    "UOM",
+                    "DESCRIPTION",
+                    "MAX VALUE UOM",
+                    "FROM ITEM",
+                    "TIERING",
+                    "STATUS",
+                  ]}
+                  endDate={endDate}
+                  showInactivate={type !== "detail" && type !== "preview"}
+                />
+              )
+               : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Select at least one criteria" />
+            ) : valuePage == "Conditions" ? (
+              <ConditionPromo
+                type={type}
+                header={"Promo"}
+                data={listDataCondition || []}
+                updateData={setListDataCondition}
+                status={status}
+                statusApproval={statusApproval}
+                selector="promo"
+                getApi={{
+                  getConditionName,
+                  getConditionOperator,
+                  getConditionType,
+                }}
+                setStoredData={setStoredDataInline}
+                storedData={storedDataInline}
+              />
+            ): <></>}
+          </NxBaseContainer>
         </div>
       </NxCardContainer>
     </>

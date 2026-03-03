@@ -6,7 +6,6 @@ import NxTable from "../../../../components/Nx/NxTable";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import SVGIcon from "../../../../assets/Icon/index";
 import DateComponent from "../../../../components/DateComponent";
-import ButtonComponent from "../../../../components/ButtonComponent";
 import { NumericFormat } from "react-number-format";
 import { columnsTableCriteriaPromo } from "../PromoDiscount/Table/TableCriteriaPromo";
 import { hasValue } from "../../../../utils";
@@ -779,18 +778,18 @@ const FunctionalCriteriaProduct = ({
             <Space className="my-2 gap-2">
               {editable ? (
                 <>
-                  <ButtonComponent
+                  <Button
                     onClick={() => cancel(record)}
-                    type="default"
+                    type="menu"
                   >
                     Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     onClick={() => save(record.key)}
                     type="submit"
                   >
                     Save
-                  </ButtonComponent>
+                  </Button>
                 </>
               ) : (
                 <div className="flex w-full justify-center gap-4">
@@ -886,10 +885,6 @@ const FunctionalCriteriaProduct = ({
     [allColumns, fixedColumns]
   );
 
-  useEffect(() => {
-    console.log("processedColumns", processedColumns)
-  }, [processedColumns])
-
   const columnDefinitions = useMemo(
     () =>
       allColumns.map((col) => ({
@@ -930,8 +925,8 @@ const FunctionalCriteriaProduct = ({
       dataCriteria.length > 0 &&
       dataCriteria[0] !== 24 ? (
         <div className="flex w-full justify-end">
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          <Button
+            icon={<SVGIcon name="IconButtonCreate" width={14} />}
             type="submit"
             onClick={() => {
               if (
@@ -953,7 +948,7 @@ const FunctionalCriteriaProduct = ({
             }}
           >
             Create
-          </ButtonComponent>
+          </Button>
         </div>
       ) : null}
       {type !== "detail" && type !== "preview" && hasValue(excludeRender)
