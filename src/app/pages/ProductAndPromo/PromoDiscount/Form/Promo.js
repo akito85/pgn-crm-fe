@@ -203,7 +203,7 @@ const Promo = ({
       </NxCardContainer>
 
       <NxCardContainer
-        header={"promo detail information"}
+        header={"Promo Detail"}
         type={"tabs"}
         element={
           <RadioTabs

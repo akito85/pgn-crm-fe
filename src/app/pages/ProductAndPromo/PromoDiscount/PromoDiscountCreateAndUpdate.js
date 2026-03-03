@@ -73,7 +73,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   const [current, setCurrent] = useState(0);
 
   const steps = [
-    { title: "Promo" },
+    { title: "Promo Information" },
     { title: "Approval" },
     { title: "Attachment" },
   ];
