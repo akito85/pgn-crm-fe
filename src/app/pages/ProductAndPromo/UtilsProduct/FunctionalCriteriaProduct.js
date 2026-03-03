@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef, useCallback, Fragment } from "react";
+import { useEffect, useState, useRef, useCallback, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import { Button, Checkbox, Form, Input, Select, Space, Table, Tooltip } from "antd";
+import { Button, Checkbox, Form, Input, Select, Space, Tooltip } from "antd";
+import NxTable from "../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../assets/Icon/index";
 import DateComponent from "../../../../components/DateComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -773,7 +774,7 @@ const FunctionalCriteriaProduct = ({
           );
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="my-2 gap-2">
               {editable ? (
                 <>
                   <ButtonComponent
@@ -793,13 +794,15 @@ const FunctionalCriteriaProduct = ({
                 <div className="flex w-full justify-center gap-4">
                   {type === "detail" ? (
                     <Tooltip title="Detail">
-                      <div className="pt-1">
+                      <Button
+                        type="table-action"
+                        onClick={() => handleDetailHistory(record)}
+                      >
                         <SVGIcon
                           name="IconDetail"
-                          width={24}
-                          onClick={() => handleDetailHistory(record)}
+                          width={20}
                         />
-                      </div>
+                      </Button>
                     </Tooltip>
                   ) : (
                     <>
@@ -969,9 +972,8 @@ const FunctionalCriteriaProduct = ({
               </Select>
             </div>
             <Form form={formTableCriteria} component={false}>
-              <Table
-                bordered
-                className="w-full"
+              <NxTable
+                idTable="functional-criteria-product-table"
                 dataSource={data}
                 columns={filterColumn(
                   columns().map((col) => ({
@@ -997,27 +999,21 @@ const FunctionalCriteriaProduct = ({
                     }),
                   }))
                 )}
-                pagination={{
-                  position: ["topRight"],
-                  current: page,
-                  pageSize: pageSize,
-                  onChange: handleChange,
-                  className: "pr-1 w-3/4",
-                  style: { marginLeft: "auto", marginRight: 0 },
-                  showSizeChanger: true,
-                  showTotal: (total, range) =>
-                    `Showing ${range[0]} to ${range[1]} of ${total} records`,
-                }}
-                rowClassName={(record) =>
-                  isEditing(record) ? "editable-row" : ""
-                }
                 components={{
                   body: {
                     cell: EditableCell,
                   },
                 }}
-                scroll={scroll}
-                onChange={onChange}
+                tableScrolled={scroll}
+                usePagination={false}
+                useInfiniteScroll={false}
+                onSort={onChange}
+                rowClassName={(record) =>
+                  isEditing(record) ? "editable-row" : ""
+                }
+                useSelect={false}
+                showAdvanceSearch={false}
+                showSearchBar={false}
               />
             </Form>
           </div>
