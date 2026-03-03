@@ -42,6 +42,7 @@ import {
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import { WARRANTY_TRANSACTION_NAMES} from "../../../../../../constants/warrantyTypes";
 
 const ModalHold = ({
   isOpen,
@@ -139,7 +140,7 @@ const ModalHold = ({
   // Define Wizard Step
   const steps = [
     {
-      title: "Warranty Information",
+      title: "Guarantee Information",
       key: "warrantyInfo",
     },
     {
@@ -162,7 +163,7 @@ const ModalHold = ({
 
   const next = () => {
     if (current === 0 && selectedWarrantyInfoRowKeys.length === 0) {
-      return message.warning("Please select Warranty Information!");
+      return message.warning("Please select Guarantee Information!");
     }
     if (current === 1) {
       if (!remarkHoldInformation) {
@@ -232,7 +233,7 @@ const ModalHold = ({
       const rowKey = preSelectedRow.billingCode || preSelectedRow.invoiceNumber || preSelectedRow.id;
       setSelectedWarrantyInfoRowKeys([rowKey]);
       setDataWarrantyInfoSelect([{ ...preSelectedRow, key: rowKey }]);
-      setCurrent(0); // Start at Step 1 (Warranty Info selection)
+      setCurrent(0); // Start at Step 1 (Guarantee Info selection)
     } else {
       setSelectedWarrantyInfoRowKeys([]);
       setDataWarrantyInfoSelect([]);
@@ -313,9 +314,8 @@ const ModalHold = ({
         }
       }
 
-      // 2. Prepare unified submission body
       const submitBody = {
-        warrantyTransTypeId: 10, // 10 = Hold
+        warrantyTransTypeId: WARRANTY_TRANSACTION_NAMES.HOLD, // 10 = Hold
         appHierId: selectedHierarchy,
         items: dataWarrantyInfoSelect.map((item, index) => ({
           payWarrantyId: item.id,
@@ -343,7 +343,7 @@ const ModalHold = ({
   };
 
 
-  // Warranty Information Step
+  // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
       const finalSearch = Object.keys(search).length > 0 
@@ -603,7 +603,6 @@ const ModalHold = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  // Removed useEffect for getAllAttachmentInfoPaginate
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({
@@ -681,7 +680,7 @@ const ModalHold = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Hold"
+        header="Guarantee Hold"
         handleCancel={handleBackForm}
         width={1000}
         footer={null}

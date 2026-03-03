@@ -1,0 +1,13 @@
+
+export const WARRANTY_TRANSACTION_TYPES = {
+  HOLD: 10,
+  RELEASE: 11,
+  REFUND: 12,
+};
+
+
+export const WARRANTY_TRANSACTION_NAMES = {
+  HOLD: 'HOLD',
+  RELEASE: 'RELEASE',
+  REFUND: 'REFUND',
+};
