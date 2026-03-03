@@ -1011,9 +1011,6 @@ const FunctionalCriteriaProduct = ({
                 rowClassName={(record) =>
                   isEditing(record) ? "editable-row" : ""
                 }
-                useSelect={false}
-                showAdvanceSearch={false}
-                showSearchBar={false}
               />
             </Form>
           </div>
