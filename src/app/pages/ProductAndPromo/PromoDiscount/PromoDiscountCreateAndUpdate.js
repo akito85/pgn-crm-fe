@@ -794,7 +794,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
               >
                 Back
               </Button>
-              <div className="flex gap-x-4">
+              <div className="flex gap-x-2">
                 <Button
                   icon={<SVGIcon name="IconButtonClear" width={14} />}
                   onClick={() => handleClear(type)}
