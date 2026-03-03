@@ -1,6 +1,6 @@
 import SVGIcon from "../../../../../assets/Icon/index";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { Space, Tooltip } from "antd";
+import { Button, Space, Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import { separatorCurrency } from "../../UtilsProduct/UtilsAllProduct";
 
@@ -419,27 +419,28 @@ export const tableConditionPromo = (
           ) : (
             <div className="flex w-full justify-center gap-4">
               <Tooltip title="Update">
-                <div className="pt-1">
+                <Button
+                  onClick={() => handleUpdate(record)}
+                  type="table-action"
+                >
                   <SVGIcon
                     name="IconEdit"
-                    width={24}
-                    onClick={() => handleUpdate(record)}
+                    width={20}
                   />
-                </div>
+                </Button>
               </Tooltip>
 
               <Tooltip title="Delete">
-                <div className="pt-1">
+                <Button
+                  onClick={() => handleDelete(record)}
+                  type="table-action"
+                  disabled={!isDelete}
+                >
                   <SVGIcon
                     name="IconDelete"
-                    color={isDelete ? "#D90000" : "#8D91A0"}
-                    width={24}
-                    className={
-                      isDelete ? undefined : "disabled cursor-not-allowed"
-                    }
-                    onClick={isDelete ? () => handleDelete(record) : undefined}
+                    width={20}
                   />
-                </div>
+                </Button>
               </Tooltip>
             </div>
           )}

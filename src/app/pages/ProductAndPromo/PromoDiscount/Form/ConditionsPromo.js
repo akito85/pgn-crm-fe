@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Select } from "antd";
+import { Button, Form, Select } from "antd";
 import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import NxTable from "../../../../../components/Nx/NxTable";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import SelectComponent from "../../../../../components/SelectComponent";
@@ -329,13 +328,13 @@ const ConditionPromo = ({
     <div className="flex flex-col w-full gap-3">
       {type !== "detail" && type !== "preview" ? (
         <div className="w-full flex justify-end">
-          <ButtonComponent
+          <Button
             type={"submit"}
             onClick={handleCreate}
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={14} />}
           >
             Create
-          </ButtonComponent>
+          </Button>
         </div>
       ) : null}
 
@@ -377,16 +376,16 @@ const ConditionPromo = ({
         type={"confirmation"}
         footer={
           <div className="w-full flex justify-end gap-5 p-4">
-            <ButtonComponent onClick={handleCancelModalForm} type="default">
+            <Button onClick={handleCancelModalForm} type="menu">
               Cancel
-            </ButtonComponent>
-            <ButtonComponent
+            </Button>
+            <Button
               form="conditionForm"
               type="submit"
               htmlType="submit"
             >
               Save
-            </ButtonComponent>
+            </Button>
           </div>
         }
       >
@@ -512,14 +511,14 @@ const ConditionPromo = ({
         header="DETAIL INFORMATION"
         width={800}
         footer={
-          <ButtonComponent
-            type={"default"}
+          <Button
+            type={"menu"}
             onClick={() => {
               setModalHistory(false);
             }}
           >
             Back
-          </ButtonComponent>
+          </Button>
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
