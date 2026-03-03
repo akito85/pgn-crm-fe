@@ -1,29 +1,42 @@
 import React from "react";
 
-/**
- * ColoredPanel
- * A simple reusable wrapper that renders a full-width rounded panel
- * with a soft background color (#E6F1F9) and default padding.
- * Props:
- * - children: node
- * - className: string (optional) additional classes
- * - style: object (optional) additional inline styles
- */
-const ColoredPanel = ({ children, className = "", style = {} }) => {
-  const defaultStyle = {
-    backgroundColor: "#E6F1F9",
-    borderRadius: 8,
-    width: "100%",
-    padding: 16,
-    boxSizing: "border-box",
-  };
-
+const ColoredPanel = ({ title, children, style = {} }) => {
   return (
     <div
-      className={`colored-panel ${className}`}
-      style={{ ...defaultStyle, ...style }}
+      style={{
+        borderRadius: "8px",
+        backgroundColor: "#F9FAFB",
+        border: "1px solid #EAECF0",
+        width: "100%",
+        ...style,
+      }}
     >
-      {children}
+      {/* HEADER */}
+      {title && (
+        <div
+          style={{
+            padding: "12px 16px",
+            fontWeight: 600,
+            color: "#1570EF",
+            textTransform: "uppercase",
+            borderBottom: "1px solid #EAECF0",
+          }}
+        >
+          {title}
+        </div>
+      )}
+
+      {/* CONTENT */}
+      <div
+        style={{
+          padding: "16px",
+          backgroundColor: "#FFFFFF",
+          borderBottomLeftRadius: "8px",
+          borderBottomRightRadius: "8px",
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 };

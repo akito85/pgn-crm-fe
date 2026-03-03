@@ -38,6 +38,9 @@ import LoggingPage from "../../app/pages/SystemSetup/Logging/LoggingPage";
 import ListPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ListPaymentCycle";
 import PaymentCycleForm from "../../app/pages/SystemSetup/MasterData/PaymentCycle/PaymentCycleForm";
 import ViewPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ViewPaymentCycle";
+import ListPaymentPeriod from "../../app/pages/SystemSetup/MasterData/PaymentPeriod/ListPaymentPeriod";
+import PaymentPeriodForm from "../../app/pages/SystemSetup/MasterData/PaymentPeriod/PaymentPeriodForm";
+import ViewPaymentPeriod from "../../app/pages/SystemSetup/MasterData/PaymentPeriod/ViewPaymentPeriod";
 import ListBillingItemCategory from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/ListBillingItemCategory";
 import BillingItemCategoryForm from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryForm";
 import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryDetail";
@@ -134,6 +137,12 @@ export const SYSTEM_SETUP_ELEMENTS = {
   DETAIL_PAYMENT_CYCLE: <ViewPaymentCycle />,
   CREATE_PAYMENT_CYCLE: <PaymentCycleForm type="create" />,
   UPDATE_PAYMENT_CYCLE: <PaymentCycleForm type="update" />,
+
+  // Payment Period
+  VIEW_PAYMENT_PERIOD: <ListPaymentPeriod />,
+  DETAIL_PAYMENT_PERIOD: <ViewPaymentPeriod />,
+  CREATE_PAYMENT_PERIOD: <PaymentPeriodForm type="create" />,
+  UPDATE_PAYMENT_PERIOD: <PaymentPeriodForm type="update" />,
 
   // Billing Item Category
   VIEW_BILLING_ITEM_CATEGORY: <ListBillingItemCategory />,

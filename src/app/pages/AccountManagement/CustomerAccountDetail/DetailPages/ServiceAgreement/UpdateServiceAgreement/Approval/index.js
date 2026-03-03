@@ -5,6 +5,8 @@ import { Form, Input, Select, Spin } from 'antd';
 import SelectComponent from '../../../../../../../../components/SelectComponent';
 import { FilterOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
+import NxCardContainer from '../../../../../../../../components/Nx/NxCardContainer';
+import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer';
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.employeeDetail
@@ -197,10 +199,10 @@ const Approval = ({
   
   return (
     <div>
-      <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">APPROVAL</h3></div>
-      <div className="w-full grid grid-cols-1 gap-2">
-        <div className="w-1/3">
-          <Form.Item
+      <NxCardContainer header={"APPROVAL"}>
+        <NxBaseContainer border>
+          <div className="flex flex-col gap-y-4">
+            <Form.Item
             label={"Approval Hierarchy"}
             name={"appHierId"}
             getValueFromEvent={(e) =>handleSaApprovalObj(e, "appHierId")}
@@ -210,7 +212,7 @@ const Approval = ({
                 required: true,
               },
             ]}
-            className='pb-6'
+            className="no-margin-form w-1/3"
           >
             <SelectComponent onChange={(e)=>handleDetailApproval(e)}>
               {dataApprovalList?.map((data, index) => (
@@ -220,30 +222,31 @@ const Approval = ({
               ))}
             </SelectComponent>
           </Form.Item>
-        </div>
-      </div>
 
-      {/* Table */}
-      <Spin spinning={loading}>
-        {isApprovalId && isApprovalId.appHierId !== undefined && (
-          <div className='py-3 mb-6'>
-            <TablePagination
-              useSelect={false}
-              usePagination={false}
-              dataSource={appHierDataDetail}
-              columns={columnApprovalData(
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
-              expandable={{
-                expandedRowRender,
-              }}
-            />
+          {/* Table */}
+          <Spin spinning={loading}>
+            {isApprovalId && isApprovalId.appHierId !== undefined && (
+              <div className='py-3 mb-6'>
+                <TablePagination
+                  useSelect={false}
+                  usePagination={false}
+                  dataSource={appHierDataDetail}
+                  columns={columnApprovalData(
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch
+                  )}
+                  expandable={{
+                    expandedRowRender,
+                  }}
+                />
+              </div>
+            )}
+          </Spin>
           </div>
-        )}
-      </Spin>
+        </NxBaseContainer>
+      </NxCardContainer>      
     </div>
   )
 }

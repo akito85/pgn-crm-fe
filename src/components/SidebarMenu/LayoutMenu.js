@@ -20,6 +20,9 @@ import {
   SwitcherOutlined,
 } from "@ant-design/icons";
 import NotificationDropdown from "../Notifications/NotificationDropdown";
+import NotificationInline from "../Notifications/NotificationInline";
+import NotificationPopup from "../Notifications/NotificationPopup";
+import useNotificationDisplayOrchestrator from "../../hooks/useNotificationDisplayOrchestrator";
 import { pgnLogo, pgnLogoKecil } from "../../assets/img/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -86,6 +89,51 @@ const LayoutMenu = ({ children }) => {
   // const [showModalExpired, setShowModalExpired] = useState(false);
   const [showModalExtendToken, setShowModalExtendToken] = useState(false);
   const [loadingLogout, setLoadingLogout] = useState(false);
+
+  // Notification display states
+  const [inlineNotifications, setInlineNotifications] = useState([]);
+  const [popupNotification, setPopupNotification] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Notification handlers
+  const handlePopupNotification = (notification) => {
+    setPopupNotification(notification);
+    setShowPopup(true);
+  };
+
+  const handleInlineNotification = (notification) => {
+    setInlineNotifications((prev) => {
+      // Check if notification already exists
+      const exists = prev.find((n) => n.id === notification.id);
+      if (exists) return prev;
+      // Add new notification (keep max 5)
+      return [notification, ...prev].slice(0, 5);
+    });
+  };
+
+  const handleDismissInline = (notificationId) => {
+    setInlineNotifications((prev) =>
+      prev.filter((n) => n.id !== notificationId)
+    );
+  };
+
+  const handleDismissAllInline = () => {
+    setInlineNotifications([]);
+  };
+
+  const handleNavigateNotification = (notification) => {
+    if (notification.redirectUrl) {
+      navigate(notification.redirectUrl);
+    }
+  };
+
+  // Initialize notification display orchestrator
+  useNotificationDisplayOrchestrator({
+    onPopupNotification: handlePopupNotification,
+    onInlineNotification: handleInlineNotification,
+    onNavigate: handleNavigateNotification,
+    enabled: true,
+  });
 
   // use effect check grant access
   useEffect(() => {
@@ -461,6 +509,18 @@ const LayoutMenu = ({ children }) => {
               overflow: "initial",
             }}
           >
+            {/* Inline Notifications */}
+            {inlineNotifications.length > 0 && (
+              <div style={{ padding: "0 24px", marginTop: "16px" }}>
+                <NotificationInline
+                  notifications={inlineNotifications}
+                  onDismiss={handleDismissInline}
+                  onViewDetails={handleNavigateNotification}
+                  onDismissAll={handleDismissAllInline}
+                />
+              </div>
+            )}
+
             {modalSuccess ? (
               <ModalSuccess
                 isOpen={modalSuccess}
@@ -650,6 +710,17 @@ const LayoutMenu = ({ children }) => {
               </div>
             </Form>
           </ModalCustom>
+
+          {/* Notification Popup Modal */}
+          <NotificationPopup
+            notification={popupNotification}
+            visible={showPopup}
+            onClose={() => {
+              setShowPopup(false);
+              setPopupNotification(null);
+            }}
+            onViewDetails={handleNavigateNotification}
+          />
         </Layout>
       </Layout>
     </>

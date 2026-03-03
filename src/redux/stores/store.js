@@ -90,6 +90,7 @@ import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
+import { tasklistSlice } from "../slices/tasklist/tasklistSlice";
 import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog";
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
@@ -138,6 +139,7 @@ import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentW
 import liborRateReducer from "../slices/receipt_collection/liborRate";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
+import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 
 const reducer = combineReducers({
@@ -282,6 +284,7 @@ const reducer = combineReducers({
   paymentWarrantyPartner: paymentWarrantyPartnerReducer,
   liborRate: liborRateReducer,
   paymentCycle: paymentCycleReducer,
+  paymentPeriod: paymentPeriodReducer,
   billingItemCategory: billingItemCategoryReducer,
 
   // Attachment
@@ -294,6 +297,9 @@ const reducer = combineReducers({
   [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
   [reportCustomerAgreementSlice.reducerPath]:
     reportCustomerAgreementSlice.reducer,
+
+  // tasklist
+  [tasklistSlice.reducerPath]: tasklistSlice.reducer,
 
   // debt and collection
   gracePeriod: gracePeriodReducer,
@@ -317,7 +323,10 @@ const store = configureStore({
   reducer: reducer,
   devTools: true,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(reportCustomerSlice.middleware),
+    getDefaultMiddleware()
+      .concat(reportCustomerSlice.middleware)
+      .concat(reportCustomerAgreementSlice.middleware)
+      .concat(tasklistSlice.middleware),
 });
 
 setupListeners(store.dispatch);

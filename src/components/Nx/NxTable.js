@@ -1,5 +1,5 @@
 // NxTable.js (with resizable columns + grouped columns support + customHeaderLeft + showExport control)
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import {
   DownloadOutlined,
   FilterOutlined,
@@ -113,27 +113,27 @@ const NxTable = ({
   pageSize = 10, // Default pagination size
   current = 1, // Default current page
   loading,
-  onChange = () => {},
-  onSizeChanger = () => {},
+  onChange = () => { },
+  onSizeChanger = () => { },
   totalData = 0, // Default total
   onDelete,
   rowSelection,
-  onRowClicked = () => {},
+  onRowClicked = () => { },
   tableScrolled,
   expandable,
   className,
   useSelect = true,
   usePagination = true,
   useInfiniteScroll = false,
-  onLoadMore = () => {},
+  onLoadMore = () => { },
   hasMore = false,
   loadMoreThreshold = 20,
-  onSort = () => {},
-  handleDownload = () => {},
+  onSort = () => { },
+  handleDownload = () => { },
   columnDefinitions,
   fixedColumns = { left: [], right: [] },
-  setFixedColumns = () => {},
-  onAdvanceSearch = () => {},
+  setFixedColumns = () => { },
+  onAdvanceSearch = () => { },
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -144,7 +144,8 @@ const NxTable = ({
   onRefresh,
   enableRowClick = false,
   selectedRowKey = null,
-  onRowClick = () => {},
+  onRowClick = () => { },
+  components: externalComponents,
 }) => {
   // Resolve aliases for backward compatibility
   const resolvedDataSource = dataSource || dataMain || [];
@@ -206,9 +207,11 @@ const NxTable = ({
       const scrollHeight = target.scrollHeight;
       const clientHeight = target.clientHeight;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-      const pixelThreshold = loadMoreThreshold * 40;
+      // Use smaller multiplier for more responsive triggering
+      const pixelThreshold = Math.max(loadMoreThreshold * 20, 50);
 
-      if (distanceFromBottom < pixelThreshold && !isLoadingMore && !loading) {
+      // Only check isLoadingMore to prevent duplicate calls - don't wait for loading state
+      if (distanceFromBottom <= pixelThreshold && !isLoadingMore) {
         setIsLoadingMore(true);
         onLoadMore().finally(() => {
           setIsLoadingMore(false);
@@ -219,7 +222,8 @@ const NxTable = ({
     const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
 
     if (tableBody) {
-      tableBody.addEventListener("scroll", handleScroll);
+      // Use passive listener for better scroll performance
+      tableBody.addEventListener("scroll", handleScroll, { passive: true });
       return () => {
         tableBody.removeEventListener("scroll", handleScroll);
       };
@@ -228,7 +232,6 @@ const NxTable = ({
     useInfiniteScroll,
     hasMore,
     isLoadingMore,
-    loading,
     loadMoreThreshold,
     onLoadMore,
     idTable,
@@ -383,15 +386,20 @@ const NxTable = ({
             onDragEnd: isDraggable ? handleDragEnd : undefined,
           };
         },
-        onCell: () => ({
-          style: {
-            textAlign: textAlign,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontSize: "11px",
-          },
-        }),
+        onCell: (record, index) => {
+          const externalOnCell = col.onCell ? col.onCell(record, index) : {};
+          return {
+            ...externalOnCell,
+            style: {
+              textAlign: textAlign,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontSize: "11px",
+              ...(externalOnCell.style || {}),
+            },
+          };
+        },
       };
 
       if (fixedPos) {
@@ -424,7 +432,7 @@ const NxTable = ({
       return columns
         .map((col) => {
           const colKey = col.key || col.dataIndex || col.title;
-          
+
           // Jika kolom ini hidden, skip
           if (optionSelectedCol.includes(colKey)) {
             return null;
@@ -513,6 +521,11 @@ const NxTable = ({
     header: {
       cell: ResizableTitle,
     },
+    ...(externalComponents ? {
+      body: {
+        ...(externalComponents.body || {}),
+      },
+    } : {}),
   };
 
   const hasRightControls =

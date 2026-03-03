@@ -12,6 +12,30 @@ const initialState = {
   isLoading: false,
   grant_access_detail: null,
 };
+// Serialize an AxiosError into a plain Redux-safe object.
+// Preserves the paths that consumers depend on:
+//   LayoutMenu:  errorCode(val) === 503  →  val.response.status
+//   LayoutMenu:  val?.response?.data?.data?.isGranted
+//   useGrantAccessHooks:  val?.isGranted  |  val?.actionList
+const serializeGrantAccessError = (error) => {
+  const errorData = error?.response?.data?.data;
+  return {
+    status: error?.response?.status,
+    response: {
+      status: error?.response?.status,
+      data: {
+        code: error?.response?.data?.code,
+        data: {
+          isGranted: errorData?.isGranted ?? false,
+          actionList: errorData?.actionList || [],
+        },
+      },
+    },
+    isGranted: errorData?.isGranted ?? false,
+    actionList: errorData?.actionList || [],
+  };
+};
+
 export const validateError = createAsyncThunk(
   "VALIDATE_ERROR",
   async ({ error, action, back = false, load = false }, thunkAPI) => {
@@ -26,9 +50,9 @@ export const validateError = createAsyncThunk(
       (errorLog === 404 && error?.response?.data?.data?.isGranted === false)
     ) {
       if (action !== "CHECK_GRANTED_ACCESS") {
-        thunkAPI.dispatch(grantedAccessDetail(error));
+        thunkAPI.dispatch(grantedAccessDetail(serializeGrantAccessError(error)));
       } else {
-        thunkAPI.dispatch(grantedAccess(error));
+        thunkAPI.dispatch(grantedAccess(serializeGrantAccessError(error)));
       }
     } else if (errorLog === 204) {
       const errorBody = {

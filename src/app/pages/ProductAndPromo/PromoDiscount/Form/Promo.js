@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Select } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import InputComponent from "../../../../../components/InputComponent";
@@ -211,7 +211,14 @@ const Promo = ({
             type={type}
             data={listDataCriteria || []} //data
             dataCriteria={criteriaValues || []} //ddl
-            updateData={setListDataCriteria}
+            updateData={(updater) => {
+              setListDataCriteria((prev) => {
+                const next = typeof updater === "function" ? updater(prev) : updater;
+                return next.map((row) =>
+                  row.status === undefined ? { ...row, status: "DRAFT" } : row
+                );
+              });
+            }}
             setStoredData={setStoredDataInline}
             storedData={storedDataInline}
             startDate={startDate}
@@ -248,8 +255,10 @@ const Promo = ({
               "MAX VALUE UOM",
               "FROM ITEM",
               "TIERING",
+              "STATUS",
             ]}
             endDate={endDate}
+            showInactivate={type !== "detail" && type !== "preview"}
           />
         </div>
         <div className={`${valuePage !== "Conditions" ? "hidden" : ""}`}>

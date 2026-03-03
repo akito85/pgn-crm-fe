@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { Form, Select, Button, Tooltip, Spin, Tag, Input } from "antd"; // Added Input import
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
@@ -8,7 +7,8 @@ import InputComponent from "../../../../../../../../../components/InputComponent
 import StatusComponent from "../../../../../../../../../components/StatusComponent";
 import DateComponent from "../../../../../../../../../components/DateComponent";
 
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
@@ -35,23 +35,29 @@ export default function InfoServiceRequest({
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedRowKey, setSelectedRowKey] = useState(null);
   const [serviceRequestRef, setServiceRequestRef] = useState("");
-  const navigate = useNavigate();
-
   // Debug: Log form values when they change
   useEffect(() => {
     const values = form?.getFieldsValue();
-    console.log("InfoServiceRequest - Current form values:", values);
   }, [form]);
 
-  // Create safe accessor functions
+  // Create safe accessor functions that handle both array and { data: [] } formats
+  const getDropdownItems = (dropdownKey) => {
+    const dropdown = dropdowns?.[dropdownKey];
+    if (!dropdown) return [];
+    if (Array.isArray(dropdown)) return dropdown;
+    if (Array.isArray(dropdown?.data)) return dropdown.data;
+    return [];
+  };
+
   const getDropdownOptions = (dropdownKey) => {
-    if (!dropdowns || !dropdowns[dropdownKey] || !dropdowns[dropdownKey].data) {
-      return [];
-    }
-    return dropdowns[dropdownKey].data.map(item => ({
+    return getDropdownItems(dropdownKey).map(item => ({
       value: item.glbTypeValId?.toString() || item.id?.toString(),
       label: item.name || item.glbTypeValName
     }));
+  };
+
+  const isDropdownLoaded = (dropdownKey) => {
+    return getDropdownItems(dropdownKey).length > 0;
   };
 
   // Or use destructuring with defaults
@@ -326,6 +332,7 @@ export default function InfoServiceRequest({
       },
     },
     {
+      key: "action",
       title: "ACTION",
       align: "center",
       width: 120,
@@ -333,26 +340,14 @@ export default function InfoServiceRequest({
       render: (v, r, i) => {
         return (
           <div className="flex w-full justify-center gap-4">
-            <Tooltip title="Detail">
+            <Tooltip title="Select">
               <div className="pt-1 cursor-pointer">
                 <SVGIcon
-                  name="IconDetail"
+                  name="IconActionCreate"
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    navigate("/account-management/account-standard/service-requests/details");
-                  }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip title="Update">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEdit"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => {
-                    // Handle update action
+                    handleRowClick(r);
                   }}
                 />
               </div>
@@ -404,11 +399,12 @@ export default function InfoServiceRequest({
     }
   ];
 
-  // Handle row click
+  // Handle row click — auto select & close modal (like PaymentRelation pattern)
   const handleRowClick = (record) => {
-    console.log('Row clicked:', record);
+    form.setFieldsValue({ srr: record.serviceRequestReference });
     setSelectedRow(record);
     setSelectedRowKey(record.key);
+    setIsOpen(false);
   };
 
   const handleTableRowClick = (record, rowIndex, event) => {
@@ -431,9 +427,10 @@ export default function InfoServiceRequest({
 
   return(
     <Fragment>
-      <NxPanel title={"SERVICE INFORMATION"}>
+      <NxCardContainer header={"SERVICE INFORMATION"}>
+        <NxBaseContainer border>
         {/* Remove the wrapper Form component since form is passed as prop */}
-        <div className="w-full grid grid-cols-2 gap-4">
+        <div className="w-full grid grid-cols-3 gap-4">
           {/* Left Column */}
           <div className="space-y-4">
             <div class="w-full gap-4 flex flex-row items-end">
@@ -463,6 +460,7 @@ export default function InfoServiceRequest({
                 Select
               </Button>
             </div>
+
             <Form.Item
               key="category"
               name="category"
@@ -477,7 +475,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Category"
-                loading={!dropdowns?.serviceRequestCategories?.data}
+                loading={!isDropdownLoaded('serviceRequestCategories')}
                 options={getDropdownOptions('serviceRequestCategories')}
               />
             </Form.Item>
@@ -496,11 +494,14 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Priorities"
-                loading={!dropdowns?.serviceRequestPriorities?.data}
+                loading={!isDropdownLoaded('serviceRequestPriorities')}
                 options={getDropdownOptions('serviceRequestPriorities')}
               />
             </Form.Item>
+          </div>
 
+          {/* Middle Column */}
+          <div className="space-y-4">
             <Form.Item
               key="srFormAccountCostCenter"
               name="srFormAccountCostCenter"
@@ -530,14 +531,11 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Sub Category"
-                loading={!dropdowns?.serviceRequestSubcategories?.data}
+                loading={!isDropdownLoaded('serviceRequestSubcategories')}
                 options={getDropdownOptions('serviceRequestSubcategories')}
               />
             </Form.Item>
-          </div>
 
-          {/* Right Column */}
-          <div className="space-y-4">
             <Form.Item
               key="requestSource"
               name="requestSource"
@@ -552,11 +550,14 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Sources"
-                loading={!dropdowns?.serviceRequestSources?.data}
+                loading={!isDropdownLoaded('serviceRequestSources')}
                 options={getDropdownOptions('serviceRequestSources')}
               />
             </Form.Item>
+          </div>
 
+          {/* Right Column */}
+          <div className="space-y-4">
             <Form.Item
               key="type"
               name="type"
@@ -571,7 +572,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Types"
-                loading={!dropdowns?.serviceRequestTypes?.data}
+                loading={!isDropdownLoaded('serviceRequestTypes')}
                 options={getDropdownOptions('serviceRequestTypes')}
               />
             </Form.Item>
@@ -590,7 +591,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Channels"
-                loading={!dropdowns?.serviceRequestChannels?.data}
+                loading={!isDropdownLoaded('serviceRequestChannels')}
                 options={getDropdownOptions('serviceRequestChannels')}
               />
             </Form.Item>
@@ -628,73 +629,45 @@ export default function InfoServiceRequest({
             />
           </Form.Item>
         </div>
-      </NxPanel>
+        </NxBaseContainer>
+      </NxCardContainer>
 
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        title="CHOOSE SERVICE REQUEST REFERENCE"
+        header={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
-        type="custom"
         footer={[
-          <div className="flex justify-end items-end w-full">
-            <div className="flex flex-row gap-2">
-              <Button onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                type="primary"
-                className="h-9 px-5 justify-center items-center"
-                style={{
-                  backgroundColor: "#0075bf",
-                  borderColor: "#0075bf",
-                  borderRadius: "5px",
-                  minWidth: "112px",
-                  color: "#ffffff"
-                }}
-                onClick={handleOk}
-                disabled={!selectedRow}
-              >
-                Select
-              </Button>
-            </div>
-          </div>
+          <Button key="close" onClick={handleClose}>
+            Close
+          </Button>,
         ]}
       >
-        <div className="mb-4">
-          {selectedRow ? (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-              <span className="font-medium">Selected Service Request:</span> 
-              <span className="ml-2 font-bold">{selectedRow.serviceRequestNumber}</span>
-              <span className="ml-2">({selectedRow.serviceRequestReference})</span>
-            </div>
-          ) : (
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded text-gray-500">
-              Click on a Service Request Number or Reference to select
-            </div>
-          )}
+        <div className="p-4">
+          <NxBaseContainer border>
+            <NxTable
+              className="border-[0.5px] border-[#c8cdd4] border-solid"
+              usePagination={true}
+              useSelect={true}
+              dataMain={ServiceRequestData}
+              columnMain={columnMain}
+              tablePadding="small"
+              fontSize="small"
+              tableScrolled={{ x: "max-content" }}
+              onRowClicked={handleTableRowClick}
+              // rowSelection={{
+              //   type: 'radio',
+              //   selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
+              //   onChange: (selectedRowKeys, selectedRows) => {
+              //     if (selectedRows.length > 0) {
+              //       handleRowClick(selectedRows[0]);
+              //     }
+              //   },
+              // }}
+            />
+          </NxBaseContainer>
         </div>
-        
-        <NxTable
-          className="border-[0.5px] border-[#c8cdd4] border-solid"
-          usePagination={true}
-          useSelect={true}
-          dataMain={ServiceRequestData}
-          columnMain={columnMain}
-          tablePadding="small"
-          fontSize="small"
-          onRowClicked={handleTableRowClick}
-          rowSelection={{
-            type: 'radio',
-            selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
-            onChange: (selectedRowKeys, selectedRows) => {
-              if (selectedRows.length > 0) {
-                handleRowClick(selectedRows[0]);
-              }
-            },
-          }}
-        />
       </NxModal>
     </Fragment>
   )

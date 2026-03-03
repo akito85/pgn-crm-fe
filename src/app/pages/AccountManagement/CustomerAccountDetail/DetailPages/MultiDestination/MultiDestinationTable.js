@@ -33,12 +33,37 @@ const MultiDestinationTable = ({
   const itemActions = nxGetAccountActions({
     idAccount,
     idCustomer,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION,
-    updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION,
-    detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION,
-    navigate,
+    handleView: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
+    handleCreate: () => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    ),
+    handleUpdate: (id) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
     handleApproval,
-    handleApprovalHistory: handleApprovalHistoryModal,
+    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
     handleInactivate: handleInactivateModal,
     idKey: "idMd",

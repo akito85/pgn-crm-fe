@@ -204,7 +204,7 @@ const ModalAttachment = ({
     setUrlLink(e.target.value);
   };
 
-  console.log(categoryOptions);
+  // console.log(categoryOptions);
   
   return (
     <Modal
