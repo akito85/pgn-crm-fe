@@ -41,7 +41,7 @@ const BillingDetail = ({
         <BillingItemTab
           billingCodeId={billingCodeId}
           calculationCodeId={calculationCodeId}
-           sourceNumber={sourceNumber}  // ✅ tambahkan ini
+          sourceNumber={sourceNumber} 
         />
       ),
     },
@@ -53,7 +53,7 @@ const BillingDetail = ({
     {
       key: "3",
       label: "Adjustment",
-      children: <AdjustmentTab billingCodeId={billingCodeId} />,
+      children: <AdjustmentTab sourceNumber={sourceNumber} />,
     },
   ];
 
