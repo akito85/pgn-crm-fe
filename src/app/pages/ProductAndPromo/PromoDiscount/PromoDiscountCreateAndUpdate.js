@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import RadioTabs from "../../../../components/RadioTabs";
+import { NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import Promo from "./Form/Promo";
@@ -32,7 +32,6 @@ import {
   getSelectedApprovalPromo,
   updatePromo,
 } from "../../../../redux/slices/product_promo/promoSlice";
-import { handleMandatory } from "../Product/utils";
 import {
   showModalError,
   showModalSuccess,
@@ -70,24 +69,20 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   const location = useLocation();
   const id = location?.state?.id; //id
 
-  const [tabPagesPromo, setTabPagesPromo] = useState([
-    {
-      value: "Promo",
-      paramValue: [
-        //mandatory fields
-        "name",
-        "startDate",
-        "endDate",
-        "promoType",
-        "promotionType",
-        "criteria",
-      ],
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
+  const [current, setCurrent] = useState(0);
 
-  const [valuePage, setValuePage] = useState(tabPagesPromo[0].value);
+  const steps = [
+    { title: "Promo" },
+    { title: "Approval" },
+    { title: "Attachment" },
+  ];
+
+  const formFields = [
+    ["name", "startDate", "endDate", "promoType", "promotionType", "criteria"],
+    ["apphierId"],
+    [],
+  ];
+
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -383,9 +378,28 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     return value;
   };
 
-  const handleErrorSubmit = ({ values, errorFields, outOfDate }) => {
-    handleMandatory(setTabPagesPromo, listDataAttachment, errorFields);
+  const next = async () => {
+    try {
+      if (current === 0) {
+        await form.validateFields(formFields[0]);
+        if (listDataCriteria.length === 0 && !form.getFieldValue("criteria")?.includes(37)) {
+          dispatch(showModalError({ title: "Failed", description: "Criteria Mandatory. Please insert data." }));
+          return;
+        }
+        if (storedDataInline) {
+          dispatch(showModalError({ title: "Failed", description: "Please save data table inline before submit. Please try again." }));
+          return;
+        }
+      } else if (current === 1) {
+        await form.validateFields(formFields[1]);
+      }
+    } catch (err) {
+      return;
+    }
+    setCurrent((prev) => prev + 1);
   };
+
+  const prev = () => setCurrent((prev) => prev - 1);
 
   const formatCriteria = (data = []) => {
     const tempArray = criteriaOptions.filter((item) =>
@@ -423,7 +437,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   );
 
   const handleBodyConfirm = useCallback(
-    (bodyData) => {
+    (bodyData, submitFlag = flag) => {
       let dataCriteriaObject = listDataCriteria.map((item, index) => ({
           ...handleMappingCriteriaGeneral({
             item: item,
@@ -464,7 +478,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           ? moment(bodyData?.endDate).format(dateFormatting.date)
           : null,
         apphierId: bodyData.apphierId,
-        action: flag ? "SUBMIT" : "DRAFT",
+        action: submitFlag !== undefined ? (submitFlag ? "SUBMIT" : "DRAFT") : (flag ? "SUBMIT" : "DRAFT"),
         productPromoConditionDtos: (listDataCondition || [])?.map((item) => {
           return {
             id: item?.id || null,
@@ -499,107 +513,59 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   // Handle Save
   const handleSave = useCallback(
-    async (formValue) => {
+    async (submitFlag) => {
       try {
         if (listDataAttachment.length === 0) {
-          handleMandatory(setTabPagesPromo, listDataAttachment); // attachment mandatory onFinish
-        } else {
-          handleMandatory(setTabPagesPromo, listDataAttachment); // clearing all badge
-          if (
-            listDataCriteria.length === 0 &&
-            !formValue.criteria.includes(37)
-          ) {
-            const errorBody = {
-              title: "Failed",
-              description: "Criteria Mandatory. Please insert data.",
-            };
-            dispatch(showModalError(errorBody));
-          } else if (storedDataInline) {
-            const errorBody = {
-              title: "Failed",
-              description: `Please save data table inline before submit. Please try again.`,
-            };
-            dispatch(showModalError(errorBody));
-            // } else if (
-            //   handleCheckCriteriaMissingValidation(
-            //     criteriaOptions,
-            //     formValue?.criteria,
-            //     listDataCriteria,
-            //     () => {},
-            //     1
-            //   )
-            // ) {
-            //   const errorBody = {
-            //     title: "Failed",
-            //     description: `There is missing values in table criteria. Please try again`,
-            //   };
-            //   dispatch(showModalError(errorBody));
-            // }
-          } else {
-            setBodyData({
-              ...formValue,
-              typeName: data_promo_type?.find(
-                (item) => item?.id === formValue?.promoType
-              )?.text,
-              promotionTypeName: data_promotion_type?.find(
-                (item) => item?.id === formValue?.promotionType
-              )?.text,
-              status:
-                type === "update"
-                  ? data_promoDiscountDetail?.status
-                  : undefined,
-            });
-            setTabPagesPromo([
-              {
-                value: "Promo",
-                paramValue: [
-                  //mandatory fields
-                  "name",
-                  "startDate",
-                  "endDate",
-                  "promoType",
-                  "promotionType",
-                  "criteria",
-                ],
-              },
-              { value: "Approval", paramValue: ["apphierId"] },
-              { value: "Attachment" },
-            ]);
-
-            const validateValueObj = {
-              body: handleBodyConfirm({
-                ...formValue,
-                typeName: data_promo_type?.find(
-                  (item) => item?.id === formValue?.promoType
-                )?.text,
-                promotionTypeName: data_promotion_type?.find(
-                  (item) => item?.id === formValue?.promotionType
-                )?.text,
-              }),
-              services: productPromoHttpService,
-              endPoint:
-                type === "create"
-                  ? "/v1/dbs/api/product-promo/validate-create"
-                  : "/v1/dbs/api/product-promo/validate-update",
-              type: type,
-            };
-            await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
-
-            setModalConfirm(true);
-          }
+          dispatch(showModalError({ title: "Failed", description: "Attachment is required. Please upload at least one file." }));
+          return;
         }
+        const formValue = form.getFieldsValue(true);
+        setBodyData({
+          ...formValue,
+          typeName: data_promo_type?.find(
+            (item) => item?.id === formValue?.promoType
+          )?.text,
+          promotionTypeName: data_promotion_type?.find(
+            (item) => item?.id === formValue?.promotionType
+          )?.text,
+          status:
+            type === "update"
+              ? data_promoDiscountDetail?.status
+              : undefined,
+        });
+
+        const validateValueObj = {
+          body: handleBodyConfirm({
+            ...formValue,
+            typeName: data_promo_type?.find(
+              (item) => item?.id === formValue?.promoType
+            )?.text,
+            promotionTypeName: data_promotion_type?.find(
+              (item) => item?.id === formValue?.promotionType
+            )?.text,
+          }, submitFlag),
+          services: productPromoHttpService,
+          endPoint:
+            type === "create"
+              ? "/v1/dbs/api/product-promo/validate-create"
+              : "/v1/dbs/api/product-promo/validate-update",
+          type: type,
+        };
+        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
+
+        setFlag(submitFlag);
+        setModalConfirm(true);
       } catch (error) {
         console.log(error);
       }
     },
     [
       listDataAttachment,
-      listDataCriteria,
-      storedDataInline,
-      criteriaOptions,
+      form,
       dispatch,
       data_promo_type,
       data_promotion_type,
+      data_promoDiscountDetail,
       handleBodyConfirm,
       type,
     ]
@@ -706,7 +672,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   };
 
   const handleRetry = () => {
-    handleSave(bodyError?.value);
+    handleSave(flag);
     setModalError(false);
   };
 
@@ -762,29 +728,14 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     <LayoutMenu>
       <Spin spinning={loading || loadingForm}>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex flex-col"}>
-          <div className={"w-full flex justify-start"}>
-            <RadioTabs
-              data={tabPagesPromo}
-              onChange={(e) => setValuePage(e.target.value)}
-              currentPosition={valuePage}
-            />
-          </div>
-        </div>
-
         <Form
           id="form"
           layout="vertical"
           form={form}
-          onFinish={handleSave}
-          onFinishFailed={handleErrorSubmit}
         >
-          <div
-            style={{
-              display:
-                valuePage !== tabPagesPromo[0].value ? "none" : undefined,
-            }}
-          >
+          <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
+
+          <div className={current !== 0 ? "hidden" : ""}>
             <Promo
               type={type}
               criteriaOptionsFix={criteriaOptions}
@@ -809,12 +760,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             />
           </div>
 
-          <div
-            style={{
-              display:
-                valuePage !== tabPagesPromo[1].value ? "none" : undefined,
-            }}
-          >
+          <div className={current !== 1 ? "hidden" : ""}>
             <BaseContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={dataListDetailApproval}
@@ -825,12 +771,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             </BaseContainer>
           </div>
 
-          <div
-            style={{
-              display:
-                valuePage !== tabPagesPromo[2].value ? "none" : undefined,
-            }}
-          >
+          <div className={current !== 2 ? "hidden" : ""}>
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
@@ -846,59 +787,58 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           </div>
 
           <div className="w-full flex justify-between mt-10">
-            <div className=" flex">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {
-                  setModalBack(true);
-                }}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
-              >
-                Back
-              </ButtonComponent>
-            </div>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonClear" width={24} />}
-                  type="submit"
-                  onClick={() => {
-                    handleClear(type);
+            <ButtonComponent
+              onClick={() => setModalBack(true)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
                   }}
-                  disabled={storedDataInline}
-                >
-                  {type === "create" ? "Clear" : "Reset"}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
+
+            <div className="flex justify-end gap-5">
+              <ButtonComponent
+                icon={<SVGIcon name="IconButtonClear" width={24} />}
+                onClick={() => handleClear(type)}
+                disabled={storedDataInline}
+              >
+                {type === "create" ? "Clear" : "Reset"}
+              </ButtonComponent>
+
+              <ButtonComponent
+                onClick={() => handleSave(false)}
+                disabled={storedDataInline || current !== steps.length - 1}
+              >
+                Save as Draft
+              </ButtonComponent>
+
+              <ButtonComponent
+                onClick={prev}
+                disabled={current < 1}
+              >
+                Previous
+              </ButtonComponent>
+
+              {current < steps.length - 1 && (
+                <ButtonComponent onClick={next} disabled={steps[current]?.disabled}>
+                  Next
                 </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
+              )}
+
+              {current === steps.length - 1 && (
                 <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(false)}
-                  disabled={storedDataInline}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(true)}
+                  onClick={() => handleSave(true)}
                   disabled={storedDataInline}
                 >
                   Save & Submit
                 </ButtonComponent>
-              </Form.Item>
+              )}
             </div>
           </div>
         </Form>
