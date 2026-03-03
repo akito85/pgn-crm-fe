@@ -46,6 +46,7 @@ import {
   handleDisabledEachColumnCriteria,
   handleMappingCriteriaGeneral,
 } from "../UtilsProduct/UtilsAllProduct";
+import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 
 const PromoDiscountCreateAndUpdate = ({ type }) => {
   // Selector
@@ -727,121 +728,122 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   return (
     <LayoutMenu>
       <Spin spinning={loading || loadingForm}>
-        <BreadCrumb routes={routes} />
-        <Form
-          id="form"
-          layout="vertical"
-          form={form}
-        >
+        <div className="flex flex-col gap-y-4">
+          <NxBreadCrumb routes={routes} />
           <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
-
-          <div className={current !== 0 ? "hidden" : ""}>
-            <Promo
-              type={type}
-              criteriaOptionsFix={criteriaOptions}
-              promoTypeOptions={data_promo_type || []}
-              promotionTypeOptions={data_promotion_type || []}
-              handleSelectCriteria={handleSelectCriteria}
-              handleDeselectCriteria={handleDeselectCriteria}
-              handleClearCriteria={handleClearCriteria}
-              handleStartDate={handleStartDate}
-              startDate={startDate}
-              listDataCriteria={listDataCriteria}
-              setListDataCriteria={setListDataCriteria}
-              criteriaValues={criteriaValues}
-              storedDataInline={storedDataInline}
-              setStoredDataInline={setStoredDataInline}
-              status={data_promoDiscountDetail?.status}
-              statusApproval={data_promoDiscountDetail?.statusApproval}
-              listDataCondition={listDataCondition}
-              setListDataCondition={setListDataCondition}
-              endDate={endDate}
-              handleEndDate={handleEndDate}
-            />
-          </div>
-
-          <div className={current !== 1 ? "hidden" : ""}>
-            <BaseContainer header={"APPROVAL INFORMATION"}>
-              <ApprovalComponentGeneral
-                dataTable={dataListDetailApproval}
-                dataOption={dataApproval}
-                selectedHierarchy={dataApprovalId}
-                updateSelectedHierarchy={setDataApprovalId}
-              />
-            </BaseContainer>
-          </div>
-
-          <div className={current !== 2 ? "hidden" : ""}>
-            <BaseContainer header={"Attachment Information"}>
-              <AttachmentComponent
+          <Form
+            id="form"
+            layout="vertical"
+            form={form}
+          >
+            <div className={`flex flex-col gap-y-4 ${current !== 0 ? "hidden" : ""}`}>
+              <Promo
                 type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                dispatch={dispatch}
-                getAPICategory={getAttachmentCategoryPromo}
-                getAPIGuard={getConfigFileMaster}
-                typeSelector={"promo"}
-                mandatory={true}
+                criteriaOptionsFix={criteriaOptions}
+                promoTypeOptions={data_promo_type || []}
+                promotionTypeOptions={data_promotion_type || []}
+                handleSelectCriteria={handleSelectCriteria}
+                handleDeselectCriteria={handleDeselectCriteria}
+                handleClearCriteria={handleClearCriteria}
+                handleStartDate={handleStartDate}
+                startDate={startDate}
+                listDataCriteria={listDataCriteria}
+                setListDataCriteria={setListDataCriteria}
+                criteriaValues={criteriaValues}
+                storedDataInline={storedDataInline}
+                setStoredDataInline={setStoredDataInline}
+                status={data_promoDiscountDetail?.status}
+                statusApproval={data_promoDiscountDetail?.statusApproval}
+                listDataCondition={listDataCondition}
+                setListDataCondition={setListDataCondition}
+                endDate={endDate}
+                handleEndDate={handleEndDate}
               />
-            </BaseContainer>
-          </div>
+            </div>
 
-          <div className="w-full flex justify-between mt-10">
-            <ButtonComponent
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
+            <div className={`flex flex-col gap-y-4 ${current !== 1 ? "hidden" : ""}`}>
+              <BaseContainer header={"APPROVAL INFORMATION"}>
+                <ApprovalComponentGeneral
+                  dataTable={dataListDetailApproval}
+                  dataOption={dataApproval}
+                  selectedHierarchy={dataApprovalId}
+                  updateSelectedHierarchy={setDataApprovalId}
                 />
-              }
-            >
-              Back
-            </ButtonComponent>
+              </BaseContainer>
+            </div>
 
-            <div className="flex justify-end gap-5">
+            <div className={`flex flex-col gap-y-4 ${current !== 2 ? "hidden" : ""}`}>
+              <BaseContainer header={"Attachment Information"}>
+                <AttachmentComponent
+                  type={type}
+                  data={listDataAttachment}
+                  updateData={setListDataAttachment}
+                  dispatch={dispatch}
+                  getAPICategory={getAttachmentCategoryPromo}
+                  getAPIGuard={getConfigFileMaster}
+                  typeSelector={"promo"}
+                  mandatory={true}
+                />
+              </BaseContainer>
+            </div>
+
+            <div className="w-full flex justify-between mt-10">
               <ButtonComponent
-                icon={<SVGIcon name="IconButtonClear" width={24} />}
-                onClick={() => handleClear(type)}
-                disabled={storedDataInline}
+                onClick={() => setModalBack(true)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
+                  />
+                }
               >
-                {type === "create" ? "Clear" : "Reset"}
+                Back
               </ButtonComponent>
 
-              <ButtonComponent
-                onClick={() => handleSave(false)}
-                disabled={storedDataInline || current !== steps.length - 1}
-              >
-                Save as Draft
-              </ButtonComponent>
-
-              <ButtonComponent
-                onClick={prev}
-                disabled={current < 1}
-              >
-                Previous
-              </ButtonComponent>
-
-              {current < steps.length - 1 && (
-                <ButtonComponent onClick={next} disabled={steps[current]?.disabled}>
-                  Next
-                </ButtonComponent>
-              )}
-
-              {current === steps.length - 1 && (
+              <div className="flex justify-end gap-5">
                 <ButtonComponent
-                  onClick={() => handleSave(true)}
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
+                  onClick={() => handleClear(type)}
                   disabled={storedDataInline}
                 >
-                  Save & Submit
+                  {type === "create" ? "Clear" : "Reset"}
                 </ButtonComponent>
-              )}
+
+                <ButtonComponent
+                  onClick={() => handleSave(false)}
+                  disabled={storedDataInline || current !== steps.length - 1}
+                >
+                  Save as Draft
+                </ButtonComponent>
+
+                <ButtonComponent
+                  onClick={prev}
+                  disabled={current < 1}
+                >
+                  Previous
+                </ButtonComponent>
+
+                {current < steps.length - 1 && (
+                  <ButtonComponent onClick={next} disabled={steps[current]?.disabled}>
+                    Next
+                  </ButtonComponent>
+                )}
+
+                {current === steps.length - 1 && (
+                  <ButtonComponent
+                    onClick={() => handleSave(true)}
+                    disabled={storedDataInline}
+                  >
+                    Save & Submit
+                  </ButtonComponent>
+                )}
+              </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
 
         {modalConfirm ? (
           <ModalCustom

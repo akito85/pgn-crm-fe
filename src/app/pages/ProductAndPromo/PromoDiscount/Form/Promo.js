@@ -36,6 +36,8 @@ import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProd
 import { formMessageRequired, requiredMessage } from "../../../../../utils";
 import { columnsTableCriteriaPromo } from "../Table/TableCriteriaPromo";
 import ConditionPromo from "./ConditionsPromo";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 
 const Promo = ({
   type,
@@ -78,124 +80,129 @@ const Promo = ({
   };
 
   return (
-    <div>
-      <BaseContainer header={"Promo Information"}>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item
-            label={"Promo Name"}
-            name={"name"}
-            rules={formMessageRequired("Promo Name")}
-          >
-            <InputComponent
-            maxLength={100}
-              disabled={status === "ACTIVE" && type === "update"}
-            />
-          </Form.Item>
-          <Form.Item
-            label={"Start Date"}
-            name={"startDate"}
-            rules={formMessageRequired("Start Date")}
-          >
-            <DateComponent
-              disabled={
-                (status === "ACTIVE" && type === "update") ||
-                listDataCriteria?.length > 0 ||
-                storedDataInline
-              }
-              dateDisable={disabledDate}
-              onChange={(e) => handleStartDate(e)}
-            />
-          </Form.Item>
-          <Form.Item
-            label={"End Date"}
-            name={"endDate"}
-            rules={[
-              {
-                validator: (_, value) =>
-                  (value && moment(startDate) <= moment(value)) || !value
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error(
-                          "The end date must be greater than or equal to the start date!"
-                        )
-                      ),
-              },
-              // { message: requiredMessage("End Date"), required: true },
-            ]}
-          >
-            <DateComponent
-              dateDisable={handleDisableEndDate}
-              onChange={(e) => handleEndDate(e)}
-            />
-          </Form.Item>
-          <Form.Item
-            label={"Type"}
-            name={"promoType"}
-            className={"w-full"}
-            rules={formMessageRequired("Type")}
-          >
-            <SelectComponent
-              disabled={status === "ACTIVE" && type === "update"}
+    <>
+      <NxCardContainer header={"Promo Information"}>
+        <NxBaseContainer border>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <Form.Item
+              label={"Promo Name"}
+              name={"name"}
+              rules={formMessageRequired("Promo Name")}
+              className="no-margin-form"
             >
-              {(promoTypeOptions || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
-                  {data.text}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            label={"Promotion Type"}
-            name={"promotionType"}
-            className={"w-full"}
-            rules={formMessageRequired("Promotion Type")}
-          >
-            <SelectComponent
-              disabled={status === "ACTIVE" && type === "update"}
+              <InputComponent
+              maxLength={100}
+                disabled={status === "ACTIVE" && type === "update"}
+              />
+            </Form.Item>
+            <Form.Item
+              label={"Start Date"}
+              name={"startDate"}
+              rules={formMessageRequired("Start Date")}
+              className="no-margin-form"
             >
-              {(promotionTypeOptions || [])?.map((data, index) => (
-                <Select.Option value={data.id} key={index}>
-                  {data.text}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-        <div className={"w-full mt-2"}>
-          <Form.Item
-            name={"criteria"}
-            rules={[{ message: requiredMessage("Criteria"), required: true }]}
-            className={"w-full no-margin-form"}
-            label={"Criteria"}
-          >
-            <SelectComponent
-              mode="multiple"
-              onSelect={handleSelectCriteria}
-              onDeselect={handleDeselectCriteria}
-              onClear={handleClearCriteria}
-              disabled={status === "ACTIVE" && type === "update"}
+              <DateComponent
+                disabled={
+                  (status === "ACTIVE" && type === "update") ||
+                  listDataCriteria?.length > 0 ||
+                  storedDataInline
+                }
+                dateDisable={disabledDate}
+                onChange={(e) => handleStartDate(e)}
+              />
+            </Form.Item>
+            <Form.Item
+              label={"End Date"}
+              name={"endDate"}
+              rules={[
+                {
+                  validator: (_, value) =>
+                    (value && moment(startDate) <= moment(value)) || !value
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error(
+                            "The end date must be greater than or equal to the start date!"
+                          )
+                        ),
+                },
+                // { message: requiredMessage("End Date"), required: true },
+              ]}
+              className="no-margin-form"
             >
-              {(criteriaOptionsFix || [])?.map((data, index) => (
-                <Select.Option key={index} value={data.value}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-        </div>
+              <DateComponent
+                dateDisable={handleDisableEndDate}
+                onChange={(e) => handleEndDate(e)}
+              />
+            </Form.Item>
+            <Form.Item
+              label={"Type"}
+              name={"promoType"}
+              className={"w-full no-margin-form"}
+              rules={formMessageRequired("Type")}
+            >
+              <SelectComponent
+                disabled={status === "ACTIVE" && type === "update"}
+              >
+                {(promoTypeOptions || [])?.map((data, index) => (
+                  <Select.Option value={data.id} key={index}>
+                    {data.text}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+            <Form.Item
+              label={"Promotion Type"}
+              name={"promotionType"}
+              className={"w-full no-margin-form"}
+              rules={formMessageRequired("Promotion Type")}
+            >
+              <SelectComponent
+                disabled={status === "ACTIVE" && type === "update"}
+              >
+                {(promotionTypeOptions || [])?.map((data, index) => (
+                  <Select.Option value={data.id} key={index}>
+                    {data.text}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+          </div>
+          <div className={"w-full"}>
+            <Form.Item
+              name={"criteria"}
+              rules={[{ message: requiredMessage("Criteria"), required: true }]}
+              className={"w-full no-margin-form"}
+              label={"Criteria"}
+            >
+              <SelectComponent
+                mode="multiple"
+                onSelect={handleSelectCriteria}
+                onDeselect={handleDeselectCriteria}
+                onClear={handleClearCriteria}
+                disabled={status === "ACTIVE" && type === "update"}
+              >
+                {(criteriaOptionsFix || [])?.map((data, index) => (
+                  <Select.Option key={index} value={data.value}>
+                    {data.name}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+          </div>
 
-        <div className="w-full mt-2">
-          <Form.Item
-            label={"Description"}
-            name={"description"}
-            className={"w-full"}
-          >
-            <InputComponent type="textarea" />
-          </Form.Item>
-        </div>
-      </BaseContainer>
+          <div className="w-full">
+            <Form.Item
+              label={"Description"}
+              name={"description"}
+              className={"w-full"}
+            >
+              <InputComponent type="textarea" />
+            </Form.Item>
+          </div>
+        </NxBaseContainer>
+      </NxCardContainer>
 
-      <BaseContainer
+      <NxCardContainer
         header={"promo detail information"}
         type={"tabs"}
         element={
@@ -279,8 +286,8 @@ const Promo = ({
             storedData={storedDataInline}
           />
         </div>
-      </BaseContainer>
-    </div>
+      </NxCardContainer>
+    </>
   );
 };
 

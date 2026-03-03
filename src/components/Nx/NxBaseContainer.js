@@ -4,7 +4,8 @@ const NxBaseContainer = ({
   border = false,
   className="",
   rounded = true,
-  padding = true
+  padding = true,
+  flexDirection = "column",
 }) => {
   // Determine class based on border prop
   const containerClass = border
@@ -28,7 +29,7 @@ const NxBaseContainer = ({
           {header}
         </div>
       )}
-      <div className={`${padding ? "p-4" : ""}`}>{children}</div>
+      <div className={`flex ${flexDirection === "column" ? "flex-col" : flexDirection === "row" ? "flex-row" : ""} flex-col gap-4 ${padding ? "p-4" : ""}`}>{children}</div>
     </div>
   );
 };
