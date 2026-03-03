@@ -37,7 +37,7 @@ import {
 } from "../../../../redux/slices/general_slice";
 import { columnsTableCriteriaPromo } from "./Table/TableCriteriaPromo";
 import { dateFormatting, hasValue } from "../../../../utils";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
+import NxModal from "../../../../components/Nx/NxModal";
 import PromoDiscountConfirm from "./Pages/PromoDiscountConfirm";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import {
@@ -87,6 +87,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const [loadingForm, setLoadingForm] = useState(false);
 
   // State
@@ -841,48 +842,48 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           </NxBaseContainer>
         </div>
 
-        {modalConfirm ? (
-          <ModalCustom
-            isOpen={modalConfirm}
-            handleCancel={() => setModalConfirm(false)}
-            header={"CONFIRMATION"}
-            width={1200}
-            type={"confirmation"}
-            footer={
-              <div className="w-full flex justify-end gap-5">
-                <ButtonComponent
-                  type={"default"}
-                  onClick={() => {
-                    setModalConfirm(false);
-                  }}
-                >
-                  Cancel
-                </ButtonComponent>
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={() => {
-                    handleConfirm();
-                  }}
-                  disabled={loading || loadingForm}
-                >
-                  Confirm
-                </ButtonComponent>
+        <NxModal
+          isOpen={modalConfirm}
+          handleCancel={() => { setActiveTab(0); setModalConfirm(false); }}
+          header={"CONFIRMATION"}
+          width={1200}
+          footer={[
+            <div className="w-full flex justify-between gap-x-4" key="footer">
+              <Button type="menu" onClick={() => { setActiveTab(0); setModalConfirm(false); }}>
+                Cancel
+              </Button>
+              <div className="flex gap-x-2">
+                <Button type="menu" disabled={activeTab < 1} onClick={() => setActiveTab(prev => prev - 1)}>
+                  Previous
+                </Button>
+                {activeTab < 2 && (
+                  <Button type="submit" onClick={() => setActiveTab(prev => prev + 1)}>
+                    Next
+                  </Button>
+                )}
+                {activeTab === 2 && (
+                  <Button type="submit" onClick={handleConfirm} disabled={loading || loadingForm}>
+                    Confirm
+                  </Button>
+                )}
               </div>
-            }
-          >
-            <PromoDiscountConfirm
-              listAttachment={listDataAttachment}
-              listDataCriteria={listDataCriteria}
-              criteriaValues={criteriaValues}
-              listCriteria={formatCriteria(bodyData?.criteria || [])}
-              listDataCondition={listDataCondition}
-              dataConfirm={bodyData}
-              dataApproval={dataApprovalId}
-              dataApprovalTable={dataListDetailApproval}
-              listApproval={dataApproval}
-            />
-          </ModalCustom>
-        ) : null}
+            </div>
+          ]}
+        >
+          <PromoDiscountConfirm
+            listAttachment={listDataAttachment}
+            listDataCriteria={listDataCriteria}
+            criteriaValues={criteriaValues}
+            listCriteria={formatCriteria(bodyData?.criteria || [])}
+            listDataCondition={listDataCondition}
+            dataConfirm={bodyData}
+            dataApproval={dataApprovalId}
+            dataApprovalTable={dataListDetailApproval}
+            listApproval={dataApproval}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </NxModal>
 
         {modalError ? (
           <ModalError

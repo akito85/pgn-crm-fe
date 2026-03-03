@@ -1,4 +1,5 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
@@ -6,6 +7,8 @@ import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProd
 import { columnsTableCriteriaPromo } from "../Table/TableCriteriaPromo";
 import ConditionPromo from "../Form/ConditionsPromo";
 import RadioTabs from "../../../../../components/RadioTabs";
+import NxDetailText from "../../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../../components/Nx/NxDatePicker";
 
 const PromoDiscountConfirmPromoSection = ({
   dataConfirm,
@@ -51,49 +54,41 @@ const PromoDiscountConfirmPromoSection = ({
   };
 
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"PROMO INFORMATION"}
-      </div>
-
-      <div className="w-full grid grid-cols-3 gap-3">
-        <DetailText label="Name">{dataConfirm?.name || ""}</DetailText>
-        <DetailText label="Category">
-          {dataConfirm?.categoryName || ""}
-        </DetailText>
-        <DetailText label="Type">{dataConfirm?.typeName}</DetailText>
-        <DetailText label="Promotion Type">{dataConfirm?.promotionTypeName}</DetailText>
-      </div>
-      <div className="w-full grid grid-cols-3 gap-3">
-        <DetailText label="Start Date">
-          {moment(dataConfirm?.startDate).format(dateFormatting.date)}
-        </DetailText>
-        <DetailText label="End Date">
-          {dataConfirm?.endDate
-            ? moment(dataConfirm?.endDate).format(dateFormatting.date)
-            : ""}
-        </DetailText>
-      </div>
-      <div className="col-span-4">
-        <DetailText label="Criteria">{listCriteria || ""}</DetailText>
-      </div>
-      <div className="col-span-4">
-        <DetailText label="Description">
+    <>
+      <NxBaseContainer border header="Promo Information">
+        <div className="w-full grid grid-cols-3 gap-4">
+          <NxDetailText label="Name">{dataConfirm?.name || ""}</NxDetailText>
+          <NxDetailText label="Category">
+            {dataConfirm?.categoryName || ""}
+          </NxDetailText>
+          <NxDetailText label="Type">{dataConfirm?.typeName}</NxDetailText>
+          <NxDetailText label="Promotion Type">{dataConfirm?.promotionTypeName}</NxDetailText>
+        </div>
+        <div className="w-full grid grid-cols-3 gap-4">
+          <NxDetailText label="Start Date">
+            {NxDate.formatDate(dataConfirm?.startDate, "DD MMM YYYY")}
+          </NxDetailText>
+          <NxDetailText label="End Date">
+            {NxDate.formatDate(dataConfirm?.endDate, "DD MMM YYYY")}
+          </NxDetailText>
+        </div>
+        <NxDetailText label="Criteria">{listCriteria || ""}</NxDetailText>
+        <NxDetailText label="Description">
           {dataConfirm?.description || ""}
-        </DetailText>
-      </div>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"PROMO DETAIL INFORMATION"}
-      </div>
-      <div className="mt-5">
+        </NxDetailText>
+      </NxBaseContainer>
+      <NxBaseContainer
+        header="Promo Detail"
+        border
+      >
         <RadioTabs
           data={tabPagesDetail}
           onChange={(e) => setValuePage(e.target.value)}
           currentPosition={valuePage}
         />
-      </div>
-      <div className={"w-full"}>{renderSection()}</div>
-    </Fragment>
+        <div className={"w-full"}>{renderSection()}</div>
+      </NxBaseContainer>
+    </>
   );
 };
 
