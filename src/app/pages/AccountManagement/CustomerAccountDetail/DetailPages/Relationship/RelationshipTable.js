@@ -27,6 +27,7 @@ import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import { setData } from "../../../../../../redux/slices/data_slice";
 import RelationshipDetail from "./RelationshipDetail";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
+import getRelatedDetailColumns from "./getRelatedDetailColumns";
 const data = [
   {
     startDate: "2021-08-01",
@@ -82,6 +83,7 @@ const RelationshipTable = ({ handleChangeInteraction = () => {} }) => {
   const [modalSuccess, setModalSuccess] = useState(false);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
 
   //   useEffect(() => {
@@ -105,6 +107,15 @@ const RelationshipTable = ({ handleChangeInteraction = () => {} }) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
   const handleDetail = (record) => {
     // dispatch(getTosDetail(id));
@@ -129,148 +140,18 @@ const RelationshipTable = ({ handleChangeInteraction = () => {} }) => {
   // };
   // const handleSubmitModalInactivate = (res, handleClear) => {};
 
-  // Search Column Table
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            display: "block",
-          }}
-        />
-      </div>
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
+  // Search Column Table - replaced by getRelatedDetailColumns
 
   const columns = [
-    {
-      title: "NO",
-      width: 50,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "DIRECTION FLAG",
-      dataIndex: "directionFlag",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("directionFlag"),
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "category",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("category"),
-    },
-    {
-      title: "SUBJECT TABLE",
-      dataIndex: "subjectTable",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("subjectTable"),
-    },
-    {
-      title: "SUBJECT ID",
-      dataIndex: "subjectId",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("subjectId"),
-    },
-    {
-      title: "SUBJECT NAME",
-      dataIndex: "subjectName",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("subjectName"),
-    },
-    {
-      title: "OBJECT TABLE",
-      dataIndex: "objectTable",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("objectTable"),
-    },
-    {
-      title: "OBJECT ID",
-      dataIndex: "objectId",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("objectId"),
-    },
-    {
-      title: "OBJECT NAME",
-      dataIndex: "objectName",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("objectName"),
-    },
-    {
-      title: "RELATION CODE",
-      dataIndex: "relationCode",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("relationCode"),
-    },
-    {
-      title: "START DATE",
-      width: 200,
-      dataIndex: "startDate",
-      render: (startDate) => moment(startDate).format("DD MMM YYYY"),
-      sorter: true,
-      ...getColumnSearchProps("startDate"),
-    },
-    {
-      title: "END DATE",
-      width: 200,
-      dataIndex: "endDate",
-      render: (endDate) => moment(endDate).format("DD MMM YYYY"),
-      sorter: true,
-      ...getColumnSearchProps("endDate"),
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      width: 100,
-      render: (index) => (
-        <div className={" flex justify-center"}>
-          <StatusComponent colour={index}>{index}</StatusComponent>
-        </div>
-      ),
-    },
+    ...getRelatedDetailColumns(
+      page,
+      pageSize,
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
     {
       title: "ACTIONS",
       align: "center",
