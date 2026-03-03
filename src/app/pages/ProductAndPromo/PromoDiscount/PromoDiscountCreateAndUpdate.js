@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Form, Spin } from "antd";
-import BreadCrumb from "../../../../components/BreadCrumb";
+import { useState, useEffect, useCallback } from "react";
+import { Button, Form, Spin } from "antd";
 import { NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
@@ -27,7 +26,6 @@ import {
   getDetailPromoDraft,
   getListCriteriaPromo,
   getListPromoType,
-  getPromoAttachment,
   getListPromotionType,
   getSelectedApprovalPromo,
   updatePromo,
@@ -47,6 +45,7 @@ import {
   handleMappingCriteriaGeneral,
 } from "../UtilsProduct/UtilsAllProduct";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PromoDiscountCreateAndUpdate = ({ type }) => {
   // Selector
@@ -786,63 +785,59 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
                 />
               </BaseContainer>
             </div>
-
-            <div className="w-full flex justify-between mt-10">
-              <ButtonComponent
+          </Form>
+          <NxBaseContainer border>
+            <div className="flex justify-between">
+              <Button
                 onClick={() => setModalBack(true)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
+                type="menu"
               >
                 Back
-              </ButtonComponent>
-
-              <div className="flex justify-end gap-5">
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonClear" width={24} />}
+              </Button>
+              <div className="flex gap-x-4">
+                <Button
+                  icon={<SVGIcon name="IconButtonClear" width={14} />}
                   onClick={() => handleClear(type)}
                   disabled={storedDataInline}
+                  type="reject"
                 >
                   {type === "create" ? "Clear" : "Reset"}
-                </ButtonComponent>
-
-                <ButtonComponent
+                </Button>
+                <Button
                   onClick={() => handleSave(false)}
                   disabled={storedDataInline || current !== steps.length - 1}
+                  type="secondary"
                 >
                   Save as Draft
-                </ButtonComponent>
-
-                <ButtonComponent
+                </Button>
+                <Button
                   onClick={prev}
                   disabled={current < 1}
+                  type="menu"
                 >
                   Previous
-                </ButtonComponent>
-
+                </Button>
                 {current < steps.length - 1 && (
-                  <ButtonComponent onClick={next} disabled={steps[current]?.disabled}>
+                  <Button
+                    onClick={next}
+                    disabled={steps[current]?.disabled}
+                    type="submit"
+                  >
                     Next
-                  </ButtonComponent>
+                  </Button>
                 )}
-
                 {current === steps.length - 1 && (
-                  <ButtonComponent
+                  <Button
                     onClick={() => handleSave(true)}
                     disabled={storedDataInline}
+                    type="approve"
                   >
-                    Save & Submit
-                  </ButtonComponent>
+                    Submit
+                  </Button>
                 )}
               </div>
             </div>
-          </Form>
+          </NxBaseContainer>
         </div>
 
         {modalConfirm ? (
