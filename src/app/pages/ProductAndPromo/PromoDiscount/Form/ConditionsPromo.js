@@ -4,7 +4,7 @@ import { Form, Select } from "antd";
 import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../components/Nx/NxTable";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import SelectComponent from "../../../../../components/SelectComponent";
 import InputComponent from "../../../../../components/InputComponent";
@@ -39,8 +39,6 @@ const ConditionPromo = ({
   const dispatch = useDispatch();
 
   // Use State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState("");
@@ -54,6 +52,10 @@ const ConditionPromo = ({
 
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState(false);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["actions"],
+    left: [],
+  }));
 
   // Use Effect
   useEffect(() => {
@@ -90,11 +92,6 @@ const ConditionPromo = ({
     return moment().add(-1, "days") >= current;
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
   const filterColumns = (data = []) => {
     return type === "preview"
       ? data.filter((item) => item.title !== "ACTION")
@@ -104,10 +101,6 @@ const ConditionPromo = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       // if (prevState[dataIndex] !== selectedKeys[0]) {
@@ -346,18 +339,18 @@ const ConditionPromo = ({
         </div>
       ) : null}
 
-      <TablePaginationNew
-        type="FE"
+      <NxTable
+        idTable="condition-promo-table"
         dataSource={data || []}
-        totalData={data?.length || 0}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChange}
+        usePagination={false}
+        useInfiniteScroll={false}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
         columns={filterColumns(
           columnsTable(
             type,
-            page,
-            pageSize,
+            1,
+            data?.length || 0,
             searchInput,
             searchedColumn,
             searchText,
@@ -373,10 +366,7 @@ const ConditionPromo = ({
             storedData,
           )
         )}
-        tableScrolled={{
-          x: 1500,
-          y: 300,
-        }}
+        tableScrolled={{ x: 1500, y: 300 }}
       />
 
       <ModalCustom
