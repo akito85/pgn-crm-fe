@@ -13,11 +13,27 @@ const initialState = {
     dataListCategory: [],
 };
 
+const sanitizeSearchInput = (input) => {
+    if (typeof input !== 'string') return '';
+    return input.replace(/[<>"'&]/g, '');
+};
+
+const getSafeErrorMessage = (error) => {
+    const safeMessages = ['invalid input', 'data not found', 'unauthorized', 'permission denied',
+        'already exists', 'not valid', 'required', 'format', 'overlapping', 'active payment cycle',
+        'pending document', 'not approved'];
+    const message = error.response?.data?.message || error.message || 'An error occurred';
+    if (safeMessages.some(safe => message.toLowerCase().includes(safe))) {
+        return message;
+    }
+    return 'Terjadi kesalahan pada sistem. Silakan hubungi administrator.';
+};
+
 export const getPaginatePeriod = createAsyncThunk(
     "GET_ALL_PAYMENT_PERIOD",
     async ({ search, page, pageSize, sort }, thunkAPI) => {
         try {
-            const searchParams = search === undefined ? "" : search;
+            const searchParams = sanitizeSearchInput(search === undefined ? "" : search);
             const sortParams =
                 sort === undefined || sort === "" ? "createdDate~desc" : sort;
             const url = `/v1/dbs/api/payment-period/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
@@ -69,10 +85,7 @@ export const createValidasiPaymentPeriod = createAsyncThunk(
             const data = await receiptCollectionHttpService.createData(url, param);
             return data.data;
         } catch (error) {
-            const message =
-                error.response?.data?.message ||
-                error.message ||
-                error.toString();
+            const message = getSafeErrorMessage(error);
             if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
                 const errorBody = {
                     title: "Failed",
@@ -159,7 +172,7 @@ export const openClosePaymentPeriod = createAsyncThunk(
             thunkAPI.dispatch(showModalSuccess(successBody));
             return data;
         } catch (error) {
-            const message = error.response?.data?.message || error.message || error.toString();
+            const message = getSafeErrorMessage(error);
             const errorBody = {
                 title: "Failed",
                 description: message,

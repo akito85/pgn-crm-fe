@@ -223,10 +223,38 @@ const PaymentPeriodForm = ({ type }) => {
     }, [dataListAppHierDetail]);
 
     const handleSubmit = async (values) => {
+        // Validasi attachment
         if (!files || files.length === 0) {
             dispatch(showModalError({
                 title: "Validation Failed",
                 description: "Please upload at least one attachment before submitting."
+            }));
+            return;
+        }
+
+        if (values.startDate && values.endDate) {
+            if (values.endDate.isBefore(values.startDate)) {
+                dispatch(showModalError({
+                    title: "Validation Failed",
+                    description: "End date must be after start date."
+                }));
+                return;
+            }
+
+            const diffMonths = values.endDate.diff(values.startDate, 'months');
+            if (diffMonths > 12) {
+                dispatch(showModalError({
+                    title: "Validation Failed",
+                    description: "Period cannot exceed 12 months."
+                }));
+                return;
+            }
+        }
+
+        if (values.periodName && !/^[a-zA-Z0-9\s\-_]+$/.test(values.periodName)) {
+            dispatch(showModalError({
+                title: "Validation Failed",
+                description: "Period name can only contain letters, numbers, spaces, hyphens, and underscores."
             }));
             return;
         }
@@ -257,28 +285,42 @@ const PaymentPeriodForm = ({ type }) => {
             });
     };
 
+    const rollbackAttachments = async (attachmentIds) => {
+        for (const attId of attachmentIds) {
+            try {
+                await receiptCollectionHttpService.deleteData(`/v1/dbs/api/attachment/delete/${attId}`);
+            } catch (rollbackErr) {
+                console.error(`Failed to rollback attachment ${attId}:`, rollbackErr);
+            }
+        }
+    };
+
     const onConfirmSubmit = async () => {
         setModalConfirm(false);
+        const uploadedAttachmentIds = [];
 
         try {
             const response = await dispatch(createPaymentPeriod(submitData)).unwrap();
             const newId = response?.data?.id;
 
             if (files && files.length > 0) {
-                try {
-                    for (const file of files) {
-                        if (file.dataType !== 'exist' && file.file) {
+                for (const file of files) {
+                    if (file.dataType !== 'exist' && file.file) {
+                        try {
                             const formData = new FormData();
                             formData.append("files", file.file);
                             formData.append("fileCategoryId", file.fileCategoryId);
                             formData.append("referensiId", newId);
                             formData.append("category", "PAYMENT_PERIOD");
 
-                            await dispatch(uploadAttachmentPaymentPeriod(formData)).unwrap();
+                            const uploadResult = await dispatch(uploadAttachmentPaymentPeriod(formData)).unwrap();
+                            uploadedAttachmentIds.push(uploadResult?.data?.id);
+                        } catch (attError) {
+                            // Rollback: hapus semua attachment yang sudah ter-upload
+                            await rollbackAttachments(uploadedAttachmentIds);
+                            throw new Error('Attachment upload failed. All data has been rolled back.');
                         }
                     }
-                } catch (attError) {
-                    console.error("Attachment upload failed:", attError);
                 }
             }
 
@@ -291,7 +333,10 @@ const PaymentPeriodForm = ({ type }) => {
             navigate("/system-setup/payment-period");
 
         } catch (error) {
-            console.error("Creation failed:", error);
+            if (uploadedAttachmentIds.length > 0) {
+                await rollbackAttachments(uploadedAttachmentIds);
+            }
+            console.error("Submission failed:", error);
             const message = error?.message || "An error occurred";
             dispatch(showModalError({ title: "Failed", description: message }));
         }

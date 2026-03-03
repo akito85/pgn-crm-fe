@@ -2,6 +2,8 @@ import {
     Tooltip,
     Spin,
     Checkbox,
+    Popover,
+    Space,
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +15,7 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, MoreOutlined } from "@ant-design/icons";
 import {
     getListPaymentPeriod,
     inactivePaymentPeriod,
@@ -28,7 +30,6 @@ import {
     renderDateColumn,
 } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
-import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 
@@ -60,16 +61,18 @@ const ListPaymentPeriod = () => {
         dataApprovalHistory,
     } = useSelector((state) => state.paymentPeriod);
 
+    const searchKey = JSON.stringify(search);
+
     const handleFetch = useCallback(() => {
         const params = {
             page: page,
             pageSize: pageSize,
-            search: encodeURIComponent(JSON.stringify(search)),
+            search: encodeURIComponent(searchKey),
             sort: sort,
         };
 
         dispatch(getListPaymentPeriod(params));
-    }, [dispatch, page, pageSize, JSON.stringify(search), sort]);
+    }, [dispatch, page, pageSize, searchKey, sort]);
 
     useEffect(() => {
         handleFetch();
@@ -356,49 +359,7 @@ const ListPaymentPeriod = () => {
                 );
             },
         },
-        {
-            action: "Open/Close",
-            type: "table",
-            render: (record, data_length) => {
-                const isActivateOrInactivate = record.statusApproval === "APPROVED" && record.status === "ACTIVE";
-                const statusOpenLowerCase = record?.statusOpen?.toLowerCase();
 
-                return (
-                    data_length > 3 ? (
-                        <ButtonComponent
-                            className="gap-5 w-full"
-                            icon={<SVGIcon name="IconEdit" color={isActivateOrInactivate ? "#0075bf" : "#8D91A0"} width={24} />}
-                            disabled={!isActivateOrInactivate}
-                            border={false}
-                            onClick={() => {
-                                setDataInactivate(record?.idPaymentPeriod);
-                                setModalOpenClose(true);
-                                setStatusOpen(record?.statusOpen?.toUpperCase());
-                            }}
-                        >
-                            <span className={"text-black gap-2 text-xl text-center w-full"}>
-                                {statusOpenLowerCase === "open" ? "Close Period" : "Open Period"}
-                            </span>
-                        </ButtonComponent>
-                    ) : (
-                        <Tooltip title={statusOpenLowerCase === "open" ? "Close Period" : "Open Period"}>
-                            <button
-                                type="button"
-                                style={{ outline: 'none', cursor: isActivateOrInactivate ? 'pointer' : 'not-allowed', background: 'none', border: 'none', padding: 0 }}
-                                disabled={!isActivateOrInactivate}
-                                onClick={() => {
-                                    setDataInactivate(record?.idPaymentPeriod);
-                                    setModalOpenClose(true);
-                                    setStatusOpen(record?.statusOpen?.toUpperCase());
-                                }}
-                            >
-                                <SVGIcon name="IconEdit" color={isActivateOrInactivate ? "#0075bf" : "#8D91A0"} width={24} />
-                            </button>
-                        </Tooltip>
-                    )
-                );
-            },
-        },
         {
             action: "history",
             type: "table",
@@ -431,6 +392,35 @@ const ListPaymentPeriod = () => {
                             </button>
                         </Tooltip>
                     )
+                );
+            },
+        },
+
+        {
+            action: "Open/Close",
+            type: "table",
+            render: (record) => {
+                const canOpenClose = record.statusApproval === "APPROVED" && record.status === "ACTIVE";
+                const statusOpenLowerCase = record?.statusOpen?.toLowerCase();
+                const label = statusOpenLowerCase === "open" ? "Close Period" : "Open Period";
+                return (
+                    <ButtonComponent
+                        className="gap-5 w-full"
+                        icon={<SVGIcon name={statusOpenLowerCase === "open" ? "IconLock" : "IconUnlock"} color={canOpenClose ? "#0075bf" : "#8D91A0"} width={24} />}
+                        border={false}
+                        disabled={!canOpenClose}
+                        onClick={() => {
+                            if (canOpenClose) {
+                                setDataInactivate(record?.idPaymentPeriod);
+                                setModalOpenClose(true);
+                                setStatusOpen(record?.statusOpen?.toUpperCase());
+                            }
+                        }}
+                    >
+                        <span className={"text-black gap-2 text-xl text-center w-full"}>
+                            {label}
+                        </span>
+                    </ButtonComponent>
                 );
             },
         },
@@ -684,10 +674,110 @@ const ListPaymentPeriod = () => {
                         showExport={false}
                         columns={[
                             ...columns,
-                            ...useColumnActionPermission(
-                                ["view", "update", "history", "activate", "Open/Close"],
-                                itemActions
-                            ),
+                            {
+                                key: "action",
+                                title: "ACTION",
+                                dataIndex: "action",
+                                fixed: "right",
+                                width: 160,
+                                render: (_, record) => {
+                                    const isEditable = record.status?.toUpperCase() === "DRAFT" || record.statusApproval?.toUpperCase() === "REJECTED";
+                                    const isActivatable =
+                                        (record.statusApproval === "APPROVED" && record.status === "ACTIVE") ||
+                                        (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
+                                        (record.statusApproval === "REJECTED" && record.status === "ACTIVE") ||
+                                        (record.statusApproval === "WAITING_APPROVAL" && record.status === "ACTIVE");
+                                    const canOpenClose = record.statusApproval === "APPROVED" && record.status === "ACTIVE";
+                                    const statusOpenLowerCase = record?.statusOpen?.toLowerCase();
+                                    const openCloseLabel = statusOpenLowerCase === "open" ? "Close Period" : "Open Period";
+
+                                    const dropdownContent = (
+                                        <Space direction="vertical">
+                                            <Link
+                                                to={isEditable ? "/system-setup/payment-period/update" : "#"}
+                                                state={{ id: record.idPaymentPeriod }}
+                                            >
+                                                <ButtonComponent
+                                                    className="gap-5 w-full"
+                                                    icon={<SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />}
+                                                    border={false}
+                                                    disabled={!isEditable}
+                                                >
+                                                    <span className="text-black gap-2 text-xl text-center w-full">Update</span>
+                                                </ButtonComponent>
+                                            </Link>
+                                            <ButtonComponent
+                                                border={false}
+                                                disabled={!isActivatable}
+                                                onClick={() => {
+                                                    setDataInactivate(record?.idPaymentPeriod);
+                                                    setModalActiveInactive(true);
+                                                    setStatus(record?.status);
+                                                }}
+                                            >
+                                                <Checkbox
+                                                    border={false}
+                                                    disabled={record?.status !== "ACTIVE"}
+                                                    checked={record?.status !== "ACTIVE"}
+                                                />
+                                                <span className="text-black ml-6 gap-2 text-xl text-center w-full">
+                                                    {record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
+                                                </span>
+                                            </ButtonComponent>
+                                            <ButtonComponent
+                                                border={false}
+                                                disabled={!canOpenClose}
+                                                onClick={() => {
+                                                    if (canOpenClose) {
+                                                        setDataInactivate(record?.idPaymentPeriod);
+                                                        setModalOpenClose(true);
+                                                        setStatusOpen(record?.statusOpen?.toUpperCase());
+                                                    }
+                                                }}
+                                            >
+                                                <Checkbox
+                                                    border={false}
+                                                    disabled={!canOpenClose}
+                                                    checked={statusOpenLowerCase !== "open"}
+                                                />
+                                                <span className="text-black ml-6 gap-2 text-xl text-center w-full">
+                                                    {openCloseLabel}
+                                                </span>
+                                            </ButtonComponent>
+                                            <ButtonComponent
+                                                className="gap-5"
+                                                icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+                                                border={false}
+                                                onClick={() => handleApprovalHistory(record)}
+                                            >
+                                                <span className="text-black gap-2 text-xl text-center">Approval History</span>
+                                            </ButtonComponent>
+                                        </Space>
+                                    );
+
+                                    return (
+                                        <div className="w-full flex justify-center items-center py-1 gap-4">
+                                            <Popover
+                                                trigger="click"
+                                                placement="bottomRight"
+                                                content={dropdownContent}
+                                            >
+                                                <div className="group">
+                                                    <MoreOutlined className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out" />
+                                                </div>
+                                            </Popover>
+                                            <Tooltip title="Detail">
+                                                <Link
+                                                    to="/system-setup/payment-period/view"
+                                                    state={{ id: record.idPaymentPeriod, statusApproval: record.statusApproval }}
+                                                >
+                                                    <EyeOutlined style={{ fontSize: "24px" }} />
+                                                </Link>
+                                            </Tooltip>
+                                        </div>
+                                    );
+                                }
+                            },
                         ]}
                         current={page}
                         onChange={handleChange}
