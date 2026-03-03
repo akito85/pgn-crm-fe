@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef, useCallback, Fragment } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { Button, Checkbox, Form, Input, Select, Space, Tooltip } from "antd";
 import NxTable from "../../../../components/Nx/NxTable";
+import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import SVGIcon from "../../../../assets/Icon/index";
 import DateComponent from "../../../../components/DateComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -864,18 +865,38 @@ const FunctionalCriteriaProduct = ({
     );
   };
 
-  // Function Show/Hide Column
-  const [optionSelectedCol, setOptionSelectedCol] = useState([]);
+  // Fixed columns state for NxTable column settings
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["operation"] });
 
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
+  const allColumns = useMemo(
+    () =>
+      columns().map((col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      })),
+    // columns() depends on: dataCriteria, type, fixedColumn, listOption,
+    // search, searchedColumn, searchText, storedData, page, pageSize
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataCriteria, type, fixedColumn, listOption, search, searchedColumn, searchText, storedData, page, pageSize]
+  );
 
-  const filterColumn = (dataColumn) => {
-    return dataColumn.filter((col) => {
-      return !optionSelectedCol.includes(col.title);
-    });
-  };
+  const processedColumns = useMemo(
+    () => nxApplyFixedColumns(allColumns, fixedColumns),
+    [allColumns, fixedColumns]
+  );
+
+  useEffect(() => {
+    console.log("processedColumns", processedColumns)
+  }, [processedColumns])
+
+  const columnDefinitions = useMemo(
+    () =>
+      allColumns.map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+      })),
+    [allColumns]
+  );
 
   // Function length column
   const numColumns = 16;
@@ -939,81 +960,49 @@ const FunctionalCriteriaProduct = ({
         : null}
       {dataCriteria && dataCriteria.length > 0 && dataCriteria[0] !== 24 ? (
         <div className="flex flex-col w-full gap-4">
-          <div className="relative flex flex-col w-full">
-            <div
-              className={`${
-                totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-              } w-1/4 flex`}
-            >
-              <Select
-                mode="multiple"
-                placeholder="Show All Column"
-                className={"w-full"}
-                maxTagCount={3}
-                onChange={handleDisplayColumn}
-              >
-                {columns()
-                  .map((col) => (
-                    <Select.Option
-                      key={col.title}
-                      value={col.title}
-                      disabled={
-                        optionSelectedCol.length > 3
-                          ? optionSelectedCol.includes(col.title)
-                            ? false
-                            : true
-                          : false
-                      }
-                    >
-                      {col.title}
-                    </Select.Option>
-                  ))
-                  .splice(1)}
-              </Select>
-            </div>
-            <Form form={formTableCriteria} component={false}>
-              <NxTable
-                idTable="functional-criteria-product-table"
-                dataSource={data}
-                columns={filterColumn(
-                  columns().map((col) => ({
-                    ...col,
-                    onCell: (record) => ({
-                      record,
-                      inputType: col.inputType,
-                      dataIndex: col.dataIndex,
-                      title: col.title,
-                      editing: isEditing(record),
-                      options: col.option,
-                      indexValue: col.indexValue,
-                      dependDataIndex: col.dependDataIndex,
-                      dataEditRecord: editDataRecord,
-                      startDate: startDate,
-                      handleEditDataRecord: handleEditDataRecord,
-                      required: col.required,
-                      endDate: endDate,
-                      requiredDate:checkStartDate,
-                      type: type,
-                      // disableDate,
-                      formTableCriteria: formTableCriteria,
-                    }),
-                  }))
-                )}
-                components={{
-                  body: {
-                    cell: EditableCell,
-                  },
-                }}
-                tableScrolled={scroll}
-                usePagination={false}
-                useInfiniteScroll={false}
-                onSort={onChange}
-                rowClassName={(record) =>
-                  isEditing(record) ? "editable-row" : ""
-                }
-              />
-            </Form>
-          </div>
+          <Form form={formTableCriteria} component={false}>
+            <NxTable
+              idTable="functional-criteria-product-table"
+              dataSource={data}
+              columns={processedColumns.map((col) => ({
+                ...col,
+                onCell: (record) => ({
+                  record,
+                  inputType: col.inputType,
+                  dataIndex: col.dataIndex,
+                  title: col.title,
+                  editing: isEditing(record),
+                  options: col.option,
+                  indexValue: col.indexValue,
+                  dependDataIndex: col.dependDataIndex,
+                  dataEditRecord: editDataRecord,
+                  startDate: startDate,
+                  handleEditDataRecord: handleEditDataRecord,
+                  required: col.required,
+                  endDate: endDate,
+                  requiredDate:checkStartDate,
+                  type: type,
+                  // disableDate,
+                  formTableCriteria: formTableCriteria,
+                }),
+              }))}
+              components={{
+                body: {
+                  cell: EditableCell,
+                },
+              }}
+              tableScrolled={scroll}
+              usePagination={false}
+              useInfiniteScroll={false}
+              onSort={onChange}
+              rowClassName={(record) =>
+                isEditing(record) ? "editable-row" : ""
+              }
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+            />
+          </Form>
           {/* Modal History Log */}
           <ModalCustom
             isOpen={modalHistory}

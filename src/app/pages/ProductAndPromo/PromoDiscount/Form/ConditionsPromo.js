@@ -53,7 +53,7 @@ const ConditionPromo = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState(false);
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["actions"],
+    right: ["action"],
     left: [],
   }));
 
