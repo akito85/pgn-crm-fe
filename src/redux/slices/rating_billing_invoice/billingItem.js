@@ -4,7 +4,7 @@ import { showModalSuccess } from "../general_slice";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 
 const initialState = {
-  data_view: { result: [], page: {} },   // ← structure disamakan agar konsisten
+  data_view: { result: [], page: {} }, 
   data_billingItemCategoryDdl: [],
   data_billingItemCategory: [],
   data_billType: [],
@@ -31,7 +31,6 @@ const initialState = {
   loading: false,
 };
 
-// ─── getBillingItemList: support isLoadMore untuk infinite scroll ─────────────
 export const getBillingItemList = createAsyncThunk(
   "GET_BILLING_ITEM_LIST",
   async ({ page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {

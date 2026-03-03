@@ -603,7 +603,7 @@ const PointOfSalesPageDetailPOS = ({
     } else {
       setAmount(value);
     }
-  }, 3000);
+  }, 1500);
 
   // Event handler for Input component with getValueFromEvent
   const onInputChange = (e, inputType) => {

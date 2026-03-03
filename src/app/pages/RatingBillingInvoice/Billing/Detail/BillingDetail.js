@@ -10,7 +10,7 @@ import DetailText from "../../../../../components/DetailText";
 const BillingDetail = ({
   billingCodeId,
   calculationCodeId,
-  ratingCodeId,
+  sourceNumber,
   selectedBillingData,
   onClose,
 }) => {
@@ -41,13 +41,14 @@ const BillingDetail = ({
         <BillingItemTab
           billingCodeId={billingCodeId}
           calculationCodeId={calculationCodeId}
+           sourceNumber={sourceNumber}  // ✅ tambahkan ini
         />
       ),
     },
     {
       key: "2",
       label: "Rating Summary",
-      children: <RatingSummaryTab ratingCodeId={ratingCodeId} />,
+      children: <RatingSummaryTab sourceNumber={sourceNumber} />,
     },
     {
       key: "3",

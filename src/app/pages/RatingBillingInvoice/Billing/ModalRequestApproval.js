@@ -162,56 +162,36 @@ const ModalRequestApproval = ({
     },
   ];
 
-  // Button Next
-  const next = () => {
-    setCurrent(current + 1);
-  };
+  const next = () => setCurrent(current + 1);
+  const prev = () => setCurrent(current - 1);
 
-  // Button Previous
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  // Scroll Left Handler
   const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft -= 250;
   };
 
-  // Scroll Right Handler
   const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft += 250;
   };
 
-  // Scroll Handler
   const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
+    if (containerRef.current) setScrollLeft(containerRef.current.scrollLeft);
   };
 
-  // Handle Next
   const handleButtonNext = () => {
     next();
     scrollRightHandler();
   };
 
-  // Mapping Step
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
   }));
 
-  //  Handle Select Approval Hierarchy
   const handleSelect = (e) => {
     dispatch(getListApprovalById(e));
     setBoolean(true);
   };
 
-  // Handle Cancel Form
   const handleCancelForm = () => {
     handleCancel();
     setSelectedRowKeys([]);
@@ -245,8 +225,9 @@ const ModalRequestApproval = ({
     handleCancel();
 
     const body = {
-      ...formValue,
-      billingCodes: dataTableSelect.map((a) => a.billingCode),
+      apphierId: formValue.apphierId,
+      billCode: dataTableSelect.map((a) => a.billCode),
+      remark: formValue.remark,
       generateInvoice: generateInvoice,
     };
 
@@ -288,17 +269,18 @@ const ModalRequestApproval = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        // PERUBAHAN: Tambahkan search sebagai argumen ke-7 (sesuai signature terbaru)
+        search
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, pageSize, searchedColumn, searchText, search]
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
@@ -313,9 +295,11 @@ const ModalRequestApproval = ({
   }, [allColumns]);
 
   const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
+    return dataSource?.map((item) => ({
       ...item,
-      key: index + 1,
+      // PERUBAHAN: Gunakan billCode sebagai row key
+      // billCode bisa null pada data Adjustment, fallback ke billHeaderId
+      key: item.billCode ?? item.billHeaderId,
     }));
   }, [dataSource]);
 
@@ -346,12 +330,9 @@ const ModalRequestApproval = ({
                 Previous
               </ButtonComponent>
             )}
-
             {current < steps.length - 1 && (
               <ButtonComponent
-                onClick={() => {
-                  handleButtonNext();
-                }}
+                onClick={handleButtonNext}
                 type={"submit"}
                 className="ant-btn ant-btn-submit flex w-full justify-center"
                 disabled={steps[current].disabled}
@@ -396,9 +377,7 @@ const ModalRequestApproval = ({
         >
           {/* STEP 1: BILLING INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${
-              current !== 0 ? "hidden" : ""
-            }`}
+            className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <div className="flex gap-2 justify-between">
@@ -463,16 +442,12 @@ const ModalRequestApproval = ({
 
           {/* STEP 2: APPROVAL INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${
-              current !== 1 ? "hidden" : ""
-            }`}
+            className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
                 Approval Information
               </p>
-
-              {/* Hidden Form.Item untuk validasi */}
               <Form.Item
                 name="apphierId"
                 hidden
@@ -485,8 +460,6 @@ const ModalRequestApproval = ({
               >
                 <input type="hidden" />
               </Form.Item>
-
-              {/* Tabel dengan Dropdown di Header */}
               <TableRBI
                 dataSource={dataTable}
                 columns={columnsApproval(
@@ -525,43 +498,43 @@ const ModalRequestApproval = ({
                 customHeaderLeft={
                   <div style={{ position: "relative" }}>
                     <style>{`
-            .approval-hierarchy-select .ant-select-selector {
-              display: flex !important;
-              align-items: center !important;
-              gap: 8px !important;
-              border: 1px solid #BDBDBD !important;
-              height: 40px !important;
-              color: black !important;
-              border-radius: 6px !important;
-              font-size: 14px !important;
-              font-weight: 500 !important;
-              padding: 0 11px !important;
-              background: white !important;
-            }
-            .approval-hierarchy-select .ant-select-selection-placeholder {
-              color: rgba(0, 0, 0, 0.25) !important;
-              line-height: 40px !important;
-              font-size: 14px !important;
-              font-weight: 500 !important;
-            }
-            .approval-hierarchy-select .ant-select-selection-item {
-              line-height: 40px !important;
-              font-size: 14px !important;
-              font-weight: 500 !important;
-              color: black !important;
-            }
-            .approval-hierarchy-select .ant-select-arrow {
-              color: black !important;
-              font-size: 12px !important;
-            }
-            .approval-hierarchy-select:not(.ant-select-disabled):hover .ant-select-selector {
-              border-color: #BDBDBD !important;
-            }
-            .approval-hierarchy-select.ant-select-focused .ant-select-selector {
-              border-color: #40a9ff !important;
-              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
-            }
-          `}</style>
+                      .approval-hierarchy-select .ant-select-selector {
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 8px !important;
+                        border: 1px solid #BDBDBD !important;
+                        height: 40px !important;
+                        color: black !important;
+                        border-radius: 6px !important;
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                        padding: 0 11px !important;
+                        background: white !important;
+                      }
+                      .approval-hierarchy-select .ant-select-selection-placeholder {
+                        color: rgba(0, 0, 0, 0.25) !important;
+                        line-height: 40px !important;
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                      }
+                      .approval-hierarchy-select .ant-select-selection-item {
+                        line-height: 40px !important;
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                        color: black !important;
+                      }
+                      .approval-hierarchy-select .ant-select-arrow {
+                        color: black !important;
+                        font-size: 12px !important;
+                      }
+                      .approval-hierarchy-select:not(.ant-select-disabled):hover .ant-select-selector {
+                        border-color: #BDBDBD !important;
+                      }
+                      .approval-hierarchy-select.ant-select-focused .ant-select-selector {
+                        border-color: #40a9ff !important;
+                        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+                      }
+                    `}</style>
                     <Select
                       value={form.getFieldValue("apphierId")}
                       onChange={(value) => {
@@ -584,13 +557,11 @@ const ModalRequestApproval = ({
               />
             </div>
           </div>
+
           {/* STEP 3: CONFIRMATION */}
           <div
-            className={`steps-content my-[30px] ${
-              current !== 2 ? "hidden" : ""
-            }`}
+            className={`steps-content my-[30px] ${current !== 2 ? "hidden" : ""}`}
           >
-            {/* Billing Information Review */}
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
               <p className="text-primary uppercase font-bold mb-4">
                 Billing List
@@ -620,12 +591,10 @@ const ModalRequestApproval = ({
               </div>
             </div>
 
-            {/* Approval Information Review */}
             <div className="w-full grid grid-cols-1 gap-x-4 border-t pt-8">
               <p className="text-primary uppercase font-bold">
                 Approval Information
               </p>
-
               <div className="w-full grid grid-cols-1 gap-2">
                 <div className="w-1/3">
                   <DetailText label={"Approval Hierarchy"}>
@@ -639,7 +608,6 @@ const ModalRequestApproval = ({
                   </DetailText>
                 </div>
               </div>
-
               <div className="w-full">
                 {boolean === true ? (
                   <TablePaginationNew

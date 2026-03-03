@@ -49,7 +49,7 @@ const BillingPage = () => {
   const [modalApproval, setModalApproval] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [billingCode, setBillingCode] = useState("");
-  const [ratingCode, setRatingCode] = useState("");
+  const [sourceNumber, setSourceNumber] = useState("");
   const [saNumberId, setSANumberId] = useState("");
   const [calculationCodeId, setCalculationCodeId] = useState("");
   const [accountNumberId, setAccountNumberId] = useState("");
@@ -186,20 +186,20 @@ const BillingPage = () => {
   };
 
   const handleDetail = (record) => {
-    const recordKey = record.billingCode || record.invoiceNumber;
+    const recordKey = record.billCode;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
       setActiveRowKey(null);
       setBillingCode("");
-      setRatingCode("");
+      setSourceNumber(""); 
       setAccountNumberId("");
       setSANumberId("");
       setCalculationCodeId("");
       setSelectedBillingData(null);
     } else {
-      setBillingCode(recordKey);
-      setRatingCode(record.ratingCode);
+      setBillingCode(record.billCode);
+      setSourceNumber(record.sourceNumber); 
       setAccountNumberId(record.accountNumber);
       setSANumberId(record.saNumber);
       setCalculationCodeId(record.calculationCode);
@@ -210,7 +210,7 @@ const BillingPage = () => {
   };
 
   const handleApprovalHistory = (record) => {
-    dispatch(getApprovalHistory(record.billingCode || record.invoiceNumber));
+    dispatch(getApprovalHistory(record.billCode));
     setModalApprovalHistory(true);
   };
 
@@ -235,8 +235,23 @@ const BillingPage = () => {
       );
     }
 
-    dispatch(getAllBillingRequestPaginate());
-    dispatch(getAllBillingApprovePaginate());
+    dispatch(
+      getAllBillingRequestPaginate({
+        search: encodeURIComponent(JSON.stringify({})),
+        page: 1,
+        pageSize: initialPageSize,
+        sort: "",
+      })
+    );
+    dispatch(
+      getAllBillingApprovePaginate({
+        search: encodeURIComponent(JSON.stringify({})),
+        page: 1,
+        pageSize: initialPageSize,
+        sort: "",
+        isLoadMore: false,
+      })
+    );
     setPage(1);
   };
 
@@ -356,7 +371,7 @@ const BillingPage = () => {
   const dataSourceWithKeys = useMemo(() => {
     return dataSource?.map((item) => ({
       ...item,
-      key: item.billingCode || item.invoiceNumber,
+      key: item.billCode,
     }));
   }, [dataSource]);
 
@@ -429,7 +444,7 @@ const BillingPage = () => {
           >
             <BillingDetail
               billingCodeId={billingCode}
-              ratingCodeId={ratingCode}
+              sourceNumber={sourceNumber}  
               saNumberId={saNumberId}
               accountNumberId={accountNumberId}
               calculationCodeId={calculationCodeId}
@@ -438,7 +453,7 @@ const BillingPage = () => {
                 setPageDetail(false);
                 setActiveRowKey(null);
                 setBillingCode("");
-                setRatingCode("");
+                setSourceNumber("");
                 setAccountNumberId("");
                 setSANumberId("");
                 setCalculationCodeId("");

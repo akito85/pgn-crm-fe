@@ -39,7 +39,7 @@ const ModalApprovalBilling = ({
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); 
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -55,7 +55,7 @@ const ModalApprovalBilling = ({
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
-    right: [] 
+    right: [],
   });
 
   // Initial fetch - Load 100 data pertama
@@ -95,7 +95,6 @@ const ModalApprovalBilling = ({
     const nextPage = page + 1;
     const totalPages = data_list_billing_approval?.page?.totalPages || 0;
 
-    // Check if there's more data to load
     if (nextPage <= totalPages) {
       await dispatch(
         getAllBillingApprovePaginate({
@@ -144,44 +143,26 @@ const ModalApprovalBilling = ({
     },
   ];
 
-  // Button Next
-  const next = () => {
-    setCurrent(current + 1);
-  };
+  const next = () => setCurrent(current + 1);
+  const prev = () => setCurrent(current - 1);
 
-  // Button Previous
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  // Scroll Left Handler
   const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft -= 250;
   };
 
-  // Scroll Right Handler
   const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft += 250;
   };
 
-  // Scroll Handler
   const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
+    if (containerRef.current) setScrollLeft(containerRef.current.scrollLeft);
   };
 
-  // Handle Next
   const handleButtonNext = () => {
     next();
     scrollRightHandler();
   };
 
-  // Mapping Step
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -207,18 +188,20 @@ const ModalApprovalBilling = ({
   const handleSave = (formValue) => {
     handleCancel();
 
-    const dataBillingCodes = dataTableSelect.map((a) => {
-      return {
-        billingCode: a.billingCode,
-        approvalId: a.tappId,
-        isGenerate: a.isGenerate,
-      };
-    });
+    // PERUBAHAN: Sesuaikan dengan payload terbaru
+    // a.billCode      → menggantikan a.billingCode
+    // a.tappId        → tetap sebagai approvalId
+    // a.isGenerate    → tetap
+    const dataBillingCodes = dataTableSelect.map((a) => ({
+      billCode: a.billCode,
+      approvalId: a.tappId,
+      isGenerate: a.isGenerate,
+    }));
 
     const body = {
       billingCodes: dataBillingCodes,
       action: action,
-      description: remark,
+      description: formValue.remark,
     };
 
     dispatch(
@@ -268,6 +251,7 @@ const ModalApprovalBilling = ({
     setBodyError({});
   };
 
+  // PERUBAHAN: Tambahkan search sebagai argumen ke-7
   const baseColumns = useMemo(
     () =>
       columnsRequestBilling(
@@ -276,17 +260,17 @@ const ModalApprovalBilling = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        search
       ),
-    [page, loadMoreSize, searchedColumn, searchText]
+    [page, loadMoreSize, searchedColumn, searchText, search]
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
@@ -300,10 +284,11 @@ const ModalApprovalBilling = ({
     }));
   }, [allColumns]);
 
+  // PERUBAHAN: Gunakan billCode sebagai row key, fallback ke billHeaderId jika null
   const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
+    return dataSource?.map((item) => ({
       ...item,
-      key: index + 1,
+      key: item.billCode ?? item.billHeaderId,
     }));
   }, [dataSource]);
 
@@ -335,12 +320,9 @@ const ModalApprovalBilling = ({
                 Previous
               </ButtonComponent>
             )}
-
             {current < steps.length - 1 && (
               <ButtonComponent
-                onClick={() => {
-                  handleButtonNext();
-                }}
+                onClick={handleButtonNext}
                 type={"submit"}
                 className="ant-btn ant-btn-submit flex w-full justify-center"
                 disabled={steps[current].disabled}
@@ -407,7 +389,8 @@ const ModalApprovalBilling = ({
                 </p>
                 {selectedRowKeys.length > 0 && (
                   <p className="text-sm font-semibold text-blue-600">
-                    {selectedRowKeys.length} {selectedRowKeys.length === 1 ? 'row' : 'rows'} selected
+                    {selectedRowKeys.length}{" "}
+                    {selectedRowKeys.length === 1 ? "row" : "rows"} selected
                   </p>
                 )}
               </div>
@@ -456,11 +439,15 @@ const ModalApprovalBilling = ({
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
             <div className="flex justify-between items-center mb-4">
-              <p className="text-primary uppercase font-bold">
-                Confirmation
-              </p>
+              <p className="text-primary uppercase font-bold">Confirmation</p>
               <p className="text-sm font-semibold text-blue-600">
-                {dataTableSelect.length} {dataTableSelect.length === 1 ? 'row' : 'rows'} will be {action === 'APPROVE' ? 'approved' : action === 'REJECT' ? 'rejected' : 'processed'}
+                {dataTableSelect.length}{" "}
+                {dataTableSelect.length === 1 ? "row" : "rows"} will be{" "}
+                {action === "APPROVE"
+                  ? "approved"
+                  : action === "REJECT"
+                  ? "rejected"
+                  : "processed"}
               </p>
             </div>
             <TableRBI
