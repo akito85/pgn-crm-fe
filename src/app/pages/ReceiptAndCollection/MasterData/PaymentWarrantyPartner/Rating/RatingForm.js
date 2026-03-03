@@ -102,7 +102,7 @@ const RatingForm = ({ form, dataListRating = [], dataListCriteria = [], disabled
         rules={!disabled ? [{ required: true, message: "Required" }] : []}
         getValueFromEvent={(values) => values ? values.floatValue : null}
       >
-        <InputComponent type="numeric" thousandSeparator="." decimalSeparator="," prefix="Rp " allowNegative={false} placeholder="Input.." disabled={disabled} />
+        <InputComponent type="numeric" thousandSeparator="." decimalSeparator="," allowNegative={false} placeholder="Input.." disabled={disabled} />
       </Form.Item>
 
       {/* Spacer to align Description correctly */}

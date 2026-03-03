@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import DOMPurify from "dompurify";
 import { 
   getPaginatePaymentWarrantyPartnerBranch,
   inactivatePaymentWarrantyPartnerBranch,
@@ -17,11 +18,12 @@ import ModalBranch from "./ModalBranch";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import ModalActiveInactive from "../../../../../../components/Modal/ModalActiveInactive";
 
-const BranchList = ({ partnerId, isApprover }) => {
+const BranchList = ({ partnerId, isApprover, partnerStatus }) => {
   const dispatch = useDispatch();
-  const { data_branch, data_history_branch } = useSelector((state) => state.paymentWarrantyPartner);
+  const { data_branch, data_history_branch, loading_branch, loading_detail } = useSelector((state) => state.paymentWarrantyPartner);
   
   const currentPartnerId = partnerId;
+  const isPartnerInactive = partnerStatus === RECORD_STATUS.INACTIVE;
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -133,7 +135,7 @@ const BranchList = ({ partnerId, isApprover }) => {
       sorter: true,
       width: 120,
       render: (text) => (
-        <StatusComponent colour={text}>{text}</StatusComponent>
+        <StatusComponent colour={text}>{DOMPurify.sanitize(text)}</StatusComponent>
       )
     },
     { 
@@ -143,12 +145,12 @@ const BranchList = ({ partnerId, isApprover }) => {
       sorter: true,
       width: 150,
       render: (text) => (
-        <StatusComponent colour={text}>{text}</StatusComponent>
+        <StatusComponent colour={text}>{DOMPurify.sanitize(text)}</StatusComponent>
       )
     }
   ];
 
-  if (!isApprover) {
+  if (!loading_detail && !isApprover && !isPartnerInactive) {
     columns.push({
       title: "ACTION",
       key: "action",
@@ -211,7 +213,7 @@ const BranchList = ({ partnerId, isApprover }) => {
   return (
     <div className="flex flex-col">
       <div className="flex justify-end mb-4">
-        {!isApprover && (
+        {!loading_detail && !isApprover && !isPartnerInactive && (
           <Button 
             type="primary" 
             icon={<PlusOutlined />} 
@@ -226,6 +228,7 @@ const BranchList = ({ partnerId, isApprover }) => {
         idTable="branch-list-table"
         dataSource={data_branch?.content || []}
         columns={columns}
+        loading={loading_branch}
         pageSize={pageSize}
         current={page}
         totalData={data_branch?.page?.totalElements || 0}

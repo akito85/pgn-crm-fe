@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Tabs, message, Spin } from "antd";
+import DOMPurify from "dompurify";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -17,6 +18,8 @@ import {
 } from "../../../../../../redux/slices/receipt_collection/paymentWarrantyPartner";
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
+import { showModalSuccess } from "../../../../../../redux/slices/general_slice";
+import { uploadAttachments } from "../../../../../../utils/uploadHelper";
 import { bytesConverter } from "../../../../../../utils/bytesConverter";
 
 const ModalBranch = ({
@@ -150,6 +153,8 @@ const ModalBranch = ({
     setCurrent(0);
     setSelectedHierarchy(null);
     setListDataAttachment([]);
+    setIsSubmitting(false);
+    setBranchData({});
     handleCancel();
   };
 
@@ -174,24 +179,21 @@ const ModalBranch = ({
         const branchId = res?.id || selectedRecord?.id;
         const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
         
-        // This is a branch modal, if no branch ID is returned or selected, we can't upload attachments
         if (newAttachments.length > 0 && !branchId) {
           throw new Error("Cannot upload attachments: No branch ID returned from server.");
         }
 
-        // Upload new attachments sequentially
-        for (const element of newAttachments) {
-          const uploadBody = {
-            referensiId: branchId,
-            files: element.file,
-            category: "PAYMENT_WARRANTY_PARTNER_BRANCH",
-            fileCategoryId: element.fileCategoryId,
-          };
-          await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+        if (newAttachments.length > 0) {
+          await uploadAttachments(
+            newAttachments, 
+            branchId, 
+            "PAYMENT_WARRANTY_PARTNER_BRANCH",
+            (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+          );
         }
-        
         setIsSubmitting(false);
-        message.success("Branch saved successfully");
+        setBranchData({});
+        dispatch(showModalSuccess({ title: "Successfull", description: "Branch have been saved", return: false }));
         handleClose();
         fetchBranch();
       })
@@ -224,8 +226,8 @@ const ModalBranch = ({
         <div style={{ display: valuePage !== "Branch Details" ? "none" : undefined }}>
           <p className="text-primary uppercase font-bold mb-4">BRANCH INFORMATION</p>
           <div className="grid grid-cols-2 gap-4">
-            <DetailText label="Branch Code">{branchData.branchCode || "-"}</DetailText>
-            <DetailText label="Branch Name">{branchData.branchName || "-"}</DetailText>
+            <DetailText label="Branch Code">{DOMPurify.sanitize(branchData.branchCode) || "-"}</DetailText>
+            <DetailText label="Branch Name">{DOMPurify.sanitize(branchData.branchName) || "-"}</DetailText>
           </div>
         </div>
 

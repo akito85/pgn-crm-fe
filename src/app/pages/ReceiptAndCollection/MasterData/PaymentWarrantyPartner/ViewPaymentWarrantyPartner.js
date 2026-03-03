@@ -164,75 +164,16 @@ const ViewPaymentWarrantyPartner = () => {
       render: (text) => renderColumn("partnerType", searchedColumn, searchText, text, true, "input", search),
     },
     {
-      title: "RATING",
-      dataIndex: ["ratings", 0, "rating"],
-      key: "rating",
-      render: (text, record) => renderColumn("rating", searchedColumn, searchText, record?.ratings?.[0]?.rating || "-", true, "input", search),
-    },
-    {
-      title: "CRITERIA",
-      dataIndex: ["ratings", 0, "criteria"],
-      key: "criteria",
-      render: (text, record) => renderColumn("criteria", searchedColumn, searchText, record?.ratings?.[0]?.criteria || "-", true, "input", search),
-    },
-    {
-      title: "RATING DATE",
-      dataIndex: "ratingDate",
-      key: "ratingDate",
-      sorter: true,
-      ...getColumnSearchPropsPaging("ratingDate", searchInput, searchedColumn, searchText, handleSearch, false),
-      render: (text) => renderColumn("ratingDate", searchedColumn, searchText, text, true, "input", search),
-    },
-    {
       title: "START DATE",
-      dataIndex: ["ratings", 0, "startDate"],
+      dataIndex: "startDate",
       key: "startDate",
-      render: (text, record) => renderColumn("startDate", searchedColumn, searchText, record?.ratings?.[0]?.startDate || "-", true, "input", search),
+      render: (text, record) => renderColumn("startDate", searchedColumn, searchText, record?.startDate || "-", false, "input", search),
     },
     {
       title: "END DATE",
-      dataIndex: ["ratings", 0, "endDate"],
+      dataIndex: "endDate",
       key: "endDate",
-      render: (text, record) => renderColumn("endDate", searchedColumn, searchText, record?.ratings?.[0]?.endDate || "-", true, "input", search),
-    },
-    {
-      title: "RATING ISSUER",
-      dataIndex: ["ratings", 0, "ratingIssuer"],
-      key: "ratingIssuer",
-      render: (text, record) => renderColumn("ratingIssuer", searchedColumn, searchText, record?.ratings?.[0]?.ratingIssuer || "-", true, "input", search),
-    },
-    {
-      title: "ESTABLISHMENT DATE",
-      dataIndex: ["ratings", 0, "establishmentDate"],
-      key: "establishmentDate",
-      render: (text, record) => renderColumn("establishmentDate", searchedColumn, searchText, record?.ratings?.[0]?.establishmentDate || "-", true, "input", search),
-    },
-    {
-      title: "RBC(%)",
-      dataIndex: ["ratings", 0, "rbc"],
-      key: "rbc",
-      render: (text, record) => {
-          const val = record?.ratings?.[0]?.rbc;
-          return renderColumn("rbc", searchedColumn, searchText, val ? `${Number(val).toLocaleString('id-ID')}%` : "-", true, "input", search);
-      }
-    },
-    {
-      title: "EQUITY ASSET(Rp250M)",
-      dataIndex: ["ratings", 0, "equity"],
-      key: "equity",
-      render: (text, record) => {
-          const val = record?.ratings?.[0]?.equity;
-          return renderColumn("equity", searchedColumn, searchText, val ? Number(val).toLocaleString('id-ID') : "-", true, "input", search);
-      }
-    },
-    {
-      title: "IDR COLLATERAL VALUE ASSET",
-      dataIndex: ["ratings", 0, "collateralValueAsset"],
-      key: "collateralValueAsset",
-      render: (text, record) => {
-          const val = record?.ratings?.[0]?.collateralValueAsset;
-          return renderColumn("collateralValueAsset", searchedColumn, searchText, val ? Number(val).toLocaleString('id-ID') : "-", true, "input", search);
-      }
+      render: (text, record) => renderColumn("endDate", searchedColumn, searchText, record?.endDate || "-", false, "input", search),
     },
     {
       title: "STATUS",

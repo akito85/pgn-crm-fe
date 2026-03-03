@@ -35,7 +35,7 @@ const ListDetailPaymentWarrantyPartner = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = location?.state || {};
-  const { data_detail, loading } = useSelector((state) => state.paymentWarrantyPartner);
+  const { data_detail, loading_detail } = useSelector((state) => state.paymentWarrantyPartner);
 
   const [partnerId, setPartnerId] = useState(null);
 
@@ -88,11 +88,13 @@ const ListDetailPaymentWarrantyPartner = () => {
     setLoadingConfirm(true);
     
     // Build the items array from all active approvals that the user can act on
-    const items = (data_detail?.activeApprovals || []).map((a) => ({
-      id: Number(a.refId),
-      category: a.approvalData?.approvalType,
-      approvalId: a.approvalData?.tAppId,
-    }));
+    const items = (data_detail?.activeApprovals || [])
+      .filter(a => a?.refId && a?.approvalData)
+      .map((a) => ({
+        id: Number(a.refId),
+        category: a.approvalData?.approvalType || '',
+        approvalId: a.approvalData?.tAppId || '',
+      }));
 
     const body = {
       action: approveOrReject.toUpperCase(),
@@ -118,7 +120,6 @@ const ListDetailPaymentWarrantyPartner = () => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainerNoBorder
           header="PAYMENT GUARANTEE PARTNER DETAIL"
@@ -140,15 +141,17 @@ const ListDetailPaymentWarrantyPartner = () => {
                   children: (
                     <div className="flex flex-col gap-4 pb-4 px-4 pt-4">
                       <SectionCard title="DETAIL">
-                        <DetailPaymentWarrantyPartner data={data_detail} />
+                        <Spin spinning={loading_detail}>
+                          <DetailPaymentWarrantyPartner data={data_detail} />
+                        </Spin>
                       </SectionCard>
 
                       <SectionCard title="RATING LIST">
-                        <RatingList partnerId={partnerId} isApprover={data_detail?.isApprover} />
+                        <RatingList partnerId={partnerId} isApprover={data_detail?.isApprover} partnerStatus={data_detail?.partner?.status} />
                       </SectionCard>
 
                       <SectionCard title="BRANCH LIST">
-                        <BranchList partnerId={partnerId} isApprover={data_detail?.isApprover} />
+                        <BranchList partnerId={partnerId} isApprover={data_detail?.isApprover} partnerStatus={data_detail?.partner?.status} />
                       </SectionCard>
                     </div>
                   ),
@@ -203,7 +206,6 @@ const ListDetailPaymentWarrantyPartner = () => {
             updatedBy: data_detail?.partner?.updatedBy || "-"
           }} 
         />
-      </Spin>
 
       <ModalApproveOrReject
         isOpen={modalApprove}
@@ -226,7 +228,7 @@ const ListDetailPaymentWarrantyPartner = () => {
           setModalApprove(true);
           setApproveOrReject("reject");
         }}
-        showApproval={data_detail?.isApprover && data_detail?.activeApprovals?.length > 0}
+        showApproval={!loading_detail && data_detail?.isApprover && data_detail?.activeApprovals?.length > 0}
       />
     </LayoutMenu>
   );
