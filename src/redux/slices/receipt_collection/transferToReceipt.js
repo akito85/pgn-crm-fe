@@ -233,13 +233,18 @@ export const getAllTransferToReceiptListPaginate = createAsyncThunk(
   "GET_ALL_TRANSFER_TO_RECEIPT_LIST_PAGINATE",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      // const searchParams = search === undefined ? "" : search;
-      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await receiptCollectionHttpService.getPagination(url);
-      const response = hc_transfer_to_receipt_list;
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/payment-warranty/transfer-receipt/get-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await receiptCollectionHttpService.getPagination(url);
+
+      if (response && response.data && response.data.result) {
+        response.data.result = response.data.result.map(item => ({
+          ...item,
+          equivalent: item.equivalentAmount,
+          remark: item.remarks
+        }));
+      }
       return response.data;
     } catch (error) {
       const message =
