@@ -7,12 +7,6 @@ import {
   validateError,
 } from "../general_slice";
 
-// Hard Code
-// Warranty List
-import hc_warranty_list from "./temp_hardcoded_json/warranty/get-list-warranty.json"
-import hc_attachment_list from "./temp_hardcoded_json/warranty/get-list-attachment.json"
-import hc_attachment_category_list from "./temp_hardcoded_json/warranty/get-list-attachment.json"
-import hc_approval_history from "./temp_hardcoded_json/warranty/get-approval-history.json"
 
 const initialState = {
   data: [],
@@ -29,11 +23,55 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: null,
 
+  dataPaymentWarrantyPartner: [],
+  loadingPaymentWarrantyPartner: false,
+
+  dataPaymentWarrantyPartnerBranch: [],
+  loadingPaymentWarrantyPartnerBranch: false,
+
   loading: false,
   isFailed: false,
   isSuccess: false,
   message: "",
 };
+
+export const getPaymentWarrantyPartnerList = createAsyncThunk(
+  "GET_PAYMENT_WARRANTY_PARTNER_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return error;
+    }
+  }
+);
+
+export const getPaymentWarrantyPartnerBranchList = createAsyncThunk(
+  "GET_PAYMENT_WARRANTY_PARTNER_BRANCH_LIST",
+  async (partnerId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partner-branches/list/${partnerId}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return error;
+    }
+  }
+);
 
 export const getAllWarrantyListPaginate = createAsyncThunk(
   "GET_ALL_WARRANTY_LIST_PAGINATE",
@@ -43,18 +81,11 @@ export const getAllWarrantyListPaginate = createAsyncThunk(
       // Default sort
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
       const [orderBy, order] = sortValue.split("~");
-      
-      // Construct URL per user request: /v1/dbs/api/payment-warranty/get-list?page=...&size=...&order=...&orderBy=...
-      // We append searchParams. If searchParams is "key~value", we might need to rely on 'searchs' param or parse it.
-      // Based on user curl, standard params are supported. 
-      // Using existing pattern searchs=${searchParams} might work if backend supports it, 
-      // otherwise we might need to depend on the Filter component to pass "key=value".
-      
+
+
       const url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
-      
+
       const response = await receiptCollectionHttpService.getPagination(url);
-      // await new Promise((resolve) => setTimeout(resolve, 500));;
-      // const response = hc_warranty_list;
       return response.data;
     } catch (error) {
       const message =
@@ -139,9 +170,9 @@ export const getAllWarrantyInfoPaginate = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
       const [orderBy, order] = sortValue.split("~");
-      
+
       let url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
-      
+
       if (transTypeName) {
         url += `&transTypeName=${transTypeName}`;
       }
@@ -168,129 +199,6 @@ export const getAllWarrantyInfoPaginate = createAsyncThunk(
   }
 );
 
-export const getAllRefundInfoPaginate = createAsyncThunk(
-  "GET_ALL_REFUND_INFO_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
-    try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await receiptCollectionHttpService.getPagination(url);
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      const response = hc_warranty_list;
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
-
-export const getAllHoldInfoPaginate = createAsyncThunk(
-  "GET_ALL_HOLD_INFO_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
-    try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await receiptCollectionHttpService.getPagination(url);
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      const response = hc_warranty_list;
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
-
-export const getAllReleaseInfoPaginate = createAsyncThunk(
-  "GET_ALL_RELEASE_INFO_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
-    try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await receiptCollectionHttpService.getPagination(url);
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      const response = hc_warranty_list;
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
-
-export const getAllAttachmentInfoPaginate = createAsyncThunk(
-  "GET_ALL_ATTACHMENT_INFO_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
-    try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await receiptCollectionHttpService.getPagination(url);
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      const response = hc_attachment_list;
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
 
 export const getAllApprovalList = createAsyncThunk(
   "GET_ALL_APPROVAL_LIST_WARRANTY",
@@ -319,37 +227,6 @@ export const getAllApprovalList = createAsyncThunk(
   }
 );
 
-export const getApprovalListPaginate = createAsyncThunk(
-  "GET_APPROVAL_LIST_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
-    try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await receiptCollectionHttpService.getPagination(url);
-      await new Promise((resolve) => setTimeout(resolve, 500));;
-      // Using warranty list as placeholder for approval data structure if needed, or just empty
-      const response = hc_warranty_list; 
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
 
 export const getListApprovalById = createAsyncThunk(
   "GET_LIST_APPROVAL_BY_ID_WARRANTY",
@@ -436,6 +313,43 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
+export const createPaymentWarranty = createAsyncThunk(
+  "CREATE_PAYMENT_WARRANTY",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-warranty/create";
+      const response = await receiptCollectionHttpService.createData(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: "Your request has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.toString();
+
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Submission failed. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 export const submitWarrantyRequest = createAsyncThunk(
   "SUBMIT_WARRANTY_REQUEST",
   async ({ body }, thunkAPI) => {
@@ -455,8 +369,11 @@ export const submitWarrantyRequest = createAsyncThunk(
         error?.response?.data?.message ||
         error?.message ||
         error?.toString();
-      
-      if (error?.response?.data?.code === 419) {
+
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
         const errorBody = {
@@ -479,9 +396,8 @@ export const submitApproval = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
         return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -491,15 +407,17 @@ export const submitApproval = createAsyncThunk(
         error?.response?.data?.message ||
         error?.message ||
         error?.toString();
-      
-      if (error?.response?.data?.code === 419) {
+
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -545,23 +463,24 @@ export const deleteWarranty = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
-    } catch (response) {
+    } catch (error) {
       const message =
-        response?.response?.data?.message ||
-        response?.message ||
-        response?.toString();
-      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
-        if (response?.data?.code === 419) {
-          thunkAPI.dispatch(setBodyError(response));
-        } else {
-          const errorBody = {
-            title: "Failed",
-            description: `Your data was not deleted. ${message}. Please try again.`,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
-        return thunkAPI.rejectWithValue(response);
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not deleted. ${message}. Please try again.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
@@ -618,55 +537,6 @@ const warrantySlice = createSlice({
       state.loading = false;
     },
 
-    // Get All GET_ALL_REFUND_INFO_PAGINATE Pagination
-    [getAllRefundInfoPaginate.pending]: (state) => {
-      state.loading = true;
-    },
-    [getAllRefundInfoPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_refund_info = action.payload;
-    },
-    [getAllRefundInfoPaginate.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Get All GET_ALL_HOLD_INFO_PAGINATE Pagination
-    [getAllHoldInfoPaginate.pending]: (state) => {
-      state.loading = true;
-    },
-    [getAllHoldInfoPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_hold_info = action.payload;
-    },
-    [getAllHoldInfoPaginate.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Get All GET_ALL_RELEASE_INFO_PAGINATE Pagination
-    [getAllReleaseInfoPaginate.pending]: (state) => {
-      state.loading = true;
-    },
-    [getAllReleaseInfoPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_release_info = action.payload;
-    },
-    [getAllReleaseInfoPaginate.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Get All GET_ALL_ATTACHMENT_INFO_PAGINATE Pagination
-    [getAllAttachmentInfoPaginate.pending]: (state) => {
-      state.loading = true;
-    },
-    [getAllAttachmentInfoPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_attachment_info = action.payload;
-    },
-    [getAllAttachmentInfoPaginate.rejected]: (state) => {
-      state.loading = false;
-    },
-
-
     /** Get List Category */
     [getListCategory.pending]: (state, action) => {
       state.dataListCategory = action.payload;
@@ -679,6 +549,32 @@ const warrantySlice = createSlice({
     [getListCategory.rejected]: (state, action) => {
       state.dataListCategory = action.payload;
       state.loadingProduct = false;
+    },
+
+    // Get Payment Warranty Partner List
+    [getPaymentWarrantyPartnerList.pending]: (state) => {
+      state.loadingPaymentWarrantyPartner = true;
+    },
+    [getPaymentWarrantyPartnerList.fulfilled]: (state, action) => {
+      state.loadingPaymentWarrantyPartner = false;
+      state.dataPaymentWarrantyPartner = action.payload;
+    },
+    [getPaymentWarrantyPartnerList.rejected]: (state) => {
+      state.loadingPaymentWarrantyPartner = false;
+      state.dataPaymentWarrantyPartner = [];
+    },
+
+    // Get Payment Warranty Partner Branch List
+    [getPaymentWarrantyPartnerBranchList.pending]: (state) => {
+      state.loadingPaymentWarrantyPartnerBranch = true;
+    },
+    [getPaymentWarrantyPartnerBranchList.fulfilled]: (state, action) => {
+      state.loadingPaymentWarrantyPartnerBranch = false;
+      state.dataPaymentWarrantyPartnerBranch = action.payload;
+    },
+    [getPaymentWarrantyPartnerBranchList.rejected]: (state) => {
+      state.loadingPaymentWarrantyPartnerBranch = false;
+      state.dataPaymentWarrantyPartnerBranch = [];
     },
 
     /** Get Approval History */
@@ -704,6 +600,20 @@ const warrantySlice = createSlice({
     },
     [downloadWarrantyList.rejected]: (state) => {
       state.loading = false;
+    },
+
+    // Create Payment Warranty
+    [createPaymentWarranty.pending]: (state) => {
+      state.loading = true;
+    },
+    [createPaymentWarranty.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [createPaymentWarranty.rejected]: (state, action) => {
+      state.loading = false;
+      state.isFailed = true;
+      state.result = action.payload;
     },
 
     // Submit Warranty Request (Unified Hold, Release, Refund)
@@ -732,17 +642,6 @@ const warrantySlice = createSlice({
       state.loading = false;
       state.isFailed = true;
       state.result = action.payload;
-    },
-    // Get All GET_APPROVAL_LIST_PAGINATE Pagination
-    [getApprovalListPaginate.pending]: (state) => {
-      state.loading = true;
-    },
-    [getApprovalListPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_approval_info = action.payload;
-    },
-    [getApprovalListPaginate.rejected]: (state) => {
-      state.loading = false;
     },
 
     // Get All Approval List
