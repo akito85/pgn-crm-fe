@@ -28,10 +28,7 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "TYPE",
       dataIndex: "type",
-      // onFilter: (value, record) => onFilter("type", value, record),
-      filteredValue: search?.["type"]
-      ? [search?.["type"]]
-      : null,
+      filteredValue: search?.["type"] ? [search?.["type"]] : null,
       sorter: (a, b) => sorter("type", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -53,21 +50,11 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "type",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
     },
     {
       title: "ITEM",
       dataIndex: "item",
-      // onFilter: (value, record) => onFilter("item", value, record),
-      filteredValue: search?.["item"]
-      ? [search?.["item"]]
-      : null,
+      filteredValue: search?.["item"] ? [search?.["item"]] : null,
       sorter: (a, b) => sorter("item", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -89,21 +76,11 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "item",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
     },
     {
       title: "CURRENCY",
       dataIndex: "currency",
-      // onFilter: (value, record) => onFilter("currency", value, record),
-      filteredValue: search?.["currency"]
-      ? [search?.["currency"]]
-      : null,
+      filteredValue: search?.["currency"] ? [search?.["currency"]] : null,
       sorter: (a, b) => sorter("currency", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -125,21 +102,11 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "currency",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
     },
     {
       title: "QUANTITY",
       dataIndex: "quantity",
-      // onFilter: (value, record) => onFilter("quantity", value, record),
-      filteredValue: search?.["quantity"]
-      ? [search?.["quantity"]]
-      : null,
+      filteredValue: search?.["quantity"] ? [search?.["quantity"]] : null,
       sorter: (a, b) => sorter("quantity", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -161,42 +128,11 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "quantity",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text) => {
-      //   if (searchedColumn === "quantity") {
-      //     return (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={text ? text.toString() : ""}
-      //       />
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return text;
-      //     }
-      //     return "";
-      //   }
-      // },
     },
     {
       title: "PRICE",
       dataIndex: "price",
-      // onFilter: (value, record) => onFilter("price", value, record),
-      filteredValue: search?.["price"]
-      ? [search?.["price"]]
-      : null,
+      filteredValue: search?.["price"] ? [search?.["price"]] : null,
       sorter: (a, b) => sorter("price", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -218,57 +154,11 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "price",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "price") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
     },
     {
       title: "AMOUNT",
       dataIndex: "amount",
-      // onFilter: (value, record) => onFilter("amount", value, record),
-      filteredValue: search?.["amount"]
-      ? [search?.["amount"]]
-      : null,
+      filteredValue: search?.["amount"] ? [search?.["amount"]] : null,
       sorter: (a, b) => sorter("amount", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -290,83 +180,15 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "amount",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "amount") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
     },
     {
       title: "REFERENCE",
       dataIndex: "referenceName",
-      // sorter: true,
-      // ...getColumnSearchPropsPaging(
-      //   "referenceName",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
       align: searchedColumn !== "" ? "left" : "center",
       ellipsis: {
         showTitle: false,
       },
       render: (v, r, i) => {
-        let text;
-        // if (searchedColumn !== "") {
-        //   text = r.referenceName;
-        //   return (
-        //     <Highlighter
-        //       highlightStyle={{
-        //         backgroundColor: "#ffc069",
-        //         padding: 0,
-        //       }}
-        //       searchWords={[searchText]}
-        //       autoEscape
-        //       textToHighlight={text ? text.toString() : ""}
-        //     />
-        //   );
-        // } else {
-        //greater or less than the index on page
         const check =
           data.findIndex(
             (item) => parseInt(item.itemId) === parseInt(r.reference)
@@ -382,10 +204,7 @@ export const columnsTablePOSDetailInfo = (
                 1 <=
                 page * pageSize
             : false;
-        text =
-          // !check
-          //   ? r.referenceName
-          //   :
+        const text =
           data.findIndex(
             (item) => parseInt(item.itemId) === parseInt(r.reference)
           ) + 1;
@@ -393,16 +212,12 @@ export const columnsTablePOSDetailInfo = (
           return text;
         }
         return "";
-        // }
       },
     },
     {
       title: "UOM",
       dataIndex: "uom",
-      // onFilter: (value, record) => onFilter("uom", value, record),
-      filteredValue: search?.["uom"]
-      ? [search?.["uom"]]
-      : null,
+      filteredValue: search?.["uom"] ? [search?.["uom"]] : null,
       sorter: (a, b) => sorter("uom", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -424,25 +239,16 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "uom",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
     },
+    // ✅ UPDATED: Ganti AMOUNT EQV IDR → TOTAL AMOUNT EQV
     {
-      title: "AMOUNT EQV IDR",
-      dataIndex: "amountEqvIdr",
-      // onFilter: (value, record) => onFilter("amountEqvIdr", value, record),
-      sorter: (a, b) => sorter("amountEqvIdr", a, b),
-      filteredValue: search?.["amountEqvIdr"]
-      ? [search?.["amountEqvIdr"]]
-      : null,
+      title: "TOTAL AMOUNT EQV",
+      dataIndex: "totalAmountEqv",
+      filteredValue: search?.["totalAmountEqv"] ? [search?.["totalAmountEqv"]] : null,
+      sorter: (a, b) => sorter("totalAmountEqv", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        "amountEqvIdr",
+        "totalAmountEqv",
         searchInput,
         searchedColumn,
         searchText,
@@ -452,209 +258,49 @@ export const columnsTablePOSDetailInfo = (
       ),
       render: (text) =>
         renderColumn(
-          "amountEqvIdr",
-          hasValue(search["amountEqvIdr"]),
+          "totalAmountEqv",
+          hasValue(search["totalAmountEqv"]),
           searchText,
           separatorCurrency(text),
           false,
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "amountEqvIdr",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "amountEqvIdr") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
     },
+    // ✅ UPDATED: Ganti AMOUNT EQV USD → CONVERTED CURRENCY
     {
-      title: "AMOUNT EQV USD",
-      dataIndex: "amountEqvUsd",
-      // onFilter: (value, record) => onFilter("amountEqvUsd", value, record),
-      filteredValue: search?.["amountEqvUsd"]
-      ? [search?.["amountEqvUsd"]]
-      : null,
-      sorter: (a, b) => sorter("amountEqvUsd", a, b),
+      title: "CONVERTED CURRENCY",
+      dataIndex: "convertedCurrency",
+      filteredValue: search?.["convertedCurrency"] ? [search?.["convertedCurrency"]] : null,
+      sorter: (a, b) => sorter("convertedCurrency", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        "amountEqvUsd",
+        "convertedCurrency",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        "currency",
+        "input",
       ),
       render: (text) =>
         renderColumn(
-          "amountEqvUsd",
-          hasValue(search["amountEqvUsd"]),
+          "convertedCurrency",
+          hasValue(search["convertedCurrency"]),
           searchText,
-          separatorCurrency(text),
+          text,
           false,
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "amountEqvUsd",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "amountEqvUsd") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
     },
-    {
-      title: "AMOUNT IDR (TAX PURPOSE)",
-      dataIndex: "eqvIdr",
-      // onFilter: (value, record) => onFilter("eqvIdr", value, record),
-      filteredValue: search?.["eqvIdr"]
-      ? [search?.["eqvIdr"]]
-      : null,
-      sorter: (a, b) => sorter("eqvIdr", a, b),
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        "eqvIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "currency",
-      ),
-      render: (text) =>
-        renderColumn(
-          "eqvIdr",
-          hasValue(search["eqvIdr"]),
-          searchText,
-          separatorCurrency(text),
-          false,
-          "input",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "eqvIdr",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "eqvIdr") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
+    // ✅ REMOVED: AMOUNT IDR (TAX PURPOSE) / eqvIdr - tidak ada di response baru
+    // ✅ REMOVED: TOTAL EQUIVALENT IDR / totalEqvIdr - tidak ada di response baru
+    // ✅ REMOVED: TOTAL EQUIVALENT USD / totalEqvUsd - tidak ada di response baru
     {
       title: "DISCOUNT",
       dataIndex: "discount",
-      // onFilter: (value, record) => onFilter("discount", value, record),
-      filteredValue: search?.["discount"]
-      ? [search?.["discount"]]
-      : null,
+      filteredValue: search?.["discount"] ? [search?.["discount"]] : null,
       sorter: (a, b) => sorter("discount", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -676,57 +322,11 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "discount",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "discount") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
     },
     {
       title: "TOTAL",
       dataIndex: "total",
-      // onFilter: (value, record) => onFilter("total", value, record),
-      filteredValue: search?.["total"]
-      ? [search?.["total"]]
-      : null,
+      filteredValue: search?.["total"] ? [search?.["total"]] : null,
       sorter: (a, b) => sorter("total", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -748,259 +348,36 @@ export const columnsTablePOSDetailInfo = (
           "input",
           search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "total",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "total") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "TOTAL EQUIVALENT IDR",
-      dataIndex: "totalEqvIdr",
-      // onFilter: (value, record) => onFilter("totalEqvIdr", value, record),
-      filteredValue: search?.["totalEqvIdr"]
-      ? [search?.["totalEqvIdr"]]
-      : null,
-      sorter: (a, b) => sorter("totalEqvIdr", a, b),
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        "totalEqvIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "currency",
-      ),
-      render: (text) =>
-        renderColumn(
-          "totalEqvIdr",
-          hasValue(search["totalEqvIdr"]),
-          searchText,
-          separatorCurrency(text),
-          false,
-          "input",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "totalEqvIdr",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //   if (searchedColumn === "totalEqvIdr") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "TOTAL EQUIVALENT USD",
-      dataIndex: "totalEqvUsd",
-      // onFilter: (value, record) => onFilter("totalEqvUsd", value, record),
-      sorter: (a, b) => sorter("totalEqvUsd", a, b),
-      filteredValue: search?.["totalEqvUsd"]
-      ? [search?.["totalEqvUsd"]]
-      : null,
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        "totalEqvUsd",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "currency",
-      ),
-      render: (text) =>
-        renderColumn(
-          "totalEqvUsd",
-          hasValue(search["totalEqvUsd"]),
-          searchText,
-          separatorCurrency(text),
-          false,
-          "input",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "totalEqvUsd",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   const tempValue = text ? (text + "").split(".") : [];
-      //   const thousandSeparator = ",";
-      //   const decimalSeparator = ".";
-      //   const descimal = tempValue[1]
-      //     ? `${decimalSeparator}${formatToTwoDecimalPlaces(tempValue[1])}`
-      //     : `${decimalSeparator}00`;
-      //   const value =
-      //     tempValue.length > 0
-      //       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      //         descimal
-      //       : 0 + descimal;
-      //     if (searchedColumn === "totalEqvUsd") {
-      //     const highlight = (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={value || ""}
-      //       />
-      //     );
-      //     if (value) {
-      //       return highlight;
-      //     }
-      //     return highlight;
-      //   } else {
-      //     if (value) {
-      //       return value;
-      //     }
-      //     return "";
-      //   }
-      // },
     },
     {
       title: "REMARK",
       dataIndex: "remark",
       width: 240,
-      // onFilter: (value, record) => onFilter("remark", value, record),
       filteredValue: search?.["remark"] ? [search?.["remark"]] : null,
       sorter: (a, b) => sorter("remark", a, b),
       ellipsis: {
         showTitle: false,
       },
-      // ...getColumnSearchPropsPaging(
-      //   "remark",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text) => {
-      //   if (searchedColumn === "remark") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    //onFilter: (value, record) => //onFilter("remark", value, record),
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "remark",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "remark",
-        hasValue(search["remark"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
+        handleSearch,
         true,
-        "input",
-        search
+        "input"
       ),
+      render: (text) =>
+        renderColumn(
+          "remark",
+          hasValue(search["remark"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
     },
     {
       title: "ACTION",
@@ -1074,8 +451,8 @@ export const columnsTablePOSDetailInfo = (
       },
     },
   ];
+
   if (type !== "editable") {
-    // console.log("column");
     return column.filter((item) => item.dataIndex !== "action");
   } else {
     return column;

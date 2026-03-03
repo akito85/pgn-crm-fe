@@ -43,6 +43,7 @@ const initialState = {
   data_cost_center_list: [],
   data_uom_codes: [],
   loading_prospective: false,
+  data_customer_type: [],
 };
 
 export const getListPointOfSales = createAsyncThunk(
@@ -411,6 +412,24 @@ export const getGlobalTermsOfPaymentData = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error, action: "GET_GLOBAL_TERMS_OF_PAYMENT_DATA" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getCustomerType = createAsyncThunk(
+  "GET_CUSTOMER_TYPE_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/customer-type`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_CUSTOMER_TYPE_POS" }),
       );
       return thunkAPI.rejectWithValue(
         error.response.data.code === 419 ? null : error.response.data,
@@ -1056,6 +1075,18 @@ const pointOfSalesSlice = createSlice({
       state.data_detailPos = action.payload;
     },
 
+    [getCustomerType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getCustomerType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_customer_type = action.payload || [];
+    },
+    [getCustomerType.rejected]: (state) => {
+      state.loading = false;
+      state.data_customer_type = [];
+    },
+
     [getApprovalList.pending]: (state, action) => {
       state.loading = true;
       state.data_approvalList = action.payload;
@@ -1086,7 +1117,9 @@ const pointOfSalesSlice = createSlice({
       state.loading = true;
     },
     [getListApprovalPage.fulfilled]: (state, action) => {
-      state.dataApprovalListPage = Array.isArray(action.payload) ? action.payload : [];
+      state.dataApprovalListPage = Array.isArray(action.payload)
+        ? action.payload
+        : [];
       state.loading = false;
     },
     [getListApprovalPage.rejected]: (state) => {

@@ -1071,6 +1071,7 @@ const PosForm = ({ type }) => {
                 (item) => item.Id === e?.termType?.termValue,
               )?.text,
           remark: e?.remark,
+          genProInv: e?.genProInv ? "Y" : "N",
           submit: typeSubmit,
           topId: e.termType.termValueDdl,
         });
@@ -1237,6 +1238,7 @@ const PosForm = ({ type }) => {
             (item) => item.Id === e?.termType?.termValue,
           )?.text || e?.termType?.termValue,
       remark: e?.remark,
+      genProInv: e?.genProInv ? "Y" : "N",
 
       appHierId: dataApprovalId,
       submit: typeSubmit,
@@ -1539,6 +1541,7 @@ const PosForm = ({ type }) => {
         termType: {
           termValueDdl: "DATE",
         },
+        genProInv: false,
       });
       setValueDdl({
         action: "changes",

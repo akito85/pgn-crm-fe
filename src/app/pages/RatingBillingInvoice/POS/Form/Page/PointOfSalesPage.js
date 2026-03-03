@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import SelectComponent from "../../../../../../components/SelectComponent";
-import { Form, Input, Select } from "antd";
+import { Form, Input, Select, Checkbox } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
 import { hasValue, requiredMessage } from "../../../../../../utils";
 import DateComponent from "../../../../../../components/DateComponent";
@@ -66,7 +66,7 @@ const PointOfSalesPage = ({
   const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
-
+  const [genProInv, setGenProInv] = useState(false);
 
   useEffect(() => {
     if (hasValue(selectedBilingPeriod)) {
@@ -95,7 +95,7 @@ const PointOfSalesPage = ({
   const handleRangeDisableInvoiceDate = useCallback(
     (current) => {
       if (selectedTransactionDate) {
-        return current < moment(selectedTransactionDate).startOf('day');
+        return current < moment(selectedTransactionDate).startOf("day");
       }
       return current < moment(rangeDisableDate?.startDate);
     },
@@ -105,7 +105,7 @@ const PointOfSalesPage = ({
   const handleRangeDisableTOPDate = useCallback(
     (current) => {
       if (selectedInvoiceDate) {
-        return current < moment(selectedInvoiceDate).startOf('day');
+        return current < moment(selectedInvoiceDate).startOf("day");
       }
       return false;
     },
@@ -138,13 +138,14 @@ const PointOfSalesPage = ({
         >
           <div className="w-full grid grid-cols-4 gap-1">
             {/* Row 1 */}
-            <Form.Item
-              label="Customer Type"
-              style={{ marginBottom: 0 }}
-            >
+            <Form.Item label="Customer Type" style={{ marginBottom: 0 }}>
               <InputComponent
                 disabled
-                value={customerType === "customer" ? "Customer" : "Prospective Customer"}
+                value={
+                  customerType === "customer"
+                    ? "Customer"
+                    : "Prospective Customer"
+                }
               />
             </Form.Item>
 
@@ -381,13 +382,14 @@ const PointOfSalesPage = ({
           }
         >
           <div className="w-full grid grid-cols-5 gap-1">
-            <Form.Item
-              label={"Customer Type"}
-              style={{ marginBottom: 0 }}
-            >
+            <Form.Item label={"Customer Type"} style={{ marginBottom: 0 }}>
               <InputComponent
                 disabled
-                value={customerType === "customer" ? "Customer" : "Prospective Customer"}
+                value={
+                  customerType === "customer"
+                    ? "Customer"
+                    : "Prospective Customer"
+                }
               />
             </Form.Item>
             <Form.Item
@@ -437,6 +439,23 @@ const PointOfSalesPage = ({
             >
               <InputComponent disabled />
             </Form.Item>
+
+            <Form.Item
+              name={"clasificationType"}
+              label={"Classification Type"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+
+            <Form.Item
+              name={"accountType"}
+              label={"Account Type"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+
             <Form.Item
               name={"accountGroupType"}
               label={"Account Group Type"}
@@ -478,6 +497,7 @@ const PointOfSalesPage = ({
             idPos={idPos}
             dataUomCodes={data_uom_codes}
             customerType={customerType}
+            data_globalCurrency={data_globalCurrency}
           />
         );
       case listDetailPage[1].value:
@@ -634,15 +654,19 @@ const PointOfSalesPage = ({
               onChange={(date) => {
                 setSelectedTransactionDate(date);
                 // Reset invoice date jika lebih kecil dari transaction date baru
-                const currentInvoiceDate = form.getFieldValue('invoiceDate');
-                if (currentInvoiceDate && date && moment(currentInvoiceDate).isBefore(moment(date), 'day')) {
+                const currentInvoiceDate = form.getFieldValue("invoiceDate");
+                if (
+                  currentInvoiceDate &&
+                  date &&
+                  moment(currentInvoiceDate).isBefore(moment(date), "day")
+                ) {
                   form.setFieldsValue({ invoiceDate: null });
                   setSelectedInvoiceDate(null);
                 }
               }}
             />
           </Form.Item>
-          
+
           <Form.Item
             name={"invoiceDate"}
             label={"Invoice Date"}
@@ -657,14 +681,21 @@ const PointOfSalesPage = ({
                 setTransactionDate(date);
                 setSelectedInvoiceDate(date);
                 // Reset TOP date jika lebih kecil dari invoice date baru
-                const currentTOPValue = form.getFieldValue(['termType', 'termValue']);
-                if (currentTOPValue && moment.isMoment(currentTOPValue) && 
-                    date && moment(currentTOPValue).isBefore(moment(date), 'day')) {
-                  form.setFieldsValue({ 
-                    termType: { 
-                      ...form.getFieldValue('termType'),
-                      termValue: null 
-                    } 
+                const currentTOPValue = form.getFieldValue([
+                  "termType",
+                  "termValue",
+                ]);
+                if (
+                  currentTOPValue &&
+                  moment.isMoment(currentTOPValue) &&
+                  date &&
+                  moment(currentTOPValue).isBefore(moment(date), "day")
+                ) {
+                  form.setFieldsValue({
+                    termType: {
+                      ...form.getFieldValue("termType"),
+                      termValue: null,
+                    },
                   });
                 }
               }}
@@ -727,6 +758,7 @@ const PointOfSalesPage = ({
             <Form.Item
               name={"remark"}
               label={"Remark"}
+              style={{ marginBottom: 0 }}
               rules={[
                 {
                   required: true,
@@ -735,6 +767,17 @@ const PointOfSalesPage = ({
               ]}
             >
               <InputComponent type="textarea" rows={3} />
+            </Form.Item>
+          </div>
+          <div className="col-span-5">
+            <Form.Item
+              name={"genProInv"}
+              valuePropName="checked"
+              style={{ marginBottom: 0 }}
+            >
+              <Checkbox onChange={(e) => setGenProInv(e.target.checked)}>
+                Generate Proforma Invoice
+              </Checkbox>
             </Form.Item>
           </div>
         </div>
