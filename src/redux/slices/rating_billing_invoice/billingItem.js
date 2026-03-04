@@ -4,10 +4,17 @@ import { showModalSuccess } from "../general_slice";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 
 const initialState = {
-  data_view: [],
+  data_view: { result: [], page: {} },   // ← structure disamakan agar konsisten
   data_billingItemCategoryDdl: [],
   data_billingItemCategory: [],
   data_billType: [],
+  data_typeList: [],
+  data_categoryList: [],
+  data_criteriaList: [],
+  data_specialGLList: [],
+  data_glAccountList: [],
+  data_classificationTypeList: [],
+  data_accountTypeList: [],
   data_itemMappingCategory: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
@@ -24,25 +31,26 @@ const initialState = {
   loading: false,
 };
 
+// ─── getBillingItemList: support isLoadMore untuk infinite scroll ─────────────
 export const getBillingItemList = createAsyncThunk(
   "GET_BILLING_ITEM_LIST",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/billingitem/get-paging?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_BILLING_ITEM_LIST" })
+        validateError({ error, action: "GET_BILLING_ITEM_LIST" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillingItemCategory = createAsyncThunk(
@@ -54,13 +62,13 @@ export const getBillingItemCategory = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_BILLING_ITEM_LIST" })
+        validateError({ error, action: "GET_BILLING_ITEM_LIST" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillType = createAsyncThunk(
@@ -73,10 +81,10 @@ export const getBillType = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_BILL_TYPE" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillingItemCategoryDdl = createAsyncThunk(
@@ -91,13 +99,13 @@ export const getBillingItemCategoryDdl = createAsyncThunk(
         validateError({
           error,
           action: "GET_BILLING_ITEM_MAPPING_CATEGORY_DDL",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getDetailMappingCategory = createAsyncThunk(
@@ -109,13 +117,13 @@ export const getDetailMappingCategory = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_DETAIL_MAPPING_CATEGORY" })
+        validateError({ error, action: "GET_DETAIL_MAPPING_CATEGORY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAvailableApproval = createAsyncThunk(
@@ -127,13 +135,13 @@ export const getAvailableApproval = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_AVAILABLE_APPROVAL" })
+        validateError({ error, action: "GET_AVAILABLE_APPROVAL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getSelectedApproval = createAsyncThunk(
@@ -145,13 +153,13 @@ export const getSelectedApproval = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_SELECTED_APPROVAL" })
+        validateError({ error, action: "GET_SELECTED_APPROVAL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAttachmentTable = createAsyncThunk(
@@ -163,13 +171,13 @@ export const getAttachmentTable = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ATTACHMENT_TABLE" })
+        validateError({ error, action: "GET_ATTACHMENT_TABLE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAttachmentCategory = createAsyncThunk(
@@ -184,13 +192,13 @@ export const getAttachmentCategory = createAsyncThunk(
       }));
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ATTACHMENT_CATEGORY" })
+        validateError({ error, action: "GET_ATTACHMENT_CATEGORY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillingItemDetail = createAsyncThunk(
@@ -202,13 +210,13 @@ export const getBillingItemDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_BILLING_ITEM_DETAIL" })
+        validateError({ error, action: "GET_BILLING_ITEM_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAttachmentDetail = createAsyncThunk(
@@ -220,13 +228,13 @@ export const getAttachmentDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ATTACHMENT_DETAIL" })
+        validateError({ error, action: "GET_ATTACHMENT_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const inactiveBillingItem = createAsyncThunk(
@@ -236,7 +244,7 @@ export const inactiveBillingItem = createAsyncThunk(
       const url = `/v1/dbs/api/billingitem/inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -255,7 +263,7 @@ export const inactiveBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "INACTIVE_BILLING_ITEM" })
+            validateError({ error, action: "INACTIVE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -268,7 +276,7 @@ export const inactiveBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -280,13 +288,13 @@ export const getApprovalHistory = createAsyncThunk(
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_APPROVAL_HISTORY" })
+        validateError({ error, action: "GET_APPROVAL_HISTORY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const downloadBillingItem = createAsyncThunk(
@@ -305,11 +313,11 @@ export const downloadBillingItem = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_BILLING_ITEM",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const createBillingItem = createAsyncThunk(
@@ -318,14 +326,6 @@ export const createBillingItem = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/billingitem/create`;
       const response = await ratingBillingHttpService.createData(url, body);
-      // const successBody = {
-      //   title: "Successful",
-      //   description: `Your data has been submitted. ${
-      //     body.isSubmit ? "created" : "submitted"
-      //   }.`,
-      //   return: false,
-      // };
-      // thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
       const message =
@@ -337,7 +337,7 @@ export const createBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "CREATE_BILLING_ITEM" })
+            validateError({ error, action: "CREATE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -352,7 +352,7 @@ export const createBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateBillingItem = createAsyncThunk(
@@ -361,14 +361,6 @@ export const updateBillingItem = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/billingitem/update`;
       const response = await ratingBillingHttpService.updateData(url, body);
-      // const successBody = {
-      //   title: "Successful",
-      //   description: `Your data has been submitted. ${
-      //     body.isSubmit ? "created" : "submitted"
-      //   }.`,
-      //   return: false,
-      // };
-      // thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
       const message =
@@ -380,7 +372,7 @@ export const updateBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "UPDATE_BILLING_ITEM" })
+            validateError({ error, action: "UPDATE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -395,7 +387,7 @@ export const updateBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalRejectBillingItem = createAsyncThunk(
@@ -405,7 +397,7 @@ export const approvalRejectBillingItem = createAsyncThunk(
       const url = `/v1/dbs/api/billingitem/approve`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -432,7 +424,7 @@ export const approvalRejectBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalInactiveBillingItem = createAsyncThunk(
@@ -442,7 +434,7 @@ export const approvalInactiveBillingItem = createAsyncThunk(
       const url = `/v1/dbs/api/billingitem/approve-inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -460,7 +452,7 @@ export const approvalInactiveBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "APPROVAL_INACTIVE_BILLING_ITEM" })
+            validateError({ error, action: "APPROVAL_INACTIVE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -473,7 +465,7 @@ export const approvalInactiveBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailDraft = createAsyncThunk(
@@ -486,13 +478,12 @@ export const getDetailDraft = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_DETAIL_DRAFT" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
-// RBI MASTER BILLING ITEM
 export const getConfigFileRBIBillingItem = createAsyncThunk(
   "GET_CONFIG_FILE_RBI_BILLING_ITEM",
   async (_, thunkAPI) => {
@@ -502,27 +493,220 @@ export const getConfigFileRBIBillingItem = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
+);
+
+export const getBillingItemTypeList = createAsyncThunk(
+  "GET_BILLING_ITEM_TYPE_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/typelist";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.map((item) => ({
+        id: item.Id,
+        name: item.text,
+        code: item.code,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_BILLING_ITEM_TYPE_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getBillingItemCriteriaList = createAsyncThunk(
+  "GET_BILLING_ITEM_CRITERIA_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/criteria-list";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.map((item) => ({
+        id: item.Id,
+        name: item.text,
+        code: item.code,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_BILLING_ITEM_CRITERIA_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getBillingItemCategoryList = createAsyncThunk(
+  "GET_BILLING_ITEM_CATEGORY_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/category-list";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_BILLING_ITEM_CATEGORY_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const generateTransactionMappingCode = createAsyncThunk(
+  "GENERATE_TRANSACTION_MAPPING_CODE",
+  async ({ id, prefix }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/generate-code";
+      const response = await ratingBillingHttpService.createData(url, {
+        id,
+        prefix,
+      });
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GENERATE_TRANSACTION_MAPPING_CODE" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getSpecialGLList = createAsyncThunk(
+  "GET_SPECIAL_GL_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/lov/special-gl";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.map((item) => ({
+        id: item.glbTypeValId,
+        name: item.name,
+        value: item.glValue,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_SPECIAL_GL_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getGLAccountList = createAsyncThunk(
+  "GET_GL_ACCOUNT_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/get-gl-account";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.map((item) => ({
+        id: item.glAccountId,
+        name: item.glAccountDesc,
+        account: item.glAccount,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_GL_ACCOUNT_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getClassificationTypeList = createAsyncThunk(
+  "GET_CLASSIFICATION_TYPE_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/get-classification-type";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.map((item) => ({
+        id: item.Id,
+        name: item.text,
+        code: item.code,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_CLASSIFICATION_TYPE_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getAccountTypeList = createAsyncThunk(
+  "GET_ACCOUNT_TYPE_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/get-account-type";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.map((item) => ({
+        id: item.Id,
+        name: item.text,
+        code: item.code,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_ACCOUNT_TYPE_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
 );
 
 const billingItemSlice = createSlice({
   name: "billing_item",
   initialState,
   extraReducers: {
-    //GET BILLING ITEM LIST
-    [getBillingItemList.pending]: (state) => {
-      state.loading = true;
+    [getBillingItemList.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getBillingItemList.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_view = action.payload;
+      const { isLoadMore, ...restPayload } = action.payload || {};
+      const newData = restPayload?.result || [];
+
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data_view?.result || []).map((item) => item.billingItemCode),
+        );
+        const uniqueNewData = newData.filter(
+          (item) => !existingIds.has(item.billingItemCode),
+        );
+        state.data_view = {
+          ...restPayload,
+          result: [...(state.data_view?.result || []), ...uniqueNewData],
+        };
+      } else {
+        state.data_view = restPayload;
+      }
     },
-    [getBillingItemList.rejected]: (state) => {
+    [getBillingItemList.rejected]: (state, action) => {
       state.loading = false;
+      // Hanya reset data jika bukan load more
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_view = { result: [], page: {} };
+      }
     },
+
     //GET BILLING ITEM CATEGORY
     [getBillingItemCategory.pending]: (state) => {
       state.loading = true;
@@ -557,7 +741,7 @@ const billingItemSlice = createSlice({
     [getBillType.rejected]: (state) => {
       state.loading = false;
     },
-    //GET BILL TYPE
+    //GET DETAIL MAPPING CATEGORY
     [getDetailMappingCategory.pending]: (state) => {
       state.loading = true;
     },
@@ -634,7 +818,7 @@ const billingItemSlice = createSlice({
     [getAttachmentDetail.rejected]: (state) => {
       state.loading = false;
     },
-    //GET INACTIVE
+    //INACTIVE BILLING ITEM
     [inactiveBillingItem.pending]: (state) => {
       state.loading = true;
     },
@@ -670,7 +854,7 @@ const billingItemSlice = createSlice({
     [downloadBillingItem.rejected]: (state) => {
       state.loading = false;
     },
-    //DOWNLOAD BILLING ITEM
+    //GET DETAIL DRAFT
     [getDetailDraft.pending]: (state) => {
       state.loading = true;
     },
@@ -690,6 +874,83 @@ const billingItemSlice = createSlice({
       state.getConfigFile = action.payload;
     },
     [getConfigFileRBIBillingItem.rejected]: (state) => {
+      state.loading = false;
+    },
+    // type
+    [getBillingItemTypeList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBillingItemTypeList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_typeList = action.payload;
+    },
+    [getBillingItemTypeList.rejected]: (state) => {
+      state.loading = false;
+    },
+    // criteria
+    [getBillingItemCriteriaList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBillingItemCriteriaList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_criteriaList = action.payload;
+    },
+    [getBillingItemCriteriaList.rejected]: (state) => {
+      state.loading = false;
+    },
+    // category
+    [getBillingItemCategoryList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBillingItemCategoryList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_categoryList = action.payload;
+    },
+    [getBillingItemCategoryList.rejected]: (state) => {
+      state.loading = false;
+    },
+    // special gl
+    [getSpecialGLList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getSpecialGLList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_specialGLList = action.payload;
+    },
+    [getSpecialGLList.rejected]: (state) => {
+      state.loading = false;
+    },
+    // gl account
+    [getGLAccountList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getGLAccountList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_glAccountList = action.payload;
+    },
+    [getGLAccountList.rejected]: (state) => {
+      state.loading = false;
+    },
+    // classification list
+    [getClassificationTypeList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getClassificationTypeList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_classificationTypeList = action.payload;
+    },
+    [getClassificationTypeList.rejected]: (state) => {
+      state.loading = false;
+    },
+    // account type list
+    [getAccountTypeList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAccountTypeList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_accountTypeList = action.payload;
+    },
+    [getAccountTypeList.rejected]: (state) => {
       state.loading = false;
     },
   },

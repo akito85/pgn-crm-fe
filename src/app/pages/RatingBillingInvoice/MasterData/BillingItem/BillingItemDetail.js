@@ -1,11 +1,9 @@
 import moment from "moment";
 import { Spin, Tabs } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BillingItemDetailInformation from "./Detail/BillingItemDetailInformation";
-import BaseContainer from "../../../../../components/BaseContainer";
 import CardContainer from "../../../../../components/CardContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +12,8 @@ import {
   approvalRejectBillingItem,
   getBillingItemDetail,
   getDetailDraft,
+  getBillingItemTypeList,
+  getBillingItemCriteriaList,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -27,8 +27,13 @@ import { renderDateTime } from "./Utils/Utils";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 
 const BillingItemDetail = () => {
-  const { data_BillingItemDetail, data_detailDraft, loading, message } =
-    useSelector((state) => state.billing_item);
+  const {
+    data_BillingItemDetail,
+    data_detailDraft,
+    data_typeList,
+    data_criteriaList,
+    loading,
+  } = useSelector((state) => state.billing_item);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,19 +41,14 @@ const BillingItemDetail = () => {
 
   const [valueTab, setValueTab] = useState("BillingItem");
   const [approveOrReject, setApproveOrReject] = useState("");
-  const [remark, setRemark] = useState("");
-
   const [modalError, setModalError] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
 
   const [dataMapping, setDataMapping] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
-
   const [dataDraft, setDataDraft] = useState({});
-  const [dataMappingDraft, setDataMappingDraft] = useState({});
-
+  const [dataMappingDraft, setDataMappingDraft] = useState([]);
   const [bodyError, setBodyError] = useState({});
-
   const [showButtonApproval, setShowButtonApproval] = useState(false);
   const [showDraftTab, setShowDraftTab] = useState(false);
 
@@ -57,88 +57,85 @@ const BillingItemDetail = () => {
       dispatch(getBillingItemDetail({ id: dataRecord }));
       dispatch(getDetailDraft({ id: dataRecord }));
     }
+    dispatch(getBillingItemTypeList());
+    dispatch(getBillingItemCriteriaList());
   }, [dispatch, dataRecord]);
 
   useEffect(() => {
-    if (dataRecord && data_BillingItemDetail && data_BillingItemDetail?.billingItemCode === dataRecord) {
+    if (
+      dataRecord &&
+      data_BillingItemDetail &&
+      data_BillingItemDetail?.billingItemCode === dataRecord
+    ) {
+      // Tombol Approve/Reject
       setShowButtonApproval(
         (data_BillingItemDetail.statusApproval === "WAITING APPROVAL" ||
           data_BillingItemDetail.statusApproval === "WAITING_APPROVAL") &&
-          data_BillingItemDetail?.approvalDto?.isApprover
+          data_BillingItemDetail?.approvalDto?.isApprover,
       );
 
       // Mapping Information
       setDataMapping(
-        (data_BillingItemDetail?.mappingInformation || [])?.map((item) => {
-          return {
-            ...item,
-            categoryName: item.category,
-            startDate: item.startDate ? moment(item.startDate) : "",
-            endDate: item.endDate ? moment(item.endDate) : "",
-            dataType: "exist",
-          };
-        })
+        (data_BillingItemDetail?.mappingInformation || []).map((item) => ({
+          ...item,
+          categoryName: item.category,
+          startDate: item.startDate ? moment(item.startDate) : "",
+          endDate: item.endDate ? moment(item.endDate) : "",
+          dataType: "exist",
+        })),
       );
 
       // Attachment Information
       setListDataAttachment(
-        (data_BillingItemDetail?.attachmentDtoList || []).map((item) => {
-          return {
-            ...item,
-            createdDate: item.createdBy
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        })
+        (data_BillingItemDetail?.attachmentDtoList || []).map((item) => ({
+          ...item,
+          createdDate: item.createdDate
+            ? moment(item.createdDate).format("DD MMM YYYY")
+            : "",
+          dataType: "exist",
+        })),
       );
 
       if (
         data_detailDraft &&
-        data_detailDraft?.billingItemCode === data_BillingItemDetail?.billingItemCode &&
+        data_detailDraft?.billingItemCode ===
+          data_BillingItemDetail?.billingItemCode &&
         data_detailDraft?.billingItemCode === dataRecord &&
-        (data_BillingItemDetail?.statusApproval !== "APPROVED")
+        data_BillingItemDetail?.statusApproval !== "APPROVED"
       ) {
-        // Mapping Information
         const dataMappingInfoDraft = (
           data_detailDraft?.mappingInformation || []
-        )?.map((item) => {
-          return {
-            ...item,
-            categoryName: item.category,
-            startDate: item.startDate ? moment(item.startDate) : "",
-            endDate: item.endDate ? moment(item.endDate) : "",
-            dataType: "exist",
-          };
-        });
+        ).map((item) => ({
+          ...item,
+          categoryName: item.category,
+          startDate: item.startDate ? moment(item.startDate) : "",
+          endDate: item.endDate ? moment(item.endDate) : "",
+          dataType: "exist",
+        }));
 
-        setDataDraft((prev) => {
-          return {
-            id: data_BillingItemDetail?.id,
-            billingItemCode: data_BillingItemDetail?.billingItemCode,
-            billingItemCategory: data_detailDraft.billingItemCategory,
-            billingItemName: data_detailDraft.billingItemName,
-            billingType: data_detailDraft.billingType,
-            startDate: data_detailDraft.startDate,
-            endDate: data_detailDraft.endDate,
-            lateCharge: data_detailDraft.lateCharge,
-            paymentWarranty: data_detailDraft.paymentWarranty,
-            description: data_detailDraft.description,
-            createdBy: data_BillingItemDetail?.createdBy,
-            createdDate: data_BillingItemDetail.createdDate,
-            updatedBy: data_BillingItemDetail.updatedBy,
-            updatedDate: data_BillingItemDetail.updatedDate,
-            status: data_BillingItemDetail?.status,
-            statusApproval: data_BillingItemDetail?.statusApproval,
-            mappingInformation: data_detailDraft?.mappingInformation?.map(
-              (item) => {
-                return {
-                  ...item,
-                  categoryId: item.categoryId,
-                };
-              }
-            ),
-          };
+        setDataDraft({
+          id: data_BillingItemDetail?.id,
+          billingItemCode: data_BillingItemDetail?.billingItemCode,
+          billingItemCategory: data_detailDraft.billingItemCategory,
+          billingItemName: data_detailDraft.billingItemName,
+          billingType: data_detailDraft.billingType,
+          startDate: data_detailDraft.startDate,
+          endDate: data_detailDraft?.endDate,
+          lateCharge: data_detailDraft.lateCharge,
+          paymentWarranty: data_detailDraft.paymentWarranty,
+          installment: data_detailDraft?.installment || false,
+          transMappingType: data_detailDraft?.transMappingType,
+          criteria: data_detailDraft?.criteria || [],
+          description: data_detailDraft.description,
+          createdBy: data_BillingItemDetail?.createdBy,
+          createdDate: data_BillingItemDetail.createdDate,
+          updatedBy: data_BillingItemDetail.updatedBy,
+          updatedDate: data_BillingItemDetail.updatedDate,
+          status: data_BillingItemDetail?.status,
+          statusApproval: data_BillingItemDetail?.statusApproval,
+          mappingInformation: data_detailDraft?.mappingInformation?.map(
+            (item) => ({ ...item, categoryId: item.categoryId }),
+          ),
         });
         setDataMappingDraft(dataMappingInfoDraft);
         setShowDraftTab(true);
@@ -149,22 +146,10 @@ const BillingItemDetail = () => {
   }, [dataRecord, data_BillingItemDetail, data_detailDraft]);
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
-    {
-      path: RBI_ROUTES.BILLING_ITEM_VIEW,
-      breadcrumbName: "Transation Mapping",
-    },
-    {
-      path: "",
-      breadcrumbName: "Detail Transaction Mapping",
-    },
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    { path: RBI_ROUTES.BILLING_ITEM_VIEW, breadcrumbName: "Transaction Mapping" },
+    { path: "", breadcrumbName: "Detail Transaction Mapping" },
   ];
 
   const handleRetry = () => {
@@ -179,7 +164,6 @@ const BillingItemDetail = () => {
   };
 
   const handleCancel = () => {
-    setRemark("");
     setModalConfirm(false);
   };
 
@@ -194,12 +178,13 @@ const BillingItemDetail = () => {
     dispatch(
       data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE")
         ? approvalInactiveBillingItem(body)
-        : approvalRejectBillingItem(body)
+        : approvalRejectBillingItem(body),
     )
       .unwrap()
-      .then(async (data) => {
+      .then(() => {
         handleClear();
         handleCancel();
+        dispatch(getBillingItemDetail({ id: dataRecord }));
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -216,19 +201,17 @@ const BillingItemDetail = () => {
     setModalConfirm(false);
   };
 
-  const onChangeTab = (key) => {
-    setValueTab(key);
-  };
-
   const tabItems = [
     {
       key: "BillingItem",
-      label: "Billing Item",
+      label: "Transaction Mapping",
       children: (
         <div className="my-0">
           <BillingItemDetailInformation
             dataMapping={dataMapping}
             dataBillingItem={data_BillingItemDetail}
+            data_typeList={data_typeList || []}
+            data_criteriaList={data_criteriaList || []}
           />
         </div>
       ),
@@ -243,6 +226,8 @@ const BillingItemDetail = () => {
                 <BillingItemDetailInformation
                   dataBillingItem={dataDraft}
                   dataMapping={dataMappingDraft}
+                  data_typeList={data_typeList || []}
+                  data_criteriaList={data_criteriaList || []}
                 />
               </div>
             ),
@@ -254,7 +239,7 @@ const BillingItemDetail = () => {
       label: "Attachment",
       children: (
         <div className="my-0">
-          <BaseContainer header={"ATTACHMENT INFORMATION"}>
+          <CardContainer header="ATTACHMENT INFORMATION">
             <AttachmentComponent
               typeSelector={"billing_item"}
               data={listDataAttachment}
@@ -263,74 +248,57 @@ const BillingItemDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         </div>
       ),
     },
   ];
 
+  // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        
-        {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") && 
-         data_BillingItemDetail?.approvalDto?.isApprover && (
-          <div className="mt-5">
-            <BaseContainer header={"Inactive Request Information"}>
-              <div className="w-full grid grid-cols-4 gap-5">
-                <DetailText label="Requested Date">
-                  {renderDateTime(data_BillingItemDetail?.approvalDto?.requestedDate)}
-                </DetailText>
-                <DetailText label="Requested By">
-                  {data_BillingItemDetail?.approvalDto?.requestedBy}
-                </DetailText>
-                <DetailText label="Remark">
-                  {data_BillingItemDetail?.approvalDto?.remark}
-                </DetailText>
-              </div>
-            </BaseContainer>
-          </div>
-        )}
+        {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") &&
+          data_BillingItemDetail?.approvalDto?.isApprover && (
+            <div className="mt-5">
+              <CardContainer header="Inactive Request Information">
+                <div className="w-full grid grid-cols-4 gap-5">
+                  <DetailText label="Requested Date">
+                    {renderDateTime(
+                      data_BillingItemDetail?.approvalDto?.requestedDate,
+                    )}
+                  </DetailText>
+                  <DetailText label="Requested By">
+                    {data_BillingItemDetail?.approvalDto?.requestedBy}
+                  </DetailText>
+                  <DetailText label="Remark">
+                    {data_BillingItemDetail?.approvalDto?.remark}
+                  </DetailText>
+                </div>
+              </CardContainer>
+            </div>
+          )}
 
         <div className="mt-5">
-          <CardContainer
-            header={
-              <div className="flex -my-4 justify-between items-center">
-                <p className="w-full mt-[15px] text-primary">BILLING ITEM DETAIL</p>
-              </div>
-            }
-          >
-            <Tabs
-              items={tabItems}
-              onChange={onChangeTab}
-              activeKey={valueTab}
-              className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:my-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
-            />
-          </CardContainer>
+          <Tabs
+            items={tabItems}
+            onChange={(key) => setValueTab(key)}
+            activeKey={valueTab}
+            tabBarStyle={{ marginBottom: 0 }}
+          />
         </div>
 
-        <div className="w-full flex justify-between my-10">
-          <div className="flex">
-            <ButtonComponent
-              type="submit"
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
+        {/* Footer: Back & Approve/Reject buttons */}
+        <div className="w-full flex justify-between my-2 shadow-md bg-white p-1 rounded-md">
+          <div className="flex w-full bg-white p-3 rounded-md">
+            <ButtonComponent type="submit" onClick={() => navigate(-1)}>
               Back
             </ButtonComponent>
           </div>
 
           {showButtonApproval && (
-            <div className="w-full flex justify-end gap-5">
+            <div className="w-full flex justify-end gap-5 p-3">
               <ButtonComponent
                 type="reject"
                 onClick={() => {
@@ -354,6 +322,7 @@ const BillingItemDetail = () => {
         </div>
       </Spin>
 
+      {/* Modal Approve/Reject */}
       {modalConfirm && (
         <ModalApproveOrReject
           isOpen={modalConfirm}
@@ -361,11 +330,12 @@ const BillingItemDetail = () => {
           onFinish={handleConfirm}
           header={approveOrReject}
           approveOrReject={approveOrReject}
-          menu={"Billing Item"}
-          named={`${data_BillingItemDetail.billingItemName}`}
+          menu={"Transaction Mapping"}
+          named={`${data_BillingItemDetail?.billingItemName || ""}`}
         />
       )}
 
+      {/* Modal Error */}
       <ModalError
         isOpen={modalError}
         handleOk={handleRetry}
@@ -379,7 +349,7 @@ const BillingItemDetail = () => {
           </div>
           <p className="pl-[70px]">{`Your data was not ${
             approveOrReject === "Approve" ? "Approved" : "Rejected"
-          }. ${bodyError.message}.`}</p>
+          }. ${bodyError.message || ""}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

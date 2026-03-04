@@ -185,7 +185,7 @@ export const getExpandedColumns = () => [
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 60,
+    width: 48,
     render: (text, object, index) => index + 1,
   },
   {
@@ -224,6 +224,36 @@ export const getExpandedColumns = () => [
         render: (text) => usageFormatting(text),
       },
     ],
+  },
+  {
+    title: "Range Min",
+    dataIndex: "rangeMin",
+    key: "rangeMin",
+    width: 100,
+    align: "center",
+    render: (text) => {
+      // Jika null atau undefined, tampilkan kosong
+      if (text === null || text === undefined) return "";
+      // Jika 0, tampilkan 0
+      if (text === 0) return "0";
+      // Jika ada nilai lainnya, tampilkan nilai tersebut
+      return text;
+    },
+  },
+  {
+    title: "Range Max",
+    dataIndex: "rangeMax",
+    key: "rangeMax",
+    width: 100,
+    align: "center",
+    render: (text) => {
+      // Jika null atau undefined, tampilkan kosong
+      if (text === null || text === undefined) return "";
+      // Jika 0, tampilkan "Unlimited"
+      if (text === 0) return "Unlimited";
+      // Jika ada nilai lainnya, tampilkan nilai tersebut
+      return text;
+    },
   },
   {
     title: "PRICE",
@@ -340,7 +370,7 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     <div
       className="bg-white"
       style={{
-        marginLeft: "45px",
+        marginLeft: "31px",
         overscrollBehaviorX: "contain",
       }}
       onWheel={handleWheel}
