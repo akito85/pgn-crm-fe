@@ -2,7 +2,14 @@ import { memo, useEffect, useMemo, useRef } from "react";
 import { useState } from "react";
 import MultiDestinationTable from "./MultiDestinationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getMultiDestination, downloadMultiDestination, getMdApprovalHistory, inactivateMultiDestination, getMdApprovalHierarchy, getDetailMdApprovalHierarchy } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import {
+  getMultiDestination,
+  downloadMultiDestination,
+  getMdApprovalHistory,
+  inactivateMultiDestination,
+  getMdApprovalHierarchy,
+  getDetailMdApprovalHierarchy
+} from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import MultiDestinationApprovalModal from "./MultiDestinationApprovalModal";
 import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
@@ -11,10 +18,7 @@ import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
-const MultiDestination = ({
-  id = 0,
-  idCustomer = 0,
-}) => {
+const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -22,10 +26,8 @@ const MultiDestination = ({
     list_multiDestination,
     pagination_multiDestination,
     data_mdApprovalHistory,
-    loading,
-  } = useSelector(
-    (state) => state.multiDestination
-  );
+    loading_listMd
+  } = useSelector((state) => state.multiDestination);
 
   //declare
   const searchInput = useRef(null);
@@ -43,11 +45,15 @@ const MultiDestination = ({
   const [inactivateMdId, setInactivateMdId] = useState(0);
   const [inactivateMdAccountNumber, setInactivateMdAccountNumber] = useState(0);
 
-  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] =
+    useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [tempFilters, setTempFilters] = useState([]);
 
-  const currentData = useMemo(() => list_multiDestination, [list_multiDestination]);
+  const currentData = useMemo(
+    () => list_multiDestination,
+    [list_multiDestination]
+  );
 
   const currentPagination = pagination_multiDestination;
   const hasMore = currentData.length < (currentPagination?.totalElements || 0);
@@ -57,7 +63,7 @@ const MultiDestination = ({
 
     return currentData.map((item, index) => ({
       ...item,
-      key: `${item.id}-${index}`,
+      key: `${item.id}-${index}`
     }));
   }, [currentData]);
 
@@ -67,14 +73,14 @@ const MultiDestination = ({
       size: loadMoreSize,
       sort,
       searchs: search,
-      inputFields: tempFilters,
-    }
+      inputFields: tempFilters
+    };
 
     dispatch(
       getMultiDestination({
         id,
         body,
-        isLoadMore: false,
+        isLoadMore: false
       })
     );
     setPage(0);
@@ -86,17 +92,21 @@ const MultiDestination = ({
    * @param {number} mdId
    * @param {number} mdAppHierId
    */
-  const handleInactivateModal = (show, newMdId = 0, newMdAccountNumber = "") => {
+  const handleInactivateModal = (
+    show,
+    newMdId = 0,
+    newMdAccountNumber = ""
+  ) => {
     if (show) {
       setInactivateMdId(newMdId);
-      setInactivateMdAccountNumber(newMdAccountNumber)
+      setInactivateMdAccountNumber(newMdAccountNumber);
       setShowInactiveModal(true);
     } else {
       setInactivateMdId(0);
       setInactivateMdAccountNumber("");
       setShowInactiveModal(false);
     }
-  }
+  };
 
   /**
    * @param {string} remark
@@ -106,28 +116,30 @@ const MultiDestination = ({
     const body = {
       id: inactivateMdId,
       appHierId,
-      remark,
-    }
+      remark
+    };
 
-    dispatch(inactivateMultiDestination({
-      body,
-    }))
-    .unwrap()
-    .then(() => {
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        inputFields: tempFilters,
-      }
+    dispatch(
+      inactivateMultiDestination({
+        body
+      })
+    )
+      .unwrap()
+      .then(() => {
+        const body = {
+          page,
+          size: loadMoreSize,
+          sort,
+          searchs: search,
+          inputFields: tempFilters
+        };
 
-      dispatch(getMultiDestination({ id, body, isLoadMore: false }));
-      setShowInactiveModal(false);
-      handleClear();
-    })
-    .catch(() => {})
-  }
+        dispatch(getMultiDestination({ id, body, isLoadMore: false }));
+        setShowInactiveModal(false);
+        handleClear();
+      })
+      .catch(() => {});
+  };
 
   /**
    * @param {string[]} selectedKeys
@@ -144,7 +156,7 @@ const MultiDestination = ({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
@@ -155,7 +167,7 @@ const MultiDestination = ({
     return keyData.map((item) => ({
       key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
     }));
   };
 
@@ -170,7 +182,7 @@ const MultiDestination = ({
     } else {
       setShowApprovalHistoryModal(false);
     }
-  }
+  };
 
   const handleDownload = () => {
     const body = {
@@ -179,9 +191,9 @@ const MultiDestination = ({
       sort,
       inputFields: tempFilters,
       searchs: search
-    }
+    };
 
-    dispatch(downloadMultiDestination({ body, id, }));
+    dispatch(downloadMultiDestination({ body, id }));
   };
 
   /**
@@ -206,14 +218,14 @@ const MultiDestination = ({
         size: loadMoreSize,
         sort,
         searchs: JSON.stringify(search),
-        inputFields: tempFilters,
-      }
+        inputFields: tempFilters
+      };
 
       await dispatch(
         getMultiDestination({
           id,
           body,
-          isLoadMore: true,
+          isLoadMore: true
         })
       );
     }
@@ -221,10 +233,18 @@ const MultiDestination = ({
   };
 
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount(`/account-management/account-standard/multi-destination`))
-    }else{
-      dispatch(getGrantedAccessAccount(`/account-management/account-onetime/multi-destination`))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          `/account-management/account-standard/multi-destination`
+        )
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount(
+          `/account-management/account-onetime/multi-destination`
+        )
+      );
     }
   }, []);
 
@@ -234,8 +254,8 @@ const MultiDestination = ({
       size: loadMoreSize,
       sort,
       searchs: search,
-      inputFields: tempFilters,
-    }
+      inputFields: tempFilters
+    };
 
     setPage(0);
 
@@ -247,12 +267,16 @@ const MultiDestination = ({
       const temp = {
         dataApprover: {
           create: data_mdApprovalHistory?.dataApprover?.MULTI_DESTINATION || [],
-          inactive: data_mdApprovalHistory?.dataApprover?.INACTIVE_MULTI_DESTINATION || [],
+          inactive:
+            data_mdApprovalHistory?.dataApprover?.INACTIVE_MULTI_DESTINATION ||
+            []
         },
         dataHistory: {
           create: data_mdApprovalHistory?.dataHistory?.MULTI_DESTINATION || [],
-          inactive: data_mdApprovalHistory?.dataHistory?.INACTIVE_MULTI_DESTINATION || [],
-        },
+          inactive:
+            data_mdApprovalHistory?.dataHistory?.INACTIVE_MULTI_DESTINATION ||
+            []
+        }
       };
 
       setDataApprovalHistoryFix(temp);
@@ -283,7 +307,7 @@ const MultiDestination = ({
           searchedColumn={searchedColumn}
           searchInput={searchInput}
           handleSearch={handleSearch}
-          loading={loading}
+          loading={loading_listMd}
         />
 
         <MultiDestinationApprovalModal
@@ -299,7 +323,9 @@ const MultiDestination = ({
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
           customMessage={`Are you sure you want to inactivate multi destination - ${inactivateMdAccountNumber}?`}
-          onFinish={({ remark, appHierId }, handleClear) => handleInactivateMd({ remark, appHierId }, handleClear)}
+          onFinish={({ remark, appHierId }, handleClear) =>
+            handleInactivateMd({ remark, appHierId }, handleClear)
+          }
           named={inactivateMdAccountNumber}
           menu="multi destination"
           sliceName="multiDestination"

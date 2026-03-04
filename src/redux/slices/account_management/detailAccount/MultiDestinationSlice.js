@@ -4,6 +4,7 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
+  loading_listMd: false,
   list_multiDestination: [],
   pagination_multiDestination: {
     totalPages: 0,
@@ -11,6 +12,7 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  loading_listMdApproval: false,
   list_multiDestinationApproval: [],
   pagination_multiDestinationApproval: {
     totalPages: 0,
@@ -38,6 +40,7 @@ const initialState = {
     pageSize: 10,
   },
   data_mdApprovalHistory: {},
+  loading_approveRejectMd: false,
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
   data_globalTypeColumn: [],
@@ -545,11 +548,11 @@ const multiDestinationSlice = createSlice({
     /** Get Multi Destination */
     [getMultiDestination.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMd = true;
       }
     },
     [getMultiDestination.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listMd = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -574,7 +577,7 @@ const multiDestinationSlice = createSlice({
       }
     },
     [getMultiDestination.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listMd = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestination = [];
@@ -590,11 +593,11 @@ const multiDestinationSlice = createSlice({
     /** Get Multi Destination Approval */
     [getMultiDestinationApproval.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMdApproval = true;
       }
     },
     [getMultiDestinationApproval.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listMdApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -619,7 +622,7 @@ const multiDestinationSlice = createSlice({
       }
     },
     [getMultiDestinationApproval.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listMdApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestinationApproval = [];
@@ -813,35 +816,35 @@ const multiDestinationSlice = createSlice({
 
     /** Approve or Reject Multi Destination */
     [approveOrRejectMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
     /** Approve or Reject Inactive Multi Destination */
     [approveOrRejectInactiveMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectInactiveMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectInactiveMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
     /** Approve or Reject All Inactive Multi Destination */
     [approveOrRejectAllMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectAllMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectAllMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
     /** Inactivate Multi Destination Attachment */

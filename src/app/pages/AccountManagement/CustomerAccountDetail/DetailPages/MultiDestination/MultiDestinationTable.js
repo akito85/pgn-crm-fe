@@ -3,7 +3,7 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_mana
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
 import NxTable from "../../../../../../components/Nx/NxTable";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
@@ -28,6 +28,10 @@ const MultiDestinationTable = ({
   handleSearch = () => {},
   loading = false,
 }) => {
+  useEffect(() => {
+    console.log("loading", loading)
+  }, [loading])
+
   const navigate = useNavigate();
 
   const itemActions = nxGetAccountActions({
