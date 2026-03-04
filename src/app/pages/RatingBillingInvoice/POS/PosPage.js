@@ -714,7 +714,7 @@ const PosPage = () => {
               ]}
               totalData={data_view?.page?.totalElements || 0}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 8000 }}
+              tableScrolled={{ y: 525, x: 2000 }}
               usePagination={false}
               useInfiniteScroll={true}
               onLoadMore={handleLoadMore}

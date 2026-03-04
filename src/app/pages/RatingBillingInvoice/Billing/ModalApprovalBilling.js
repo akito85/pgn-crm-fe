@@ -188,10 +188,6 @@ const ModalApprovalBilling = ({
   const handleSave = (formValue) => {
     handleCancel();
 
-    // PERUBAHAN: Sesuaikan dengan payload terbaru
-    // a.billCode      → menggantikan a.billingCode
-    // a.tappId        → tetap sebagai approvalId
-    // a.isGenerate    → tetap
     const dataBillingCodes = dataTableSelect.map((a) => ({
       billCode: a.billCode,
       approvalId: a.tappId,
@@ -251,7 +247,6 @@ const ModalApprovalBilling = ({
     setBodyError({});
   };
 
-  // PERUBAHAN: Tambahkan search sebagai argumen ke-7
   const baseColumns = useMemo(
     () =>
       columnsRequestBilling(
@@ -398,7 +393,7 @@ const ModalApprovalBilling = ({
                 dataSource={dataSourceWithKeys}
                 columns={processedColumns}
                 totalData={data_list_billing_approval?.page?.totalElements || 0}
-                tableScrolled={{ y: 525, x: 15000 }}
+                tableScrolled={{ y: 525, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}

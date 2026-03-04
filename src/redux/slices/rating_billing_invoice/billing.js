@@ -26,6 +26,14 @@ const initialState = {
   isFailed: false,
   isSuccess: false,
   message: "",
+  // TAMBAHAN: untuk fix race condition
+  currentRequestId: null,
+  // TAMBAHAN: simpan filters seperti pattern Prabilling
+  filters: {
+    search: {},
+    sort: "",
+    page: 1,
+  },
 };
 
 export const requestedBilling = createAsyncThunk(
@@ -256,12 +264,12 @@ export const getAllRatingResultPaginate = createAsyncThunk(
 
 export const getAllAdjustmentPaginate = createAsyncThunk(
   "GET_ALL_ADJUSTMENT_PAGINATE",
-  async ({ sourceNumber, page, pageSize, search, sort }, thunkAPI) => { 
+  async ({ sourceNumber, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "lineNumber~asc" : sort;
-      const url = `/v1/dbs/api/billing/adjustment-item/${sourceNumber}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`; 
+      const url = `/v1/dbs/api/billing/adjustment-item/${sourceNumber}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
       return responseData;
@@ -479,6 +487,17 @@ export const getListApprovalById = createAsyncThunk(
 const billingSlice = createSlice({
   name: "billing",
   initialState,
+  reducers: {
+    // TAMBAHAN: set filters seperti pattern Prabilling
+    setBillingFilters: (state, action) => {
+      state.filters = { ...state.filters, ...action.payload };
+    },
+    // TAMBAHAN: reset data billing (untuk dipakai saat ganti tab)
+    resetBillingData: (state) => {
+      state.data = [];
+      state.currentRequestId = null;
+    },
+  },
   extraReducers: {
     // Requested Billing
     [requestedBilling.pending]: (state) => {
@@ -512,11 +531,23 @@ const billingSlice = createSlice({
     [getAllBillingPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
+        // TAMBAHAN: simpan requestId terbaru untuk deteksi stale response
+        state.currentRequestId = action.meta.requestId;
       }
     },
     [getAllBillingPaginate.fulfilled]: (state, action) => {
+      const isLoadMore = action.payload?.isLoadMore;
+
+      // TAMBAHAN: ignore response lama (stale) jika bukan load more
+      // Ini fix utama untuk race condition saat search berubah cepat
+      if (
+        !isLoadMore &&
+        action.meta.requestId !== state.currentRequestId
+      ) {
+        return;
+      }
+
       state.loading = false;
-      const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
@@ -709,34 +740,48 @@ const billingSlice = createSlice({
     },
 
     // Get Approve Hierarchy List
-    [getAllApprovalList.pending]: (state, action) => {
+    [getAllApprovalList.pending]: (state) => {
       state.loading = true;
-      state.data_approval = action.payload;
     },
     [getAllApprovalList.fulfilled]: (state, action) => {
-      state.data_approval = action.payload;
+      // Guard: pastikan selalu array meskipun API return object atau null
+      const payload = action.payload;
+      if (Array.isArray(payload)) {
+        state.data_approval = payload;
+      } else if (payload?.result && Array.isArray(payload.result)) {
+        state.data_approval = payload.result;
+      } else {
+        state.data_approval = [];
+      }
       state.loading = false;
     },
-    [getAllApprovalList.rejected]: (state, action) => {
-      state.data_approval = action.payload;
+    [getAllApprovalList.rejected]: (state) => {
+      state.data_approval = [];
       state.loading = false;
     },
 
     // Get List Approval By Id
-    [getListApprovalById.pending]: (state, action) => {
+    [getListApprovalById.pending]: (state) => {
       state.loading = true;
-      state.data_approval_list = action.payload;
     },
     [getListApprovalById.fulfilled]: (state, action) => {
-      state.data_approval_list = action.payload;
+      const payload = action.payload;
+      if (Array.isArray(payload)) {
+        state.data_approval_list = payload;
+      } else if (payload?.result && Array.isArray(payload.result)) {
+        state.data_approval_list = payload.result;
+      } else {
+        state.data_approval_list = [];
+      }
       state.loading = false;
     },
-    [getListApprovalById.rejected]: (state, action) => {
-      state.data_approval_list = action.payload;
+    [getListApprovalById.rejected]: (state) => {
+      state.data_approval_list = [];
       state.loading = false;
     },
   },
 });
 
+export const { setBillingFilters, resetBillingData } = billingSlice.actions;
 const { reducer } = billingSlice;
 export default reducer;

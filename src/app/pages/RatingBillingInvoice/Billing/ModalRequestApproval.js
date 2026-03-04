@@ -65,7 +65,7 @@ const ModalRequestApproval = ({
   const [bodyError, setBodyError] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
+    left: [],
     right: [],
   });
 
@@ -401,7 +401,7 @@ const ModalRequestApproval = ({
                 totalData={
                   data_list_billing_request_approval?.page?.totalElements || 0
                 }
-                tableScrolled={{ y: 525, x: 15000 }}
+                tableScrolled={{ y: 525, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
