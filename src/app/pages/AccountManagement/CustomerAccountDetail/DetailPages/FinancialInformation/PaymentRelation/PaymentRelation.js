@@ -5,7 +5,8 @@ import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
-import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
+import { getPrApprovalHierarchy, getDetailPrApprovalHierarchy } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 const PaymentRelation = ({
@@ -37,7 +38,6 @@ const PaymentRelation = ({
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivatePrId, setInactivatePrId] = useState(0);
-  const [inactivatePrAppHierId, setInactivatePrAppHierId] = useState(0);
   const [inactivatePrAccountNumber, setInactivatePrAccountNumber] = useState(0);
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
@@ -83,15 +83,13 @@ const PaymentRelation = ({
    * @param {number} prId 
    * @param {number} prAppHierId 
    */
-  const handleInactivateModal = (show, newPrId = 0, newPrAppHierId = 0, newPrAccountNumber = "") => {
+  const handleInactivateModal = (show, newPrId = 0, newPrAccountNumber = "") => {
     if (show) {
       setInactivatePrId(newPrId);
-      setInactivatePrAppHierId(newPrAppHierId);
-      setInactivatePrAccountNumber(newPrAccountNumber)
+      setInactivatePrAccountNumber(newPrAccountNumber);
       setShowInactiveModal(true);
     } else {
       setInactivatePrId(0);
-      setInactivatePrAppHierId(0);
       setInactivatePrAccountNumber("");
       setShowInactiveModal(false);
     }
@@ -101,10 +99,10 @@ const PaymentRelation = ({
    * @param {string} remark 
    * @param {() => {}} handleClear 
    */
-  const handleInactivatePr = (remark, handleClear) => {
+  const handleInactivatePr = ({ remark, appHierId }, handleClear) => {
     const body = {
       id: inactivatePrId,
-      appHierId: inactivatePrAppHierId,
+      appHierId,
       remark,
     }
 
@@ -282,12 +280,21 @@ const PaymentRelation = ({
       />
 
       {/* Inactivate Modal */}
-      <NxApproveOrRejectModal
+      <NxInactivateModal
         isOpen={showInactiveModal}
         header={"INACTIVATE"}
         handleCloseModal={() => handleInactivateModal(false)}
         customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrAccountNumber}?`}
-        onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
+        onFinish={({ remark, appHierId }, handleClear) =>
+          handleInactivatePr({ remark, appHierId }, handleClear)
+        }
+        named={inactivatePrAccountNumber}
+        menu="payment relation"
+        sliceName="paymentRelation"
+        approvalOptionsStateName="data_prApprovalHierarchy"
+        approvalHierarchtDetailsStateName="detail_prApprovalHierarchy"
+        getApprovalOptions={getPrApprovalHierarchy}
+        getApprovalHierarchyDetails={(id) => getDetailPrApprovalHierarchy({ id })}
       />
 
       {/* Approval History Modal */}
