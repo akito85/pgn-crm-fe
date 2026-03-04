@@ -6,7 +6,7 @@ import { dateFormatting } from "../../../../../utils";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaPromo } from "../Table/TableCriteriaPromo";
 import ConditionPromo from "../Form/ConditionsPromo";
-import RadioTabs from "../../../../../components/RadioTabs";
+import NxTabs from "../../../../../components/Nx/NxTabs";
 import NxDetailText from "../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../components/Nx/NxDatePicker";
 
@@ -18,40 +18,6 @@ const PromoDiscountConfirmPromoSection = ({
 	listCriteria = [],
 }) => {
   const [valuePage, setValuePage] = useState("Criteria");
-  const [tabPagesDetail, setTabPagesDetail] = useState([
-    { value: "Criteria" },
-    { value: "Conditions" },
-  ]);
-
-  const renderSection = () => {
-    switch (valuePage) {
-      case "Criteria":
-        return (
-          <FunctionalCriteriaProduct
-            type={"preview"}
-            data={listDataCriteria || []} //data
-            dataCriteria={criteriaValues || []} //ddl
-            columnsTable={columnsTableCriteriaPromo}
-            fixedColumn={[
-              "ADJUSTMENT TYPE",
-              "ADJUSTMENT VALUE",
-              "UOM",
-              "DESCRIPTION",
-              "MAX VALUE UOM",
-              "FROM ITEM",
-              "TIERING",
-            ]}
-            selector="promo"
-          />
-        );
-      case "Conditions":
-        return (
-          <ConditionPromo type={"preview"} data={listDataCondition || []} />
-        );
-      default:
-        return <></>;
-    }
-  };
 
   return (
     <>
@@ -80,13 +46,43 @@ const PromoDiscountConfirmPromoSection = ({
       <NxBaseContainer
         header="Promo Detail"
         border
+        padding={false}
       >
-        <RadioTabs
-          data={tabPagesDetail}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
+        <NxTabs
+          activeKey={valuePage}
+          onChange={(key) => setValuePage(key)}
+          items={[
+            {
+              key: "Criteria",
+              label: "Criteria",
+              children: (
+                <FunctionalCriteriaProduct
+                  type={"preview"}
+                  data={listDataCriteria || []}
+                  dataCriteria={criteriaValues || []}
+                  columnsTable={columnsTableCriteriaPromo}
+                  fixedColumn={[
+                    "ADJUSTMENT TYPE",
+                    "ADJUSTMENT VALUE",
+                    "UOM",
+                    "DESCRIPTION",
+                    "MAX VALUE UOM",
+                    "FROM ITEM",
+                    "TIERING",
+                  ]}
+                  selector="promo"
+                />
+              ),
+            },
+            {
+              key: "Conditions",
+              label: "Conditions",
+              children: (
+                <ConditionPromo type={"preview"} data={listDataCondition || []} />
+              ),
+            },
+          ]}
         />
-        <div className={"w-full"}>{renderSection()}</div>
       </NxBaseContainer>
     </>
   );

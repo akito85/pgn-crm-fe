@@ -9,7 +9,7 @@ const NxBaseContainer = ({
 }) => {
   // Determine class based on border prop
   const containerClass = border
-    ? `bg-white ${rounded ? "rounded-lg" : ""} w-full ${className}`
+    ? `flex flex-col gap-y-4 bg-white ${rounded ? "rounded-lg" : ""} w-full ${className}`
     : `drop-shadow-md bg-white rounded-lg w-full`;
 
   // Use inline style for border to ensure visibility
@@ -29,7 +29,7 @@ const NxBaseContainer = ({
           {header}
         </div>
       )}
-      <div className={`flex ${flexDirection === "column" ? "flex-col" : flexDirection === "row" ? "flex-row" : ""} flex-col gap-4 ${padding ? "p-4" : ""}`}>{children}</div>
+      <div className={`flex ${flexDirection === "column" ? "flex-col" : flexDirection === "row" ? "flex-row" : ""} flex-col gap-4 ${(padding && !header) ? "p-4" : padding ? "px-4 pb-4" : ""}`}>{children}</div>
     </div>
   );
 };
