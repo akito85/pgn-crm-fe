@@ -10,7 +10,7 @@ import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
     loading: false,
-    data: null,
+    data: { result: [], page: {} },
     data_detail: null,
     dataListAppHierId: [],
     dataListAppHierDetail: [],
@@ -22,14 +22,14 @@ const initialState = {
 // Get paginated list
 export const getPaginateCollectingAgent = createAsyncThunk(
     "GET_ALL_COLLECTING_AGENT",
-    async ({ search, page, pageSize, sort }, thunkAPI) => {
+    async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
         try {
             const searchParams = search === undefined ? "" : search;
             const sortParams =
                 sort === undefined || sort === "" ? "createdDate~desc" : sort;
             const url = `/v1/dbs/api/collecting-agent/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
-            return response.data;
+            return { ...response.data, isLoadMore };
         } catch (error) {
             thunkAPI.dispatch(
                 validateError({
@@ -452,17 +452,23 @@ const ViewCollectingAgentSlice = createSlice({
     initialState,
     extraReducers: {
         // Get all paginate
-        [getPaginateCollectingAgent.pending]: (state, action) => {
-            state.data = action.payload;
+        [getPaginateCollectingAgent.pending]: (state) => {
             state.loading = true;
         },
         [getPaginateCollectingAgent.fulfilled]: (state, action) => {
-            state.data = action.payload;
+            const { isLoadMore, ...rest } = action.payload || {};
+            if (isLoadMore) {
+                state.data = {
+                    ...rest,
+                    result: [...(state.data?.result || []), ...(rest?.result || [])],
+                };
+            } else {
+                state.data = rest;
+            }
             state.loading = false;
         },
-        [getPaginateCollectingAgent.rejected]: (state, action) => {
-            state.data = action.payload;
-            state.loading = true;
+        [getPaginateCollectingAgent.rejected]: (state) => {
+            state.loading = false;
         },
 
         // Get detail
