@@ -111,27 +111,27 @@ const TableRBI = ({
   pageSize,
   current,
   loading,
-  onChange = () => { },
-  onSizeChanger = () => { },
+  onChange = () => {},
+  onSizeChanger = () => {},
   totalData,
   onDelete,
   rowSelection,
-  onRowClicked = () => { },
+  onRowClicked = () => {},
   tableScrolled,
   expandable,
   className,
   useSelect = true,
   usePagination = true,
   useInfiniteScroll = false,
-  onLoadMore = () => { },
+  onLoadMore = () => {},
   hasMore = false,
   loadMoreThreshold = 20,
-  onSort = () => { },
-  handleDownload = () => { },
+  onSort = () => {},
+  handleDownload = () => {},
   columnDefinitions,
   fixedColumns = { left: [], right: [] },
-  setFixedColumns = () => { },
-  onAdvanceSearch = () => { },
+  setFixedColumns = () => {},
+  onAdvanceSearch = () => {},
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -142,7 +142,7 @@ const TableRBI = ({
   onRefresh,
   enableRowClick = false,
   selectedRowKey = null,
-  onRowClick = () => { },
+  onRowClick = () => {},
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -274,7 +274,7 @@ const TableRBI = ({
         [key]: newWidth,
       }));
     },
-    []
+    [],
   );
 
   const handleDragStart = useCallback((e, columnKey) => {
@@ -312,7 +312,7 @@ const TableRBI = ({
       setDraggedColumnKey(null);
       return false;
     },
-    [draggedColumnKey]
+    [draggedColumnKey],
   );
 
   const handleDragEnd = useCallback(() => {
@@ -329,7 +329,9 @@ const TableRBI = ({
         return {
           ...col,
           key: colKey,
-          children: col.children.map((childCol) => processColumn(childCol, fixedPos)),
+          children: col.children.map((childCol) =>
+            processColumn(childCol, fixedPos),
+          ),
         };
       }
 
@@ -403,7 +405,7 @@ const TableRBI = ({
       handleDrop,
       handleDragEnd,
       draggedColumnKey,
-    ]
+    ],
   );
 
   const displayedColumns = useMemo(() => {
@@ -417,7 +419,7 @@ const TableRBI = ({
       return columns
         .map((col) => {
           const colKey = col.key || col.dataIndex || col.title;
-          
+
           // Jika kolom ini hidden, skip
           if (optionSelectedCol.includes(colKey)) {
             return null;
@@ -485,13 +487,7 @@ const TableRBI = ({
     ];
 
     return finalCols;
-  }, [
-    columns,
-    optionSelectedCol,
-    fixedColumns,
-    columnOrder,
-    processColumn,
-  ]);
+  }, [columns, optionSelectedCol, fixedColumns, columnOrder, processColumn]);
 
   const handleAdvanceSearch = (searchData) => {
     onAdvanceSearch(searchData);
@@ -523,7 +519,7 @@ const TableRBI = ({
       setClickedRowKey(rowKey);
       onRowClick(record, rowKey);
     },
-    [onRowClick]
+    [onRowClick],
   );
 
   const customOnRow = useCallback(
@@ -549,7 +545,7 @@ const TableRBI = ({
         },
       };
     },
-    [onRow, enableRowClick, handleRowClick]
+    [onRow, enableRowClick, handleRowClick],
   );
 
   const customRowClassName = useCallback(
@@ -564,150 +560,184 @@ const TableRBI = ({
 
       return `${baseClassName} ${isSelected ? "row-selected" : ""}`.trim();
     },
-    [rowClassName, enableRowClick, clickedRowKey]
+    [rowClassName, enableRowClick, clickedRowKey],
   );
 
   return (
     <div className={"flex flex-col w-full"}>
-      <style>
-        {`
-            #${idTable} .ant-table-content {
-              position: relative;
-              z-index: 1;
-            }
+    <style>
+      {`
+        #${idTable} .ant-table-content {
+          position: relative;
+          z-index: 1;
+        }
 
-            #${idTable} .ant-table-body {
-              position: relative;
-              z-index: 1;
-            }
+        #${idTable} .ant-table-body {
+          position: relative;
+          z-index: 1;
+        }
 
-            #${idTable} .ant-table-tbody > tr {
-              position: relative;
-              z-index: 1;
-            }
+        #${idTable} .ant-table-tbody > tr {
+          position: relative;
+          z-index: 1;
+        }
 
-            #${idTable} .ant-table-tbody > tr:hover {
-              z-index: 2;
-            }
+        #${idTable} .ant-table-tbody > tr:hover {
+          z-index: 2;
+        }
 
-            #${idTable} .ant-table-tbody > tr.row-selected {
-              z-index: 2;
-            }
+        #${idTable} .ant-table-tbody > tr.row-selected {
+          z-index: 2;
+        }
 
-            #${idTable} .ant-table-tbody .ant-table-cell-fix-left,
-            #${idTable} .ant-table-tbody .ant-table-cell-fix-right {
-              z-index: 3;
-            }
+        #${idTable} .ant-table-tbody .ant-table-cell-fix-left,
+        #${idTable} .ant-table-tbody .ant-table-cell-fix-right {
+          z-index: 3;
+        }
 
-            #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-left,
-            #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-right,
-            #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-left,
-            #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-right {
-              z-index: 3;
-            }
+        #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-left,
+        #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-right,
+        #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-left,
+        #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-right {
+          z-index: 3;
+        }
 
-            #${idTable} .ant-table-thead > tr > th {
-              position: relative;
-              z-index: 4;
-              background-color: #0075BF !important;
-              color: white !important;
-            }
+        #${idTable} .ant-table-thead > tr > th {
+          position: relative;
+          z-index: 4;
+          background-color: #0075BF !important;
+          color: white !important;
+        }
 
-            #${idTable} .ant-table-thead > tr > th .ant-table-column-sorter {
-              color: white !important;
-            }
+        #${idTable} .ant-table-thead > tr > th .ant-table-column-sorter {
+          color: white !important;
+        }
 
-            #${idTable} .ant-table-thead > tr > th .ant-table-filter-trigger {
-              color: white !important;
-            }
+        #${idTable} .ant-table-thead > tr > th .ant-table-filter-trigger {
+          color: white !important;
+        }
 
-            #${idTable} .ant-table-thead .ant-table-cell-fix-left,
-            #${idTable} .ant-table-thead .ant-table-cell-fix-right {
-              z-index: 5;
-              background-color: #0075BF !important;
-              color: white !important;
-            }
+        #${idTable} .ant-table-thead .ant-table-cell-fix-left,
+        #${idTable} .ant-table-thead .ant-table-cell-fix-right {
+          z-index: 5;
+          background-color: #0075BF !important;
+          color: white !important;
+        }
 
-            #${idTable} .ant-table-filter-trigger,
-            #${idTable} .ant-table-filter-trigger-container,
-            #${idTable} .ant-table-column-sorter {
-              position: relative;
-              z-index: 6;
-              pointer-events: auto;
-            }
+        #${idTable} .ant-table-filter-trigger,
+        #${idTable} .ant-table-filter-trigger-container,
+        #${idTable} .ant-table-column-sorter {
+          position: relative;
+          z-index: 6;
+          pointer-events: auto;
+        }
 
-            #${idTable} .ant-table-body::-webkit-scrollbar {
-              width: 8px;
-              height: 8px;
-              z-index: 10;
-            }
+        #${idTable} .ant-table-body::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+          z-index: 10;
+        }
 
-            #${idTable} .ant-table-body::-webkit-scrollbar-track {
-              background: #f1f1f1;
-              z-index: 10;
-            }
+        #${idTable} .ant-table-body::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          z-index: 10;
+        }
 
-            #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
-              background: #888;
-              border-radius: 6px;
-              z-index: 10;
-            }
+        #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 6px;
+          z-index: 10;
+        }
 
-            #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
-              background: #555;
-            }
+        #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
 
-            #${idTable} .ant-table-body {
-              scrollbar-width: thin;
-              scrollbar-color: #888 #f1f1f1;
-              padding-bottom: 8px;
-            }
+        #${idTable} .ant-table-body {
+          scrollbar-width: thin;
+          scrollbar-color: #888 #f1f1f1;
+          padding-bottom: 8px;
+        }
 
-            @supports (-moz-appearance:none) {
-              #${idTable} .ant-table-body {
-                padding-bottom: 12px;
-              }
+        @supports (-moz-appearance:none) {
+          #${idTable} .ant-table-body {
+            padding-bottom: 12px;
+          }
 
-              #${idTable} .ant-table-content {
-                padding-bottom: 4px;
-              }
-            }
+          #${idTable} .ant-table-content {
+            padding-bottom: 4px;
+          }
+        }
 
-            #${idTable} .ant-table-column-sorter,
-            #${idTable} .ant-table-filter-trigger,
-            #${idTable} .ant-table-column-sorter-up,
-            #${idTable} .ant-table-column-sorter-down,
-            #${idTable} .ant-table-filter-trigger-container {
-              cursor: pointer;
-            }
+        #${idTable} .ant-table-column-sorter,
+        #${idTable} .ant-table-filter-trigger,
+        #${idTable} .ant-table-column-sorter-up,
+        #${idTable} .ant-table-column-sorter-down,
+        #${idTable} .ant-table-filter-trigger-container {
+          cursor: pointer;
+        }
 
-            #${idTable} th[draggable="true"] {
-              cursor: move;
-            }
+        #${idTable} th[draggable="true"] {
+          cursor: move;
+        }
 
-            #${idTable} th[draggable="true"] .ant-table-column-sorter,
-            #${idTable} th[draggable="true"] .ant-table-filter-trigger,
-            #${idTable} th[draggable="true"] .ant-table-column-sorter-up,
-            #${idTable} th[draggable="true"] .ant-table-column-sorter-down,
-            #${idTable} th[draggable="true"] .ant-table-filter-trigger-container,
-            #${idTable} th[draggable="true"] .ant-table-column-sorters {
-              cursor: pointer;
-            }
+        #${idTable} th[draggable="true"] .ant-table-column-sorter,
+        #${idTable} th[draggable="true"] .ant-table-filter-trigger,
+        #${idTable} th[draggable="true"] .ant-table-column-sorter-up,
+        #${idTable} th[draggable="true"] .ant-table-column-sorter-down,
+        #${idTable} th[draggable="true"] .ant-table-filter-trigger-container,
+        #${idTable} th[draggable="true"] .ant-table-column-sorters {
+          cursor: pointer;
+        }
 
-            #${idTable} .ant-table-column-sorter {
-              margin-left: 4px;
-              margin-right: 0px;
-            }
+        #${idTable} .ant-table-column-sorter {
+          margin-left: 4px;
+          margin-right: 0px;
+        }
 
-            #${idTable} .ant-table-filter-trigger {
-              margin-right: 6px;
-            }
+        #${idTable} .ant-table-filter-trigger {
+          margin-right: 6px;
+        }
 
-            #${idTable} .ant-table-column-sorters {
-              padding-right: 0px;
-            }
-          `}
-      </style>
+        #${idTable} .ant-table-column-sorters {
+          padding-right: 0px;
+        }
+
+        /* Fix div expanded row yang menutupi expand icon */
+        #${idTable} .ant-table-expanded-row-fixed {
+          pointer-events: none !important;
+        }
+
+        #${idTable} .ant-table-expanded-row-fixed > * {
+          pointer-events: auto !important;
+        }
+
+        /* Fix expand icon z-index agar bisa diklik */
+        #${idTable} .ant-table-row-expand-icon-cell {
+          position: relative;
+          z-index: 6;
+        }
+
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell {
+          position: relative;
+          z-index: 6;
+        }
+
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell button,
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell .ant-table-row-expand-icon,
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell > * {
+          position: relative;
+          z-index: 7;
+          pointer-events: auto !important;
+          cursor: pointer !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr.ant-table-expanded-row > td {
+          position: relative;
+          z-index: 1;
+        }
+      `}
+    </style>
       {useSelect ? (
         <div className={"w-full flex mb-3 justify-between items-center"}>
           <div className="flex items-center gap-4">
@@ -821,7 +851,9 @@ const TableRBI = ({
               Showing {current * pageSize - pageSize + 1} to{" "}
               {Math.min(current * pageSize, totalData)} entries
               <span className="mx-2">•</span>
-              <span className="text-[#288C44] font-medium">All data showed</span>
+              <span className="text-[#288C44] font-medium">
+                All data showed
+              </span>
             </span>
           </div>
           <Pagination

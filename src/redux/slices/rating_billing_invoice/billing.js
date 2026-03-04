@@ -13,6 +13,7 @@ const initialState = {
   data_approval_history: [],
   data_billingItem: [],
   data_ratingResult: [],
+  data_adjustment: [],
   data_Payment: [],
   data_PrevPayment: [],
   data_approval: [],
@@ -105,10 +106,9 @@ export const getAllBillingPaginate = createAsyncThunk(
       const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
 
-      // Return data dengan flag isLoadMore
       return {
         ...response.data,
-        isLoadMore, // Pass the flag to reducer
+        isLoadMore,
       };
     } catch (error) {
       const message =
@@ -227,6 +227,36 @@ export const getAllRatingResultPaginate = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "id~desc" : sort;
       const url = `/v1/dbs/api/billing/rating-result/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+
+export const getAllAdjustmentPaginate = createAsyncThunk(
+  "GET_ALL_ADJUSTMENT_PAGINATE",
+  async ({ billingCodeId, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "lineNumber~asc" : sort;
+      const url = `/v1/dbs/api/billing/adjustment/${billingCodeId}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -452,7 +482,7 @@ const billingSlice = createSlice({
       state.result = action.payload;
     },
 
-    // Requested Billing
+    // Approved Billing
     [approvedBilling.pending]: (state) => {
       state.loading = true;
     },
@@ -466,6 +496,7 @@ const billingSlice = createSlice({
       state.result = action.payload;
     },
 
+    // Get All Billing Pagination
     [getAllBillingPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
@@ -512,7 +543,6 @@ const billingSlice = createSlice({
 
     // Get All Billing Approve Pagination
     [getAllBillingApprovePaginate.pending]: (state, action) => {
-      // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -522,7 +552,6 @@ const billingSlice = createSlice({
       const newData = action.payload.result || [];
       const isLoadMore = action.payload.isLoadMore;
 
-      // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
         state.data_list_billing_approval = {
           result: [
@@ -550,7 +579,6 @@ const billingSlice = createSlice({
     },
     [getAllBillingApprovePaginate.rejected]: (state, action) => {
       state.loading = false;
-      // Only clear data on initial fetch failure, not on load more failure
       if (!action.meta.arg?.isLoadMore) {
         state.data_list_billing_approval = {
           result: [],
@@ -585,6 +613,18 @@ const billingSlice = createSlice({
       state.data_ratingResult = action.payload;
     },
     [getAllRatingResultPaginate.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // Get All Adjustment Pagination
+    [getAllAdjustmentPaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllAdjustmentPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_adjustment = action.payload;
+    },
+    [getAllAdjustmentPaginate.rejected]: (state) => {
       state.loading = false;
     },
 

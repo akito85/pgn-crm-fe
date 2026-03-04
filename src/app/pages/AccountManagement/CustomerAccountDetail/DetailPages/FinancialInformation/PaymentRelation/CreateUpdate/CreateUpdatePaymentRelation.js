@@ -84,7 +84,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
 
   const attachmentIsRequired = true;
 
-  const detail = (isActive && statusApproval && isDraftApproval && isRejectApproval) ? detailDraft_paymentRelation : detail_paymentRelation;
+  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
 
   const formFields = [
     [
@@ -231,8 +231,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             objectId,
             priority,
             description,
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
+            startDate: NxDate.formatForAPI(startDate, false),
+            endDate: NxDate.formatForAPI(endDate, false),
             appHierId,
             validationType: validationTypes[current]
           };
@@ -259,8 +259,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
         objectId,
         priority,
         description,
-        startDate: NxDate.formatForAPI(startDate),
-        endDate: NxDate.formatForAPI(endDate),
+        startDate: NxDate.formatForAPI(startDate, false),
+        endDate: NxDate.formatForAPI(endDate, false),
         appHierId,
         action: submitType
       };
@@ -365,7 +365,6 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             <AttachmentSectionForm
               data={dataAttachment}
               updateData={setDataAttachment}
-              dispatch={dispatch}
               key={`payment-relation-tab-2`}
               getAPICategory={getPrAttachmentCategory}
               service={accountManagementService}
@@ -411,8 +410,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           objectId,
           priority,
           description,
-          startDate: NxDate.formatForAPI(startDate),
-          endDate: NxDate.formatForAPI(endDate),
+          startDate: NxDate.formatForAPI(startDate, false),
+          endDate: NxDate.formatForAPI(endDate, false),
           appHierId,
           validationType: validationTypes[current]
         };
@@ -467,8 +466,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
             objectId,
             priority,
             description,
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
+            startDate: NxDate.formatForAPI(startDate, false),
+            endDate: NxDate.formatForAPI(endDate, false),
             appHierId,
             validationType: validationTypes[i]
           };
@@ -524,8 +523,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       objectId,
       priority,
       description,
-      startDate: NxDate.formatForAPI(startDate),
-      endDate: NxDate.formatForAPI(endDate),
+      startDate: NxDate.formatForAPI(startDate, false),
+      endDate: NxDate.formatForAPI(endDate, false),
       appHierId,
       action: confirmationType,
       remark
