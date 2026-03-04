@@ -48,7 +48,8 @@ const MultiDestinationApprovalModal = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
@@ -59,11 +60,12 @@ const MultiDestinationApprovalModal = ({
   useEffect(() => {
     if (isOpen) {
       const body = {
-        inputFields: tempFilters,
         page,
         size: loadMoreSize,
         sort,
-        searchs: search
+        searchs: search,
+        filters,
+        filterRules
       };
 
       dispatch(
@@ -101,11 +103,12 @@ const MultiDestinationApprovalModal = ({
     // Check if there's more data to load
     if (nextPage <= totalPages) {
       const body = {
-        inputFields: tempFilters,
         page: nextPage,
         size: loadMoreSize,
         sort,
-        searchs: search
+        searchs: search,
+        filters,
+        filterRules
       };
 
       dispatch(

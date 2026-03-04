@@ -48,7 +48,8 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] =
     useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const currentData = useMemo(
     () => list_multiDestination,
@@ -73,7 +74,8 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
       size: loadMoreSize,
       sort,
       searchs: search,
-      inputFields: tempFilters
+      filters,
+      filterRules,
     };
 
     dispatch(
@@ -131,7 +133,8 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
           size: loadMoreSize,
           sort,
           searchs: search,
-          inputFields: tempFilters
+          filters,
+          filterRules,
         };
 
         dispatch(getMultiDestination({ id, body, isLoadMore: false }));
@@ -189,7 +192,8 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
       page,
       size: loadMoreSize,
       sort,
-      inputFields: tempFilters,
+      filters,
+      filterRules,
       searchs: search
     };
 
@@ -218,7 +222,8 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
         size: loadMoreSize,
         sort,
         searchs: JSON.stringify(search),
-        inputFields: tempFilters
+        filters,
+        filterRules,
       };
 
       await dispatch(
@@ -254,13 +259,14 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
       size: loadMoreSize,
       sort,
       searchs: search,
-      inputFields: tempFilters
+      filters,
+      filterRules,
     };
 
     setPage(0);
 
     dispatch(getMultiDestination({ id, body, isLoadMore: false }));
-  }, [sort, search, tempFilters]);
+  }, [sort, search, filters]);
 
   useEffect(() => {
     if (data_mdApprovalHistory && data_mdApprovalHistory?.dataApprover) {
@@ -299,7 +305,7 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleApproval={setShowApprovalModal}
           handleDownload={handleDownload}
-          tempFilters={tempFilters}
+          filters={filters}
           handleLoadMore={handleLoadMore}
           hasMore={hasMore}
           searchText={searchText}
