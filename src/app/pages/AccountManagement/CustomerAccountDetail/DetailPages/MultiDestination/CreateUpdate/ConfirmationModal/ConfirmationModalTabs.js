@@ -14,17 +14,20 @@ const ConfirmationModalTabs = ({
   configApplication,
   activeTab = 0,
   setActiveTab = () => {},
+  disabled = false,
 }) => {
   const tabOptions = [
     {
       key: 0,
       label: "Multi Destination Information",
       children: <InfoMultiDestination form={form} formView={false} />,
+      disabled,
     },
     {
       key: 1,
       label: "Approval",
       children: <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />,
+      disabled,
     },
     {
       key: 2,
@@ -37,11 +40,13 @@ const ConfirmationModalTabs = ({
           type={"confirmation"}
         />
       ),
+      disabled,
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark />,
+      children: <ConfirmationModalRemark disabled={disabled} />,
+      disabled,
     },
   ]
     .filter(Boolean)

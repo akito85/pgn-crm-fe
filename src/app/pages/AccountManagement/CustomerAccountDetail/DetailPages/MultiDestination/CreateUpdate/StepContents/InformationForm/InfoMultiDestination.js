@@ -60,13 +60,9 @@ export default function InfoMultiDestination({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { list_mdAccountStandard, pagination_mdAccountStandard } = useSelector(
+  const { list_mdAccountStandard, pagination_mdAccountStandard, loading_listMdAccountStandard } = useSelector(
     (state) => state.multiDestination
   );
-
-  const handleOk = () => {
-    console.log("ok");
-  };
 
   const handleCancel = () => {
     setIsOpen(false);
@@ -396,7 +392,7 @@ export default function InfoMultiDestination({
         </Form.Item>
       </div>
 
-      <div className="w-full my-5">
+      <div className="w-full">
         <Form.Item
           key="description"
           name={"description"}
@@ -416,7 +412,6 @@ export default function InfoMultiDestination({
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        handleOk={handleOk}
         header={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}
@@ -442,6 +437,7 @@ export default function InfoMultiDestination({
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
               columnDefinitions={columnDefinitions}
+              loading={loading_listMdAccountStandard}
             />
           </NxBaseContainer>
         </div>
