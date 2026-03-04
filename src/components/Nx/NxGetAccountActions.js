@@ -130,7 +130,7 @@ const nxGetAccountActions = ({
             }
             border={false}
             disabled={!isActive}
-            onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+            onClick={() => handleInactivate(true, record?.id, record?.relatedAccountNumber)}
             type={"action"}
           >
             <span className={"text-black ml-3"}>Inactivate</span>
@@ -144,7 +144,7 @@ const nxGetAccountActions = ({
               className="action-checkbox"
               disabled={!isActive}
               checked={isInactive}
-              onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+              onClick={() => handleInactivate(true, record?.id, record?.relatedAccountNumber)}
               style={{ transform: "scale(0.9)" }}
             />
           </Tooltip>

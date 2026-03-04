@@ -366,7 +366,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailMdApprovalHierarchy({ id: appHierId }));
+    dispatch(getDetailMdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 

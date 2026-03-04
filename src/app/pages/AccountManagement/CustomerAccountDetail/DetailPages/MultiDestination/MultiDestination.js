@@ -2,9 +2,9 @@ import { memo, useEffect, useMemo, useRef } from "react";
 import { useState } from "react";
 import MultiDestinationTable from "./MultiDestinationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getMultiDestination, downloadMultiDestination, getMdApprovalHistory, inactivateMultiDestination } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { getMultiDestination, downloadMultiDestination, getMdApprovalHistory, inactivateMultiDestination, getMdApprovalHierarchy, getDetailMdApprovalHierarchy } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import MultiDestinationApprovalModal from "./MultiDestinationApprovalModal";
-import NxApproveOrRejectModal from "../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
@@ -41,7 +41,6 @@ const MultiDestination = ({
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateMdId, setInactivateMdId] = useState(0);
-  const [inactivateMdAppHierId, setInactivateMdAppHierId] = useState(0);
   const [inactivateMdAccountNumber, setInactivateMdAccountNumber] = useState(0);
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
@@ -87,15 +86,13 @@ const MultiDestination = ({
    * @param {number} mdId
    * @param {number} mdAppHierId
    */
-  const handleInactivateModal = (show, newMdId = 0, newMdAppHierId = 0, newMdAccountNumber = "") => {
+  const handleInactivateModal = (show, newMdId = 0, newMdAccountNumber = "") => {
     if (show) {
       setInactivateMdId(newMdId);
-      setInactivateMdAppHierId(newMdAppHierId);
       setInactivateMdAccountNumber(newMdAccountNumber)
       setShowInactiveModal(true);
     } else {
       setInactivateMdId(0);
-      setInactivateMdAppHierId(0);
       setInactivateMdAccountNumber("");
       setShowInactiveModal(false);
     }
@@ -105,10 +102,10 @@ const MultiDestination = ({
    * @param {string} remark
    * @param {() => {}} handleClear
    */
-  const handleInactivateMd = (remark, handleClear) => {
+  const handleInactivateMd = ({ remark, appHierId }, handleClear) => {
     const body = {
       id: inactivateMdId,
-      appHierId: inactivateMdAppHierId,
+      appHierId,
       remark,
     }
 
@@ -297,12 +294,19 @@ const MultiDestination = ({
         />
 
         {/* Inactivate Modal */}
-        <NxApproveOrRejectModal
+        <NxInactivateModal
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
           customMessage={`Are you sure you want to inactivate multi destination - ${inactivateMdAccountNumber}?`}
-          onFinish={({ remark }, handleClear) => handleInactivateMd(remark, handleClear)}
+          onFinish={({ remark, appHierId }, handleClear) => handleInactivateMd({ remark, appHierId }, handleClear)}
+          named={inactivateMdAccountNumber}
+          menu="multi destination"
+          sliceName="multiDestination"
+          approvalOptionsStateName="data_mdApprovalHierarchy"
+          approvalHierarchtDetailsStateName="detail_mdApprovalHierarchy"
+          getApprovalOptions={getMdApprovalHierarchy}
+          getApprovalHierarchyDetails={getDetailMdApprovalHierarchy}
         />
 
         {/* Approval History Modal */}
