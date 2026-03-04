@@ -266,7 +266,7 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
     setPage(0);
 
     dispatch(getMultiDestination({ id, body, isLoadMore: false }));
-  }, [sort, search, filters]);
+  }, [sort, search, filters, filterRules]);
 
   useEffect(() => {
     if (data_mdApprovalHistory && data_mdApprovalHistory?.dataApprover) {

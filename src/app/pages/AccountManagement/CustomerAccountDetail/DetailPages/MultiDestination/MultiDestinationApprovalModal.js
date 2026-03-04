@@ -77,7 +77,7 @@ const MultiDestinationApprovalModal = ({
       );
       setPage(1);
     }
-  }, [dispatch, isOpen, search, sort]);
+  }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
