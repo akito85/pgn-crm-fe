@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
-import { Form, Button, Input } from "antd";
-
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../../../components/InputComponent";
-import { dateFormatting, requiredMessage } from "../../../../../../../../../utils";
-
+import {
+  dateFormatting,
+  requiredMessage
+} from "../../../../../../../../../utils";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
@@ -21,7 +21,7 @@ export default function InfoMultiDestination({
   form,
   isUpdate,
   isDraft,
-  formView = true,
+  formView = true
 }) {
   const account = Form.useWatch("account", form);
   const accountSor = Form.useWatch("accountSor", form);
@@ -34,6 +34,7 @@ export default function InfoMultiDestination({
   const subDistrict = Form.useWatch("subDistrict", form);
   const district = Form.useWatch("district", form);
   const city = Form.useWatch("city", form);
+  const province = Form.useWatch("province", form);
   const country = Form.useWatch("country", form);
   const longitude = Form.useWatch("longitude", form);
   const latitude = Form.useWatch("latitude", form);
@@ -64,16 +65,16 @@ export default function InfoMultiDestination({
   );
 
   const handleOk = () => {
-    console.log("ok")
-  }
+    console.log("ok");
+  };
 
   const handleCancel = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleClose = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -85,7 +86,7 @@ export default function InfoMultiDestination({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
@@ -102,7 +103,7 @@ export default function InfoMultiDestination({
           size: loadMoreSize,
           sort,
           isLoadMore: true,
-          id: accountId,
+          id: accountId
         })
       );
     }
@@ -111,32 +112,36 @@ export default function InfoMultiDestination({
 
   useEffect(() => {
     if (formView)
-      dispatch(getMdAccountStandard({
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        id: accountId,
-        isLoadMore: false,
-      }));
-  }, [ sort, search ]);
+      dispatch(
+        getMdAccountStandard({
+          page,
+          size: loadMoreSize,
+          sort,
+          searchs: JSON.stringify(search),
+          id: accountId,
+          isLoadMore: false
+        })
+      );
+  }, [sort, search]);
 
-  const baseColumns = useMemo(() =>
-    getAccountStandardColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      setAccount,
-      setIsOpen
-    ),
-  [search, searchText, searchedColumn]);
+  const baseColumns = useMemo(
+    () =>
+      getAccountStandardColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        setAccount,
+        setIsOpen
+      ),
+    [search, searchText, searchedColumn]
+  );
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns].map((col) => ({
       ...col,
-      key: col.key || col.dataIndex || col.title,
+      key: col.key || col.dataIndex || col.title
     }));
     return columnsWithKeys;
   }, [baseColumns]);
@@ -144,20 +149,24 @@ export default function InfoMultiDestination({
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
-      title: col.title,
+      title: col.title
     }));
   }, [allColumns]);
 
-  const currentData = useMemo(() => list_mdAccountStandard, [list_mdAccountStandard]);
+  const currentData = useMemo(
+    () => list_mdAccountStandard,
+    [list_mdAccountStandard]
+  );
 
-  const hasMore = currentData.length < (pagination_mdAccountStandard?.totalElements || 0);
+  const hasMore =
+    currentData.length < (pagination_mdAccountStandard?.totalElements || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
 
     return currentData.map((item, index) => ({
       ...item,
-      key: `${item.id}-${index}`,
+      key: `${item.id}-${index}`
     }));
   }, [currentData]);
 
@@ -167,20 +176,31 @@ export default function InfoMultiDestination({
         <div className="w-full grid grid-cols-3 gap-4">
           <NxDetailText label="Account">{account}</NxDetailText>
           <NxDetailText label="Account SOR">{accountSor}</NxDetailText>
-          <NxDetailText label="Account Cost Center">{accountCostCenter}</NxDetailText>
-          <NxDetailText label="Meter Reading Code">{meterReadingCode}</NxDetailText>
+          <NxDetailText label="Account Cost Center">
+            {accountCostCenter}
+          </NxDetailText>
+          <NxDetailText label="Meter Reading Code">
+            {meterReadingCode}
+          </NxDetailText>
           <NxDetailText label="Account Segment">{accountSegment}</NxDetailText>
-          <NxDetailText label="Account Group Type">{accountGroupType}</NxDetailText>
+          <NxDetailText label="Account Group Type">
+            {accountGroupType}
+          </NxDetailText>
           <NxDetailText label="Account Type">{accountType}</NxDetailText>
           <NxDetailText label="Premise Address">{premiseAddress}</NxDetailText>
           <NxDetailText label="Subdistrict">{subDistrict}</NxDetailText>
           <NxDetailText label="District">{district}</NxDetailText>
           <NxDetailText label="City">{city}</NxDetailText>
+          <NxDetailText label="Province">{province}</NxDetailText>
           <NxDetailText label="Country">{country}</NxDetailText>
           <NxDetailText label="Longitude">{longitude}</NxDetailText>
           <NxDetailText label="Latitude">{latitude}</NxDetailText>
-          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
-          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Start Date">
+            {NxDate.formatDate(startDate, dateFormatting.date)}
+          </NxDetailText>
+          <NxDetailText label="End Date">
+            {NxDate.formatDate(endDate, dateFormatting.date)}
+          </NxDetailText>
         </div>
         <div className="w-full">
           <NxDetailText label="Description">{description}</NxDetailText>
@@ -189,14 +209,10 @@ export default function InfoMultiDestination({
     );
   }
 
-  return(
+  return (
     <div className="flex flex-col gap-y-4">
       <div className="w-full grid grid-cols-3 gap-4">
-        <Form.Item
-          label={"Account"}
-          required
-          className="no-margin-form"
-        >
+        <Form.Item label={"Account"} required className="no-margin-form">
           <div className="flex gap-x-1">
             <Form.Item
               key="account"
@@ -204,7 +220,7 @@ export default function InfoMultiDestination({
               rules={[
                 {
                   message: requiredMessage("Account"),
-                  required: true,
+                  required: true
                 }
               ]}
               noStyle
@@ -213,7 +229,9 @@ export default function InfoMultiDestination({
             </Form.Item>
             <Button
               type="submit"
-              onClick={() => { setIsOpen(true) }}
+              onClick={() => {
+                setIsOpen(true);
+              }}
               className="w-[120px]"
               disabled={!isDraft && isUpdate}
             >
@@ -227,12 +245,6 @@ export default function InfoMultiDestination({
           name={"accountSor"}
           label={"Account SOR"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Account SOR"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -242,12 +254,6 @@ export default function InfoMultiDestination({
           name={"accountCostCenter"}
           label={"Account Cost Center"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Account Cost Center"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -257,12 +263,6 @@ export default function InfoMultiDestination({
           name={"meterReadingCode"}
           label={"Meter Reading Code"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Meter Reading Code"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -272,12 +272,6 @@ export default function InfoMultiDestination({
           name={"accountSegment"}
           label={"Account Segment"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Account Segment"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -287,12 +281,6 @@ export default function InfoMultiDestination({
           name={"accountGroupType"}
           label={"Account Group Type"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Account Group Type"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -302,12 +290,6 @@ export default function InfoMultiDestination({
           name={"accountType"}
           label={"Account Type"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Account Type"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -317,12 +299,6 @@ export default function InfoMultiDestination({
           name={"premiseAddress"}
           label={"Premise Address"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Premise Address"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -332,12 +308,6 @@ export default function InfoMultiDestination({
           name={"subDistrict"}
           label={"Subdistrict"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Subdistrict"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -347,12 +317,6 @@ export default function InfoMultiDestination({
           name={"district"}
           label={"District"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("District"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -362,12 +326,15 @@ export default function InfoMultiDestination({
           name={"city"}
           label={"City"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("City"),
-              required: true,
-            }
-          ]}
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="province"
+          name={"province"}
+          label={"Province"}
+          className="no-margin-form"
         >
           <InputComponent disabled />
         </Form.Item>
@@ -377,12 +344,6 @@ export default function InfoMultiDestination({
           name={"country"}
           label={"Country"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Country"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -392,12 +353,6 @@ export default function InfoMultiDestination({
           name={"longitude"}
           label={"Longitude"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Longitude"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
@@ -407,18 +362,9 @@ export default function InfoMultiDestination({
           name={"latitude"}
           label={"Latitude"}
           className="no-margin-form"
-          rules={[
-            {
-              message: requiredMessage("Latitude"),
-              required: true,
-            }
-          ]}
         >
           <InputComponent disabled />
         </Form.Item>
-      </div>
-
-      <div className="w-full grid grid-cols-3 gap-4">
         <Form.Item
           key="startDate"
           name={"startDate"}
@@ -426,11 +372,13 @@ export default function InfoMultiDestination({
           rules={[
             {
               message: requiredMessage("Start Date"),
-              required: true,
-            },
+              required: true
+            }
           ]}
           className="no-margin-form"
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
+          getValueProps={(value) => ({
+            value: value && moment(value, dateFormatting.dateForm)
+          })}
         >
           <NxDate disabled={!isDraft && isUpdate} />
         </Form.Item>
@@ -440,7 +388,9 @@ export default function InfoMultiDestination({
           name={"endDate"}
           label={"End Date"}
           className="no-margin-form"
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
+          getValueProps={(value) => ({
+            value: value && moment(value, dateFormatting.dateForm)
+          })}
         >
           <NxDate disabled={!isDraft && isUpdate} />
         </Form.Item>
@@ -471,7 +421,9 @@ export default function InfoMultiDestination({
         width={1100}
         type={"confirmation"}
         footer={[
-          <Button key="close" onClick={handleClose}>Close</Button>,
+          <Button key="close" onClick={handleClose}>
+            Close
+          </Button>
         ]}
       >
         <div className="p-4">
@@ -495,5 +447,5 @@ export default function InfoMultiDestination({
         </div>
       </NxModal>
     </div>
-  )
+  );
 }
