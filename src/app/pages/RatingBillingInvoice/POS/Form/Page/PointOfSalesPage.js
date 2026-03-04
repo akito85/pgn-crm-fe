@@ -62,6 +62,8 @@ const PointOfSalesPage = ({
   setSelectedTransactionDate = () => {},
   selectedInvoiceDate = null,
   setSelectedInvoiceDate = () => {},
+  data_account_type = [],
+  data_classification_type = [],
 }) => {
   const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
@@ -261,41 +263,7 @@ const PointOfSalesPage = ({
                 )}
             </div>
 
-            <Form.Item
-              noStyle
-              shouldUpdate={(prevValues, currentValues) =>
-                prevValues.costcenter !== currentValues.costcenter
-              }
-            >
-              {({ getFieldValue }) => {
-                const costCenter = getFieldValue("costcenter");
-                const isCostCenterFilled =
-                  costCenter &&
-                  (Array.isArray(costCenter) ? costCenter.length > 0 : true);
 
-                return (
-                  <Form.Item
-                    name="meterReadingCode"
-                    label="Meter Reading Code"
-                    style={{ marginBottom: 0 }}
-                  >
-                    <SelectComponent
-                      onChange={onMeterReadingCodeChange}
-                      disabled={
-                        !mergedArrayMrc ||
-                        mergedArrayMrc.length === 0 ||
-                        !isCostCenterFilled
-                      }
-                      placeholder="Select Meter Reading Code"
-                      options={(mergedArrayMrc || []).map((item) => ({
-                        label: item?.name,
-                        value: item?.id,
-                      }))}
-                    />
-                  </Form.Item>
-                );
-              }}
-            </Form.Item>
 
             <Form.Item
               name="accountSegment"
@@ -314,6 +282,40 @@ const PointOfSalesPage = ({
                 }}
                 placeholder="Select Account Segment"
                 options={(data_account_segment || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="clasificationType"
+              label="Classification Type"
+              rules={[
+                { message: requiredMessage("Classification Type"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                placeholder="Select Classification Type"
+                options={(data_classification_type || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="accountType"
+              label="Account Type"
+              rules={[
+                { message: requiredMessage("Account Type"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                placeholder="Select Account Type"
+                options={(data_account_type || []).map((item) => ({
                   label: item?.name,
                   value: item?.id,
                 }))}
@@ -340,6 +342,25 @@ const PointOfSalesPage = ({
             </Form.Item>
 
             <Form.Item
+              name="meterReadingCode"
+              label="Meter Reading Code"
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                onChange={onMeterReadingCodeChange}
+                disabled={
+                  !mergedArrayMrc ||
+                  mergedArrayMrc.length === 0
+                }
+                placeholder="Select Meter Reading Code"
+                options={(mergedArrayMrc || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
               name="email"
               label="Email"
               rules={[
@@ -349,6 +370,17 @@ const PointOfSalesPage = ({
               style={{ marginBottom: 0 }}
             >
               <InputComponent placeholder="Enter Email" />
+            </Form.Item>
+
+            <Form.Item
+              name="phoneNumber"
+              label="Phone Number"
+              rules={[
+                { message: requiredMessage("Phone Number"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent placeholder="Enter Phone Number" />
             </Form.Item>
 
             <div className="col-span-5">

@@ -54,7 +54,7 @@ const BillingPage = () => {
   const [modalApproval, setModalApproval] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [billingCode, setBillingCode] = useState("");
-  const [sourceNumber, setSourceNumber] = useState("");
+  const [billHeaderId, setBillHeaderId] = useState("");
   const [saNumberId, setSANumberId] = useState("");
   const [calculationCodeId, setCalculationCodeId] = useState("");
   const [accountNumberId, setAccountNumberId] = useState("");
@@ -191,14 +191,14 @@ const BillingPage = () => {
       setPageDetail(false);
       setActiveRowKey(null);
       setBillingCode("");
-      setSourceNumber("");
+      setBillHeaderId("");
       setAccountNumberId("");
       setSANumberId("");
       setCalculationCodeId("");
       setSelectedBillingData(null);
     } else {
       setBillingCode(record.billCode);
-      setSourceNumber(record.sourceNumber);
+      setBillHeaderId(record.billHeaderId);
       setAccountNumberId(record.accountNumber);
       setSANumberId(record.saNumber);
       setCalculationCodeId(record.calculationCode);
@@ -224,7 +224,7 @@ const BillingPage = () => {
     setPageDetail(false);
     setActiveRowKey(null);
     setBillingCode("");
-    setSourceNumber("");
+    setBillHeaderId("");
     setAccountNumberId("");
     setSANumberId("");
     setCalculationCodeId("");
@@ -424,7 +424,7 @@ const BillingPage = () => {
         >
           <BillingDetail
             billingCodeId={billingCode}
-            sourceNumber={sourceNumber}
+            billHeaderId={billHeaderId}
             saNumberId={saNumberId}
             accountNumberId={accountNumberId}
             calculationCodeId={calculationCodeId}
@@ -433,7 +433,7 @@ const BillingPage = () => {
               setPageDetail(false);
               setActiveRowKey(null);
               setBillingCode("");
-              setSourceNumber("");
+              setBillHeaderId("");
               setAccountNumberId("");
               setSANumberId("");
               setCalculationCodeId("");

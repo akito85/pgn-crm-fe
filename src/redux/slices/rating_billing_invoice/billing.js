@@ -203,12 +203,12 @@ export const getAllBillingApprovePaginate = createAsyncThunk(
 
 export const getAllBillingItemPaginate = createAsyncThunk(
   "GET_ALL_BILLING_ITEM_PAGINATE",
-  async ({ sourceNumber, pageBI, pageSizeBI, searchBI, sortBI }, thunkAPI) => {
+  async ({ billHeaderId, pageBI, pageSizeBI, searchBI, sortBI }, thunkAPI) => {
     try {
       const searchParams = searchBI === undefined ? "" : searchBI;
       const sortParams =
         sortBI === undefined || sortBI === "" ? "lineNumber~asc" : sortBI;
-      const url = `/v1/dbs/api/billing/billing-item/${sourceNumber}?page=${pageBI}&size=${pageSizeBI}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/billing/billing-item/${billHeaderId}?page=${pageBI}&size=${pageSizeBI}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
       return responseData;

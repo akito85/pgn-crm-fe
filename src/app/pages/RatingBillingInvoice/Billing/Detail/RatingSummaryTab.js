@@ -5,7 +5,7 @@ import { getAllRatingResultPaginate } from "../../../../../redux/slices/rating_b
 import { columnsRatingResult } from "./Table/TableRatingResult";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const RatingSummaryTab = ({ sourceNumber }) => {
+const RatingSummaryTab = ({ billHeaderId }) => {
   const { data_ratingResult } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
@@ -27,14 +27,14 @@ const RatingSummaryTab = ({ sourceNumber }) => {
   useEffect(() => {
     dispatch(
       getAllRatingResultPaginate({
-        id: sourceNumber,
+        id: billHeaderId,
         search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
       })
     );
-  }, [dispatch, sourceNumber, search, page, pageSize, sort]);
+  }, [dispatch, billHeaderId, search, page, pageSize, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();

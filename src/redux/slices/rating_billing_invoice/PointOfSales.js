@@ -44,6 +44,8 @@ const initialState = {
   data_uom_codes: [],
   loading_prospective: false,
   data_customer_type: [],
+  data_account_type: [],
+  data_classification_type: [],
 };
 
 export const getListPointOfSales = createAsyncThunk(
@@ -934,6 +936,60 @@ export const getUomCodes = createAsyncThunk(
   },
 );
 
+export const getAccountTypeList = createAsyncThunk(
+  "GET_ACCOUNT_TYPE_LIST_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/account-type`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getClassificationTypeList = createAsyncThunk(
+  "GET_CLASSIFICATION_TYPE_LIST_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/classification-type`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 export const generateProformaInvoice = createAsyncThunk(
   "GENERATE_PROFORMA_INVOICE",
   async (posNumber, thunkAPI) => {
@@ -1436,6 +1492,32 @@ const pointOfSalesSlice = createSlice({
     [getUomCodes.rejected]: (state) => {
       state.loading = false;
       state.data_uom_codes = [];
+    },
+
+    // Account Type
+    [getAccountTypeList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getAccountTypeList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_account_type = action.payload || [];
+    },
+    [getAccountTypeList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_account_type = [];
+    },
+
+    // Classification Type
+    [getClassificationTypeList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getClassificationTypeList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_classification_type = action.payload || [];
+    },
+    [getClassificationTypeList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_classification_type = [];
     },
   },
 });

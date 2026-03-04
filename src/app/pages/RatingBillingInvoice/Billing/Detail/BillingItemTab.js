@@ -5,7 +5,7 @@ import { getAllBillingItemPaginate } from "../../../../../redux/slices/rating_bi
 import { columnsBillingItem } from "./Table/TableBillingItem";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const BillingItemTab = ({ billingCodeId, calculationCodeId, sourceNumber }) => {
+const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
   const { data_billingItem } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
@@ -27,14 +27,14 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, sourceNumber }) => {
   useEffect(() => {
     dispatch(
       getAllBillingItemPaginate({
-        sourceNumber,
+        billHeaderId,
         searchBI: encodeURIComponent(JSON.stringify(searchBI)),
         pageBI,
         pageSizeBI,
         sortBI,
       }),
     );
-  }, [dispatch, sourceNumber, searchBI, pageBI, pageSizeBI, sortBI]);
+  }, [dispatch, billHeaderId, searchBI, pageBI, pageSizeBI, sortBI]);
 
   const handleSearchBI = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -112,7 +112,7 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, sourceNumber }) => {
         </div>
         <div>
           <p className="text-[13px] text-gray-600 mb-1">Source Number</p>
-          <p className="text-[15px] text-primary">{sourceNumber || "-"}</p>
+          <p className="text-[15px] text-primary">{billHeaderId || "-"}</p>
         </div>
       </div>
 

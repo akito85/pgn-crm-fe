@@ -36,6 +36,8 @@ import {
   getSorList,
   getCostCenterList,
   getUomCodes,
+  getAccountTypeList,
+  getClassificationTypeList,
 } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import PointOfSalesPageAttachment from "./Page/PointOfSalesPageAttachment";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -81,6 +83,8 @@ const PosForm = ({ type }) => {
     data_sor_list,
     data_cost_center_list,
     data_uom_codes,
+    data_account_type,
+    data_classification_type,
   } = useSelector((state) => state.pointOfSales);
 
   const dispatch = useDispatch();
@@ -343,6 +347,8 @@ const PosForm = ({ type }) => {
       dispatch(getSorList());
       dispatch(getCostCenterList());
       dispatch(getAccountSegmentList());
+      dispatch(getAccountTypeList());
+      dispatch(getClassificationTypeList());
       if (type === "create") {
         dispatch(getUserDetailForPOS());
       }
@@ -1118,6 +1124,28 @@ const PosForm = ({ type }) => {
       return e?.costcenter || e?.costCenter || "";
     };
 
+    const getClassificationTypeName = () => {
+      if (customerType === "prospective" && e?.clasificationType) {
+        if (typeof e.clasificationType === "string") return e.clasificationType;
+        const classification = data_classification_type?.find(
+          (item) => item.id === e.clasificationType,
+        );
+        return classification ? classification.name : "";
+      }
+      return e?.clasificationType || "";
+    };
+
+    const getAccountTypeName = () => {
+      if (customerType === "prospective" && e?.accountType) {
+        if (typeof e.accountType === "string") return e.accountType;
+        const accType = data_account_type?.find(
+          (item) => item.id === e.accountType,
+        );
+        return accType ? accType.name : "";
+      }
+      return e?.accountType || "";
+    };
+
     let body = {
       id: type === "create" ? undefined : idUpdate,
       posNumber: type === "create" ? undefined : idPos,
@@ -1130,13 +1158,15 @@ const PosForm = ({ type }) => {
         accountNumber: e?.accountNumber,
         registrationNumber: null,
         email: null,
+        phoneNumber: null,
         address: null,
       }),
 
       ...(customerType === "prospective" && {
         registrationNumber: e?.registrationNumber,
-        accountNumber: null,
+        accountNumber: "",
         email: e?.email || "",
+        phoneNumber: e?.phoneNumber || "",
         address: e?.address || "",
         customerNumber: null,
       }),
@@ -1146,6 +1176,8 @@ const PosForm = ({ type }) => {
       meterReadingCode: getMrcName(),
       accountSegment: getAccountSegmentName(),
       accountGroupType: getAccountGroupTypeName(),
+      clasificationType: getClassificationTypeName(),
+      accountType: getAccountTypeName(),
       billingCycleId: billingCycleId,
       billingCycle:
         data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
@@ -1157,10 +1189,10 @@ const PosForm = ({ type }) => {
       currency:
         data_globalCurrency?.find((item) => item.Id === e?.currency)?.text ||
         e?.currency,
-      transactionDate: moment(e?.transactionDate).format("DD MMM YYYY"),
-      invoiceDate: moment(e?.invoiceDate).format("DD MMM YYYY"),
+      transactionDate: moment(e?.transactionDate).format(dateFormatting.dateFormal),
+      invoiceDate: moment(e?.invoiceDate).format(dateFormatting.dateFormal),
       termsOfPayment: moment.isMoment(e?.termType?.termValue)
-        ? moment(e?.termType?.termValue).format(dateFormatting.date)
+        ? moment(e?.termType?.termValue).format(dateFormatting.dateFormal)
         : data_globalTermsOfPaymentValue?.find(
             (item) => item.Id === e?.termType?.termValue,
           )?.text || e?.termType?.termValue,
@@ -1176,7 +1208,7 @@ const PosForm = ({ type }) => {
         parseFloat(dataDynamic?.rate?.replace?.(/,/g, "") ?? "0") || 0,
       rateDate: dataDynamic?.rateDate
         ? moment(dataDynamic.rateDate, dateFormatting.date).format(
-            "DD MMM YYYY",
+            dateFormatting.dateFormal,
           )
         : null,
       rateType: dataDynamic?.rateType || null,
@@ -1184,7 +1216,7 @@ const PosForm = ({ type }) => {
         parseFloat(dataDynamic?.taxRate?.replace?.(/,/g, "") ?? "0") || 0,
       taxRateDate: dataDynamic?.taxRateDate
         ? moment(dataDynamic.taxRateDate, dateFormatting.date).format(
-            "DD MMM YYYY",
+            dateFormatting.dateFormal,
           )
         : null,
       taxRateType: dataDynamic?.taxRateType || null,
@@ -1548,6 +1580,8 @@ const PosForm = ({ type }) => {
               setSelectedTransactionDate={setSelectedTransactionDate}
               selectedInvoiceDate={selectedInvoiceDate}
               setSelectedInvoiceDate={setSelectedInvoiceDate}
+              data_account_type={data_account_type}
+              data_classification_type={data_classification_type}
             />
           </div>
 
