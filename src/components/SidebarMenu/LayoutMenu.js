@@ -473,7 +473,7 @@ const LayoutMenu = ({ children }) => {
               </div>
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
                 <NotificationDropdown />
-                <Dropdown menu={menu} trigger={["click"]}>
+                <Dropdown overlay={menu} trigger={["click"]}>
                   <a onClick={(e) => e.preventDefault()}>
                     {data_profile?.data?.urlImage2 === null ? (
                       data_profile?.data?.username === "" ? (
