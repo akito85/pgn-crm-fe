@@ -175,8 +175,8 @@ export const usePromo = () => {
    * Load promo history list
    */
   const loadPromoHistoryList = useCallback(
-    (params = {}, advancedSearch = null) => {
-      dispatch(fetchPromoHistoryList({ params, advancedSearch }));
+    (params = {}, payload = null) => {
+      dispatch(fetchPromoHistoryList({ params, payload }));
     },
     [dispatch],
   );

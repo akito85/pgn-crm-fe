@@ -137,23 +137,21 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  getListValidPromoCriteriaByPromoId: async (params, advancedSearch = {}) => {
+  getListValidPromoCriteriaByPromoId: async (params, payload = {}) => {
     try {
       const config = {
-        params: params,
+        params: { promoId: params.promoId, accountId: params.accountId },
         headers: tokenHeader(),
       };
 
-      const body =
-        advancedSearch &&
-        advancedSearch.inputFields &&
-        advancedSearch.inputFields.length > 0
-          ? advancedSearch
-          : {
-              inputFields: [
-                { condition: "", column: "", operator: "", value: "" },
-              ],
-            };
+      const body = {
+        page: params.page ?? 0,
+        size: params.size ?? 20,
+        sort: payload.sort ?? "id~desc",
+        filters: payload.filters ?? [],
+        filterRules: payload.filterRules ?? [],
+      };
+
       const response = await axios.post(
         `${BASE_URL}${API_PATH}/criteria`,
         body,
@@ -240,23 +238,21 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria
    */
-  getListValidPromoConditionByPromoId: async (params, advancedSearch = {}) => {
+  getListValidPromoConditionByPromoId: async (params, payload = {}) => {
     try {
       const config = {
-        params: params,
+        params: { promoId: params.promoId, accountId: params.accountId },
         headers: tokenHeader(),
       };
 
-      const body =
-        advancedSearch &&
-        advancedSearch.inputFields &&
-        advancedSearch.inputFields.length > 0
-          ? advancedSearch
-          : {
-              inputFields: [
-                { condition: "", column: "", operator: "", value: "" },
-              ],
-            };
+      const body = {
+        page: params.page ?? 0,
+        size: params.size ?? 20,
+        sort: payload.sort ?? "id~desc",
+        filters: payload.filters ?? [],
+        filterRules: payload.filterRules ?? [],
+      };
+
       const response = await axios.post(
         `${BASE_URL}${API_PATH}/condition`,
         body,
@@ -453,32 +449,22 @@ const promoRepository = {
    * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
    * @param {Object} advancedSearch - Advanced search criteria: { inputFields: [{condition, column, operator, value}] }
    */
-  getListPromoHistory: async (params, advancedSearch = {}) => {
-    try {
-      const config = {
-        params: params,
-        headers: tokenHeader(),
-      };
+  getListPromoHistory: async (accountId, payload = {}) => {
+    const config = {
+      params: { accountId },
+      headers: tokenHeader(),
+    };
 
-      const body =
-        advancedSearch &&
-        advancedSearch.inputFields &&
-        advancedSearch.inputFields.length > 0
-          ? advancedSearch
-          : {
-              inputFields: [
-                { condition: "", column: "", operator: "", value: "" },
-              ],
-            };
-      const response = await axios.post(
-        `${BASE_URL}${API_PATH}/history`,
-        body,
-        config,
-      );
-      return response?.data;
-    } catch (error) {
-      throw error;
-    }
+    const body = {
+      page: payload.page ?? 1,
+      size: payload.size ?? 10,
+      sort: payload.sort ?? "id~desc",
+      searchs: payload.searchs ?? {},
+      filters: payload.filters ?? [],
+      filterRules: payload.filterRules ?? [],
+    };
+
+    return axios.post(`${BASE_URL}${API_PATH}/history`, body, config);
   },
 
   /**
@@ -636,12 +622,6 @@ const promoRepository = {
         dataIndex: "promotionType",
         key: "promotionType",
         width: 150,
-      },
-      {
-        title: "Promo Category",
-        dataIndex: "categoryName",
-        key: "categoryName",
-        width: 130,
       },
       {
         title: "Criteria",

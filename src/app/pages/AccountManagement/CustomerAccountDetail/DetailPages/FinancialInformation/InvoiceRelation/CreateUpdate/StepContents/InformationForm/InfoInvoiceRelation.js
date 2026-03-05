@@ -215,7 +215,7 @@ export default function InfoInvoiceRelation({
               required: true,
             },
           ]}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
           className="no-margin-form"
         >
           <NxDate disabled={!isDraft && isUpdate} />
@@ -225,7 +225,7 @@ export default function InfoInvoiceRelation({
           key="endDate"
           name={"endDate"}
           label={"End Date"}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateForm)})}
+          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
           className="no-margin-form"
         >
           <NxDate />

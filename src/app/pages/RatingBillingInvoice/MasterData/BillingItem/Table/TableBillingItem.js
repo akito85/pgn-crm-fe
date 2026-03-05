@@ -19,22 +19,22 @@ export const columns = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      key: "typeTransaction",
+      key: "transMappingType",
       title: "TYPE",
-      dataIndex: "typeTransaction",
+      dataIndex: "transMappingType",
       sorter: true,
       width: 200,
-      filteredValue: [search?.typeTransaction] || null,
+      filteredValue: [search?.transMappingType] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "typeTransaction",
+        "transMappingType",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true
       ),
-      render: (text) => renderColumn('typeTransaction', hasValue(search['typeTransaction']), searchText, text, false, 'input', search)
+      render: (text) => renderColumn('transMappingType', hasValue(search['transMappingType']), searchText, text, false, 'input', search)
     },
     {
       key: "billingItemCode",
@@ -190,43 +190,43 @@ export const columns = (
       render: (text) => renderColumn('paymentWarranty', hasValue(search['paymentWarranty']), searchText, text, false, 'input', search)
     },
     {
-      key: "instalmentRestructure",
-      title: "INSTALMENT/RESTRUCTURE",
-      dataIndex: "instalmentRestructure",
+      key: "installment",
+      title: "INSTALMENT",
+      dataIndex: "installment",
       sorter: true,
       align: "center",
       width: 200,
-      filteredValue: [search?.instalmentRestructure] || null,
+      filteredValue: [search?.installment] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "instalmentRestructure",
+        "installment",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true
       ),
-      render: (text) => renderColumn('instalmentRestructure', hasValue(search['instalmentRestructure']), searchText, text, false, 'input', search)
+      render: (text) => renderColumn('installment', hasValue(search['installment']), searchText, text, false, 'input', search)
     },
-    {
-      key: "criteria",
-      title: "CRITERIA",
-      dataIndex: "criteria",
-      sorter: true,
-      align: "center",
-      width: 200,
-      filteredValue: [search?.criteria] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "criteria",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('criteria', hasValue(search['criteria']), searchText, text, false, 'input', search)
-    },
+    // {
+    //   key: "criteria",
+    //   title: "CRITERIA",
+    //   dataIndex: "criteria",
+    //   sorter: true,
+    //   align: "center",
+    //   width: 200,
+    //   filteredValue: [search?.criteria] || null,
+    //   ...getColumnSearchPropsUseFilteredValue(
+    //     search,
+    //     "criteria",
+    //     searchInput,
+    //     searchedColumn,
+    //     searchText,
+    //     handleSearch,
+    //     true
+    //   ),
+    //   render: (text) => renderColumn('criteria', hasValue(search['criteria']), searchText, text, false, 'input', search)
+    // },
     {
       key: "description",
       title: "DESCRIPTION",

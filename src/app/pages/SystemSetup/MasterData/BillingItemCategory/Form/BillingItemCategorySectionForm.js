@@ -28,12 +28,12 @@ const BillingItemCategorySectionForm = ({
 
   const disabledStartDate = (current) => {
     // Disable dates before today
-    return current && current < moment().startOf('day');
+    return current && current < moment().startOf("day");
   };
 
   return (
     <div>
-      <BaseContainer header={"Billing Item Category Information"}>
+      <BaseContainer header={"Transaction Mapping Category Information"}>
         <div className="w-full grid grid-cols-4 gap-3">
           <Form.Item
             label={"Category Code"}

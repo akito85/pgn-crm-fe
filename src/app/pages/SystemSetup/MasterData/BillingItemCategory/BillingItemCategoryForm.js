@@ -83,7 +83,7 @@ const BillingItemCategoryForm = ({ type }) => {
 
   // Steps configuration
   const steps = [
-    { title: "BILLING ITEM CATEGORY", value: "Billing Item Category" },
+    { title: "TRANSACTION MAPPING CATEGORY", value: "Billing Item Category" },
     { title: "APPROVAL", value: "Approval" },
     { title: "ATTACHMENT", value: "Attachment" },
   ];
@@ -131,9 +131,12 @@ const BillingItemCategoryForm = ({ type }) => {
   // Validation: Check if user can update
   useEffect(() => {
     if (type === "update" && statusApproval) {
-      const canUpdate = statusApproval === "DRAFT" || statusApproval === "REJECTED";
+      const canUpdate =
+        statusApproval === "DRAFT" || statusApproval === "REJECTED";
       if (!canUpdate) {
-        navigate("/system-setup/billing-item-category", { replace: true });
+        navigate(SYSTEM_SETUP_ROUTES.VIEW_BILLING_ITEM_CATEGORY, {
+          replace: true,
+        });
       }
     }
   }, [type, statusApproval, navigate]);
@@ -146,7 +149,11 @@ const BillingItemCategoryForm = ({ type }) => {
   }, [dispatch, id, type]);
 
   useEffect(() => {
-    if (id && data_detail_draft?.billingCategory?.id === id && data_detail?.billingCategory?.id === id) {
+    if (
+      id &&
+      data_detail_draft?.billingCategory?.id === id &&
+      data_detail?.billingCategory?.id === id
+    ) {
       const draftCategory = data_detail_draft?.billingCategory;
 
       // Data Draft Attachment Information
@@ -175,7 +182,9 @@ const BillingItemCategoryForm = ({ type }) => {
       form.setFieldsValue({
         code: draftCategory?.code,
         name: draftCategory?.name,
-        startDate: draftCategory?.startDate ? moment(draftCategory.startDate) : undefined,
+        startDate: draftCategory?.startDate
+          ? moment(draftCategory.startDate)
+          : undefined,
         endDate: draftCategory?.endDate
           ? moment(draftCategory.endDate)
           : undefined,
@@ -183,7 +192,9 @@ const BillingItemCategoryForm = ({ type }) => {
         apphierId: draftCategory?.apphierId,
       });
 
-      setStartDate(draftCategory?.startDate ? moment(draftCategory.startDate) : undefined);
+      setStartDate(
+        draftCategory?.startDate ? moment(draftCategory.startDate) : undefined,
+      );
       setSelectedHierarchy(draftCategory?.apphierId);
       setListDataAttachment(dataDraftAttachment);
     } else if (id && data_detail?.billingCategory?.id === id) {
@@ -213,7 +224,9 @@ const BillingItemCategoryForm = ({ type }) => {
       form.setFieldsValue({
         code: billingCategory?.code,
         name: billingCategory?.name,
-        startDate: billingCategory?.startDate ? moment(billingCategory.startDate) : undefined,
+        startDate: billingCategory?.startDate
+          ? moment(billingCategory.startDate)
+          : undefined,
         endDate: billingCategory?.endDate
           ? moment(billingCategory.endDate)
           : undefined,
@@ -221,7 +234,11 @@ const BillingItemCategoryForm = ({ type }) => {
         apphierId: billingCategory?.apphierId,
       });
 
-      setStartDate(billingCategory?.startDate ? moment(billingCategory.startDate) : undefined);
+      setStartDate(
+        billingCategory?.startDate
+          ? moment(billingCategory.startDate)
+          : undefined,
+      );
       setSelectedHierarchy(billingCategory?.apphierId);
       setListDataAttachment(dataAttachment);
     }
@@ -270,8 +287,8 @@ const BillingItemCategoryForm = ({ type }) => {
       breadcrumbName: "Master Data",
     },
     {
-      path: SYSTEM_SETUP_ROUTES.BILLING_ITEM_CATEGORY,
-      breadcrumbName: "Billing Item Category",
+      path: SYSTEM_SETUP_ROUTES.VIEW_BILLING_ITEM_CATEGORY,
+      breadcrumbName: "Transaction Mapping Category",
     },
     {
       path:
@@ -280,8 +297,8 @@ const BillingItemCategoryForm = ({ type }) => {
           : SYSTEM_SETUP_ROUTES.UPDATE_BILLING_ITEM_CATEGORY,
       breadcrumbName:
         type === "create"
-          ? "Create Billing Item Category"
-          : "Update Billing Item Category",
+          ? "Create Transaction Mapping Category"
+          : "Update Transaction Mapping Category",
     },
   ];
 

@@ -24,6 +24,7 @@ import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalI
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 
 const ListBillingItemCategory = () => {
   const dispatch = useDispatch();
@@ -327,12 +328,12 @@ const ListBillingItemCategory = () => {
     {
       action: "Create",
       render: (
-        <NavLink to={"/system-setup/billing-item-category/create"}>
+        <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_BILLING_ITEM_CATEGORY}>
           <ButtonComponent
             icon={<PlusOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
-            Create Billing Item Category
+            Transaction Mapping Category
           </ButtonComponent>
         </NavLink>
       ),
@@ -345,7 +346,7 @@ const ListBillingItemCategory = () => {
       render: (record) => {
         return (
           <Link
-            to="/system-setup/billing-item-category/view"
+            to={SYSTEM_SETUP_ROUTES.DETAIL_BILLING_ITEM_CATEGORY}
             state={{ id: record.id }}
           >
             <Tooltip title="Detail">
@@ -368,7 +369,7 @@ const ListBillingItemCategory = () => {
           data > 3 ? (
             isEditable ? (
               <Link
-                to="/system-setup/billing-item-category/update"
+                to={SYSTEM_SETUP_ROUTES.UPDATE_BILLING_ITEM_CATEGORY}
                 state={{
                   id: record.id,
                   status: record.status,
@@ -395,7 +396,7 @@ const ListBillingItemCategory = () => {
           ) : isEditable ? (
             <Tooltip title="Update">
               <Link
-                to="/system-setup/billing-item-category/update"
+                to={SYSTEM_SETUP_ROUTES.UPDATE_BILLING_ITEM_CATEGORY}
                 state={{
                   id: record.id,
                   status: record.status,
@@ -449,7 +450,7 @@ const ListBillingItemCategory = () => {
                 <Checkbox
                   className="inactive-check"
                   disabled={true}
-                  checked={true}
+                  checked={false}
                 />
                 <span className="text-gray-400 ml-6">Inactivate</span>
               </div>
@@ -463,7 +464,7 @@ const ListBillingItemCategory = () => {
                     canInactivate ? () => handleInactive(record) : undefined
                   }
                   disabled={!canInactivate}
-                  checked={!canInactivate}
+                  checked={false}
                 />
               </div>
             </Tooltip>
@@ -802,7 +803,7 @@ const ListBillingItemCategory = () => {
     },
     {
       path: "",
-      breadcrumbName: "Billing Item Category",
+      breadcrumbName: "Transaction Mapping Category",
     },
   ];
 
@@ -813,7 +814,7 @@ const ListBillingItemCategory = () => {
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px]">BILLING ITEM CATEGORY LIST</p>
+            <p className="mt-[15px]">TRANSACTION MAPPING CATEGORY LIST</p>
             <div className="flex gap-2">
               <Toolbar items={itemGrantAccess} />
             </div>
@@ -849,7 +850,7 @@ const ListBillingItemCategory = () => {
         dispatch={dispatch}
         getAPIOption={getAvailableApproval}
         getAPIDetail={getSelectedApproval}
-        alertMessage={`Are you sure you want to inactivate this Billing Item Category with code ${
+        alertMessage={`Are you sure you want to inactivate this Transaction Mapping Category with code ${
           chooseId?.code || ""
         }?`}
         openModalInactivate={modalInactive}
