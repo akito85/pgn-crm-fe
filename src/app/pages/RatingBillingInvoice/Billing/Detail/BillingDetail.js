@@ -90,10 +90,10 @@ const BillingDetail = ({
               ? moment(selectedBillingData?.createdDate).format(
                   "DD MMM YYYY HH:mm:ss",
                 )
-              : "-"}
+              : " "}
           </DetailText>
           <DetailText label={"Created By"}>
-            {selectedBillingData?.createdBy || "-"}
+            {selectedBillingData?.createdBy || " "}
           </DetailText>
           <DetailText label={"Updated Date"}>
             {selectedBillingData?.updatedDate
