@@ -11,9 +11,9 @@ export const RenderContentActions = (
   itemRender = [],
   totalLength,
   permissions = [],
-  sliceColumn = "View"
+  sliceColumn = "View",
 ) => {
-  if (totalLength > 3) {
+  if (totalLength > 2) {
     return (
       <div className="w-full flex justify-center items-center py-1 gap-4">
         <Popover
@@ -34,9 +34,7 @@ export const RenderContentActions = (
           }
         >
           <div className="group">
-            <MoreOutlined
-              className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out"
-            />
+            <MoreOutlined className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out" />
           </div>
         </Popover>
         <div>
@@ -75,17 +73,17 @@ export const useColumnActionPermission = (
   permissionList = [],
   itemsRender = [],
   sliceColumn = "View",
-  type = "page"
+  type = "page",
 ) => {
   const access = useGrantAccessHooks(type);
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -95,13 +93,13 @@ export const useColumnActionPermission = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender
@@ -132,7 +130,7 @@ export const useColumnActionPermission = (
               lowerCaseItemsRender,
               arrayActions?.length,
               arrayActions,
-              sliceColumn
+              sliceColumn,
             ),
         },
       ];
