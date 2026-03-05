@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from "react"
+import { Fragment, useMemo, useState, useEffect } from "react"
 import { PlusOutlined } from "@ant-design/icons"
 
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent"
@@ -80,6 +80,15 @@ export default function ContactForm({ form }) {
       key: 'status',
     },
   ]
+
+  const tableColumns = useMemo(
+    () =>
+      columnMain.map((col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      })),
+    [columnMain]
+  )
 
   const handleEdit = (record) => {
     console.log("edit", record)
@@ -170,13 +179,17 @@ export default function ContactForm({ form }) {
         </div>
 
         {/* Main Contact Table */}
-        <NxTable
-          className="border-[0.5px] border-[#c8cdd4] border-solid "
-          usePagination={true}
-          useSelect={true}
-          dataMain={contactList}
-          columnMain={columnMain}
-        />
+        <div className="flex flex-col gap-y-4">
+          <NxTable
+            idTable="create-service-request-contact-table"
+            className="border-[0.5px] border-[#c8cdd4] border-solid "
+            dataSource={contactList}
+            columns={tableColumns}
+            tableScrolled={{ y: 400, x: "max-content" }}
+            usePagination={true}
+            useSelect={true}
+          />
+        </div>
         </NxBaseContainer>
       </NxCardContainer>
 
