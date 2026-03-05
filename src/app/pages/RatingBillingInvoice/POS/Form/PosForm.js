@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -36,6 +36,8 @@ import {
   getSorList,
   getCostCenterList,
   getUomCodes,
+  getAccountTypeList,
+  getClassificationTypeList,
 } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import PointOfSalesPageAttachment from "./Page/PointOfSalesPageAttachment";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -81,6 +83,8 @@ const PosForm = ({ type }) => {
     data_sor_list,
     data_cost_center_list,
     data_uom_codes,
+    data_account_type,
+    data_classification_type,
   } = useSelector((state) => state.pointOfSales);
 
   const dispatch = useDispatch();
@@ -145,6 +149,12 @@ const PosForm = ({ type }) => {
   const [valuePage, setValuePage] = useState("Point of Sales");
   const [rangeDisableDate, setRangeDisableDate] = useState({});
 
+  // ✅ Debounce timer untuk materai - menunggu 600ms setelah item terakhir ditambah
+  const materaiDebounceTimer = useRef(null);
+  // ✅ Flag untuk mencegah re-trigger saat setData dipanggil dari response materai
+  // Tanpa ini: setData di .then() → useEffect → debounce → dispatch → loop tak terbatas
+  const isUpdatingFromMaterai = useRef(false);
+
   const getCustomerTypeNumber = (type) => {
     return type === "prospective" ? 2 : 1;
   };
@@ -168,7 +178,6 @@ const PosForm = ({ type }) => {
     },
   ];
 
-  // Navigation handlers
   const next = () => {
     const fieldsToValidate = dataTabs[current]?.paramValue;
     if (fieldsToValidate) {
@@ -179,9 +188,7 @@ const PosForm = ({ type }) => {
             setCurrent(current + 1);
           }
         })
-        .catch((error) => {
-          // Validation failed
-        });
+        .catch((error) => {});
     } else {
       if (current < steps.length - 1) {
         setCurrent(current + 1);
@@ -198,13 +205,57 @@ const PosForm = ({ type }) => {
   const handleAccountSegmentChange = (selectedSegmentId) => {
     form.resetFields(["accountGroupType"]);
     setIsAccountSegmentFilled(!!selectedSegmentId);
-
     if (selectedSegmentId) {
       dispatch(getAccountGroupTypeList([selectedSegmentId]));
     }
   };
 
   const handleMeterReadingCodeChange = () => {};
+
+  useEffect(() => {
+    if (data_approvalList) {
+      const tempAppHier = (data_approvalList || []).map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setDataApproval(tempAppHier);
+    }
+  }, [data_approvalList]);
+
+  useEffect(() => {
+    if (data_approvalListDetail && data_approvalListDetail.length > 0) {
+      const data = data_approvalListDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setDataListDetailApproval(data);
+    } else {
+      setDataListDetailApproval([]);
+    }
+  }, [data_approvalListDetail]);
+
+  useEffect(() => {
+    if (accountNumber) {
+      setDataAccount(
+        data_globalAccountNumber?.find(
+          (item) => item.accountNumber === accountNumber,
+        ),
+      );
+    }
+  }, [accountNumber]);
+
+  useEffect(() => {
+    if (dataAccount) {
+      form.setFieldsValue({
+        ...dataAccount,
+        costCenter: dataAccount.costcenter || dataAccount.costCenter,
+      });
+    }
+  }, [dataAccount]);
 
   const handleValueDdlSet = (value) => {
     if (!hasValue(value)) {
@@ -266,7 +317,6 @@ const PosForm = ({ type }) => {
     (data_detailPos, data_globalCurrency) => {
       const costCenterValue =
         data_detailPos?.costcenter || data_detailPos?.costCenter || "";
-
       form.setFieldsValue({
         ...data_detailPos,
         currency: data_globalCurrency?.find(
@@ -281,7 +331,6 @@ const PosForm = ({ type }) => {
     [form],
   );
 
-  // Detect customer type from API response
   useEffect(() => {
     if (type === "update" && data_detailPos && data_detailPos.id === idUpdate) {
       if (!customerTypeFromNav && !customerType) {
@@ -293,29 +342,23 @@ const PosForm = ({ type }) => {
     }
   }, [data_detailPos, type, idUpdate, customerTypeFromNav, customerType]);
 
-  // Load prospective customer data
   useEffect(() => {
     if (customerType === "prospective") {
       dispatch(getSorList());
       dispatch(getCostCenterList());
       dispatch(getAccountSegmentList());
-
+      dispatch(getAccountTypeList());
+      dispatch(getClassificationTypeList());
       if (type === "create") {
         dispatch(getUserDetailForPOS());
       }
     }
   }, [dispatch, type, customerType]);
 
-  // Set default data for prospective customer (CREATE)
   useEffect(() => {
-    if (
-      type === "create" &&
-      customerType === "prospective" &&
-      data_user_detail
-    ) {
+    if (type === "create" && customerType === "prospective" && data_user_detail) {
       const defaultSor = data_user_detail?.sorId || null;
       const defaultCostCenter = data_user_detail?.ccId || null;
-
       const tempDefaultData = {
         sor: defaultSor,
         costcenter:
@@ -325,14 +368,11 @@ const PosForm = ({ type }) => {
               : defaultCostCenter
             : [],
       };
-
       setDefaultData(tempDefaultData);
-
       form.setFieldsValue({
         sor: defaultSor,
         costcenter: tempDefaultData.costcenter,
       });
-
       if (tempDefaultData.costcenter && tempDefaultData.costcenter.length > 0) {
         const body = {
           ccIds: tempDefaultData.costcenter.map((id) => ({ ccId: id })),
@@ -342,7 +382,6 @@ const PosForm = ({ type }) => {
     }
   }, [type, customerType, data_user_detail, form, dispatch]);
 
-  // Merge meter reading code data
   useEffect(() => {
     let dataMrc = data_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
@@ -351,7 +390,6 @@ const PosForm = ({ type }) => {
     setMergedArrayMrc(dataMrc);
   }, [data_meter_reading_code]);
 
-  // Convert MRC name to ID for UPDATE prospective
   useEffect(() => {
     if (
       type === "update" &&
@@ -364,16 +402,12 @@ const PosForm = ({ type }) => {
       const mrcId = mergedArrayMrc?.find(
         (item) => item.name === data_detailPos?.meterReadingCode,
       )?.id;
-
       if (mrcId) {
-        form.setFieldsValue({
-          meterReadingCode: mrcId,
-        });
+        form.setFieldsValue({ meterReadingCode: mrcId });
       }
     }
   }, [type, customerType, data_detailPos, mergedArrayMrc, form, idUpdate]);
 
-  // Handle daily rate validation
   useEffect(() => {
     if (data_rate === null || data_rate?.success === false) {
       setInvoiceDate(null);
@@ -384,7 +418,6 @@ const PosForm = ({ type }) => {
     }
   }, [data_rate, form]);
 
-  // Fetch rates when invoice date and currency are set
   useEffect(() => {
     if (data && invoiceDate && currency && data.length < 1) {
       dispatch(
@@ -402,7 +435,6 @@ const PosForm = ({ type }) => {
     }
   }, [dispatch, invoiceDate, currency, data]);
 
-  // Load global data
   useEffect(() => {
     dispatch(getGlobalType());
     dispatch(getGlobalBillingCycle());
@@ -415,20 +447,17 @@ const PosForm = ({ type }) => {
     dispatch(getUomCodes());
   }, [dispatch]);
 
-  // Track missing priority data
   useEffect(() => {
     const newData = [
       { name: "Account Number", data: accountNumber },
       { name: "Currency", data: currency },
       { name: "Invoice Date", data: invoiceDate },
     ];
-
     const missingData = newData.filter((data) => !data.data);
     setDataMissing(missingData);
     setDataPriority(newData);
   }, [currency, accountNumber, invoiceDate]);
 
-  // Initialize data for create/update
   useEffect(() => {
     if (type === "update") {
       dispatch(getDetailPOS(idUpdate));
@@ -451,27 +480,23 @@ const PosForm = ({ type }) => {
     }
   }, [dispatch, type, idUpdate]);
 
-  // Fetch terms of payment data (customer)
   useEffect(() => {
     if (customerType === "customer" && hasValue(accountNumber)) {
       const getAccountId = data_globalAccountNumber?.find(
         (item) => item?.accountNumber === accountNumber,
       )?.accountId;
-
       if (getAccountId) {
         dispatch(getGlobalTermsOfPaymentData(getAccountId));
       }
     }
   }, [customerType, accountNumber, data_globalAccountNumber, dispatch]);
 
-  // Fetch terms of payment data (prospective) once on type change
   useEffect(() => {
     if (customerType === "prospective") {
       dispatch(getGlobalTermsOfPaymentData(null));
     }
   }, [customerType, dispatch]);
 
-  // Populate form for UPDATE mode
   useEffect(() => {
     if (
       type === "update" &&
@@ -482,13 +507,10 @@ const PosForm = ({ type }) => {
       data_globalBillingCycle
     ) {
       const isProspective = data_detailPos.customerType === 2;
-
       const transDate = moment(data_detailPos?.transactionDate);
       const invDate = moment(data_detailPos?.invoiceDate);
-
       setSelectedTransactionDate(transDate);
       setSelectedInvoiceDate(invDate);
-
       setValueDdl({
         action: "setData",
         value: isDateString(data_detailPos?.termsOfPayment) ? "DATE" : "TOP",
@@ -499,22 +521,17 @@ const PosForm = ({ type }) => {
         const sorId = data_sor_list?.find(
           (item) => item.name === data_detailPos?.sor,
         )?.id;
-
         const costCenterString = data_detailPos?.costcenter || "";
-
         const costCenterCode = costCenterString.split(" - ")[0]?.trim();
-
         const ccId = data_cost_center_list?.find(
           (item) =>
             item.code === costCenterCode ||
             item.name === costCenterCode ||
             costCenterString.includes(item.name),
         )?.id;
-
         const costCenterNames = costCenterString
           ? costCenterString.split(",").map((name) => name.trim())
           : [];
-
         const costCenterIds =
           costCenterNames.length > 0
             ? data_cost_center_list
@@ -530,22 +547,18 @@ const PosForm = ({ type }) => {
                 })
                 .map((cc) => cc.id)
             : [];
-
         const accountSegmentId = data_account_segment?.find(
           (item) => item.name === data_detailPos?.accountSegment,
         )?.id;
-
         const accountGroupTypeId = data_account_group_type?.find(
           (item) =>
             (item.glbValue || item.name) === data_detailPos?.accountGroupType,
         )?.glbTypeValId;
-
         setDefaultData({
           sor: sorId,
           costcenter:
             costCenterIds.length > 0 ? costCenterIds : ccId ? [ccId] : [],
         });
-
         form.setFieldsValue({
           customerName: data_detailPos?.customerName,
           registrationNumber: data_detailPos?.registrationNumber,
@@ -568,23 +581,18 @@ const PosForm = ({ type }) => {
           accountSegment: accountSegmentId,
           accountGroupType: accountGroupTypeId,
         });
-
         setAccountNumber(data_detailPos?.registrationNumber);
-
         if (ccId) {
-          const body = {
-            ccIds: [{ ccId: ccId }],
-          };
-          dispatch(getMeterReadingCodeList(body));
+          dispatch(getMeterReadingCodeList({ ccIds: [{ ccId: ccId }] }));
           setIsCostCenterFilled(true);
         } else if (costCenterIds && costCenterIds.length > 0) {
-          const body = {
-            ccIds: costCenterIds.map((id) => ({ ccId: id })),
-          };
-          dispatch(getMeterReadingCodeList(body));
+          dispatch(
+            getMeterReadingCodeList({
+              ccIds: costCenterIds.map((id) => ({ ccId: id })),
+            }),
+          );
           setIsCostCenterFilled(true);
         }
-
         if (accountSegmentId) {
           setIsAccountSegmentFilled(true);
           dispatch(getAccountGroupTypeList([accountSegmentId]));
@@ -593,6 +601,7 @@ const PosForm = ({ type }) => {
         handleSetFormUpdate(data_detailPos, data_globalCurrency);
         setAccountNumber(data_detailPos?.accountNumber);
       }
+
       setCurrency(
         data_globalCurrency?.find(
           (item) => item.text === data_detailPos?.currency,
@@ -613,21 +622,28 @@ const PosForm = ({ type }) => {
         taxRateDate: data_detailPos.taxRateDate || "",
         taxRateType: data_detailPos.taxRateType || "",
       });
+
       setData(
-        data_detailPos?.mrbiPosDetails?.map((item) => {
-          let temp = {
-            ...item,
-            price: item?.price || 0,
-            amount: item?.amount || 0,
-            amountEqvUsd: Number(item?.amountEqvUsd.toFixed(2)) || 0,
-            amountEqvIdr: item?.amountEqvIdr || 0,
-            eqvIdr: item?.eqvIdr || 0,
-            totalEqvIdr: item?.totalEqvIdr || 0,
-            totalEqvUsd: Number(item?.totalEqvUsd.toFixed(2)) || 0,
-          };
-          return temp;
-        }),
+        data_detailPos?.mrbiPosDetails?.map((item) => ({
+          ...item,
+          price: item?.price || 0,
+          amount: item?.amount || 0,
+          totalAmountEqv: item?.totalAmountEqv || 0,
+          convertedCurrency: item?.convertedCurrency || null,
+          amountEqvUsd:
+            item?.amountEqvUsd != null
+              ? Number(item.amountEqvUsd.toFixed(2))
+              : 0,
+          amountEqvIdr: item?.amountEqvIdr || 0,
+          eqvIdr: item?.eqvIdr || 0,
+          totalEqvIdr: item?.totalEqvIdr || 0,
+          totalEqvUsd:
+            item?.totalEqvUsd != null
+              ? Number(item.totalEqvUsd.toFixed(2))
+              : 0,
+        })),
       );
+
       setDataAttachment(
         (data_detailPos?.mattachments || []).map((item) => ({
           ...item,
@@ -651,7 +667,6 @@ const PosForm = ({ type }) => {
     dispatch,
   ]);
 
-  // Set rate data from API
   useEffect(() => {
     if (data_rate && data_rate_tax) {
       setDataDynamic({
@@ -670,253 +685,241 @@ const PosForm = ({ type }) => {
     }
   }, [data_rate, data_rate_tax]);
 
-  // Calculate POS totals and materai
-  useEffect(() => {
-    if (data) {
-      let dataMaterai =
-        data.filter(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
-        )[0] || {};
-      const newDataDynamic = data
-        .filter(
-          (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297,
-        )
-        .reduce(
-          (sums, item) => {
-            let tempSum = { ...sums };
-            if (
-              item.typeId === 2144 &&
-              data.some(
-                (dataItem) => dataItem.reference === parseInt(item.itemId),
-              )
-            ) {
-              tempSum.taxBasisEqvIdr += item.eqvIdr || 0;
-              if (item.currency === "USD") {
-                tempSum.taxBasisUsd += item.total || 0;
-              } else if (item.currency === "IDR") {
-                tempSum.taxBasisIdr += item.total || 0;
-              }
-            }
-            if (
-              item.typeId === 2342 ||
-              item?.typeValueName?.toLowerCase()?.includes("ppn")
-            ) {
-              tempSum.vatEqvIdr += item.eqvIdr || 0;
-              if (item.currency === "USD") {
-                tempSum.vatUsd += item.total || 0;
-              } else if (item.currency === "IDR") {
-                tempSum.vatIdr += item.total || 0;
-              }
-            }
-            if (
-              item.typeId === 2343 ||
-              item?.typeValueName?.toLowerCase()?.includes("pph")
-            ) {
-              tempSum.withholdingTax += item.totalEqvIdr || 0;
-            }
-            if (item.currency === "USD") {
-              tempSum.totalAmountUsd +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.total || 0
-                  : 0;
-              tempSum.amountUsd +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.amount || 0
-                  : 0;
-              tempSum.discountAmountUsd += item.discount || 0;
-            } else if (item.currency === "IDR") {
-              tempSum.totalAmountIdr +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.total || 0
-                  : 0;
-              tempSum.amountIdr +=
-                item.typeId !== 2343 ||
-                !item?.typeValueName?.toLowerCase()?.includes("pph")
-                  ? item.amount || 0
-                  : 0;
-              tempSum.discountAmountIdr += item.discount || 0;
-            }
-            tempSum.totalEqvIdr +=
-              item.typeId !== 2343 ||
-              !item?.typeValueName?.toLowerCase()?.includes("pph")
-                ? item.totalEqvIdr || 0
-                : 0;
-            tempSum.totalEqvUsd +=
-              item.typeId !== 2343 ||
-              !item?.typeValueName?.toLowerCase()?.includes("pph")
-                ? item.totalEqvUsd || 0
-                : 0;
-            return tempSum;
-          },
-          {
-            totalAmountIdr: 0,
-            totalAmountUsd: 0,
-            amountIdr: 0,
-            amountUsd: 0,
-            discountAmountIdr: 0,
-            discountAmountUsd: 0,
-            taxBasisIdr: 0,
-            taxBasisUsd: 0,
-            taxBasisEqvIdr: 0,
-            vatIdr: 0,
-            vatUsd: 0,
-            vatEqvIdr: 0,
-            withholdingTax: 0,
-            totalEqvIdr: 0,
-            totalEqvUsd: 0,
-          },
-        );
-      if (
-        newDataDynamic.totalEqvIdr >= 5000000 &&
-        !data.some(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
-        )
-      ) {
-        dispatch(
-          getMaterai({
-            transactionDate: moment(invoiceDate).format(
-              dateFormatting.dateFormal,
-            ),
-          }),
-        )
-          .unwrap()
-          .then((dataRes) => {
-            dataMaterai = {
-              typeId: dataRes?.type,
-              type: dataRes?.typeName,
-              itemId: parseInt(dataRes?.item),
-              item: dataRes?.itemName,
-              price: dataRes?.price,
-              quantity: dataRes?.quantity,
-              uom: dataRes?.uom,
-              currency: dataRes?.currency,
-              amount: dataRes?.amount,
-              discount: dataRes?.discount || 0,
-              amountEqvIdr: dataRes?.amountEqvIdr,
-              amountEqvUsd: Number(dataRes?.amountEqvUsd.toFixed(2)),
-              total: dataRes.total,
-              eqvIdr: dataRes?.eqvIdr || 0,
-              totalEqvUsd: Number(dataRes?.totalEqvUsd.toFixed(2)),
-              totalEqvIdr: dataRes?.totalEqvIdr,
-              remark: dataRes?.remark || "",
-            };
-            const temp = [...data, dataMaterai || {}];
-            setData(
-              temp.map((items, index) => {
-                return {
-                  ...items,
-                  lineNumber: index + 1,
-                };
-              }),
-            );
-          });
-      } else if (
-        newDataDynamic.totalEqvIdr < 5000000 &&
-        data.some((item) => item.item === "Meterai" || item.itemId === 297)
-      ) {
-        setData(
-          data
-            .filter(
-              (item) =>
-                item.item !== "Meterai" || parseInt(item.itemId) !== 297,
-            )
-            .map((items, index) => {
-              return {
-                ...items,
-                lineNumber: index + 1,
-              };
-            }),
-        );
-      } else {
-        const dataCalculate = {
-          totalAmountIdr:
-            newDataDynamic.totalAmountIdr +
-            (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
-          totalAmountUsd:
-            newDataDynamic.totalAmountUsd +
-            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqvUsd) : 0),
-          amountIdr:
-            newDataDynamic.amountIdr +
-            (dataMaterai.currency === "IDR" ? parseInt(dataMaterai.amount) : 0),
-          amountUsd:
-            newDataDynamic.amountUsd +
-            (dataMaterai.currency === "USD" ? parseInt(dataMaterai.amount) : 0),
-          discountAmountIdr:
-            newDataDynamic.discountAmountIdr +
-            (dataMaterai.currency === "IDR"
-              ? parseInt(dataMaterai.discount)
-              : 0),
-          discountAmountUsd:
-            newDataDynamic.discountAmountUsd +
-            (dataMaterai.currency === "USD"
-              ? parseInt(dataMaterai.discount)
-              : 0),
-          taxBasisUsd: newDataDynamic.taxBasisUsd,
-          taxBasisIdr: newDataDynamic.taxBasisIdr,
-          taxBasisEqvIdr: newDataDynamic.taxBasisEqvIdr,
-          vatUsd: newDataDynamic.vatUsd,
-          vatIdr: newDataDynamic.vatIdr,
-          vatEqvIdr: newDataDynamic.vatEqvIdr,
-          withholdingTax: newDataDynamic.withholdingTax,
-          totalEqvIdr:
-            newDataDynamic.totalEqvIdr +
-            (dataMaterai.totalEqvIdr ? parseInt(dataMaterai.totalEqvIdr) : 0),
-          totalEqvUsd:
-            newDataDynamic.totalEqvUsd +
-            (dataMaterai.totalEqvUsd ? parseInt(dataMaterai.totalEqvUsd) : 0),
-        };
-        setDataDynamic({ ...dataDynamic, ...dataCalculate });
-      }
-    }
-  }, [data, dispatch, invoiceDate]);
+  // ============================================================
+  // ✅ MAIN EFFECT: Calculate totals + trigger materai endpoint
+  //
+  // SOLUSI INFINITE LOOP:
+  // Pisahkan useEffect menjadi 2:
+  //   1. useEffect([data]) → hanya hitung totals + set prevDataRef
+  //   2. useEffect([invoiceDate, accountNumber, customerType]) → tidak ada
+  // Dispatch materai dipanggil dari useEffect([data]) TAPI menggunakan
+  // debounce + skipMateraiUpdate ref untuk mencegah loop dari setData di .then()
+  // ============================================================
 
-  // Fetch billing period data
+  // ✅ Ref menyimpan snapshot data sebelumnya untuk deteksi perubahan real
+  const prevNonMateraiRef = useRef([]);
+
+  useEffect(() => {
+    if (!data) return;
+
+    // ✅ Pisahkan item materai dan non-materai
+    const filteredData = data.filter(
+      (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+    );
+
+    // ✅ Hitung totals dari item non-materai
+    const newDataDynamic = filteredData.reduce(
+      (sums, item) => {
+        let tempSum = { ...sums };
+        if (
+          item.typeId === 2144 &&
+          data.some((dataItem) => dataItem.reference === parseInt(item.itemId))
+        ) {
+          tempSum.taxBasisEqvIdr += item.totalAmountEqv || item.eqvIdr || 0;
+          if (item.currency === "USD") tempSum.taxBasisUsd += item.total || 0;
+          else if (item.currency === "IDR") tempSum.taxBasisIdr += item.total || 0;
+        }
+        if (item.typeId === 2342 || item?.typeValueName?.toLowerCase()?.includes("ppn")) {
+          tempSum.vatEqvIdr += item.totalAmountEqv || item.eqvIdr || 0;
+          if (item.currency === "USD") tempSum.vatUsd += item.total || 0;
+          else if (item.currency === "IDR") tempSum.vatIdr += item.total || 0;
+        }
+        if (item.typeId === 2343 || item?.typeValueName?.toLowerCase()?.includes("pph")) {
+          tempSum.withholdingTax += item.totalAmountEqv || item.totalEqvIdr || 0;
+        }
+        if (item.currency === "USD") {
+          const notPph = item.typeId !== 2343 && !item?.typeValueName?.toLowerCase()?.includes("pph");
+          tempSum.totalAmountUsd += notPph ? item.total || 0 : 0;
+          tempSum.amountUsd += notPph ? item.amount || 0 : 0;
+          tempSum.discountAmountUsd += item.discount || 0;
+        } else if (item.currency === "IDR") {
+          const notPph = item.typeId !== 2343 && !item?.typeValueName?.toLowerCase()?.includes("pph");
+          tempSum.totalAmountIdr += notPph ? item.total || 0 : 0;
+          tempSum.amountIdr += notPph ? item.amount || 0 : 0;
+          tempSum.discountAmountIdr += item.discount || 0;
+        }
+        const notPph = item.typeId !== 2343 && !item?.typeValueName?.toLowerCase()?.includes("pph");
+        tempSum.totalEqvIdr += notPph ? item.totalAmountEqv || item.totalEqvIdr || 0 : 0;
+        tempSum.totalEqvUsd += notPph ? item.totalAmountEqv || item.totalEqvUsd || 0 : 0;
+        return tempSum;
+      },
+      {
+        totalAmountIdr: 0, totalAmountUsd: 0, amountIdr: 0, amountUsd: 0,
+        discountAmountIdr: 0, discountAmountUsd: 0, taxBasisIdr: 0, taxBasisUsd: 0,
+        taxBasisEqvIdr: 0, vatIdr: 0, vatUsd: 0, vatEqvIdr: 0,
+        withholdingTax: 0, totalEqvIdr: 0, totalEqvUsd: 0,
+      },
+    );
+
+    // ✅ Selalu update totals (sinkron)
+    setDataDynamic((prev) => ({
+      ...prev,
+      totalAmountIdr: newDataDynamic.totalAmountIdr,
+      totalAmountUsd: newDataDynamic.totalAmountUsd,
+      amountIdr: newDataDynamic.amountIdr,
+      amountUsd: newDataDynamic.amountUsd,
+      discountAmountIdr: newDataDynamic.discountAmountIdr,
+      discountAmountUsd: newDataDynamic.discountAmountUsd,
+      taxBasisUsd: newDataDynamic.taxBasisUsd,
+      taxBasisIdr: newDataDynamic.taxBasisIdr,
+      taxBasisEqvIdr: newDataDynamic.taxBasisEqvIdr,
+      vatUsd: newDataDynamic.vatUsd,
+      vatIdr: newDataDynamic.vatIdr,
+      vatEqvIdr: newDataDynamic.vatEqvIdr,
+      withholdingTax: newDataDynamic.withholdingTax,
+      totalEqvIdr: newDataDynamic.totalEqvIdr,
+      totalEqvUsd: newDataDynamic.totalEqvUsd,
+    }));
+
+    // ✅ Tidak ada item → hapus materai jika ada
+    if (filteredData.length === 0) {
+      setData((prev) => {
+        const hasMaterai = prev.some(
+          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+        );
+        if (hasMaterai) {
+          isUpdatingFromMaterai.current = true;
+          return prev
+            .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+            .map((items, index) => ({ ...items, lineNumber: index + 1 }));
+        }
+        return prev;
+      });
+      prevNonMateraiRef.current = [];
+      return;
+    }
+
+    // ✅ Cek apakah non-materai items benar-benar berubah
+    // (bukan hanya karena materai ditambahkan ke list)
+    const prevIds = prevNonMateraiRef.current.map((i) => i.itemId + "_" + i.total).join(",");
+    const currIds = filteredData.map((i) => i.itemId + "_" + i.total).join(",");
+
+    if (prevIds === currIds) {
+      // Tidak ada perubahan pada item non-materai → skip dispatch
+      // Ini terjadi saat setData dari .then() menambahkan materai ke list
+      return;
+    }
+
+    // ✅ Update snapshot
+    prevNonMateraiRef.current = filteredData;
+
+    // ✅ Skip jika invoiceDate belum ada
+    if (!invoiceDate) return;
+
+    // ✅ Build payload per item (bukan digabung per currency)
+    const buildMateraiPayload = () => {
+      const totalAmounts = filteredData
+        .filter(
+          (item) =>
+            item.typeId !== 2343 &&
+            !item?.typeValueName?.toLowerCase()?.includes("pph") &&
+            item.typeId !== 2342 &&
+            !item?.typeValueName?.toLowerCase()?.includes("ppn"),
+        )
+        .map((item) => ({
+          currCode: item.currency,
+          amount: item.total || item.amount || 0,
+        }));
+
+      return {
+        account: customerType === "customer" ? accountNumber : null,
+        transactionDate: moment(invoiceDate).format(dateFormatting.dateFormal),
+        totalAmounts,
+      };
+    };
+
+    // ✅ Debounce 600ms - pastikan semua item (termasuk Tax auto-generate) sudah masuk
+    if (materaiDebounceTimer.current) {
+      clearTimeout(materaiDebounceTimer.current);
+    }
+
+    materaiDebounceTimer.current = setTimeout(() => {
+      dispatch(getMaterai(buildMateraiPayload()))
+        .unwrap()
+        .then((dataRes) => {
+          if (!dataRes || !dataRes?.item) {
+            // BE: tidak perlu materai → hapus jika sudah ada
+            isUpdatingFromMaterai.current = true;
+            setData((prev) => {
+              const hasMaterai = prev.some(
+                (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+              );
+              if (!hasMaterai) return prev;
+              return prev
+                .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+                .map((items, index) => ({ ...items, lineNumber: index + 1 }));
+            });
+            return;
+          }
+
+          // BE: perlu materai → tambah atau replace
+          const newMaterai = {
+            typeId: dataRes?.type,
+            type: dataRes?.typeName,
+            typeValueName: dataRes?.typeValueName || null,
+            itemId: parseInt(dataRes?.item),
+            item: dataRes?.itemName,
+            price: dataRes?.price,
+            quantity: dataRes?.quantity,
+            uom: dataRes?.uom,
+            currency: dataRes?.currency,
+            amount: dataRes?.amount,
+            discount: dataRes?.discount || 0,
+            totalAmountEqv: dataRes?.totalAmountEqv || 0,
+            convertedCurrency: dataRes?.convertedCurrency || null,
+            total: dataRes?.total,
+            amountEqvIdr: dataRes?.amountEqvIdr || 0,
+            amountEqvUsd:
+              dataRes?.amountEqvUsd != null ? Number(dataRes.amountEqvUsd.toFixed(2)) : 0,
+            eqvIdr: dataRes?.eqvIdr || 0,
+            totalEqvUsd:
+              dataRes?.totalEqvUsd != null ? Number(dataRes.totalEqvUsd.toFixed(2)) : 0,
+            totalEqvIdr: dataRes?.totalEqvIdr || 0,
+            remark: dataRes?.remark || "",
+          };
+
+          // ✅ Set flag SEBELUM setData agar useEffect langsung skip di run berikutnya
+          isUpdatingFromMaterai.current = true;
+          setData((prev) => {
+            const baseData = prev.some(
+              (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+            )
+              ? prev.filter(
+                  (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+                )
+              : prev;
+            return [...baseData, newMaterai].map((items, index) => ({
+              ...items,
+              lineNumber: index + 1,
+            }));
+          });
+        })
+        .catch(() => {
+          // Error → tidak ada perubahan, totals sudah diupdate di atas
+        });
+    }, 600);
+
+    return () => {
+      if (materaiDebounceTimer.current) {
+        clearTimeout(materaiDebounceTimer.current);
+      }
+    };
+  }, [data, dispatch, invoiceDate, accountNumber, customerType]);
+
+
+
   useEffect(() => {
     if (dataBillingCycle && dataBillingCycle !== undefined) {
       dispatch(getGlobalBillingPeriod(dataBillingCycle));
     }
   }, [dispatch, dataBillingCycle]);
 
-  // Fetch approval detail
   useEffect(() => {
     if (dataApprovalId && dataApprovalId !== undefined) {
       dispatch(getApprovalListDetail(dataApprovalId));
     }
   }, [dispatch, dataApprovalId]);
 
-  // Transform approval list data
-  useEffect(() => {
-    if (data_approvalList) {
-      const tempAppHier = (data_approvalList || []).map((appHier) => ({
-        name: appHier.approvalName,
-        value: appHier.appHierId,
-      }));
-
-      setDataApproval(tempAppHier);
-    }
-  }, [data_approvalList]);
-
-  // Transform approval detail data
-  useEffect(() => {
-    if (data_approvalListDetail && data_approvalListDetail.length > 0) {
-      const data = data_approvalListDetail.map((a, index) => ({
-        ...a,
-        key: index + 1,
-        employeeDetail: a.employeeDetail.map((b, index) => ({
-          ...b,
-          key: index + 1,
-        })),
-      }));
-      setDataListDetailApproval(data);
-    } else {
-      setDataListDetailApproval([]);
-    }
-  }, [data_approvalListDetail]);
-
-  // Set account data for customer
   useEffect(() => {
     if (accountNumber && customerType === "customer") {
       setDataAccount(
@@ -927,16 +930,12 @@ const PosForm = ({ type }) => {
     }
   }, [accountNumber, customerType, data_globalAccountNumber]);
 
-  // Populate form with account data
   useEffect(() => {
     if (dataAccount && customerType === "customer") {
-      form.setFieldsValue({
-        ...dataAccount,
-      });
+      form.setFieldsValue({ ...dataAccount });
     }
   }, [dataAccount, customerType, form]);
 
-  // Handle terms of payment DDL changes
   useEffect(() => {
     if (valueDdl) {
       form.resetFields(["termType", "termValue"]);
@@ -945,14 +944,12 @@ const PosForm = ({ type }) => {
     }
   }, [valueDdl, handleSetFormTypeValueDdl, data_detailPos, form]);
 
-  // Set terms of payment value
   useEffect(() => {
     if (hasValue(ddlFinal?.value)) {
       handleSetFormTypeTOP(ddlFinal, data_detailPos);
     }
   }, [ddlFinal, handleSetFormTypeTOP, data_detailPos]);
 
-  // Update value page based on current step
   useEffect(() => {
     setValuePage(steps[current].value);
   }, [current]);
@@ -1000,21 +997,22 @@ const PosForm = ({ type }) => {
         const findBillingCycle = data_globalBillingCycle?.find(
           (item) => item.id === e?.billingCycle,
         )?.name;
-
         const findBillingPeriod = data_globalBillingPeriod?.find(
           (item) => item.id === e?.billingPeriod,
         )?.name;
-
         setDataSend({
           ...e,
           billingCycle:
-            findBillingCycle === undefined ? e?.billingCycle : findBillingCycle,
+            findBillingCycle === undefined
+              ? e?.billingCycle
+              : findBillingCycle,
           billingPeriod:
             findBillingPeriod === undefined
               ? e?.billingPeriod
               : findBillingPeriod,
-          currency: data_globalCurrency?.find((item) => item.Id === e?.currency)
-            ?.text,
+          currency: data_globalCurrency?.find(
+            (item) => item.Id === e?.currency,
+          )?.text,
           transactionDate: moment(e?.transactionDate).format(
             dateFormatting.date,
           ),
@@ -1025,6 +1023,7 @@ const PosForm = ({ type }) => {
                 (item) => item.Id === e?.termType?.termValue,
               )?.text,
           remark: e?.remark,
+          genProInv: e?.genProInv ? "Y" : "N",
           submit: typeSubmit,
           topId: e.termType.termValueDdl,
         });
@@ -1054,17 +1053,12 @@ const PosForm = ({ type }) => {
   const handleSendData = (e) => {
     setModalConfirm(false);
 
-    const calculateAmount = data.map((a) => a.amount);
-    const sumAmount = calculateAmount.reduce(
-      (accumulator, currentValue) => accumulator + currentValue,
-      0,
-    );
-
-    const calculateDiscount = data.map((a) => a.discount);
-    const sumDiscount = calculateDiscount.reduce(
-      (accumulator, currentValue) => accumulator + currentValue,
-      0,
-    );
+    const sumAmount = data
+      .map((a) => a.amount)
+      .reduce((acc, cur) => acc + cur, 0);
+    const sumDiscount = data
+      .map((a) => a.discount)
+      .reduce((acc, cur) => acc + cur, 0);
 
     const dataTypeTOP = data_globalTermsOfPaymentValue?.find(
       (item) => item.Id === e.termType.termValue,
@@ -1073,76 +1067,83 @@ const PosForm = ({ type }) => {
     const billingCycleId =
       typeof e?.billingCycle === "number"
         ? e?.billingCycle
-        : data_globalBillingCycle?.find((item) => item.name === e?.billingCycle)
-            ?.id;
+        : data_globalBillingCycle?.find(
+            (item) => item.name === e?.billingCycle,
+          )?.id;
 
-    // Helper functions to convert ID to NAME or return existing NAME
     const getSorName = () => {
       if (customerType === "prospective" && e?.sor) {
-        if (typeof e.sor === "string") {
-          return e.sor;
-        } else {
-          const sorItem = data_sor_list?.find((item) => item.id === e.sor);
-          return sorItem ? sorItem.name : "";
-        }
+        if (typeof e.sor === "string") return e.sor;
+        const sorItem = data_sor_list?.find((item) => item.id === e.sor);
+        return sorItem ? sorItem.name : "";
       }
       return e?.sor || "";
     };
 
     const getMrcName = () => {
       if (customerType === "prospective" && e?.meterReadingCode) {
-        if (typeof e.meterReadingCode === "string") {
-          return e.meterReadingCode;
-        } else {
-          const mrc = mergedArrayMrc?.find(
-            (item) => item.id === e.meterReadingCode,
-          );
-          return mrc ? mrc.name : "";
-        }
+        if (typeof e.meterReadingCode === "string") return e.meterReadingCode;
+        const mrc = mergedArrayMrc?.find(
+          (item) => item.id === e.meterReadingCode,
+        );
+        return mrc ? mrc.name : "";
       }
       return e?.meterReadingCode || "";
     };
 
     const getAccountSegmentName = () => {
       if (customerType === "prospective" && e?.accountSegment) {
-        if (typeof e.accountSegment === "string") {
-          return e.accountSegment;
-        } else {
-          const segment = data_account_segment?.find(
-            (item) => item.id === e.accountSegment,
-          );
-          return segment ? segment.name : "";
-        }
+        if (typeof e.accountSegment === "string") return e.accountSegment;
+        const segment = data_account_segment?.find(
+          (item) => item.id === e.accountSegment,
+        );
+        return segment ? segment.name : "";
       }
       return e?.accountSegment || "";
     };
 
     const getAccountGroupTypeName = () => {
       if (customerType === "prospective" && e?.accountGroupType) {
-        if (typeof e.accountGroupType === "string") {
-          return e.accountGroupType;
-        } else {
-          const groupType = data_account_group_type?.find(
-            (item) => item.glbTypeValId === e.accountGroupType,
-          );
-          return groupType ? groupType.glbValue || groupType.name : "";
-        }
+        if (typeof e.accountGroupType === "string") return e.accountGroupType;
+        const groupType = data_account_group_type?.find(
+          (item) => item.glbTypeValId === e.accountGroupType,
+        );
+        return groupType ? groupType.glbValue || groupType.name : "";
       }
       return e?.accountGroupType || "";
     };
 
     const getCostCenterName = () => {
       if (customerType === "prospective" && e?.costcenter) {
-        if (typeof e.costcenter === "string") {
-          return e.costcenter;
-        } else {
-          const cc = data_cost_center_list?.find(
-            (item) => item.id === e.costcenter,
-          );
-          return cc ? cc.name : "";
-        }
+        if (typeof e.costcenter === "string") return e.costcenter;
+        const cc = data_cost_center_list?.find(
+          (item) => item.id === e.costcenter,
+        );
+        return cc ? cc.name : "";
       }
       return e?.costcenter || e?.costCenter || "";
+    };
+
+    const getClassificationTypeName = () => {
+      if (customerType === "prospective" && e?.clasificationType) {
+        if (typeof e.clasificationType === "string") return e.clasificationType;
+        const classification = data_classification_type?.find(
+          (item) => item.id === e.clasificationType,
+        );
+        return classification ? classification.name : "";
+      }
+      return e?.clasificationType || "";
+    };
+
+    const getAccountTypeName = () => {
+      if (customerType === "prospective" && e?.accountType) {
+        if (typeof e.accountType === "string") return e.accountType;
+        const accType = data_account_type?.find(
+          (item) => item.id === e.accountType,
+        );
+        return accType ? accType.name : "";
+      }
+      return e?.accountType || "";
     };
 
     let body = {
@@ -1157,13 +1158,15 @@ const PosForm = ({ type }) => {
         accountNumber: e?.accountNumber,
         registrationNumber: null,
         email: null,
+        phoneNumber: null,
         address: null,
       }),
 
       ...(customerType === "prospective" && {
         registrationNumber: e?.registrationNumber,
-        accountNumber: null,
+        accountNumber: "",
         email: e?.email || "",
+        phoneNumber: e?.phoneNumber || "",
         address: e?.address || "",
         customerNumber: null,
       }),
@@ -1173,41 +1176,47 @@ const PosForm = ({ type }) => {
       meterReadingCode: getMrcName(),
       accountSegment: getAccountSegmentName(),
       accountGroupType: getAccountGroupTypeName(),
+      clasificationType: getClassificationTypeName(),
+      accountType: getAccountTypeName(),
       billingCycleId: billingCycleId,
       billingCycle:
         data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
           ?.name || e?.billingCycle,
       billingPeriod:
-        data_globalBillingPeriod?.find((item) => item.id === e?.billingPeriod)
-          ?.name || e?.billingPeriod,
+        data_globalBillingPeriod?.find(
+          (item) => item.id === e?.billingPeriod,
+        )?.name || e?.billingPeriod,
       currency:
         data_globalCurrency?.find((item) => item.Id === e?.currency)?.text ||
         e?.currency,
-      transactionDate: moment(e?.transactionDate).format("DD MMM YYYY"),
-      invoiceDate: moment(e?.invoiceDate).format("DD MMM YYYY"),
+      transactionDate: moment(e?.transactionDate).format(dateFormatting.dateFormal),
+      invoiceDate: moment(e?.invoiceDate).format(dateFormatting.dateFormal),
       termsOfPayment: moment.isMoment(e?.termType?.termValue)
-        ? moment(e?.termType?.termValue).format(dateFormatting.date)
+        ? moment(e?.termType?.termValue).format(dateFormatting.dateFormal)
         : data_globalTermsOfPaymentValue?.find(
             (item) => item.Id === e?.termType?.termValue,
           )?.text || e?.termType?.termValue,
       remark: e?.remark,
-
+      genProInv: e?.genProInv ? "Y" : "N",
       appHierId: dataApprovalId,
       submit: typeSubmit,
-      topDataType: dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
+      topDataType:
+        dataTypeTOP === undefined ? null : dataTypeTOP?.topDataType,
       topId: e.termType.termValueDdl,
 
-      rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
+      rate:
+        parseFloat(dataDynamic?.rate?.replace?.(/,/g, "") ?? "0") || 0,
       rateDate: dataDynamic?.rateDate
         ? moment(dataDynamic.rateDate, dateFormatting.date).format(
-            "DD MMM YYYY",
+            dateFormatting.dateFormal,
           )
         : null,
       rateType: dataDynamic?.rateType || null,
-      taxRate: parseFloat(dataDynamic?.taxRate.replace(/,/g, "")) || 0,
+      taxRate:
+        parseFloat(dataDynamic?.taxRate?.replace?.(/,/g, "") ?? "0") || 0,
       taxRateDate: dataDynamic?.taxRateDate
         ? moment(dataDynamic.taxRateDate, dateFormatting.date).format(
-            "DD MMM YYYY",
+            dateFormatting.dateFormal,
           )
         : null,
       taxRateType: dataDynamic?.taxRateType || null,
@@ -1242,6 +1251,8 @@ const PosForm = ({ type }) => {
         uom: item?.uom || null,
         currency: item?.currency || null,
         amount: item?.amount || 0,
+        totalAmountEqv: item?.totalAmountEqv || 0,
+        convertedCurrency: item?.convertedCurrency || null,
         amountEqvIdr: item?.amountEqvIdr || 0,
         amountEqvUsd: item?.amountEqvUsd || 0,
         eqvIdr: item?.eqvIdr || 0,
@@ -1263,22 +1274,18 @@ const PosForm = ({ type }) => {
         .then(async (data) => {
           const id = data?.id;
           setLoadingForm(true);
-
           for (let icon = 0; icon < dataAttachment.length; icon++) {
             const element = dataAttachment[icon];
-            const attachBody = {
-              files: element.file,
-              refId: id,
-              category: element.fileCategoryId,
-            };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              attachBody,
+              {
+                files: element.file,
+                refId: id,
+                category: element.fileCategoryId,
+              },
             );
           }
-
           navigate(RBI_ROUTES.POS_VIEW, { replace: true });
-
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1293,9 +1300,7 @@ const PosForm = ({ type }) => {
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
-              (error?.response &&
-                error?.response?.data &&
-                error?.response?.data?.message) ||
+              error?.response?.data?.message ||
               error?.message ||
               error?.toString();
             setBodyError({ message, value: e });
@@ -1311,22 +1316,18 @@ const PosForm = ({ type }) => {
           const filterDataAttach = dataAttachment.filter(
             (item) => item.dataType !== "exist",
           );
-
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
-            const attachBody = {
-              files: element.file,
-              refId: id,
-              category: element.fileCategoryId,
-            };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              attachBody,
+              {
+                files: element.file,
+                refId: id,
+                category: element.fileCategoryId,
+              },
             );
           }
-
           navigate(RBI_ROUTES.POS_VIEW, { replace: true });
-
           form.resetFields();
           setLoadingForm(false);
           setData([]);
@@ -1341,9 +1342,7 @@ const PosForm = ({ type }) => {
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
-              (error?.response &&
-                error?.response?.data &&
-                error?.response?.data?.message) ||
+              error?.response?.data?.message ||
               error?.message ||
               error?.toString();
             setBodyError({ message, value: e });
@@ -1375,10 +1374,10 @@ const PosForm = ({ type }) => {
   const handleChangeCostCenter = (selectedCostCenterId) => {
     form.resetFields(["meterReadingCode"]);
     setIsCostCenterFilled(!!selectedCostCenterId);
-
     if (selectedCostCenterId) {
-      const body = { ccIds: [{ ccId: selectedCostCenterId }] };
-      dispatch(getMeterReadingCodeList(body));
+      dispatch(
+        getMeterReadingCodeList({ ccIds: [{ ccId: selectedCostCenterId }] }),
+      );
     }
   };
 
@@ -1386,7 +1385,6 @@ const PosForm = ({ type }) => {
     if (type === "update") {
       if (data_detailPos && type === "update") {
         const isProspective = data_detailPos.customerType === 2;
-
         setValueDdl({
           action: "setData",
           value: isDateString(data_detailPos?.termsOfPayment) ? "DATE" : "TOP",
@@ -1396,27 +1394,23 @@ const PosForm = ({ type }) => {
           const sorId = data_sor_list?.find(
             (item) => item.name === data_detailPos?.sor,
           )?.id;
-
           const costCenterNames = data_detailPos?.costcenter
             ? data_detailPos.costcenter.split(",").map((name) => name.trim())
             : [];
-
           const costCenterIds =
             costCenterNames.length > 0
               ? data_cost_center_list
                   ?.filter((cc) => costCenterNames.includes(cc.name))
                   .map((cc) => cc.id)
               : [];
-
           const accountSegmentId = data_account_segment?.find(
             (item) => item.name === data_detailPos?.accountSegment,
           )?.id;
-
           const accountGroupTypeId = data_account_group_type?.find(
             (item) =>
-              (item.glbValue || item.name) === data_detailPos?.accountGroupType,
+              (item.glbValue || item.name) ===
+              data_detailPos?.accountGroupType,
           )?.glbTypeValId;
-
           form.setFieldsValue({
             customerName: data_detailPos?.customerName,
             registrationNumber: data_detailPos?.registrationNumber,
@@ -1435,11 +1429,11 @@ const PosForm = ({ type }) => {
             billingPeriod: data_detailPos?.billingPeriod,
             remark: data_detailPos?.remark,
             sor: sorId,
-            costcenter: costCenterIds.length > 0 ? costCenterIds[0] : undefined,
+            costcenter:
+              costCenterIds.length > 0 ? costCenterIds[0] : undefined,
             accountSegment: accountSegmentId,
             accountGroupType: accountGroupTypeId,
           });
-
           setAccountNumber(data_detailPos?.registrationNumber);
         } else {
           handleSetFormUpdate(data_detailPos, data_globalCurrency);
@@ -1447,20 +1441,26 @@ const PosForm = ({ type }) => {
         }
 
         setData(
-          data_detailPos?.mrbiPosDetails?.map((item) => {
-            let temp = {
-              ...item,
-              price: item?.price || 0,
-              amount: item?.amount || 0,
-              amountEqvUsd: Number(item?.amountEqvUsd.toFixed(2)) || 0,
-              amountEqvIdr: item?.amountEqvIdr || 0,
-              eqvIdr: item?.eqvIdr || 0,
-              totalEqvIdr: item?.totalEqvIdr || 0,
-              totalEqvUsd: Number(item?.totalEqvUsd.toFixed(2)) || 0,
-            };
-            return temp;
-          }),
+          data_detailPos?.mrbiPosDetails?.map((item) => ({
+            ...item,
+            price: item?.price || 0,
+            amount: item?.amount || 0,
+            totalAmountEqv: item?.totalAmountEqv || 0,
+            convertedCurrency: item?.convertedCurrency || null,
+            amountEqvUsd:
+              item?.amountEqvUsd != null
+                ? Number(item.amountEqvUsd.toFixed(2))
+                : 0,
+            amountEqvIdr: item?.amountEqvIdr || 0,
+            eqvIdr: item?.eqvIdr || 0,
+            totalEqvIdr: item?.totalEqvIdr || 0,
+            totalEqvUsd:
+              item?.totalEqvUsd != null
+                ? Number(item.totalEqvUsd.toFixed(2))
+                : 0,
+          })),
         );
+
         setCurrency(
           data_globalCurrency?.find(
             (item) => item.text === data_detailPos?.currency,
@@ -1490,14 +1490,10 @@ const PosForm = ({ type }) => {
       setCurrency();
       setInvoiceDate();
       form.setFieldsValue({
-        termType: {
-          termValueDdl: "DATE",
-        },
+        termType: { termValueDdl: "DATE" },
+        genProInv: false,
       });
-      setValueDdl({
-        action: "changes",
-        value: null,
-      });
+      setValueDdl({ action: "changes", value: null });
       setDataAttachment([]);
       setDataApprovalId();
       setDataListDetailApproval([]);
@@ -1531,7 +1527,8 @@ const PosForm = ({ type }) => {
         >
           <div
             style={{
-              display: valuePage !== dataTabs[0].value ? "none" : undefined,
+              display:
+                valuePage !== dataTabs[0].value ? "none" : undefined,
             }}
           >
             <PointOfSalesPage
@@ -1583,12 +1580,15 @@ const PosForm = ({ type }) => {
               setSelectedTransactionDate={setSelectedTransactionDate}
               selectedInvoiceDate={selectedInvoiceDate}
               setSelectedInvoiceDate={setSelectedInvoiceDate}
+              data_account_type={data_account_type}
+              data_classification_type={data_classification_type}
             />
           </div>
 
           <div
             style={{
-              display: valuePage !== dataTabs[1].value ? "none" : undefined,
+              display:
+                valuePage !== dataTabs[1].value ? "none" : undefined,
             }}
           >
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -1603,7 +1603,8 @@ const PosForm = ({ type }) => {
 
           <div
             style={{
-              display: valuePage !== dataTabs[2].value ? "none" : undefined,
+              display:
+                valuePage !== dataTabs[2].value ? "none" : undefined,
             }}
           >
             <PointOfSalesPageAttachment

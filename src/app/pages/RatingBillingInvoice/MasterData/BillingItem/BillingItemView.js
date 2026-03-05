@@ -120,10 +120,7 @@ const BillingItemView = () => {
     });
   };
 
-  const currentList = useMemo(
-    () => data_view?.result || [],
-    [data_view],
-  );
+  const currentList = useMemo(() => data_view?.result || [], [data_view]);
   const totalElements = data_view?.page?.totalElements || 0;
   const hasMore = currentList.length < totalElements;
 
@@ -505,6 +502,7 @@ const BillingItemView = () => {
       >
         <div className="my-0">
           <TableRBI
+            idTable="transaction-mapping"
             dataSource={currentList}
             columns={processedColumns}
             totalData={totalElements}

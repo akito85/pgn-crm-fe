@@ -75,32 +75,6 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "type",
-    title: "TYPE",
-    dataIndex: "type",
-    sorter: true,
-    isClassification: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      searchBI,
-      "type",
-      searchInput,
-      searchedColumnBI,
-      searchTextBI,
-      handleSearchBI,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "type",
-        hasValue(searchBI["type"]),
-        searchTextBI,
-        text,
-        false,
-        "input",
-        searchBI
-      ),
-  },
-  {
     key: "groupId",
     title: "GROUP ID",
     dataIndex: "groupId",
@@ -153,14 +127,14 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "itemCode",
+    key: "billingItemCode",
     title: "ITEM CODE",
-    dataIndex: "itemCode",
+    dataIndex: "billingItemCode",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
-      "itemCode",
+      "billingItemCode",
       searchInput,
       searchedColumnBI,
       searchTextBI,
@@ -169,8 +143,8 @@ export const columnsBillingItem = (
     ),
     render: (text) =>
       renderColumn(
-        "itemCode",
-        hasValue(searchBI["itemCode"]),
+        "billingItemCode",
+        hasValue(searchBI["billingItemCode"]),
         searchTextBI,
         text,
         false,
@@ -568,14 +542,14 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "withHoldingTaxCode",
+    key: "withholdingTaxCode",
     title: "WITHHOLDING TAX CODE",
-    dataIndex: "withHoldingTaxCode",
+    dataIndex: "withholdingTaxCode",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
-      "withHoldingTaxCode",
+      "withholdingTaxCode",
       searchInput,
       searchedColumnBI,
       searchTextBI,
@@ -584,8 +558,8 @@ export const columnsBillingItem = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTaxCode",
-        hasValue(searchBI["withHoldingTaxCode"]),
+        "withholdingTaxCode",
+        hasValue(searchBI["withholdingTaxCode"]),
         searchTextBI,
         text,
         false,
@@ -594,14 +568,14 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "withHoldingTaxRate",
+    key: "withholdingTaxRate",
     title: "WITHHOLDING TAX RATE",
-    dataIndex: "withHoldingTaxRate",
+    dataIndex: "withholdingTaxRate",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
-      "withHoldingTaxRate",
+      "withholdingTaxRate",
       searchInput,
       searchedColumnBI,
       searchTextBI,
@@ -610,8 +584,8 @@ export const columnsBillingItem = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTaxRate",
-        hasValue(searchBI["withHoldingTaxRate"]),
+        "withholdingTaxRate",
+        hasValue(searchBI["withholdingTaxRate"]),
         searchTextBI,
         text,
         false,
@@ -620,14 +594,14 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "withHoldingTax",
+    key: "withholdingTax",
     title: "WITHHOLDING TAX",
-    dataIndex: "withHoldingTax",
+    dataIndex: "withholdingTax",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
-      "withHoldingTax",
+      "withholdingTax",
       searchInput,
       searchedColumnBI,
       searchTextBI,
@@ -636,8 +610,8 @@ export const columnsBillingItem = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTax",
-        hasValue(searchBI["withHoldingTax"]),
+        "withholdingTax",
+        hasValue(searchBI["withholdingTax"]),
         searchTextBI,
         text,
         false,
@@ -646,14 +620,14 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "vatExchRateType",
+    key: "vatExchangeRateType",
     title: "VAT EXCH RATE TYPE",
-    dataIndex: "vatExchRateType",
+    dataIndex: "vatExchangeRateType",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
-      "vatExchRateType",
+      "vatExchangeRateType",
       searchInput,
       searchedColumnBI,
       searchTextBI,
@@ -662,8 +636,8 @@ export const columnsBillingItem = (
     ),
     render: (text) =>
       renderColumn(
-        "vatExchRateType",
-        hasValue(searchBI["vatExchRateType"]),
+        "vatExchangeRateType",
+        hasValue(searchBI["vatExchangeRateType"]),
         searchTextBI,
         text,
         false,
@@ -672,14 +646,14 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "vatExchRateDate",
+    key: "vatExchangeRateDate",
     title: "VAT EXCH RATE DATE",
-    dataIndex: "vatExchRateDate",
+    dataIndex: "vatExchangeRateDate",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
-      "vatExchRateDate",
+      "vatExchangeRateDate",
       searchInput,
       searchedColumnBI,
       searchTextBI,
@@ -689,8 +663,8 @@ export const columnsBillingItem = (
     ),
     render: (text) =>
       renderDateColumn(
-        "vatExchRateDate",
-        hasValue(searchBI["vatExchRateDate"]),
+        "vatExchangeRateDate",
+        hasValue(searchBI["vatExchangeRateDate"]),
         searchTextBI,
         text,
         "date",
@@ -698,14 +672,14 @@ export const columnsBillingItem = (
       ),
   },
   {
-    key: "vatExchRate",
+    key: "vatExchangeRate",
     title: "VAT EXCH RATE",
-    dataIndex: "vatExchRate",
+    dataIndex: "vatExchangeRate",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
-      "vatExchRate",
+      "vatExchangeRate",
       searchInput,
       searchedColumnBI,
       searchTextBI,
@@ -714,8 +688,8 @@ export const columnsBillingItem = (
     ),
     render: (text) =>
       renderColumn(
-        "vatExchRate",
-        hasValue(searchBI["vatExchRate"]),
+        "vatExchangeRate",
+        hasValue(searchBI["vatExchangeRate"]),
         searchTextBI,
         text,
         false,
