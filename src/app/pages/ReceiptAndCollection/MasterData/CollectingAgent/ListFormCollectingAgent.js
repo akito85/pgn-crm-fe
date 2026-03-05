@@ -51,7 +51,7 @@ const ListFormCollectingAgent = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [form] = Form.useForm();
-    const formValue = form.getFieldsValue();
+    const formValue = Form.useWatch([], form) ?? {};
     const location = useLocation();
     const { id, status } = location?.state || {};
     const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -239,6 +239,7 @@ const ListFormCollectingAgent = (props) => {
                     const sukses = data?.success;
                     if (sukses === false) {
                         setModalConfirm(false);
+                        return;
                     }
                     setModalConfirm(true);
                 });
@@ -249,6 +250,7 @@ const ListFormCollectingAgent = (props) => {
                     const sukses = data?.success;
                     if (sukses === false) {
                         setModalConfirm(false);
+                        return;
                     }
                     setModalConfirm(true);
                     setSendBody(bodyValidasiUpdate);
