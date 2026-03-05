@@ -22,8 +22,8 @@ const initialState = {
   },
   loading_listMdApprovalOption: false,
   list_mdApprovalOptions: [],
-  loading_detailMdApprovalHierarchyDetails: false,
-  detail_mdApprovalHierarchyDetails: [],
+  loading_listMdApprovalHierarchyDetail: false,
+  list_mdApprovalHierarchyDetail: [],
   data_mdAttachmentCategory: [],
   loading_listMdAccountStandard: false,
   list_mdAccountStandard: [],
@@ -730,16 +730,16 @@ const multiDestinationSlice = createSlice({
 
     /** Get Multi Destination Detail Approval Hierarchy */
     [getDetailMdApprovalHierarchy.pending]: (state) => {
-      state.detail_mdApprovalHierarchyDetails = [];
-      state.loading = true;
+      state.list_mdApprovalHierarchyDetail = [];
+      state.loading_listMdApprovalHierarchyDetail = true;
     },
     [getDetailMdApprovalHierarchy.fulfilled]: (state, action) => {
-      state.detail_mdApprovalHierarchyDetails = action.payload;
-      state.loading = false;
+      state.list_mdApprovalHierarchyDetail = action.payload;
+      state.loading_listMdApprovalHierarchyDetail = false;
     },
     [getDetailMdApprovalHierarchy.rejected]: (state) => {
-      state.detail_mdApprovalHierarchyDetails = [];
-      state.loading = false;
+      state.list_mdApprovalHierarchyDetail = [];
+      state.loading_listMdApprovalHierarchyDetail = false;
     },
 
     /** Get Multi Destination Attachment Category */
