@@ -42,7 +42,7 @@ const initialState = {
   loading_listRelationshipType: false,
   loading_listRelationshipCategory: false,
   loading_listRelationshipApprovalOption: false,
-  loading_detailRelationshipApprovalHierarchyDetails: false,
+  loading_listRelationshipApprovalHierarchyDetail: false,
   loading_listRelatedObject: false,
   loading_approvalHistoryRelationship: false,
   loading_createUpdateRelationship: false,
@@ -799,14 +799,14 @@ const relationshipSlice = createSlice({
 
     // Get Approval Hierarchy Detail
     [getApprovalHierarchyDetail.pending]: (state) => {
-      state.loading_detailRelationshipApprovalHierarchyDetails = true;
+      state.loading_listRelationshipApprovalHierarchyDetail = true;
     },
     [getApprovalHierarchyDetail.fulfilled]: (state, action) => {
       state.data_approvalHierarchyDetail = action.payload;
-      state.loading_detailRelationshipApprovalHierarchyDetails = false;
+      state.loading_listRelationshipApprovalHierarchyDetail = false;
     },
     [getApprovalHierarchyDetail.rejected]: (state) => {
-      state.loading_detailRelationshipApprovalHierarchyDetails = false;
+      state.loading_listRelationshipApprovalHierarchyDetail = false;
     },
 
     // Get Relationship Search Column
