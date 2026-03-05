@@ -1167,7 +1167,7 @@ const PosForm = ({ type }) => {
         accountNumber: "",
         email: e?.email || "",
         phoneNumber: e?.phoneNumber || "",
-        address: e?.address || "",
+        address: null,
         customerNumber: null,
       }),
 
@@ -1244,7 +1244,7 @@ const PosForm = ({ type }) => {
         posNumber: item?.posNumber,
         lineNumber: item?.lineNumber || 0,
         type: item?.typeId,
-        item: item?.itemId,
+        item: String(item?.itemId),
         price: item?.price || 0,
         reference: item?.reference || null,
         quantity: item?.quantity,
