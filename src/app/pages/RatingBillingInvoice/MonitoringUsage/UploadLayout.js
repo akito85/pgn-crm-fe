@@ -51,9 +51,7 @@ const UploadLayout = ({
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [modalDelete, setModalDelete] = useState(false);
 
-  // ✅ NEW: State untuk modal konfirmasi recalculate
   const [showRecalculateModal, setShowRecalculateModal] = useState(false);
-  // ✅ NEW: Simpan pending upload action (file atau link) agar bisa dilanjutkan setelah konfirmasi
   const [pendingUploadAction, setPendingUploadAction] = useState(null);
 
   const MAX_FILE_SIZE = 5000000;
@@ -64,7 +62,6 @@ const UploadLayout = ({
   const dispatch = useDispatch();
   const { list_usage_type } = useSelector((state) => state.monitoring_usage);
   
-  // Ref untuk scroll ke file preview
   const filePreviewRef = useRef(null);
 
   useEffect(() => {
@@ -75,24 +72,19 @@ const UploadLayout = ({
     }
   }, [dispatch]);
 
-  // ✅ NEW: Helper untuk cek apakah format yang dipilih adalah "NEED"
   const isNeedType = (formatValue) => {
     const target = formatValue ?? format;
     if (!target) return false;
 
-    // Ant Design labelInValue bisa return: { value, label } atau string
-    // label bisa berupa string, React node, atau array
     let labelStr = "";
 
     if (typeof target === "object") {
       const raw = target?.label ?? target?.children ?? target?.name ?? "";
-      // Jika label adalah React element atau array, ambil dari value/id sebagai fallback
       if (typeof raw === "string") {
         labelStr = raw;
       } else if (Array.isArray(raw)) {
         labelStr = raw.join("");
       } else {
-        // Fallback: cek dari list_usage_type berdasarkan value/id
         const matched = list_usage_type?.find(
           (d) => d.id === target?.value || d.id === target?.key
         );
@@ -165,10 +157,9 @@ const UploadLayout = ({
     setFormat(value);
     setFileUploadEnabled(!!value);
 
-    // ✅ Tampilkan modal recalculate langsung saat user pilih NEED
     if (isNeedType(value)) {
       setShowRecalculateModal(true);
-      setPendingUploadAction(null); // null = hanya info, bukan pending upload
+      setPendingUploadAction(null);
     }
   };
 
@@ -176,7 +167,6 @@ const UploadLayout = ({
     setFileList(fileList);
   };
 
-  // properties dragger
   const property = {
     name: "file",
     multiple: false,
@@ -215,7 +205,6 @@ const UploadLayout = ({
     }
   };
 
-  // ✅ MODIFIED: Actual upload logic (dipanggil langsung atau setelah konfirmasi modal)
   const executeUpload = async () => {
     try {
       setFileProgress(0);
@@ -251,7 +240,6 @@ const UploadLayout = ({
     setLoadingUpload(false);
   };
 
-  // ✅ MODIFIED: Actual upload link logic (dipanggil langsung atau setelah konfirmasi modal)
   const executeUploadLink = async () => {
     try {
       setFileProgress(0);
@@ -283,19 +271,15 @@ const UploadLayout = ({
     }
   };
 
-  // ✅ MODIFIED: handleUpload — cek NEED type sebelum upload file
   const handleUpload = async () => {
     if (isNeedType()) {
-      // Simpan action yang akan dijalankan setelah konfirmasi
       setPendingUploadAction("file");
       setShowRecalculateModal(true);
       return;
     }
-    // Jika bukan NEED, langsung upload
     await executeUpload();
   };
 
-  // ✅ MODIFIED: handleUploadLink — cek NEED type sebelum upload link
   const handleUploadLink = async (e) => {
     e.stopPropagation();
 
@@ -310,33 +294,26 @@ const UploadLayout = ({
     }
 
     if (isNeedType()) {
-      // Simpan action yang akan dijalankan setelah konfirmasi
       setPendingUploadAction("link");
       setShowRecalculateModal(true);
       return;
     }
-    // Jika bukan NEED, langsung upload
     await executeUploadLink();
   };
 
-  // ✅ NEW: Handler saat user klik OK di modal recalculate
   const handleRecalculateConfirm = async () => {
     setShowRecalculateModal(false);
-    // Jika ada pending upload action (dari klik tombol Upload), lanjutkan
     if (pendingUploadAction === "file") {
       await executeUpload();
     } else if (pendingUploadAction === "link") {
       await executeUploadLink();
     }
-    // Jika null = modal muncul dari pilih dropdown NEED, tidak perlu action lanjutan
     setPendingUploadAction(null);
   };
 
-  // ✅ NEW: Handler saat user klik Cancel di modal recalculate
   const handleRecalculateCancel = () => {
     setShowRecalculateModal(false);
     setPendingUploadAction(null);
-    // Reset dropdown format usage type
     setFormat(undefined);
     setFileUploadEnabled(false);
     form.resetFields(['format_usage_type']);
@@ -613,7 +590,6 @@ const UploadLayout = ({
     <>
       {renderLayout(type)}
       
-      {/* Modal: Link kosong */}
       <ModalAttention
         isOpen={isLinkModalVisible}
         handleCancel={() => setLinkModalVisible(false)}
@@ -622,7 +598,6 @@ const UploadLayout = ({
         header="Link Required"
       />
 
-      {/* Modal: Konfirmasi Delete */}
       <ModalConfirm
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}
@@ -642,7 +617,6 @@ const UploadLayout = ({
         />
       </ModalConfirm>
 
-      {/* ✅ NEW: Modal Konfirmasi Recalculate — muncul saat usage type = NEED */}
       <ModalConfirm
         isOpen={showRecalculateModal}
         handleCancel={handleRecalculateCancel}
