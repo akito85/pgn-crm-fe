@@ -19,7 +19,7 @@ const PaymentRelation = ({
     list_paymentRelation,
     pagination_paymentRelation,
     data_prApprovalHistory,
-    loading,
+    loading_listPr,
   } = useSelector(
     (state) => state.financialInformation
   );
@@ -269,7 +269,7 @@ const PaymentRelation = ({
         searchedColumn={searchedColumn}
         searchInput={searchInput}
         handleSearch={handleSearch}
-        loading={loading}
+        loading={loading_listPr}
       />
 
       <PaymentRelationApprovalModal
