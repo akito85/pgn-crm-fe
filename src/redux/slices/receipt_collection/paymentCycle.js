@@ -308,7 +308,7 @@ export const getPaymentPeriods = createAsyncThunk(
     "GET_PAYMENT_PERIODS",
     async (thunkAPI) => {
         try {
-            const url = `/v1/dbs/api/payment-period/get-list`;
+            const url = `/v1/dbs/api/payment-period/get-list-active`;
             const response = await receiptCollectionHttpService.getAll(url);
             return response.data;
         } catch (error) {

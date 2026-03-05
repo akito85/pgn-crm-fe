@@ -117,6 +117,8 @@ export const FormFooter = ({
     onSubmit,
     useClearData = true,
     useSaveDraft = true,
+    isLoading = false,
+    isApprover = false,
 }) => {
     return (
         <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
@@ -128,7 +130,7 @@ export const FormFooter = ({
                     Cancel
                 </ButtonComponent>
                 <div className="flex items-center gap-3">
-                    {useClearData && (
+                    {!isApprover && useClearData && (
                         <Button
                             icon={
                                 <SVGIcon
@@ -151,7 +153,7 @@ export const FormFooter = ({
                             {type === "update" ? "Reset Data" : "Clear Data"}
                         </Button>
                     )}
-                    {useSaveDraft && (
+                    {!isApprover && useSaveDraft && (
                         <Button
                             onClick={onSaveDraft}
                             style={{
@@ -181,7 +183,7 @@ export const FormFooter = ({
                     >
                         Previous
                     </Button>
-                    {current < totalSteps - 1 ? (
+                    {!isApprover && (current < totalSteps - 1 ? (
                         <Button
                             key="btn-next"
                             htmlType="button"
@@ -204,6 +206,8 @@ export const FormFooter = ({
                             htmlType="button"
                             onClick={onSubmit}
                             type="primary"
+                            loading={isLoading}
+                            disabled={isLoading}
                             style={{
                                 backgroundColor: "#388E3C",
                                 borderColor: "#388E3C",
@@ -215,7 +219,7 @@ export const FormFooter = ({
                         >
                             Submit
                         </Button>
-                    )}
+                    ))}
                 </div>
             </div>
         </div>
