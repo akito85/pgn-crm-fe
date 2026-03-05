@@ -1,18 +1,20 @@
-import React, { useEffect, useState, useRef, useCallback, Fragment } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import { Button, Checkbox, Form, Input, Select, Space, Table, Tooltip } from "antd";
+import { Button, Checkbox, Form, Input, Select, Space, Tooltip } from "antd";
+import NxTable from "../../../../components/Nx/NxTable";
+import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import SVGIcon from "../../../../assets/Icon/index";
 import DateComponent from "../../../../components/DateComponent";
-import ButtonComponent from "../../../../components/ButtonComponent";
 import { NumericFormat } from "react-number-format";
 import { columnsTableCriteriaPromo } from "../PromoDiscount/Table/TableCriteriaPromo";
-import { dateFormatting, hasValue } from "../../../../utils";
+import { hasValue } from "../../../../utils";
 import { dataDependAdvanced, dataDepended, handleMappingBodyTiering } from "./UtilsAllProduct";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
-import CardComponent from "../../../../components/Card/CardComponent";
-import DetailText from "../../../../components/DetailText";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
+import NxModal from "../../../../components/Nx/NxModal";
+import NxDetailText from "../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../components/Nx/NxDatePicker";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const EditableCell = ({
   editing,
@@ -773,33 +775,35 @@ const FunctionalCriteriaProduct = ({
           );
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="my-2 gap-2">
               {editable ? (
                 <>
-                  <ButtonComponent
+                  <Button
                     onClick={() => cancel(record)}
-                    type="default"
+                    type="menu"
                   >
                     Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     onClick={() => save(record.key)}
                     type="submit"
                   >
                     Save
-                  </ButtonComponent>
+                  </Button>
                 </>
               ) : (
                 <div className="flex w-full justify-center gap-4">
                   {type === "detail" ? (
                     <Tooltip title="Detail">
-                      <div className="pt-1">
+                      <Button
+                        type="table-action"
+                        onClick={() => handleDetailHistory(record)}
+                      >
                         <SVGIcon
                           name="IconDetail"
-                          width={24}
-                          onClick={() => handleDetailHistory(record)}
+                          width={20}
                         />
-                      </div>
+                      </Button>
                     </Tooltip>
                   ) : (
                     <>
@@ -861,18 +865,34 @@ const FunctionalCriteriaProduct = ({
     );
   };
 
-  // Function Show/Hide Column
-  const [optionSelectedCol, setOptionSelectedCol] = useState([]);
+  // Fixed columns state for NxTable column settings
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["operation"] });
 
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
+  const allColumns = useMemo(
+    () =>
+      columns().map((col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      })),
+    // columns() depends on: dataCriteria, type, fixedColumn, listOption,
+    // search, searchedColumn, searchText, storedData, page, pageSize
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataCriteria, type, fixedColumn, listOption, search, searchedColumn, searchText, storedData, page, pageSize]
+  );
 
-  const filterColumn = (dataColumn) => {
-    return dataColumn.filter((col) => {
-      return !optionSelectedCol.includes(col.title);
-    });
-  };
+  const processedColumns = useMemo(
+    () => nxApplyFixedColumns(allColumns, fixedColumns),
+    [allColumns, fixedColumns]
+  );
+
+  const columnDefinitions = useMemo(
+    () =>
+      allColumns.map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+      })),
+    [allColumns]
+  );
 
   // Function length column
   const numColumns = 16;
@@ -905,8 +925,8 @@ const FunctionalCriteriaProduct = ({
       dataCriteria.length > 0 &&
       dataCriteria[0] !== 24 ? (
         <div className="flex w-full justify-end">
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          <Button
+            icon={<SVGIcon name="IconButtonCreate" width={14} />}
             type="submit"
             onClick={() => {
               if (
@@ -928,7 +948,7 @@ const FunctionalCriteriaProduct = ({
             }}
           >
             Create
-          </ButtonComponent>
+          </Button>
         </div>
       ) : null}
       {type !== "detail" && type !== "preview" && hasValue(excludeRender)
@@ -936,135 +956,90 @@ const FunctionalCriteriaProduct = ({
         : null}
       {dataCriteria && dataCriteria.length > 0 && dataCriteria[0] !== 24 ? (
         <div className="flex flex-col w-full gap-4">
-          <div className="relative flex flex-col w-full">
-            <div
-              className={`${
-                totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-              } w-1/4 flex`}
-            >
-              <Select
-                mode="multiple"
-                placeholder="Show All Column"
-                className={"w-full"}
-                maxTagCount={3}
-                onChange={handleDisplayColumn}
-              >
-                {columns()
-                  .map((col) => (
-                    <Select.Option
-                      key={col.title}
-                      value={col.title}
-                      disabled={
-                        optionSelectedCol.length > 3
-                          ? optionSelectedCol.includes(col.title)
-                            ? false
-                            : true
-                          : false
-                      }
-                    >
-                      {col.title}
-                    </Select.Option>
-                  ))
-                  .splice(1)}
-              </Select>
-            </div>
-            <Form form={formTableCriteria} component={false}>
-              <Table
-                bordered
-                className="w-full"
-                dataSource={data}
-                columns={filterColumn(
-                  columns().map((col) => ({
-                    ...col,
-                    onCell: (record) => ({
-                      record,
-                      inputType: col.inputType,
-                      dataIndex: col.dataIndex,
-                      title: col.title,
-                      editing: isEditing(record),
-                      options: col.option,
-                      indexValue: col.indexValue,
-                      dependDataIndex: col.dependDataIndex,
-                      dataEditRecord: editDataRecord,
-                      startDate: startDate,
-                      handleEditDataRecord: handleEditDataRecord,
-                      required: col.required,
-                      endDate: endDate,
-                      requiredDate:checkStartDate,
-                      type: type,
-                      // disableDate,
-                      formTableCriteria: formTableCriteria,
-                    }),
-                  }))
-                )}
-                pagination={{
-                  position: ["topRight"],
-                  current: page,
-                  pageSize: pageSize,
-                  onChange: handleChange,
-                  className: "pr-1 w-3/4",
-                  style: { marginLeft: "auto", marginRight: 0 },
-                  showSizeChanger: true,
-                  showTotal: (total, range) =>
-                    `Showing ${range[0]} to ${range[1]} of ${total} records`,
-                }}
-                rowClassName={(record) =>
-                  isEditing(record) ? "editable-row" : ""
-                }
-                components={{
-                  body: {
-                    cell: EditableCell,
-                  },
-                }}
-                scroll={scroll}
-                onChange={onChange}
-              />
-            </Form>
-          </div>
+          <Form form={formTableCriteria} component={false}>
+            <NxTable
+              idTable="functional-criteria-product-table"
+              dataSource={data}
+              columns={processedColumns.map((col) => ({
+                ...col,
+                onCell: (record) => ({
+                  record,
+                  inputType: col.inputType,
+                  dataIndex: col.dataIndex,
+                  title: col.title,
+                  editing: isEditing(record),
+                  options: col.option,
+                  indexValue: col.indexValue,
+                  dependDataIndex: col.dependDataIndex,
+                  dataEditRecord: editDataRecord,
+                  startDate: startDate,
+                  handleEditDataRecord: handleEditDataRecord,
+                  required: col.required,
+                  endDate: endDate,
+                  requiredDate:checkStartDate,
+                  type: type,
+                  // disableDate,
+                  formTableCriteria: formTableCriteria,
+                }),
+              }))}
+              components={{
+                body: {
+                  cell: EditableCell,
+                },
+              }}
+              tableScrolled={scroll}
+              usePagination={false}
+              useInfiniteScroll={false}
+              onSort={onChange}
+              rowClassName={(record) =>
+                isEditing(record) ? "editable-row" : ""
+              }
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+            />
+          </Form>
           {/* Modal History Log */}
-          <ModalCustom
+          <NxModal
             isOpen={modalHistory}
             handleCancel={() => {
               setModalHistory(false);
             }}
-            type="detail"
             header="DETAIL INFORMATION"
-            width={800}
+            width={1000}
             footer={
-              <ButtonComponent
-                type={"default"}
-                onClick={() => {
-                  setModalHistory(false);
-                }}
-              >
-                Back
-              </ButtonComponent>
+              <div className="flex justify-end">
+                <Button
+                  type={"menu"}
+                  onClick={() => {
+                    setModalHistory(false);
+                  }}
+                >
+                  Back
+                </Button>
+              </div>
             }
           >
-            <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-              <DetailText label="Record ID">{dataHistory.id}</DetailText>
-              <DetailText label="Created Date">
-                {dataHistory?.createdDate
-                  ? moment(dataHistory.createdDate).format(
-                      dateFormatting.dateTime
-                    )
-                  : ""}
-              </DetailText>
-              <DetailText label="Created By">
-                {dataHistory?.createdBy}
-              </DetailText>
-              <DetailText label="Updated Date">
-                {dataHistory?.updatedDate
-                  ? moment(dataHistory.updatedDate).format(
-                      dateFormatting.dateTime
-                    )
-                  : ""}
-              </DetailText>
-              <DetailText label="Updated By">
-                {dataHistory?.updatedBy}
-              </DetailText>
-            </CardComponent>
-          </ModalCustom>
+            <div className="p-4">
+              <NxBaseContainer border>
+                <div className="grid grid-cols-5 gap-x-4">
+                  <NxDetailText label="Record ID">{dataHistory.id}</NxDetailText>
+                  <NxDetailText label="Created Date">
+                    {NxDate.formatDate(dataHistory?.createdDate)}
+                  </NxDetailText>
+                  <NxDetailText label="Created By">
+                    {dataHistory?.createdBy}
+                  </NxDetailText>
+                  <NxDetailText label="Updated Date">
+                    {NxDate.formatDate(dataHistory?.updatedDate)}
+                  </NxDetailText>
+                  <NxDetailText label="Updated By">
+                    {dataHistory?.updatedBy}
+                  </NxDetailText>
+                </div>
+              </NxBaseContainer>
+            </div>
+          </NxModal>
 
           {/* modal error no startDate */}
           {ModalError ? (
@@ -1106,177 +1081,6 @@ const FunctionalCriteriaProduct = ({
       ) : null}
     </Fragment>
   );
-
-  // return  dataCriteria && dataCriteria.length > 0 && dataCriteria[0] !== 24 ? (
-  //   <div className="flex flex-col w-full gap-4">
-  //     {type !== "detail" && type !== "preview" ? (
-  //       <div className="flex w-full justify-end">
-  //         <ButtonComponent
-  //           icon={<SVGIcon name="IconButtonCreate" width={24} />}
-  //           type="submit"
-  //           onClick={() => {
-  //             if (
-  //               !storedData &&
-  //               (hasValue(startDate) || !checkStartDate) &&
-  //               !(
-  //                 dataCriteria?.includes(37) && //All
-  //                 data?.length > 0
-  //               ) //All must only have 1 data
-  //             ) {
-  //               addRow();
-  //             } else {
-  //               if (dataCriteria?.includes(37) && data?.length > 0) {
-  //                 setModalRequired(true);
-  //               } else if (!hasValue(startDate)) {
-  //                 setModalRequired(true);
-  //               }
-  //             }
-  //           }}
-  //         >
-  //           Create
-  //         </ButtonComponent>
-  //       </div>
-  //     ) : null}
-  //     <div className="relative flex flex-col w-full">
-  //       <div
-  //         className={`${
-  //           totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-  //         } w-1/4 flex`}
-  //       >
-  //         <Select
-  //           mode="multiple"
-  //           placeholder="Show All Column"
-  //           className={"w-full"}
-  //           maxTagCount={3}
-  //           onChange={handleDisplayColumn}
-  //         >
-  //           {columns()
-  //             .map((col) => (
-  //               <Select.Option
-  //                 key={col.title}
-  //                 value={col.title}
-  //                 disabled={
-  //                   optionSelectedCol.length > 3
-  //                     ? optionSelectedCol.includes(col.title)
-  //                       ? false
-  //                       : true
-  //                     : false
-  //                 }
-  //               >
-  //                 {col.title}
-  //               </Select.Option>
-  //             ))
-  //             .splice(1)}
-  //         </Select>
-  //       </div>
-  //       <Form form={formTableCriteria} component={false}>
-  //         <Table
-  //           bordered
-  //           className="w-full"
-  //           dataSource={data}
-  //           columns={filterColumn(
-  //             columns().map((col) => ({
-  //               ...col,
-  //               onCell: (record) => ({
-  //                 record,
-  //                 inputType: col.inputType,
-  //                 dataIndex: col.dataIndex,
-  //                 title: col.title,
-  //                 editing: isEditing(record),
-  //                 options: col.option,
-  //                 indexValue: col.indexValue,
-  //                 dependDataIndex: col.dependDataIndex,
-  //                 dataEditRecord: editDataRecord,
-  //                 startDate: startDate,
-  //                 handleEditDataRecord: handleEditDataRecord,
-  //                 required: col.required,
-  //                 // disableDate,
-  //                 formTableCriteria: formTableCriteria,
-  //               }),
-  //             }))
-  //           )}
-  //           pagination={{
-  //             position: ["topRight"],
-  //             current: page,
-  //             pageSize: pageSize,
-  //             onChange: handleChange,
-  //             className: "pr-1 w-3/4",
-  //             style: { marginLeft: "auto", marginRight: 0 },
-  //             showSizeChanger: true,
-  //             showTotal: (total, range) =>
-  //               `Showing ${range[0]} to ${range[1]} of ${total} records`,
-  //           }}
-  //           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-  //           components={{
-  //             body: {
-  //               cell: EditableCell,
-  //             },
-  //           }}
-  //           scroll={scroll}
-  //           onChange={onChange}
-  //         />
-  //       </Form>
-  //     </div>
-  //     {/* Modal History Log */}
-  //     <ModalCustom
-  //       isOpen={modalHistory}
-  //       handleCancel={() => {
-  //         setModalHistory(false);
-  //       }}
-  //       type="detail"
-  //       header="DETAIL INFORMATION"
-  //       width={800}
-  //       footer={
-  //         <ButtonComponent
-  //           type={"default"}
-  //           onClick={() => {
-  //             setModalHistory(false);
-  //           }}
-  //         >
-  //           Back
-  //         </ButtonComponent>
-  //       }
-  //     >
-  //       <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-  //         <DetailText label="Record ID">{dataHistory.id}</DetailText>
-  //         <DetailText label="Created Date">
-  //           {dataHistory?.createdDate
-  //             ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)
-  //             : ""}
-  //         </DetailText>
-  //         <DetailText label="Created By">{dataHistory?.createdBy}</DetailText>
-  //         <DetailText label="Updated Date">
-  //           {dataHistory?.updatedDate
-  //             ? moment(dataHistory.updatedDate).format(dateFormatting.dateTime)
-  //             : ""}
-  //         </DetailText>
-  //         <DetailText label="Updated By">{dataHistory?.updatedBy}</DetailText>
-  //       </CardComponent>
-  //     </ModalCustom>
-
-  //     {/* modal error no startDate */}
-  //     {ModalError ? (
-  //       <ModalError
-  //         isOpen={modalRequired}
-  //         handleOk={() => setModalRequired(false)}
-  //         handleCancel={() => setModalRequired(false)}
-  //         // customText={"Try Again"}
-  //       >
-  //         <div className="px-5 pt-5 pb-[10px] justify-center">
-  //           <div className="w-full flex gap-[20px]">
-  //             <SVGIcon name="IconFailed" width={48} />
-  //             <p className="text-[18px] font-bold">{"Failed"}</p>
-  //           </div>
-  //           <p className="pl-[70px]">{`You can't create criteria. ${
-  //             dataCriteria?.includes(37) && data?.length > 0
-  //               ? "Criteria All must only have 1 data!"
-  //               : "Please input Start Date!"
-  //           }`}</p>
-  //         </div>
-  //       </ModalError>
-  //     ) : null}
-  //   </div>
-  // ) : null;
 };
 
 export default FunctionalCriteriaProduct;

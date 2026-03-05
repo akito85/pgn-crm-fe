@@ -342,6 +342,23 @@ const getAccountStandardColumns = (
     ),
   },
   {
+    key: "province",
+    title: "PROVINCE",
+    dataIndex: "province",
+    width: 200,
+    sorter: true,
+    filteredValue: [search?.province] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "province",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+  },
+  {
     key: "country",
     title: "COUNTRY",
     dataIndex: "country",
@@ -409,22 +426,23 @@ const getAccountStandardColumns = (
                 width={20}
                 onClick={() => {
                   setAccount({
-                    objectId: r?.accountId,
-                    accountNumber: r?.accountNumber,
-                    accountName: r?.accountName,
-                    accountSor: r?.sor,
-                    accountCostCenter: r?.costCenter,
-                    meterReadingCode: r?.meterReadingCode,
-                    accountSegment: r?.accountSegment,
-                    accountGroupType: r?.accountGroupType,
-                    accountType: r?.accountType,
-                    premiseAddress: r?.premiseAddress,
-                    subDistrict: r?.subDistrict,
-                    district: r?.district,
-                    city: r?.city,
-                    country: r?.country,
-                    longitude: r?.longitude,
-                    latitude: r?.latitude,
+                    objectId: r.accountId,
+                    accountNumber: r.accountNumber,
+                    accountName: r.accountName,
+                    accountSor: r.sor,
+                    accountCostCenter: r.costCenter,
+                    meterReadingCode: r.meterReadingCode,
+                    accountSegment: r.accountSegment,
+                    accountGroupType: r.accountGroupType,
+                    accountType: r.accountType,
+                    premiseAddress: r.premiseAddress,
+                    subDistrict: r.subDistrict,
+                    district: r.district,
+                    city: r.city,
+                    province: r.province,
+                    country: r.country,
+                    longitude: r.longitude,
+                    latitude: r.latitude,
                   })
                   setIsOpen(false);
                 }}

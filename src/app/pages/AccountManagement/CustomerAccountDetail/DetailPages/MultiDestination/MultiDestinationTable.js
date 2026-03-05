@@ -28,6 +28,10 @@ const MultiDestinationTable = ({
   handleSearch = () => {},
   loading = false,
 }) => {
+  useEffect(() => {
+    console.log("loading", loading)
+  }, [loading])
+
   const navigate = useNavigate();
 
   const itemActions = nxGetAccountActions({

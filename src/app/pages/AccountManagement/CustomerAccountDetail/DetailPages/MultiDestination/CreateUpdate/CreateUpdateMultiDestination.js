@@ -1,17 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-
 import { Button, Form, Spin } from "antd";
-
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import InformationForm from "./StepContents/InformationForm/InfoMultiDestination";
 import AttachmentForm from "./StepContents/AttachmentForm/AttachmentMultiDestination";
 import ApprovalForm from "./StepContents/ApprovalForm/ApprovalMultiDestination";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
@@ -48,13 +44,25 @@ const CreateUpdateMultiDestination = ({ type }) => {
   } = useSelector((state) => state.accountManagement);
 
   const {
-    loading,
-    data_mdApprovalHierarchy,
-    detail_mdApprovalHierarchy,
+    loading_listMdApprovalOption,
+    list_mdApprovalOptions,
+    loading_detailMdApprovalHierarchyDetails,
+    detail_mdApprovalHierarchyDetails,
+    loading_detailMd,
     detail_multiDestination,
+    loading_detailDraftMd,
     detailDraft_multiDestination,
+    loading_detailMdDetailAttachment,
     list_mdDetailAttachment,
+    loading_createUpdateMd,
   } = useSelector((state) => state.multiDestination);
+
+  const loading =
+    loading_listMdApprovalOption ||
+    loading_detailMdApprovalHierarchyDetails ||
+    loading_detailMd ||
+    loading_detailDraftMd ||
+    loading_detailMdDetailAttachment;
 
   //declare
   const location = useLocation();
@@ -127,7 +135,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
     if (
       isUpdate &&
       detail &&
-      data_mdApprovalHierarchy?.length
+      list_mdApprovalOptions?.length
     ) {
       const {
         subjectId,
@@ -176,12 +184,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
         appHierId,
       });
 
-      const appHierOption = data_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
+      const appHierOption = list_mdApprovalOptions.find((option) => option.appHierId === appHierId);
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, data_mdApprovalHierarchy]);
+  }, [detail, list_mdApprovalOptions]);
 
   useEffect(() => {
     if (isUpdate) {
@@ -339,6 +347,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       subDistrict,
       district,
       city,
+      province,
       country,
       longitude,
       latitude,
@@ -357,6 +366,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       subDistrict,
       district,
       city,
+      province,
       country,
       longitude,
       latitude,
@@ -364,7 +374,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailMdApprovalHierarchy({ id: appHierId }));
+    dispatch(getDetailMdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -393,7 +403,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         content: (
           <ApprovalForm
             form={form}
-            dataTable={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
+            dataTable={(detail_mdApprovalHierarchyDetails || []).map((detail, index) => ({
               ...detail,
               employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                 ...employeeDetail,
@@ -401,7 +411,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
               })),
               key: `detail-detail-${index}`,
             }))}
-            dataOption={data_mdApprovalHierarchy}
+            dataOption={list_mdApprovalOptions}
             handleSelectHiararchy={handleSelectHiararchy}
             key={`multi-destination-tab-1`}
           />
@@ -625,7 +635,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
     } else if (isUpdate) {
       if (
         detail &&
-        data_mdApprovalHierarchy?.length
+        list_mdApprovalOptions?.length
       ) {
         const {
           subjectId,
@@ -674,7 +684,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
           appHierId,
         });
 
-        const appHierOption = data_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
+        const appHierOption = list_mdApprovalOptions.find((option) => option.appHierId === appHierId);
 
         if (appHierOption)
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
@@ -800,7 +810,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
               formId={"multiDestinationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(detail_mdApprovalHierarchy || []).map((detail, index) => ({
+              approvalData={(detail_mdApprovalHierarchyDetails || []).map((detail, index) => ({
                 ...detail,
                 employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                   ...employeeDetail,
@@ -812,6 +822,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
               dataAttachment={dataAttachment}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
+              loading={loading_createUpdateMd}
             />
           </Form>
         </Spin>

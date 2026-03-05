@@ -28,7 +28,7 @@ const ApprovalComponentGeneral = ({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-y-4">
       <FunctionalApproval
         dataTable={dataTable}
         dataOption={dataOption}
