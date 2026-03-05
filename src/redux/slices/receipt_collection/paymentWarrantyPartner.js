@@ -18,10 +18,283 @@ const initialState = {
   dataApprovalHistory: [],
   dataListParent: [],
   dataListPartnerType: [],
+  dataListRating: [],
+  dataListCriteria: [],
+  partnerCode: "",
+  data_rating: null,
+  data_branch: null,
+  data_detail_rating: null,
+  data_detail_branch: null,
+  data_history_rating: [],
+  data_history_branch: [],
+  loading_detail: false,
+  loading_rating: false,
+  loading_branch: false,
+  loading_history_rating: false,
+  loading_history_branch: false,
 };
 
-const BASE_URL = "/v1/dbs/api/payment-warranty-partners";
+// BASE_URL removed as per request to use full strings in thunks
 
+// --- RATING THUNKS ---
+export const getPaginatePaymentWarrantyPartnerRating = createAsyncThunk(
+  "GET_ALL_PAYMENT_WARRANTY_PARTNER_RATING",
+  async ({ partnerId, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/get-list/${partnerId}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: error,
+            action: "GET_ALL_PAYMENT_WARRANTY_PARTNER_RATING",
+            back: false,
+          })
+        );
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const createPaymentWarrantyPartnerRating = createAsyncThunk(
+  "CREATE_PAYMENT_WARRANTY_PARTNER_RATING",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/create-update`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      return data.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Your data was not saved. ${message}.` }));
+      }
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const getDetailPaymentWarrantyPartnerRating = createAsyncThunk(
+  "GET_DETAIL_PAYMENT_WARRANTY_PARTNER_RATING",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/detail-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const approveOrRejectPaymentWarrantyPartnerRating = createAsyncThunk(
+  "APPROVE_OR_REJECT_PAYMENT_WARRANTY_PARTNER_RATING",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/approve-reject`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: false }));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Your data was not updated. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getHistoryPaymentWarrantyPartnerRating = createAsyncThunk(
+  "GET_HISTORY_PAYMENT_WARRANTY_PARTNER_RATING",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/approval-history-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: error,
+            action: "GET_HISTORY_PAYMENT_WARRANTY_PARTNER_RATING",
+            back: false,
+          })
+        );
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const inactivatePaymentWarrantyPartnerRating = createAsyncThunk(
+  "INACTIVATE_PAYMENT_WARRANTY_PARTNER_RATING",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/rating/inactivate`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: "Your inactivation request has been submitted.", return: false }));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Inactivation request failed. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// --- BRANCH THUNKS ---
+export const getPaginatePaymentWarrantyPartnerBranch = createAsyncThunk(
+  "GET_ALL_PAYMENT_WARRANTY_PARTNER_BRANCH",
+  async ({ partnerId, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/get-list/${partnerId}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: error,
+            action: "GET_ALL_PAYMENT_WARRANTY_PARTNER_BRANCH",
+            back: false,
+          })
+        );
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const createPaymentWarrantyPartnerBranch = createAsyncThunk(
+  "CREATE_PAYMENT_WARRANTY_PARTNER_BRANCH",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/create-update`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      return data.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Your data was not saved. ${message}.` }));
+      }
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const getDetailPaymentWarrantyPartnerBranch = createAsyncThunk(
+  "GET_DETAIL_PAYMENT_WARRANTY_PARTNER_BRANCH",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/detail-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const approveOrRejectPaymentWarrantyPartnerBranch = createAsyncThunk(
+  "APPROVE_OR_REJECT_PAYMENT_WARRANTY_PARTNER_BRANCH",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/approve-reject`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: false }));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Your data was not updated. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getHistoryPaymentWarrantyPartnerBranch = createAsyncThunk(
+  "GET_HISTORY_PAYMENT_WARRANTY_PARTNER_BRANCH",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/approval-history-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: error,
+            action: "GET_HISTORY_PAYMENT_WARRANTY_PARTNER_BRANCH",
+            back: false,
+          })
+        );
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const inactivatePaymentWarrantyPartnerBranch = createAsyncThunk(
+  "INACTIVATE_PAYMENT_WARRANTY_PARTNER_BRANCH",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/branch/inactivate`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: "Your inactivation request has been submitted.", return: false }));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Inactivation request failed. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// --- PARTNER THUNKS ---
 export const getPaginatePaymentWarrantyPartner = createAsyncThunk(
   "GET_ALL_PAYMENT_WARRANTY_PARTNER",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
@@ -29,17 +302,21 @@ export const getPaginatePaymentWarrantyPartner = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_ALL_PAYMENT_WARRANTY_PARTNER_PAGING",
-          back: false,
-        })
-      );
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: error,
+            action: "GET_ALL_PAYMENT_WARRANTY_PARTNER_PAGING",
+            back: false,
+          })
+        );
+      }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -52,17 +329,21 @@ export const getDownloadPaymentWarrantyPartner = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `${BASE_URL}/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(
-        validateError({
-          error: response,
-          action: "DOWNLOAD_PAYMENT_WARRANTY_PARTNER",
-          back: false,
-        })
-      );
+      if (response?.response?.data?.code === 500 || response?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(response));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: response,
+            action: "DOWNLOAD_PAYMENT_WARRANTY_PARTNER",
+            back: false,
+          })
+        );
+      }
       return thunkAPI.rejectWithValue(response.response);
     }
   }
@@ -72,22 +353,26 @@ export const createPaymentWarrantyPartner = createAsyncThunk(
   "CREATE_PAYMENT_WARRANTY_PARTNER",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/create-update`;
+      const url = `/v1/dbs/api/payment-warranty-partners/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        data: error.response.data.data,
-        description: `Your data was not created. ${message}.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+        const errorBody = {
+          title: "Failed",
+          data: error.response.data.data,
+          description: `Your data was not created. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -97,23 +382,27 @@ export const updatePaymentWarrantyPartner = createAsyncThunk(
   "UPDATE_PAYMENT_WARRANTY_PARTNER",
   async (body, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/create-update`;
+      const url = `/v1/dbs/api/payment-warranty-partners/create-update`;
       const data = await receiptCollectionHttpService.updateDataPost(url, body);
       return data.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        data: error.response.data.data,
-        code: error.response.data.code,
-        description: `Your data was not updated. ${message}. Please try again.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+        const errorBody = {
+          title: "Failed",
+          data: error.response.data.data,
+          code: error.response.data.code,
+          description: `Your data was not updated. ${message}. Please try again.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -123,18 +412,15 @@ export const getDetailPaymentWarrantyPartner = createAsyncThunk(
   "GET_DETAIL_PAYMENT_WARRANTY_PARTNER",
   async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/detail-get/${id}`;
+      const url = `/v1/dbs/api/payment-warranty-partners/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
         const errorBody = {
           title: "Failed",
           description: `${message}`,
@@ -146,31 +432,11 @@ export const getDetailPaymentWarrantyPartner = createAsyncThunk(
   }
 );
 
-export const getApprovalHistory = createAsyncThunk(
-  "GET_APPROVAL_HISTORY_PAYMENT_WARRANTY_PARTNER",
-  async (id, thunkAPI) => {
-    try {
-      const url = `${BASE_URL}/approval-history-get/${id}`;
-      const response = await receiptCollectionHttpService.getDetail(url);
-      return Array.isArray(response.data) ? null : response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_APPROVAL_HISTORY",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
 export const approveOrRejectPaymentWarrantyPartner = createAsyncThunk(
   "APPROVE_OR_REJECT_PAYMENT_WARRANTY_PARTNER",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approve-reject`;
+      const url = `/v1/dbs/api/payment-warranty-partners/approve-reject`;
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -182,20 +448,24 @@ export const approveOrRejectPaymentWarrantyPartner = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
-          return: false,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+        if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
       }
       return thunkAPI.rejectWithValue(error);
     }
@@ -206,7 +476,7 @@ export const approveOrRejectInactivePaymentWarrantyPartner = createAsyncThunk(
   "APPROVE_OR_REJECT_FOR_INACTIVE_PAYMENT_WARRANTY_PARTNER",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/approve-inactive`;
+      const url = `/v1/dbs/api/payment-warranty-partners/approve-inactive`;
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -218,41 +488,163 @@ export const approveOrRejectInactivePaymentWarrantyPartner = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
-          return: false,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+        if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
       }
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
+export const inactivePaymentWarrantyPartner = createAsyncThunk(
+  "INACTIVE_PAYMENT_WARRANTY_PARTNER",
+  async ({ body }, thunkAPI) => {
+    let status = body?.status === "Active" ? "Inactivate" : "Activate";
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/active-inactive`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(
+        url,
+        body
+      );
+      const successMessage = {
+        title: "Successfull",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      if (response?.response?.data?.code === 500 || response?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(response));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: errorBody(errorCode(response), status, errorMessage(response)),
+            action: "INACTIVE_PAYMENT_WARRANTY_PARTNER",
+            back: false,
+          })
+        );
+      }
+      return thunkAPI.rejectWithValue(response.response.data);
+    }
+  }
+);
+
+export const saveDraftPaymentWarrantyPartner = createAsyncThunk(
+  "SAVE_DRAFT_PAYMENT_WARRANTY_PARTNER",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/save-draft`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: "Successfull",
+        description: `Your data has been saved as draft`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return data.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+        const errorBody = {
+          title: "Failed",
+          data: error.response.data.data,
+          description: `Your draft was not saved. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const approveOrRejectGlobal = createAsyncThunk(
+  "APPROVE_OR_REJECT_GLOBAL",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/global/approve-reject`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: false }));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Global approval failed. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getApprovalHistory = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_PAYMENT_WARRANTY_PARTNER",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/approval-history-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: error,
+            action: "GET_APPROVAL_HISTORY",
+            back: false,
+          })
+        );
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+// --- GLOBAL THUNKS ---
 export const getListParent = createAsyncThunk(
   "GET_LIST_PARENT_PAYMENT_WARRANTY_PARTNER",
   async (thunkAPI) => {
     try {
-      const url = `${BASE_URL}/get-list-parent`;
+      const url = `/v1/dbs/api/payment-warranty-partners/get-list-parent`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -262,17 +654,93 @@ export const getListPartnerType = createAsyncThunk(
   "GET_LIST_PARTNER_TYPE_PAYMENT_WARRANTY_PARTNER",
   async (thunkAPI) => {
     try {
-      const url = `${BASE_URL}/partner-type`;
+      const url = `/v1/dbs/api/payment-warranty-partners/partner-type`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getPartnerCode = createAsyncThunk(
+  "GET_PARTNER_CODE_PAYMENT_WARRANTY_PARTNER",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/partner-code`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data?.partnerCode || "";
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getListRating = createAsyncThunk(
+  "GET_LIST_RATING_PAYMENT_WARRANTY_PARTNER",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/rating`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getListCriteria = createAsyncThunk(
+  "GET_LIST_CRITERIA_PAYMENT_WARRANTY_PARTNER",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty-partners/criteria`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -286,14 +754,11 @@ export const getAllApprovalList = createAsyncThunk(
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
         const errorBody = {
           title: "Failed",
           description: `${message}`,
@@ -313,14 +778,11 @@ export const getListApprovalById = createAsyncThunk(
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
         const errorBody = {
           title: "Failed",
           description: `${message}`,
@@ -344,14 +806,11 @@ export const getListCategory = createAsyncThunk(
       }));
       return mapsCategory;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
+        const message =
+          error?.response?.data?.message || error?.message || error?.toString();
         const errorBody = {
           title: "Failed",
           description: `${message}`,
@@ -359,67 +818,6 @@ export const getListCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-export const inactivePaymentWarrantyPartner = createAsyncThunk(
-  "INACTIVE_PAYMENT_WARRANTY_PARTNER",
-  async ({ body }, thunkAPI) => {
-    let status = body?.status === "Active" ? "Inactivate" : "Activate";
-    try {
-      const url = `${BASE_URL}/active-inactive`;
-      const response = await receiptCollectionHttpService.activationWithRemarkPost(
-        url,
-        body
-      );
-      const successMessage = {
-        title: "Successfull",
-        description: "Your data has been submitted.",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response.data;
-    } catch (response) {
-      thunkAPI.dispatch(
-        validateError({
-          error: errorBody(errorCode(response), status, errorMessage(response)),
-          action: "INACTIVE_PAYMENT_WARRANTY_PARTNER",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(response.response.data);
-    }
-  }
-);
-
-export const saveDraftPaymentWarrantyPartner = createAsyncThunk(
-  "SAVE_DRAFT_PAYMENT_WARRANTY_PARTNER",
-  async (body, thunkAPI) => {
-    try {
-      const url = `${BASE_URL}/save-draft`;
-      const data = await receiptCollectionHttpService.createData(url, body);
-      const successBody = {
-        title: "Successfull",
-        description: `Your data has been saved as draft`,
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return data.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        data: error.response.data.data,
-        description: `Your draft was not saved. ${message}.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
@@ -451,14 +849,14 @@ const paymentWarrantyPartnerSlice = createSlice({
     },
 
     [getDetailPaymentWarrantyPartner.pending]: (state) => {
-      state.loading = true;
+      state.loading_detail = true;
     },
     [getDetailPaymentWarrantyPartner.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
-      state.loading = false;
+      state.loading_detail = false;
     },
     [getDetailPaymentWarrantyPartner.rejected]: (state) => {
-      state.loading = false;
+      state.loading_detail = false;
     },
 
     [getAllApprovalList.pending]: (state) => {
@@ -555,12 +953,125 @@ const paymentWarrantyPartnerSlice = createSlice({
     [getListPartnerType.rejected]: (state) => {
       state.loading = false;
     },
+
+    [getListRating.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListRating.fulfilled]: (state, action) => {
+      state.dataListRating = action.payload;
+      state.loading = false;
+    },
+    [getListRating.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getListCriteria.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListCriteria.fulfilled]: (state, action) => {
+      state.dataListCriteria = action.payload;
+      state.loading = false;
+    },
+    [getListCriteria.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getPartnerCode.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPartnerCode.fulfilled]: (state, action) => {
+      state.partnerCode = action.payload;
+      state.loading = false;
+    },
+    [getPartnerCode.rejected]: (state) => {
+      state.loading = false;
+    },
     
     [getDownloadPaymentWarrantyPartner.fulfilled]: (state, action) => {
       state.data_download = action.payload;
       state.loading = false;
     },
     [getDownloadPaymentWarrantyPartner.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getPaginatePaymentWarrantyPartnerRating.pending]: (state) => {
+      state.loading_rating = true;
+    },
+    [getPaginatePaymentWarrantyPartnerRating.fulfilled]: (state, action) => {
+      state.data_rating = action.payload;
+      state.loading_rating = false;
+    },
+    [getPaginatePaymentWarrantyPartnerRating.rejected]: (state) => {
+      state.loading_rating = false;
+    },
+    [createPaymentWarrantyPartnerRating.pending]: (state) => {
+      state.loading = true;
+    },
+    [createPaymentWarrantyPartnerRating.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [createPaymentWarrantyPartnerRating.rejected]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectPaymentWarrantyPartnerRating.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectPaymentWarrantyPartnerRating.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectPaymentWarrantyPartnerRating.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getDetailPaymentWarrantyPartnerRating.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailPaymentWarrantyPartnerRating.fulfilled]: (state, action) => {
+      state.data_detail_rating = action.payload;
+      state.loading = false;
+    },
+    [getDetailPaymentWarrantyPartnerRating.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getPaginatePaymentWarrantyPartnerBranch.pending]: (state) => {
+      state.loading_branch = true;
+    },
+    [getPaginatePaymentWarrantyPartnerBranch.fulfilled]: (state, action) => {
+      state.data_branch = action.payload;
+      state.loading_branch = false;
+    },
+    [getPaginatePaymentWarrantyPartnerBranch.rejected]: (state) => {
+      state.loading_branch = false;
+    },
+    [createPaymentWarrantyPartnerBranch.pending]: (state) => {
+      state.loading = true;
+    },
+    [createPaymentWarrantyPartnerBranch.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [createPaymentWarrantyPartnerBranch.rejected]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectPaymentWarrantyPartnerBranch.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectPaymentWarrantyPartnerBranch.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectPaymentWarrantyPartnerBranch.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getDetailPaymentWarrantyPartnerBranch.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailPaymentWarrantyPartnerBranch.fulfilled]: (state, action) => {
+      state.data_detail_branch = action.payload;
+      state.loading = false;
+    },
+    [getDetailPaymentWarrantyPartnerBranch.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -571,6 +1082,44 @@ const paymentWarrantyPartnerSlice = createSlice({
       state.loading = false;
     },
     [approveOrRejectInactivePaymentWarrantyPartner.rejected]: (state) => {
+      state.loading = false;
+    },
+    [getHistoryPaymentWarrantyPartnerRating.pending]: (state) => {
+      state.loading_history_rating = true;
+    },
+    [getHistoryPaymentWarrantyPartnerRating.fulfilled]: (state, action) => {
+      state.data_history_rating = action.payload;
+      state.loading_history_rating = false;
+    },
+    [getHistoryPaymentWarrantyPartnerRating.rejected]: (state, action) => {
+      state.loading_history_rating = false;
+    },
+    [getHistoryPaymentWarrantyPartnerBranch.pending]: (state) => {
+      state.loading_history_branch = true;
+    },
+    [getHistoryPaymentWarrantyPartnerBranch.fulfilled]: (state, action) => {
+      state.data_history_branch = action.payload;
+      state.loading_history_branch = false;
+    },
+    [getHistoryPaymentWarrantyPartnerBranch.rejected]: (state, action) => {
+      state.loading_history_branch = false;
+    },
+    [inactivatePaymentWarrantyPartnerRating.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivatePaymentWarrantyPartnerRating.fulfilled]: (state, action) => {
+      state.loading = false;
+    },
+    [inactivatePaymentWarrantyPartnerRating.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    [inactivatePaymentWarrantyPartnerBranch.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivatePaymentWarrantyPartnerBranch.fulfilled]: (state, action) => {
+      state.loading = false;
+    },
+    [inactivatePaymentWarrantyPartnerBranch.rejected]: (state, action) => {
       state.loading = false;
     },
   },

@@ -24,6 +24,7 @@ import {
   getApprovalHistory,
   getListPointOfSales,
   generateProformaInvoice,
+  getCustomerType,
 } from "../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
@@ -37,7 +38,7 @@ import TableRBI from "../../../../components/TableRBI";
 
 const PosPage = () => {
   // Selector
-  const { data_view, data_approvalHistory, loading } = useSelector(
+  const { data_view, data_approvalHistory, loading, data_customer_type} = useSelector(
     (state) => state.pointOfSales,
   );
 
@@ -182,6 +183,10 @@ const PosPage = () => {
       console.error("Error generating proforma invoice:", error);
     }
   };
+
+  useEffect(() => {
+  dispatch(getCustomerType());
+}, [dispatch]);
 
   const handleOpenCustomerTypeModal = () => {
     setSelectedCustomerType(null);
@@ -709,7 +714,7 @@ const PosPage = () => {
               ]}
               totalData={data_view?.page?.totalElements || 0}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 8000 }}
+              tableScrolled={{ y: 525, x: 2000 }}
               usePagination={false}
               useInfiniteScroll={true}
               onLoadMore={handleLoadMore}
@@ -769,6 +774,7 @@ const PosPage = () => {
           onConfirm={handleConfirmCustomerType}
           selectedType={selectedCustomerType}
           setSelectedType={setSelectedCustomerType}
+          customerTypes={data_customer_type}
         />
 
         {/** Modal Retry */}

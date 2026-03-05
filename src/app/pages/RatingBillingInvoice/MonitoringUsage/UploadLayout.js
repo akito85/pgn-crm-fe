@@ -50,6 +50,8 @@ const UploadLayout = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [modalDelete, setModalDelete] = useState(false);
+  const [showRecalculateModal, setShowRecalculateModal] = useState(false);
+
   const MAX_FILE_SIZE = 5000000;
   const [form] = Form.useForm();
   const { loading } = useSelector((state) => state.monitoring_usage);
@@ -58,7 +60,6 @@ const UploadLayout = ({
   const dispatch = useDispatch();
   const { list_usage_type } = useSelector((state) => state.monitoring_usage);
   
-  // Ref untuk scroll ke file preview
   const filePreviewRef = useRef(null);
 
   useEffect(() => {
@@ -69,10 +70,32 @@ const UploadLayout = ({
     }
   }, [dispatch]);
 
-  const handleUpdate = (record, values) => {
-    // Fungsi ini hanya untuk navigasi ke halaman update
-    // Data handling dilakukan di halaman update
+  const isNeedType = (formatValue) => {
+    const target = formatValue ?? format;
+    if (!target) return false;
+
+    let labelStr = "";
+
+    if (typeof target === "object") {
+      const raw = target?.label ?? target?.children ?? target?.name ?? "";
+      if (typeof raw === "string") {
+        labelStr = raw;
+      } else if (Array.isArray(raw)) {
+        labelStr = raw.join("");
+      } else {
+        const matched = list_usage_type?.find(
+          (d) => d.id === target?.value || d.id === target?.key
+        );
+        labelStr = matched?.name ?? "";
+      }
+    } else {
+      labelStr = String(target);
+    }
+
+    return labelStr.toUpperCase() === "NEED";
   };
+
+  const handleUpdate = (record, values) => {};
 
   const handleDeleteOk = () => {
     const newData = dataTable.filter((item) => item.recordId !== recordId);
@@ -80,7 +103,6 @@ const UploadLayout = ({
     setModalDelete(false);
   };
 
-  // column action dengan recordId
   const action = [
     {
       title: "ACTION",
@@ -122,22 +144,34 @@ const UploadLayout = ({
     },
   ];
 
-  // handle pagination
   const updateDataPagination = (page, pageSize) => {
     return dataTable?.slice((page - 1) * pageSize, page * pageSize);
   };
 
-  // handle format change
   const handleFormat = (value) => {
     setFormat(value);
     setFileUploadEnabled(!!value);
+
+    if (isNeedType(value)) {
+      setShowRecalculateModal(true);
+    }
+  };
+
+  const handleRecalculateConfirm = () => {
+    setShowRecalculateModal(false);
+  };
+
+  const handleRecalculateCancel = () => {
+    setShowRecalculateModal(false);
+    setFormat(undefined);
+    setFileUploadEnabled(false);
+    form.resetFields(['format_usage_type']);
   };
 
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
   };
 
-  // properties dragger
   const property = {
     name: "file",
     multiple: false,
@@ -146,16 +180,11 @@ const UploadLayout = ({
     accept: ".xlsx, .xls",
     maxCount: 1,
     beforeUpload: (file) => {
-      // Validasi: cek format usage type terlebih dahulu
       if (!format) {
-        // Trigger validasi untuk menampilkan error di field
-        form.validateFields(['format_usage_type']).catch(() => {
-          // Error akan ditampilkan di field
-        });
+        form.validateFields(['format_usage_type']).catch(() => {});
         return false;
       }
 
-      // Check file size
       if (file.size > MAX_FILE_SIZE) {
         message.error('File size exceeds 5 MB limit');
         return false;
@@ -163,7 +192,6 @@ const UploadLayout = ({
 
       setFileName(file);
       
-      // Scroll ke preview setelah file dipilih
       setTimeout(() => {
         filePreviewRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
@@ -178,10 +206,7 @@ const UploadLayout = ({
 
   const handleUploadButtonClick = () => {
     if (!format) {
-      // Trigger validasi untuk menampilkan error di field
-      form.validateFields(['format_usage_type']).catch(() => {
-        // Error akan ditampilkan di field
-      });
+      form.validateFields(['format_usage_type']).catch(() => {});
     }
   };
 
@@ -196,17 +221,13 @@ const UploadLayout = ({
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
 
-      // Set nama file yang berhasil diupload
       setUploadedFileName(fileName.name);
-      
-      // Tampilkan success modal
       setShowSuccessModal(true);
 
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
       
-      // Clear file setelah berhasil upload
       setFileList([]);
       setFileName("");
       
@@ -224,19 +245,14 @@ const UploadLayout = ({
     setLoadingUpload(false);
   };
 
-  // handle upload by link
   const handleUploadLink = async (e) => {
     e.stopPropagation();
 
-    // Validasi: cek format usage type terlebih dahulu
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {
-        // Error akan ditampilkan di field
-      });
+      form.validateFields(['format_usage_type']).catch(() => {});
       return;
     }
 
-    // Validasi: cek apakah urlLink sudah diisi
     if (!urlLink || urlLink.trim() === "") {
       setLinkModalVisible(true);
       return;
@@ -253,18 +269,15 @@ const UploadLayout = ({
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
 
-      // Set nama file dari link
       const linkFileName = urlLink.split('/').pop() || 'File from link';
       setUploadedFileName(linkFileName);
       
-      // Tampilkan success modal
       setShowSuccessModal(true);
 
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
 
-      // Reset urlLink setelah berhasil upload
       setUrlLink("");
       
     } catch (error) {
@@ -281,7 +294,6 @@ const UploadLayout = ({
     setPageSize(pageSizeChange);
   };
 
-  // update link files
   const updateLink = (e) => {
     e.stopPropagation();
     setUrlLink(e.target.value);
@@ -298,7 +310,6 @@ const UploadLayout = ({
     handleUpload();
   };
 
-  // remove file list
   const handleRemove = (index) => {
     setFileList((prevFileList) => {
       const updatedFileList = [...prevFileList];
@@ -308,13 +319,9 @@ const UploadLayout = ({
     setFileName("");
   };
 
-  // Handle click pada dragger area - trigger validasi format
   const handleDraggerClick = (e) => {
     if (!format) {
-      // Trigger validasi field format_usage_type untuk menampilkan error merah
-      form.validateFields(['format_usage_type']).catch(() => {
-        // Error akan ditampilkan di field
-      });
+      form.validateFields(['format_usage_type']).catch(() => {});
     }
   };
 
@@ -414,17 +421,11 @@ const UploadLayout = ({
               rules={[
                 {
                   validator: async (_, value) => {
-                    // Validator ini akan di-trigger saat user interact dengan dragger
                     return Promise.resolve();
                   },
                 },
               ]}
               validateTrigger={['onChange', 'onBlur']}
-              help={
-                form.getFieldError('format_usage_type').length > 0 
-                  ? undefined 
-                  : undefined
-              }
             >
               <div className="w-full">
                 <Spin spinning={loadingUpload}>
@@ -478,7 +479,6 @@ const UploadLayout = ({
               </div>
             </Form.Item>
             
-            {/* File Preview dengan ref untuk scroll */}
             <div ref={filePreviewRef}>
               {fileList.map((file, index) => (
                 <div
@@ -557,7 +557,6 @@ const UploadLayout = ({
     <>
       {renderLayout(type)}
       
-      {/* Modal: Link kosong */}
       <ModalAttention
         isOpen={isLinkModalVisible}
         handleCancel={() => setLinkModalVisible(false)}
@@ -566,7 +565,6 @@ const UploadLayout = ({
         header="Link Required"
       />
 
-      {/* Modal: Konfirmasi Delete */}
       <ModalConfirm
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}
@@ -583,6 +581,25 @@ const UploadLayout = ({
         <Alert
           message="Warning! if you delete this data, it will be permanently."
           type={"error"}
+        />
+      </ModalConfirm>
+
+      <ModalConfirm
+        isOpen={showRecalculateModal}
+        handleCancel={handleRecalculateCancel}
+        handleOk={handleRecalculateConfirm}
+        width={500}
+        useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#FAAD14" }} />
+          <p className={"text-[18px] font-bold"}>
+            Data will be Recalculated
+          </p>
+        </div>
+        <Alert
+          message="You selected usage type NEED. Uploading this data will trigger a recalculation process. Are you sure you want to continue?"
+          type={"warning"}
         />
       </ModalConfirm>
     </>

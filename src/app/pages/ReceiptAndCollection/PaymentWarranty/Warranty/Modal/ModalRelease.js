@@ -31,10 +31,7 @@ import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllCustomerInfoPaginate,
   getAllWarrantyInfoPaginate,
-  getAllReleaseInfoPaginate,
-  getAllAttachmentInfoPaginate,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
@@ -43,6 +40,7 @@ import {
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import { WARRANTY_TRANSACTION_NAMES} from "../../../../../../constants/warrantyTypes";
 
 const ModalRelease = ({
   isOpen,
@@ -139,7 +137,7 @@ const ModalRelease = ({
   // Define Wizard Step
   const steps = [
     {
-      title: "Warranty Information",
+      title: "Guarantee Information",
       key: "warrantyInfo",
     },
     {
@@ -162,7 +160,7 @@ const ModalRelease = ({
 
   const next = () => {
     if (current === 0 && selectedWarrantyInfoRowKeys.length === 0) {
-      return message.warning("Please select Warranty Information!");
+      return message.warning("Please select Guarantee Information!");
     }
     if (current === 1) {
       if (!remarkReleaseInformation) {
@@ -232,7 +230,7 @@ const ModalRelease = ({
       const rowKey = preSelectedRow.billingCode || preSelectedRow.invoiceNumber || preSelectedRow.id;
       setSelectedWarrantyInfoRowKeys([rowKey]);
       setDataWarrantyInfoSelect([{ ...preSelectedRow, key: rowKey }]);
-      setCurrent(0); // Start at Step 1 (Warranty Info selection)
+      setCurrent(0); // Start at Step 1 (Guarantee Info selection)
     } else {
       setSelectedWarrantyInfoRowKeys([]);
       setDataWarrantyInfoSelect([]);
@@ -316,7 +314,7 @@ const ModalRelease = ({
 
       // 2. Prepare unified submission body
       const submitBody = {
-        warrantyTransTypeId: 11, // 11 = Release
+        warrantyTransTypeId: WARRANTY_TRANSACTION_NAMES.RELEASE, // 11 = Release
         appHierId: selectedHierarchy,
         items: dataWarrantyInfoSelect.map((item, index) => ({
           payWarrantyId: item.id,
@@ -344,7 +342,7 @@ const ModalRelease = ({
   };
 
 
-  // Warranty Information Step
+  // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
       const finalSearch = Object.keys(search).length > 0 
@@ -604,7 +602,6 @@ const ModalRelease = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  // Removed useEffect for getAllAttachmentInfoPaginate
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({
@@ -682,7 +679,7 @@ const ModalRelease = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Release"
+        header="Guarantee Release"
         handleCancel={handleBackForm}
         width={1000}
         footer={null}
