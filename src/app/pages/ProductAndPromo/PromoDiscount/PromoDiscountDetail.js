@@ -185,7 +185,7 @@ const PromoDiscountDetail = () => {
       id: data_promoDiscountDetail?.id,
       description: e?.remark,
       approvalId: data_promoDiscountDetail?.tappId,
-      action: approveOrReject,
+      action: approveOrReject ? "APPROVE" : "REJECT",
     };
     dispatch(
       data_promoDiscountDetail?.approvalType?.includes("INACTIVE")

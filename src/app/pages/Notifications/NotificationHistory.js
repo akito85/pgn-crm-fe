@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Notifications.css";
+import { buildApprovalState, getNotificationLink } from "../../../utils/approvalRouteHelper";
 import {
   Card,
   List,
@@ -40,6 +41,7 @@ import {
   selectDirectNotifications,
   selectUnreadCount,
   selectConnectionStatus,
+  selectCurrentPositionId,
   markAsRead,
   markAllAsRead,
   markNotificationAsReadApi,
@@ -86,7 +88,8 @@ const NotificationHistory = () => {
 
   // Get current position for filtering
   const authCurrentPosition = useSelector((state) => state.auth?.currentPosition);
-  const currentPositionId = authCurrentPosition?.positionId;
+  const reduxCurrentPositionId = useSelector(selectCurrentPositionId);
+  const currentPositionId = authCurrentPosition?.positionId || reduxCurrentPositionId;
 
   // Defensive check: Ensure all notification arrays are actually arrays
   const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
@@ -124,9 +127,11 @@ const NotificationHistory = () => {
     notifications = notifications.filter(notification => {
       const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
 
-      // If notification has a position ID, only show when user is in that exact position
-      if (notifPositionId) {
-        if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+      // If notification has a position ID AND user has a current position set,
+      // only show when it matches. When no position is set, allow all through
+      // to prevent silently hiding notifications before user selects a position.
+      if (notifPositionId && currentPositionId) {
+        if (Number(notifPositionId) !== Number(currentPositionId)) {
           return false;
         }
       }
@@ -185,8 +190,9 @@ const NotificationHistory = () => {
   // Position filter must be applied for accurate counts
   const positionFilteredNotifications = safeAllNotifications.filter(notification => {
     const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
-    if (notifPositionId) {
-      if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+    // Only filter by position when both notification has position ID AND user has current position
+    if (notifPositionId && currentPositionId) {
+      if (Number(notifPositionId) !== Number(currentPositionId)) {
         return false;
       }
     }
@@ -389,7 +395,7 @@ const NotificationHistory = () => {
   };
 
   /**
-   * Handle notification click - State-based navigation
+   * Handle notification click - State-based navigation with standardized state
    */
   const handleNotificationClick = (notification) => {
     // Mark as read if not already read
@@ -400,52 +406,9 @@ const NotificationHistory = () => {
       dispatch(markNotificationAsReadApi(notificationId));
     }
 
-    // Navigate using state-based routing pattern
-    const link = notification.link || notification.LINK;
-
+    const link = getNotificationLink(notification);
     if (link) {
-      // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
-      let parsedNavigationState = {};
-      const navState = notification.navigationState || notification.NAVIGATION_STATE;
-
-      if (navState) {
-        try {
-          parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
-        } catch (e) {
-          parsedNavigationState = {};
-        }
-      }
-
-      // Build route state object
-      const routeState = {
-        id: notification.entityId || notification.ENTITY_ID,
-        type: notification.entityType || notification.ENTITY_TYPE,
-        ...parsedNavigationState, // Spread parsed navigation state (idAccount, idCustomer, etc.)
-      };
-
-      // Add approval context if present
-      const tappId = notification.tappId || notification.TAPP_ID;
-      const appHierId = notification.appHierId || notification.APP_HIER_ID;
-      const approvalAction = notification.approvalAction || notification.APPROVAL_ACTION;
-      const approvalLevel = notification.approvalLevel || notification.APPROVAL_LEVEL;
-
-      if (tappId) {
-        routeState.tappId = tappId;
-        routeState.appHierId = appHierId;
-        routeState.approvalAction = approvalAction;
-        routeState.approvalLevel = approvalLevel;
-      }
-
-      // Navigate based on presence of entity_id
-      if (notification.entityId || notification.ENTITY_ID) {
-        navigate(link, { state: routeState });
-      } else {
-        navigate(link, {
-          state: Object.keys(parsedNavigationState).length > 0
-            ? parsedNavigationState
-            : undefined
-        });
-      }
+      navigate(link, { state: buildApprovalState(null, notification) });
     }
   };
 

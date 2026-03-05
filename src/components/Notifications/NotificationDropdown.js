@@ -36,6 +36,7 @@ import {
 } from "../../redux/slices/notifications";
 import { NOTIFICATION_CONFIG } from "../../constants/configApp";
 import notificationApi from "../../services/notificationApi";
+import { buildApprovalState, getNotificationLink } from "../../utils/approvalRouteHelper";
 import moment from "moment";
 
 const { Text } = Typography;
@@ -86,7 +87,10 @@ const NotificationDropdown = () => {
   const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
 
   // Get positionId from auth.currentPosition (from switch-pos API) or fallback to Redux notifications.currentPositionId
-  const positionId = authCurrentPosition?.positionId || currentPositionId;
+  // Also check localStorage for persistence across navigation/refresh
+  const persistedPositionId = localStorage.getItem("notification_positionId");
+  const positionId = authCurrentPosition?.positionId || currentPositionId || persistedPositionId ?
+    (authCurrentPosition?.positionId || currentPositionId || persistedPositionId) : null;
 
   // Filter notifications for current user and current position
   const userNotifications = safeAllNotifications.filter(notification => {
@@ -101,14 +105,12 @@ const NotificationDropdown = () => {
 
     if (!isForThisUser) return false;
 
-    // Position-based filter: if notification has a toPositionId, only show
-    // when it matches the user's current position (belt-and-suspenders with backend filter)
+    // Position-based filter: if notification has a toPositionId AND user has a current position set,
+    // only show when it matches. When no position is set (before switch-pos API), allow all through
+    // to prevent silently hiding notifications before user selects a position.
     const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
-    if (notifPositionId) {
-      // If notification is targeted at a specific position, ONLY show when user is in that exact position
-      // This ensures users don't see notifications for other roles/positions they hold
-      // Use Redux currentPositionId (not localStorage) to ensure reactivity when position changes
-      if (!currentPositionId || Number(notifPositionId) !== Number(currentPositionId)) {
+    if (notifPositionId && currentPositionId) {
+      if (Number(notifPositionId) !== Number(currentPositionId)) {
         return false;
       }
     }
@@ -166,10 +168,18 @@ const NotificationDropdown = () => {
     );
     const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
 
-    // Get positionId from auth.currentPosition (from switch-pos API response)
-    const positionId = authCurrentPosition?.positionId;
+    // Get positionId from auth.currentPosition or localStorage fallback
+    const positionId = authCurrentPosition?.positionId || localStorage.getItem("notification_positionId");
 
     if (userId) {
+      // Persist userId for reconnects (survives token format changes)
+      localStorage.setItem("notification_userId", userId);
+
+      // Persist positionId for reconnects (survives navigation/refresh)
+      if (positionId) {
+        localStorage.setItem("notification_positionId", positionId);
+      }
+
       // Set current position in Redux for position-based filtering
       dispatch(setCurrentPositionId(positionId || null));
 
@@ -222,21 +232,32 @@ const NotificationDropdown = () => {
       return;
     }
 
-    // Get user ID from token
+    // Get user ID from token - fall back to persisted value if token format changed
     const tokenJSON = JSON.parse(authToken || "{}");
-    const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username;
+    const userId = tokenJSON?.userId || tokenJSON?.id || tokenJSON?.username
+                 || localStorage.getItem("notification_userId"); // fallback if token format changed
 
-    // Get positionId from auth.currentPosition (from switch-pos API response)
-    const positionId = authCurrentPosition?.positionId;
+    // Get positionId from auth.currentPosition or localStorage fallback
+    const positionId = authCurrentPosition?.positionId || localStorage.getItem("notification_positionId");
 
     if (userId) {
+      // Persist userId if not already stored (survives token format changes)
+      if (!localStorage.getItem("notification_userId")) {
+        localStorage.setItem("notification_userId", userId);
+      }
+
+      // Persist positionId if available (survives navigation/refresh)
+      if (positionId && !localStorage.getItem("notification_positionId")) {
+        localStorage.setItem("notification_positionId", positionId);
+      }
+
       // Update current position in Redux for position-based filtering
       dispatch(setCurrentPositionId(positionId || null));
 
       // Refresh notification data after token change (e.g., position switch)
       const refreshNotifications = async () => {
         try {
-          console.log("[NotificationDropdown] Token changed - refreshing notifications for userId:", userId, "positionId:", positionId);
+          // console.log("[NotificationDropdown] Token changed - refreshing notifications for userId:", userId, "positionId:", positionId);
 
           // Step 1: Disconnect from current SSE connection
           dispatch(disconnectNotifications());
@@ -368,7 +389,7 @@ const NotificationDropdown = () => {
   };
 
   /**
-   * Handle notification click - State-based navigation with proper NAVIGATION_STATE parsing
+   * Handle notification click - State-based navigation with standardized state
    */
   const handleNotificationClick = (notification) => {
     // Mark as read if not already read (backend now handles broadcast read status)
@@ -379,52 +400,9 @@ const NotificationDropdown = () => {
       dispatch(markNotificationAsReadApi(notificationId));
     }
 
-    // Navigate using state-based routing pattern
-    const link = notification.link || notification.LINK;
-
+    const link = getNotificationLink(notification);
     if (link) {
-      // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
-      let parsedNavigationState = {};
-      const navState = notification.navigationState || notification.NAVIGATION_STATE;
-
-      if (navState) {
-        try {
-          parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
-        } catch (e) {
-          parsedNavigationState = {};
-        }
-      }
-
-      // Build route state object
-      const routeState = {
-        id: notification.entityId || notification.ENTITY_ID,
-        type: notification.entityType || notification.ENTITY_TYPE,
-        ...parsedNavigationState, // Spread parsed navigation state (idAccount, idCustomer, etc.)
-      };
-
-      // Add approval context if present
-      const tappId = notification.tappId || notification.TAPP_ID;
-      const appHierId = notification.appHierId || notification.APP_HIER_ID;
-      const approvalAction = notification.approvalAction || notification.APPROVAL_ACTION;
-      const approvalLevel = notification.approvalLevel || notification.APPROVAL_LEVEL;
-
-      if (tappId) {
-        routeState.tappId = tappId;
-        routeState.appHierId = appHierId;
-        routeState.approvalAction = approvalAction;
-        routeState.approvalLevel = approvalLevel;
-      }
-
-      // Navigate based on presence of entity_id
-      if (notification.entityId || notification.ENTITY_ID) {
-        navigate(link, { state: routeState });
-      } else {
-        navigate(link, {
-          state: Object.keys(parsedNavigationState).length > 0
-            ? parsedNavigationState
-            : undefined
-        });
-      }
+      navigate(link, { state: buildApprovalState(null, notification) });
     }
   };
 

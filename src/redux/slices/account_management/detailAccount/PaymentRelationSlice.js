@@ -22,6 +22,7 @@ const initialState = {
     pageSize: 10,
   },
   detail_paymentRelation: {},
+  detailDraft_paymentRelation: {},
   data_prApprovalHistory: {},
 };
 
@@ -162,6 +163,19 @@ export const getDetailPaymentRelation = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/detail/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDetailDraftPaymentRelation = createAsyncThunk(
+  "GET_DETAIL_DRAFT_PAYMENT_RELATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/detail-draft/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -402,15 +416,27 @@ const paymentRelationSlice = createSlice({
   extraReducers: {
     /** Get Detail Payment Relation */
     [getDetailPaymentRelation.pending]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
       state.loading = true;
     },
     [getDetailPaymentRelation.fulfilled]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
+      state.detail_paymentRelation = action.payload?.result || {};
       state.loading = false;
     },
     [getDetailPaymentRelation.rejected]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
+      state.detail_paymentRelation = {};
+      state.loading = false;
+    },
+
+    /** Get Detail Draft Payment Relation */
+    [getDetailDraftPaymentRelation.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getDetailDraftPaymentRelation.fulfilled]: (state, action) => {
+      state.detailDraft_paymentRelation = action.payload?.result || {};
+      state.loading = false;
+    },
+    [getDetailDraftPaymentRelation.rejected]: (state, action) => {
+      state.detailDraft_paymentRelation = {};
       state.loading = false;
     },
 

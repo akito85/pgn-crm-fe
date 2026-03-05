@@ -59,12 +59,12 @@ export const tasklistSlice = createApi({
           const headers = notificationTokenHeader();
           const config = { headers, withCredentials: true };
 
-          console.log('[TasklistSlice] Request URL:', url);
-          console.log('[TasklistSlice] Headers:', headers);
-          console.log('[TasklistSlice] UserId:', userId);
+          // console.log('[TasklistSlice] Request URL:', url);
+          // console.log('[TasklistSlice] Headers:', headers);
+          // console.log('[TasklistSlice] UserId:', userId);
 
           const result = await axios.get(url, config);
-          console.log('[TasklistSlice] Success response:', result.data);
+          // console.log('[TasklistSlice] Success response:', result.data);
           return { data: result.data };
         } catch (error) {
           console.error('[TasklistSlice] Error details:', {

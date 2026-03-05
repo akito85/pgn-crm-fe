@@ -1,51 +1,104 @@
-import React,{useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import moment from 'moment'
-import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 
-import BaseContainer from '../../../../../../../../components/BaseContainer'
-import GridLayout from '../../../../../../../../components/GridLayout'
-import DetailText from '../../../../../../../../components/DetailText'
-import RadioTabs from '../../../../../../../../components/RadioTabs'
+import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer'
+import NxDetailText from '../../../../../../../../components/Nx/NxDetailText'
+import NxTabs from '../../../../../../../../components/Nx/NxTabs'
+import NxTable from '../../../../../../../../components/Nx/NxTable'
 import Pricing from './Pricing'
 import LateCharge from './LateCharge'
 import CalculationRule from './CalculationRule'
 import TermOfService from './TermOfService'
 import { dateFormatting, hasValue, renderColumn } from '../../../../../../../../utils'
 import TaxImplication from './TaxImplication'
-import Attachment from '../Attachment';
-import { sorterFunction } from '../../../../../../../../utils/sorterFunction';
-import TablePaginationNew from '../../../../../../../../components/TablePaginationNew';
+import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../utils/getColumnSearchProps'
 
-const ServiceAgreementDetailCompoment = ({data, dataDraft}) => {
+const ServiceAgreementDetailCompoment = ({ data, dataDraft }) => {
 
+  // --- Payment Information Table state (NxTable infinite scroll) ---
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
+  const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [dataTable, setDataTable] = useState([]);
-  const [search, setSearch ] = useState({});
+
+  // --- Pricing Information tabs state ---
+  const [activePricingTab, setActivePricingTab] = useState("pricing");
+
+  // --- Hardcoded IDs for Payment Information filter ---
+  const paymentTypeId = 210;
+  const chargingMethodId = 214;
+
+  const paymentType = data?.saDetail?.find(item => item.name.toLowerCase() === "payment type")?.unit ?? "-"
+  const chargingMethod = data?.saDetail?.find(item => item.name.toLowerCase() === "charging method")?.unit ?? "-"
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
+    setSearchedColumn(tempSearchColumn);
+    setSearch((prevState) => {
+      let tempData = { ...prevState };
+      if (selectedKeys[0]) {
+        tempData[dataIndex] = selectedKeys[0];
+      } else {
+        delete tempData[dataIndex];
+      }
+      return tempData;
+    });
+    setLoadedCount(20);
+  };
+
+  // Processed data for NxTable (excl. Payment Type & Charging Method rows, with FE search)
+  const processedData = useMemo(() => {
+    let raw = (data?.saDetail || []).filter(
+      item => item.name.toLowerCase() !== "payment type" && item.name.toLowerCase() !== "charging method"
+    ).map(item => ({
+      ...item,
+      value: item.value !== null ? item.value.toString() : '',
+    }));
+
+    // Apply FE search filters
+    if (Object.keys(search).length > 0) {
+      raw = raw.filter(item => {
+        return Object.entries(search).every(([key, val]) => {
+          if (!val) return true;
+          return item[key]?.toString()?.toLowerCase()?.includes(val.toLowerCase());
+        });
+      });
+    }
+
+    if (!fieldSort) return raw;
+
+    return [...raw].sort((a, b) => {
+      const fa = a[fieldSort]?.toString()?.toLowerCase() || "";
+      const fb = b[fieldSort]?.toString()?.toLowerCase() || "";
+      if (fa < fb) return orderSort === "asc" ? -1 : 1;
+      if (fa > fb) return orderSort === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [data?.saDetail, fieldSort, orderSort, search]);
 
   useEffect(() => {
-    if(data?.saDetail){
-      setTotalElement(data?.saDetail?.length)
-      let modifyData = data?.saDetail.map(item=> {
-        return {
-          ...item,
-          value: item.value !== null ? item.value.toString() : '',
-        }
-      })
-      setDataTable(modifyData)
-    }
-  }, [data?.saDetail])
-  
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -55,303 +108,155 @@ const ServiceAgreementDetailCompoment = ({data, dataDraft}) => {
       setFieldSort("");
       setOrderSort("");
     }
+    setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  const filterDataByPage = () => {
-    const excludedIds = [paymentTypeId, chargingMethodId]
-    const tempProductWithoutTwoNameProduct = dataTable.filter(item => !excludedIds.includes(item.nameId))
-    let result = [...tempProductWithoutTwoNameProduct];
-    if (searchedColumn) {
-      const fixSearchText = searchText?.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase()?.includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
-
-  const dataAttachment = (data?.attachment || []).map(
-    (item) => {
-      return {
-        id: item.id,
-        size: item.size,
-        fileName: item.fileName,
-        fileSize: item.fileSize,
-        fileType: item.type,
-        category: item.fileCategoryName,
-        categoryName: item.categoryName,
-        pathFile: item.pathFile,
-        urlFile1: item.urlFile1,
-        urlFile2: item.urlFile2,
-        uploadBy: item.createdBy,
-        uploadDate: item.createdDate
-          ? moment(item.createdDate).format("DD MMM YYYY HH:mm:ss")
-          : "",
-        dataType: "exist",
-      };
-    }
-  );
-
-  const listSectionSection= [
-    { value: "Pricing" },
-    { value: "Calculation Rule" },
-    { value: "Term of Service" },
-    { value: "Late Charge" },
-    { value: "Tax Implication" },
+  const columns = [
+    {
+      title: "NO",
+      key: "no",
+      align: "center",
+      width: 60,
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: "NAME",
+      key: "name",
+      dataIndex: "name",
+      sorter: true,
+      width: 150,
+      filteredValue: search?.["name"] ? [search?.["name"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "name", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("name", hasValue(search["name"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "VALUE",
+      key: "value",
+      dataIndex: "value",
+      sorter: true,
+      align: "right",
+      width: 150,
+      filteredValue: search?.["value"] ? [search?.["value"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "value", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("value", hasValue(search["value"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "UNIT",
+      key: "unit",
+      dataIndex: "unit",
+      sorter: true,
+      width: 150,
+      filteredValue: search?.["unit"] ? [search?.["unit"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "unit", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("unit", hasValue(search["unit"]), searchText, text, false, "input", search),
+    },
+    {
+      title: "DESCRIPTION",
+      key: "description",
+      dataIndex: "description",
+      sorter: true,
+      width: 200,
+      filteredValue: search?.["description"] ? [search?.["description"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "description", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("description", hasValue(search["description"]), searchText, text, false, "input", search),
+    },
   ];
-  const dataTabs = {
-    pricing: "Pricing",
-    calculationRule: "Calculation Rule",
-    tos: "Term of Service",
-    lateCharge: "Late Charge",
-    taxImplication: "Tax Implication",
-  };
-  const [typeTabSection, setTypeTabSection] = useState(
-    listSectionSection[0].value
-  );
-  const handleChangeTab = (e) => {
-    setTypeTabSection(e.target.value);
-  };
-  const renderSection = () => {
-    switch (typeTabSection) {
-      case dataTabs.pricing:
-        return <Pricing data={data}/>;
-      case dataTabs.calculationRule:
-        return <CalculationRule data={data}/>;
-      case dataTabs.tos:
-        return <TermOfService data={data}/>;
-      case dataTabs.lateCharge:
-        return <LateCharge data={data}/>;
-      case dataTabs.taxImplication:
-        return <TaxImplication data={data}/>;
-      default:
-        return <></>;
-    }
-  };
-
-  const columns = ({
-    search,
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result = [
-      {
-        title: "NO",
-        width: 25,
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        title: "NAME",
-        dataIndex: "name",
-        width: 150,
-        sorter: (a, b) => sorterFunction('name', a,b),
-        ...getColumnSearchProps(
-          "name",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) => renderColumn('name', hasValue(search['name']), searchText, text, false, 'input', search)
-      },
-      {
-        title: "VALUE",
-        dataIndex: "value",
-        width: 150,
-        sorter: (a, b) => sorterFunction('value', a, b, 'number'),
-        align: 'right',
-        ...getColumnSearchProps(
-          "value",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) => renderColumn('value', hasValue(search['value']), searchText, text, false, 'input', search)
-      },
-      {
-        title: "UNIT",
-        dataIndex: "unit",
-        width: 150,
-        sorter: (a, b) => sorterFunction('unit', a, b),
-        ...getColumnSearchProps(
-          "unit",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) => renderColumn('unit', hasValue(search['unit']), searchText, text, false, 'input', search)
-      },
-      {
-        title: "DESCRIPTION",
-        width: 150,
-        sorter: (a, b) => sorterFunction("description", a, b),
-        dataIndex: "description",
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchProps(
-          "description",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
-      },
-    ]
-
-    return result;
-  }
-
-  // Start DDL Product Selected
-  const paymentTypeId = 210;
-  const chargingMethodId = 214;
-  const hasIdpaymentTypeId = dataTable?.filter(item => item?.nameId === paymentTypeId);
-  const haschargingMethodId = dataTable?.filter(item => item?.nameId === chargingMethodId);
-  // End DDL Product Selected
 
   return (
     <div>
       {/* SA DETAIL VIEW */}
-      <BaseContainer header={"SERVICE AGREEMENT DETAIL"} >
-        
-        {/* ====== SA Origin ====== */}
-        <div >
-          <GridLayout cols={4}>
-            {data?.saInfo?.productVersionId && (
-              <>
-                <DetailText label={"Product"}>{data?.saInfo?.productName}</DetailText>
-                <DetailText label={"Product Type"}>{data?.saInfo?.productType}</DetailText>
-              </>
-            )}
-            <DetailText label={"Service Type"}>{data?.saInfo?.saServiceType}</DetailText>
-            {data?.saInfo?.productVersionId && (
-              <>
-                <DetailText label={"Product Class"}>{data?.saInfo?.productClass}</DetailText>
-                <DetailText label={"Product Version"}>{data?.saInfo?.productVersion}</DetailText>
-              </>
-            )}
-            <DetailText label={"Create From"}>{data?.saInfo?.isCustom === "Y" ? "Product" : data?.saInfo?.isCustom  === null ? "": "Custom"}</DetailText>
-          </GridLayout>
-
-          <div className={"w-full py-6"}>
-            <GridLayout cols={2}>
-              <div>
-                <div className='text-primary text-xs font-bold uppercase pb-6'>
-                  PAYMENT TYPE
-                </div>
-                <DetailText label={"Payment Type"}>{hasIdpaymentTypeId[0]?.unit}</DetailText>
-              </div>
-              <div>
-                <div className='text-primary text-xs font-bold uppercase pb-6'>
-                  CHARGING METHOD
-                </div>
-                <DetailText label={"Charging Method"}>{haschargingMethodId[0]?.unit}</DetailText>
-              </div>
-            </GridLayout>
-            {/* Table Service Agreement Detail */}
-            <TablePaginationNew
-              type='FE'
-              pageSize={pageSize}
-              current={page}
-              dataSource={dataTable.filter(item => ![paymentTypeId, chargingMethodId].includes(item.nameId))}
-              tableScrolled={{y: 525, x: 1000 }}
-              totalData={totalElement}
-              onChange={handleChangeSize}
-              onSort={onSort}
-              columns={columns({
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-              })}
-            />
-          </div>
-
-          <div className='pt-6 pb-4'>
-            <span>
-              <RadioTabs 
-                currentPosition={typeTabSection}
-                data={listSectionSection} 
-                onChange={handleChangeTab}
+      <>
+        <div className="flex flex-col gap-y-4">
+          <NxBaseContainer border={true} header={"CREATE FROM"}>
+            <div className="w-full grid grid-cols-4 gap-4">
+              <NxDetailText label={"Create From"}>{data?.saInfo?.isCustom === "Y" ? "Product" : data?.saInfo?.isCustom === null ? "" : "Custom"}</NxDetailText>
+              <NxDetailText label={"Product"}>{data?.saInfo?.productName}</NxDetailText>
+            </div>
+          </NxBaseContainer>
+          <NxBaseContainer border={true} header={"PRODUCT INFORMATION"}>
+            <div className='w-full grid grid-cols-4 gap-4'>
+              {data?.saInfo?.productVersionId && (
+                <>
+                  <NxDetailText label={"Product Type"}>{data?.saInfo?.productType}</NxDetailText>
+                </>
+              )}
+              <NxDetailText label={"Service Type"}>{data?.saInfo?.saServiceType}</NxDetailText>
+              {data?.saInfo?.productVersionId && (
+                <>
+                  <NxDetailText label={"Product Class"}>{data?.saInfo?.productClass}</NxDetailText>
+                  <NxDetailText label={"Product Version"}>{data?.saInfo?.productVersion}</NxDetailText>
+                </>
+              )}
+              <NxDetailText label={"Description"}>{data?.saInfo?.productDescription || "-"}</NxDetailText>
+            </div>
+          </NxBaseContainer>
+          <NxBaseContainer border={true} header={"PAYMENT INFORMATION"}>
+            <div className="w-full grid grid-cols-2 gap-4">
+              <NxDetailText label={"Payment Type"}>{paymentType}</NxDetailText>
+              <NxDetailText label={"Charging Method"}>{chargingMethod}</NxDetailText>
+            </div>
+            <div className='w-full py-4'>
+              <NxTable
+                idTable="sa-detail-payment-table"
+                dataSource={displayData}
+                columns={columns}
+                totalData={processedData.length}
+                tableScrolled={{ x: "max-content", y: 400 }}
+                usePagination={false}
+                useInfiniteScroll={true}
+                hasMore={hasMore}
+                onLoadMore={handleLoadMore}
+                loadMoreThreshold={2}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                columnDefinitions={columns.map((col) => ({
+                  key: col.key || col.dataIndex || col.title,
+                  title: col.title,
+                }))}
+                onChange={onSort}
+                loading={false}
+                showAdvanceSearch={false}
+                showSearchBar={false}
               />
-            </span>
-          </div>
-
-          {renderSection()}
+            </div>
+          </NxBaseContainer>
+          <NxBaseContainer border={true} header={"PRICING INFORMATION"}>
+            <NxTabs
+              activeKey={activePricingTab}
+              onChange={(key) => setActivePricingTab(key)}
+              items={[
+                {
+                  key: "pricing",
+                  label: "Pricing",
+                  children: <Pricing data={data} />,
+                },
+                {
+                  key: "calculationRule",
+                  label: "Calculation Rule",
+                  children: <CalculationRule data={data} />,
+                },
+                {
+                  key: "tos",
+                  label: "Term of Service",
+                  children: <TermOfService data={data} />,
+                },
+                {
+                  key: "lateCharge",
+                  label: "Late Charge",
+                  children: <LateCharge data={data} />,
+                },
+                {
+                  key: "taxImplication",
+                  label: "Tax Implication",
+                  children: <TaxImplication data={data} />,
+                },
+              ]}
+            />
+          </NxBaseContainer>
 
         </div>
-      </BaseContainer>
+      </>
 
-      <BaseContainer header={"Attachment"}>
-        <Attachment dataSource={dataAttachment}/>
-      </BaseContainer>
-
-      {/* History Log Information */}
-      <BaseContainer header={"History Log Information"}>
-        <div className="w-full grid grid-cols-5 gap-5">
-          <DetailText label={"Record ID"}>
-          {data?.saHistory?.saId}
-          </DetailText>
-          <DetailText label={"Created Date"}>
-            {data?.saHistory?.createdDate ? moment(data?.saHistory?.createdDate).format(dateFormatting.dateTime) : ''}
-          </DetailText>
-          <DetailText label={"Created By"}>
-          {data?.saHistory?.createdBy}
-          </DetailText>
-          <DetailText label={"Updated Date"}>
-            {data?.saHistory?.updateDate ? moment(data?.saHistory?.updateDate).format(dateFormatting.dateTime) : ''}
-          </DetailText>
-          <DetailText label={"Updated By"}>
-          {data?.saHistory?.updatedBy}
-          </DetailText>
-        </div>
-      </BaseContainer>
     </div>
   )
 }

@@ -1,4 +1,3 @@
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
 import { useEffect, useState, useRef } from "react";
@@ -17,11 +16,12 @@ import {
   getApprovalHierarchyDetail,
   getAttachmentCategory,
   getAttachmentList,
+  getDetailDraftRelationship,
   getRelationshipDetail,
   updateRelationship
 } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import { showModalError, validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
@@ -53,6 +53,7 @@ const CreateUpdateRelationship = ({
     data_approvalHierarchies,
     data_approvalHierarchyDetail,
     data_relationshipDetail,
+    detailDraft_relationshipDetail,
     data_relationshipType,
     data_relationshipCategory,
     loadingDetail,
@@ -60,6 +61,19 @@ const CreateUpdateRelationship = ({
   } = useSelector(
     (state) => state.relationship
   );
+
+  const status = data_relationshipDetail.status || "DRAFT";
+  const statusApproval = data_relationshipDetail.statusApproval || "DRAFT";
+
+  const isDraft = status === "DRAFT";
+  const isActive = status === "ACTIVE";
+
+  const isDraftApproval = statusApproval === "DRAFT";
+  const isRejectApproval = statusApproval === "REJECT";
+
+  const detail = (isActive && statusApproval && isDraftApproval && isRejectApproval)
+    ? detailDraft_relationshipDetail
+    : data_relationshipDetail;
 
   // State Management
   const [current, setCurrent] = useState(0);
@@ -81,13 +95,12 @@ const CreateUpdateRelationship = ({
     if (type === "update" && id) {
       dispatch(getAttachmentList({ idAccount, idRelationship: id }));
       dispatch(getRelationshipDetail({ idAccount, idRelationship: id }));
+      dispatch(getDetailDraftRelationship({ idAccount, idRelationship: id }));
     }
   }, [type, id]);
 
   // Populate form when both detail data AND approval hierarchy list are loaded (update mode)
   useEffect(() => {
-    const detail = data_relationshipDetail;
-
     if (
       type === "update" &&
       detail?.appHierId &&
@@ -446,8 +459,6 @@ const CreateUpdateRelationship = ({
     } else if (type === "update") {
       // Update mode - restore to original API data
       if (data_relationshipDetail && data_relationshipDetail.id) {
-        const detail = data_relationshipDetail;
-
         // Restore form values to original
         form.setFieldsValue({
           relationshipType: detail.relationshipType,
@@ -614,28 +625,28 @@ const CreateUpdateRelationship = ({
               {/* Section Action Steps */}
               <NxBaseContainer border>
                 <div className="flex justify-between">
-                  <ButtonComponent
+                  <Button
                     type="menu"
                     onClick={() => navigate(-1)}
                   >
                     Cancel
-                  </ButtonComponent>
+                  </Button>
                   <div className="flex w-full justify-end gap-x-4">
-                    <ButtonComponent
-                      icon={<SVGIcon name="IconButtonClear" width={24} />}
+                    <Button
+                      icon={<SVGIcon name="IconButtonClear" width={14} />}
                       type="reject"
                       onClick={handleClear}
                     >
                       {type === "create" ? "Clear" : "Reset"}
-                    </ButtonComponent>
-                    <ButtonComponent
+                    </Button>
+                    <Button
                       onClick={() => handleSetShowConfirmationModal(true, "draft")}
                       type={"secondary"}
                       disabled={current !== steps.length - 1}
                     >
                       Save as Draft
-                    </ButtonComponent>
-                      <ButtonComponent
+                    </Button>
+                      <Button
                         onClick={() => {
                           prev();
                           scrollLeftHandler();
@@ -644,24 +655,24 @@ const CreateUpdateRelationship = ({
                         disabled={current < 1}
                       >
                         Previous
-                      </ButtonComponent>
+                      </Button>
                     {current < steps.length - 1 && (
-                      <ButtonComponent
+                      <Button
                         onClick={handleButtonNext}
                         type={"submit"}
                         disabled={steps[current].disabled}
                       >
                         Next
-                      </ButtonComponent>
+                      </Button>
                     )}
                     {current === steps.length - 1 && (
                       <>
-                        <ButtonComponent
+                        <Button
                           onClick={() => handleSetShowConfirmationModal(true, "submit")}
                           type={"submit"}
                         >
                           Save & Submit
-                        </ButtonComponent>
+                        </Button>
                       </>
                     )}
                   </div>

@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
+import { Button } from "antd";
 
 const ConfirmationModal = ({
   form,
+  formId,
   isOpen,
   handleCancel,
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
+  approvalData,
   dataAttachment,
   type = "",
-  data = {},
   service,
   configApplication,
 }) => {
@@ -21,13 +19,13 @@ const ConfirmationModal = ({
   const [activeTab, setActiveTab] = useState(0);
 
   /**
-   * @param {"next" | "prev"} type
+   * @param {"next" | "prev"} direction
    */
-  const handleChangeTab = (type) => {
-    if (type === "next" && activeTab < tabLength - 1) {
+  const handleChangeTab = (direction) => {
+    if (direction === "next" && activeTab < tabLength - 1) {
       setActiveTab((prev) => prev + 1);
     }
-    else if (type === "prev" && activeTab >= 0) {
+    else if (direction === "prev" && activeTab >= 0) {
       setActiveTab((prev) => prev - 1);
     }
   }
@@ -49,33 +47,31 @@ const ConfirmationModal = ({
       }}
       footer={[
         <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
-          <ButtonComponent type={"menu"} onClick={() => handleCancel()}>
+          <Button type={"menu"} onClick={() => handleCancel()}>
             Cancel
-          </ButtonComponent>
+          </Button>
           <div className="flex gap-x-2">
-            <ButtonComponent disabled={activeTab < 1} type={"menu"} onClick={() => handleChangeTab("prev")}>
+            <Button disabled={activeTab < 1} type={"menu"} onClick={() => handleChangeTab("prev")}>
               Previous
-            </ButtonComponent>
+            </Button>
             {activeTab < (tabLength - 1)  && (
-              <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
+              <Button type={"submit"} onClick={() => handleChangeTab("next")}>
                 Next
-              </ButtonComponent>
+              </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <ButtonComponent type={"submit"} form={form} htmlType={"submit"} >
+              <Button type={"submit"} form={formId} htmlType={"submit"} >
                 {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
-              </ButtonComponent>
+              </Button>
             )}
           </div>
         </div>,
       ]}
     >
       <ConfirmationModalTabs
-        selectedAppHierId={selectedAppHierId}
-        selectedApprovalName={selectedApprovalName}
-        hierarchyTableData={hierarchyTableData}
+        form={form}
+        approvalData={approvalData}
         dataAttachment={dataAttachment}
-        data={data}
         service={service}
         type={type}
         configApplication={configApplication}
