@@ -291,10 +291,10 @@ const PaymentRelation = ({
         named={inactivatePrAccountNumber}
         menu="payment relation"
         sliceName="paymentRelation"
-        approvalOptionsStateName="data_prApprovalHierarchy"
-        approvalHierarchtDetailsStateName="detail_prApprovalHierarchy"
+        approvalOptionsStateName="list_prApprovalOptions"
+        approvalHierarchtDetailsStateName="list_prApprovalHierarchyDetail"
         getApprovalOptions={getPrApprovalHierarchy}
-        getApprovalHierarchyDetails={(id) => getDetailPrApprovalHierarchy({ id })}
+        getApprovalHierarchyDetails={getDetailPrApprovalHierarchy}
       />
 
       {/* Approval History Modal */}

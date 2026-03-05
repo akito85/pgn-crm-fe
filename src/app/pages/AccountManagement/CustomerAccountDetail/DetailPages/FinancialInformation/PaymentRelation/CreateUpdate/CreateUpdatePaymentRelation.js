@@ -52,8 +52,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
 
   const {
     loading,
-    data_prApprovalHierarchy,
-    detail_prApprovalHierarchy,
+    list_prApprovalOptions,
+    list_prApprovalHierarchyDetail,
     detail_paymentRelation,
     detailDraft_paymentRelation,
     list_prDetailAttachment
@@ -119,7 +119,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   }, [formType, idPr]);
 
   useEffect(() => {
-    if (isUpdate && data_prApprovalHierarchy.length) {
+    if (isUpdate && list_prApprovalOptions.length) {
       const {
         subjectId,
         objectId,
@@ -144,14 +144,14 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
         appHierId
       });
 
-      const appHierOption = data_prApprovalHierarchy.find(
+      const appHierOption = list_prApprovalOptions.find(
         (option) => option.appHierId === appHierId
       );
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, data_prApprovalHierarchy]);
+  }, [detail, list_prApprovalOptions]);
 
   useEffect(() => {
     if (isUpdate && list_prDetailAttachment) {
@@ -303,7 +303,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailPrApprovalHierarchy({ id: appHierId }));
+    dispatch(getDetailPrApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -335,7 +335,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           content: (
             <ApprovalSectionForm
               form={form}
-              dataTable={(detail_prApprovalHierarchy || []).map(
+              dataTable={(list_prApprovalHierarchyDetail || []).map(
                 (detail, index) => ({
                   ...detail,
                   employeeDetail: detail.employeeDetail.map(
@@ -347,7 +347,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
                   key: `detail-detail-${index}`
                 })
               )}
-              dataOption={data_prApprovalHierarchy}
+              dataOption={list_prApprovalOptions}
               handleSelectHiararchy={handleSelectHiararchy}
               key={`payment-relation-tab-1`}
             />
@@ -577,7 +577,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      if (data_prApprovalHierarchy?.length) {
+      if (list_prApprovalOptions?.length) {
         const {
           subjectId,
           objectId,
@@ -602,7 +602,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           appHierId
         });
 
-        const appHierOption = data_prApprovalHierarchy.find(
+        const appHierOption = list_prApprovalOptions.find(
           (option) => option.appHierId === appHierId
         );
 
@@ -728,7 +728,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               formId={"paymentRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(detail_prApprovalHierarchy || []).map(
+              approvalData={(list_prApprovalHierarchyDetail || []).map(
                 (detail, index) => ({
                   ...detail,
                   employeeDetail: detail.employeeDetail.map(
