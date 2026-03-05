@@ -60,7 +60,7 @@ const nxGetAccountActions = ({
           key={`table-action-${index}`}
           >
           <Button
-            onClick={() => handleView(record.id)}
+            onClick={() => handleView(record.id, record.subjectId, record.objectId)}
             type="table-action"
           >
             <SVGIcon name="IconDetail" width={20} />
@@ -84,7 +84,7 @@ const nxGetAccountActions = ({
             icon={<SVGIcon name="IconEdit" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />}
             border={false}
             disabled={!isEditable}
-            onClick={() => handleUpdate(record.id)}
+            onClick={() => handleUpdate(record.id, record.subjectId, record.objectId)}
             type={"action"}
             className="group"
           >
@@ -93,7 +93,7 @@ const nxGetAccountActions = ({
         ) : (
           <Tooltip title={isEditable ? "Update" : ""} key={`table-action-${index}`}>
             <Button
-              onClick={() => handleUpdate(record.id)}
+              onClick={() => handleUpdate(record.id, record.subjectId, record.objectId)}
               disabled={!isEditable}
               type="table-action"
             >

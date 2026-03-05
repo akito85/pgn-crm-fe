@@ -70,6 +70,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idMd = location?.state?.id;
+  const subjectId = location?.state?.subjectId;
+  const objectId = location?.state?.objectId;
   const accountType = location?.state?.type; // "standard" or "onetime"
 
   const isCreate = type === "create";
@@ -125,8 +127,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
   useEffect(() => {
     if (isUpdate && idMd) {
-      dispatch(getDetailMultiDestination(idMd));
-      dispatch(getDetailDraftMultiDestination(idMd));
+      dispatch(getDetailMultiDestination(idMd, { subjectId, objectId }));
+      dispatch(getDetailDraftMultiDestination(idMd, { subjectId, objectId }));
       dispatch(getMultiDestinationAttachment({ id: idMd }));
     }
   }, [type, idMd]);

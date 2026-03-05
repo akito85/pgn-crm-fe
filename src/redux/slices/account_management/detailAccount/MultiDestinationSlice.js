@@ -217,9 +217,20 @@ export const updateMultiDestination = createAsyncThunk(
 
 export const getDetailMultiDestination = createAsyncThunk(
   "GET_DETAIL_MULTI_DESTINATION",
-  async (id, thunkAPI) => {
+  async ({ id, subjectId, objectId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/multi-destination/${id}`;
+      const queryParams = new URLSearchParams;
+
+      if (subjectId)
+        queryParams.append("subjectId", subjectId);
+      if (objectId)
+        queryParams.append("objectId", objectId);
+
+      let url = `/v1/dbs/api/multi-destination/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -230,9 +241,20 @@ export const getDetailMultiDestination = createAsyncThunk(
 
 export const getDetailDraftMultiDestination = createAsyncThunk(
   "GET_DETAIL_DRAFT_MULTI_DESTINATION",
-  async (id, thunkAPI) => {
+  async ({ id, subjectId, objectId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
+      const queryParams = new URLSearchParams;
+
+      if (subjectId)
+        queryParams.append("subjectId", subjectId);
+      if (objectId)
+        queryParams.append("objectId", objectId);
+
+      let url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {

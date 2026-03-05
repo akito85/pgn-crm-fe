@@ -28,22 +28,20 @@ const MultiDestinationTable = ({
   handleSearch = () => {},
   loading = false,
 }) => {
-  useEffect(() => {
-    console.log("loading", loading)
-  }, [loading])
-
   const navigate = useNavigate();
 
   const itemActions = nxGetAccountActions({
     idAccount,
     idCustomer,
-    handleView: (id) => navigate(
+    handleView: (id, subjectId, objectId) => navigate(
       ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION,
       {
         state: {
           idAccount,
           idCustomer,
           id,
+          subjectId,
+          objectId
         }
       }
     ),
@@ -56,13 +54,15 @@ const MultiDestinationTable = ({
         }
       }
     ),
-    handleUpdate: (id) => navigate(
+    handleUpdate: (id, subjectId, objectId) => navigate(
       ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION,
       {
         state: {
           idAccount,
           idCustomer,
           id,
+          subjectId,
+          objectId,
         }
       }
     ),

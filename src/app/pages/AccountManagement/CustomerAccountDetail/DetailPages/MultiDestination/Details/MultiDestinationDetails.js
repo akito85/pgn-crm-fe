@@ -44,6 +44,8 @@ const MultiDestinationDetails = ({
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idMd = location?.state?.id;
+  const subjectId = location?.state?.subjectId;
+  const objectId = location?.state?.objectId;
 
   const tabOptions = [
     { key: "ori", label: "Original" },
@@ -105,8 +107,8 @@ const MultiDestinationDetails = ({
       dispatch(approveOrRejectMultiDestination({ body, action }))
         .unwrap()
         .then(() => {
-          dispatch(getDetailMultiDestination(idMd));
-          dispatch(getDetailDraftMultiDestination(idMd));
+          dispatch(getDetailMultiDestination({ id: idMd, subjectId, objectId }));
+          dispatch(getDetailDraftMultiDestination({ id: idMd, subjectId, objectId }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -115,8 +117,8 @@ const MultiDestinationDetails = ({
       dispatch(approveOrRejectInactiveMultiDestination({ body, action }))
         .unwrap()
         .then(() => {
-          dispatch(getDetailMultiDestination(idMd));
-          dispatch(getDetailDraftMultiDestination(idMd));
+          dispatch(getDetailMultiDestination({ id: idMd, subjectId, objectId }));
+          dispatch(getDetailDraftMultiDestination({ id: idMd, subjectId, objectId }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -143,8 +145,8 @@ const MultiDestinationDetails = ({
 
   useEffect(() => {
     if (idMd) {
-      dispatch(getDetailMultiDestination(idMd));
-      dispatch(getDetailDraftMultiDestination(idMd));
+      dispatch(getDetailMultiDestination({ id: idMd, subjectId, objectId }));
+      dispatch(getDetailDraftMultiDestination({ id: idMd, subjectId, objectId }));
       dispatch(getMultiDestinationAttachment({ id: idMd }));
     }
   }, [idMd])
