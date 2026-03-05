@@ -33,7 +33,7 @@ const NxBaseContainer = ({
             {header}
           </span>
           {required && (
-            <span className="text-red-500">
+            <span className="text-[#ff4d4f]">
               *
             </span>
           )}
