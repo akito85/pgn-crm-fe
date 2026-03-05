@@ -46,8 +46,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const {
     loading_listMdApprovalOption,
     list_mdApprovalOptions,
-    loading_detailMdApprovalHierarchyDetails,
-    detail_mdApprovalHierarchyDetails,
+    loading_listMdApprovalHierarchyDetail,
+    list_mdApprovalHierarchyDetail,
     loading_detailMd,
     detail_multiDestination,
     loading_detailDraftMd,
@@ -59,7 +59,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
   const loading =
     loading_listMdApprovalOption ||
-    loading_detailMdApprovalHierarchyDetails ||
+    loading_listMdApprovalHierarchyDetail ||
     loading_detailMd ||
     loading_detailDraftMd ||
     loading_detailMdDetailAttachment;
@@ -405,7 +405,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         content: (
           <ApprovalForm
             form={form}
-            dataTable={(detail_mdApprovalHierarchyDetails || []).map((detail, index) => ({
+            dataTable={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
               ...detail,
               employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                 ...employeeDetail,
@@ -812,7 +812,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
               formId={"multiDestinationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(detail_mdApprovalHierarchyDetails || []).map((detail, index) => ({
+              approvalData={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
                 ...detail,
                 employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                   ...employeeDetail,
