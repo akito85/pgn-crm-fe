@@ -51,13 +51,25 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   );
 
   const {
-    loading,
+    loading_listIrApprovalOption,
+    loading_detailIrApprovalHierarchyDetails,
+    loading_detailIr,
+    loading_detailDraftIr,
+    loading_detailIrDetailAttachment,
+    loading_createUpdateIr,
     data_irApprovalHierarchy,
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
     detailDraft_invoiceRelation,
     list_irDetailAttachment
   } = useSelector((state) => state.invoiceRelation);
+
+  const loading =
+    loading_listIrApprovalOption ||
+    loading_detailIrApprovalHierarchyDetails ||
+    loading_detailIr ||
+    loading_detailDraftIr ||
+    loading_detailIrDetailAttachment;
 
   //declare
   const location = useLocation();
@@ -735,6 +747,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
               dataAttachment={dataAttachment}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
+              loading={loading_createUpdateIr}
             />
           </Form>
         </Spin>

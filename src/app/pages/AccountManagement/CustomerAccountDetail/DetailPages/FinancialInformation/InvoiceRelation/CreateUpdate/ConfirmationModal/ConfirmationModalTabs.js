@@ -15,6 +15,7 @@ const ConfirmationModalTabs = ({
   configApplication,
   activeTab = 0,
   setActiveTab = () => {},
+  disabled = false,
 }) => {
   const dispatch = useDispatch();
 
@@ -22,14 +23,16 @@ const ConfirmationModalTabs = ({
     {
       key: 0,
       label: "Invoice Relation Information",
-      children: <InfoInvoiceRelation form={form} formView={false} />
+      children: <InfoInvoiceRelation form={form} formView={false} />,
+      disabled,
     },
     {
       key: 1,
       label: "Approval",
       children: (
         <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />
-      )
+      ),
+      disabled,
     },
     {
       key: 2,
@@ -42,12 +45,14 @@ const ConfirmationModalTabs = ({
           configApplication={configApplication}
           type={"confirmation"}
         />
-      )
+      ),
+      disabled,
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark />
+      children: <ConfirmationModalRemark disabled={disabled} />,
+      disabled,
     },
   ].filter(Boolean).map((tabOption) => ({
     ...tabOption,
