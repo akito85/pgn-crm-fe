@@ -1,7 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Modal, Form, Select, Table, Button } from "antd";
-import { PlusOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
+import { Form, Select, Table, Button } from "antd";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
+import {
+  PlusOutlined,
+  LeftOutlined,
+  RightOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
+import {
+  getDistributeMedia,
+  getContactByAccount,
+  getApprovalHierarchyList,
+  getApprovalHierarchyDetail,
+  createTaxExemption,
+  uploadTaxExemptionAttachment,
+  getCategoryListTaxExemption,
+} from "../../../../redux/slices/rating_billing_invoice/taxExemption";
+import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
 import { Steps } from "antd";
 import InputComponent from "../../../../components/InputComponent";
 import DateComponent from "../../../../components/DateComponent";
@@ -13,50 +30,106 @@ import AttachmentComponent from "../../../../components/Attachment/AttachmentCom
 import SVGIcon from "../../../../assets/Icon/index";
 import { configApp } from "../../../../constants/configApp";
 import { getConfigFileRBIData } from "../../../../redux/slices/attachmentSlice";
+import { ModalError } from "../../../../components/Modal/ModalPopUp";
 
 // ─── Step 1: Tax Exemption Form ──────────────────────────────────────────────
 
-const TaxExemptionStep = ({ form, record }) => {
-  const [contactRows, setContactRows] = useState([
-    {
-      key: "1",
-      distributionMedia: undefined,
-      contactName: undefined,
-      value: "",
-      job: "",
-      position: "",
-      contactAddress: "",
-      contactAddressNote: "",
-      description: "",
-    },
-  ]);
+const TaxExemptionStep = ({
+  form,
+  record,
+  dispatch,
+  contactRows,
+  setContactRows,
+  contactRowErrors,
+  setContactRowErrors,
+}) => {
+  const { distributeMediaList, contactList } = useSelector(
+    (state) => state.taxExemption || {},
+  );
 
-  const distributionMediaOptions = [
-    { value: "Email", label: "Email" },
-    { value: "Fax", label: "Fax" },
-    { value: "Phone", label: "Phone" },
-    { value: "WhatsApp", label: "WhatsApp" },
-  ];
+  // Fetch distribute media on mount
+  useEffect(() => {
+    dispatch(getDistributeMedia());
+  }, [dispatch]);
 
-  const handleAddRow = () => {
-    const newRow = {
-      key: String(Date.now()),
-      distributionMedia: undefined,
-      contactName: undefined,
-      value: "",
-      job: "",
-      position: "",
-      contactAddress: "",
-      contactAddressNote: "",
-      description: "",
-    };
-    setContactRows((prev) => [...prev, newRow]);
-  };
+  // Fetch contacts when accountNumber changes
+  useEffect(() => {
+    if (record?.accountNumber) {
+      dispatch(getContactByAccount({ accountNumber: record.accountNumber }));
+    }
+  }, [dispatch, record?.accountNumber]);
+
+  // Collect all contact names already selected in other rows
+  const usedContactIds = useMemo(
+    () => contactRows.map((r) => r.contactName).filter(Boolean),
+    [contactRows],
+  );
 
   const handleRowChange = (key, field, value) => {
     setContactRows((prev) =>
-      prev.map((row) => (row.key === key ? { ...row, [field]: value } : row))
+      prev.map((row) => {
+        if (row.key !== key) return row;
+        if (field === "distributionMedia") {
+          return {
+            ...row,
+            distributionMedia: value,
+            contactName: undefined,
+            value: "",
+            job: "",
+            position: "",
+            contactAddress: "",
+            contactAddressNote: "",
+            description: "",
+          };
+        }
+        if (field === "contactName") {
+          const contact = contactList.find((c) => c.id === value);
+          return {
+            ...row,
+            contactName: value,
+            contactNameLabel: contact?.contactName || "",
+            value: contact?.value || "",
+            job: contact?.job || "",
+            position: contact?.position || "",
+            contactAddress: contact?.contactAddress || "",
+            contactAddressNote: contact?.contactAddressAdditionalNotes || "",
+            description: contact?.description || "",
+          };
+        }
+        return { ...row, [field]: value };
+      }),
     );
+    // Clear error for this row/field when user fills it
+    if (contactRowErrors[key]?.[field]) {
+      setContactRowErrors((prev) => {
+        const updated = { ...prev[key] };
+        delete updated[field];
+        if (Object.keys(updated).length === 0) {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        }
+        return { ...prev, [key]: updated };
+      });
+    }
+  };
+
+  const handleAddRow = () => {
+    setContactRows((prev) => [
+      ...prev,
+      {
+        key: String(Date.now()),
+        distributionMedia: undefined,
+        contactName: undefined,
+        contactNameLabel: "",
+        value: "",
+        job: "",
+        position: "",
+        contactAddress: "",
+        contactAddressNote: "",
+        description: "",
+      },
+    ]);
   };
 
   const contactColumns = [
@@ -68,56 +141,95 @@ const TaxExemptionStep = ({ form, record }) => {
       render: (_, __, index) => index + 1,
     },
     {
-      title: "DISTRIBUTION MEDIA",
+      title: (
+        <span>
+          DISTRIBUTION MEDIA <span style={{ color: "red" }}>*</span>
+        </span>
+      ),
       dataIndex: "distributionMedia",
       key: "distributionMedia",
       width: 160,
       render: (val, row) => (
-        <SelectComponent
-          value={val}
-          size="small"
-          style={{ width: "100%" }}
-          placeholder="Select"
-          onChange={(v) => handleRowChange(row.key, "distributionMedia", v)}
-        >
-          {distributionMediaOptions.map((opt) => (
-            <Select.Option key={opt.value} value={opt.value}>
-              {opt.label}
-            </Select.Option>
-          ))}
-        </SelectComponent>
+        <div>
+          <SelectComponent
+            value={val}
+            size="small"
+            style={{
+              width: "100%",
+              borderColor: contactRowErrors[row.key]?.distributionMedia
+                ? "red"
+                : undefined,
+            }}
+            status={
+              contactRowErrors[row.key]?.distributionMedia ? "error" : undefined
+            }
+            placeholder="Select"
+            onChange={(v) => handleRowChange(row.key, "distributionMedia", v)}
+          >
+            {distributeMediaList.map((opt) => (
+              <Select.Option key={opt.code} value={opt.code}>
+                {opt.text}
+              </Select.Option>
+            ))}
+          </SelectComponent>
+          {contactRowErrors[row.key]?.distributionMedia && (
+            <p style={{ color: "red", fontSize: 10, margin: 0 }}>Required</p>
+          )}
+        </div>
       ),
     },
     {
-      title: "CONTACT NAME",
+      title: (
+        <span>
+          CONTACT NAME <span style={{ color: "red" }}>*</span>
+        </span>
+      ),
       dataIndex: "contactName",
       key: "contactName",
-      width: 160,
-      render: (val, row) => (
-        <SelectComponent
-          value={val}
-          size="small"
-          style={{ width: "100%" }}
-          placeholder="Select"
-          showSearch
-          onChange={(v) => handleRowChange(row.key, "contactName", v)}
-        >
-          {/* TODO: populate from API */}
-        </SelectComponent>
-      ),
+      width: 180,
+      render: (val, row) => {
+        const filtered = contactList.filter(
+          (c) =>
+            c.type === row.distributionMedia &&
+            (!usedContactIds.includes(c.id) || c.id === val),
+        );
+        return (
+          <div>
+            <SelectComponent
+              value={val}
+              size="small"
+              style={{ width: "100%" }}
+              status={
+                contactRowErrors[row.key]?.contactName ? "error" : undefined
+              }
+              placeholder="Select"
+              showSearch
+              disabled={!row.distributionMedia}
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().includes(input.toLowerCase())
+              }
+              onChange={(v) => handleRowChange(row.key, "contactName", v)}
+            >
+              {filtered.map((c) => (
+                <Select.Option key={c.id} value={c.id}>
+                  {c.contactName}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+            {contactRowErrors[row.key]?.contactName && (
+              <p style={{ color: "red", fontSize: 10, margin: 0 }}>Required</p>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "VALUE",
       dataIndex: "value",
       key: "value",
       width: 150,
-      render: (val, row) => (
-        <InputComponent
-          value={val}
-          size="small"
-          placeholder="{value}"
-          onChange={(e) => handleRowChange(row.key, "value", e.target.value)}
-        />
+      render: (val) => (
+        <InputComponent value={val} size="small" placeholder="-" disabled />
       ),
     },
     {
@@ -125,13 +237,8 @@ const TaxExemptionStep = ({ form, record }) => {
       dataIndex: "job",
       key: "job",
       width: 120,
-      render: (val, row) => (
-        <InputComponent
-          value={val}
-          size="small"
-          placeholder="Job"
-          onChange={(e) => handleRowChange(row.key, "job", e.target.value)}
-        />
+      render: (val) => (
+        <InputComponent value={val} size="small" placeholder="-" disabled />
       ),
     },
     {
@@ -139,13 +246,8 @@ const TaxExemptionStep = ({ form, record }) => {
       dataIndex: "position",
       key: "position",
       width: 160,
-      render: (val, row) => (
-        <InputComponent
-          value={val}
-          size="small"
-          placeholder="Position"
-          onChange={(e) => handleRowChange(row.key, "position", e.target.value)}
-        />
+      render: (val) => (
+        <InputComponent value={val} size="small" placeholder="-" disabled />
       ),
     },
     {
@@ -153,15 +255,8 @@ const TaxExemptionStep = ({ form, record }) => {
       dataIndex: "contactAddress",
       key: "contactAddress",
       width: 200,
-      render: (val, row) => (
-        <InputComponent
-          value={val}
-          size="small"
-          placeholder="Contact Address"
-          onChange={(e) =>
-            handleRowChange(row.key, "contactAddress", e.target.value)
-          }
-        />
+      render: (val) => (
+        <InputComponent value={val} size="small" placeholder="-" disabled />
       ),
     },
     {
@@ -169,15 +264,8 @@ const TaxExemptionStep = ({ form, record }) => {
       dataIndex: "contactAddressNote",
       key: "contactAddressNote",
       width: 220,
-      render: (val, row) => (
-        <InputComponent
-          value={val}
-          size="small"
-          placeholder="Additional Note"
-          onChange={(e) =>
-            handleRowChange(row.key, "contactAddressNote", e.target.value)
-          }
-        />
+      render: (val) => (
+        <InputComponent value={val} size="small" placeholder="-" disabled />
       ),
     },
     {
@@ -185,15 +273,8 @@ const TaxExemptionStep = ({ form, record }) => {
       dataIndex: "description",
       key: "description",
       width: 180,
-      render: (val, row) => (
-        <InputComponent
-          value={val}
-          size="small"
-          placeholder="Description"
-          onChange={(e) =>
-            handleRowChange(row.key, "description", e.target.value)
-          }
-        />
+      render: (val) => (
+        <InputComponent value={val} size="small" placeholder="-" disabled />
       ),
     },
   ];
@@ -207,44 +288,56 @@ const TaxExemptionStep = ({ form, record }) => {
     { label: "Service Agreement Class", value: record?.serviceType },
     { label: "Account Segment", value: record?.accountSegment },
     { label: "SOR", value: record?.sor },
-    { label: "Cost Center Code", value: record?.costCenter },
-    { label: "Cost Center Name", value: record?.costCenterName },
+    { label: "Cost Center", value: record?.costCenter },
+    // { label: "Cost Center Name", value: record?.costCenterName },
     { label: "Meter Reading Code", value: record?.meterReadingCode },
   ];
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 p-3">
       {/* Document Number & Document Date */}
       <BaseContainer border>
         <div className="grid grid-cols-2 gap-x-4 py-2">
           <Form.Item
             label="Document Number"
             name="documentNumber"
-            rules={[{ required: true, message: "Please input Document Number!" }]}
+            rules={[
+              { required: true, message: "Please input Document Number!" },
+            ]}
           >
             <InputComponent placeholder="Type here.." />
           </Form.Item>
           <Form.Item
             label="Document Date"
             name="documentDate"
-            rules={[{ required: true, message: "Please select Document Date!" }]}
+            rules={[
+              { required: true, message: "Please select Document Date!" },
+            ]}
           >
-            <DateComponent placeholder="Select Date" />
+            <DateComponent
+              placeholder="Select Date"
+              dateDisable={() => false}
+            />
           </Form.Item>
         </div>
       </BaseContainer>
 
       {/* Proforma Invoice */}
-      <BaseContainer border>
-        <div className="py-2">
-          <p className="text-xs text-gray-500 mb-1">Proforma Invoice</p>
+      <BaseContainer
+        border
+        header={
+          <p className="text-xs text-black capitalize font-semibold">
+            Proforma Invoice
+          </p>
+        }
+      >
+        <div className="pb-2">
           <a
-            href="#"
+            href={record?.pathFile}
             className="text-primary text-xs"
             style={{ color: "#0075BF" }}
           >
-            {record?.proformaInvoice ||
-              "proforma-invoice-{customer}-{year}.pdf"}
+            {record?.pathFile}
           </a>
         </div>
       </BaseContainer>
@@ -288,7 +381,10 @@ const TaxExemptionStep = ({ form, record }) => {
                     <div className="flex justify-end text-xs text-gray-500 pr-2">
                       Showing {contactRows.length} of {contactRows.length}{" "}
                       entries{" "}
-                      <span className="text-primary ml-2" style={{ color: "#0075BF" }}>
+                      <span
+                        className="text-primary ml-2"
+                        style={{ color: "#0075BF" }}
+                      >
                         All data showed
                       </span>
                     </div>
@@ -310,19 +406,34 @@ const ApprovalStep = ({
   appHierDataDetail,
   selectedHierarchy,
   setSelectedHierarchy,
+  dispatch,
   form,
 }) => {
+  // Fetch approval hierarchy list on mount
+  useEffect(() => {
+    dispatch(getApprovalHierarchyList());
+  }, [dispatch]);
+
+  // Fetch detail when selection changes
+  useEffect(() => {
+    if (selectedHierarchy && selectedHierarchy !== 0) {
+      dispatch(getApprovalHierarchyDetail({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
+
   return (
-    <BaseContainer header="Approval Information">
-      <ApprovalComponentGeneral
-        type="create"
-        dataTable={appHierDataDetail}
-        dataOption={appHierOptions}
-        selectedHierarchy={selectedHierarchy}
-        updateSelectedHierarchy={setSelectedHierarchy}
-        form={form}
-        fieldName="apphierId"
-      />
+    <BaseContainer border header="Approval Information">
+      <div className="pb-3">
+        <ApprovalComponentGeneral
+          type="create"
+          dataTable={appHierDataDetail}
+          dataOption={appHierOptions}
+          selectedHierarchy={selectedHierarchy}
+          updateSelectedHierarchy={setSelectedHierarchy}
+          form={form}
+          fieldName="apphierId"
+        />
+      </div>
     </BaseContainer>
   );
 };
@@ -333,24 +444,24 @@ const AttachmentStep = ({
   listDataAttachment,
   setListDataAttachment,
   dispatch,
-  getAPICategory,
-  typeSelector,
 }) => {
   return (
-    <BaseContainer header="Attachment Information">
-      <AttachmentComponent
-        type="create"
-        data={listDataAttachment}
-        updateData={setListDataAttachment}
-        dispatch={dispatch}
-        getAPICategory={getAPICategory}
-        typeSelector={typeSelector}
-        service={null}
-        configApplication={configApp.RATING_BILLING_SERVICE}
-        getAPIGuard={getConfigFileRBIData}
-        typeRBI="data"
-        mandatory={true}
-      />
+    <BaseContainer border header="Attachment Information">
+      <div className="pb-3">
+        <AttachmentComponent
+          type="create"
+          data={listDataAttachment}
+          updateData={setListDataAttachment}
+          dispatch={dispatch}
+          getAPICategory={getCategoryListTaxExemption}
+          typeSelector="taxExemption"
+          service={ratingBillingHttpService}
+          configApplication={configApp.RATING_BILLING_SERVICE}
+          getAPIGuard={getConfigFileRBIData}
+          typeRBI="data"
+          mandatory={true}
+        />
+      </div>
     </BaseContainer>
   );
 };
@@ -424,17 +535,14 @@ const ModalStepper = ({ steps, current, onPrev, onNext }) => {
           borderRadius: "50%",
           backgroundColor:
             current < steps.length - 1 ? "transparent" : "#E0E0E0",
-          border:
-            current < steps.length - 1 ? "1px solid #0075BF" : "none",
+          border: current < steps.length - 1 ? "1px solid #0075BF" : "none",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: current < steps.length - 1 ? "pointer" : "not-allowed",
           flexShrink: 0,
         }}
-        onClick={() =>
-          current < steps.length - 1 && onNext && onNext()
-        }
+        onClick={() => current < steps.length - 1 && onNext && onNext()}
       >
         <RightOutlined
           style={{
@@ -453,21 +561,70 @@ const ModalCreateTaxExemption = ({
   isOpen,
   onClose,
   record,
-  // approval props - pass from parent when redux slice ready
-  appHierOptions = [],
-  appHierDataDetail = [],
-  selectedHierarchy,
-  setSelectedHierarchy = () => {},
-  // attachment props
   listDataAttachment = [],
   setListDataAttachment = () => {},
   dispatch,
-  getAPICategory,
-  typeSelector = "taxExemption",
   onSubmit = () => {},
 }) => {
+  const { approvalHierarchyList, approvalHierarchyDetail } = useSelector(
+    (state) => state.taxExemption || {},
+  );
+
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
+  const [selectedHierarchy, setSelectedHierarchy] = useState(undefined);
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [modalConfirm, setModalConfirm] = useState(false);
+  const [modalError, setModalError] = useState(false);
+  const [bodyError, setBodyError] = useState({});
+  const [bodyData, setBodyData] = useState({});
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [contactRows, setContactRows] = useState([
+    {
+      key: "1",
+      distributionMedia: undefined,
+      contactName: undefined,
+      contactNameLabel: "",
+      value: "",
+      job: "",
+      position: "",
+      contactAddress: "",
+      contactAddressNote: "",
+      description: "",
+    },
+  ]);
+  const [contactRowErrors, setContactRowErrors] = useState({});
+
+  // Map approval hierarchy list to options
+  useEffect(() => {
+    if (approvalHierarchyList && approvalHierarchyList.length > 0) {
+      const options = approvalHierarchyList.map((item) => ({
+        name: item.approvalName,
+        value: item.appHierId,
+      }));
+      setAppHierOptions(options);
+    } else {
+      setAppHierOptions([]);
+    }
+  }, [approvalHierarchyList]);
+
+  // Map approval hierarchy detail to table data
+  useEffect(() => {
+    if (approvalHierarchyDetail && approvalHierarchyDetail.length > 0) {
+      const data = approvalHierarchyDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: (a.employeeDetail || []).map((b, i) => ({
+          ...b,
+          key: i + 1,
+        })),
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [approvalHierarchyDetail]);
 
   const steps = [
     { title: "TAX EXEMPTION" },
@@ -476,28 +633,164 @@ const ModalCreateTaxExemption = ({
   ];
 
   const handlePrev = () => setCurrentStep((prev) => Math.max(0, prev - 1));
-  const handleNext = () =>
-    setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
 
-  const handleCancel = () => {
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      // Validate form fields (documentNumber, documentDate)
+      try {
+        await form.validateFields(["documentNumber", "documentDate"]);
+      } catch {
+        return;
+      }
+
+      // Validate contact rows: at least 1 row, every row must have both distributionMedia and contactName
+      const errors = {};
+      contactRows.forEach((row) => {
+        if (!row.distributionMedia) {
+          errors[row.key] = errors[row.key] || {};
+          errors[row.key].distributionMedia = true;
+        }
+        if (!row.contactName) {
+          errors[row.key] = errors[row.key] || {};
+          errors[row.key].contactName = true;
+        }
+      });
+
+      if (Object.keys(errors).length > 0) {
+        setContactRowErrors(errors);
+        return;
+      }
+      setContactRowErrors({});
+    }
+
+    if (currentStep === 1) {
+      // Validate approval hierarchy selection
+      try {
+        await form.validateFields(["apphierId"]);
+      } catch {
+        return;
+      }
+    }
+
+    setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+  };
+
+  const resetModal = () => {
     form.resetFields();
     setCurrentStep(0);
+    setSelectedHierarchy(undefined);
+    setAppHierDataDetail([]);
+    setBodyData({});
+    setListDataAttachment([]);
+    setContactRowErrors({});
+    setContactRows([
+      {
+        key: "1",
+        distributionMedia: undefined,
+        contactName: undefined,
+        value: "",
+        job: "",
+        position: "",
+        contactAddress: "",
+        contactAddressNote: "",
+        description: "",
+      },
+    ]);
+  };
+
+  const handleCancel = () => {
+    resetModal();
     onClose();
   };
 
+  // Build request body from form values + contact rows state
+  const buildBody = (values) => ({
+    id: record?.taxExemptionId || null,
+    documentNumber: values.documentNumber,
+    documentDate: values.documentDate,
+    apphierId: values.apphierId,
+    contactInformation: contactRows
+      .filter((r) => r.contactName)
+      .map((r) => ({
+        distributionMedia: r.distributionMedia,
+        contactName: r.contactNameLabel || "",
+        value: r.value || "",
+        job: r.job || "",
+        position: r.position || "",
+        contactAddress: r.contactAddress || "",
+        contactAddressAdditionalNotes: r.contactAddressNote || "",
+        description: r.description || "",
+      })),
+  });
+
   const handleSubmit = async () => {
+    if (listDataAttachment.length === 0) {
+      setCurrentStep(2);
+      return;
+    }
     try {
       const values = await form.validateFields();
-      onSubmit(values);
+
+      // Validate with backend before showing confirm modal
+      const isValid = await dispatch(
+        validateCreateUpdate({
+          body: buildBody(values),
+          services: ratingBillingHttpService,
+          endPoint: "/v1/dbs/api/tax-exemption/validate-create",
+          type: "create",
+        }),
+      )
+        .unwrap()
+        .then(() => true)
+        .catch(() => false);
+
+      if (isValid) {
+        setBodyData(values);
+        setModalConfirm(true);
+      }
     } catch (e) {
-      // validation failed, stay on current step
+      // form validation failed, stay on current step
     }
+  };
+
+  const handleConfirm = () => {
+    setLoadingSave(true);
+    setModalConfirm(false);
+
+    dispatch(createTaxExemption({ body: buildBody(bodyData) }))
+      .unwrap()
+      .then(async (dataForm) => {
+        const referenceId = dataForm?.id;
+        for (let i = 0; i < listDataAttachment.length; i++) {
+          const element = listDataAttachment[i];
+          await dispatch(
+            uploadTaxExemptionAttachment({
+              referenceId,
+              files: element.file,
+              categoryId: element.fileCategoryId,
+            }),
+          );
+        }
+        setLoadingSave(false);
+        resetModal();
+        onSubmit(dataForm);
+        onClose();
+      })
+      .catch((error) => {
+        setLoadingSave(false);
+        const message =
+          error?.message || error?.toString() || "Something went wrong";
+        setBodyError({ message });
+        setModalError(true);
+      });
   };
 
   // Reset step when modal opens
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(0);
+      setSelectedHierarchy(undefined);
+      setAppHierDataDetail([]);
       form.resetFields();
     }
   }, [isOpen, form]);
@@ -544,6 +837,7 @@ const ModalCreateTaxExemption = ({
           <Button
             onClick={handleSubmit}
             type="primary"
+            loading={loadingSave}
             style={{
               backgroundColor: "#388E3C",
               borderColor: "#388E3C",
@@ -560,69 +854,145 @@ const ModalCreateTaxExemption = ({
   );
 
   return (
-    <Modal
-      open={isOpen}
-      onCancel={handleCancel}
-      className="modal-custom"
-      centered
-      width={1200}
-      maskClosable={false}
-      destroyOnClose
-      title={
-        <div>
-          <p
-            className="text-primary font-bold text-sm uppercase"
-            style={{ color: "#0075BF" }}
-          >
-            CREATE TAX EXEMPTION
-          </p>
+    <>
+      <ModalCustom
+        isOpen={isOpen}
+        handleCancel={handleCancel}
+        width={1200}
+        footer={footerButtons}
+        header="Create Tax Exemption"
+        hidePadding={true}
+      >
+        <div style={{ padding: "4px 8px 0" }}>
           <ModalStepper
             steps={steps}
             current={currentStep}
             onPrev={handlePrev}
-            onNext={handleNext}
+            onNext={() => {
+              if (currentStep < steps.length - 1) handleNext();
+            }}
           />
         </div>
-      }
-      footer={footerButtons}
-    >
-      <Form form={form} layout="vertical">
-        <div
-          style={{
-            maxHeight: "65vh",
-            overflowY: "auto",
-            paddingRight: 4,
-          }}
-        >
-          {/* Step 1: Tax Exemption */}
-          <div className={currentStep !== 0 ? "hidden" : ""}>
-            <TaxExemptionStep form={form} record={record} />
-          </div>
+        <Form form={form} layout="vertical">
+          <div
+            style={{
+              maxHeight: "60vh",
+              overflowY: "auto",
+              paddingRight: 4,
+            }}
+          >
+            {/* Step 1: Tax Exemption */}
+            <div className={currentStep !== 0 ? "hidden" : ""}>
+              <TaxExemptionStep
+                form={form}
+                record={record}
+                dispatch={dispatch}
+                contactRows={contactRows}
+                setContactRows={setContactRows}
+                contactRowErrors={contactRowErrors}
+                setContactRowErrors={setContactRowErrors}
+              />
+            </div>
 
-          {/* Step 2: Approval */}
-          <div className={currentStep !== 1 ? "hidden" : ""}>
-            <ApprovalStep
-              appHierOptions={appHierOptions}
-              appHierDataDetail={appHierDataDetail}
-              selectedHierarchy={selectedHierarchy}
-              setSelectedHierarchy={setSelectedHierarchy}
-              form={form}
-            />
-          </div>
+            {/* Step 2: Approval */}
+            <div className={currentStep !== 1 ? "hidden" : "p-3"}>
+              <ApprovalStep
+                appHierOptions={appHierOptions}
+                appHierDataDetail={appHierDataDetail}
+                selectedHierarchy={selectedHierarchy}
+                setSelectedHierarchy={setSelectedHierarchy}
+                dispatch={dispatch}
+                form={form}
+              />
+            </div>
 
-          {/* Step 3: Attachment */}
-          <div className={currentStep !== 2 ? "hidden" : ""}>
-            <AttachmentStep
-              listDataAttachment={listDataAttachment}
-              setListDataAttachment={setListDataAttachment}
-              dispatch={dispatch}
-              getAPICategory={getAPICategory}
-              typeSelector={typeSelector}
-            />
+            {/* Step 3: Attachment */}
+            <div className={currentStep !== 2 ? "hidden" : "p-3"}>
+              <AttachmentStep
+                listDataAttachment={listDataAttachment}
+                setListDataAttachment={setListDataAttachment}
+                dispatch={dispatch}
+              />
+            </div>
+          </div>
+        </Form>
+      </ModalCustom>
+
+      {/* Confirmation Modal */}
+      <ModalCustom
+        isOpen={modalConfirm}
+        handleCancel={() => setModalConfirm(false)}
+        header="CONFIRMATION"
+        width={500}
+        type="confirmation"
+        footer={
+          <div className="w-full flex justify-end gap-3 p-4">
+            <ButtonComponent
+              onClick={() => setModalConfirm(false)}
+              type="default"
+            >
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+              isPrimary
+              onClick={handleConfirm}
+              loading={loadingSave}
+            >
+              Confirm
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-3 p-4">
+          <div className="flex items-center gap-2">
+            <WarningOutlined style={{ color: "#FF9800", fontSize: 20 }} />
+            <span className="font-semibold text-sm">
+              Are you sure you want to submit this Tax Exemption?
+            </span>
+          </div>
+          <div className="text-sm text-gray-600">
+            <p>
+              <span className="font-medium">Document Number:</span>{" "}
+              {bodyData?.documentNumber || "-"}
+            </p>
+            <p>
+              <span className="font-medium">Document Date:</span>{" "}
+              {bodyData?.documentDate
+                ? typeof bodyData.documentDate === "string"
+                  ? bodyData.documentDate
+                  : bodyData.documentDate.format?.("DD MMM YYYY") || "-"
+                : "-"}
+            </p>
           </div>
         </div>
-      </Form>
-    </Modal>
+      </ModalCustom>
+
+      {/* Error Modal */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={() => {
+          setModalError(false);
+          handleConfirm();
+        }}
+        handleCancel={() => {
+          setModalError(false);
+          setBodyError({});
+        }}
+        customText="Try Again"
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">Failed</p>
+          </div>
+          <p className="pl-[70px]">
+            Your data was not created. {bodyError.message}.
+          </p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
+    </>
   );
 };
 

@@ -20,7 +20,7 @@ const ButtonComponent = ({
   directChildren = false,
 }) => {
   const isButtonLoading = isLoading || loading;
-  
+
   return (
     <div>
       <Button
@@ -43,7 +43,9 @@ const ButtonComponent = ({
           cursor: disabled || isButtonLoading ? "not-allowed" : "pointer", // ← FIX: Cursor saat loading
         }}
       >
-        { directChildren ? children : (
+        {directChildren ? (
+          children
+        ) : (
           <div
             className={
               children ? `py-0.5 px-1 ${fontSizeClassname} text-center` : ``

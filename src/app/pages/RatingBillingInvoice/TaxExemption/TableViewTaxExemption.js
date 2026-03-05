@@ -1,8 +1,4 @@
-import {
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-} from "../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../components/StatusComponent";
 
@@ -11,7 +7,7 @@ export const columnsTaxExemption = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => {
   return [
     {
@@ -34,7 +30,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -44,7 +40,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -62,7 +58,7 @@ export const columnsTaxExemption = (
         searchText,
         handleSearch,
         true,
-        "datePeriod"
+        "datePeriod",
       ),
       render: (text) =>
         renderDateColumn(
@@ -71,7 +67,7 @@ export const columnsTaxExemption = (
           searchText,
           text,
           "datePeriod",
-          search
+          search,
         ),
     },
     {
@@ -87,7 +83,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -97,7 +93,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -113,7 +109,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -123,7 +119,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -139,7 +135,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -149,7 +145,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -165,7 +161,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -175,7 +171,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -191,7 +187,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -201,7 +197,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -217,7 +213,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -227,7 +223,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -243,7 +239,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -253,7 +249,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -269,7 +265,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -279,7 +275,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -295,7 +291,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -305,7 +301,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -321,7 +317,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -331,7 +327,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -347,7 +343,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -357,7 +353,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -373,7 +369,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -383,7 +379,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -399,7 +395,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -409,7 +405,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -425,7 +421,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -435,7 +431,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -451,7 +447,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -461,7 +457,7 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -477,7 +473,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -487,13 +483,13 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
       key: "billingAddress",
       title: "BILLING ADDRESS",
-      dataIndex: "billingAddress",
+      dataIndex: "billAddress",
       isClassification: true,
       width: 250,
       sorter: true,
@@ -506,7 +502,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -516,7 +512,7 @@ export const columnsTaxExemption = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -534,7 +530,7 @@ export const columnsTaxExemption = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -543,7 +539,7 @@ export const columnsTaxExemption = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -561,7 +557,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -571,13 +567,13 @@ export const columnsTaxExemption = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
       key: "proformaInvoice",
       title: "PROFORMA INVOICE",
-      dataIndex: "proformaInvoice",
+      dataIndex: "pathFile",
       isClassification: true,
       width: 200,
       sorter: true,
@@ -587,7 +583,7 @@ export const columnsTaxExemption = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -597,40 +593,40 @@ export const columnsTaxExemption = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
       key: "statusBilling",
       title: "STATUS BILLING",
-      dataIndex: "statusBilling",
+      dataIndex: "status",
       isClassification: true,
       width: 160,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "statusBilling",
+        "status",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) => <StatusComponent colour={text}>{text}</StatusComponent>,
     },
     {
       key: "statusExemption",
       title: "STATUS EXEMPTION",
-      dataIndex: "statusExemption",
+      dataIndex: "statusApproval",
       isClassification: true,
       width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "statusExemption",
+        "statusApproval",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) => <StatusComponent colour={text}>{text}</StatusComponent>,
     },

@@ -12,6 +12,7 @@ import AdjustmentInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/
 import AdjustmentInvoiceForm from "../../app/pages/RatingBillingInvoice/Invoice/AdjustmentInvoice/AdjustmentInvoiceForm";
 import AdjustmentInvoiceDetail from "../../app/pages/RatingBillingInvoice/Invoice/AdjustmentInvoice/AdjustmentInvoiceDetail";
 import EFakturForm from "../../app/pages/RatingBillingInvoice/Management E-Faktur/CreateEfaktur/EFakturForm";
+import DetailTaxExemption from "../../app/pages/RatingBillingInvoice/TaxExemption/DetailTaxExemption";
 
 export const INVOICE_ELEMENTS = {
   // Generate Invoice List (main page)
@@ -41,5 +42,5 @@ export const INVOICE_ELEMENTS = {
   // Tax Exemption
   TAX_EXMPTION_VIEW_PAGE: <ViewTaxExemption />,
   TAX_EXMPTION_CREATE_PAGE: <div>Tax Exemption Create Page</div>,
-  TAX_EXMPTION_DETAIL_PAGE: <div>Tax Exemption Detail Page</div>,
+  TAX_EXMPTION_DETAIL_PAGE: <DetailTaxExemption />,
 };
