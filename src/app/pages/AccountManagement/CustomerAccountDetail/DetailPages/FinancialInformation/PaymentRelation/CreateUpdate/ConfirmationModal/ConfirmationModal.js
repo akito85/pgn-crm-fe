@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import { Button } from "antd";
+import { useSelector } from "react-redux";
 
 const ConfirmationModal = ({
   form,
@@ -13,10 +14,13 @@ const ConfirmationModal = ({
   type = "",
   service,
   configApplication,
+  loading = false,
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
   const [activeTab, setActiveTab] = useState(0);
+
+  const { loading_createUpdatePr } = useSelector((state) => state.paymentRelation);
 
   /**
    * @param {"next" | "prev"} type
@@ -47,26 +51,27 @@ const ConfirmationModal = ({
       }}
       footer={[
         <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
-          <Button type={"menu"} onClick={() => handleCancel()}>
+          <Button type={"menu"} disabled={loading_createUpdatePr} onClick={() => handleCancel()}>
             Cancel
           </Button>
           <div className="flex gap-x-2">
-            <Button type={"menu"} disabled={activeTab < 1} onClick={() => handleChangeTab("prev")}>
+            <Button type={"menu"} disabled={loading_createUpdatePr || activeTab < 1} onClick={() => handleChangeTab("prev")}>
               Previous
             </Button>
             {activeTab < (tabLength - 1)  && (
-              <Button type={"submit"} onClick={() => handleChangeTab("next")}>
+              <Button type={"submit"} disabled={loading_createUpdatePr} onClick={() => handleChangeTab("next")}>
                 Next
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} form={formId} htmlType={"submit"} >
+              <Button type={"submit"} form={formId} htmlType={"submit"} loading={loading_createUpdatePr}>
                 {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
               </Button>
             )}
           </div>
         </div>,
       ]}
+      loading={loading}
     >
       <ConfirmationModalTabs
         form={form}
@@ -77,6 +82,7 @@ const ConfirmationModal = ({
         configApplication={configApplication}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        disabled={loading}
       />
     </NxModal>
   )
