@@ -48,7 +48,7 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "react-scripts --max-old-space-size=2048 start",
+    "start": "react-scripts start",
     "build": "react-scripts --max-old-space-size=4096 build",
     "lint": "eslint 'src/**/*.{js,jsx}' --quiet || true",
     "test": "react-scripts test",
