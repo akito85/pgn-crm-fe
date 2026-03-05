@@ -4,6 +4,12 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
+  loading_listPr: false,
+  loading_listPrApproval: false,
+  loading_listIr: false,
+  loading_listIrApproval: false,
+  loading_approveRejectPr: false,
+  loading_approveRejectIr: false,
   data_withHoldingTax: [],
   data_taxIdentifier: [],
   data_taxRelation: [],
@@ -1065,11 +1071,11 @@ const financialInformationSlice = createSlice({
     /** Get Payment Relation */
     [getPaymentRelation.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listPr = true;
       }
     },
     [getPaymentRelation.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listPr = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1094,7 +1100,7 @@ const financialInformationSlice = createSlice({
       }
     },
     [getPaymentRelation.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listPr = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_paymentRelation = [];
@@ -1110,11 +1116,11 @@ const financialInformationSlice = createSlice({
     /** Get Payment Relation Approval */
     [getPaymentRelationApproval.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listPrApproval = true;
       }
     },
     [getPaymentRelationApproval.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listPrApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1139,7 +1145,7 @@ const financialInformationSlice = createSlice({
       }
     },
     [getPaymentRelationApproval.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listPrApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_paymentRelationApproval = [];
@@ -1153,11 +1159,13 @@ const financialInformationSlice = createSlice({
     },
 
     /** Get Invoice Relation */
-    [getInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+    [getInvoiceRelation.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listIr = true;
+      }
     },
     [getInvoiceRelation.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listIr = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1182,7 +1190,7 @@ const financialInformationSlice = createSlice({
       }
     },
     [getInvoiceRelation.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listIr = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelation = [];
@@ -1198,11 +1206,11 @@ const financialInformationSlice = createSlice({
     /** Get Invoice Relation Approval */
     [getInvoiceRelationApproval.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listIrApproval = true;
       }
     },
     [getInvoiceRelationApproval.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listIrApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1227,7 +1235,7 @@ const financialInformationSlice = createSlice({
       }
     },
     [getInvoiceRelationApproval.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listIrApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelationApproval = [];
@@ -1270,24 +1278,24 @@ const financialInformationSlice = createSlice({
     
     /** Approve or Reject All Inactive Payment Relation */
     [approveOrRejectAllPaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectPr = true;
     },
     [approveOrRejectAllPaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
     [approveOrRejectAllPaymentRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
 
     /** Inactivate Payment Relation Attachment */
     [inactivatePaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectPr = true;
     },
     [inactivatePaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
     [inactivatePaymentRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
 
     /** Get Payment Relation Approval History */
@@ -1304,46 +1312,46 @@ const financialInformationSlice = createSlice({
 
     /** Approve or Reject Invoice Relation */
     [approveOrRejectInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Approve or Reject Inactive Invoice Relation */
     [approveOrRejectInactiveInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectInactiveInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectInactiveInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Approve or Reject All Inactive Invoice Relation */
     [approveOrRejectAllInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectAllInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectAllInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Inactivate Invoice Relation Attachment */
     [inactivateInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [inactivateInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [inactivateInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Get Invoice Relation Approval History */
