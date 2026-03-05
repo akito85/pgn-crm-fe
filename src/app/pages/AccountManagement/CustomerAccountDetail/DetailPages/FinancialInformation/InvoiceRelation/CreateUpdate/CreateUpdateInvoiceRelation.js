@@ -304,7 +304,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailIrApprovalHierarchy({ id: appHierId }));
+    dispatch(getDetailIrApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
