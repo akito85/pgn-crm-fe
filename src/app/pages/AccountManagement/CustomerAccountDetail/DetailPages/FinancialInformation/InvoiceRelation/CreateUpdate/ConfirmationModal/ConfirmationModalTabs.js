@@ -1,8 +1,10 @@
-import ConfirmationModalInfo from "./ConfirmationModalInfo";
-import ConfirmationModalApproval from "./ConfirmationModalApproval";
-import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
+import { useDispatch } from "react-redux";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import AttachmentSectionForm from "../StepContents/AttachmentForm/AttachmentInvoiceRelation";
+import ApprovalSectionForm from "../StepContents/ApprovalForm/ApprovalInvoiceRelation";
+import InfoInvoiceRelation from "../StepContents/InformationForm/InfoInvoiceRelation";
 
 const ConfirmationModalTabs = ({
   form,
@@ -14,30 +16,31 @@ const ConfirmationModalTabs = ({
   activeTab = 0,
   setActiveTab = () => {},
 }) => {
+  const dispatch = useDispatch();
+
   const tabOptions = [
     {
       key: 0,
       label: "Invoice Relation Information",
-      children: <ConfirmationModalInfo form={form} />
+      children: <InfoInvoiceRelation form={form} formView={false} />
     },
     {
       key: 1,
       label: "Approval",
       children: (
-        <ConfirmationModalApproval
-          dataTable={approvalData}
-          form={form}
-        />
+        <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />
       )
     },
     {
       key: 2,
       label: "Attachment",
       children: (
-        <ConfirmationModalAttachment
+        <AttachmentSectionForm
           data={dataAttachment}
+          dispatch={dispatch}
           service={service}
           configApplication={configApplication}
+          type={"confirmation"}
         />
       )
     },
@@ -46,7 +49,13 @@ const ConfirmationModalTabs = ({
       label: "Remark",
       children: <ConfirmationModalRemark />
     },
-  ].filter(Boolean);
+  ].filter(Boolean).map((tabOption) => ({
+    ...tabOption,
+    children:
+      <NxBaseContainer border header={tabOption.label}>
+        {tabOption.children}
+      </NxBaseContainer>
+  }));
 
   return (
     <NxTabs
