@@ -1000,8 +1000,8 @@ const handleReset = () => {
               </div>
             </div>
           </CardContainer>
-          <div className={"w-full flex mt-5"}>
-            <div className={"w-full justify-start"}>
+          <div className={"flex mt-5"}>
+            <div className={"justify-start"}>
               <Form.Item>
                 <ButtonComponent
                   type={"submit"}

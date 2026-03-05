@@ -264,12 +264,12 @@ export const getAllRatingResultPaginate = createAsyncThunk(
 
 export const getAllAdjustmentPaginate = createAsyncThunk(
   "GET_ALL_ADJUSTMENT_PAGINATE",
-  async ({ sourceNumber, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "lineNumber~asc" : sort;
-      const url = `/v1/dbs/api/billing/adjustment-item/${sourceNumber}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/billing/adjustment-item/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
       return responseData;
