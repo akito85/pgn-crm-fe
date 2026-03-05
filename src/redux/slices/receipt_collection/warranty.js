@@ -23,6 +23,9 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: null,
 
+  dataMutationInfo: null,
+  loadingMutation: false,
+
   dataPaymentWarrantyPartner: [],
   loadingPaymentWarrantyPartner: false,
 
@@ -159,6 +162,30 @@ export const getAllCustomerInfoPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return error;
+    }
+  }
+);
+
+export const getDetailWarrantyMutation = createAsyncThunk(
+  "GET_DETAIL_WARRANTY_MUTATION",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
+      const [orderBy, order] = sortValue.split("~");
+
+      const url = `/v1/dbs/api/payment-warranty/mutation/get-list/${id}?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+
+      const response = await receiptCollectionHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
@@ -449,6 +476,29 @@ export const downloadWarrantyList = createAsyncThunk(
   }
 );
 
+export const downloadWarrantyListDetail = createAsyncThunk(
+  "DOWNLOAD_WARRANTY_LIST_DETAIL",
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/payment-warranty/download-detail-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_WARRANTY_LIST_DETAIL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const deleteWarranty = createAsyncThunk(
   "DELETE_WARRANTY",
   async (id, thunkAPI) => {
@@ -525,6 +575,20 @@ const warrantySlice = createSlice({
       state.loading = false;
     },
 
+    // Get Mutation GET_DETAIL_WARRANTY_MUTATION
+    [getDetailWarrantyMutation.pending]: (state) => {
+      state.loadingMutation = true;
+      state.dataMutationInfo = null;
+    },
+    [getDetailWarrantyMutation.fulfilled]: (state, action) => {
+      state.loadingMutation = false;
+      state.dataMutationInfo = action.payload;
+    },
+    [getDetailWarrantyMutation.rejected]: (state) => {
+      state.loadingMutation = false;
+      state.dataMutationInfo = null;
+    },
+
     // Get All GET_ALL_WARRANTY_INFO_PAGINATE Pagination
     [getAllWarrantyInfoPaginate.pending]: (state) => {
       state.loading = true;
@@ -599,6 +663,17 @@ const warrantySlice = createSlice({
       state.loading = false;
     },
     [downloadWarrantyList.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // Download Warranty Detail
+    [downloadWarrantyListDetail.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadWarrantyListDetail.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadWarrantyListDetail.rejected]: (state) => {
       state.loading = false;
     },
 

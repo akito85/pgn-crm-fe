@@ -1,0 +1,4 @@
+export const WARRANTY_TYPES = {
+    CASH: 'CASH',
+    BANK_GUARANTY: 'BANK_GUARANTY',
+};

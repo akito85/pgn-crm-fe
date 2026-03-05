@@ -28,14 +28,14 @@ import { columnWarranty } from "./ColumnConfig/WarrantyColumns";
 import {
   getAllWarrantyListPaginate,
   downloadWarrantyList,
-  getApprovalHistory
+  getApprovalHistory,
+  downloadWarrantyListDetail
 } from "../../../../../redux/slices/receipt_collection/warranty";
 
 // Modal
 import ModalRefund from "./Modal/ModalRefund";
 import ModalHold from "./Modal/ModalHold";
 import ModalRelease from "./Modal/ModalRelease";
-import ModalCreateWarranty from "./Modal/ModalCreateWarranty";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { deleteWarranty } from "../../../../../redux/slices/receipt_collection/warranty";
@@ -61,7 +61,6 @@ const ViewWarranty = () => {
   const [modalHold, setModalHold] = useState(false);
   const [modalRelease, setModalRelease] = useState(false);
   const [modalRefund, setModalRefund] = useState(false);
-  const [modalCreate, setModalCreate] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -144,6 +143,17 @@ const ViewWarranty = () => {
   const handleDownload = () => {
     dispatch(
       downloadWarrantyList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
+  };
+
+  const handleDownloadDetail = () => {
+    dispatch(
+      downloadWarrantyListDetail({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
@@ -237,6 +247,19 @@ const ViewWarranty = () => {
       ),
     },
     {
+      action: "Download Detail",
+      render: (
+        <ButtonComponent
+          onClick={handleDownloadDetail}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download Detail List
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Hold",
       render: (
         <ButtonComponent
@@ -287,14 +310,15 @@ const ViewWarranty = () => {
     {
       action: "Create",
       render: (
-        <ButtonComponent
-          onClick={() => setModalCreate(true)}
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
-        >
-          Create
-        </ButtonComponent>
+        <Link to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_WARRANTY}>
+          <ButtonComponent
+            type={"submit"}
+            border={false}
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          >
+            Create
+          </ButtonComponent>
+        </Link>
       ),
     },
     {
@@ -600,12 +624,6 @@ const ViewWarranty = () => {
           />
         </div>
       </CardContainer>
-
-      <ModalCreateWarranty
-        isOpen={modalCreate}
-        handleBack={() => setModalCreate(false)}
-        handleRefresh={handleRefresh}
-      />
 
       <ModalRefund
         isOpen={modalRefund}
