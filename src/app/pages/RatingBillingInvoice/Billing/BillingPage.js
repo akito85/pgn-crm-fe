@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -184,8 +190,8 @@ const BillingPage = () => {
     );
   };
 
-  const handleDetail = (record, rowKey) => {
-    const recordKey = rowKey || record.billCode;
+  const handleDetail = (record) => {
+    const recordKey = record.billHeaderId;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
@@ -202,7 +208,7 @@ const BillingPage = () => {
       setAccountNumberId(record.accountNumber);
       setSANumberId(record.saNumber);
       setCalculationCodeId(record.calculationCode);
-      setActiveRowKey(recordKey); 
+      setActiveRowKey(recordKey);
       setSelectedBillingData(record);
       setPageDetail(true);
     }
@@ -313,7 +319,11 @@ const BillingPage = () => {
               e.stopPropagation();
               handleApprovalHistory(record);
             }}
-            style={{ cursor: "pointer", display: "inline-block", lineHeight: 0 }}
+            style={{
+              cursor: "pointer",
+              display: "inline-block",
+              lineHeight: 0,
+            }}
           >
             <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
           </div>
@@ -333,9 +343,25 @@ const BillingPage = () => {
 
   const baseColumns = useMemo(() => {
     if (valueTab === "All") {
-      return columnsAllBilling(0, 0, searchInput, searchedColumn, searchText, handleSearch, search);
+      return columnsAllBilling(
+        0,
+        0,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search,
+      );
     }
-    return columnsBilling(0, 0, searchInput, searchedColumn, searchText, handleSearch, search);
+    return columnsBilling(
+      0,
+      0,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search,
+    );
   }, [valueTab, searchInput, searchedColumn, searchText, handleSearch, search]);
 
   const allColumns = useMemo(() => {
@@ -351,12 +377,16 @@ const BillingPage = () => {
   );
 
   const columnDefinitions = useMemo(
-    () => allColumns.map((col) => ({ key: col.key || col.dataIndex || col.title, title: col.title })),
+    () =>
+      allColumns.map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+      })),
     [allColumns],
   );
 
   const dataSourceWithKeys = useMemo(
-    () => dataSource?.map((item) => ({ ...item, key: item.billCode })),
+    () => dataSource?.map((item) => ({ ...item, key: item.billHeaderId })),
     [dataSource],
   );
 

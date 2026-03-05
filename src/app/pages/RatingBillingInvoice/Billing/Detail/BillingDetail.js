@@ -18,7 +18,7 @@ const BillingDetail = ({
   const detailRef = useRef(null);
 
   useEffect(() => {
-    if (billingCodeId && detailRef.current) {
+    if (billHeaderId  && detailRef.current) {
       setActiveTab("1");
 
       requestAnimationFrame(() => {
