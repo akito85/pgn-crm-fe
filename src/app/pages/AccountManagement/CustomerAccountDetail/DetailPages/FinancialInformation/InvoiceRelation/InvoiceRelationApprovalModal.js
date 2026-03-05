@@ -18,7 +18,7 @@ const InvoiceRelationApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_invoiceRelationApproval, pagination_invoiceRelationApproval, loading } = useSelector(
+  const { list_invoiceRelationApproval, pagination_invoiceRelationApproval, loading_listIrApproval, loading_approveRejectIr } = useSelector(
     (state) => state.financialInformation
   );
 
@@ -353,14 +353,14 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading}
+                    loading={loading_approveRejectIr}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading}
+                    loading={loading_approveRejectIr}
                   >
                     Approve
                   </Button>
@@ -414,7 +414,7 @@ const InvoiceRelationApprovalModal = ({
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_listIrApproval}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}
