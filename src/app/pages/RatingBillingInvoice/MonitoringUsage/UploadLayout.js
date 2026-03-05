@@ -50,6 +50,12 @@ const UploadLayout = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [modalDelete, setModalDelete] = useState(false);
+
+  // ✅ NEW: State untuk modal konfirmasi recalculate
+  const [showRecalculateModal, setShowRecalculateModal] = useState(false);
+  // ✅ NEW: Simpan pending upload action (file atau link) agar bisa dilanjutkan setelah konfirmasi
+  const [pendingUploadAction, setPendingUploadAction] = useState(null);
+
   const MAX_FILE_SIZE = 5000000;
   const [form] = Form.useForm();
   const { loading } = useSelector((state) => state.monitoring_usage);
@@ -69,10 +75,37 @@ const UploadLayout = ({
     }
   }, [dispatch]);
 
-  const handleUpdate = (record, values) => {
-    // Fungsi ini hanya untuk navigasi ke halaman update
-    // Data handling dilakukan di halaman update
+  // ✅ NEW: Helper untuk cek apakah format yang dipilih adalah "NEED"
+  const isNeedType = (formatValue) => {
+    const target = formatValue ?? format;
+    if (!target) return false;
+
+    // Ant Design labelInValue bisa return: { value, label } atau string
+    // label bisa berupa string, React node, atau array
+    let labelStr = "";
+
+    if (typeof target === "object") {
+      const raw = target?.label ?? target?.children ?? target?.name ?? "";
+      // Jika label adalah React element atau array, ambil dari value/id sebagai fallback
+      if (typeof raw === "string") {
+        labelStr = raw;
+      } else if (Array.isArray(raw)) {
+        labelStr = raw.join("");
+      } else {
+        // Fallback: cek dari list_usage_type berdasarkan value/id
+        const matched = list_usage_type?.find(
+          (d) => d.id === target?.value || d.id === target?.key
+        );
+        labelStr = matched?.name ?? "";
+      }
+    } else {
+      labelStr = String(target);
+    }
+
+    return labelStr.toUpperCase() === "NEED";
   };
+
+  const handleUpdate = (record, values) => {};
 
   const handleDeleteOk = () => {
     const newData = dataTable.filter((item) => item.recordId !== recordId);
@@ -131,6 +164,12 @@ const UploadLayout = ({
   const handleFormat = (value) => {
     setFormat(value);
     setFileUploadEnabled(!!value);
+
+    // ✅ Tampilkan modal recalculate langsung saat user pilih NEED
+    if (isNeedType(value)) {
+      setShowRecalculateModal(true);
+      setPendingUploadAction(null); // null = hanya info, bukan pending upload
+    }
   };
 
   const handleFileChange = ({ fileList }) => {
@@ -146,16 +185,11 @@ const UploadLayout = ({
     accept: ".xlsx, .xls",
     maxCount: 1,
     beforeUpload: (file) => {
-      // Validasi: cek format usage type terlebih dahulu
       if (!format) {
-        // Trigger validasi untuk menampilkan error di field
-        form.validateFields(['format_usage_type']).catch(() => {
-          // Error akan ditampilkan di field
-        });
+        form.validateFields(['format_usage_type']).catch(() => {});
         return false;
       }
 
-      // Check file size
       if (file.size > MAX_FILE_SIZE) {
         message.error('File size exceeds 5 MB limit');
         return false;
@@ -163,7 +197,6 @@ const UploadLayout = ({
 
       setFileName(file);
       
-      // Scroll ke preview setelah file dipilih
       setTimeout(() => {
         filePreviewRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
@@ -178,14 +211,12 @@ const UploadLayout = ({
 
   const handleUploadButtonClick = () => {
     if (!format) {
-      // Trigger validasi untuk menampilkan error di field
-      form.validateFields(['format_usage_type']).catch(() => {
-        // Error akan ditampilkan di field
-      });
+      form.validateFields(['format_usage_type']).catch(() => {});
     }
   };
 
-  const handleUpload = async () => {
+  // ✅ MODIFIED: Actual upload logic (dipanggil langsung atau setelah konfirmasi modal)
+  const executeUpload = async () => {
     try {
       setFileProgress(0);
       const body = {
@@ -196,17 +227,13 @@ const UploadLayout = ({
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
 
-      // Set nama file yang berhasil diupload
       setUploadedFileName(fileName.name);
-      
-      // Tampilkan success modal
       setShowSuccessModal(true);
 
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
       
-      // Clear file setelah berhasil upload
       setFileList([]);
       setFileName("");
       
@@ -224,24 +251,8 @@ const UploadLayout = ({
     setLoadingUpload(false);
   };
 
-  // handle upload by link
-  const handleUploadLink = async (e) => {
-    e.stopPropagation();
-
-    // Validasi: cek format usage type terlebih dahulu
-    if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {
-        // Error akan ditampilkan di field
-      });
-      return;
-    }
-
-    // Validasi: cek apakah urlLink sudah diisi
-    if (!urlLink || urlLink.trim() === "") {
-      setLinkModalVisible(true);
-      return;
-    }
-
+  // ✅ MODIFIED: Actual upload link logic (dipanggil langsung atau setelah konfirmasi modal)
+  const executeUploadLink = async () => {
     try {
       setFileProgress(0);
       const body = {
@@ -253,18 +264,15 @@ const UploadLayout = ({
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
 
-      // Set nama file dari link
       const linkFileName = urlLink.split('/').pop() || 'File from link';
       setUploadedFileName(linkFileName);
       
-      // Tampilkan success modal
       setShowSuccessModal(true);
 
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
 
-      // Reset urlLink setelah berhasil upload
       setUrlLink("");
       
     } catch (error) {
@@ -275,13 +283,71 @@ const UploadLayout = ({
     }
   };
 
+  // ✅ MODIFIED: handleUpload — cek NEED type sebelum upload file
+  const handleUpload = async () => {
+    if (isNeedType()) {
+      // Simpan action yang akan dijalankan setelah konfirmasi
+      setPendingUploadAction("file");
+      setShowRecalculateModal(true);
+      return;
+    }
+    // Jika bukan NEED, langsung upload
+    await executeUpload();
+  };
+
+  // ✅ MODIFIED: handleUploadLink — cek NEED type sebelum upload link
+  const handleUploadLink = async (e) => {
+    e.stopPropagation();
+
+    if (!format) {
+      form.validateFields(['format_usage_type']).catch(() => {});
+      return;
+    }
+
+    if (!urlLink || urlLink.trim() === "") {
+      setLinkModalVisible(true);
+      return;
+    }
+
+    if (isNeedType()) {
+      // Simpan action yang akan dijalankan setelah konfirmasi
+      setPendingUploadAction("link");
+      setShowRecalculateModal(true);
+      return;
+    }
+    // Jika bukan NEED, langsung upload
+    await executeUploadLink();
+  };
+
+  // ✅ NEW: Handler saat user klik OK di modal recalculate
+  const handleRecalculateConfirm = async () => {
+    setShowRecalculateModal(false);
+    // Jika ada pending upload action (dari klik tombol Upload), lanjutkan
+    if (pendingUploadAction === "file") {
+      await executeUpload();
+    } else if (pendingUploadAction === "link") {
+      await executeUploadLink();
+    }
+    // Jika null = modal muncul dari pilih dropdown NEED, tidak perlu action lanjutan
+    setPendingUploadAction(null);
+  };
+
+  // ✅ NEW: Handler saat user klik Cancel di modal recalculate
+  const handleRecalculateCancel = () => {
+    setShowRecalculateModal(false);
+    setPendingUploadAction(null);
+    // Reset dropdown format usage type
+    setFormat(undefined);
+    setFileUploadEnabled(false);
+    form.resetFields(['format_usage_type']);
+  };
+
   const handleChangePage = (page, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : page;
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  // update link files
   const updateLink = (e) => {
     e.stopPropagation();
     setUrlLink(e.target.value);
@@ -298,23 +364,9 @@ const UploadLayout = ({
     handleUpload();
   };
 
-  // remove file list
-  const handleRemove = (index) => {
-    setFileList((prevFileList) => {
-      const updatedFileList = [...prevFileList];
-      updatedFileList.splice(index, 1);
-      return updatedFileList;
-    });
-    setFileName("");
-  };
-
-  // Handle click pada dragger area - trigger validasi format
   const handleDraggerClick = (e) => {
     if (!format) {
-      // Trigger validasi field format_usage_type untuk menampilkan error merah
-      form.validateFields(['format_usage_type']).catch(() => {
-        // Error akan ditampilkan di field
-      });
+      form.validateFields(['format_usage_type']).catch(() => {});
     }
   };
 
@@ -414,17 +466,11 @@ const UploadLayout = ({
               rules={[
                 {
                   validator: async (_, value) => {
-                    // Validator ini akan di-trigger saat user interact dengan dragger
                     return Promise.resolve();
                   },
                 },
               ]}
               validateTrigger={['onChange', 'onBlur']}
-              help={
-                form.getFieldError('format_usage_type').length > 0 
-                  ? undefined 
-                  : undefined
-              }
             >
               <div className="w-full">
                 <Spin spinning={loadingUpload}>
@@ -553,6 +599,16 @@ const UploadLayout = ({
     }
   };
 
+  // remove file list
+  const handleRemove = (index) => {
+    setFileList((prevFileList) => {
+      const updatedFileList = [...prevFileList];
+      updatedFileList.splice(index, 1);
+      return updatedFileList;
+    });
+    setFileName("");
+  };
+
   return (
     <>
       {renderLayout(type)}
@@ -583,6 +639,26 @@ const UploadLayout = ({
         <Alert
           message="Warning! if you delete this data, it will be permanently."
           type={"error"}
+        />
+      </ModalConfirm>
+
+      {/* ✅ NEW: Modal Konfirmasi Recalculate — muncul saat usage type = NEED */}
+      <ModalConfirm
+        isOpen={showRecalculateModal}
+        handleCancel={handleRecalculateCancel}
+        handleOk={handleRecalculateConfirm}
+        width={500}
+        useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#FAAD14" }} />
+          <p className={"text-[18px] font-bold"}>
+            Data will be Recalculated
+          </p>
+        </div>
+        <Alert
+          message="You selected usage type NEED. Uploading this data will trigger a recalculation process. Are you sure you want to continue?"
+          type={"warning"}
         />
       </ModalConfirm>
     </>
