@@ -207,7 +207,7 @@ export const getIrApprovalHierarchy = createAsyncThunk(
 
 export const getDetailIrApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_IR_APPROVAL_HIERARCHY",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
