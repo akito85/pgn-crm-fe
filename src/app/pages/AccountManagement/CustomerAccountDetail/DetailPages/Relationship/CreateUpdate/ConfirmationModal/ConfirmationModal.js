@@ -16,7 +16,7 @@ const ConfirmationModal = ({
   service,
   relatedDetails,
 }) => {
-  const { loading } = useSelector((state) => state.relationship);
+  const { loading_createUpdateRelationship } = useSelector((state) => state.relationship);
   const tabLength = type === "submit" ? 4 : 3;
   const [activeTab, setActiveTab] = useState(0);
 
@@ -43,26 +43,26 @@ const ConfirmationModal = ({
       width={1000}
       header={"CONFIRMATION RELATIONSHIP"}
       type={"confirmation"}
-      loading={loading}
+      loading={loading_createUpdateRelationship}
       hidePadding={{
         top: true,
       }}
       footer={[
         <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
-          <Button type={"menu"} disabled={loading} onClick={() => handleCancel()}>
+          <Button type={"menu"} disabled={loading_createUpdateRelationship} onClick={() => handleCancel()}>
             Cancel
           </Button>
           <div className="flex gap-x-2">
-            <Button type={"menu"} disabled={loading || activeTab < 1} onClick={() => handleChangeTab("prev")}>
+            <Button type={"menu"} disabled={loading_createUpdateRelationship || activeTab < 1} onClick={() => handleChangeTab("prev")}>
               Previous
             </Button>
             {activeTab < (tabLength - 1) && (
-              <Button type={"submit"} disabled={loading} onClick={() => handleChangeTab("next")}>
+              <Button type={"submit"} disabled={loading_createUpdateRelationship} onClick={() => handleChangeTab("next")}>
                 Next
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} loading={loading} form={formId} htmlType={"submit"}>
+              <Button type={"submit"} loading={loading_createUpdateRelationship} form={formId} htmlType={"submit"}>
                 {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
               </Button>
             )}
@@ -80,7 +80,7 @@ const ConfirmationModal = ({
         activeTab={activeTab}
         relatedDetails={relatedDetails}
         setActiveTab={setActiveTab}
-        disabled={loading}
+        disabled={loading_createUpdateRelationship}
       />
     </NxModal>
   );

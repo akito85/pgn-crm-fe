@@ -22,6 +22,7 @@ const ConfirmationModalTabs = ({
     {
       key: 0,
       label: "Relationship Information",
+      disabled,
       children: (
         <div className="flex flex-col gap-y-4">
           <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
@@ -36,6 +37,7 @@ const ConfirmationModalTabs = ({
     {
       key: 1,
       label: "Approval",
+      disabled,
       children: (
         <NxBaseContainer border header={"APPROVAL"}>
           <RelationshipApproval
@@ -49,6 +51,7 @@ const ConfirmationModalTabs = ({
     {
       key: 2,
       label: "Attachment",
+      disabled,
       children: (
         <NxBaseContainer border header={"ATTACHMENT"}>
           <RelationshipAttachment
@@ -63,6 +66,7 @@ const ConfirmationModalTabs = ({
     type === "submit" && {
       key: 3,
       label: "Remark",
+      disabled,
       children: <ConfirmationModalRemark disabled={disabled} />,
     },
   ].filter(Boolean);
