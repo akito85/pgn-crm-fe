@@ -3,18 +3,9 @@ import InputComponent from "../../../../../../../../components/InputComponent";
 import { requiredMessage } from "../../../../../../../../utils";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 
-const ConfirmationModalRemark = () => {
+const ConfirmationModalRemark = ({ disabled = false }) => {
   return (
-    <NxBaseContainer border header={
-      <div className="flex items-center gap-x-1">
-        <span>
-          REMARK
-        </span>
-        <span style={{ color: "red" }}>
-          *
-        </span>
-      </div>
-    }>
+    <NxBaseContainer border header="REMARK" required>
       <Form.Item
         key="remark"
         name={"remark"}
@@ -25,6 +16,7 @@ const ConfirmationModalRemark = () => {
           group
           type="textarea"
           placeholder={"Type your remark"}
+          disabled={disabled}
         />
       </Form.Item>
     </NxBaseContainer>
