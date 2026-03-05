@@ -50,9 +50,7 @@ const UploadLayout = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [modalDelete, setModalDelete] = useState(false);
-
   const [showRecalculateModal, setShowRecalculateModal] = useState(false);
-  const [pendingUploadAction, setPendingUploadAction] = useState(null);
 
   const MAX_FILE_SIZE = 5000000;
   const [form] = Form.useForm();
@@ -105,7 +103,6 @@ const UploadLayout = ({
     setModalDelete(false);
   };
 
-  // column action dengan recordId
   const action = [
     {
       title: "ACTION",
@@ -147,20 +144,28 @@ const UploadLayout = ({
     },
   ];
 
-  // handle pagination
   const updateDataPagination = (page, pageSize) => {
     return dataTable?.slice((page - 1) * pageSize, page * pageSize);
   };
 
-  // handle format change
   const handleFormat = (value) => {
     setFormat(value);
     setFileUploadEnabled(!!value);
 
     if (isNeedType(value)) {
       setShowRecalculateModal(true);
-      setPendingUploadAction(null);
     }
+  };
+
+  const handleRecalculateConfirm = () => {
+    setShowRecalculateModal(false);
+  };
+
+  const handleRecalculateCancel = () => {
+    setShowRecalculateModal(false);
+    setFormat(undefined);
+    setFileUploadEnabled(false);
+    form.resetFields(['format_usage_type']);
   };
 
   const handleFileChange = ({ fileList }) => {
@@ -205,7 +210,7 @@ const UploadLayout = ({
     }
   };
 
-  const executeUpload = async () => {
+  const handleUpload = async () => {
     try {
       setFileProgress(0);
       const body = {
@@ -240,7 +245,19 @@ const UploadLayout = ({
     setLoadingUpload(false);
   };
 
-  const executeUploadLink = async () => {
+  const handleUploadLink = async (e) => {
+    e.stopPropagation();
+
+    if (!format) {
+      form.validateFields(['format_usage_type']).catch(() => {});
+      return;
+    }
+
+    if (!urlLink || urlLink.trim() === "") {
+      setLinkModalVisible(true);
+      return;
+    }
+
     try {
       setFileProgress(0);
       const body = {
@@ -271,54 +288,6 @@ const UploadLayout = ({
     }
   };
 
-  const handleUpload = async () => {
-    if (isNeedType()) {
-      setPendingUploadAction("file");
-      setShowRecalculateModal(true);
-      return;
-    }
-    await executeUpload();
-  };
-
-  const handleUploadLink = async (e) => {
-    e.stopPropagation();
-
-    if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
-      return;
-    }
-
-    if (!urlLink || urlLink.trim() === "") {
-      setLinkModalVisible(true);
-      return;
-    }
-
-    if (isNeedType()) {
-      setPendingUploadAction("link");
-      setShowRecalculateModal(true);
-      return;
-    }
-    await executeUploadLink();
-  };
-
-  const handleRecalculateConfirm = async () => {
-    setShowRecalculateModal(false);
-    if (pendingUploadAction === "file") {
-      await executeUpload();
-    } else if (pendingUploadAction === "link") {
-      await executeUploadLink();
-    }
-    setPendingUploadAction(null);
-  };
-
-  const handleRecalculateCancel = () => {
-    setShowRecalculateModal(false);
-    setPendingUploadAction(null);
-    setFormat(undefined);
-    setFileUploadEnabled(false);
-    form.resetFields(['format_usage_type']);
-  };
-
   const handleChangePage = (page, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : page;
     setPage(tempPage);
@@ -339,6 +308,15 @@ const UploadLayout = ({
       }))
     );
     handleUpload();
+  };
+
+  const handleRemove = (index) => {
+    setFileList((prevFileList) => {
+      const updatedFileList = [...prevFileList];
+      updatedFileList.splice(index, 1);
+      return updatedFileList;
+    });
+    setFileName("");
   };
 
   const handleDraggerClick = (e) => {
@@ -501,7 +479,6 @@ const UploadLayout = ({
               </div>
             </Form.Item>
             
-            {/* File Preview dengan ref untuk scroll */}
             <div ref={filePreviewRef}>
               {fileList.map((file, index) => (
                 <div
@@ -574,16 +551,6 @@ const UploadLayout = ({
         </Form>
       );
     }
-  };
-
-  // remove file list
-  const handleRemove = (index) => {
-    setFileList((prevFileList) => {
-      const updatedFileList = [...prevFileList];
-      updatedFileList.splice(index, 1);
-      return updatedFileList;
-    });
-    setFileName("");
   };
 
   return (
