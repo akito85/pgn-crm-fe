@@ -11,8 +11,10 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
-  data_prApprovalHierarchy: [],
-  detail_prApprovalHierarchy: [],
+  loading_listPrApprovalOption: false,
+  list_prApprovalOptions: [],
+  loading_detailPrApprovalHierarchyDetails: false,
+  list_prApprovalHierarchyDetail: [],
   data_prAttachmentCategory: [],
   list_prAccountStandard: [],
   pagination_prAccountStandard: {
@@ -199,7 +201,7 @@ export const getPrApprovalHierarchy = createAsyncThunk(
 
 export const getDetailPrApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_PR_APPROVAL_HIERARCHY",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
@@ -464,28 +466,30 @@ const paymentRelationSlice = createSlice({
 
     /** Get Payment Relation Approval Hierarchy */
     [getPrApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+      state.list_prApprovalOptions = [];
+      state.loading_listPrApprovalOption = true;
     },
     [getPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.data_prApprovalHierarchy = action.payload;
-      state.loading = false;
+      state.list_prApprovalOptions = action.payload;
+      state.loading_listPrApprovalOption = false;
     },
     [getPrApprovalHierarchy.rejected]: (state) => {
-      state.data_prApprovalHierarchy = [];
-      state.loading = false;
+      state.list_prApprovalOptions = [];
+      state.loading_listPrApprovalOption = false;
     },
 
     /** Get Payment Relation Detail Approval Hierarchy */
     [getDetailPrApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+      state.list_prApprovalHierarchyDetail = [];
+      state.loading_detailPrApprovalHierarchyDetails = true;
     },
     [getDetailPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.detail_prApprovalHierarchy = action.payload;
-      state.loading = false;
+      state.list_prApprovalHierarchyDetail = action.payload;
+      state.loading_detailPrApprovalHierarchyDetails = false;
     },
     [getDetailPrApprovalHierarchy.rejected]: (state) => {
-      state.detail_prApprovalHierarchy = [];
-      state.loading = false;
+      state.list_prApprovalHierarchyDetail = [];
+      state.loading_detailPrApprovalHierarchyDetails = false;
     },
 
     /** Get Payment Relation Attachment Category */
