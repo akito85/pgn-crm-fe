@@ -57,7 +57,7 @@ const CreateUpdateRelationship = ({
     data_relationshipType,
     data_relationshipCategory,
     loading_detailRelationship,
-    loading_detailRelationshipApprovalHierarchyDetails
+    loading_listRelationshipApprovalHierarchyDetail
   } = useSelector(
     (state) => state.relationship
   );
@@ -560,7 +560,7 @@ const CreateUpdateRelationship = ({
                 key: `detail-detail-${index}`,
               }))}
               handleSelectHierarchy={handleSelectHierarchy}
-              loading={loading_detailRelationshipApprovalHierarchyDetails}
+              loading={loading_listRelationshipApprovalHierarchyDetail}
               key={`relationship-tab-1`}
               className={`${current !== 1 ? "hidden" : ""}`}
             />
