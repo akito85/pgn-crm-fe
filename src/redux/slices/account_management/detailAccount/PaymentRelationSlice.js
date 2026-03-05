@@ -4,6 +4,12 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
+  loading_detailPr: false,
+  loading_detailDraftPr: false,
+  loading_createUpdatePr: false,
+  loading_listPrAccountStandard: false,
+  loading_detailPrDetailAttachment: false,
+  loading_approveRejectPr: false,
   list_prDetailAttachment: [],
   pagination_prDetailAttachment: {
     totalPages: 0,
@@ -418,50 +424,50 @@ const paymentRelationSlice = createSlice({
   extraReducers: {
     /** Get Detail Payment Relation */
     [getDetailPaymentRelation.pending]: (state, action) => {
-      state.loading = true;
+      state.loading_detailPr = true;
     },
     [getDetailPaymentRelation.fulfilled]: (state, action) => {
       state.detail_paymentRelation = action.payload?.result || {};
-      state.loading = false;
+      state.loading_detailPr = false;
     },
     [getDetailPaymentRelation.rejected]: (state, action) => {
       state.detail_paymentRelation = {};
-      state.loading = false;
+      state.loading_detailPr = false;
     },
 
     /** Get Detail Draft Payment Relation */
     [getDetailDraftPaymentRelation.pending]: (state, action) => {
-      state.loading = true;
+      state.loading_detailDraftPr = true;
     },
     [getDetailDraftPaymentRelation.fulfilled]: (state, action) => {
       state.detailDraft_paymentRelation = action.payload?.result || {};
-      state.loading = false;
+      state.loading_detailDraftPr = false;
     },
     [getDetailDraftPaymentRelation.rejected]: (state, action) => {
       state.detailDraft_paymentRelation = {};
-      state.loading = false;
+      state.loading_detailDraftPr = false;
     },
 
     /** Create Payment Relation */
     [createPaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdatePr = true;
     },
     [createPaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdatePr = false;
     },
-    [createPaymentRelation.pending]: (state) => {
-      state.loading = false;
+    [createPaymentRelation.rejected]: (state) => {
+      state.loading_createUpdatePr = false;
     },
 
     /** Update Payment Relation */
     [updatePaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdatePr = true;
     },
     [updatePaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdatePr = false;
     },
-    [updatePaymentRelation.pending]: (state) => {
-      state.loading = false;
+    [updatePaymentRelation.rejected]: (state) => {
+      state.loading_createUpdatePr = false;
     },
 
     /** Get Payment Relation Approval Hierarchy */
@@ -508,11 +514,11 @@ const paymentRelationSlice = createSlice({
     /** Get Payment Relation Account Standard */
     [getPrAccountStandard.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listPrAccountStandard = true;
       }
     },
     [getPrAccountStandard.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listPrAccountStandard = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -537,7 +543,7 @@ const paymentRelationSlice = createSlice({
       }
     },
     [getPrAccountStandard.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listPrAccountStandard = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_prAccountStandard = [];
@@ -553,11 +559,11 @@ const paymentRelationSlice = createSlice({
     /** Get Payment Relation Attachment */
     [getPaymentRelationAttachment.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_detailPrDetailAttachment = true;
       }
     },
     [getPaymentRelationAttachment.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_detailPrDetailAttachment = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -582,7 +588,7 @@ const paymentRelationSlice = createSlice({
       }
     },
     [getPaymentRelationAttachment.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_detailPrDetailAttachment = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_prDetailAttachment = [];
@@ -597,24 +603,24 @@ const paymentRelationSlice = createSlice({
 
     /** Approve or Reject Payment Relation */
     [approveOrRejectPaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectPr = true;
     },
     [approveOrRejectPaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
     [approveOrRejectPaymentRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
 
     /** Approve or Reject Inactive Payment Relation */
     [approveOrRejectInactivePaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectPr = true;
     },
     [approveOrRejectInactivePaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
     [approveOrRejectInactivePaymentRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
 
     /** Inactivate Payment Relation Attachment */
