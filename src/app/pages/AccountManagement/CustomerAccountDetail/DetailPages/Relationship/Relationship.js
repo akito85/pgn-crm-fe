@@ -28,7 +28,7 @@ const Relationship = ({
     list_relationship,
     pagination_relationship,
     data_approvalHistory,
-    loading,
+    loading_listRelationship,
   } = useSelector((state) => state.relationship);
 
   // declare
@@ -321,7 +321,7 @@ const Relationship = ({
           searchedColumn={searchedColumn}
           searchInput={searchInput}
           handleSearch={handleSearch}
-          loading={loading}
+          loading={loading_listRelationship}
         />
 
         <RelationshipApprovalModal

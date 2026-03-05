@@ -89,7 +89,7 @@ const RelationshipApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_relationship, pagination_relationship, loading } = useSelector(
+  const { list_relationship, pagination_relationship, loading_approveRejectRelationship } = useSelector(
     (state) => state.relationship
   );
 
@@ -451,14 +451,14 @@ const RelationshipApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading}
+                    loading={loading_approveRejectRelationship}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading}
+                    loading={loading_approveRejectRelationship}
                   >
                     Approve
                   </Button>
@@ -507,7 +507,7 @@ const RelationshipApprovalModal = ({
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_approveRejectRelationship}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}

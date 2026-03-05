@@ -36,6 +36,7 @@ const initialState = {
   data_approvalHierarchyDetail: [],
   data_approvalHistory: {},
   loading: false,
+  loading_listRelationship: false,
   loading_detailRelationship: false,
   loading_detailDraftRelationship: false,
   loading_listRelationshipType: false,
@@ -693,11 +694,11 @@ const relationshipSlice = createSlice({
     // Get Relationship List Advanced
     [getRelationshipListAdvanced.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listRelationship = true;
       }
     },
     [getRelationshipListAdvanced.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listRelationship = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -722,7 +723,7 @@ const relationshipSlice = createSlice({
       };
     },
     [getRelationshipListAdvanced.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listRelationship = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_relationship = [];
