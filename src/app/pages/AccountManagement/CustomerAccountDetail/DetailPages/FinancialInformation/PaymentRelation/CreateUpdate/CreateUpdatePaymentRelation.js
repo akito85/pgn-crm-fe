@@ -756,6 +756,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
               dataAttachment={dataAttachment}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
+              loading={loading_createUpdatePr}
             />
           </Form>
         </Spin>

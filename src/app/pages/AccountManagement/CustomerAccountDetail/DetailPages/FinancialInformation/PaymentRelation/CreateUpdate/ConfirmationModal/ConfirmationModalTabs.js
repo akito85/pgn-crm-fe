@@ -14,16 +14,19 @@ const ConfirmationModalTabs = ({
   configApplication,
   activeTab = 0,
   setActiveTab = () => {},
+  disabled = false,
 }) => {
   const tabOptions = [
     {
       key: 0,
       label: "Payment Relation Information",
+      disabled,
       children: <InfoPaymentRelation form={form} formView={false} />
     },
     {
       key: 1,
       label: "Approval",
+      disabled,
       children: (
         <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />
       )
@@ -31,6 +34,7 @@ const ConfirmationModalTabs = ({
     {
       key: 2,
       label: "Attachment",
+      disabled,
       children: (
         <AttachmentSectionForm
           data={dataAttachment}
@@ -43,7 +47,8 @@ const ConfirmationModalTabs = ({
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark />
+      disabled,
+      children: <ConfirmationModalRemark disabled={disabled} />
     },
   ].filter(Boolean).map((tabOption) => ({
     ...tabOption,
