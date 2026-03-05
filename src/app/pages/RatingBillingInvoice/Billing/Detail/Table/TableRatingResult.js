@@ -127,14 +127,14 @@ export const columnsRatingResult = (
       ),
   },
   {
-    key: "itemCode",
-    title: "ITEM CODE",
-    dataIndex: "itemCode",
+    key: "billingItemCode",
+    title: "BILLING ITEM CODE",
+    dataIndex: "billingItemCode",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "itemCode",
+      "billingItemCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -143,8 +143,8 @@ export const columnsRatingResult = (
     ),
     render: (text) =>
       renderColumn(
-        "itemCode",
-        hasValue(search["itemCode"]),
+        "billingItemCode",
+        hasValue(search["billingItemCode"]),
         searchText,
         text,
         false,
@@ -301,7 +301,7 @@ export const columnsRatingResult = (
         "price",
         hasValue(search["price"]),
         searchText,
-        text,
+        separatorNumber(text),
         false,
         "input",
         search
@@ -327,7 +327,33 @@ export const columnsRatingResult = (
         "amount",
         hasValue(search["amount"]),
         searchText,
-        text,
+        separatorNumber(text),
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "discountAmount",
+    title: "DISCOUNT AMOUNT",
+    dataIndex: "discountAmount",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "discountAmount",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "discountAmount",
+        hasValue(search["discountAmount"]),
+        searchText,
+        separatorNumber(text),
         false,
         "input",
         search
@@ -353,7 +379,7 @@ export const columnsRatingResult = (
         "totalAmount",
         hasValue(search["totalAmount"]),
         searchText,
-        text,
+        separatorNumber(text),
         false,
         "input",
         search
@@ -379,7 +405,7 @@ export const columnsRatingResult = (
         "vatBasis",
         hasValue(search["vatBasis"]),
         searchText,
-        text,
+        separatorNumber(text),
         false,
         "input",
         search
@@ -405,7 +431,7 @@ export const columnsRatingResult = (
         "vatBasisEqv",
         hasValue(search["vatBasisEqv"]),
         searchText,
-        text,
+        separatorNumber(text),
         false,
         "input",
         search
@@ -483,7 +509,7 @@ export const columnsRatingResult = (
         "vat",
         hasValue(search["vat"]),
         searchText,
-        text,
+        separatorNumber(text),
         false,
         "input",
         search
@@ -509,21 +535,21 @@ export const columnsRatingResult = (
         "vatEqv",
         hasValue(search["vatEqv"]),
         searchText,
-        text,
+        separatorNumber(text),
         false,
         "input",
         search
       ),
   },
   {
-    key: "withHoldingTaxCode",
+    key: "withholdingTaxCode",
     title: "WITHHOLDING TAX CODE",
-    dataIndex: "withHoldingTaxCode",
+    dataIndex: "withholdingTaxCode",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "withHoldingTaxCode",
+      "withholdingTaxCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -532,8 +558,8 @@ export const columnsRatingResult = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTaxCode",
-        hasValue(search["withHoldingTaxCode"]),
+        "withholdingTaxCode",
+        hasValue(search["withholdingTaxCode"]),
         searchText,
         text,
         false,
@@ -542,14 +568,14 @@ export const columnsRatingResult = (
       ),
   },
   {
-    key: "withHoldingTaxRate",
+    key: "withholdingTaxRate",
     title: "WITHHOLDING TAX RATE",
-    dataIndex: "withHoldingTaxRate",
+    dataIndex: "withholdingTaxRate",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "withHoldingTaxRate",
+      "withholdingTaxRate",
       searchInput,
       searchedColumn,
       searchText,
@@ -558,8 +584,8 @@ export const columnsRatingResult = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTaxRate",
-        hasValue(search["withHoldingTaxRate"]),
+        "withholdingTaxRate",
+        hasValue(search["withholdingTaxRate"]),
         searchText,
         text,
         false,
@@ -568,14 +594,14 @@ export const columnsRatingResult = (
       ),
   },
   {
-    key: "withHoldingTax",
+    key: "withholdingTax",
     title: "WITHHOLDING TAX",
-    dataIndex: "withHoldingTax",
+    dataIndex: "withholdingTax",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "withHoldingTax",
+      "withholdingTax",
       searchInput,
       searchedColumn,
       searchText,
@@ -584,24 +610,24 @@ export const columnsRatingResult = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTax",
-        hasValue(search["withHoldingTax"]),
+        "withholdingTax",
+        hasValue(search["withholdingTax"]),
         searchText,
-        text,
+        separatorNumber(text),
         false,
         "input",
         search
       ),
   },
   {
-    key: "vatExchRateType",
-    title: "VAT EXCH RATE TYPE",
-    dataIndex: "vatExchRateType",
+    key: "vatExchangeRateType",
+    title: "VAT EXCHANGE RATE TYPE",
+    dataIndex: "vatExchangeRateType",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "vatExchRateType",
+      "vatExchangeRateType",
       searchInput,
       searchedColumn,
       searchText,
@@ -610,8 +636,8 @@ export const columnsRatingResult = (
     ),
     render: (text) =>
       renderColumn(
-        "vatExchRateType",
-        hasValue(search["vatExchRateType"]),
+        "vatExchangeRateType",
+        hasValue(search["vatExchangeRateType"]),
         searchText,
         text,
         false,
@@ -620,14 +646,14 @@ export const columnsRatingResult = (
       ),
   },
   {
-    key: "vatExchRateDate",
-    title: "VAT EXCH RATE DATE",
-    dataIndex: "vatExchRateDate",
+    key: "vatExchangeRateDate",
+    title: "VAT EXCHANGE RATE DATE",
+    dataIndex: "vatExchangeRateDate",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "vatExchRateDate",
+      "vatExchangeRateDate",
       searchInput,
       searchedColumn,
       searchText,
@@ -637,8 +663,8 @@ export const columnsRatingResult = (
     ),
     render: (text) =>
       renderDateColumn(
-        "vatExchRateDate",
-        hasValue(search["vatExchRateDate"]),
+        "vatExchangeRateDate",
+        hasValue(search["vatExchangeRateDate"]),
         searchText,
         text,
         "date",
@@ -646,14 +672,14 @@ export const columnsRatingResult = (
       ),
   },
   {
-    key: "vatExchRate",
-    title: "VAT EXCH RATE",
-    dataIndex: "vatExchRate",
+    key: "vatExchangeRate",
+    title: "VAT EXCHANGE RATE",
+    dataIndex: "vatExchangeRate",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "vatExchRate",
+      "vatExchangeRate",
       searchInput,
       searchedColumn,
       searchText,
@@ -662,8 +688,346 @@ export const columnsRatingResult = (
     ),
     render: (text) =>
       renderColumn(
-        "vatExchRate",
-        hasValue(search["vatExchRate"]),
+        "vatExchangeRate",
+        hasValue(search["vatExchangeRate"]),
+        searchText,
+        separatorNumber(text),
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "convertedCurrency",
+    title: "CONVERTED CURRENCY",
+    dataIndex: "convertedCurrency",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "convertedCurrency",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "convertedCurrency",
+        hasValue(search["convertedCurrency"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "totalAmountEqv",
+    title: "TOTAL AMOUNT EQV",
+    dataIndex: "totalAmountEqv",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "totalAmountEqv",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "totalAmountEqv",
+        hasValue(search["totalAmountEqv"]),
+        searchText,
+        separatorNumber(text),
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "rateType",
+    title: "RATE TYPE",
+    dataIndex: "rateType",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "rateType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "rateType",
+        hasValue(search["rateType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "rateDate",
+    title: "RATE DATE",
+    dataIndex: "rateDate",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "rateDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "rateDate",
+        hasValue(search["rateDate"]),
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    key: "rate",
+    title: "RATE",
+    dataIndex: "rate",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "rate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "rate",
+        hasValue(search["rate"]),
+        searchText,
+        separatorNumber(text),
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "printSwitch",
+    title: "PRINT SWITCH",
+    dataIndex: "printSwitch",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "printSwitch",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "printSwitch",
+        hasValue(search["printSwitch"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "applyChargeSwitch",
+    title: "APPLY CHARGE SWITCH",
+    dataIndex: "applyChargeSwitch",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "applyChargeSwitch",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "applyChargeSwitch",
+        hasValue(search["applyChargeSwitch"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "balance",
+    title: "BALANCE",
+    dataIndex: "balance",
+    sorter: true,
+    isNumber: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "balance",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "balance",
+        hasValue(search["balance"]),
+        searchText,
+        separatorNumber(text),
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "paymentStatus",
+    title: "PAYMENT STATUS",
+    dataIndex: "paymentStatus",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "paymentStatus",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "paymentStatus",
+        hasValue(search["paymentStatus"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "status",
+        hasValue(search["status"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "transferedFrom",
+    title: "TRANSFERRED FROM",
+    dataIndex: "transferedFrom",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "transferedFrom",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "transferedFrom",
+        hasValue(search["transferedFrom"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "transferedTo",
+    title: "TRANSFERRED TO",
+    dataIndex: "transferedTo",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "transferedTo",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "transferedTo",
+        hasValue(search["transferedTo"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "source",
+    title: "SOURCE",
+    dataIndex: "source",
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "source",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "source",
+        hasValue(search["source"]),
         searchText,
         text,
         false,
