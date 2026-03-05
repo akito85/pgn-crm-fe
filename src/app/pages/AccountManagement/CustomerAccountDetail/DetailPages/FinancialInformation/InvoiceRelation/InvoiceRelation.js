@@ -18,7 +18,7 @@ const InvoiceRelation = ({
     list_invoiceRelation,
     pagination_invoiceRelation,
     data_irApprovalHistory,
-    loading,
+    loading_listIr,
   } = useSelector(
     (state) => state.financialInformation
   );
@@ -259,7 +259,7 @@ const InvoiceRelation = ({
         searchedColumn={searchedColumn}
         searchInput={searchInput}
         handleSearch={handleSearch}
-        loading={loading}
+        loading={loading_listIr}
       />
 
       <InvoiceRelationApprovalModal
