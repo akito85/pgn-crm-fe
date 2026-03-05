@@ -42,7 +42,7 @@ const RelationshipInfo = ({
   const description = Form.useWatch("description", { form });
 
   // Get data from Redux store
-  const { data_relationshipType, data_relationshipCategory, loadingType, loadingCategory } =
+  const { data_relationshipType, data_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
     useSelector((state) => state.relationship);
 
   // Fetch relationship type and category on component mount
@@ -67,7 +67,7 @@ const RelationshipInfo = ({
             className="no-margin-form"
           >
             <SelectComponent
-              loading={loadingType}
+              loading={loading_listRelationshipType}
               onChange={(_, option) => {
                 form.setFieldValue("relationshipTypeName", option.children)
                 setRelatedDetails([]);
@@ -97,7 +97,7 @@ const RelationshipInfo = ({
           >
             <SelectComponent
               onChange={(_, option) => form.setFieldValue("relationshipCategoryName", option.children)}
-              loading={loadingCategory}
+              loading={loading_listRelationshipCategory}
             >
               {data_relationshipCategory?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>

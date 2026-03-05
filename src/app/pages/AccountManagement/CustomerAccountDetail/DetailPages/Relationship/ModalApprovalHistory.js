@@ -5,7 +5,7 @@ import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 
 const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId }) => {
   const dispatch = useDispatch();
-  const { data_approvalHistory, loadingApprovalHistory } = useSelector(
+  const { data_approvalHistory, loading_approvalHistoryRelationship } = useSelector(
     (state) => state.relationship
   );
 

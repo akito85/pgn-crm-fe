@@ -56,8 +56,8 @@ const CreateUpdateRelationship = ({
     detailDraft_relationshipDetail,
     data_relationshipType,
     data_relationshipCategory,
-    loadingDetail,
-    loadingApprovalHierarchyDetail
+    loading_detailRelationship,
+    loading_detailRelationshipApprovalHierarchyDetails
   } = useSelector(
     (state) => state.relationship
   );
@@ -560,7 +560,7 @@ const CreateUpdateRelationship = ({
                 key: `detail-detail-${index}`,
               }))}
               handleSelectHierarchy={handleSelectHierarchy}
-              loading={loadingApprovalHierarchyDetail}
+              loading={loading_detailRelationshipApprovalHierarchyDetails}
               key={`relationship-tab-1`}
               className={`${current !== 1 ? "hidden" : ""}`}
             />
@@ -600,7 +600,7 @@ const CreateUpdateRelationship = ({
             idCustomer={idCustomer}
             type={accountType}
           />
-          <Spin spinning={loadingDetail}>
+          <Spin spinning={loading_detailRelationship}>
             <Form
               id="relationshipForm"
               form={form}

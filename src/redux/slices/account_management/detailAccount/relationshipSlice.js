@@ -36,13 +36,17 @@ const initialState = {
   data_approvalHierarchyDetail: [],
   data_approvalHistory: {},
   loading: false,
-  loadingDetail: false,
-  loadingType: false,
-  loadingCategory: false,
-  loadingApprovalHierarchies: false,
-  loadingApprovalHierarchyDetail: false,
-  loadingRelatedObject: false,
-  loadingApprovalHistory: false,
+  loading_detailRelationship: false,
+  loading_detailDraftRelationship: false,
+  loading_listRelationshipType: false,
+  loading_listRelationshipCategory: false,
+  loading_listRelationshipApprovalOption: false,
+  loading_detailRelationshipApprovalHierarchyDetails: false,
+  loading_listRelatedObject: false,
+  loading_approvalHistoryRelationship: false,
+  loading_createUpdateRelationship: false,
+  loading_approveRejectRelationship: false,
+  loading_detailRelationshipAttachment: false,
 };
 
 // Get Relationship List with Advanced Filter (POST)
@@ -733,75 +737,75 @@ const relationshipSlice = createSlice({
 
     // Get Relationship Detail
     [getRelationshipDetail.pending]: (state) => {
-      state.loadingDetail = true;
+      state.loading_detailRelationship = true;
     },
     [getRelationshipDetail.fulfilled]: (state, action) => {
       state.data_relationshipDetail = action.payload;
-      state.loadingDetail = false;
+      state.loading_detailRelationship = false;
     },
     [getRelationshipDetail.rejected]: (state) => {
-      state.loadingDetail = false;
+      state.loading_detailRelationship = false;
     },
 
     // Get Relationship Detail Draft
     [getDetailDraftRelationship.pending]: (state) => {
-      state.loadingDetail = true;
+      state.loading_detailDraftRelationship = true;
     },
     [getDetailDraftRelationship.fulfilled]: (state, action) => {
       state.detailDraft_relationshipDetail = action.payload;
-      state.loadingDetail = false;
+      state.loading_detailDraftRelationship = false;
     },
     [getDetailDraftRelationship.rejected]: (state) => {
       state.detailDraft_relationshipDetail = {};
-      state.loadingDetail = false;
+      state.loading_detailDraftRelationship = false;
     },
 
     // Get Relationship Type
     [getRelationshipType.pending]: (state) => {
-      state.loadingType = true;
+      state.loading_listRelationshipType = true;
     },
     [getRelationshipType.fulfilled]: (state, action) => {
       state.data_relationshipType = action.payload;
-      state.loadingType = false;
+      state.loading_listRelationshipType = false;
     },
     [getRelationshipType.rejected]: (state) => {
-      state.loadingType = false;
+      state.loading_listRelationshipType = false;
     },
 
     // Get Relationship Category
     [getRelationshipCategory.pending]: (state) => {
-      state.loadingCategory = true;
+      state.loading_listRelationshipCategory = true;
     },
     [getRelationshipCategory.fulfilled]: (state, action) => {
       state.data_relationshipCategory = action.payload;
-      state.loadingCategory = false;
+      state.loading_listRelationshipCategory = false;
     },
     [getRelationshipCategory.rejected]: (state) => {
-      state.loadingCategory = false;
+      state.loading_listRelationshipCategory = false;
     },
 
     // Get Approval Hierarchies
     [getApprovalHierarchies.pending]: (state) => {
-      state.loadingApprovalHierarchies = true;
+      state.loading_listRelationshipApprovalOption = true;
     },
     [getApprovalHierarchies.fulfilled]: (state, action) => {
       state.data_approvalHierarchies = action.payload;
-      state.loadingApprovalHierarchies = false;
+      state.loading_listRelationshipApprovalOption = false;
     },
     [getApprovalHierarchies.rejected]: (state) => {
-      state.loadingApprovalHierarchies = false;
+      state.loading_listRelationshipApprovalOption = false;
     },
 
     // Get Approval Hierarchy Detail
     [getApprovalHierarchyDetail.pending]: (state) => {
-      state.loadingApprovalHierarchyDetail = true;
+      state.loading_detailRelationshipApprovalHierarchyDetails = true;
     },
     [getApprovalHierarchyDetail.fulfilled]: (state, action) => {
       state.data_approvalHierarchyDetail = action.payload;
-      state.loadingApprovalHierarchyDetail = false;
+      state.loading_detailRelationshipApprovalHierarchyDetails = false;
     },
     [getApprovalHierarchyDetail.rejected]: (state) => {
-      state.loadingApprovalHierarchyDetail = false;
+      state.loading_detailRelationshipApprovalHierarchyDetails = false;
     },
 
     // Get Relationship Search Column
@@ -875,24 +879,24 @@ const relationshipSlice = createSlice({
 
     // Create Relationship
     [createRelationship.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateRelationship = true;
     },
     [createRelationship.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
     [createRelationship.rejected]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
 
     // Update Relationship
     [updateRelationship.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateRelationship = true;
     },
     [updateRelationship.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
     [updateRelationship.rejected]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
 
     // Get Attachment Category
@@ -909,26 +913,26 @@ const relationshipSlice = createSlice({
 
     // Upload Attachment
     [uploadAttachment.pending]: (state) => {
-      state.loading = true;
+      state.loading_detailRelationshipAttachment = true;
     },
     [uploadAttachment.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_detailRelationshipAttachment = false;
     },
     [uploadAttachment.rejected]: (state) => {
-      state.loading = false;
+      state.loading_detailRelationshipAttachment = false;
     },
 
     // Get Attachment List
     [getAttachmentList.pending]: (state) => {
-      state.loading = true;
+      state.loading_detailRelationshipAttachment = true;
     },
     [getAttachmentList.fulfilled]: (state, action) => {
       const payload = action.payload;
       state.data_attachmentList = payload?.data?.result || payload?.result || payload || [];
-      state.loading = false;
+      state.loading_detailRelationshipAttachment = false;
     },
     [getAttachmentList.rejected]: (state) => {
-      state.loading = false;
+      state.loading_detailRelationshipAttachment = false;
     },
 
     // Get All Accounts (Choose Related)
@@ -946,11 +950,11 @@ const relationshipSlice = createSlice({
     // Get Related Object Data
     [getRelatedObjectData.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loadingRelatedObject = true;
+        state.loading_listRelatedObject = true;
       }
     },
     [getRelatedObjectData.fulfilled]: (state, action) => {
-      state.loadingRelatedObject = false;
+      state.loading_listRelatedObject = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -976,7 +980,7 @@ const relationshipSlice = createSlice({
       };
     },
     [getRelatedObjectData.rejected]: (state, action) => {
-      state.loadingRelatedObject = false;
+      state.loading_listRelatedObject = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_relatedObject = [];
@@ -991,47 +995,47 @@ const relationshipSlice = createSlice({
 
     // Download Attachment
     [downloadAttachment.pending]: (state) => {
-      state.loading = true;
+      state.loading_detailRelationshipAttachment = true;
     },
     [downloadAttachment.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_detailRelationshipAttachment = false;
     },
     [downloadAttachment.rejected]: (state) => {
-      state.loading = false;
+      state.loading_detailRelationshipAttachment = false;
     },
 
     // Get Approval History
     [getApprovalHistory.pending]: (state) => {
-      state.loadingApprovalHistory = true;
+      state.loading_approvalHistoryRelationship = true;
     },
     [getApprovalHistory.fulfilled]: (state, action) => {
       state.data_approvalHistory = action.payload;
-      state.loadingApprovalHistory = false;
+      state.loading_approvalHistoryRelationship = false;
     },
     [getApprovalHistory.rejected]: (state) => {
-      state.loadingApprovalHistory = false;
+      state.loading_approvalHistoryRelationship = false;
     },
 
     // Approve or Reject Relationship
     [approveOrRejectRelationship.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectRelationship = true;
     },
     [approveOrRejectRelationship.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectRelationship = false;
     },
     [approveOrRejectRelationship.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectRelationship = false;
     },
 
     // Approve or Reject Inactive Relationship
     [approveOrRejectInactiveRelationship.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectRelationship = true;
     },
     [approveOrRejectInactiveRelationship.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectRelationship = false;
     },
     [approveOrRejectInactiveRelationship.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectRelationship = false;
     },
   },
 });
