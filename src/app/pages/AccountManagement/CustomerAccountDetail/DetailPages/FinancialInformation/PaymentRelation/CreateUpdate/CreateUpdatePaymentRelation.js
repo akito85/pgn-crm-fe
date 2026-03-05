@@ -51,13 +51,25 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   );
 
   const {
-    loading,
+    loading_listPrApprovalOption,
+    loading_detailPrApprovalHierarchyDetails,
+    loading_detailPr,
+    loading_detailDraftPr,
+    loading_detailPrDetailAttachment,
+    loading_createUpdatePr,
     list_prApprovalOptions,
     list_prApprovalHierarchyDetail,
     detail_paymentRelation,
     detailDraft_paymentRelation,
     list_prDetailAttachment
   } = useSelector((state) => state.paymentRelation);
+
+  const loading =
+    loading_listPrApprovalOption ||
+    loading_detailPrApprovalHierarchyDetails ||
+    loading_detailPr ||
+    loading_detailDraftPr ||
+    loading_detailPrDetailAttachment;
 
   //declare
   const location = useLocation();

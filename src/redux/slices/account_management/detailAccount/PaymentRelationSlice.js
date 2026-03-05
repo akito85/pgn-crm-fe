@@ -568,11 +568,11 @@ const paymentRelationSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_paymentRelation.map((item) => item.id));
+          const currentIds = new Set(state.list_prDetailAttachment.map((item) => item.id));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
-          
+
           state.list_prDetailAttachment = [
-            ...state.list_paymentRelation,
+            ...state.list_prDetailAttachment,
             ...filteredResult,
           ];
         }
