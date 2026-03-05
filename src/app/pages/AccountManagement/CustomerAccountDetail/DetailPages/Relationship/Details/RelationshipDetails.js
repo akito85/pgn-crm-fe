@@ -30,7 +30,7 @@ import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 const RelationshipDetails = ({ type = "standard" }) => {
   const dispatch = useDispatch();
 
-  const { data_relationshipDetail, detailDraft_relationshipDetail, loadingDetail } = useSelector(
+  const { data_relationshipDetail, detailDraft_relationshipDetail, loading_detailRelationship } = useSelector(
     (state) => state.relationship
   );
 
@@ -40,7 +40,7 @@ const RelationshipDetails = ({ type = "standard" }) => {
 
   const { data_accountDetail } = useSelector((state) => state.accountManagement);
 
-  const isLoading = loadingDetail || loadingCustomer || loadingAccount;
+  const isLoading = loading_detailRelationship || loadingCustomer || loadingAccount;
 
   // declare
   const navigate = useNavigate();
