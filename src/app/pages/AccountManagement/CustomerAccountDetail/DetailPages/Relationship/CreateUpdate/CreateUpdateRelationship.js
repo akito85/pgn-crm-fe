@@ -539,6 +539,8 @@ const CreateUpdateRelationship = ({
               form={form}
               key={`relationship-tab-0`}
               setRelatedDetails={setRelatedDetails}
+              isDraft={isDraft}
+              isUpdate={isUpdate}
             />
           )
         },
