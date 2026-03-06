@@ -6,6 +6,7 @@ const NxBaseContainer = ({
   rounded = true,
   padding = true,
   flexDirection = "column",
+  required = false,
 }) => {
   // Determine class based on border prop
   const containerClass = border
@@ -25,8 +26,17 @@ const NxBaseContainer = ({
   return (
     <div className={containerClass} style={containerStyle}>
       {header && (
-        <div className="text-primary text-sm uppercase pt-4 px-4">
-          {header}
+        <div className="flex gap-x-1 pt-4 px-4">
+          <span
+            className="text-primary text-sm uppercase"
+          >
+            {header}
+          </span>
+          {required && (
+            <span className="text-[#ff4d4f]">
+              *
+            </span>
+          )}
         </div>
       )}
       <div className={`flex ${flexDirection === "column" ? "flex-col" : flexDirection === "row" ? "flex-row" : ""} flex-col gap-4 ${(padding && !header) ? "p-4" : padding ? "px-4 pb-4" : ""}`}>{children}</div>

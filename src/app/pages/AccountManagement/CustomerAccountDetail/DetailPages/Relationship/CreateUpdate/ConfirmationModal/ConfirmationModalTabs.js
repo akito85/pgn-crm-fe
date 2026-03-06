@@ -1,8 +1,10 @@
-import ConfirmationModalInfo from "./ConfirmationModalInfo";
-import ConfirmationModalApproval from "./ConfirmationModalApproval";
-import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import RelationshipInfo from "../StepContents/InformationForm/RelationshipInfo";
+import RelatedDetailCard from "../StepContents/InformationForm/RelatedDetailCard";
+import RelationshipApproval from "../StepContents/ApprovalForm/RelationshipApproval";
+import RelationshipAttachment from "../StepContents/AttachmentForm/RelationshipAttachment";
 
 const ConfirmationModalTabs = ({
   form,
@@ -14,38 +16,58 @@ const ConfirmationModalTabs = ({
   activeTab = 0,
   relatedDetails,
   setActiveTab = () => {},
+  disabled = false,
 }) => {
   const tabOptions = [
     {
       key: 0,
       label: "Relationship Information",
-      children: <ConfirmationModalInfo form={form} relatedDetails={relatedDetails} />,
+      disabled,
+      children: (
+        <div className="flex flex-col gap-y-4">
+          <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
+            <RelationshipInfo form={form} formView={false} />
+          </NxBaseContainer>
+          <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
+            <RelatedDetailCard relatedDetails={relatedDetails} />
+          </NxBaseContainer>
+        </div>
+      ),
     },
     {
       key: 1,
       label: "Approval",
+      disabled,
       children: (
-        <ConfirmationModalApproval
-          form={form}
-          dataTable={hierarchyTableData}
-        />
+        <NxBaseContainer border header={"APPROVAL"}>
+          <RelationshipApproval
+            form={form}
+            dataDetailApproval={hierarchyTableData}
+            formView={false}
+          />
+        </NxBaseContainer>
       ),
     },
     {
       key: 2,
       label: "Attachment",
+      disabled,
       children: (
-        <ConfirmationModalAttachment
-          data={dataAttachment}
-          service={service}
-          configApplication={configApplication}
-        />
+        <NxBaseContainer border header={"ATTACHMENT"}>
+          <RelationshipAttachment
+            data={dataAttachment}
+            service={service}
+            configApplication={configApplication}
+            type={"confirmation"}
+          />
+        </NxBaseContainer>
       ),
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark />,
+      disabled,
+      children: <ConfirmationModalRemark disabled={disabled} />,
     },
   ].filter(Boolean);
 

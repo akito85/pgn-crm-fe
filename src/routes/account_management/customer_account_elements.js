@@ -142,10 +142,15 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   //ACCOUNT
   UPDATE_ACCOUNT_STANDARD_PAGE: <UpdateAccountInformation />,
 
-  //RELATIONSHIP
-  CREATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship type={"create"} />,
-  UPDATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship type={"update"} />,
-  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetails />,
+  //RELATIONSHIP ACCOUNT STANDARD
+  CREATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship accountType="standard" formType="create" />,
+  UPDATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship accountType="standard" formType="update" />,
+  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetails accountType="standard" />,
+
+  //RELATIONSHIP ACCOUNT ONE TIME
+  CREATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship accountType="oneTime" formType="create" />,
+  UPDATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship accountType="oneTime" formType="update" />,
+  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetails accountType="oneTime" />,
 
   //SA-APPROVE-REJECT-TOS
   APPROVE_OR_REJECT_TOS_PAGE: <ApproveOrRejectTOS />,

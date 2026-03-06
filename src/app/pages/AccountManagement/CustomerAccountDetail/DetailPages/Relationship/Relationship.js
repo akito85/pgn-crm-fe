@@ -3,12 +3,14 @@ import { useState } from "react";
 import RelationshipTable from "./RelationshipTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getRelationshipListAdvanced,
+  getRelationshipList,
   downloadRelationship,
   getApprovalHistory,
   inactivateRelationship,
+  getApprovalHierarchies,
+  getApprovalHierarchyDetail,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import NxApproveOrRejectModal from "../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
@@ -28,7 +30,7 @@ const Relationship = ({
     list_relationship,
     pagination_relationship,
     data_approvalHistory,
-    loading,
+    loading_listRelationship,
   } = useSelector((state) => state.relationship);
 
   // declare
@@ -45,7 +47,6 @@ const Relationship = ({
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateId, setInactivateId] = useState(0);
-  const [inactivateAppHierId, setInactivateAppHierId] = useState(0);
   const [inactivateName, setInactivateName] = useState("");
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
@@ -76,7 +77,7 @@ const Relationship = ({
     };
 
     dispatch(
-      getRelationshipListAdvanced({
+      getRelationshipList({
         idAccount: id,
         page: 0,
         pageSize: loadMoreSize,
@@ -98,12 +99,10 @@ const Relationship = ({
   const handleInactivateModal = (show, relationshipId = 0, appHierId = 0, name = "") => {
     if (show) {
       setInactivateId(relationshipId);
-      setInactivateAppHierId(appHierId);
       setInactivateName(name);
       setShowInactiveModal(true);
     } else {
       setInactivateId(0);
-      setInactivateAppHierId(0);
       setInactivateName("");
       setShowInactiveModal(false);
     }
@@ -113,10 +112,10 @@ const Relationship = ({
    * @param {string} remark
    * @param {() => {}} handleClear
    */
-  const handleInactivate = (remark, handleClear) => {
+  const handleInactivate = ({ remark, appHierId }, handleClear) => {
     const body = {
       id: inactivateId,
-      appHierId: inactivateAppHierId,
+      appHierId,
       remark,
     };
 
@@ -137,7 +136,7 @@ const Relationship = ({
         };
 
         dispatch(
-          getRelationshipListAdvanced({
+          getRelationshipList({
             idAccount: id,
             page: 0,
             pageSize: loadMoreSize,
@@ -233,7 +232,7 @@ const Relationship = ({
       };
 
       await dispatch(
-        getRelationshipListAdvanced({
+        getRelationshipList({
           idAccount: id,
           page: nextPage,
           pageSize: loadMoreSize,
@@ -268,7 +267,7 @@ const Relationship = ({
     };
 
     dispatch(
-      getRelationshipListAdvanced({
+      getRelationshipList({
         idAccount: id,
         page,
         pageSize: loadMoreSize,
@@ -321,7 +320,7 @@ const Relationship = ({
           searchedColumn={searchedColumn}
           searchInput={searchInput}
           handleSearch={handleSearch}
-          loading={loading}
+          loading={loading_listRelationship}
         />
 
         <RelationshipApprovalModal
@@ -332,12 +331,19 @@ const Relationship = ({
         />
 
         {/* Inactivate Modal */}
-        <NxApproveOrRejectModal
+        <NxInactivateModal
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
           customMessage={`Are you sure you want to inactivate relationship - ${inactivateName}?`}
-          onFinish={({ remark }, handleClear) => handleInactivate(remark, handleClear)}
+          onFinish={({ remark, appHierId }, handleClear) => handleInactivate({ remark, appHierId }, handleClear)}
+          named={inactivateName}
+          menu="relationship"
+          sliceName="relationship"
+          approvalOptionsStateName="data_approvalHierarchies"
+          approvalHierarchtDetailsStateName="data_approvalHierarchyDetail"
+          getApprovalOptions={getApprovalHierarchies}
+          getApprovalHierarchyDetails={getApprovalHierarchyDetail}
         />
 
         {/* Approval History Modal */}
