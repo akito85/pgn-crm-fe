@@ -35,6 +35,11 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   CREATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/create",
   UPDATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/update",
 
+  // Invoice Relation Account One Time
+  VIEW_DETAIL_INVOICE_RELATION_ONETIME: "/account-management/account-onetime/financial-information/invoice-relation/view",
+  CREATE_INVOICE_RELATION_ONETIME: "/account-management/account-onetime/financial-information/invoice-relation/create",
+  UPDATE_INVOICE_RELATION_ONETIME: "/account-management/account-onetime/financial-information/invoice-relation/update",
+
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
     "/account-management/account-standard/service-agreement/view",

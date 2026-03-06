@@ -8,7 +8,7 @@ import InvoiceRelationDetailTabs from "./InvoiceRelationDetailTabs";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
+import { getAccountStandardDetail, getAccountOneTimeDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import { getDetailInvoiceRelation, getDetailDraftInvoiceRelation, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
@@ -20,8 +20,10 @@ import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const InvoiceRelationDetails = ({
-  type = "standard"
+  accountType = "standard"
 }) => {
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
   const dispatch = useDispatch();
 
   const { detail_invoiceRelation, detailDraft_invoiceRelation } = useSelector(
@@ -90,15 +92,15 @@ const InvoiceRelationDetails = ({
     },
     {
       path:
-        type == "standard"
+        isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
           : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
       breadcrumbName:
-        type == "standard" ? "Account - Standard" : "Account - One Time",
+        isStandard ? "Account - Standard" : "Account - One Time",
     },
     {
       path:
-        type == "standard"
+        isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
           : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
@@ -171,7 +173,11 @@ const InvoiceRelationDetails = ({
   }
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers/view/service-requests/details'))
+    isStandard
+      ? dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information/invoice-relation'))
+      : isOneTime
+        ? dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information/invoice-relation'))
+        : null;
   }, [dispatch]);
 
   useEffect(() => {
@@ -181,7 +187,11 @@ const InvoiceRelationDetails = ({
 
   useEffect(() => {
     if (idAccount && idCustomer) {
-      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+      if (isStandard) {
+        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+      } else if (isOneTime) {
+        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
+      }
     }
   }, [idAccount, idCustomer]);
 
@@ -205,7 +215,7 @@ const InvoiceRelationDetails = ({
             dispatch={dispatch}
             idAccount={idAccount}
             idCustomer={idCustomer}
-            type={"standard"}
+            type={accountType}
           />
 
           {draftExist && (

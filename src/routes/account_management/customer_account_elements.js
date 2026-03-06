@@ -120,10 +120,15 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   CREATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"create"} accountType={"oneTime"} />,
   UPDATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"oneTime"} />,
 
-  // Payment Relation Detail
-  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
-  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"create"} />,
-  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"update"} />,
+  // Invoice Relation Account Standard
+  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails accountType="standard" />,
+  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"create"} accountType={"standard"} />,
+  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"update"} accountType={"standard"} />,
+
+  // Invoice Relation Account One Time
+  VIEW_DETAIL_INVOICE_RELATION_ONETIME_PAGE: <InvoiceRelationDetails accountType="oneTime" />,
+  CREATE_INVOICE_RELATION_ONETIME_PAGE: <CreateUpdateInvoiceRelation formType={"create"} accountType={"oneTime"} />,
+  UPDATE_INVOICE_RELATION_ONETIME_PAGE: <CreateUpdateInvoiceRelation formType={"update"} accountType={"oneTime"} />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,

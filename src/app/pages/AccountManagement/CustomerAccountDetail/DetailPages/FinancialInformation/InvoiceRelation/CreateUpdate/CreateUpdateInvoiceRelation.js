@@ -37,7 +37,9 @@ import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepN
 import HeaderDetail from "../../../../HeaderDetail";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
-const CreateUpdateInvoiceRelation = ({ formType }) => {
+const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "standard" }) => {
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
@@ -77,7 +79,6 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idIr = location?.state?.id;
-  const accountType = location?.state?.type; // "standard" or "onetime"
 
   const status = detail_invoiceRelation.status || "DRAFT";
   const statusApproval = detail_invoiceRelation.statusApproval || "DRAFT";
@@ -107,11 +108,6 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
   useEffect(() => {
     if (idCustomer) dispatch(getCustomerDetail(idCustomer));
   }, [idCustomer]);
-
-  useEffect(() => {
-    if (idAccount)
-      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-  }, [idAccount]);
 
   useEffect(() => {
     if (isUpdate && idIr) {
@@ -175,11 +171,15 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
       breadcrumbName: "Account"
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
-      breadcrumbName: "Account - Standard"
+      path: isStandard
+        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+        : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
+      breadcrumbName: isStandard ? "Account - Standard" : "Account - One Time"
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      path: isStandard
+        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+        : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
       state: {
         idAccount,
@@ -536,12 +536,18 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
     // Filter only new attachments (not existing ones)
     const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
 
+    const navigateTarget = isStandard
+      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+      : isOneTime
+        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
+        : "";
+
     if (isCreate)
       dispatch(createInvoiceRelation({ body, attachments: newAttachments }))
         .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+            navigate(navigateTarget, {
               state: {
                 idAccount,
                 idCustomer
@@ -563,7 +569,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
         .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+            navigate(navigateTarget, {
               state: {
                 idAccount,
                 idCustomer
@@ -633,7 +639,7 @@ const CreateUpdateInvoiceRelation = ({ formType }) => {
           dispatch={dispatch}
           idAccount={idAccount}
           idCustomer={idCustomer}
-          type={"standard"}
+          type={accountType}
         />
         <Spin spinning={loading}>
           <Form
