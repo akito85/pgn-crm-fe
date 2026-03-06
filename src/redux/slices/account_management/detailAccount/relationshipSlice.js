@@ -770,11 +770,11 @@ const relationshipSlice = createSlice({
     // Get Relationship List
     [getRelationshipApprovalList.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listRelationshipAproval = true;
+        state.loading_listRelationshipApproval = true;
       }
     },
     [getRelationshipApprovalList.fulfilled]: (state, action) => {
-      state.loading_listRelationshipAproval = false;
+      state.loading_listRelationshipApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -799,7 +799,7 @@ const relationshipSlice = createSlice({
       };
     },
     [getRelationshipApprovalList.rejected]: (state, action) => {
-      state.loading_listRelationshipAproval = false;
+      state.loading_listRelationshipApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_relationshipApproval = [];
