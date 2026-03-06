@@ -8,7 +8,6 @@ import {
   validateError,
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
-import { data } from "autoprefixer";
 
 const initialState = {
   loading: false,
@@ -24,14 +23,14 @@ const initialState = {
 
 export const getPaginatePaymentChannel = createAsyncThunk(
   "GET_ALL_PAYMENT_CHANNEL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/payment-channel/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore: !!isLoadMore };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
@@ -499,16 +498,26 @@ const paymentChannelSlice = createSlice({
   extraReducers: {
     //get all employee paginate reducer
     [getPaginatePaymentChannel.pending]: (state, action) => {
-      state.data = action.payload;
       state.loading = true;
     },
     [getPaginatePaymentChannel.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      const { isLoadMore, ...rest } = action.payload || {};
+      if (isLoadMore && state.data?.result) {
+        // Append new results for infinity scroll
+        state.data = {
+          ...rest,
+          result: [
+            ...state.data.result,
+            ...(rest.result || []),
+          ],
+        };
+      } else {
+        state.data = rest;
+      }
       state.loading = false;
     },
     [getPaginatePaymentChannel.rejected]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
+      state.loading = false;
     },
 
     // get type ddl
