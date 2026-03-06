@@ -95,6 +95,7 @@ import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
+import taxExemptionReducer from "../slices/rating_billing_invoice/taxExemption";
 import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
 import activityNameReducer from "../slices/debt_and_collection/activityName";
 import templateRemindingReducer from "../slices/debt_and_collection/templateReminding";
@@ -248,6 +249,7 @@ const reducer = combineReducers({
   top: termsofPaymentReducer,
   tax_code: taxCodeReducer,
   emeterai: emeteraiReducer,
+  taxExemption: taxExemptionReducer,
   managementDeliveryInvoice: managementDeliveryInvoiceReducer,
   masterEfakturCode: masterEfakturCodeReducer,
   digitalSignature: digitalSignatureReducer,
