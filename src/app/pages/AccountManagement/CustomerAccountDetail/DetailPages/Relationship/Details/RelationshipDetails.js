@@ -60,7 +60,7 @@ const RelationshipDetails = ({ accountType = "standard" }) => {
   const handleSetActiveKey = (newActiveKey) => setActiveKey(newActiveKey);
 
   const isStandard = accountType === "standard";
-  const isOneTime = accountType === "onetime";
+  const isOneTime = accountType === "oneTime";
 
   const {
     id,

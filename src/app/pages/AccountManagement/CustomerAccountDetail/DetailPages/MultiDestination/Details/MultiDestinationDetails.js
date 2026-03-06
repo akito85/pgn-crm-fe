@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import MultiDestinationDetailTabs from "./MultiDestinationDetailTabs";
 import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
+import { getAccountStandardDetail, getAccountOneTimeDetail, getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 import { getDetailMultiDestination, getDetailDraftMultiDestination, getMultiDestinationAttachment, approveOrRejectMultiDestination, approveOrRejectInactiveMultiDestination } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
@@ -20,7 +20,7 @@ import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 const MultiDestinationDetails = ({
-  type = "standard"
+  accountType = "standard"
 }) => {
   const dispatch = useDispatch();
 
@@ -56,6 +56,9 @@ const MultiDestinationDetails = ({
   const detail = (activeKey === originalKey ? detail_multiDestination : detailDraft_multiDestination) || {};
   const handleSetActiveKey = (newActiveKey) => setActiveKey(newActiveKey);
 
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
+
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
 
@@ -66,15 +69,30 @@ const MultiDestinationDetails = ({
     },
     {
       path:
-        type == "standard"
-          ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-          : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
+          "",
       breadcrumbName:
-        type == "standard" ? "Account - Standard" : "Account - One Time",
+        isStandard ?
+          "Account - Standard" :
+        isOneTime ?
+          "Account - One Time" :
+          "",
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION,
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
+          "",
       breadcrumbName: "Detail Account",
+      state: {
+        idAccount,
+        idCustomer,
+      }
     },
     {
       path: "",
@@ -139,7 +157,11 @@ const MultiDestinationDetails = ({
 
   useEffect(() => {
     if (idAccount && idCustomer) {
-      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+      if (isStandard) {
+        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+      } else {
+        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
+      }
     }
   }, [idAccount, idCustomer]);
 
@@ -176,7 +198,7 @@ const MultiDestinationDetails = ({
             dispatch={dispatch}
             idAccount={idAccount}
             idCustomer={idCustomer}
-            type={type}
+            type={accountType}
           />
 
           {draftExist && (

@@ -86,6 +86,11 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   CREATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/create",
   UPDATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/update",
 
+  // Multi Destination Account One Time
+  VIEW_DETAIL_MULTI_DESTINATION_ONETIME: "/account-management/account-onetime/multi-destination/view",
+  CREATE_MULTI_DESTINATION_ONETIME: "/account-management/account-onetime/multi-destination/create",
+  UPDATE_MULTI_DESTINATION_ONETIME: "/account-management/account-onetime/multi-destination/update",
+
   //Premise
   DETAIL_PREMISE: "/account-management/account-standard/premise/view",
 

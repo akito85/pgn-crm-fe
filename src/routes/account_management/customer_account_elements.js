@@ -127,10 +127,15 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   VIEW_GAS_SOURCE: <ViewGasSource />,
   UPLOAD_GAS_SOURCE: <UploadGasSource />,
 
-  // Multi Destination
-  VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetails />,
-  CREATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination type={"create"} />,
-  UPDATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination type={"update"} />,
+  // Multi Destination Account Standard
+  VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetails accountType="standard" />,
+  CREATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination accountType="standard" formType="create" />,
+  UPDATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination accountType="standard" formType="update" />,
+
+  // Multi Destination Account One Time
+  VIEW_DETAIL_MULTI_DESTINATION_ONETIME_PAGE: <MultiDestinationDetails accountType="oneTime" />,
+  CREATE_MULTI_DESTINATION_ONETIME_PAGE: <CreateUpdateMultiDestination accountType="oneTime" formType="create" />,
+  UPDATE_MULTI_DESTINATION_ONETIME_PAGE: <CreateUpdateMultiDestination accountType="oneTime" formType="update" />,
 
   // Premise
   VIEW_DETAIL_PREMISE_PAGE: <PremiseDetail />,
