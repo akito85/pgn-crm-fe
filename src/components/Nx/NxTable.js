@@ -668,16 +668,17 @@ const NxTable = ({
             #${idTable} .ant-table-body {
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
-              padding-bottom: 8px;
+              padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "8px"};
+              ${(useInfiniteScroll || usePagination) ? "border-left: 0.5px solid #C8CDD4; border-right: 0.5px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
               #${idTable} .ant-table-body {
-                padding-bottom: 12px;
+                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "12px"};
               }
 
               #${idTable} .ant-table-content {
-                padding-bottom: 4px;
+                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "4px"};
               }
             }
 
@@ -713,6 +714,60 @@ const NxTable = ({
 
             #${idTable} .ant-table-column-sorters {
               padding-right: 0px;
+            }
+
+            #${idTable} .ant-table {
+              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              overflow: hidden;
+              border: 1px solid #C8CDD4;
+              ${(useInfiniteScroll || usePagination) ? "border-bottom: none;" : ""}
+            }
+
+            #${idTable} .ant-table-container {
+              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              overflow: hidden;
+              border: none;
+            }
+
+            #${idTable} .ant-table-container table > thead > tr:first-child > *:first-child {
+              border-start-start-radius: 8px;
+            }
+
+            #${idTable} .ant-table-container table > thead > tr:first-child > *:last-child {
+              border-start-end-radius: 8px;
+            }
+
+            #${idTable} .ant-table-bordered .ant-table-cell,
+            #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
+            #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
+            #${idTable} .ant-table-bordered .ant-table-container {
+              border-color: #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-thead {
+              border-left: 0.5px solid #C8CDD4;
+              border-right: 0.5px solid #C8CDD4;
+            }
+
+            #${idTable} .ant-table-thead > tr > th {
+              padding: 4px 8px !important;
+              min-height: 30px;
+              border: 0.5px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
+              padding: 4px 8px !important;
+              min-height: 30px;
+              font-size: 12px;
+              border: 0.5px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-measure-row > td {
+              padding: 0 !important;
+              height: 0 !important;
+              line-height: 0;
+              font-size: 0;
+              overflow: hidden;
             }
           `}
       </style>
@@ -812,21 +867,21 @@ const NxTable = ({
       />
 
       {useInfiniteScroll ? (
-        <div className={"w-full flex justify-end mt-3 items-center"}>
-          <span style={{ fontSize: "12px", color: "#666" }}>
-            Showing {resolvedDataSource?.length || 0} rows
-            {isLoadingMore && " | Loading..."}
-            {!hasMore && resolvedDataSource?.length > 0 && (
-              <span style={{ color: "#52c41a", fontWeight: "500" }}>
-                {" "}
-                | All data showed
-              </span>
-            )}
+        <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <span style={{ fontSize: "12px", color: "#6B7280" }}>
+            Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
+            {isLoadingMore && " · Loading..."}
           </span>
+          {!hasMore && resolvedDataSource?.length > 0 && (
+            <>
+              <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+              <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+            </>
+          )}
         </div>
       ) : usePagination ? (
-        <div className={"w-full flex justify-between mt-3 items-center"}>
-          <div className="flex items-center gap-3">
+        <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Select
               value={pageSize}
               onChange={(value) => onSizeChanger(current, value)}

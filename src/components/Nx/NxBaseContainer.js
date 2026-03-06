@@ -7,11 +7,12 @@ const NxBaseContainer = ({
   padding = true,
   flexDirection = "column",
   required = false,
+  headerActions = null,
 }) => {
   // Determine class based on border prop
   const containerClass = border
     ? `flex flex-col gap-y-4 bg-white ${rounded ? "rounded-lg" : ""} w-full ${className}`
-    : `drop-shadow-md bg-white rounded-lg w-full`;
+    : `drop-shadow-md bg-white rounded-lg w-full ${className}`;
 
   // Use inline style for border to ensure visibility
   const containerStyle = border ? {
@@ -26,16 +27,17 @@ const NxBaseContainer = ({
   return (
     <div className={containerClass} style={containerStyle}>
       {header && (
-        <div className="flex gap-x-1 pt-4 px-4">
-          <span
-            className="text-primary text-sm uppercase"
-          >
-            {header}
-          </span>
-          {required && (
-            <span className="text-[#ff4d4f]">
-              *
+        <div className={`flex justify-between items-center min-h-[50px] px-4 py-2 border-b border-[#C8CDD4] ${border ? "bg-gray-50" : ""}`}>
+          <div className="flex items-center gap-x-1">
+            <span className="text-primary text-base font-normal uppercase leading-6">
+              {header}
             </span>
+            {required && <span className="text-[#ff4d4f]">*</span>}
+          </div>
+          {headerActions && (
+            <div className="flex items-center gap-2">
+              {headerActions}
+            </div>
           )}
         </div>
       )}
