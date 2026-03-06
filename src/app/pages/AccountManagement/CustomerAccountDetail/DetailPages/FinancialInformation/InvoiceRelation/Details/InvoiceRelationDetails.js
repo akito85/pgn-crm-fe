@@ -173,11 +173,10 @@ const InvoiceRelationDetails = ({
   }
 
   useEffect(() => {
-    isStandard
-      ? dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information/invoice-relation'))
-      : isOneTime
-        ? dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information/invoice-relation'))
-        : null;
+    if (isStandard)
+      dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information/invoice-relation'))
+    else if (isOneTime)
+      dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information/invoice-relation'))
   }, [dispatch]);
 
   useEffect(() => {
