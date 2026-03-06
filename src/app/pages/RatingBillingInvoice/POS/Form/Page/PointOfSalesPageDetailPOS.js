@@ -125,12 +125,8 @@ const PointOfSalesPageDetailPOS = ({
 
   const [formCreate] = Form.useForm();
   const searchInput = useRef(null);
-
-  // ✅ FIX: Flag ref untuk mengabaikan data_calculate lama dari Redux
-  // ketika modal create baru dibuka (sebelum user memilih item & dispatch baru)
   const ignoreCalculate = useRef(false);
 
-  // ✅ modalKey untuk force remount CreateAndUpdatePOSDetail setiap buka modal
   const [modalKey, setModalKey] = useState(0);
 
   const [page, setPage] = useState(1);
@@ -166,7 +162,6 @@ const PointOfSalesPageDetailPOS = ({
   // useEffect for product
   useEffect(() => {
     if (type === 2144 && hasValue(item) && hasValue(quantity) && quantity > 0) {
-      // ✅ User sudah memilih item → izinkan data_calculate baru masuk
       ignoreCalculate.current = false;
 
       const requestData = {
@@ -214,7 +209,6 @@ const PointOfSalesPageDetailPOS = ({
   // useEffect for billing
   useEffect(() => {
     if (type === 2145 && item && amount && amount > 0 && billingCurrency) {
-      // ✅ User sudah memilih item & amount → izinkan data_calculate baru masuk
       ignoreCalculate.current = false;
 
       const requestData = {
@@ -247,9 +241,7 @@ const PointOfSalesPageDetailPOS = ({
     }
   }, [dispatch, amount, item, billingCurrency, dataPriority, formCreate, type]);
 
-  // ✅ FIX UTAMA: Gunakan ignoreCalculate.current untuk skip data lama
   useEffect(() => {
-    // Jika flag aktif → abaikan data_calculate dari Redux (masih data lama)
     if (ignoreCalculate.current) {
       return;
     }
@@ -619,7 +611,6 @@ const PointOfSalesPageDetailPOS = ({
     handleInputChange(result, inputType);
   };
 
-  // ✅ Reset terpusat semua state modal
   const handleResetAllState = useCallback(() => {
     setModalCreate(false);
     setDataItemFilter([]);
@@ -633,7 +624,6 @@ const PointOfSalesPageDetailPOS = ({
     setIsUpdate({ type: false, index: null, item: null });
     setPosDetailId(undefined);
     setPosNumber(undefined);
-    // Increment modalKey → next open = CreateAndUpdatePOSDetail remount bersih
     setModalKey((prev) => prev + 1);
   }, [formCreate]);
 
@@ -641,12 +631,7 @@ const PointOfSalesPageDetailPOS = ({
     handleResetAllState();
   }, [handleResetAllState]);
 
-  // ✅ FIX UTAMA: handleOpenCreate
-  // 1. Set ignoreCalculate = true → block data_calculate lama dari Redux
-  // 2. Reset semua form & state
-  // 3. Increment modalKey → force remount CreateAndUpdatePOSDetail
   const handleOpenCreate = useCallback(() => {
-    // Blokir data_calculate lama agar tidak mengisi form
     ignoreCalculate.current = true;
 
     formCreate.resetFields();
@@ -665,7 +650,6 @@ const PointOfSalesPageDetailPOS = ({
   }, [formCreate]);
 
   const handleUpdate = (e, index) => {
-    // Saat edit: izinkan data_calculate masuk (akan di-fetch ulang)
     ignoreCalculate.current = false;
 
     formCreate.resetFields();
@@ -721,7 +705,6 @@ const PointOfSalesPageDetailPOS = ({
         <ButtonComponent
           onClick={() => {
             if (dataMissing.length < 1) {
-              // ✅ Gunakan handleOpenCreate (bukan setModalCreate langsung)
               handleOpenCreate();
             } else {
               setModalValidate(true);
@@ -806,11 +789,6 @@ const PointOfSalesPageDetailPOS = ({
           form={formCreate}
           onFinish={onFinish}
         >
-          {/*
-            ✅ key={modalKey}: Setiap buka modal, key berubah →
-            React unmount + remount CreateAndUpdatePOSDetail →
-            semua internal state (Amount, UOM, Currency, dll) bersih total
-          */}
           <CreateAndUpdatePOSDetail
             key={modalKey}
             data={dataTableTax}

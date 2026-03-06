@@ -22,11 +22,8 @@ const CreateAndUpdatePOSDetail = ({
   data_globalCurrency = [],
   headerCurrency,
   onCurrencyChange = () => {},
-  // ✅ TAMBAH: prop form dari parent agar bisa reset field
   form,
-  // ✅ TAMBAH: prop isOpen untuk deteksi modal dibuka
   isOpen = false,
-  // ✅ TAMBAH: callback reset dari parent
   onResetState = () => {},
 }) => {
   const searchInput = useRef(null);
@@ -38,7 +35,6 @@ const CreateAndUpdatePOSDetail = ({
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
 
-  // ✅ FIX: Reset semua internal state setiap kali modal dibuka (isOpen berubah jadi true)
   useEffect(() => {
     if (isOpen) {
       setDisplayedRowCount(20);
@@ -49,7 +45,6 @@ const CreateAndUpdatePOSDetail = ({
     }
   }, [isOpen]);
 
-  // ✅ FIX: Reset form fields saat modal dibuka
   useEffect(() => {
     if (isOpen && form) {
       form.resetFields([
@@ -66,8 +61,6 @@ const CreateAndUpdatePOSDetail = ({
         "totalAmountEqv",
         "remark",
       ]);
-
-      // Reset state di parent juga
       setType(undefined);
       setItem(undefined);
       onResetState();
@@ -82,11 +75,9 @@ const CreateAndUpdatePOSDetail = ({
       ...prevState,
       [dataIndex]: selectedKeys[0],
     }));
-    // Reset displayed rows saat search
     setDisplayedRowCount(20);
   };
 
-  // Handle load more untuk infinite scroll
   const handleLoadMore = async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -176,12 +167,9 @@ const CreateAndUpdatePOSDetail = ({
     return handleCompare(fa, fb);
   };
 
-  // Data yang ditampilkan (slice berdasarkan displayedRowCount)
   const displayedData = useMemo(() => {
     return data.slice(0, displayedRowCount);
   }, [data, displayedRowCount]);
-
-  // Check apakah masih ada data untuk di-load
   const hasMore = displayedRowCount < data.length;
 
   // Columns definition

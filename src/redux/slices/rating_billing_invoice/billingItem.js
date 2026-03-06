@@ -16,8 +16,8 @@ const initialState = {
   data_classificationTypeList: [],
   data_accountTypeList: [],
   data_itemMappingCategory: [],
-  dataListAppHierId: [],       // <-- approval options dropdown
-  dataListAppHierDetail: [],   // <-- approval detail table
+  dataListAppHierId: [],
+  dataListAppHierDetail: [],
   data_AttachmentTable: [],
   dataListCategory: [],
   data_BillingItemDetail: [],
@@ -127,7 +127,7 @@ export const getDetailMappingCategory = createAsyncThunk(
 
 export const getAvailableApproval = createAsyncThunk(
   "GET_AVAILABLE_APPROVAL",
-  async (_, thunkAPI) => { // <-- FIX: ganti parameter dari thunkAPI ke _ agar tidak konflik
+  async (_, thunkAPI) => { 
     try {
       const url = `/v1/dbs/api/billingitem/approval-hierarchies-get`;
       const response = await ratingBillingHttpService.getAll(url);
@@ -145,9 +145,8 @@ export const getAvailableApproval = createAsyncThunk(
 
 export const getSelectedApproval = createAsyncThunk(
   "GET_SELECTED_APPROVAL",
-  async (arg, thunkAPI) => { // <-- FIX: arg bisa undefined (saat init) atau { id }
+  async (arg, thunkAPI) => {
     try {
-      // Jika dipanggil tanpa id (saat init), skip fetch dan return array kosong
       if (!arg || !arg.id) {
         return [];
       }

@@ -174,27 +174,15 @@ const BillingItemForm = (props) => {
     dispatch(getAccountTypeList());
   }, [dispatch]);
 
-  // =========================================================
-  // FIX: Reset approval data saat posisi berubah
-  // Ketika user Switch Position, data approval harus dikosongkan
-  // dan di-fetch ulang sesuai posisi baru
-  // =========================================================
   useEffect(() => {
     if (currentPosition === null || currentPosition === undefined) return;
-
-    // Reset Redux state approval
     dispatch(resetApprovalState());
-
-    // Reset local state approval
     setAppHierDataDetail([]);
     setAppHierOptions([]);
     setSelectedHierarchy(undefined);
     form.setFieldsValue({ apphierId: null });
-
-    // Fetch ulang approval sesuai posisi baru
     dispatch(getAvailableApproval());
   }, [currentPosition, dispatch, form]);
-  // =========================================================
 
   useEffect(() => {
     if (type === "update" && id) {
@@ -237,7 +225,6 @@ const BillingItemForm = (props) => {
       }));
       setAppHierOptions(tempAppHier);
     } else {
-      // FIX: Pastikan options juga kosong saat dataListAppHierId kosong (misal setelah reset)
       setAppHierOptions([]);
     }
   }, [dataListAppHierId]);
