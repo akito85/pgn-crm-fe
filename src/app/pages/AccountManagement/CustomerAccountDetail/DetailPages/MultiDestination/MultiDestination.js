@@ -22,6 +22,9 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
   const location = useLocation();
   const dispatch = useDispatch();
 
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
+
   const {
     list_multiDestination,
     pagination_multiDestination,
@@ -232,19 +235,19 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
           body,
           isLoadMore: true
         })
-      );
+      ).unwrap();
     }
     setPage(nextPage);
   };
 
   useEffect(() => {
-    if (location?.pathname.includes("account-standard")) {
+    if (isStandard) {
       dispatch(
         getGrantedAccessAccount(
           `/account-management/account-standard/multi-destination`
         )
       );
-    } else {
+    } else if (isOneTime) {
       dispatch(
         getGrantedAccessAccount(
           `/account-management/account-onetime/multi-destination`
