@@ -4,7 +4,7 @@ import { showModalSuccess } from "../general_slice";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 
 const initialState = {
-  data_view: { result: [], page: {} }, 
+  data_view: { result: [], page: {} },
   data_billingItemCategoryDdl: [],
   data_billingItemCategory: [],
   data_billType: [],
@@ -16,8 +16,8 @@ const initialState = {
   data_classificationTypeList: [],
   data_accountTypeList: [],
   data_itemMappingCategory: [],
-  dataListAppHierId: [],
-  dataListAppHierDetail: [],
+  dataListAppHierId: [],       // <-- approval options dropdown
+  dataListAppHierDetail: [],   // <-- approval detail table
   data_AttachmentTable: [],
   dataListCategory: [],
   data_BillingItemDetail: [],
@@ -127,7 +127,7 @@ export const getDetailMappingCategory = createAsyncThunk(
 
 export const getAvailableApproval = createAsyncThunk(
   "GET_AVAILABLE_APPROVAL",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => { // <-- FIX: ganti parameter dari thunkAPI ke _ agar tidak konflik
     try {
       const url = `/v1/dbs/api/billingitem/approval-hierarchies-get`;
       const response = await ratingBillingHttpService.getAll(url);
@@ -145,9 +145,13 @@ export const getAvailableApproval = createAsyncThunk(
 
 export const getSelectedApproval = createAsyncThunk(
   "GET_SELECTED_APPROVAL",
-  async ({ id }, thunkAPI) => {
+  async (arg, thunkAPI) => { // <-- FIX: arg bisa undefined (saat init) atau { id }
     try {
-      const url = `/v1/dbs/api/billingitem/approval-hierarchies-detail/${id}`;
+      // Jika dipanggil tanpa id (saat init), skip fetch dan return array kosong
+      if (!arg || !arg.id) {
+        return [];
+      }
+      const url = `/v1/dbs/api/billingitem/approval-hierarchies-detail/${arg.id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -672,6 +676,14 @@ export const getAccountTypeList = createAsyncThunk(
 const billingItemSlice = createSlice({
   name: "billing_item",
   initialState,
+
+  reducers: {
+    resetApprovalState: (state) => {
+      state.dataListAppHierId = [];
+      state.dataListAppHierDetail = [];
+    },
+  },
+
   extraReducers: {
     [getBillingItemList.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
@@ -700,13 +712,11 @@ const billingItemSlice = createSlice({
     },
     [getBillingItemList.rejected]: (state, action) => {
       state.loading = false;
-      // Hanya reset data jika bukan load more
       if (!action.meta.arg?.isLoadMore) {
         state.data_view = { result: [], page: {} };
       }
     },
 
-    //GET BILLING ITEM CATEGORY
     [getBillingItemCategory.pending]: (state) => {
       state.loading = true;
     },
@@ -718,7 +728,6 @@ const billingItemSlice = createSlice({
       state.loading = false;
     },
 
-    //GET BILLING ITEM CATEGORY DDL
     [getBillingItemCategoryDdl.pending]: (state) => {
       state.loading = true;
     },
@@ -729,7 +738,7 @@ const billingItemSlice = createSlice({
     [getBillingItemCategoryDdl.rejected]: (state) => {
       state.loading = false;
     },
-    //GET BILL TYPE
+
     [getBillType.pending]: (state) => {
       state.loading = true;
     },
@@ -740,7 +749,7 @@ const billingItemSlice = createSlice({
     [getBillType.rejected]: (state) => {
       state.loading = false;
     },
-    //GET DETAIL MAPPING CATEGORY
+
     [getDetailMappingCategory.pending]: (state) => {
       state.loading = true;
     },
@@ -751,7 +760,7 @@ const billingItemSlice = createSlice({
     [getDetailMappingCategory.rejected]: (state) => {
       state.loading = false;
     },
-    //GET AVAILABLE APPROVAL
+
     [getAvailableApproval.pending]: (state) => {
       state.loading = true;
     },
@@ -762,7 +771,7 @@ const billingItemSlice = createSlice({
     [getAvailableApproval.rejected]: (state) => {
       state.loading = false;
     },
-    //GET SELECTED APPROVAL
+
     [getSelectedApproval.pending]: (state) => {
       state.loading = true;
     },
@@ -773,7 +782,7 @@ const billingItemSlice = createSlice({
     [getSelectedApproval.rejected]: (state) => {
       state.loading = false;
     },
-    //GET ATTACHMENT TABLE
+
     [getAttachmentTable.pending]: (state) => {
       state.loading = true;
     },
@@ -784,7 +793,7 @@ const billingItemSlice = createSlice({
     [getAttachmentTable.rejected]: (state) => {
       state.loading = false;
     },
-    //GET ATTACHMENT CATEGORY
+
     [getAttachmentCategory.pending]: (state) => {
       state.loading = true;
     },
@@ -795,7 +804,7 @@ const billingItemSlice = createSlice({
     [getAttachmentCategory.rejected]: (state) => {
       state.loading = false;
     },
-    //GET BILLING ITEM DETAIL
+
     [getBillingItemDetail.pending]: (state) => {
       state.loading = true;
     },
@@ -806,7 +815,7 @@ const billingItemSlice = createSlice({
     [getBillingItemDetail.rejected]: (state) => {
       state.loading = false;
     },
-    //GET ATTACHMENT DETAIL
+
     [getAttachmentDetail.pending]: (state) => {
       state.loading = true;
     },
@@ -817,7 +826,7 @@ const billingItemSlice = createSlice({
     [getAttachmentDetail.rejected]: (state) => {
       state.loading = false;
     },
-    //INACTIVE BILLING ITEM
+
     [inactiveBillingItem.pending]: (state) => {
       state.loading = true;
     },
@@ -829,7 +838,7 @@ const billingItemSlice = createSlice({
       state.loading = false;
       state.message = action.payload;
     },
-    //GET APPROVAL HISTORY
+
     [getApprovalHistory.pending]: (state, action) => {
       state.data_ApprovalHistory = action.payload;
       state.loading = true;
@@ -842,7 +851,7 @@ const billingItemSlice = createSlice({
       state.data_ApprovalHistory = action.payload;
       state.loading = false;
     },
-    //DOWNLOAD BILLING ITEM
+
     [downloadBillingItem.pending]: (state) => {
       state.loading = true;
     },
@@ -853,7 +862,7 @@ const billingItemSlice = createSlice({
     [downloadBillingItem.rejected]: (state) => {
       state.loading = false;
     },
-    //GET DETAIL DRAFT
+
     [getDetailDraft.pending]: (state) => {
       state.loading = true;
     },
@@ -864,7 +873,7 @@ const billingItemSlice = createSlice({
     [getDetailDraft.rejected]: (state) => {
       state.loading = false;
     },
-    //CONFIG FILE RBI BILLING ITEM
+
     [getConfigFileRBIBillingItem.pending]: (state) => {
       state.loading = true;
     },
@@ -875,7 +884,7 @@ const billingItemSlice = createSlice({
     [getConfigFileRBIBillingItem.rejected]: (state) => {
       state.loading = false;
     },
-    // type
+
     [getBillingItemTypeList.pending]: (state) => {
       state.loading = true;
     },
@@ -886,7 +895,7 @@ const billingItemSlice = createSlice({
     [getBillingItemTypeList.rejected]: (state) => {
       state.loading = false;
     },
-    // criteria
+
     [getBillingItemCriteriaList.pending]: (state) => {
       state.loading = true;
     },
@@ -897,7 +906,7 @@ const billingItemSlice = createSlice({
     [getBillingItemCriteriaList.rejected]: (state) => {
       state.loading = false;
     },
-    // category
+
     [getBillingItemCategoryList.pending]: (state) => {
       state.loading = true;
     },
@@ -908,7 +917,7 @@ const billingItemSlice = createSlice({
     [getBillingItemCategoryList.rejected]: (state) => {
       state.loading = false;
     },
-    // special gl
+
     [getSpecialGLList.pending]: (state) => {
       state.loading = true;
     },
@@ -919,7 +928,7 @@ const billingItemSlice = createSlice({
     [getSpecialGLList.rejected]: (state) => {
       state.loading = false;
     },
-    // gl account
+
     [getGLAccountList.pending]: (state) => {
       state.loading = true;
     },
@@ -930,7 +939,7 @@ const billingItemSlice = createSlice({
     [getGLAccountList.rejected]: (state) => {
       state.loading = false;
     },
-    // classification list
+
     [getClassificationTypeList.pending]: (state) => {
       state.loading = true;
     },
@@ -941,7 +950,7 @@ const billingItemSlice = createSlice({
     [getClassificationTypeList.rejected]: (state) => {
       state.loading = false;
     },
-    // account type list
+
     [getAccountTypeList.pending]: (state) => {
       state.loading = true;
     },
@@ -954,6 +963,8 @@ const billingItemSlice = createSlice({
     },
   },
 });
+
+export const { resetApprovalState } = billingItemSlice.actions;
 
 const { reducer } = billingItemSlice;
 export default reducer;

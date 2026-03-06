@@ -123,11 +123,16 @@ const PointOfSalesPageDetailPOS = ({
     (state) => state.pointOfSales,
   );
 
-  //declare
   const [formCreate] = Form.useForm();
   const searchInput = useRef(null);
 
-  // Use State
+  // ✅ FIX: Flag ref untuk mengabaikan data_calculate lama dari Redux
+  // ketika modal create baru dibuka (sebelum user memilih item & dispatch baru)
+  const ignoreCalculate = useRef(false);
+
+  // ✅ modalKey untuk force remount CreateAndUpdatePOSDetail setiap buka modal
+  const [modalKey, setModalKey] = useState(0);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -149,7 +154,6 @@ const PointOfSalesPageDetailPOS = ({
     item: 0,
   });
 
-  //modal
   const [modalCreate, setModalCreate] = useState(false);
   const [dataItemFilter, setDataItemFilter] = useState([]);
   const [dataTemp, setDataTemp] = useState([]);
@@ -159,11 +163,14 @@ const PointOfSalesPageDetailPOS = ({
     setDataTemp(data);
   }, [data]);
 
-  //useEffect for product
+  // useEffect for product
   useEffect(() => {
     if (type === 2144 && hasValue(item) && hasValue(quantity) && quantity > 0) {
+      // ✅ User sudah memilih item → izinkan data_calculate baru masuk
+      ignoreCalculate.current = false;
+
       const requestData = {
-        headerCurrency: currency ? String(currency) : null, // ✅ string
+        headerCurrency: currency ? String(currency) : null,
         itemId: item,
         qty: parseInt(quantity),
         transactionDate: moment(dataPriority[2]?.data).format(
@@ -171,7 +178,6 @@ const PointOfSalesPageDetailPOS = ({
         ),
       };
 
-      // Hanya kirim account jika customerType bukan prospective
       if (customerType !== "prospective" && dataPriority[0]?.data) {
         requestData.account = dataPriority[0]?.data;
       }
@@ -205,9 +211,12 @@ const PointOfSalesPageDetailPOS = ({
     currency,
   ]);
 
-  //useEffect for billing
+  // useEffect for billing
   useEffect(() => {
     if (type === 2145 && item && amount && amount > 0 && billingCurrency) {
+      // ✅ User sudah memilih item & amount → izinkan data_calculate baru masuk
+      ignoreCalculate.current = false;
+
       const requestData = {
         currency: billingCurrency,
         headerCurrency: currency,
@@ -238,7 +247,13 @@ const PointOfSalesPageDetailPOS = ({
     }
   }, [dispatch, amount, item, billingCurrency, dataPriority, formCreate, type]);
 
+  // ✅ FIX UTAMA: Gunakan ignoreCalculate.current untuk skip data lama
   useEffect(() => {
+    // Jika flag aktif → abaikan data_calculate dari Redux (masih data lama)
+    if (ignoreCalculate.current) {
+      return;
+    }
+
     if (data_calculate) {
       if (type === 2144) {
         formCreate.setFieldsValue({
@@ -255,7 +270,7 @@ const PointOfSalesPageDetailPOS = ({
           uom: data_calculate?.priceInformation?.uom || null,
           currency: data_calculate?.priceInformation?.currency || null,
           convertedCurrency:
-            data_calculate?.priceInformation?.convertedCurrency || null, // ✅
+            data_calculate?.priceInformation?.convertedCurrency || null,
           discount:
             hasValue(quantity) &&
             data_calculate?.priceInformation?.discount >= 0
@@ -269,20 +284,18 @@ const PointOfSalesPageDetailPOS = ({
             hasValue(quantity) &&
             data_calculate?.priceInformation?.totalAmountEqv
               ? data_calculate?.priceInformation?.totalAmountEqv
-              : null, // ✅
-          // field lama tidak dipakai untuk product, set null
+              : null,
           amountEqvUsd: null,
           amountEqvIdr: null,
           eqvIdrTaxPurpose: null,
           totalEqvUsd: null,
           totalEqvIdr: null,
         });
-      } else {
-        // billing mapping tetap sama seperti sebelumnya
+      } else if (type === 2145) {
         formCreate.setFieldsValue({
           amount: data_calculate?.priceInformation?.amount || null,
           reference: data_calculate?.priceInformation?.referenceName || null,
-          uom: data_calculate?.priceInformation?.uom || null,
+          uom: data_calculate?.priceInformation?.uom || "LUMPSUM",
           currency: data_calculate?.priceInformation?.currency || null,
           convertedCurrency:
             data_calculate?.priceInformation?.convertedCurrency || null,
@@ -298,55 +311,49 @@ const PointOfSalesPageDetailPOS = ({
         });
       }
 
-      // Tax information tetap sama
-      setDataTableTax([
-        ...(data_calculate?.taxInformation || [])?.map((taxData) => {
-          const temp = {
-            ...taxData,
-            // ✅ Field numerik - cek null sebelum toFixed
-            amount:
-              taxData?.amount != null ? Number(taxData.amount.toFixed(2)) : 0,
-            total:
-              taxData?.total != null ? Number(taxData.total.toFixed(2)) : 0,
-            totalAmountEqv:
-              taxData?.totalAmountEqv != null
-                ? Number(taxData.totalAmountEqv.toFixed(4))
-                : 0, // ✅ pakai 4 desimal karena nilainya kecil (0.0231)
-
-            // ✅ Field mapping sesuai response
-            typeId: taxData?.type,
-            type: taxData?.typeName,
-            convertedCurrency: taxData?.convertedCurrency || null, // ✅ ganti dari amountEqvUsd
-
-            // ✅ Field yang ada di response
-            reference: taxData?.reference ?? null,
-            referenceName: taxData?.referenceName || null,
-            quantity: taxData?.quantity ?? null,
-            uom: taxData?.uom || null,
-            currency: taxData?.currency || null,
-            discount: taxData?.discount ?? 0,
-
-            // ✅ Mapping item
-            item: taxData?.itemName,
-            itemId: taxData?.item,
-
-            dataType: "exist",
-
-            // ✅ Field lama yang tidak ada di response, set 0 agar tidak error
-            totalEqvUsd: 0,
-            amountEqvUsd: 0,
-            eqvIdr: 0,
-            totalEqvIdr: 0,
-            amountEqvIdr: 0,
-          };
-          delete temp?.itemName;
-          return temp;
-        }),
-      ]);
+      // Set tax info hanya jika type aktif
+      if (type === 2144 || type === 2145) {
+        setDataTableTax([
+          ...(data_calculate?.taxInformation || [])?.map((taxData) => {
+            const temp = {
+              ...taxData,
+              amount:
+                taxData?.amount != null
+                  ? Number(taxData.amount.toFixed(2))
+                  : 0,
+              total:
+                taxData?.total != null ? Number(taxData.total.toFixed(2)) : 0,
+              totalAmountEqv:
+                taxData?.totalAmountEqv != null
+                  ? Number(taxData.totalAmountEqv.toFixed(4))
+                  : 0,
+              typeId: taxData?.type,
+              type: taxData?.typeName,
+              convertedCurrency: taxData?.convertedCurrency || null,
+              reference: taxData?.reference ?? null,
+              referenceName: taxData?.referenceName || null,
+              quantity: taxData?.quantity ?? null,
+              uom: taxData?.uom || null,
+              currency: taxData?.currency || null,
+              discount: taxData?.discount ?? 0,
+              item: taxData?.itemName,
+              itemId: taxData?.item,
+              dataType: "exist",
+              totalEqvUsd: 0,
+              amountEqvUsd: 0,
+              eqvIdr: 0,
+              totalEqvIdr: 0,
+              amountEqvIdr: 0,
+            };
+            delete temp?.itemName;
+            return temp;
+          }),
+        ]);
+      }
     }
   }, [data_calculate, formCreate, quantity, type]);
 
-  //reset for every changes on data Table or filter
+  // reset for every changes on data Table or filter
   useEffect(() => {
     if (data.length > 0 || (type && type !== undefined)) {
       const tempItem = data
@@ -392,7 +399,6 @@ const PointOfSalesPageDetailPOS = ({
     }
   }, [data, type, isUpdate, dataItemBilling, dataItemProduct]);
 
-  //for handling data from API if existing to dataTable
   const handleTypeChanges = useCallback(
     (e) => {
       formCreate.resetFields([
@@ -410,6 +416,8 @@ const PointOfSalesPageDetailPOS = ({
         "totalEqvUsd",
         "totalEqvIdr",
         "amount",
+        "convertedCurrency",
+        "totalAmountEqv",
       ]);
       if (e === 2144) {
         setQuantity(null);
@@ -419,6 +427,7 @@ const PointOfSalesPageDetailPOS = ({
       } else if (e === 2145) {
         formCreate.setFieldsValue({
           quantity: 1,
+          uom: "Lumpsum",
         });
         setQuantity(1);
         setItem(null);
@@ -450,7 +459,6 @@ const PointOfSalesPageDetailPOS = ({
     });
   };
 
-  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -526,7 +534,6 @@ const PointOfSalesPageDetailPOS = ({
         }
       });
     } else {
-      //create
       const newData = {
         typeId: e?.type,
         type: dataType?.find((typeData) => typeData?.Id === e?.type)?.text,
@@ -567,13 +574,8 @@ const PointOfSalesPageDetailPOS = ({
         }));
       });
     }
-    setModalCreate(false);
-    formCreate.resetFields();
-    setType();
-    setItem();
-    setQuantity();
-    setIsUpdate(false);
-    setDataItemFilter([]);
+
+    handleResetAllState();
   };
 
   const handleDelete = (r) => {
@@ -596,7 +598,6 @@ const PointOfSalesPageDetailPOS = ({
     };
   };
 
-  // Debounced version of the function you want to execute on input change
   const handleInputChange = debounce((value, inputType) => {
     if (inputType === "quantity") {
       setQuantity(value);
@@ -605,7 +606,6 @@ const PointOfSalesPageDetailPOS = ({
     }
   }, 1500);
 
-  // Event handler for Input component with getValueFromEvent
   const onInputChange = (e, inputType) => {
     let result;
     switch (inputType) {
@@ -619,18 +619,64 @@ const PointOfSalesPageDetailPOS = ({
     handleInputChange(result, inputType);
   };
 
-  const handleCancel = () => {
+  // ✅ Reset terpusat semua state modal
+  const handleResetAllState = useCallback(() => {
     setModalCreate(false);
     setDataItemFilter([]);
     formCreate.resetFields();
     setType(null);
     setItem(null);
     setQuantity(null);
+    setAmount(null);
+    setBillingCurrency(null);
     setDataTableTax([]);
     setIsUpdate({ type: false, index: null, item: null });
-  };
+    setPosDetailId(undefined);
+    setPosNumber(undefined);
+    // Increment modalKey → next open = CreateAndUpdatePOSDetail remount bersih
+    setModalKey((prev) => prev + 1);
+  }, [formCreate]);
+
+  const handleCancel = useCallback(() => {
+    handleResetAllState();
+  }, [handleResetAllState]);
+
+  // ✅ FIX UTAMA: handleOpenCreate
+  // 1. Set ignoreCalculate = true → block data_calculate lama dari Redux
+  // 2. Reset semua form & state
+  // 3. Increment modalKey → force remount CreateAndUpdatePOSDetail
+  const handleOpenCreate = useCallback(() => {
+    // Blokir data_calculate lama agar tidak mengisi form
+    ignoreCalculate.current = true;
+
+    formCreate.resetFields();
+    setType(null);
+    setItem(null);
+    setQuantity(null);
+    setAmount(null);
+    setBillingCurrency(null);
+    setDataTableTax([]);
+    setIsUpdate({ type: false, index: null, item: null });
+    setPosDetailId(undefined);
+    setPosNumber(undefined);
+    setDataItemFilter([]);
+    setModalKey((prev) => prev + 1);
+    setModalCreate(true);
+  }, [formCreate]);
 
   const handleUpdate = (e, index) => {
+    // Saat edit: izinkan data_calculate masuk (akan di-fetch ulang)
+    ignoreCalculate.current = false;
+
+    formCreate.resetFields();
+    setType(null);
+    setItem(null);
+    setQuantity(null);
+    setAmount(null);
+    setBillingCurrency(null);
+    setDataTableTax([]);
+    setModalKey((prev) => prev + 1);
+
     setIsUpdate({
       type: true,
       index: index,
@@ -675,7 +721,8 @@ const PointOfSalesPageDetailPOS = ({
         <ButtonComponent
           onClick={() => {
             if (dataMissing.length < 1) {
-              setModalCreate(true);
+              // ✅ Gunakan handleOpenCreate (bukan setModalCreate langsung)
+              handleOpenCreate();
             } else {
               setModalValidate(true);
             }
@@ -719,7 +766,7 @@ const PointOfSalesPageDetailPOS = ({
         />
       </div>
 
-      {/* modal create */}
+      {/* modal create / update */}
       <ModalCustom
         isOpen={modalCreate}
         type={"confirmation"}
@@ -759,7 +806,13 @@ const PointOfSalesPageDetailPOS = ({
           form={formCreate}
           onFinish={onFinish}
         >
+          {/*
+            ✅ key={modalKey}: Setiap buka modal, key berubah →
+            React unmount + remount CreateAndUpdatePOSDetail →
+            semua internal state (Amount, UOM, Currency, dll) bersih total
+          */}
           <CreateAndUpdatePOSDetail
+            key={modalKey}
             data={dataTableTax}
             dispatch={dispatch}
             setData={setDataTableTax}

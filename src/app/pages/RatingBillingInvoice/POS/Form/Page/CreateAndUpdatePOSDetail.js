@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState, useMemo } from "react";
+import React, { Fragment, useRef, useState, useMemo, useEffect } from "react";
 import InputComponent from "../../../../../../components/InputComponent";
 import { Form, Select, Spin } from "antd";
 import { requiredMessage } from "../../../../../../utils";
@@ -22,6 +22,12 @@ const CreateAndUpdatePOSDetail = ({
   data_globalCurrency = [],
   headerCurrency,
   onCurrencyChange = () => {},
+  // ✅ TAMBAH: prop form dari parent agar bisa reset field
+  form,
+  // ✅ TAMBAH: prop isOpen untuk deteksi modal dibuka
+  isOpen = false,
+  // ✅ TAMBAH: callback reset dari parent
+  onResetState = () => {},
 }) => {
   const searchInput = useRef(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
@@ -31,6 +37,42 @@ const CreateAndUpdatePOSDetail = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
+
+  // ✅ FIX: Reset semua internal state setiap kali modal dibuka (isOpen berubah jadi true)
+  useEffect(() => {
+    if (isOpen) {
+      setDisplayedRowCount(20);
+      setSearchedColumn("");
+      setSearchText("");
+      setSearch({});
+      setFixedColumns({ left: [], right: [] });
+    }
+  }, [isOpen]);
+
+  // ✅ FIX: Reset form fields saat modal dibuka
+  useEffect(() => {
+    if (isOpen && form) {
+      form.resetFields([
+        "type",
+        "item",
+        "quantity",
+        "price",
+        "amount",
+        "uom",
+        "currency",
+        "convertedCurrency",
+        "discount",
+        "total",
+        "totalAmountEqv",
+        "remark",
+      ]);
+
+      // Reset state di parent juga
+      setType(undefined);
+      setItem(undefined);
+      onResetState();
+    }
+  }, [isOpen]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -276,13 +318,7 @@ const CreateAndUpdatePOSDetail = ({
           </Form.Item>
 
           <Form.Item name={"uom"} label={"UOM"}>
-            <SelectComponent disabled={loading}>
-              {(dataUomCodes || [])?.map((uom) => (
-                <Select.Option key={uom?.label} value={uom?.label}>
-                  {uom?.label}
-                </Select.Option>
-              ))}
-            </SelectComponent>
+            <InputComponent disabled />
           </Form.Item>
 
           <Form.Item
@@ -291,12 +327,12 @@ const CreateAndUpdatePOSDetail = ({
             rules={[
               {
                 message: requiredMessage("Currency"),
-                required: type === 2145 ? true : false, 
+                required: type === 2145 ? true : false,
               },
             ]}
           >
             <SelectComponent
-              disabled={type === 2144 ? true : loading} 
+              disabled={type === 2144 ? true : loading}
               onChange={(val) => onCurrencyChange(val)}
             >
               {(data_globalCurrency || [])?.map((item) => (
