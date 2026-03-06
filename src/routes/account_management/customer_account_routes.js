@@ -25,6 +25,11 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   CREATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/create",
   UPDATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/update",
 
+  // Payment Relation Account One Time
+  VIEW_DETAIL_PAYMENT_RELATION_ONETIME: "/account-management/account-onetime/financial-information/payment-relation/view",
+  CREATE_PAYMENT_RELATION_ONETIME: "/account-management/account-onetime/financial-information/payment-relation/create",
+  UPDATE_PAYMENT_RELATION_ONETIME: "/account-management/account-onetime/financial-information/payment-relation/update",
+
   // Invoice Relation Detail
   VIEW_DETAIL_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/view",
   CREATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/create",

@@ -111,9 +111,14 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   CREATE_SERVICE_REQUEST_PREREQUISITE_PAGE: <PreRequisiteCreateForm />,
 
   // Payment Relation Detail
-  VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails />,
-  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"create"} />,
-  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"update"} />,
+  VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails accountType="standard" />,
+  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"create"} accountType={"standard"} />,
+  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"standard"} />,
+
+  // Payment Relation Account One Time
+  VIEW_DETAIL_PAYMENT_RELATION_ONETIME_PAGE: <PaymentRelationDetails accountType="oneTime" />,
+  CREATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"create"} accountType={"oneTime"} />,
+  UPDATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"oneTime"} />,
 
   // Payment Relation Detail
   VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
