@@ -8,6 +8,7 @@ import {
 
 const initialState = {
   list_relationship: [],
+  list_relationshipApproval: [],
   pagination_relationship: {
     totalPages: 0,
     totalElements: 0,
@@ -37,6 +38,7 @@ const initialState = {
   data_approvalHistory: {},
   loading: false,
   loading_listRelationship: false,
+  loading_listRelationshipApproval: false,
   loading_detailRelationship: false,
   loading_detailDraftRelationship: false,
   loading_listRelationshipType: false,
@@ -50,9 +52,9 @@ const initialState = {
   loading_detailRelationshipAttachment: false,
 };
 
-// Get Relationship List with Advanced Filter (POST)
-export const getRelationshipListAdvanced = createAsyncThunk(
-  "GET_RELATIONSHIP_LIST_ADVANCED",
+// Get Relationship List (POST)
+export const getRelationshipList = createAsyncThunk(
+  "GET_RELATIONSHIP_LIST",
   async ({ idAccount, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
     try {
       // empty string for default sort
@@ -63,6 +65,35 @@ export const getRelationshipListAdvanced = createAsyncThunk(
         page,
         size: pageSize,
         sort: sortParam,
+        listType: "all",
+      };
+      const response = await accountManagementService.updateDataWithMethodPost(url, requestBody);
+      return {
+        ...response?.data,
+        isLoadMore,
+      };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_RELATIONSHIP_LIST_ADVANCED" })
+      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getRelationshipApprovalList = createAsyncThunk(
+  "GET_RELATIONSHIP_APPROVAL_LIST",
+  async ({ idAccount, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
+    try {
+      // empty string for default sort
+      const sortParam = sort === undefined || sort === "" ? "" : sort;
+      const url = `/v1/dbs/api/accounts/${idAccount}/relationships`;
+      const requestBody = {
+        ...body,
+        page,
+        size: pageSize,
+        sort: sortParam,
+        listType: "approval",
       };
       const response = await accountManagementService.updateDataWithMethodPost(url, requestBody);
       return {
@@ -691,13 +722,13 @@ const relationshipSlice = createSlice({
   name: "relationship",
   initialState,
   extraReducers: {
-    // Get Relationship List Advanced
-    [getRelationshipListAdvanced.pending]: (state, action) => {
+    // Get Relationship List
+    [getRelationshipList.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listRelationship = true;
       }
     },
-    [getRelationshipListAdvanced.fulfilled]: (state, action) => {
+    [getRelationshipList.fulfilled]: (state, action) => {
       state.loading_listRelationship = false;
       const { result, page, isLoadMore } = action.payload;
 
@@ -722,11 +753,56 @@ const relationshipSlice = createSlice({
         pageSize: page?.size || 20,
       };
     },
-    [getRelationshipListAdvanced.rejected]: (state, action) => {
+    [getRelationshipList.rejected]: (state, action) => {
       state.loading_listRelationship = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_relationship = [];
+        state.pagination_relationship = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 20,
+        };
+      }
+    },
+
+    // Get Relationship List
+    [getRelationshipApprovalList.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listRelationshipAproval = true;
+      }
+    },
+    [getRelationshipApprovalList.fulfilled]: (state, action) => {
+      state.loading_listRelationshipAproval = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_relationshipApproval.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_relationshipApproval = [
+            ...state.list_relationshipApproval,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_relationshipApproval = result;
+        }
+      }
+
+      state.pagination_relationship = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 20,
+      };
+    },
+    [getRelationshipApprovalList.rejected]: (state, action) => {
+      state.loading_listRelationshipAproval = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_relationshipApproval = [];
         state.pagination_relationship = {
           totalPages: 0,
           totalElements: 0,
