@@ -57,10 +57,20 @@ const CreateUpdateRelationship = ({
     data_relationshipType,
     data_relationshipCategory,
     loading_detailRelationship,
-    loading_listRelationshipApprovalHierarchyDetail
+    loading_listRelationshipApprovalHierarchyDetail,
+    loading_listRelationshipApprovalOption,
+    loading_detailDraftRelationship,
+    loading_detailRelationshipAttachment,
   } = useSelector(
     (state) => state.relationship
   );
+
+  const loading =
+    loading_detailRelationship ||
+    loading_listRelationshipApprovalOption ||
+    loading_listRelationshipApprovalHierarchyDetail ||
+    loading_detailDraftRelationship ||
+    loading_detailRelationshipAttachment;
 
   const status = data_relationshipDetail.status || "DRAFT";
   const statusApproval = data_relationshipDetail.statusApproval || "DRAFT";
@@ -600,7 +610,7 @@ const CreateUpdateRelationship = ({
             idCustomer={idCustomer}
             type={accountType}
           />
-          <Spin spinning={loading_detailRelationship}>
+          <Spin spinning={loading}>
             <Form
               id="relationshipForm"
               form={form}
