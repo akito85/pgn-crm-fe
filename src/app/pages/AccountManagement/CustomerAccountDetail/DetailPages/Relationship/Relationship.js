@@ -26,6 +26,9 @@ const Relationship = ({
   const location = useLocation();
   const dispatch = useDispatch();
 
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
+
   const {
     list_relationship,
     pagination_relationship,
@@ -246,11 +249,11 @@ const Relationship = ({
   };
 
   useEffect(() => {
-    if (location?.pathname.includes("account-standard")) {
+    if (isStandard) {
       dispatch(
         getGrantedAccessAccount(`/account-management/account-standard/relationship`)
       );
-    } else {
+    } else if (isOneTime) {
       dispatch(
         getGrantedAccessAccount(`/account-management/account-onetime/relationship`)
       );
