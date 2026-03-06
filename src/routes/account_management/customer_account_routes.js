@@ -103,13 +103,21 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPDATE_ACCOUNT_ONETIME:
     "/account-management/account-onetime/account-information/update",
 
-  //Relationship
+  //Relationship Account Standard
   CREATE_RELATIONSHIP:
     "/account-management/account-standard/relationship/create",
   UPDATE_RELATIONSHIP:
     "/account-management/account-standard/relationship/update",
   DETAIL_RELATIONSHIP:
     "/account-management/account-standard/relationship/view",
+
+  //Relationship Account Standard
+  CREATE_RELATIONSHIP_ONETIME:
+    "/account-management/account-onetime/relationship/create",
+  UPDATE_RELATIONSHIP_ONETIME:
+    "/account-management/account-onetime/relationship/update",
+  DETAIL_RELATIONSHIP_ONETIME:
+    "/account-management/account-onetime/relationship/view",
 
   //SA-Approve-Reject-TOS
   APPROVE_REJECT_TOS:
