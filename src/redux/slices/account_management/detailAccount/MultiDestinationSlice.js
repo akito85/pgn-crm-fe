@@ -304,26 +304,11 @@ export const getMdAttachmentCategory = createAsyncThunk(
 
 export const getMdAccountStandard = createAsyncThunk(
   "GET_MD_ACCOUNT_STANDARD",
-  async ({ page, size, sort, searchs, id, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
-
-      if (page)
-        queryParams.append("page", page);
-      if (size)
-        queryParams.append("size", size);
-      if (sort)
-        queryParams.append("sort", sort);
-      if (searchs)
-        queryParams.append("searchs", searchs);
-
-      let url = `/v1/dbs/api/multi-destination/list-account/${id}`;
-
+      const url = `/v1/dbs/api/multi-destination/list-account/${id}`;
       
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
-
-      const response = await accountManagementService.getPagination(url);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         isLoadMore,
