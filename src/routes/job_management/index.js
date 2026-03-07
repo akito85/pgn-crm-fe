@@ -1,0 +1,9 @@
+import { JOB_MGMT_ROUTES } from "./job_routes";
+import { JOB_MGMT_ELEMENTS } from "./job_elements";
+
+export const job_management = [
+  { path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT, element: JOB_MGMT_ELEMENTS.VIEW_JOB_PAGE },
+  { path: JOB_MGMT_ROUTES.VIEW_JOB,           element: JOB_MGMT_ELEMENTS.VIEW_JOB_PAGE },
+  { path: JOB_MGMT_ROUTES.VIEW_JOB_GROUP,     element: JOB_MGMT_ELEMENTS.VIEW_JOB_GROUP_PAGE },
+  { path: JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION, element: JOB_MGMT_ELEMENTS.VIEW_JOB_EXECUTION_PAGE },
+];
