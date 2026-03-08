@@ -18,12 +18,14 @@ import {
     deleteMutation,
     getDetailMutation,
     getMutationApprovalHistory,
-    getPaymentWarrantyPartnerBranchList
+    getPaymentWarrantyPartnerBranchList,
+    submitApproval
 } from "../../../../../redux/slices/receipt_collection/warranty";
 import { getListServiceAgreement } from "../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import ModalMutation from "./Modal/ModalMutation";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 
 const DetailWarranty = ({ data_detail }) => {
   const dispatch = useDispatch();
@@ -41,6 +43,9 @@ const DetailWarranty = ({ data_detail }) => {
   const [selectedRecordDelete, setSelectedRecordDelete] = useState(null);
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [isModalApprovalOpen, setIsModalApprovalOpen] = useState(false);
+  const [approvalAction, setApprovalAction] = useState("");
+  const [selectedMutationRecord, setSelectedMutationRecord] = useState(null);
 
   useEffect(() => {
     if (data_detail?.accountId) {
@@ -93,18 +98,20 @@ const DetailWarranty = ({ data_detail }) => {
   };
 
   const handleEdit = (record) => {
-    setSelectedRecord(record);
+    const normalizedRecord = { ...record, id: record.id || record.no };
+    setSelectedRecord(normalizedRecord);
     setModalType("update");
     setIsModalMutationOpen(true);
   };
 
   const handleDelete = (record) => {
-    setSelectedRecordDelete(record);
+    const normalizedRecord = { ...record, id: record.id || record.no };
+    setSelectedRecordDelete(normalizedRecord);
     setModalDelete(true);
   };
 
   const handleConfirmDelete = () => {
-    dispatch(deleteMutation({ id: selectedRecordDelete.id }))
+    dispatch(deleteMutation({ id: selectedRecordDelete.id || selectedRecordDelete.no }))
       .unwrap()
       .then(() => {
         setModalDelete(false);
@@ -144,6 +151,38 @@ const DetailWarranty = ({ data_detail }) => {
     } catch (error) {
       setOpenModalHistory(false);
     }
+  };
+
+  const handleApproveMutation = (record) => {
+    setSelectedMutationRecord(record);
+    setApprovalAction("APPROVE");
+    setIsModalApprovalOpen(true);
+  };
+
+  const handleRejectMutation = (record) => {
+    setSelectedMutationRecord(record);
+    setApprovalAction("REJECT");
+    setIsModalApprovalOpen(true);
+  };
+
+  const onFinishMutationApproval = async (values, clearForm) => {
+    const body = {
+      approvalId: data_detail?.approvalId ,
+      id: selectedMutationRecord?.id || selectedMutationRecord?.no || 0,
+      action: approvalAction,
+      remark: values.remark,
+    };
+
+    dispatch(submitApproval({ body }))
+      .unwrap()
+      .then(() => {
+        setIsModalApprovalOpen(false);
+        clearForm();
+        fetchMutation();
+      })
+      .catch(() => {
+        // Error is handled in thunk
+      });
   };
 
   return (
@@ -223,8 +262,10 @@ const DetailWarranty = ({ data_detail }) => {
               columns={columnMutation(
                 page, pageSize, null, null, "", () => {}, {}, 
                 handleEdit, handleDelete, handleHistory, 
+                handleApproveMutation, handleRejectMutation,
                 false, false, data_detail?.isApprover
               )}
+fixedColumns={{ left: ["no"], right: ["action"] }}
               current={page}
               pageSize={pageSize}
               totalData={dataMutationInfo?.page?.totalElements || 0}
@@ -273,6 +314,16 @@ const DetailWarranty = ({ data_detail }) => {
           </span>
         </div>
       </ModalConfirm>
+
+      <ModalApproveOrReject
+        isOpen={isModalApprovalOpen}
+        handleCloseModal={() => setIsModalApprovalOpen(false)}
+        onFinish={onFinishMutationApproval}
+        header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
+        approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
+        menu="Payment Guarantee Mutation"
+        named={selectedMutationRecord?.noDocumentMutation || "-"}
+      />
     </div>
   );
 };

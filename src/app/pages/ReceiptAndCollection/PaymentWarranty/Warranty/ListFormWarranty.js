@@ -353,7 +353,7 @@ const ListFormWarranty = (props) => {
       if (payloadToSave.id) finalBody.id = payloadToSave.id;
 
       const action = type === "update" ? updatePaymentWarranty : createPaymentWarranty;
-      const res = await dispatch(action({ body: finalBody })).unwrap();
+      const res = await dispatch(action({ id: finalBody.id, body: finalBody })).unwrap();
       
       const warrantyId = res?.id || res;
       const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");

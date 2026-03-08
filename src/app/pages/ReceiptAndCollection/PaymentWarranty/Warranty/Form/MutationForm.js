@@ -109,7 +109,7 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
             { required: true },
             ({ getFieldValue }) => ({
               validator(_, value) {
-                const selectedCurrency = currencyDDL?.data?.find(c => c.id === value)?.name;
+                const selectedCurrency = value;
                 if (!value || selectedCurrency !== headerCurrency) {
                   return Promise.resolve();
                 }
@@ -123,7 +123,7 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
             {currencyDDL?.data
               ?.filter(item => item.name !== headerCurrency)
               ?.map((item) => (
-                <Option key={item.id} value={item.id}>{item.name}</Option>
+                <Option key={item.id} value={item.name}>{item.name}</Option>
               ))}
           </Select>
         </Form.Item>
