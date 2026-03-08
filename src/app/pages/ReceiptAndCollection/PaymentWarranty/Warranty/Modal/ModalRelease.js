@@ -334,7 +334,18 @@ const ModalRelease = ({
       setLoadingSave(false);
     } catch (error) {
       setLoadingSave(false);
-      const message = error?.response?.data?.message || error?.message || error?.toString();
+      let message = error?.response?.data?.message || error?.message || error?.toString();
+
+      if (message && typeof message === "object") {
+        if (Array.isArray(message)) {
+          message = message.join(", ");
+        } else {
+          message = Object.values(message)
+            .map((val) => (typeof val === "object" ? JSON.stringify(val) : val))
+            .join(", ");
+        }
+      }
+
       setBodyError({ message, type: "requested" });
       setModalError(true);
     }

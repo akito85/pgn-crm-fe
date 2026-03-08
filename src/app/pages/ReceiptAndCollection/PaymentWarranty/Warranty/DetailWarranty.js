@@ -142,7 +142,7 @@ const DetailWarranty = ({ data_detail }) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-4 px-4 pt-4">
+    <div className="flex flex-col gap-4 pb-5 px-5 pt-5">
       <SectionCard title="ACCOUNT INFORMATION">
         <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
             <DetailText label="Account Number">{data_detail?.accountNumber || "-"}</DetailText>
