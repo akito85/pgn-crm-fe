@@ -23,13 +23,25 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: null,
 
+  dataMutationInfo: null,
+  dataDetailMutation: null,
+  loadingMutation: false,
+  loadingDetailMutation: false,
+
   dataPaymentWarrantyPartner: [],
   loadingPaymentWarrantyPartner: false,
 
   dataPaymentWarrantyPartnerBranch: [],
   loadingPaymentWarrantyPartnerBranch: false,
 
+  dataWarrantyTypeOptions: [],
+  dataMutationCategoryOptions: [],
+
   loading: false,
+  loadingList: false,
+  loadingDetail: false,
+  loadingApproval: false,
+  loadingCreate: false,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -163,6 +175,33 @@ export const getAllCustomerInfoPaginate = createAsyncThunk(
   }
 );
 
+export const getDetailWarrantyMutation = createAsyncThunk(
+  "GET_DETAIL_WARRANTY_MUTATION",
+  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
+      const [orderBy, order] = sortValue.split("~");
+
+      const url = `/v1/dbs/api/payment-warranty/mutation/get-list/${id}?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+
+      const response = await receiptCollectionHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 export const getAllWarrantyInfoPaginate = createAsyncThunk(
   "GET_ALL_WARRANTY_INFO_PAGINATE",
   async ({ page, pageSize, search, sort, transTypeName }, thunkAPI) => {
@@ -261,7 +300,34 @@ export const getApprovalHistory = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-warranty/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
-      return response.data;
+      return response?.data ?? response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getMutationApprovalHistory = createAsyncThunk(
+  "GET_MUTATION_APPROVAL_HISTORY",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty/mutation/approval-history-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response?.data ?? response;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -313,6 +379,38 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
+export const getWarrantyTypeOptions = createAsyncThunk(
+  "GET_WARRANTY_TYPE_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-warranty/warranty-type";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return error;
+    }
+  }
+);
+
+export const getMutationCategoryOptions = createAsyncThunk(
+  "GET_MUTATION_CATEGORY_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-warranty/mutation-category";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return error;
+    }
+  }
+);
+
 export const createPaymentWarranty = createAsyncThunk(
   "CREATE_PAYMENT_WARRANTY",
   async ({ body }, thunkAPI) => {
@@ -323,6 +421,43 @@ export const createPaymentWarranty = createAsyncThunk(
       const successBody = {
         title: `Successful`,
         description: "Your request has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.toString();
+
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Submission failed. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const createMutation = createAsyncThunk(
+  "CREATE_MUTATION_WARRANTY",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-warranty/mutation/create";
+      const response = await receiptCollectionHttpService.createData(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: "Your mutation has been submitted.",
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -449,6 +584,29 @@ export const downloadWarrantyList = createAsyncThunk(
   }
 );
 
+export const downloadWarrantyListDetail = createAsyncThunk(
+  "DOWNLOAD_WARRANTY_LIST_DETAIL",
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/payment-warranty/download-detail-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_WARRANTY_LIST_DETAIL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const deleteWarranty = createAsyncThunk(
   "DELETE_WARRANTY",
   async (id, thunkAPI) => {
@@ -485,56 +643,164 @@ export const deleteWarranty = createAsyncThunk(
   }
 );
 
+export const getDetailMutation = createAsyncThunk(
+  "GET_DETAIL_MUTATION",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty/mutation/detail-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const deleteMutation = createAsyncThunk(
+  "DELETE_MUTATION",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty/mutation/delete/${id}`;
+      const response = await receiptCollectionHttpService.deleteData(url);
+      const successBody = {
+        title: `Successful`,
+        description: "Your mutation has been deleted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Your mutation was not deleted. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const updateMutation = createAsyncThunk(
+  "UPDATE_MUTATION_WARRANTY",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-warranty/mutation/update";
+      const response = await receiptCollectionHttpService.updateDataPost(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: "Your mutation has been updated.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Update failed. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const updatePaymentWarranty = createAsyncThunk(
+  "UPDATE_PAYMENT_WARRANTY",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-warranty/update";
+      const response = await receiptCollectionHttpService.updateDataPost(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: "Your warranty has been updated.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const message = error?.response?.data?.message || error?.message || error?.toString();
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `Update failed. ${message}.`, return: false }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 const warrantySlice = createSlice({
   name: "warranty",
   initialState,
   extraReducers: {
     // Get All GET_ALL_WARRANTY_LIST_PAGINATE Pagination
     [getAllWarrantyListPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingList = true;
     },
     [getAllWarrantyListPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingList = false;
       state.data = action.payload;
     },
     [getAllWarrantyListPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingList = false;
     },
 
     // Get Detail GET_DETAIL_WARRANTY
     [getDetailWarranty.pending]: (state) => {
-      state.loading = true;
+      state.loadingDetail = true;
     },
     [getDetailWarranty.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_detail = action.payload;
     },
     [getDetailWarranty.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDetail = false;
     },
 
     // Get All GET_ALL_CUSTOMER_INFO_PAGINATE Pagination
     [getAllCustomerInfoPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingList = true;
     },
     [getAllCustomerInfoPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingList = false;
       state.data_customer_info = action.payload;
     },
     [getAllCustomerInfoPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingList = false;
+    },
+
+    // Get Mutation GET_DETAIL_WARRANTY_MUTATION
+    [getDetailWarrantyMutation.pending]: (state) => {
+      state.loadingMutation = true;
+      state.dataMutationInfo = null;
+    },
+    [getDetailWarrantyMutation.fulfilled]: (state, action) => {
+      state.loadingMutation = false;
+      state.dataMutationInfo = action.payload;
+    },
+    [getDetailWarrantyMutation.rejected]: (state) => {
+      state.loadingMutation = false;
+      state.dataMutationInfo = null;
     },
 
     // Get All GET_ALL_WARRANTY_INFO_PAGINATE Pagination
     [getAllWarrantyInfoPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingList = true;
     },
     [getAllWarrantyInfoPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingList = false;
       state.data_warranty_info = action.payload;
     },
     [getAllWarrantyInfoPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingList = false;
     },
 
     /** Get List Category */
@@ -579,105 +845,206 @@ const warrantySlice = createSlice({
 
     /** Get Approval History */
     [getApprovalHistory.pending]: (state) => {
-      state.loading = true;
+      state.loadingApproval = true;
       state.dataApprovalHistory = null;
     },
     [getApprovalHistory.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingApproval = false;
       state.dataApprovalHistory = action.payload;
     },
     [getApprovalHistory.rejected]: (state) => {
-      state.loading = false;
+      state.loadingApproval = false;
       state.dataApprovalHistory = null;
+    },
+
+    /** Get Mutation Approval History */
+    [getMutationApprovalHistory.pending]: (state) => {
+      state.loadingApproval = true;
+      state.dataApprovalHistory = null;
+    },
+    [getMutationApprovalHistory.fulfilled]: (state, action) => {
+      state.loadingApproval = false;
+      state.dataApprovalHistory = action.payload;
+    },
+    [getMutationApprovalHistory.rejected]: (state) => {
+      state.loadingApproval = false;
+      state.dataApprovalHistory = null;
+    },
+
+    // Get Warranty Type Options
+    [getWarrantyTypeOptions.fulfilled]: (state, action) => {
+      state.dataWarrantyTypeOptions = action.payload;
+    },
+
+    // Get Mutation Category Options
+    [getMutationCategoryOptions.pending]: (state) => {
+      state.loadingMutation = true;
+    },
+    [getMutationCategoryOptions.fulfilled]: (state, action) => {
+      state.loadingMutation = false;
+      state.dataMutationCategoryOptions = action.payload;
+    },
+    [getMutationCategoryOptions.rejected]: (state) => {
+      state.loadingMutation = false;
     },
 
     // Download Warranty
     [downloadWarrantyList.pending]: (state) => {
-      state.loading = true;
+      state.loadingList = true;
     },
     [downloadWarrantyList.fulfilled]: (state) => {
-      state.loading = false;
+      state.loadingList = false;
     },
     [downloadWarrantyList.rejected]: (state) => {
-      state.loading = false;
+      state.loadingList = false;
+    },
+
+    // Download Warranty Detail
+    [downloadWarrantyListDetail.pending]: (state) => {
+      state.loadingList = true;
+    },
+    [downloadWarrantyListDetail.fulfilled]: (state) => {
+      state.loadingList = false;
+    },
+    [downloadWarrantyListDetail.rejected]: (state) => {
+      state.loadingList = false;
     },
 
     // Create Payment Warranty
     [createPaymentWarranty.pending]: (state) => {
-      state.loading = true;
+      state.loadingCreate = true;
     },
     [createPaymentWarranty.fulfilled]: (state) => {
       state.isSuccess = true;
-      state.loading = false;
+      state.loadingCreate = false;
     },
     [createPaymentWarranty.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingCreate = false;
       state.isFailed = true;
       state.result = action.payload;
     },
 
     // Submit Warranty Request (Unified Hold, Release, Refund)
     [submitWarrantyRequest.pending]: (state) => {
-      state.loading = true;
+      state.loadingCreate = true;
     },
     [submitWarrantyRequest.fulfilled]: (state) => {
       state.isSuccess = true;
-      state.loading = false;
+      state.loadingCreate = false;
     },
     [submitWarrantyRequest.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingCreate = false;
+      state.isFailed = true;
+      state.result = action.payload;
+    },
+
+    // Create Mutation
+    [createMutation.pending]: (state) => {
+      state.loadingCreate = true;
+    },
+    [createMutation.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loadingCreate = false;
+    },
+    [createMutation.rejected]: (state, action) => {
+      state.loadingCreate = false;
       state.isFailed = true;
       state.result = action.payload;
     },
 
     // Submit Approval (Approve / Reject)
     [submitApproval.pending]: (state) => {
-      state.loading = true;
+      state.loadingApproval = true;
     },
     [submitApproval.fulfilled]: (state) => {
       state.isSuccess = true;
-      state.loading = false;
+      state.loadingApproval = false;
     },
     [submitApproval.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingApproval = false;
       state.isFailed = true;
       state.result = action.payload;
     },
 
     // Get All Approval List
     [getAllApprovalList.pending]: (state) => {
-      state.loading = true;
+      state.loadingApproval = true;
     },
     [getAllApprovalList.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingApproval = false;
       state.dataListAppHierId = action.payload;
     },
     [getAllApprovalList.rejected]: (state) => {
-      state.loading = false;
+      state.loadingApproval = false;
     },
 
     // Get List Approval By Id
     [getListApprovalById.pending]: (state) => {
-      state.loading = true;
+      state.loadingApproval = true;
     },
     [getListApprovalById.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingApproval = false;
       state.dataListAppHierDetail = action.payload;
     },
     [getListApprovalById.rejected]: (state) => {
-      state.loading = false;
+      state.loadingApproval = false;
     },
 
-    // Get Approval History
-    [getApprovalHistory.pending]: (state) => {
-      state.loading = true;
-    },
-    [getApprovalHistory.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.dataApprovalHistory = action.payload;
-    },
     [getApprovalHistory.rejected]: (state) => {
-      state.loading = false;
+      state.loadingApproval = false;
+      state.dataApprovalHistory = null;
+    },
+
+    // Get Mutation Detail
+    [getDetailMutation.pending]: (state) => {
+      state.loadingDetailMutation = true;
+      state.dataDetailMutation = null;
+    },
+    [getDetailMutation.fulfilled]: (state, action) => {
+      state.loadingDetailMutation = false;
+      state.dataDetailMutation = action.payload;
+    },
+    [getDetailMutation.rejected]: (state) => {
+      state.loadingDetailMutation = false;
+    },
+
+    // Delete Mutation
+    [deleteMutation.pending]: (state) => {
+      state.loadingMutation = true;
+    },
+    [deleteMutation.fulfilled]: (state) => {
+      state.loadingMutation = false;
+      state.isSuccess = true;
+    },
+    [deleteMutation.rejected]: (state) => {
+      state.loadingMutation = false;
+      state.isFailed = true;
+    },
+
+    // Update Mutation
+    [updateMutation.pending]: (state) => {
+      state.loadingMutation = true;
+    },
+    [updateMutation.fulfilled]: (state) => {
+      state.loadingMutation = false;
+      state.isSuccess = true;
+    },
+    [updateMutation.rejected]: (state) => {
+      state.loadingMutation = false;
+      state.isFailed = true;
+    },
+
+    // Update Payment Warranty
+    [updatePaymentWarranty.pending]: (state) => {
+      state.loadingCreate = true;
+    },
+    [updatePaymentWarranty.fulfilled]: (state) => {
+      state.loadingCreate = false;
+      state.isSuccess = true;
+    },
+    [updatePaymentWarranty.rejected]: (state) => {
+      state.loadingCreate = false;
+      state.isFailed = true;
     },
   },
 });

@@ -19,12 +19,14 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import FooterDetail from "../../../../../components/FooterDetail";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
+import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 
-const ListDetailWarranty = () => {
+const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   const location = useLocation();
-  const id = location.state?.id;
+  const id = propId || location.state?.id;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("warranty");
@@ -34,7 +36,8 @@ const ListDetailWarranty = () => {
     data_approval_info,
     dataListAppHierId,
     dataListAppHierDetail,
-    loading,
+    loadingDetail,
+    loadingApproval,
   } = useSelector((state) => state.warranty);
 
   useEffect(() => {
@@ -175,36 +178,84 @@ const ListDetailWarranty = () => {
     },
   ];
 
-  return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        <div>
+  const content = (
+    <Spin spinning={loadingDetail || loadingApproval}>
+      {!isEmbedded && <BreadCrumb routes={routes} />}
+      
+      <CardContainerNoBorder
+        header="GUARANTEE DETAIL"
+        className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+        noPadding
+        collapsible={true}
+        defaultExpanded={true}
+      >
+        <div className="full-width-tabs">
           <Tabs
             activeKey={activeTab}
             items={items}
             onChange={handleTabChange}
-            tabBarStyle={{ marginBottom: 24 }}
+            className="custom-tabs-layout"
           />
         </div>
+        <style>
+          {`
+            .full-width-tabs .ant-tabs-nav {
+              margin-bottom: 0 !important;
+              padding: 0 !important;
+            }
+            .full-width-tabs .ant-tabs-nav::before {
+              border-bottom: 1px solid #BDBDBD !important;
+            }
+            .full-width-tabs .ant-tabs-tab {
+              margin: 0 !important;
+              padding: 12px 16px !important;
+            }
+            .full-width-tabs .ant-tabs-ink-bar {
+              height: 2px !important;
+              background: #0075bf !important;
+            }
+          `}
+        </style>
+      </CardContainerNoBorder>
 
+      <LogHistoryInfo 
+        data={{
+          recordId: data_detail?.recordId || data_detail?.id || "-",
+          createdDate: data_detail?.createdDate ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
+          createdBy: data_detail?.createdBy || "-",
+          updatedDate: data_detail?.updatedDate ? moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
+          updatedBy: data_detail?.updatedBy || "-"
+        }} 
+      />
+
+      {!isEmbedded && (
         <FooterDetail
           onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.WARRANTY)}
           showApproval={isShowButton === true}
           onApprove={handleApprove}
           onReject={handleReject}
         />
+      )}
 
-        <ModalApproveOrReject
-          isOpen={isModalOpen}
-          handleCloseModal={() => setIsModalOpen(false)}
-          onFinish={onFinishApproval}
-          header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
-          approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
-          menu="Payment Guarantee"
-          named={data_detail?.customerName || "-"}
-        />
-      </Spin>
+      <ModalApproveOrReject
+        isOpen={isModalOpen}
+        handleCloseModal={() => setIsModalOpen(false)}
+        onFinish={onFinishApproval}
+        header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
+        approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
+        menu="Payment Guarantee"
+        named={data_detail?.customerName || "-"}
+      />
+    </Spin>
+  );
+
+  if (isEmbedded) {
+    return content;
+  }
+
+  return (
+    <LayoutMenu>
+      {content}
     </LayoutMenu>
   );
 };
