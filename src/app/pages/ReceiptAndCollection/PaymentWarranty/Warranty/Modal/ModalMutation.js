@@ -5,7 +5,7 @@ import DOMPurify from "dompurify";
 import moment from "moment";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
-import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
 import MutationForm from "../Form/MutationForm";
 import DetailText from "../../../../../../components/DetailText";
@@ -39,7 +39,6 @@ const ModalMutation = ({
   warrantyType = null,
   headerCurrency = null,
   fetchMutation = () => {},
-  isOffline = false
 }) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
@@ -77,7 +76,7 @@ const ModalMutation = ({
       dispatch(getAllApprovalList());
       dispatch(getMutationCategoryOptions());
       
-      if (modalType === "update" || modalType === "detail") {
+      if (modalType !== "create") {
         if (selectedRecord?.id) {
           dispatch(getDetailMutation({ id: selectedRecord.id }));
         }
@@ -148,13 +147,14 @@ const ModalMutation = ({
 
   const next = () => {
     if (current === 0) {
-      if (modalType === "detail") {
-        setCurrent(prev => prev + 1);
-        return;
-      }
       form.validateFields(["source", "mutationNumber", "type", "category", "date", "amount", "convertedCurrency", "rate", "eqvAmount", "description"])
         .then(() => {
-          setMutationData(form.getFieldsValue());
+          const values = form.getFieldsValue();
+          const currencyName = currencyDDL?.data?.find(c => c.id === values.convertedCurrency)?.name || "-";
+          setMutationData({
+            ...values,
+            convertedCurrencyName: currencyName
+          });
           setCurrent(prev => prev + 1);
         })
         .catch(err => {
@@ -194,27 +194,8 @@ const ModalMutation = ({
       const values = await form.validateFields();
       setIsSubmitting(true);
 
-      if (isOffline) {
-        // Unique check for mutationNumber
-        const isDuplicate = mutationDataInfo.some(m => 
-          m.mutationNumber === values.mutationNumber && 
-          (modalType === "create" || (selectedRecord && m.key !== selectedRecord.key))
-        );
-
-        if (isDuplicate) {
-          message.error("Mutation Number must be unique.");
-          setIsSubmitting(false);
-          return;
-        }
-
-        setTimeout(() => {
-          setIsSubmitting(false);
-          handleClose();
-          fetchMutation(values);
-        }, 500);
-      } else {
-        // Online Submission
-        let parsedAmount = 0;
+      // Online Submission
+      let parsedAmount = 0;
         if (values.amount) parsedAmount = parseFloat(values.amount.toString().replace(/,/g, ""));
         
         let parsedRate = 0;
@@ -240,11 +221,11 @@ const ModalMutation = ({
           attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id),
         };
 
-        if (modalType === 'update' && selectedRecord?.id) {
+        if (modalType !== 'create' && selectedRecord?.id) {
           submitBody.id = selectedRecord.id;
         }
 
-        const action = modalType === 'update' ? updateMutation : createMutation;
+        const action = modalType !== 'create' ? updateMutation : createMutation;
         const res = await dispatch(action({ body: submitBody })).unwrap();
         const createdMutationId = res?.id || res || selectedRecord?.id;
 
@@ -259,7 +240,6 @@ const ModalMutation = ({
         setIsSubmitting(false);
         handleClose();
         if (fetchMutation) fetchMutation();
-      }
     } catch (error) {
       console.error("Submission error:", error);
       setIsSubmitting(false);
@@ -287,10 +267,10 @@ const ModalMutation = ({
               <DetailText label="Type">{DOMPurify.sanitize(mutationData.type) || "-"}</DetailText>
               <DetailText label="Category">{DOMPurify.sanitize(mutationData.category) || "-"}</DetailText>
               <DetailText label="Date">{mutationData.date ? moment(mutationData.date).format("DD MMM YYYY") : "-"}</DetailText>
-              <DetailText label="Amount">{mutationData.amount || "-"}</DetailText>
-              <DetailText label="Converted Currency">{DOMPurify.sanitize(mutationData.convertedCurrency) || "-"}</DetailText>
-              <DetailText label="Rate">{mutationData.rate || "-"}</DetailText>
-              <DetailText label="EQV Amount">{mutationData.eqvAmount || "-"}</DetailText>
+              <DetailText label="Amount">{mutationData.amount?.toLocaleString() || "-"}</DetailText>
+              <DetailText label="Converted Currency">{DOMPurify.sanitize(mutationData.convertedCurrencyName) || "-"}</DetailText>
+              <DetailText label="Rate">{mutationData.rate?.toLocaleString() || "-"}</DetailText>
+              <DetailText label="EQV Amount">{mutationData.eqvAmount?.toLocaleString() || "-"}</DetailText>
               <div className="col-span-5">
                 <DetailText label="Description">{DOMPurify.sanitize(mutationData.description) || "-"}</DetailText>
               </div>
@@ -300,7 +280,7 @@ const ModalMutation = ({
 
         <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
           <SectionCard title="APPROVAL INFORMATION" defaultActiveKey={['1']}>
-            <ApprovalSectionForm
+            <ApprovalComponentGeneral
               showSelect={false}
               disableSelect={true}
               approvalName={appHierOptions.find(o => o.value === selectedHierarchy)?.name || ""}
@@ -334,20 +314,20 @@ const ModalMutation = ({
     <ModalCustom
       isOpen={isOpen}
       handleCancel={handleClose}
-      header={`${modalType === "create" ? "CREATE" : modalType === "update" ? "UPDATE" : "DETAIL"} MUTATION`}
+      header={`${modalType === "create" ? "CREATE" : "UPDATE"} MUTATION`}
       width={1100}
       footer={null}
       type="confirmation"
     >
       <Spin spinning={loadingMutation || loadingApproval || loadingCreate || isSubmitting || loadingDetailMutation}>
         <div className="w-full h-full flex flex-col pt-4 gap-y-5">
-        {!isOffline && <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />}
+        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         
         <Form layout="vertical" form={form} onFinish={handleSubmit} id="formRequest">
           <div className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}>
             <SectionCard title="MUTATION INFORMATION" defaultActiveKey={['1']}>
               <MutationForm 
-                disabled={modalType === "detail"} 
+                disabled={false} 
                 currencyDDL={currencyDDL} 
                 warrantyType={warrantyType}
                 headerCurrency={headerCurrency}
@@ -357,20 +337,12 @@ const ModalMutation = ({
 
           <div className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}>
             <SectionCard title="APPROVAL INFORMATION" defaultActiveKey={['1']}>
-              <ApprovalSectionForm
+              <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
-                disabled={modalType === "detail"}
+                updateSelectedHierarchy={setSelectedHierarchy}
               />
-              <Form.Item name="remark" label="Remark" rules={[{ required: modalType === "update" }]} className="mt-4">
-                <InputComponent 
-                  type="textarea" 
-                  rows={3} 
-                  placeholder="Remark" 
-                  disabled={modalType === "detail"} 
-                />
-              </Form.Item>
             </SectionCard>
           </div>
 
@@ -387,7 +359,7 @@ const ModalMutation = ({
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
                 mandatory={true}
-                disabled={modalType === "detail"}
+                disabled={false}
               />
             </SectionCard>
           </div>
@@ -397,10 +369,10 @@ const ModalMutation = ({
           </div>
         
           <FormFooter
-            current={isOffline ? 0 : current}
-            totalSteps={isOffline ? 1 : steps.length}
+            current={current}
+            totalSteps={steps.length}
             onPrev={prev}
-            onNext={isOffline ? handleSubmit : (current === steps.length - 1 ? handleSubmit : next)}
+            onNext={current === steps.length - 1 ? handleSubmit : next}
             onCancel={handleClose}
             onClear={() => {
               form.resetFields();

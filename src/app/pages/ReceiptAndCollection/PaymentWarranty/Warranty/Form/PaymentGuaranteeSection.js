@@ -106,7 +106,7 @@ const PaymentGuaranteeSection = ({
                     // API: rateType
                   >
                     <Select disabled={isPartialEdit} placeholder="Select Rate Type">
-                      {rateTypeDDL?.data?.map((item) => (<Option key={item.id} value={item.id}>{`${item.name} - ${item.description}`}</Option>))}
+                      {rateTypeDDL?.data?.map((item) => (<Option key={item.id} value={item.name}>{`${item.name} - ${item.description}`}</Option>))}
                     </Select>
                   </Form.Item>
                 </Col>

@@ -7,6 +7,9 @@ import { dateFormatting } from "../../../../../utils";
 import DetailText from "../../../../../components/DetailText";
 import TableRBI from "../../../../../components/TableRBI";
 import { columnMutation } from "./ColumnConfig/MutationColumns";
+import { configApp } from "../../../../../constants/configApp";
+import { getCurrencyDDL } from "../../../../../redux/slices/receipt_collection/receipt";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -27,6 +30,7 @@ const DetailWarranty = ({ data_detail }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const { dataMutationInfo, loadingMutation, dataApprovalHistory, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
+  const { currencyDDL } = useSelector((state) => state.receipt);
   const { data: dataServiceAgreement } = useSelector((state) => state.accountServiceAgreement);
   const [selectedSA, setSelectedSA] = useState({});
   const [selectedBranchName, setSelectedBranchName] = useState(null);
@@ -42,6 +46,7 @@ const DetailWarranty = ({ data_detail }) => {
     if (data_detail?.accountId) {
       dispatch(getListServiceAgreement({ id: data_detail.accountId, page: 1, pageSize: 999 }));
     }
+    dispatch(getCurrencyDDL());
   }, [dispatch, data_detail?.accountId]);
 
   useEffect(() => {
@@ -142,7 +147,7 @@ const DetailWarranty = ({ data_detail }) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-4 px-4 pt-4">
+    <div className="flex flex-col gap-4 pb-5 px-5 pt-5">
       <SectionCard title="ACCOUNT INFORMATION">
         <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
             <DetailText label="Account Number">{data_detail?.accountNumber || "-"}</DetailText>
@@ -188,9 +193,13 @@ const DetailWarranty = ({ data_detail }) => {
             <DetailText label="Issuer">{data_detail?.issuerBankName || data_detail?.issuerBank || data_detail?.partnerName || "-"}</DetailText>
             <DetailText label="Issuer Branch">{data_detail?.issuerBranchName || selectedBranchName || data_detail?.issuerBranch || "-"}</DetailText>
             <DetailText label="Currency">{data_detail?.currency || "-"}</DetailText>
-            <DetailText label="Rate Type">{data_detail?.rateType || "-"}</DetailText>
-            <DetailText label="Rate Date">{data_detail?.rateDate ? moment(data_detail?.rateDate).format("DD/MM/YYYY") : "-"}</DetailText>
-            <DetailText label="Rate">{data_detail?.rateAmount?.toLocaleString() || data_detail?.rate?.toLocaleString() || "-"}</DetailText>
+            {data_detail?.warrantyType === "CASH" && (
+              <>
+                <DetailText label="Rate Type">{data_detail?.rateType || "-"}</DetailText>
+                <DetailText label="Rate Date">{data_detail?.rateDate ? moment(data_detail?.rateDate).format("DD/MM/YYYY") : "-"}</DetailText>
+                <DetailText label="Rate">{data_detail?.rateAmount?.toLocaleString() || data_detail?.rate?.toLocaleString() || "-"}</DetailText>
+              </>
+            )}
             <DetailText label="EFF Start Date">{data_detail?.effectiveStartDate ? moment(data_detail?.effectiveStartDate).format("DD/MM/YYYY") : "-"}</DetailText>
             <DetailText label="EFF End Date">{data_detail?.effectiveEndDate ? moment(data_detail?.effectiveEndDate).format("DD/MM/YYYY") : "-"}</DetailText>
             <DetailText label="Term Of Claim Period">{data_detail?.claimPeriodTermValue ? `${data_detail?.claimPeriodTermValue} ${data_detail?.claimPeriodTermType || ''}` : "-"}</DetailText>
@@ -234,6 +243,9 @@ const DetailWarranty = ({ data_detail }) => {
         modalType={modalType}
         selectedRecord={selectedRecord}
         warrantyId={data_detail?.id}
+        warrantyType={data_detail?.warrantyType}
+        currencyDDL={currencyDDL}
+        headerCurrency={data_detail?.currency}
         fetchMutation={fetchMutation}
       />
 
