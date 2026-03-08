@@ -503,13 +503,11 @@ const paymentChannelSlice = createSlice({
     [getPaginatePaymentChannel.fulfilled]: (state, action) => {
       const { isLoadMore, ...rest } = action.payload || {};
       if (isLoadMore && state.data?.result) {
-        // Append new results for infinity scroll
+        const existingIds = new Set(state.data.result.map((item) => item.id));
+        const newItems = (rest.result || []).filter((item) => !existingIds.has(item.id));
         state.data = {
           ...rest,
-          result: [
-            ...state.data.result,
-            ...(rest.result || []),
-          ],
+          result: [...state.data.result, ...newItems],
         };
       } else {
         state.data = rest;

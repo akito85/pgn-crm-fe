@@ -401,7 +401,7 @@ const ListFormPaymentChannel = (props) => {
       effEndDate: currentFormValue.effEndDate
         ? moment(currentFormValue.effEndDate).format(dateFormatting.date)
         : null,
-      appHierId: currentFormValue.apphierId,
+      appHierId: currentFormValue.appHierId || currentFormValue.apphierId,
       category: currentFormValue.category,
     };
     dispatch(saveDraftPaymentChannel(dataValue))

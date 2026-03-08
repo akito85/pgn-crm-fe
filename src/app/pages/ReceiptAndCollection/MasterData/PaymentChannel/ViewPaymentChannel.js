@@ -2,7 +2,7 @@ import {
   Checkbox,
   Tooltip,
 } from "antd";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -132,14 +132,14 @@ const ViewPaymentChannel = () => {
   };
 
   // Function Search Column
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
-  };
+  }, []);
 
-  const handleReset = (clearFilters, dataIndex) => {
+  const handleReset = useCallback((clearFilters, dataIndex) => {
     clearFilters();
     setSearch((prev) => {
       const next = { ...prev };
@@ -147,7 +147,7 @@ const ViewPaymentChannel = () => {
       return next;
     });
     setSearchText("");
-  };
+  }, []);
 
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
@@ -235,9 +235,9 @@ const ViewPaymentChannel = () => {
         width: 180,
         sorter: true,
         isClassification: true,
-        filteredValue: [search?.code] || null,
+        filteredValue: search?.code !== undefined ? [search.code] : null,
         ...getColumnSearchPropsUseFilteredValue(
-          search, "code", searchInput, searchedColumn, searchText, handleSearch, true
+          search, "code", searchInput, searchedColumn, searchText, handleSearch, true, "input", [], handleReset
         ),
         render: (text) =>
           renderColumn("code", hasValue(search["code"]), searchText, text, true, "input", search),
@@ -249,9 +249,9 @@ const ViewPaymentChannel = () => {
         width: 180,
         sorter: true,
         isClassification: true,
-        filteredValue: [search?.name] || null,
+        filteredValue: search?.name !== undefined ? [search.name] : null,
         ...getColumnSearchPropsUseFilteredValue(
-          search, "name", searchInput, searchedColumn, searchText, handleSearch, true
+          search, "name", searchInput, searchedColumn, searchText, handleSearch, true, "input", [], handleReset
         ),
         render: (text) =>
           renderColumn("name", hasValue(search["name"]), searchText, text, true, "input", search),
@@ -263,9 +263,9 @@ const ViewPaymentChannel = () => {
         width: 150,
         sorter: true,
         isClassification: true,
-        filteredValue: [search?.category] || null,
+        filteredValue: search?.category !== undefined ? [search.category] : null,
         ...getColumnSearchPropsUseFilteredValue(
-          search, "category", searchInput, searchedColumn, searchText, handleSearch, false
+          search, "category", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
         render: (text) =>
           renderColumn("category", hasValue(search["category"]), searchText, text, true, "input", search),
@@ -277,9 +277,9 @@ const ViewPaymentChannel = () => {
         width: 130,
         sorter: true,
         isClassification: true,
-        filteredValue: [search?.startDate] || null,
+        filteredValue: search?.startDate !== undefined ? [search.startDate] : null,
         ...getColumnSearchPropsUseFilteredValue(
-          search, "startDate", searchInput, searchedColumn, searchText, handleSearch, false, "date"
+          search, "startDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
         ),
         render: (text) =>
           renderDateColumn("startDate", hasValue(search["startDate"]), searchText, text, "date", search),
@@ -291,9 +291,9 @@ const ViewPaymentChannel = () => {
         width: 130,
         sorter: true,
         isClassification: true,
-        filteredValue: [search?.endDate] || null,
+        filteredValue: search?.endDate !== undefined ? [search.endDate] : null,
         ...getColumnSearchPropsUseFilteredValue(
-          search, "endDate", searchInput, searchedColumn, searchText, handleSearch, false, "date"
+          search, "endDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
         ),
         render: (text) =>
           renderDateColumn("endDate", hasValue(search["endDate"]), searchText, text, "date", search),
@@ -306,9 +306,9 @@ const ViewPaymentChannel = () => {
         sorter: true,
         isClassification: true,
         fixed: "right",
-        filteredValue: [search?.status] || null,
+        filteredValue: search?.status !== undefined ? [search.status] : null,
         ...getColumnSearchPropsUseFilteredValue(
-          search, "status", searchInput, searchedColumn, searchText, handleSearch, false
+          search, "status", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
         render: (text) =>
           renderColumn("status", hasValue(search["status"]), searchText, text, false, "status", search),
@@ -321,15 +321,15 @@ const ViewPaymentChannel = () => {
         sorter: true,
         isClassification: true,
         fixed: "right",
-        filteredValue: [search?.statusApproval] || null,
+        filteredValue: search?.statusApproval !== undefined ? [search.statusApproval] : null,
         ...getColumnSearchPropsUseFilteredValue(
-          search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, false
+          search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
         render: (text) =>
           renderColumn("status", hasValue(search["statusApproval"]), searchText, text, false, "status", search),
       },
     ],
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn, handleSearch, handleReset]
   );
 
 
@@ -465,15 +465,21 @@ const ViewPaymentChannel = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
 
-  const actionCols = useColumnActionPermission(
+  const actionColsRaw = useColumnActionPermission(
     ["view", "update", "activate", "history"],
     itemActions
-  ).map((col) => ({
-    ...col,
-    key: col.action,
-    width: 60,
-    align: "center",
-  }));
+  );
+
+  const actionCols = useMemo(
+    () =>
+      actionColsRaw.map((col) => ({
+        ...col,
+        key: col.action,
+        width: 60,
+        align: "center",
+      })),
+    [actionColsRaw]
+  );
 
   const allColumns = useMemo(() => {
     const cols = [...baseColumns, ...actionCols].map((col) => ({
