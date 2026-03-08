@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
-import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../components/Nx/NxTable";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../components/ButtonComponent";
 import { getAllJobGroupPaginate } from "../../../../redux/slices/job_management/jobGroupSlice";
 import { getJobManagementColumns } from "../jobManagementColumns";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
@@ -109,31 +112,76 @@ const JobGroupPage = () => {
     [allColumns]
   );
 
+  // Toolbar buttons
+  const downloadListHandler = () => {
+    // Add download functionality here
+    console.log('Download List clicked');
+  };
+
+  const createHandler = () => {
+    // Add create functionality here
+    console.log('Create clicked');
+  };
+
+  const routes = [
+    {
+      path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT,
+      breadcrumbName: "Job Scheduler Management",
+    },
+    {
+      path: "",
+      breadcrumbName: "Job Group List",
+    },
+  ];
+
   return (
     <LayoutMenu>
-      <NxCardContainer header="JOB SCHEDULER MANAGEMENT">
-        <NxBaseContainer border header="JOB GROUP LIST" className="overflow-hidden">
-          <NxTable
-            idTable="job-group-list-table"
-            dataSource={accumulatedData}
-            totalData={data?.page?.totalElements}
-            current={page}
-            loading={loading}
-            columns={processedColumns}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            tableScrolled={{ y: 500, x: "max-content" }}
-            onSort={onSort}
-            usePagination={false}
-            useInfiniteScroll={true}
-            hasMore={hasMore}
-            onLoadMore={handleLoadMore}
-            loadMoreThreshold={20}
-            onRefresh={handleRefresh}
-            showRefresh={true}
-          />
-        </NxBaseContainer>
+      <BreadCrumb routes={routes} />
+      <NxCardContainer 
+        header="JOB GROUP LIST"
+        actionElement={
+          <div className="flex gap-2">
+            <ButtonComponent
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={downloadListHandler}
+              isPrimary={true}
+              className="px-2 py-2 rounded-lg min-h-[32px]"
+            >
+              <span className="text-xs font-medium tracking-tight">Download List</span>
+            </ButtonComponent>
+            <ButtonComponent
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={createHandler}
+              isPrimary={true}
+              className="px-2 py-2 rounded-lg min-h-[32px]"
+            >
+              <span className="text-xs font-medium tracking-tight">Create</span>
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <NxTable
+          idTable="job-group-list-table"
+          dataSource={accumulatedData}
+          totalData={data?.page?.totalElements}
+          current={page}
+          loading={loading}
+          columns={processedColumns}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          tableScrolled={{ y: 500, x: "max-content" }}
+          onSort={onSort}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={20}
+          onRefresh={handleRefresh}
+          showRefresh={true}
+        />
       </NxCardContainer>
     </LayoutMenu>
   );
