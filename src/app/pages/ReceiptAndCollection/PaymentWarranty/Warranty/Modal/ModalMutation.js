@@ -13,8 +13,15 @@ import SectionCard from "../../../../../../components/SectionCard";
 import { 
   getAllApprovalList,
   getListApprovalById,
-  getListCategory
+  getListCategory,
+  getMutationCategoryOptions,
+  createMutation,
+  updateMutation,
+  getDetailMutation
 } from "../../../../../../redux/slices/receipt_collection/warranty";
+
+import InputComponent from "../../../../../../components/InputComponent";
+
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import { showModalSuccess } from "../../../../../../redux/slices/general_slice";
@@ -27,12 +34,25 @@ const ModalMutation = ({
   modalType = "create",
   selectedRecord = null,
   warrantyId = null,
-  fetchMutation = () => {}
+  currencyDDL = null,
+  mutationDataInfo = [],
+  warrantyType = null,
+  headerCurrency = null,
+  fetchMutation = () => {},
+  isOffline = false
 }) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   
-  const { dataListAppHierId, dataListAppHierDetail, loading } = useSelector((state) => state.warranty);
+  const { 
+    dataListAppHierId, 
+    dataListAppHierDetail, 
+    loadingMutation, 
+    loadingApproval, 
+    loadingCreate,
+    dataDetailMutation,
+    loadingDetailMutation
+  } = useSelector((state) => state.warranty);
 
   const [errorMessage, setErrorMessage] = useState("");
   
@@ -55,9 +75,12 @@ const ModalMutation = ({
   useEffect(() => {
     if (isOpen) {
       dispatch(getAllApprovalList());
+      dispatch(getMutationCategoryOptions());
       
       if (modalType === "update" || modalType === "detail") {
-        // Handle pre-fill data if needed
+        if (selectedRecord?.id) {
+          dispatch(getDetailMutation({ id: selectedRecord.id }));
+        }
       } else {
         form.resetFields();
         setCurrent(0);
@@ -93,6 +116,35 @@ const ModalMutation = ({
       setAppHierDataDetail([]);
     }
   }, [dataListAppHierDetail]);
+
+  useEffect(() => {
+    if (dataDetailMutation) {
+      const type = dataDetailMutation.transTypeId === 14 ? "IN" : dataDetailMutation.transTypeId === 15 ? "OUT" : dataDetailMutation.transTypeId;
+      const source = dataDetailMutation.sourceId === 19 ? "Manual" : dataDetailMutation.sourceId === 20 ? "Automated" : dataDetailMutation.sourceId;
+      
+      const currencyId = currencyDDL?.data?.find(c => c.name === dataDetailMutation.currency)?.id;
+
+      form.setFieldsValue({
+        ...dataDetailMutation,
+        type: type,
+        source: source,
+        convertedCurrency: currencyId,
+        date: dataDetailMutation.transactionDate ? moment(dataDetailMutation.transactionDate) : null,
+      });
+
+      if (dataDetailMutation.appHierId) {
+        setSelectedHierarchy(dataDetailMutation.appHierId);
+      }
+
+      if (dataDetailMutation.attachmentDtoList) {
+        setListDataAttachment(dataDetailMutation.attachmentDtoList.map(item => ({
+          ...item,
+          uid: item.uid || item.id,
+          dataType: "exist"
+        })));
+      }
+    }
+  }, [dataDetailMutation, form, currencyDDL]);
 
   const next = () => {
     if (current === 0) {
@@ -137,27 +189,82 @@ const ModalMutation = ({
     handleCancel();
   };
 
-  const handleSubmit = () => {
-    setIsSubmitting(true);
-    const values = form.getFieldsValue(true);
-    
-    // Replace with real mutation submission call once API handles it
-    /*
-    const payload = {
-      ...values,
-      paymentWarrantyId: warrantyId,
-      appHierId: selectedHierarchy,
-      attachmentIds: listDataAttachment.filter(a => a.dataType === "exist").map(a => a.id)
-    };
-    dispatch(createPaymentWarrantyMutation(payload)).unwrap().then(...)
-    */
-    setTimeout(() => {
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      setIsSubmitting(true);
+
+      if (isOffline) {
+        // Unique check for mutationNumber
+        const isDuplicate = mutationDataInfo.some(m => 
+          m.mutationNumber === values.mutationNumber && 
+          (modalType === "create" || (selectedRecord && m.key !== selectedRecord.key))
+        );
+
+        if (isDuplicate) {
+          message.error("Mutation Number must be unique.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        setTimeout(() => {
+          setIsSubmitting(false);
+          handleClose();
+          fetchMutation(values);
+        }, 500);
+      } else {
+        // Online Submission
+        let parsedAmount = 0;
+        if (values.amount) parsedAmount = parseFloat(values.amount.toString().replace(/,/g, ""));
+        
+        let parsedRate = 0;
+        if (values.rate) parsedRate = parseFloat(values.rate.toString().replace(/,/g, ""));
+
+        let parsedEqvAmount = 0;
+        if (values.eqvAmount) parsedEqvAmount = parseFloat(values.eqvAmount.toString().replace(/,/g, ""));
+
+        const submitBody = {
+          paymentWarrantyId: warrantyId,
+          source: values.source,
+          mutationNumber: values.mutationNumber,
+          type: values.type, 
+          category: values.category,
+          transactionDate: values.date ? moment(values.date).toISOString(true) : null,
+          amount: parsedAmount,
+          currency: currencyDDL?.data?.find(c => c.id === values.convertedCurrency)?.name || "IDR",
+          rate: parsedRate,
+          equivalentAmount: parsedEqvAmount,
+          description: values.description,
+          appHierId: selectedHierarchy,
+          remark: values.remark,
+          attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id),
+        };
+
+        if (modalType === 'update' && selectedRecord?.id) {
+          submitBody.id = selectedRecord.id;
+        }
+
+        const action = modalType === 'update' ? updateMutation : createMutation;
+        const res = await dispatch(action({ body: submitBody })).unwrap();
+        const createdMutationId = res?.id || res || selectedRecord?.id;
+
+        // Upload new attachments
+        const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+        if (newAttachments.length > 0 && createdMutationId) {
+          await uploadAttachments(newAttachments, createdMutationId, "PAYMENT_WARRANTY",
+              (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+          );
+        }
+
+        setIsSubmitting(false);
+        handleClose();
+        if (fetchMutation) fetchMutation();
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
       setIsSubmitting(false);
-      setMutationData({});
-      dispatch(showModalSuccess({ title: "Successfull", description: "Mutation have been saved", return: false }));
-      handleClose();
-      fetchMutation();
-    }, 1000);
+      message.error("Please fill all required fields correctly.");
+    }
   };
 
   const steps = [
@@ -211,7 +318,7 @@ const ModalMutation = ({
               updateData={setListDataAttachment}
               service={receiptCollectionHttpService}
               configApplication={configApp.PAYMENT_SERVICE}
-              typeSelector="paymentWarrantyPartner"
+              typeSelector="warranty"
               dispatch={dispatch}
               getAPICategory={getListCategory}
               typeRBI={"data"}
@@ -232,14 +339,19 @@ const ModalMutation = ({
       footer={null}
       type="confirmation"
     >
-      <Spin spinning={loading || isSubmitting}>
+      <Spin spinning={loadingMutation || loadingApproval || loadingCreate || isSubmitting || loadingDetailMutation}>
         <div className="w-full h-full flex flex-col pt-4 gap-y-5">
-        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
+        {!isOffline && <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />}
         
         <Form layout="vertical" form={form} onFinish={handleSubmit} id="formRequest">
           <div className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}>
             <SectionCard title="MUTATION INFORMATION" defaultActiveKey={['1']}>
-              <MutationForm disabled={modalType === "detail"} />
+              <MutationForm 
+                disabled={modalType === "detail"} 
+                currencyDDL={currencyDDL} 
+                warrantyType={warrantyType}
+                headerCurrency={headerCurrency}
+              />
             </SectionCard>
           </div>
 
@@ -249,12 +361,16 @@ const ModalMutation = ({
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={(val) => {
-                  setSelectedHierarchy(val);
-                  form.setFieldsValue({ approvalHierarchy: val });
-                }}
                 disabled={modalType === "detail"}
               />
+              <Form.Item name="remark" label="Remark" rules={[{ required: modalType === "update" }]} className="mt-4">
+                <InputComponent 
+                  type="textarea" 
+                  rows={3} 
+                  placeholder="Remark" 
+                  disabled={modalType === "detail"} 
+                />
+              </Form.Item>
             </SectionCard>
           </div>
 
@@ -264,7 +380,7 @@ const ModalMutation = ({
                 type={modalType}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="paymentWarrantyPartner"
+                typeSelector="warranty"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}
@@ -280,24 +396,24 @@ const ModalMutation = ({
             {renderConfirmationContent()}
           </div>
         
-        <FormFooter
-          current={current}
-          totalSteps={steps.length}
-          onPrev={prev}
-          onNext={next}
-          onCancel={handleClose}
-          onClear={() => {
-            form.resetFields();
-            setSelectedHierarchy(null);
-            setListDataAttachment([]);
-            setMutationData({});
-          }}
-          useClearData={false}
-          useSaveDraft={false}
-          onSubmit={handleSubmit}
-          type={modalType}
-          isLoading={loading || isSubmitting}
-        />
+          <FormFooter
+            current={isOffline ? 0 : current}
+            totalSteps={isOffline ? 1 : steps.length}
+            onPrev={prev}
+            onNext={isOffline ? handleSubmit : (current === steps.length - 1 ? handleSubmit : next)}
+            onCancel={handleClose}
+            onClear={() => {
+              form.resetFields();
+              setSelectedHierarchy(null);
+              setListDataAttachment([]);
+              setMutationData({});
+            }}
+            useClearData={false}
+            useSaveDraft={false}
+            onSubmit={handleSubmit}
+            type={modalType}
+            isLoading={loadingMutation || loadingApproval || loadingCreate || isSubmitting}
+          />
         </Form>
       </div>
       </Spin>

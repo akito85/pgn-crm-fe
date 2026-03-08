@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Dropdown, Menu, Tooltip, Checkbox } from "antd";
-import { DownOutlined, EyeOutlined, DownloadOutlined } from "@ant-design/icons";
-import { Link, NavLink } from "react-router-dom";
+import { DownOutlined, EyeOutlined, DownloadOutlined,EditOutlined } from "@ant-design/icons";
+import { Link, useNavigate } from "react-router-dom";
+import { disabledActionByStatus } from "../../../../../utils";
 
 import SVGIcon from "../../../../../assets/Icon/index";
 
@@ -23,11 +24,14 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 
 // Column Configuration
 import { columnWarranty } from "./ColumnConfig/WarrantyColumns";
+import ListDetailWarranty from "./ListDetailWarranty";
+import { WARRANTY_STATUS, WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 
 // Redux / Service
 import {
   getAllWarrantyListPaginate,
   downloadWarrantyList,
+  getDetailWarranty,
   getApprovalHistory,
   downloadWarrantyListDetail
 } from "../../../../../redux/slices/receipt_collection/warranty";
@@ -41,14 +45,17 @@ import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { deleteWarranty } from "../../../../../redux/slices/receipt_collection/warranty";
 
 const ViewWarranty = () => {
-  const { data, loading, dataApprovalHistory } = useSelector(
+  const { data, loading, loadingList, dataApprovalHistory, data_detail } = useSelector(
     (state) => state.warranty
   );
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
+  const isSubmitter = data?.isSubmitter || false;
+  const isApprover = data?.isApprover || false;
   const detailRef = useRef(null);
+  const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -163,14 +170,22 @@ const ViewWarranty = () => {
   };
 
   const handleDetail = (record) => {
+    if (isApprover) {
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY, { state: { id: record?.id } });
+      return;
+    }
+
     const recordKey = record.billingCode || record.invoiceNumber || record.id;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
       setActiveRowKey(null);
+      setSelectedRecord(null);
     } else {
       setActiveRowKey(recordKey);
+      setSelectedRecord(record);
       setPageDetail(true);
+      dispatch(getDetailWarranty({ id: record.id }));
     }
   };
 
@@ -186,11 +201,13 @@ const ViewWarranty = () => {
     if (dataApprovalHistory && (dataApprovalHistory?.approver || dataApprovalHistory?.history)) {
       setDataApprovalHistoryFix({
         dataApprover: {
+          create: dataApprovalHistory?.approver?.PAYMENT_WARRANTY || [],
           hold: dataApprovalHistory?.approver?.WARRANTY_HOLD || [],
           release: dataApprovalHistory?.approver?.WARRANTY_RELEASE || [],
           refund: dataApprovalHistory?.approver?.WARRANTY_REFUND || [],
         },
         dataHistory: {
+          create: dataApprovalHistory?.history?.PAYMENT_WARRANTY || [],
           hold: dataApprovalHistory?.history?.WARRANTY_HOLD || [],
           release: dataApprovalHistory?.history?.WARRANTY_RELEASE || [],
           refund: dataApprovalHistory?.history?.WARRANTY_REFUND || [],
@@ -211,7 +228,7 @@ const ViewWarranty = () => {
 
   const handleHistory = async (record) => {
     try {
-      await dispatch(getApprovalHistory(record.id)).unwrap();
+      await dispatch(getApprovalHistory({ id: record.id })).unwrap();
       setOpenModalHistory(true);
     } catch (error) {
       setOpenModalHistory(false);
@@ -327,177 +344,227 @@ const ViewWarranty = () => {
       render: (record, data_length) => (
         data_length > 3 ? (
           <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY}
-              state={{ id: record?.id }}
-            >
-              <ButtonComponent
-                className="gap-5"
-                icon={<EyeOutlined style={{ fontSize: "24px", color: "#0075bf" }} />}
-                border={false}
-                type="action"
-              />
-            </Link>
+            <ButtonComponent
+              className="gap-5"
+              icon={<EyeOutlined style={{ fontSize: "24px", color: "#0075bf" }} />}
+              border={false}
+              type="action"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDetail(record);
+              }}
+            />
           </Tooltip>
         ) : (
           <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY}
-              state={{ id: record?.id }}
-            >
-              <div className="cursor-pointer">
-                <EyeOutlined style={{ fontSize: "16px", color: "#0075bf" }} />
-              </div>
-            </Link>
+            <div className="cursor-pointer" onClick={(e) => {
+              e.stopPropagation();
+              handleDetail(record);
+            }}>
+              <EyeOutlined style={{ fontSize: "16px", color: "#0075bf" }} />
+            </div>
           </Tooltip>
         )
       ),
     },
     {
-      action: "Refund",
+      action: "Update",
       type: "table",
       render: (record, data_length) => {
-        const isDisabled = record?.statusApproval !== "Approved" ||
-          (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0);
-
+        const disabled = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
+        
         return data_length > 3 ? (
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => {
-              if (!isDisabled) {
-                setActiveRowKey(record.id);
-                setSelectedRecord(record);
-                setModalRefund(true);
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!disabled) {
+                navigate(RECEIPT_AND_COLLECTION_ROUTES.UPDATE_WARRANTY, { state: { id: record?.id } });
               }
             }}
             type="action"
-            disabled={isDisabled}
-            icon={<SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+            disabled={disabled}
+            icon={<EditOutlined style={{ fontSize: "16px", color: disabled ? "#D3D3D3" : "#000" }} />}
           >
-            <span className={isDisabled ? "text-gray-400" : "text-black"}>Refund</span>
+            <span className={disabled ? "text-gray-400" : "text-black"}>Update</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Refund">
-            <div
-              onClick={() => {
-                if (!isDisabled) {
-                  setActiveRowKey(record.id);
-                  setSelectedRecord(record);
-                  setModalRefund(true);
+          <Tooltip title={"Update"}>
+            <Link
+              to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_WARRANTY}
+              state={{ id: record?.id }}
+              className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+              onClick={(e) => {
+                if (disabled) {
+                  e.preventDefault();
+                  e.stopPropagation();
                 }
               }}
-              className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
-            </div>
+              <EditOutlined style={{ fontSize: "16px", color: disabled ? "#d9d9d9" : "#0075bf" }} />
+            </Link>
           </Tooltip>
         );
       },
     },
-    {
-      action: "Hold",
-      type: "table",
-      render: (record, data_length) => {
-        const isDisabled = !(record?.statusApproval === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED");
+    // {
+    //   action: "Refund",
+    //   type: "table",
+    //   render: (record, data_length) => {
+    //     const isDisabled = record?.statusApproval !== "Approved" ||
+    //       (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0);
 
-        return data_length > 3 ? (
-          <ButtonComponent
-            border={false}
-            className="gap-2"
-            onClick={() => {
-              if (!isDisabled) {
-                setActiveRowKey(record.id);
-                setSelectedRecord(record);
-                setModalHold(true);
-              }
-            }}
-            type="action"
-            disabled={isDisabled}
-            icon={<SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
-          >
-            <span className={isDisabled ? "text-gray-400" : "text-black"}>Hold</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Hold">
-            <div
-              onClick={() => {
-                if (!isDisabled) {
-                  setActiveRowKey(record.id);
-                  setSelectedRecord(record);
-                  setModalHold(true);
-                }
-              }}
-              className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Release",
-      type: "table",
-      render: (record, data_length) => {
-        const isDisabled = !(record?.status === "Hold" && record?.statusApproval === "Approved");
+    //     return data_length > 3 ? (
+    //       <ButtonComponent
+    //         border={false}
+    //         className="gap-2"
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           if (!isDisabled) {
+    //             setActiveRowKey(record.id);
+    //             setSelectedRecord(record);
+    //             setModalRefund(true);
+    //           }
+    //         }}
+    //         type="action"
+    //         disabled={isDisabled}
+    //         icon={<SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+    //       >
+    //         <span className={isDisabled ? "text-gray-400" : "text-black"}>Refund</span>
+    //       </ButtonComponent>
+    //     ) : (
+    //       <Tooltip title="Refund">
+    //         <div
+    //           onClick={(e) => {
+    //             e.stopPropagation();
+    //             if (!isDisabled) {
+    //               setActiveRowKey(record.id);
+    //               setSelectedRecord(record);
+    //               setModalRefund(true);
+    //             }
+    //           }}
+    //           className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    //         >
+    //           <SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
+    //         </div>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
+    // {
+    //   action: "Hold",
+    //   type: "table",
+    //   render: (record, data_length) => {
+    //     const isDisabled = !(record?.statusApproval === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED");
 
-        return data_length > 3 ? (
-          <ButtonComponent
-            border={false}
-            className="gap-2"
-            onClick={() => {
-              if (!isDisabled) {
-                setActiveRowKey(record.id);
-                setSelectedRecord(record);
-                setModalRelease(true);
-              }
-            }}
-            type="action"
-            disabled={isDisabled}
-            icon={<SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
-          >
-            <span className={isDisabled ? "text-gray-400" : "text-black"}>Release</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Release">
-            <div
-              onClick={() => {
-                if (!isDisabled) {
-                  setActiveRowKey(record.id);
-                  setSelectedRecord(record);
-                  setModalRelease(true);
-                }
-              }}
-              className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
+    //     return data_length > 3 ? (
+    //       <ButtonComponent
+    //         border={false}
+    //         className="gap-2"
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           if (!isDisabled) {
+    //             setActiveRowKey(record.id);
+    //             setSelectedRecord(record);
+    //             setModalHold(true);
+    //           }
+    //         }}
+    //         type="action"
+    //         disabled={isDisabled}
+    //         icon={<SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+    //       >
+    //         <span className={isDisabled ? "text-gray-400" : "text-black"}>Hold</span>
+    //       </ButtonComponent>
+    //     ) : (
+    //       <Tooltip title="Hold">
+    //         <div
+    //           onClick={(e) => {
+    //             e.stopPropagation();
+    //             if (!isDisabled) {
+    //               setActiveRowKey(record.id);
+    //               setSelectedRecord(record);
+    //               setModalHold(true);
+    //             }
+    //           }}
+    //           className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    //         >
+    //           <SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
+    //         </div>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
+    // {
+    //   action: "Release",
+    //   type: "table",
+    //   render: (record, data_length) => {
+    //     const isDisabled = !(record?.status === "Hold" && record?.statusApproval === "Approved");
+
+    //     return data_length > 3 ? (
+    //       <ButtonComponent
+    //         border={false}
+    //         className="gap-2"
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           if (!isDisabled) {
+    //             setActiveRowKey(record.id);
+    //             setSelectedRecord(record);
+    //             setModalRelease(true);
+    //           }
+    //         }}
+    //         type="action"
+    //         disabled={isDisabled}
+    //         icon={<SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+    //       >
+    //         <span className={isDisabled ? "text-gray-400" : "text-black"}>Release</span>
+    //       </ButtonComponent>
+    //     ) : (
+    //       <Tooltip title="Release">
+    //         <div
+    //           onClick={(e) => {
+    //             e.stopPropagation();
+    //             if (!isDisabled) {
+    //               setActiveRowKey(record.id);
+    //               setSelectedRecord(record);
+    //               setModalRelease(true);
+    //             }
+    //           }}
+    //           className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    //         >
+    //           <SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
+    //         </div>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
     {
-      action: "History",
+      action: "history",
       type: "table",
       render: (record, data_length) => (
         data_length > 3 ? (
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => handleHistory(record)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleHistory(record);
+            }}
             type="action"
-            icon={<SVGIcon name="IconLogHistory" color={"#000000"} width={16} />}
+            icon={<SVGIcon name="IconLogHistory" color={"#000"} width={16} />}
           >
             <span className="text-black">Approval History</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Approval History">
-            <div
-              onClick={() => handleHistory(record)}
+          <Tooltip title={'Approval History'}>
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleHistory(record);
+              }} 
               className="cursor-pointer"
             >
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={16} />
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
             </div>
           </Tooltip>
         )
@@ -506,28 +573,41 @@ const ViewWarranty = () => {
     {
       action: "Delete",
       type: "table",
-      render: (record, data_length) => (
-        data_length > 3 ? (
+      render: (record, data_length) => {
+        const disabled = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
+
+        return data_length > 3 ? (
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => handleDelete(record)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!disabled) {
+                handleDelete(record);
+              }
+            }}
             type="action"
-            icon={<SVGIcon name="IconDelete" color={"#BE3036"} width={16} />}
+            disabled={disabled}
+            icon={<SVGIcon name="IconDelete" color={disabled ? "#D3D3D3" : "#BE3036"} width={16} />}
           >
-            <span className="text-[#BE3036]">Delete</span>
+            <span className={disabled ? "text-gray-400" : "text-[#BE3036]"}>Delete</span>
           </ButtonComponent>
         ) : (
           <Tooltip title="Delete">
             <div
-              onClick={() => handleDelete(record)}
-              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled) {
+                  handleDelete(record);
+                }
+              }}
+              className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
             >
-              <SVGIcon name="IconDelete" color={"#BE3036"} width={16} />
+              <SVGIcon name="IconDelete" color={disabled ? "#D3D3D3" : "#BE3036"} width={16} />
             </div>
           </Tooltip>
-        )
-      ),
+        );
+      }
     },
   ];
 
@@ -551,8 +631,11 @@ const ViewWarranty = () => {
   ]);
 
   const actionColumns = useColumnActionPermission(
-    ["view", "refund", "hold", "release", "history", "delete"],
-    itemActions
+    ["view", "refund", "hold", "release", "history", "delete","Update"],
+    itemActions,
+    "View",
+    "page",
+    true
   );
 
   const allColumns = useMemo(() => {
@@ -609,18 +692,21 @@ const ViewWarranty = () => {
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
-            loading={loading}
-            onRow={(record) => ({
-              onClick: () => handleDetail(record),
-              style: {
-                cursor: "pointer",
-                backgroundColor:
-                  activeRowKey === (record.billingCode || record.invoiceNumber || record.id)
-                    ? "#bae7ff"
-                    : "transparent",
-                transition: "background-color 0.2s ease",
-              },
-            })}
+            loading={loadingList}
+            onRow={(record) => {
+              const recordKey = record.billingCode || record.invoiceNumber || record.id;
+              const isActive = activeRowKey === recordKey;
+              
+              return {
+                onClick: () => handleDetail(record),
+                className: isActive ? "row-selected" : "",
+                style: {
+                  cursor: "pointer",
+                  backgroundColor: isActive ? "#fffbea" : "transparent",
+                  transition: "background-color 0.2s ease",
+                },
+              };
+            }}
           />
         </div>
       </CardContainer>
@@ -673,6 +759,12 @@ const ViewWarranty = () => {
           </span>
         </div>
       </ModalConfirm>
+
+      {pageDetail && activeRowKey && selectedRecord && (
+        <div ref={detailRef} className="mt-5">
+           <ListDetailWarranty id={selectedRecord.id} isEmbedded={true} />
+        </div>
+      )}
 
       {/* </Spin> */}
     </LayoutMenu>

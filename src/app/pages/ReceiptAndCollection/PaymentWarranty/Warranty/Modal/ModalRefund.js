@@ -269,25 +269,9 @@ const ModalRefund = ({
     setLoadingSave(true);
     
     try {
-      // 1. Upload new attachments first to get their IDs
-      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-      const attachmentIds = (listDataAttachment.filter(item => item.dataType === "exist") || []).map(item => item.id);
-      
-      for (const element of newAttachments) {
-        const uploadBody = {
-          // referensiId: null, // No reference ID yet as per new unified submit flow
-          files: element.file,
-          category: "PAYMENT_WARRANTY",
-          fileCategoryId: element.fileCategoryId,
-        };
-        const uploadRes = await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
-        if (uploadRes?.data?.id) {
-          attachmentIds.push(uploadRes.data.id);
-        }
-      }
-
+      // 1. Prepare unified submission body first
       const submitBody = {
-        warrantyTransTypeId: WARRANTY_TRANSACTION_NAMES.REFUND, // 12 = Refund
+        type: WARRANTY_TRANSACTION_NAMES.REFUND,
         appHierId: selectedHierarchy,
         customerId: dataCustomerInfoSelect[0]?.id,
         items: dataWarrantyInfoSelect.map((item, index) => ({
@@ -298,12 +282,28 @@ const ModalRefund = ({
             ? moment(refundDateData[dataSourceRefundInfoWithKeys[index]?.key]).format("YYYY-MM-DDTHH:mm:ss") 
             : null,
         })),
-        attachmentIds: attachmentIds,
         remark: remarkRefundInformation,
       };
 
-      // 3. Dispatch the unified thunk
-      await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+      // 2. Dispatch the unified thunk
+      const submitRes = await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+      const transIds = submitRes?.data?.transIds || [];
+
+      // 3. Upload new attachments per transId
+      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+      if (newAttachments.length > 0 && transIds.length > 0) {
+        for (const transId of transIds) {
+          for (const element of newAttachments) {
+            const uploadBody = {
+              referensiId: transId, // Link attachment to the returned transaction ID
+              files: element.file,
+              category: "PAYMENT_WARRANTY_TRANS",
+              fileCategoryId: element.fileCategoryId,
+            };
+            await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+          }
+        }
+      }
 
       // 4. Cleanup and close
       handleRefresh();

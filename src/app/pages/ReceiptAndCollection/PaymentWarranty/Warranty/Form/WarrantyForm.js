@@ -16,15 +16,29 @@ const WarrantyForm = ({
   columnMutation,
   setIsModalMutationOpen,
   dispatch,
-  getPaymentWarrantyPartnerBranchList
+  getPaymentWarrantyPartnerBranchList,
+  dataServiceAgreement,
+  handleMutationEdit,
+  handleMutationDelete,
+  isCreate,
+  warrantyType,
+  headerCurrency,
+  isPartialEdit,
+  isApprover
 }) => {
   return (
     <div className="flex flex-col gap-8 mt-8 pb-4">
       <AccountInfoSection 
+        form={form}
         dataAccNumber={dataAccNumber} 
         handleAccountChange={handleAccountChange} 
+        disabled={isPartialEdit}
       />
-      <ServiceAgreementSection />
+      <ServiceAgreementSection 
+        form={form}
+        dataServiceAgreement={dataServiceAgreement}
+        disabled={isPartialEdit}
+      />
       <PaymentGuaranteeSection 
         form={form}
         dispatch={dispatch}
@@ -33,11 +47,17 @@ const WarrantyForm = ({
         currencyDDL={currencyDDL}
         rateTypeDDL={rateTypeDDL}
         getPaymentWarrantyPartnerBranchList={getPaymentWarrantyPartnerBranchList}
+        isPartialEdit={isPartialEdit}
       />
       <MutationInfoSection 
         mutationDataInfo={mutationDataInfo}
         columnMutation={columnMutation}
         setIsModalMutationOpen={setIsModalMutationOpen}
+        handleEdit={handleMutationEdit}
+        handleDelete={handleMutationDelete}
+        isCreate={isCreate}
+        disabled={isPartialEdit}
+        isApprover={isApprover}
       />
     </div>
   );
