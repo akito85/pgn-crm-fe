@@ -4,6 +4,7 @@ import { dateFormatting, renderColumn } from "../../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import { MoreOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../assets/Icon/index";
+import { WARRANTY_STATUS, WARRANTY_APPROVAL_STATUS } from "../../../../../../constants/warranty";
 
 export const columnMutation = (
   page = 1,
@@ -31,11 +32,11 @@ export const columnMutation = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      key: "noDocumentMutation",
+      key: "documentNumber",
       title: "REFF. DOCUMENT NUMBER",
-      dataIndex: "noDocumentMutation",
+      dataIndex: "documentNumber",
       sorter: true,
-      ...getColumnSearchPropsPaging("noDocumentMutation", searchInput, searchedColumn, searchText, handleSearch),
+      ...getColumnSearchPropsPaging("documentNumber", searchInput, searchedColumn, searchText, handleSearch),
       render: (text, record) => text || record.noDocumentMutation || "",
     },
     {
@@ -47,20 +48,20 @@ export const columnMutation = (
       render: (text, record) => text || record?.payWarranty?.documentNumber || "",
     },
     {
-      key: "typePaymentWarranty",
+      key: "type",
       title: "TYPE",
-      dataIndex: "typePaymentWarranty",
+      dataIndex: "type",
       sorter: true,
-      ...getColumnSearchPropsPaging("typePaymentWarranty", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record?.typePaymentWarranty || "",
+      ...getColumnSearchPropsPaging("type", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => text || record?.type || "",
     },
     {
-      key: "categoryMutation",
+      key: "category",
       title: "CATEGORY",
-      dataIndex: "categoryMutation",
+      dataIndex: "category",
       sorter: true,
-      ...getColumnSearchPropsPaging("categoryMutation", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => record?.categoryMutation || "",
+      ...getColumnSearchPropsPaging("category", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => record?.category || "",
     },
     {
       key: "date",
@@ -79,16 +80,16 @@ export const columnMutation = (
       align: "right",
       sorter: true,
       render: (text, record) => {
-        const currency = record.currency || record.currencyName;
-        return (currency ? `${currency} ` : "") + text?.toLocaleString();
+        //const currency = record.currency || record.currencyName;
+        return record.amount; //(currency ? `${currency} ` : "") + text?.toLocaleString();
       }
     },
     {
       key: "convertedCurrency",
       title: "CONVERTED CURRENCY",
-      dataIndex: "convertedCurrencyName",
+      dataIndex: "convertedCurrency",
       sorter: true,
-      ...getColumnSearchPropsPaging("convertedCurrencyName", searchInput, searchedColumn, searchText, handleSearch),
+      ...getColumnSearchPropsPaging("convertedCurrency", searchInput, searchedColumn, searchText, handleSearch),
       render: (text, record) => text || record.currency || "",
     },
     {
@@ -102,13 +103,13 @@ export const columnMutation = (
     {
       key: "equivalentAmount",
       title: "EQV AMOUNT",
-      dataIndex: "eqvAmount",
+      dataIndex: "equivalentAmount",
       align: "right",
       sorter: true,
       render: (text, record) => {
-        const val = text || record.equivalentAmount;
-        const currency = record.currency || record.currencyName;
-        return (currency ? `${currency} ` : "") + val?.toLocaleString();
+        // const val = text || record.equivalentAmount;
+        // const currency = record.currency || record.equivalentAmount;
+        return record.equivalentAmount;//(currency ? `${currency} ` : "") + val?.toLocaleString();
       }
     },
     {
@@ -150,11 +151,11 @@ export const columnMutation = (
       fixed: "right",
       width: 120,
       render: (record) => {
-        const isPending = record.approvalStatus === "Waiting Approval";
-        const isInactive = record.status === "Inactive";
+        const isPending = record.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
+        const isInactive = record.status === WARRANTY_STATUS.INACTIVE;
         const isDisabled = isPending || isInactive;
-        const tooltipEdit = isPending ? "Waiting Approval" : isInactive ? "Inactive" : "Update";
-        const tooltipDelete = isPending ? "Waiting Approval" : isInactive ? "Inactive" : "Delete";
+        const tooltipEdit = isPending ? WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL : isInactive ? WARRANTY_STATUS.INACTIVE : "Update";
+        const tooltipDelete = isPending ? WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL : isInactive ? WARRANTY_STATUS.INACTIVE : "Delete";
 
         return (
           <div className="w-full flex justify-center items-center py-1 gap-2">
