@@ -4,7 +4,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import DateComponent from "../../../../../../components/DateComponent";
 import { useSelector } from "react-redux";
-import { MUTATION_TYPES, MUTATION_SOURCES } from "../../../../../../constants/warranty";
+import { MUTATION_TYPES, MUTATION_SOURCES, WARRANTY_TYPES } from "../../../../../../constants/warranty";
 
 
 const { Option } = Select;
@@ -105,7 +105,18 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
         <Form.Item 
           name="convertedCurrency" 
           label="Converted Currency" 
-          rules={[{ required: true }]}
+          rules={[
+            { required: true },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                const selectedCurrency = currencyDDL?.data?.find(c => c.id === value)?.name;
+                if (!value || selectedCurrency !== headerCurrency) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error("Converted currency must be different from warranty currency"));
+              },
+            }),
+          ]}
           // API: convertedCurrency (maps to currency name)
         >
           <Select placeholder="Select Currency" disabled={disabled}>
@@ -121,13 +132,13 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
         <Form.Item 
           name="rate" 
           label="Rate" 
-          rules={[{ required: warrantyType === "CASH" }]}
+          rules={[{ required: warrantyType === WARRANTY_TYPES.CASH }]}
           // API: rate
           getValueFromEvent={(val) => val.floatValue}
         >
           <InputComponent 
             placeholder="Rate" 
-            disabled={disabled || warrantyType !== "CASH"} 
+            disabled={disabled || warrantyType !== WARRANTY_TYPES.CASH} 
             type="numeric"
             thousandSeparator=","
             decimalSeparator="."
