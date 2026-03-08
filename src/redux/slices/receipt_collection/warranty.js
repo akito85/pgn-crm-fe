@@ -714,10 +714,10 @@ export const updateMutation = createAsyncThunk(
 
 export const updatePaymentWarranty = createAsyncThunk(
   "UPDATE_PAYMENT_WARRANTY",
-  async ({ body }, thunkAPI) => {
+  async ({ id, body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-warranty/update";
-      const response = await receiptCollectionHttpService.updateDataPost(url, body);
+      const url = `/v1/dbs/api/payment-warranty/update/${id}`;
+      const response = await receiptCollectionHttpService.updateData(url, body);
       const successBody = {
         title: `Successful`,
         description: "Your warranty has been updated.",

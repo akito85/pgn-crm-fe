@@ -55,9 +55,9 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   const [pageSize, setPageSize] = useState(10);
   const [fixedColumns, setFixedColumns] = useState({ left: ["no"], right: [] });
 
-  const isHold = true; //data_detail?.withHold === true;
-  const isRelease = true;//data_detail?.withRelease === true;
-  const isRefund = true;//data_detail?.withRefund === true;
+  const isHold = data_detail?.withHold === true; // true;
+  const isRelease = data_detail?.withRelease === true; // true;
+  const isRefund = data_detail?.withRefund === true; // true;
 
   useEffect(() => {
     if (id) {
@@ -178,7 +178,8 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                   <Spin spinning={loadingMutation}>
                     <TableRBI
                       dataSource={transactionHoldItems.map((item, index) => ({ ...item, key: index + 1 }))}
-                      columns={applyFixedColumns(processedColumnsHold, fixedColumns)}
+                      columns={processedColumnsHold}
+                      fixedColumns={{ left: ["no"], right: ["holdAmount", "status", "approvalStatus"] }}
                       current={page}
                       pageSize={pageSize}
                       onChange={(p, s) => { setPage(p); setPageSize(s); }}
@@ -201,7 +202,8 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                   <Spin spinning={loadingMutation}>
                     <TableRBI
                       dataSource={transactionReleaseItems.map((item, index) => ({ ...item, key: index + 1 }))}
-                      columns={applyFixedColumns(processedColumnsRelease, fixedColumns)}
+                      columns={processedColumnsRelease}
+                      fixedColumns={{ left: ["no"], right: ["releaseAmount", "status", "approvalStatus"] }}
                       current={page}
                       pageSize={pageSize}
                       onChange={(p, s) => { setPage(p); setPageSize(s); }}
@@ -224,7 +226,8 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                   <Spin spinning={loadingMutation}>
                     <TableRBI
                       dataSource={transactionRefundItems.map((item, index) => ({ ...item, key: index + 1 }))}
-                      columns={applyFixedColumns(processedColumnsRefund, fixedColumns)}
+                      columns={processedColumnsRefund}
+                      fixedColumns={{ left: ["no"], right: ["date", "refundAmount", "status", "approvalStatus"] }}
                       current={page}
                       pageSize={pageSize}
                       onChange={(p, s) => { setPage(p); setPageSize(s); }}

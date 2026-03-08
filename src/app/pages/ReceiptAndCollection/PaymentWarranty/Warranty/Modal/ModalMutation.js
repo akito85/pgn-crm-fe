@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Tabs, message, Spin } from "antd";
+import { Form, Tabs, message, Spin, Select } from "antd";
 import DOMPurify from "dompurify";
 import moment from "moment";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
@@ -16,9 +16,9 @@ import {
   getListCategory,
   getMutationCategoryOptions,
   createMutation,
-  updateMutation,
   getDetailMutation
 } from "../../../../../../redux/slices/receipt_collection/warranty";
+import { getCurrencyDDL } from "../../../../../../redux/slices/receipt_collection/receipt";
 
 import InputComponent from "../../../../../../components/InputComponent";
 
@@ -75,10 +75,12 @@ const ModalMutation = ({
     if (isOpen) {
       dispatch(getAllApprovalList());
       dispatch(getMutationCategoryOptions());
+      dispatch(getCurrencyDDL());
       
       if (modalType !== "create") {
-        if (selectedRecord?.id) {
-          dispatch(getDetailMutation({ id: selectedRecord.id }));
+        const targetId = selectedRecord?.id || selectedRecord?.no;
+        if (targetId) {
+          dispatch(getDetailMutation({ id: targetId }));
         }
       } else {
         form.resetFields();
@@ -118,21 +120,25 @@ const ModalMutation = ({
 
   useEffect(() => {
     if (dataDetailMutation) {
-      const type = dataDetailMutation.transTypeId === 14 ? "IN" : dataDetailMutation.transTypeId === 15 ? "OUT" : dataDetailMutation.transTypeId;
-      const source = dataDetailMutation.sourceId === 19 ? "Manual" : dataDetailMutation.sourceId === 20 ? "Automated" : dataDetailMutation.sourceId;
+      const type = dataDetailMutation.type;
+      const source = dataDetailMutation.source;
       
-      const currencyId = currencyDDL?.data?.find(c => c.name === dataDetailMutation.currency)?.id;
+      const convertedCurrency = dataDetailMutation.convertedCurrency;
 
       form.setFieldsValue({
         ...dataDetailMutation,
         type: type,
         source: source,
-        convertedCurrency: currencyId,
+        convertedCurrency: convertedCurrency,
+        mutationNumber: dataDetailMutation.mutationNumber || dataDetailMutation.documentNumber,
+        eqvAmount: dataDetailMutation.eqvAmount || dataDetailMutation.equivalentAmount,
         date: dataDetailMutation.transactionDate ? moment(dataDetailMutation.transactionDate) : null,
       });
 
-      if (dataDetailMutation.appHierId) {
-        setSelectedHierarchy(dataDetailMutation.appHierId);
+      const appHierId = dataDetailMutation.appHierId || dataDetailMutation.apphierId;
+      if (appHierId) {
+        setSelectedHierarchy(appHierId);
+        form.setFieldsValue({ appHierId: appHierId });
       }
 
       if (dataDetailMutation.attachmentDtoList) {
@@ -150,22 +156,18 @@ const ModalMutation = ({
       form.validateFields(["source", "mutationNumber", "type", "category", "date", "amount", "convertedCurrency", "rate", "eqvAmount", "description"])
         .then(() => {
           const values = form.getFieldsValue();
-          const currencyName = currencyDDL?.data?.find(c => c.id === values.convertedCurrency)?.name || "-";
+          const currencyName = values.convertedCurrency || "-";
           setMutationData({
             ...values,
             convertedCurrencyName: currencyName
           });
           setCurrent(prev => prev + 1);
         })
-        .catch(err => {
-          message.error("Please fill all required fields correctly.");
-        });
     } else if (current === 1) {
-      form.validateFields(["approvalHierarchy", "remark"])
-        .then(() => setCurrent(prev => prev + 1))
-        .catch(err => {
-          message.error("Please select an Approval Hierarchy.");
-        });
+      if (!selectedHierarchy) {
+        return message.error("Please select an Approval Hierarchy.");
+      }
+      setCurrent(prev => prev + 1);
     } else if (current === 2) {
       if (listDataAttachment.length === 0) {
         message.warning("Please add at least one attachment.");
@@ -212,20 +214,18 @@ const ModalMutation = ({
           category: values.category,
           transactionDate: values.date ? moment(values.date).toISOString(true) : null,
           amount: parsedAmount,
-          currency: currencyDDL?.data?.find(c => c.id === values.convertedCurrency)?.name || "IDR",
+          currency: values.convertedCurrency || "IDR",
           rate: parsedRate,
           equivalentAmount: parsedEqvAmount,
           description: values.description,
           appHierId: selectedHierarchy,
-          remark: values.remark,
           attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id),
         };
 
-        if (modalType !== 'create' && selectedRecord?.id) {
-          submitBody.id = selectedRecord.id;
+        if (modalType !== 'create' && (selectedRecord?.id || selectedRecord?.no)) {
+          submitBody.id = selectedRecord.id || selectedRecord.no;
         }
-
-        const action = modalType !== 'create' ? updateMutation : createMutation;
+        const action = createMutation;
         const res = await dispatch(action({ body: submitBody })).unwrap();
         const createdMutationId = res?.id || res || selectedRecord?.id;
 

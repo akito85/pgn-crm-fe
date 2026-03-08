@@ -16,6 +16,8 @@ export const columnMutation = (
   handleEdit = () => {},
   handleDelete = () => {},
   handleHistory = () => {},
+  handleApprove = () => {},
+  handleReject = () => {},
   isCreate = false,
   disabled = false,
   isApprover = false
@@ -29,12 +31,12 @@ export const columnMutation = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      key: "mutationNumber",
+      key: "noDocumentMutation",
       title: "REFF. DOCUMENT NUMBER",
-      dataIndex: "mutationNumber",
+      dataIndex: "noDocumentMutation",
       sorter: true,
-      ...getColumnSearchPropsPaging("mutationNumber", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record.documentNumber || "",
+      ...getColumnSearchPropsPaging("noDocumentMutation", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => text || record.noDocumentMutation || "",
     },
     {
       key: "source",
@@ -45,20 +47,20 @@ export const columnMutation = (
       render: (text, record) => text || record?.payWarranty?.documentNumber || "",
     },
     {
-      key: "type",
+      key: "typePaymentWarranty",
       title: "TYPE",
-      dataIndex: "type",
+      dataIndex: "typePaymentWarranty",
       sorter: true,
-      ...getColumnSearchPropsPaging("type", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record?.warrantyTranstype?.warrantyTranstypeName || "",
+      ...getColumnSearchPropsPaging("typePaymentWarranty", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => text || record?.typePaymentWarranty || "",
     },
     {
-      key: "category",
+      key: "categoryMutation",
       title: "CATEGORY",
-      dataIndex: "category",
+      dataIndex: "categoryMutation",
       sorter: true,
-      ...getColumnSearchPropsPaging("category", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => record?.category || "",
+      ...getColumnSearchPropsPaging("categoryMutation", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => record?.categoryMutation || "",
     },
     {
       key: "date",
@@ -140,6 +142,7 @@ export const columnMutation = (
   }
 
   if (!disabled && !isApprover) {
+    // ... existing logic for requester (Edit/Delete/More)
     columns.push({
       title: "ACTION",
       key: "action",
@@ -207,6 +210,40 @@ export const columnMutation = (
                 </div>
               </Popover>
             )}
+          </div>
+        );
+      },
+    });
+  }
+
+  if (isApprover) {
+    columns.push({
+      title: "ACTION",
+      key: "action",
+      align: "center",
+      fixed: "right",
+      width: 120,
+      render: (record) => {
+        if (!record.isApproval) return null;
+
+        return (
+          <div className="w-full flex justify-center items-center py-1 gap-4">
+            <Tooltip title="Reject">
+              <div
+                className="cursor-pointer"
+                onClick={() => handleReject(record)}
+              >
+                <SVGIcon name="IconReject" width={20} color="#D90000" />
+              </div>
+            </Tooltip>
+            <Tooltip title="Approve">
+              <div
+                className="cursor-pointer"
+                onClick={() => handleApprove(record)}
+              >
+                <SVGIcon name="IconApprove" width={20} color="#ACC424" />
+              </div>
+            </Tooltip>
           </div>
         );
       },

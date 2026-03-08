@@ -26,7 +26,7 @@ const MutationInfoSection = ({
       <TableRBI
           idTable="table-mutation"
           dataSource={mutationDataInfo}
-          columns={columnMutation(1, 10, null, null, "", () => {}, {}, handleEdit, handleDelete, isCreate, disabled, isApprover)}
+          columns={columnMutation(1, 10, null, null, "", () => {}, {}, handleEdit, handleDelete, () => {}, () => {}, () => {}, isCreate, disabled, isApprover)}
           current={1}
           pageSize={10}
           totalData={mutationDataInfo.length}
