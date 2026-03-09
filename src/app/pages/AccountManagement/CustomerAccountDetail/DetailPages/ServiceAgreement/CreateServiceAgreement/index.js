@@ -1645,6 +1645,13 @@ const CreateServiceAgreement = ({ saType }) => {
     ];
   }
 
+  if (segment === "KI") {
+    saInformationFields = [
+      ...saInformationFields,
+      'commitmentDate',
+    ];
+  }
+
 
   const functionCheckSaInformation = () => {
     form
@@ -1884,10 +1891,14 @@ const CreateServiceAgreement = ({ saType }) => {
             saDetailObj.productVersionId !== undefined
               ? saDetailObj.productVersionId
               : null,
-          // Add SA Child Type to payload
-          saChildType: saInfoObj?.serviceAgreementTypeValue === "ADDON"
-            ? saDetailObj?.productId : saInfoObj?.serviceAgreementTypeValue === "OTHERS"
-              ? saDetailObj?.serviceAgreementChildType : null,
+          // Include saChildType only for non-main SA (isMain === "N")
+          ...(isMain !== true && {
+            saChildType: saInfoObj?.serviceAgreementTypeValue === "ADDON"
+              ? saDetailObj?.productId
+              : saInfoObj?.serviceAgreementTypeValue === "OTHERS"
+                ? saDetailObj?.serviceAgreementChildType
+                : null,
+          }),
           isCustom: saDetailObj.createFrom === 1 ? "Y" : "N",
           productDetail: tempArrayProduct.map((item) => {
             return {
