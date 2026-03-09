@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -119,9 +120,10 @@ const JobPage = () => {
     console.log('Download List clicked');
   };
 
+  const navigate = useNavigate();
+
   const createHandler = () => {
-    // Add create functionality here
-    console.log('Create clicked');
+    navigate(JOB_MGMT_ROUTES.CREATE_JOB);
   };
 
   const routes = [

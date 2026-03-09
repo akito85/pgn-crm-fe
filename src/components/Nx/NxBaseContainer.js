@@ -27,7 +27,7 @@ const NxBaseContainer = ({
   return (
     <div className={containerClass} style={containerStyle}>
       {header && (
-        <div className={`flex justify-between items-center min-h-[50px] px-4 py-2 border-b border-[#C8CDD4] ${border ? "bg-gray-50" : ""}`}>
+        <div className={`flex justify-between items-center min-h-[50px] px-4 py-2 border-b border-[#C8CDD4] bg-gray-50 ${rounded ? "rounded-t-lg" : ""}`}>
           <div className="flex items-center gap-x-1">
             <span className="text-primary text-base font-normal uppercase leading-6">
               {header}
