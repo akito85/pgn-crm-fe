@@ -9,11 +9,11 @@ import {
 import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns";
 import { usePromo } from "../hooks/usePromo";
 import promoHistoryRepository from "../repository/promoHistoryRepository";
 import PopupDetailPromoHistory from "../Detail/PopupDetailPromoHistory";
 import PopupDetailPromoHistoryDetail from "../Detail/PopupDetailPromoHistoryDetail";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 /* =======================
  * COMPONENTS
@@ -303,7 +303,7 @@ const PromoHistoryViewData = ({
   ========================= */
   const parentColumns = useMemo(
     () =>
-      applyFixedColumns(
+      nxApplyFixedColumns(
         promoHistoryRepository.getParentColumns((record) => {
           setSelectedHistoryData(record);
           setPopupDetailHistoryVisible(true);
@@ -315,10 +315,13 @@ const PromoHistoryViewData = ({
 
   const childColumns = useMemo(
     () =>
-      promoHistoryRepository.getChildColumns((record) => {
-        setSelectedHistoryDetailData(record);
-        setPopupDetailHistoryDetailVisible(true);
-      }),
+      nxApplyFixedColumns(
+        promoHistoryRepository.getChildColumns((record) => {
+          setSelectedHistoryDetailData(record);
+          setPopupDetailHistoryDetailVisible(true);
+        }),
+        { left: ["no"], right: ["action"] },
+      ),
     [setSelectedHistoryDetailData, setPopupDetailHistoryDetailVisible],
   );
 
