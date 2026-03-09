@@ -633,7 +633,7 @@ const NxTable = ({
 
             #${idTable} .ant-table-thead .ant-table-cell-fix-left,
             #${idTable} .ant-table-thead .ant-table-cell-fix-right {
-              z-index: 5;
+              z-index: 5 !important;
             }
 
             #${idTable} .ant-table-filter-trigger,
