@@ -32,7 +32,8 @@ import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer"
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 const CreateUpdateRelationship = ({
-  type = {},
+  accountType = "standard",
+  formType = "create",
 }) => {
   //declare
   const [form] = Form.useForm();
@@ -45,7 +46,6 @@ const CreateUpdateRelationship = ({
   //modal
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
-  const accountType = location?.state?.type;
 
   // Get Attachment Category and List from Store
   const {
@@ -56,11 +56,27 @@ const CreateUpdateRelationship = ({
     detailDraft_relationshipDetail,
     data_relationshipType,
     data_relationshipCategory,
-    loadingDetail,
-    loadingApprovalHierarchyDetail
+    loading_detailRelationship,
+    loading_listRelationshipApprovalHierarchyDetail,
+    loading_listRelationshipApprovalOption,
+    loading_detailDraftRelationship,
+    loading_detailRelationshipAttachment,
   } = useSelector(
     (state) => state.relationship
   );
+
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
+
+  const isCreate = formType ==="create";
+  const isUpdate = formType ==="update";
+
+  const loading =
+    loading_detailRelationship ||
+    loading_listRelationshipApprovalOption ||
+    loading_listRelationshipApprovalHierarchyDetail ||
+    loading_detailDraftRelationship ||
+    loading_detailRelationshipAttachment;
 
   const status = data_relationshipDetail.status || "DRAFT";
   const statusApproval = data_relationshipDetail.statusApproval || "DRAFT";
@@ -92,17 +108,17 @@ const CreateUpdateRelationship = ({
   }, [idAccount]);
 
   useEffect(() => {
-    if (type === "update" && id) {
+    if (formType === "update" && id) {
       dispatch(getAttachmentList({ idAccount, idRelationship: id }));
       dispatch(getRelationshipDetail({ idAccount, idRelationship: id }));
       dispatch(getDetailDraftRelationship({ idAccount, idRelationship: id }));
     }
-  }, [type, id]);
+  }, [formType, id]);
 
   // Populate form when both detail data AND approval hierarchy list are loaded (update mode)
   useEffect(() => {
     if (
-      type === "update" &&
+      formType === "update" &&
       detail?.appHierId &&
       detail?.relationshipType &&
       data_relationshipDetail?.id &&
@@ -148,10 +164,10 @@ const CreateUpdateRelationship = ({
       if (detail.relatedDetail && detail.relatedDetail.length > 0)
         setRelatedDetails(detail.relatedDetail);
     }
-  }, [data_relationshipDetail, data_approvalHierarchies, type]);
+  }, [data_relationshipDetail, data_approvalHierarchies, formType]);
 
   useEffect(() => {
-    if (data_attachmentList && data_attachmentList.length > 0 && type === "update") {
+    if (data_attachmentList && data_attachmentList.length > 0 && formType === "update") {
       const mapped = data_attachmentList.map((item) => ({
         key: item.id,
         fileId: item.fileId || item.id,
@@ -168,7 +184,7 @@ const CreateUpdateRelationship = ({
       }));
       setListDataAttachment(mapped);
     }
-  }, [data_attachmentList, type]);
+  }, [data_attachmentList, formType]);
 
   const handleSelectHierarchy = (appHierId, appHierOptions) => {
     if (idAccount && appHierId)
@@ -206,7 +222,7 @@ const CreateUpdateRelationship = ({
     // Filter only new attachments (not existing ones)
     const newAttachments = listDataAttachment.filter(a => a.dataType !== "exist");
 
-    if (type === "create")
+    if (formType === "create")
       dispatch(createRelationship({
         idAccount,
         payload,
@@ -215,19 +231,11 @@ const CreateUpdateRelationship = ({
         .unwrap()
         .then(() => {
           setTimeout(() => {
-            navigate(
-              ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-              {
-                state: {
-                  idAccount,
-                  idCustomer,
-                }
-              }
-            );
+            navigate(-1);
           }, 2000);
         })
         .catch(() => {});
-    else if (type === "update")
+    else if (isUpdate)
       dispatch(updateRelationship({
         idAccount,
         idRelationship: id,
@@ -237,15 +245,7 @@ const CreateUpdateRelationship = ({
         .unwrap()
         .then(() => {
           setTimeout(() => {
-            navigate(
-              ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-              {
-                state: {
-                  idAccount,
-                  idCustomer,
-                }
-              }
-            );
+            navigate(-1);
           }, 2000);
         })
         .catch(() => {});
@@ -278,7 +278,7 @@ const CreateUpdateRelationship = ({
           } = form.getFieldsValue(true);
 
           const body = {
-            id: type === "update" ? id : undefined,
+            id: isUpdate ? id : undefined,
             subjectId: idAccount,
             relationshipType,
             relationshipCategory,
@@ -293,8 +293,8 @@ const CreateUpdateRelationship = ({
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
-            type,
+            endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${formType}`,
+            type: formType,
           })).unwrap();
         }
       } catch (err) {
@@ -312,7 +312,7 @@ const CreateUpdateRelationship = ({
       } = form.getFieldsValue(true);
 
       const body = {
-        id: type === "update" ? id : undefined,
+        id: isUpdate ? id : undefined,
         subjectId: idAccount,
         relationshipType,
         relationshipCategory,
@@ -327,8 +327,8 @@ const CreateUpdateRelationship = ({
       dispatch(validateCreateUpdate({
         body,
         services: accountManagementService,
-        endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
-        type,
+        endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${formType}`,
+        type: formType,
       }))
         .unwrap()
         .then(() => {
@@ -345,23 +345,35 @@ const CreateUpdateRelationship = ({
   const routes = [
     {
       path: "",
-      breadcrumbName: "Account Management",
-    },
-    {
-      path: "",
-      breadcrumbName: "Customer/Account",
-    },
-    {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      breadcrumbName: "Detail Account",
+      breadcrumbName: "Account",
     },
     {
       path:
-        type === "create"
-          ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP
-          : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
+          "",
       breadcrumbName:
-        type === "create" ? "Create Relationship" : "Update Relationship",
+        isStandard ?
+          "Account - Standard" :
+        isOneTime ?
+          "Account - One Time" :
+          "",
+    },
+    {
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
+          "",
+      breadcrumbName: "Detail Account",
+    },
+    {
+      path: "",
+      breadcrumbName:
+        isCreate ? "Create Relationship" : "Update Relationship",
     },
   ];
 
@@ -408,7 +420,7 @@ const CreateUpdateRelationship = ({
         } = form.getFieldsValue(true);
 
         const body = {
-          id: type === "update" ? id : undefined,
+          id: isUpdate ? id : undefined,
           subjectId: idAccount,
           relationshipType,
           relationshipCategory,
@@ -423,8 +435,8 @@ const CreateUpdateRelationship = ({
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${type}`,
-          type,
+          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${formType}`,
+          type: formType,
         })).unwrap();
       }
     } catch (err) {
@@ -451,12 +463,12 @@ const CreateUpdateRelationship = ({
   };
 
   const handleClear = () => {
-    if (type === "create") {
+    if (isCreate) {
       setListDataAttachment([]);
       setRelatedDetails([]);
       form.resetFields();
       setCurrent(0);
-    } else if (type === "update") {
+    } else if (isUpdate) {
       // Update mode - restore to original API data
       if (data_relationshipDetail && data_relationshipDetail.id) {
         // Restore form values to original
@@ -527,6 +539,8 @@ const CreateUpdateRelationship = ({
               form={form}
               key={`relationship-tab-0`}
               setRelatedDetails={setRelatedDetails}
+              isDraft={isDraft}
+              isUpdate={isUpdate}
             />
           )
         },
@@ -560,7 +574,7 @@ const CreateUpdateRelationship = ({
                 key: `detail-detail-${index}`,
               }))}
               handleSelectHierarchy={handleSelectHierarchy}
-              loading={loadingApprovalHierarchyDetail}
+              loading={loading_listRelationshipApprovalHierarchyDetail}
               key={`relationship-tab-1`}
               className={`${current !== 1 ? "hidden" : ""}`}
             />
@@ -577,7 +591,6 @@ const CreateUpdateRelationship = ({
             <RelationshipAttachment
               data={listDataAttachment}
               updateData={setListDataAttachment}
-              type={type}
               dispatch={dispatch}
               key={`relationship-tab-2`}
               className={`${current !== 2 ? "hidden" : ""}`}
@@ -600,7 +613,7 @@ const CreateUpdateRelationship = ({
             idCustomer={idCustomer}
             type={accountType}
           />
-          <Spin spinning={loadingDetail}>
+          <Spin spinning={loading}>
             <Form
               id="relationshipForm"
               form={form}
@@ -637,7 +650,7 @@ const CreateUpdateRelationship = ({
                       type="reject"
                       onClick={handleClear}
                     >
-                      {type === "create" ? "Clear" : "Reset"}
+                      {isCreate ? "Clear" : "Reset"}
                     </Button>
                     <Button
                       onClick={() => handleSetShowConfirmationModal(true, "draft")}

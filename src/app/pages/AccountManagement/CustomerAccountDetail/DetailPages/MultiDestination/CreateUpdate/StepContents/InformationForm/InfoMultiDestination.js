@@ -50,6 +50,8 @@ export default function InfoMultiDestination({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
@@ -92,33 +94,46 @@ export default function InfoMultiDestination({
     const totalPages = pagination_mdAccountStandard?.totalPages || 0;
 
     if (nextPage <= totalPages) {
+      const body = {
+        searchs: search,
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        filters,
+        filterRules,
+      }
+
       await dispatch(
         getMdAccountStandard({
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
+          body,
           isLoadMore: true,
           id: accountId
         })
-      );
+      ).unwrap();
     }
     setPage(nextPage);
   };
 
   useEffect(() => {
-    if (formView)
+    if (formView) {
+      const body = {
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      }
+
       dispatch(
         getMdAccountStandard({
-          page,
-          size: loadMoreSize,
-          sort,
-          searchs: JSON.stringify(search),
+          body,
           id: accountId,
           isLoadMore: false
         })
       );
-  }, [sort, search]);
+    }
+  }, [sort, search, filters, filterRules]);
 
   const baseColumns = useMemo(
     () =>

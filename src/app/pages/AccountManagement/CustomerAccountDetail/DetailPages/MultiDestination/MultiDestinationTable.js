@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
@@ -28,13 +28,21 @@ const MultiDestinationTable = ({
   handleSearch = () => {},
   loading = false,
 }) => {
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
     idAccount,
     idCustomer,
     handleView: (id, subjectId, objectId) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION,
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION_ONETIME :
+        "",
       {
         state: {
           idAccount,
@@ -46,7 +54,11 @@ const MultiDestinationTable = ({
       }
     ),
     handleCreate: () => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION,
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION_ONETIME :
+        "",
       {
         state: {
           idAccount,
@@ -55,7 +67,11 @@ const MultiDestinationTable = ({
       }
     ),
     handleUpdate: (id, subjectId, objectId) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION,
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION_ONETIME :
+        "",
       {
         state: {
           idAccount,

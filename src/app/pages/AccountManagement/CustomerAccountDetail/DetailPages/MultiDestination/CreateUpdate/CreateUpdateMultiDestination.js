@@ -33,7 +33,7 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
-const CreateUpdateMultiDestination = ({ type }) => {
+const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "create" }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
@@ -46,8 +46,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const {
     loading_listMdApprovalOption,
     list_mdApprovalOptions,
-    loading_detailMdApprovalHierarchyDetails,
-    detail_mdApprovalHierarchyDetails,
+    loading_listMdApprovalHierarchyDetail,
+    list_mdApprovalHierarchyDetail,
     loading_detailMd,
     detail_multiDestination,
     loading_detailDraftMd,
@@ -59,7 +59,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
   const loading =
     loading_listMdApprovalOption ||
-    loading_detailMdApprovalHierarchyDetails ||
+    loading_listMdApprovalHierarchyDetail ||
     loading_detailMd ||
     loading_detailDraftMd ||
     loading_detailMdDetailAttachment;
@@ -72,10 +72,12 @@ const CreateUpdateMultiDestination = ({ type }) => {
   const idMd = location?.state?.id;
   const subjectId = location?.state?.subjectId;
   const objectId = location?.state?.objectId;
-  const accountType = location?.state?.type; // "standard" or "onetime"
 
-  const isCreate = type === "create";
-  const isUpdate = type === "update";
+  const isCreate = formType === "create";
+  const isUpdate = formType === "update";
+
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
 
   const status = detail_multiDestination.status || "DRAFT";
   const statusApproval = detail_multiDestination.statusApproval || "DRAFT";
@@ -131,7 +133,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
       dispatch(getDetailDraftMultiDestination(idMd, { subjectId, objectId }));
       dispatch(getMultiDestinationAttachment({ id: idMd }));
     }
-  }, [type, idMd]);
+  }, [formType, idMd]);
 
   useEffect(() => {
     if (
@@ -216,11 +218,26 @@ const CreateUpdateMultiDestination = ({ type }) => {
       breadcrumbName: "Account",
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
-      breadcrumbName: "Account - Standard",
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
+          "",
+      breadcrumbName:
+        isStandard ?
+          "Account - Standard" :
+        isOneTime ?
+          "Account - One Time" :
+          "",
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
+          "",
       breadcrumbName: "Detail Account",
       state: {
         idAccount,
@@ -277,8 +294,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
-            type,
+            endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+            type: formType,
           }))
           .unwrap();
         }
@@ -308,8 +325,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
       dispatch(validateCreateUpdate({
         body,
         services: accountManagementService,
-        endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
-        type,
+        endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+        type: formType,
       }))
       .unwrap()
       .then((data) => {
@@ -326,7 +343,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
     if (idAccount && idCustomer && accountType) {
-      if (accountType === "standard") {
+      if (isStandard) {
         dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
       } else {
         dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
@@ -405,7 +422,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         content: (
           <ApprovalForm
             form={form}
-            dataTable={(detail_mdApprovalHierarchyDetails || []).map((detail, index) => ({
+            dataTable={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
               ...detail,
               employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                 ...employeeDetail,
@@ -427,7 +444,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         directRender: true,
         content: (
           <AttachmentForm
-            type={type}
+            type={formType}
             data={dataAttachment}
             updateData={setDataAttachment}
             key={`multi-destination-tab-2`}
@@ -482,8 +499,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
-          type,
+          endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+          type: formType,
         }))
         .unwrap();
       }
@@ -537,8 +554,8 @@ const CreateUpdateMultiDestination = ({ type }) => {
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/multi-destination/validate-${type}`,
-            type,
+            endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+            type: formType,
           }))
           .unwrap();
         }
@@ -593,13 +610,17 @@ const CreateUpdateMultiDestination = ({ type }) => {
 
     const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
 
+    const detailRoute = isStandard
+      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME;
+
     if (isCreate)
       dispatch(createMultiDestination({ body, attachments: newAttachments }))
       .unwrap()
       .then((data) => {
         setTimeout(() => {
           navigate(
-            ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+            detailRoute,
             {
               state: {
                 idAccount,
@@ -616,7 +637,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
         .then((data) => {
           setTimeout(() => {
             navigate(
-              ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+              detailRoute,
               {
                 state: {
                   idAccount,
@@ -714,7 +735,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
           dispatch={dispatch}
           idAccount={idAccount}
           idCustomer={idCustomer}
-          type={"standard"}
+          type={accountType}
         />
         <Spin
           spinning={loading}
@@ -812,7 +833,7 @@ const CreateUpdateMultiDestination = ({ type }) => {
               formId={"multiDestinationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(detail_mdApprovalHierarchyDetails || []).map((detail, index) => ({
+              approvalData={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
                 ...detail,
                 employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
                   ...employeeDetail,

@@ -23,6 +23,8 @@ const RelationshipInfo = ({
   form,
   setRelatedDetails = () => {},
   formView = true,
+  isDraft = false,
+  isUpdate = false,
 }) => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -42,7 +44,7 @@ const RelationshipInfo = ({
   const description = Form.useWatch("description", { form });
 
   // Get data from Redux store
-  const { data_relationshipType, data_relationshipCategory, loadingType, loadingCategory } =
+  const { data_relationshipType, data_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
     useSelector((state) => state.relationship);
 
   // Fetch relationship type and category on component mount
@@ -67,7 +69,8 @@ const RelationshipInfo = ({
             className="no-margin-form"
           >
             <SelectComponent
-              loading={loadingType}
+              disabled={!isDraft && isUpdate}
+              loading={loading_listRelationshipType}
               onChange={(_, option) => {
                 form.setFieldValue("relationshipTypeName", option.children)
                 setRelatedDetails([]);
@@ -96,8 +99,9 @@ const RelationshipInfo = ({
             className="no-margin-form"
           >
             <SelectComponent
+              disabled={!isDraft && isUpdate}
               onChange={(_, option) => form.setFieldValue("relationshipCategoryName", option.children)}
-              loading={loadingCategory}
+              loading={loading_listRelationshipCategory}
             >
               {data_relationshipCategory?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
@@ -128,7 +132,7 @@ const RelationshipInfo = ({
               <Button
                 type="submit"
                 onClick={() => setModalChoose(true)}
-                disabled={!relationshipType || !relationshipCategory}
+                disabled={(!isDraft && isUpdate) || !relationshipType || !relationshipCategory}
                 className="w-[120px]"
               >
                 Select
@@ -157,7 +161,7 @@ const RelationshipInfo = ({
             rules={[{ message: requiredMessage("Start Date"), required: true }]}
             className="no-margin-form"
           >
-            <DateComponent />
+            <DateComponent disabled={!isDraft && isUpdate} />
           </Form.Item>
 
           {/* Row 2 - Col 3: End Date */}
@@ -167,7 +171,7 @@ const RelationshipInfo = ({
             rules={[{ message: requiredMessage("End Date"), required: false }]}
             className="no-margin-form"
           >
-            <DateComponent />
+            <DateComponent disabled={!isDraft && isUpdate} />
           </Form.Item>
         </div>
 
@@ -181,6 +185,7 @@ const RelationshipInfo = ({
           >
             <InputComponent
               type="textarea"
+              disabled={!isDraft && isUpdate}
             />
           </Form.Item>
         </div>

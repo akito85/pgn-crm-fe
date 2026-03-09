@@ -37,7 +37,7 @@ import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepN
 import HeaderDetail from "../../../../HeaderDetail";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
-const CreateUpdatePaymentRelation = ({ formType }) => {
+const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "standard" }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
@@ -77,7 +77,8 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idPr = location?.state?.id;
-  const accountType = location?.state?.type; // "standard" or "onetime"
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
 
   const status = detail_paymentRelation.status || "DRAFT";
   const statusApproval = detail_paymentRelation.statusApproval || "DRAFT";
@@ -118,9 +119,14 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
   }, [idCustomer]);
 
   useEffect(() => {
-    if (idAccount)
-      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-  }, [idAccount]);
+    if (idAccount && idCustomer) {
+      if (isStandard) {
+        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+      } else if (isOneTime) {
+        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
+      }
+    }
+  }, [idAccount, idCustomer]);
 
   useEffect(() => {
     if (isUpdate && idPr) {
@@ -186,11 +192,21 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       breadcrumbName: "Account"
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
-      breadcrumbName: "Account - Standard"
+      path: 
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
+          "",
+      breadcrumbName: isStandard ? "Account - Standard" : "Account - One Time"
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
+          "",
       breadcrumbName: "Detail Account",
       state: {
         idAccount,
@@ -296,17 +312,6 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
       setConfirmationType("");
     }
   };
-
-  // Fetch Account Standard/OneTime Detail
-  useEffect(() => {
-    if (idAccount && idCustomer && accountType) {
-      if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
-      }
-    }
-  }, [dispatch, idAccount, idCustomer, accountType]);
 
   const setAccount = (objectId, accountNumber, accountName) => {
     form.setFieldValue("objectId", objectId);
@@ -550,12 +555,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
         .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
-              state: {
-                idAccount,
-                idCustomer
-              }
-            });
+            navigate(-1);
           }, 2000);
         })
         .catch((error) => {});
@@ -572,12 +572,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
         .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
-              state: {
-                idAccount,
-                idCustomer
-              }
-            });
+            navigate(-1);
           }, 2000);
         })
         .catch((error) => {});
@@ -642,7 +637,7 @@ const CreateUpdatePaymentRelation = ({ formType }) => {
           dispatch={dispatch}
           idAccount={idAccount}
           idCustomer={idCustomer}
-          type={"standard"}
+          type={accountType}
         />
         <Spin spinning={loading}>
           <Form
