@@ -15,6 +15,7 @@ import {
   getBankDetailDraft,
   getJobContact,
   getPositionContact,
+  getAllGLType // <--- TAMBAHAN: Tarik API Master GL Type
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailBank from "./DetailBank";
@@ -45,7 +46,6 @@ const ListDetailBank = () => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [listDataAttachmentDraft, setListDataAttachmentDraft] = useState([]);
 
-  // Define tabData before using it in useState
   const [tabData, setTabData] = useState([
     { value: "Bank" },
     { value: "Attachment" },
@@ -69,6 +69,12 @@ const ListDetailBank = () => {
   useEffect(() => {
     dispatch(getBankDetail(id));
     dispatch(getBankDetailDraft(id));
+    
+    // --- TAMBAHAN: Panggil Master Data biar Dropdown/Translate jalan ---
+    dispatch(getPositionContact());
+    dispatch(getJobContact());
+    dispatch(getAllGLType()); 
+    // -----------------------------------------------------------------
   }, [id, dispatch]);
 
   useEffect(() => {
@@ -87,7 +93,7 @@ const ListDetailBank = () => {
         data_detail?.bank?.bankContacts?.length > 0
       ) {
         const data = data_detail?.bank?.bankContacts?.map((item, index) => {
-          const bankContacts = item?.contactDetails || []; // Ensure bankContacts is an array
+          const bankContacts = item?.contactDetails || []; 
           return {
             ...item,
             key: index + 1,
@@ -137,7 +143,7 @@ const ListDetailBank = () => {
       ) {
         const data = data_detail_draft?.bank?.bankContacts?.map(
           (item, index) => {
-            const bankContacts = item?.contactDetails || []; // Ensure bankContacts is an array
+            const bankContacts = item?.contactDetails || []; 
             return {
               ...item,
               key: index + 1,
@@ -184,10 +190,6 @@ const ListDetailBank = () => {
     }
   }, [id, data_detail, data_detail_draft]);
 
-  useEffect(() => {
-    dispatch(getPositionContact());
-    dispatch(getJobContact());
-  }, []);
 
   const renderSection = (segmentedPage) => {
     switch (segmentedPage) {
@@ -200,9 +202,12 @@ const ListDetailBank = () => {
             key={"active"}
             dataSource={dataSource}
             data_job={data_job}
-            // dataAccountInfoPaging={dataAccountInfoPaging}
             data_position={data_position}
             totalData={totalElement}
+            
+            // --- LEMPAR DATA GL ACCOUNT DI SINI ---
+            data_glAccount={data_detail?.bank?.bankglAccount || []}
+            // --------------------------------------
           />
         );
       case "Draft":
@@ -212,11 +217,14 @@ const ListDetailBank = () => {
             id={id}
             key={"draft"}
             data_req={data_detail_draft?.tApprovalDto}
-            // dataAccountInfoPaging={dataAccountInfoPaging}
             dataSource={dataSourceDraft}
             data_job={data_job}
             data_position={data_position}
             totalData={totalElementDraft}
+            
+            // --- LEMPAR DATA GL ACCOUNT DRAFT DI SINI ---
+            data_glAccount={data_detail_draft?.bank?.bankglAccount || []}
+            // --------------------------------------------
           />
         );
       case "Attachment":
@@ -237,7 +245,6 @@ const ListDetailBank = () => {
     }
   };
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -257,7 +264,6 @@ const ListDetailBank = () => {
     },
   ];
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
     let data
 
