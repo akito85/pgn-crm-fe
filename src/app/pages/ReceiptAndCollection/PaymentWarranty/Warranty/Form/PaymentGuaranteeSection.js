@@ -69,7 +69,9 @@ const PaymentGuaranteeSection = ({
         <Col span={6}>
           <Form.Item name="issuerBank" label="Issuer" rules={[{ required: true }]}>
             <Select disabled={isPartialEdit} placeholder="Select Issuer" onChange={(value) => { dispatch(getPaymentWarrantyPartnerBranchList(value)); form.setFieldsValue({ issuerBranch: null }); }}>
-              {(dataPaymentWarrantyPartner?.data || dataPaymentWarrantyPartner || []).map((item) => (<Option key={item.id} value={item.id}>{item.partnerGuaranteeIssuer}</Option>))}
+              {(Array.isArray(dataPaymentWarrantyPartner) ? dataPaymentWarrantyPartner : (dataPaymentWarrantyPartner?.data || [])).map((item) => (
+                <Option key={item.id} value={item.id}>{item.partnerGuaranteeIssuer}</Option>
+              ))}
             </Select>
           </Form.Item>
         </Col>
@@ -77,7 +79,9 @@ const PaymentGuaranteeSection = ({
         <Col span={6}>
           <Form.Item name="issuerBranch" label="Issuer Branch" rules={[{ required: true }]}>
             <Select disabled={isPartialEdit} placeholder="Select Issuer Branch">
-              {(dataPaymentWarrantyPartnerBranch?.data || dataPaymentWarrantyPartnerBranch || []).map((item) => (<Option key={item.id} value={item.id}>{item.branchName}</Option>))}
+              {(Array.isArray(dataPaymentWarrantyPartnerBranch) ? dataPaymentWarrantyPartnerBranch : (dataPaymentWarrantyPartnerBranch?.data || [])).map((item) => (
+                <Option key={item.id} value={item.id}>{item.branchName}</Option>
+              ))}
             </Select>
           </Form.Item>
         </Col>

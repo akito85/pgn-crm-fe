@@ -371,7 +371,16 @@ const ViewWarranty = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
-        const disabled = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
+        const isDraft = record?.status === WARRANTY_STATUS.DRAFT;
+        const isApprDraft = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+        const isApprRejected = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.REJECTED;
+        const isActive = record?.status === WARRANTY_STATUS.ACTIVE;
+        const isApprApproved = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.APPROVED;
+
+        const isDraftFullyEditable = isDraft && (isApprDraft || isApprRejected);
+        const isPartialEditable = isActive && isApprApproved;
+        
+        const disabled = !(isDraftFullyEditable || isPartialEditable);
         
         return data_length > 3 ? (
           <ButtonComponent
@@ -574,7 +583,10 @@ const ViewWarranty = () => {
       action: "Delete",
       type: "table",
       render: (record, data_length) => {
-        const disabled = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
+        const isDraft = record?.status === WARRANTY_STATUS.DRAFT;
+        const isApprDraft = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+        
+        const disabled = !(isDraft && isApprDraft);
 
         return data_length > 3 ? (
           <ButtonComponent

@@ -13,6 +13,7 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
 import ButtonComponent from "../../../../../components/ButtonComponent";
+import { WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 import { 
     getDetailWarrantyMutation,
     deleteMutation,
@@ -250,7 +251,7 @@ const DetailWarranty = ({ data_detail }) => {
 
       <SectionCard title="MUTATION DATA INFORMATION">
         <div className="flex justify-end mb-4">
-          {!data_detail?.isApprover && (
+          {!data_detail?.isApprover && data_detail?.approvalStatus !== WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL && (
             <ButtonComponent type="submit" icon={<PlusOutlined />} onClick={handleCreate}>
               Create
             </ButtonComponent>

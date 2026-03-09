@@ -20,6 +20,7 @@ import {
   createPaymentWarranty,
   updatePaymentWarranty,
   getDetailWarranty,
+  getDetailWarrantyMutation,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
@@ -66,7 +67,7 @@ const ListFormWarranty = (props) => {
   const location = useLocation();
   const { id } = location?.state || {};
 
-  const { dataListAppHierId, dataListAppHierDetail, loadingDetail, loadingApproval, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, data_detail } = useSelector((state) => state.warranty);
+  const { dataListAppHierId, dataListAppHierDetail, loadingDetail, loadingApproval, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, data_detail, dataMutationInfo } = useSelector((state) => state.warranty);
   
   const {
     dataAccountNumber,
@@ -93,9 +94,18 @@ const ListFormWarranty = (props) => {
   const [isModalMutationOpen, setIsModalMutationOpen] = useState(false);
   const [selectedMutation, setSelectedMutation] = useState(null);
   const [mutationModalType, setMutationModalType] = useState("create");
+  // Ref to ensure mutation data from API only populates local state once
+  const mutationInitializedRef = useRef(false);
   const warrantyType = Form.useWatch("warrantyType", form);
   const headerCurrencyId = Form.useWatch("currency", form);
-  const headerCurrency = currencyDDL?.data?.find(c => c.id === headerCurrencyId)?.name;
+  const headerCurrency = useMemo(() => {
+    if (!headerCurrencyId) return null;
+    const foundById = currencyDDL?.data?.find(c => c.id === headerCurrencyId);
+    if (foundById) return foundById.name;
+    const foundByName = currencyDDL?.data?.find(c => c.name === headerCurrencyId);
+    if (foundByName) return foundByName.name;
+    return headerCurrencyId;
+  }, [headerCurrencyId, currencyDDL]);
 
   const steps = [
     { title: "PAYMENT GUARANTEE", value: "Partner" },
@@ -170,10 +180,11 @@ const ListFormWarranty = (props) => {
         warrantyType: data_detail.warrantyType,
         documentNumber: data_detail.documentNumber,
         documentDate: data_detail.documentDate ? moment(data_detail.documentDate) : null,
-        issuerBank: data_detail.issuerBank,
-        issuerBranch: data_detail.issuerBranch,
-        currency: currencyDDL?.data?.find(c => c.name === data_detail.currency)?.id,
-        rateType: rateTypeDDL?.data?.find(r => r.name === data_detail.rateType)?.name,
+        issuerBank: data_detail.issuerBankId,
+        issuerBranch: data_detail.issuerBranchId,
+        currency: data_detail.currency,
+        rateType: data_detail.rateType,
+        saNumber: data_detail.saNumber,
         rateDate: data_detail.rateDate ? moment(data_detail.rateDate) : null,
         rateAmount: data_detail?.rateAmount,
         effStartDate: data_detail.effectiveStartDate ? moment(data_detail.effectiveStartDate) : null,
@@ -181,20 +192,42 @@ const ListFormWarranty = (props) => {
         claimPeriodTermType: data_detail.claimPeriodTermType,
         claimPeriodTermValue: data_detail.claimPeriodTermValue,
         description: data_detail.description,
+        // Set approval hierarchy form field so the dropdown auto-selects
+        apphierId: data_detail.appHierId,
       });
       setSelectedHierarchy(data_detail.appHierId);
-      setListDataAttachment(data_detail.attachments?.map(a => ({ ...a, dataType: 'exist' })) || []);
-      setMutationDataInfo(data_detail.mutations || []);
+      setListDataAttachment((data_detail.attachmentDtoList || data_detail.attachments || []).map(a => ({ ...a, dataType: 'exist' })));
+      // Load existing mutations from detail payload (if available)
+      if (data_detail.mutations && data_detail.mutations.length > 0) {
+        setMutationDataInfo(data_detail.mutations.map((m, i) => ({ ...m, key: i + 1 })));
+      }
       
       if (data_detail.accountId) {
         dispatch(getAccountNumberDDL(data_detail.accountId));
         dispatch(getListServiceAgreement({ id: data_detail.accountId, page: 1, pageSize: 999 }));
       }
-      if (data_detail.issuerBankId) {
+      if (data_detail.issuerBankId || data_detail.issuerBank) {
         dispatch(getPaymentWarrantyPartnerBranchList(data_detail.issuerBankId));
       }
     }
-  }, [id, type, data_detail, currencyDDL, rateTypeDDL, dispatch, form]);
+  // Only re-run when data_detail or id/type changes — remove DDL deps that cause re-runs
+  }, [id, type, data_detail, dispatch, form]);
+
+  // One-time fetch of mutation list from API when entering update mode
+  useEffect(() => {
+    if (id && type === "update") {
+      dispatch(getDetailWarrantyMutation({ id, page: 1, pageSize: 999 }));
+    }
+  }, [id, type, dispatch]);
+
+  useEffect(() => {
+    if (type === "update" && !mutationInitializedRef.current && dataMutationInfo?.content) {
+      mutationInitializedRef.current = true;
+      if (dataMutationInfo.content.length > 0) {
+        setMutationDataInfo(dataMutationInfo.content.map((m, i) => ({ ...m, key: i + 1 })));
+      }
+    }
+  }, [dataMutationInfo, type]);
 
   const isPartialEdit = useMemo(() => {
     if (type !== "update" || !data_detail) return false;
@@ -202,6 +235,11 @@ const ListFormWarranty = (props) => {
       data_detail.status === WARRANTY_STATUS.ACTIVE && 
       data_detail.approvalStatus === WARRANTY_APPROVAL_STATUS.APPROVED
     );
+  }, [type, data_detail]);
+
+  const isWaitingApproval = useMemo(() => {
+    if (type !== "update" || !data_detail) return false;
+    return data_detail.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
   }, [type, data_detail]);
 
   const handleAccountChange = (value) => {
@@ -270,19 +308,16 @@ const ListFormWarranty = (props) => {
       let parsedRateAmount = 0;
       if (values.rateAmount) parsedRateAmount = typeof values.rateAmount === 'string' ? parseFloat(values.rateAmount.replace(/,/g, "")) : values.rateAmount;
 
-      const submitBody = {
+      // Separate payload for create and update
+      const baseBody = {
           accountId: values.accountId || null,
           warrantyType: values.warrantyType || null,
           documentNumber: values.documentNumber || null,
-          documentDate: values.documentDate ? moment(values.documentDate).toISOString(true) : null,
           issuerBank: values.issuerBank || null,
           issuerBranch: values.issuerBranch || null,
-          currency: values.currency ? (currencyDDL?.data?.find(c => c.id === values.currency)?.name || "IDR") : "IDR",
-          rateType: values.rateType ? (rateTypeDDL?.data?.find(r => r.id === values.rateType)?.name || "Mid Rate") : "Mid Rate",
-          rateDate: values.rateDate ? moment(values.rateDate).toISOString(true) : null,
+          currency: values.currency ? (currencyDDL?.data?.find(c => c.id === values.currency)?.name || values.currency) : "IDR",
+          rateType: values.rateType || null,
           rateAmount: parsedRateAmount,
-          effectiveStartDate: values.effStartDate ? moment(values.effStartDate).toISOString(true) : null,
-          effectiveEndDate: values.effEndDate ? moment(values.effEndDate).toISOString(true) : null,
           claimPeriodTermType: values.claimPeriodTermType ? values.claimPeriodTermType.toUpperCase() : "DATE",
           claimPeriodTermValue: values.claimPeriodTermValue ? parseInt(values.claimPeriodTermValue, 10) : null,
           description: values.description || null,
@@ -290,17 +325,36 @@ const ListFormWarranty = (props) => {
           appHierId: selectedHierarchy || null,
           saNumber: values.saNumber || null,
           mutations: (mutationDataInfo || []).map(m => ({
+              ...(m.id ? { id: m.id } : {}),
+              ...(m._delete ? { isDeleted: true } : {}),
               source: m.source,
-              mutationNumber: m.mutationNumber,
+              mutationNumber: m.mutationNumber || m.documentNumber,
               type: m.type,
               category: m.category,
-              transactionDate: m.date ? moment(m.date).toISOString(true) : null,
+              transactionDate: m.date ? moment(m.date).toISOString(true) : (m.transactionDate ? moment(m.transactionDate).toISOString(true) : null),
               amount: m.amount ? parseFloat(m.amount.toString().replace(/,/g, "")) : 0,
-              convertedCurrency: currencyDDL?.data?.find(c => c.id === m.convertedCurrency)?.name || "IDR",
+              convertedCurrency: m.convertedCurrencyName || m.convertedCurrency || "IDR",
               rate: m.rate ? parseFloat(m.rate.toString().replace(/,/g, "")) : 1,
-              eqvAmount: m.eqvAmount ? parseFloat(m.eqvAmount.toString().replace(/,/g, "")) : 0,
+              eqvAmount: (m.eqvAmount ?? m.equivalentAmount) ? parseFloat((m.eqvAmount ?? m.equivalentAmount).toString().replace(/,/g, "")) : 0,
               description: m.description
           })),
+      };
+
+      const submitBody = type === "update" ? {
+          ...baseBody,
+          documentDate: values.documentDate ? moment(values.documentDate).format("YYYY-MM-DD") : null,
+          rateDate: values.rateDate ? moment(values.rateDate).format("YYYY-MM-DD") : null,
+          effectiveStartDate: values.effStartDate ? moment(values.effStartDate).format("YYYY-MM-DD") : null,
+          effectiveEndDate: values.effEndDate ? moment(values.effEndDate).format("YYYY-MM-DD") : null,
+          submitForApproval: !isDraft,
+          attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id),
+          partners: data_detail?.partners || [],
+      } : {
+          ...baseBody,
+          documentDate: values.documentDate ? moment(values.documentDate).toISOString(true) : null,
+          rateDate: values.rateDate ? moment(values.rateDate).toISOString(true) : null,
+          effectiveStartDate: values.effStartDate ? moment(values.effStartDate).toISOString(true) : null,
+          effectiveEndDate: values.effEndDate ? moment(values.effEndDate).toISOString(true) : null,
       };
 
       if (id) submitBody.id = id;
@@ -328,32 +382,15 @@ const ListFormWarranty = (props) => {
   const executeSave = async (payloadToSave) => {
     setLoadingSave(true);
     try {
-      const finalBody = {
-          accountId: payloadToSave.accountId,
-          saNumber: payloadToSave.saNumber,
-          warrantyType: payloadToSave.warrantyType,
-          documentNumber: payloadToSave.documentNumber,
-          documentDate: payloadToSave.documentDate,
-          issuerBank: payloadToSave.issuerBank,
-          issuerBranch: payloadToSave.issuerBranch,
-          currency: payloadToSave.currency,
-          rateType: payloadToSave.rateType,
-          rateDate: payloadToSave.rateDate,
-          rateAmount: payloadToSave.rateAmount,
-          effectiveStartDate: payloadToSave.effectiveStartDate,
-          effectiveEndDate: payloadToSave.effectiveEndDate,
-          claimPeriodTermType: payloadToSave.claimPeriodTermType,
-          claimPeriodTermValue: payloadToSave.claimPeriodTermValue,
-          description: payloadToSave.description,
-          isDraft: payloadToSave.isDraft,
-          appHierId: payloadToSave.appHierId,
-          mutations: payloadToSave.mutations
-      };
-
+      const finalBody = { ...payloadToSave };
       if (payloadToSave.id) finalBody.id = payloadToSave.id;
 
       const action = type === "update" ? updatePaymentWarranty : createPaymentWarranty;
-      const res = await dispatch(action({ id: finalBody.id, body: finalBody })).unwrap();
+      const res = await dispatch(
+        type === "update" 
+          ? action({ id: finalBody.id, body: finalBody }) 
+          : action({ body: finalBody })
+      ).unwrap();
       
       const warrantyId = res?.id || res;
       const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
@@ -386,7 +423,14 @@ const ListFormWarranty = (props) => {
   };
 
   const handleMutationDelete = (record) => {
-    setMutationDataInfo(mutationDataInfo.filter(m => m.key !== record.key).map((m, i) => ({ ...m, key: i + 1 })));
+    if (record.id) {
+      // If mutation has an id (existing from backend), mark as deleted locally
+      // On submit, the backend will receive isDeleted: true and delete it
+      setMutationDataInfo(mutationDataInfo.map(m => m.key === record.key ? { ...m, _delete: true } : m));
+    } else {
+      // New mutation (no id), just remove from local state
+      setMutationDataInfo(mutationDataInfo.filter(m => m.key !== record.key).map((m, i) => ({ ...m, key: i + 1 })));
+    }
   };
 
   const routesBread = [
@@ -419,11 +463,12 @@ const ListFormWarranty = (props) => {
                 isCreate={type === "create" || type === "update"}
                 warrantyType={warrantyType}
                 headerCurrency={headerCurrency}
-                mutationDataInfo={mutationDataInfo}
+                mutationDataInfo={mutationDataInfo.filter(m => !m._delete)}
                 columnMutation={columnMutation}
                 setIsModalMutationOpen={setIsModalMutationOpen}
                 dispatch={dispatch}
                 isPartialEdit={isPartialEdit}
+                isWaitingApproval={isWaitingApproval}
                 isApprover={data_detail?.isApprover}
             />
           </div>
@@ -509,7 +554,7 @@ const ListFormWarranty = (props) => {
         modalType={mutationModalType}
         selectedRecord={selectedMutation}
         currencyDDL={currencyDDL}
-        mutationDataInfo={mutationDataInfo}
+        mutationDataInfo={mutationDataInfo.filter(m => !m._delete)}
         warrantyType={warrantyType}
         headerCurrency={headerCurrency}
         fetchMutation={(newMutation) => {

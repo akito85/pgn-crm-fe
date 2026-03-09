@@ -119,30 +119,35 @@ const ModalMutation = ({
   }, [dataListAppHierDetail]);
 
   useEffect(() => {
-    if (dataDetailMutation) {
-      const type = dataDetailMutation.type;
-      const source = dataDetailMutation.source;
-      
-      const convertedCurrency = dataDetailMutation.convertedCurrency;
+    if (dataDetailMutation?.data) {
+      const actualData = dataDetailMutation.data;
+      const type = actualData.type || selectedRecord?.type || selectedRecord?.mutationType;
+      const source = actualData.isManual ? "Manual" : (actualData.source || selectedRecord?.source || "Manual");
+      const convertedCurrency = actualData.convertedCurrency || actualData.currency || selectedRecord?.convertedCurrency;
 
       form.setFieldsValue({
-        ...dataDetailMutation,
+        ...selectedRecord,
+        ...actualData,
         type: type,
         source: source,
         convertedCurrency: convertedCurrency,
-        mutationNumber: dataDetailMutation.mutationNumber || dataDetailMutation.documentNumber,
-        eqvAmount: dataDetailMutation.eqvAmount || dataDetailMutation.equivalentAmount,
-        date: dataDetailMutation.transactionDate ? moment(dataDetailMutation.transactionDate) : null,
+        mutationNumber: actualData.mutationNumber || actualData.documentNumber || selectedRecord?.mutationNumber || selectedRecord?.documentNumber,
+        eqvAmount: actualData.eqvAmount ?? actualData.equivalentAmount ?? selectedRecord?.eqvAmount ?? selectedRecord?.equivalentAmount,
+        date: actualData.date 
+          ? moment(actualData.date) 
+          : actualData.transactionDate 
+            ? moment(actualData.transactionDate) 
+            : (selectedRecord?.date ? moment(selectedRecord.date) : selectedRecord?.transactionDate ? moment(selectedRecord.transactionDate) : null),
       });
 
-      const appHierId = dataDetailMutation.appHierId || dataDetailMutation.apphierId;
+      const appHierId = actualData.appHierId || actualData.apphierId || selectedRecord?.apphierId || selectedRecord?.appHierId;
       if (appHierId) {
         setSelectedHierarchy(appHierId);
         form.setFieldsValue({ appHierId: appHierId });
       }
 
-      if (dataDetailMutation.attachmentDtoList) {
-        setListDataAttachment(dataDetailMutation.attachmentDtoList.map(item => ({
+      if (actualData.attachmentDtoList) {
+        setListDataAttachment(actualData.attachmentDtoList.map(item => ({
           ...item,
           uid: item.uid || item.id,
           dataType: "exist"
