@@ -98,20 +98,20 @@ const DetailWarranty = ({ data_detail }) => {
   };
 
   const handleEdit = (record) => {
-    const normalizedRecord = { ...record, id: record.id || record.no };
+    const normalizedRecord = { ...record, id: record.id };
     setSelectedRecord(normalizedRecord);
     setModalType("update");
     setIsModalMutationOpen(true);
   };
 
   const handleDelete = (record) => {
-    const normalizedRecord = { ...record, id: record.id || record.no };
+    const normalizedRecord = { ...record, id: record.id };
     setSelectedRecordDelete(normalizedRecord);
     setModalDelete(true);
   };
 
   const handleConfirmDelete = () => {
-    dispatch(deleteMutation({ id: selectedRecordDelete.id || selectedRecordDelete.no }))
+    dispatch(deleteMutation({ id: selectedRecordDelete.id  }))
       .unwrap()
       .then(() => {
         setModalDelete(false);
@@ -168,7 +168,7 @@ const DetailWarranty = ({ data_detail }) => {
   const onFinishMutationApproval = async (values, clearForm) => {
     const body = {
       approvalId: data_detail?.approvalId ,
-      id: selectedMutationRecord?.id || selectedMutationRecord?.no || 0,
+      id: selectedMutationRecord?.id  || 0,
       action: approvalAction,
       remark: values.remark,
     };
