@@ -224,7 +224,7 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
         page: nextPage,
         size: loadMoreSize,
         sort,
-        searchs: JSON.stringify(search),
+        searchs: search,
         filters,
         filterRules,
       };

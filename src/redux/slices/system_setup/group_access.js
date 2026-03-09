@@ -161,7 +161,7 @@ export const updateGroupAccess = createAsyncThunk(
   "UPDATE_GROUP_ACCESS",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/ga//update-group-access";
+      const url = "/v1/dbs/api/ga/update-group-access";
       const response = await userHttpService.updateData(url, body);
       const successBody = {
         title: "Successfull",

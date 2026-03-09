@@ -43,6 +43,31 @@
           "children": null
         }
       ]
+    },
+    {
+      "path": null,
+      "name": "Job Scheduler Management",
+      "icon": "SettingOutlined",
+      "children": [
+        {
+          "path": "job-scheduler-management/job-list",
+          "name": "Job List",
+          "icon": null,
+          "children": null
+        },
+        {
+          "path": "job-scheduler-management/job-group-list",
+          "name": "Job Group List",
+          "icon": null,
+          "children": null
+        },
+        {
+          "path": "job-scheduler-management/job-execution-list",
+          "name": "Job Execution List",
+          "icon": null,
+          "children": null
+        }
+      ]
     }
     ]
 }

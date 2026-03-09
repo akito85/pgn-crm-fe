@@ -151,10 +151,10 @@ const ModalConfirmationApprovalMultiDestination = ({
     },
     {
       title: "SUBDISTRICT",
-      dataIndex: "subdistrict",
+      dataIndex: "subDistrict",
       width: 250,
       align: "center",
-      ...getColumnSearchProps("subdistrict"),
+      ...getColumnSearchProps("subDistrict"),
     },
     {
       title: "DISTRICT",

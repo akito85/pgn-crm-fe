@@ -95,7 +95,7 @@ export default function InfoMultiDestination({
 
     if (nextPage <= totalPages) {
       const body = {
-        searchs: JSON.stringify(search),
+        searchs: search,
         page: nextPage,
         size: loadMoreSize,
         sort,
@@ -120,7 +120,7 @@ export default function InfoMultiDestination({
         page,
         size: loadMoreSize,
         sort,
-        searchs: JSON.stringify(search),
+        searchs: search,
         filters,
         filterRules,
       }
