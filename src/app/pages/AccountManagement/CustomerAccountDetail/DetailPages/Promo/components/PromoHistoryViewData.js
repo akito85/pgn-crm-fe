@@ -246,6 +246,7 @@ const PromoHistoryViewData = ({
       setHasMore(true);
       setDataSource([]);
       setExpandedRows([]);
+      loadMoreData(true, mappedFilters);
     },
     [],
   );
@@ -253,7 +254,7 @@ const PromoHistoryViewData = ({
   /* =========================
      DATA LOADING
   ========================= */
-  const loadMoreData = async (reset = false) => {
+  const loadMoreData = async (reset = false, overrideFilters) => {
     if (loading) return;
 
     setLoading(true);
@@ -264,12 +265,13 @@ const PromoHistoryViewData = ({
       const currentPage = reset ? 1 : page;
       isFirstPageRef.current = reset;
 
+      const filters = overrideFilters !== undefined ? overrideFilters : activeFilters;
       const payload = {
         page: currentPage,
         size: pageSize,
         sort: "id~desc",
         searchs: {},
-        filters: activeFilters,
+        filters,
         filterRules: [],
       };
 
@@ -287,13 +289,6 @@ const PromoHistoryViewData = ({
   useEffect(() => {
     loadMoreData(true);
   }, []);
-
-  // Re-load data ketika filter berubah
-  useEffect(() => {
-    if (activeFilters.length > 0) {
-      loadMoreData(true);
-    }
-  }, [activeFilters]);
 
   const handleExpand = (expanded, record) => {
     if (!expanded) {
