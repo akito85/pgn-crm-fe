@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
+import PropTypes from 'prop-types';
 import { PlusOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import CardContainer from "../../../../../../components/CardContainer";
@@ -21,9 +22,24 @@ const MutationInfoSection = ({
   onMutationPageChange,
   loadingMutation = false,
 }) => {
-  const currentPage = mutationPage || 1;
-  const currentPageSize = mutationPageSize || 10;
+  const [currentPage, setCurrentPage] = useState(mutationPage || 1);
+  const [currentPageSize, setCurrentPageSize] = useState(mutationPageSize || 10);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * currentPageSize;
+    const end = start + currentPageSize;
+    return (mutationDataInfo || []).slice(start, end);
+  }, [mutationDataInfo, currentPage, currentPageSize]);
+
   const totalData = mutationTotalData !== undefined ? mutationTotalData : (mutationDataInfo?.length || 0);
+
+  const handlePageChange = (page, pageSize) => {
+    setCurrentPage(page);
+    setCurrentPageSize(pageSize);
+    if (onMutationPageChange) {
+      onMutationPageChange(page, pageSize);
+    }
+  };
 
   return (
     <CardContainer header="MUTATION INFORMATION">
@@ -37,12 +53,12 @@ const MutationInfoSection = ({
       <Spin spinning={loadingMutation}>
         <TableRBI
             idTable="table-mutation"
-            dataSource={mutationDataInfo}
+            dataSource={paginatedData}
             columns={columnMutation(currentPage, currentPageSize, null, null, "", () => {}, {}, handleEdit, handleDelete, () => {}, () => {}, () => {}, isCreate, disabled, isApprover)}
             current={currentPage}
             pageSize={currentPageSize}
             totalData={totalData}
-            onChange={onMutationPageChange}
+            onChange={handlePageChange}
             showExport={false}
             showAdvanceSearch={true}
             showSearchBar={true}
@@ -51,6 +67,23 @@ const MutationInfoSection = ({
       </Spin>
     </CardContainer>
   );
+};
+
+MutationInfoSection.propTypes = {
+  mutationDataInfo: PropTypes.array,
+  columnMutation: PropTypes.func.isRequired,
+  setIsModalMutationOpen: PropTypes.func.isRequired,
+  handleEdit: PropTypes.func,
+  handleDelete: PropTypes.func,
+  isCreate: PropTypes.bool,
+  disabled: PropTypes.bool,
+  isWaitingApproval: PropTypes.bool,
+  isApprover: PropTypes.bool,
+  mutationTotalData: PropTypes.number,
+  mutationPage: PropTypes.number,
+  mutationPageSize: PropTypes.number,
+  onMutationPageChange: PropTypes.func,
+  loadingMutation: PropTypes.bool,
 };
 
 export default MutationInfoSection;

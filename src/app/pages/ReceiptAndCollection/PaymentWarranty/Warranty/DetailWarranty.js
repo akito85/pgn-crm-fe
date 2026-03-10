@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { Spin } from "antd";
@@ -13,6 +14,7 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
 import ButtonComponent from "../../../../../components/ButtonComponent";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import { WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 import { 
     getDetailWarrantyMutation,
@@ -32,7 +34,7 @@ const DetailWarranty = ({ data_detail }) => {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { dataMutationInfo, loadingMutation, dataApprovalHistory, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
+  const { dataMutation, loadingMutation, dataApprovalHistory, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
   const { currencyDDL } = useSelector((state) => state.receipt);
   const { data: dataServiceAgreement } = useSelector((state) => state.accountServiceAgreement);
   const [selectedSA, setSelectedSA] = useState({});
@@ -56,9 +58,10 @@ const DetailWarranty = ({ data_detail }) => {
   }, [dispatch, data_detail?.accountId]);
 
   useEffect(() => {
-    if (dataServiceAgreement?.result && (data_detail?.serviceAgreementNumber || data_detail?.saNumber)) {
+    const saList = Array.isArray(dataServiceAgreement?.result) ? dataServiceAgreement.result : [];
+    if (saList.length > 0 && (data_detail?.serviceAgreementNumber || data_detail?.saNumber)) {
       const saNumberValue = data_detail?.serviceAgreementNumber || data_detail?.saNumber;
-      const foundSA = dataServiceAgreement.result.find(sa => sa.saNumber === saNumberValue);
+      const foundSA = saList.find(sa => sa.saNumber === saNumberValue);
       if (foundSA) {
         setSelectedSA(foundSA);
       } else {
@@ -151,6 +154,11 @@ const DetailWarranty = ({ data_detail }) => {
       setOpenModalHistory(true);
     } catch (error) {
       setOpenModalHistory(false);
+      dispatch(showModalError({
+        title: "Failed to Load History",
+        description: error?.message || "Unable to load approval history. Please try again."
+      }));
+      console.error('Failed to load mutation approval history:', error);
     }
   };
 
@@ -259,7 +267,7 @@ const DetailWarranty = ({ data_detail }) => {
         </div>
         <Spin spinning={loadingMutation}>
           <TableRBI
-              dataSource={dataMutationInfo?.content || []}
+              dataSource={dataMutation?.content || []}
               columns={columnMutation(
                 page, pageSize, null, null, "", () => {}, {}, 
                 handleEdit, handleDelete, handleHistory, 
@@ -269,7 +277,7 @@ const DetailWarranty = ({ data_detail }) => {
 fixedColumns={{ left: ["no"], right: ["action"] }}
               current={page}
               pageSize={pageSize}
-              totalData={dataMutationInfo?.page?.totalElements || 0}
+              totalData={dataMutation?.page?.totalElements || 0}
               onChange={(p, ps) => { setPage(p); setPageSize(ps); }}
               showExport={false}
               showAdvanceSearch={true}
@@ -327,6 +335,10 @@ fixedColumns={{ left: ["no"], right: ["action"] }}
       />
     </div>
   );
+};
+
+DetailWarranty.propTypes = {
+  data_detail: PropTypes.object
 };
 
 export default DetailWarranty;

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { Form, Row, Col, Select } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
@@ -86,7 +87,25 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
         <Form.Item 
           name="amount" 
           label="Amount" 
-          rules={[{ required: true }]}
+          rules={[
+            { required: true, message: 'Amount is required' },
+            { 
+              pattern: /^\d+(\.\d{1,2})?$/,
+              message: 'Amount must be a positive number with max 2 decimal places'
+            },
+            { 
+              validator: (_, value) => {
+                const floatValue = typeof value === 'object' ? value?.floatValue : value;
+                if (floatValue === undefined || floatValue === null || floatValue <= 0) {
+                  return Promise.reject(new Error('Amount must be greater than 0'));
+                }
+                if (floatValue > 999999999999) {
+                  return Promise.reject(new Error('Amount exceeds maximum allowed value'));
+                }
+                return Promise.resolve();
+              }
+            }
+          ]}
           // API: amount
           getValueFromEvent={(val) => val.floatValue}
         >
@@ -180,6 +199,15 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
       </Col>
     </Row>
   );
+};
+
+MutationForm.propTypes = {
+  disabled: PropTypes.bool,
+  currencyDDL: PropTypes.shape({
+    data: PropTypes.array
+  }),
+  warrantyType: PropTypes.string,
+  headerCurrency: PropTypes.string
 };
 
 export default MutationForm;

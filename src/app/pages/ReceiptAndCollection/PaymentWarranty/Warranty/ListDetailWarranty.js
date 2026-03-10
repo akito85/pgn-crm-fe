@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, Spin } from "antd";
@@ -29,6 +30,8 @@ import { columnsReleaseInfo } from "./Modal/Table/TableReleaseInfo";
 import { columnsRefundInfo } from "./Modal/Table/TableRefundInfo";
 import { getDetailWarrantyMutation } from "../../../../../redux/slices/receipt_collection/warranty";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import { useFilteredMutations } from "../../../../../hooks/useFilteredMutations";
+import "./warrantyStyles.css";
 
 const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   const location = useLocation();
@@ -45,7 +48,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
     data_approval_info,
     dataListAppHierId,
     dataListAppHierDetail,
-    dataMutationInfo,
+    dataMutation,
     loadingDetail,
     loadingApproval,
     loadingMutation,
@@ -77,17 +80,9 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
     }
   }, [activeTab, dispatch, data_detail?.appHierId]);
 
-  const filterMutationItems = (type) => {
-    if (!dataMutationInfo?.content) return [];
-    return dataMutationInfo.content.filter(item =>
-      item.typePaymentWarranty?.toLowerCase() === type.toLowerCase() ||
-      item.mutationType?.toLowerCase() === type.toLowerCase()
-    );
-  };
-
-  const transactionHoldItems = React.useMemo(() => filterMutationItems("Hold"), [dataMutationInfo]);
-  const transactionReleaseItems = React.useMemo(() => filterMutationItems("Release"), [dataMutationInfo]);
-  const transactionRefundItems = React.useMemo(() => filterMutationItems("Refund"), [dataMutationInfo]);
+  const transactionHoldItems = useFilteredMutations(dataMutation, "Hold");
+  const transactionReleaseItems = useFilteredMutations(dataMutation, "Release");
+  const transactionRefundItems = useFilteredMutations(dataMutation, "Refund");
 
   const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.appHierId)?.approvalName || data_detail?.approvalName || "-";
 
@@ -386,26 +381,6 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
         </CardContainerNoBorder>
       )}
 
-      <style>
-        {`
-          .full-width-tabs .ant-tabs-nav {
-            margin-bottom: 0 !important;
-            padding: 0 20px !important;
-          }
-          .full-width-tabs .ant-tabs-nav::before {
-            border-bottom: 1px solid #BDBDBD !important;
-          }
-          .full-width-tabs .ant-tabs-tab {
-            margin: 0 !important;
-            padding: 12px 16px !important;
-          }
-          .full-width-tabs .ant-tabs-ink-bar {
-            height: 2px !important;
-            background: #0075bf !important;
-          }
-        `}
-      </style>
-
       <LogHistoryInfo
         data={{
           recordId: data_detail?.recordId || data_detail?.id || "-",
@@ -446,6 +421,11 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       {content}
     </LayoutMenu>
   );
+};
+
+ListDetailWarranty.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  isEmbedded: PropTypes.bool
 };
 
 export default ListDetailWarranty;

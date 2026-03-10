@@ -166,7 +166,17 @@ const PaymentGuaranteeSection = ({
                 <Form.Item 
                   name="effEndDate" 
                   label="Eff End Date" 
-                  rules={[{ required: !isCash }]}
+                  rules={[
+                    { required: !isCash, message: 'End Date is required' },
+                    {
+                      validator: (_, value) => {
+                        if (value && value.isAfter(moment().add(10, 'years'))) {
+                          return Promise.reject(new Error('End Date cannot exceed 10 years from today'));
+                        }
+                        return Promise.resolve();
+                      }
+                    }
+                  ]}
                   // API: effectiveEndDate
                 >
                   <DatePicker 
@@ -174,7 +184,15 @@ const PaymentGuaranteeSection = ({
                     className="w-full" 
                     style={{ borderRadius: '8px' }} 
                     disabledDate={(current) => {
-                      return current && effStartDate && current.isBefore(moment(effStartDate).startOf('day'));
+                      const today = moment().startOf('day');
+                      const maxDate = moment().add(10, 'years').endOf('year');
+                      return (
+                        current && (
+                          (effStartDate && current.isBefore(moment(effStartDate).startOf('day'))) ||
+                          current.isBefore(today) ||
+                          current.isAfter(maxDate)
+                        )
+                      );
                     }}
                   />
                 </Form.Item>

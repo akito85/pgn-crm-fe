@@ -33,7 +33,8 @@ import {
   downloadWarrantyList,
   getDetailWarranty,
   getApprovalHistory,
-  downloadWarrantyListDetail
+  downloadWarrantyListDetail,
+  selectAllWarranties
 } from "../../../../../redux/slices/receipt_collection/warranty";
 
 // Modal
@@ -48,10 +49,11 @@ const ViewWarranty = () => {
   const { data, loading, loadingList, dataApprovalHistory, data_detail } = useSelector(
     (state) => state.warranty
   );
+  const warranties = useSelector(selectAllWarranties);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
+  const dataSource = warranties;
   const isSubmitter = data?.isSubmitter || false;
   const isApprover = data?.isApprover || false;
   const detailRef = useRef(null);
@@ -118,7 +120,7 @@ const ViewWarranty = () => {
     }
   ];
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = React.useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
@@ -131,7 +133,7 @@ const ViewWarranty = () => {
         [dataIndex]: selectedKeys[0],
       };
     });
-  };
+  }, []);
 
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -640,6 +642,7 @@ const ViewWarranty = () => {
     searchedColumn,
     searchText,
     search,
+    handleSearch
   ]);
 
   const actionColumns = useColumnActionPermission(

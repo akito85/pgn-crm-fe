@@ -1,5 +1,7 @@
 import { WarningOutlined, PlusOutlined } from "@ant-design/icons";
-import { Form, Spin, Row, Col, Select, DatePicker, Input } from "antd";
+import DOMPurify from 'dompurify';
+import { Form, Spin, Row, Col, Select, DatePicker, Input, message } from "antd";
+import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -67,7 +69,7 @@ const ListFormWarranty = (props) => {
   const location = useLocation();
   const { id } = location?.state || {};
 
-  const { dataListAppHierId, dataListAppHierDetail, loadingDetail, loadingApproval, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, data_detail, dataMutationInfo } = useSelector((state) => state.warranty);
+  const { dataListAppHierId, dataListAppHierDetail, loadingDetail, loadingApproval, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, data_detail, dataMutation } = useSelector((state) => state.warranty);
   
   const {
     dataAccountNumber,
@@ -83,6 +85,7 @@ const ListFormWarranty = (props) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sendBody, setSendBody] = useState(null);
   
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -221,13 +224,13 @@ const ListFormWarranty = (props) => {
   }, [id, type, dispatch]);
 
   useEffect(() => {
-    if (type === "update" && !mutationInitializedRef.current && dataMutationInfo?.content) {
+    if (type === "update" && !mutationInitializedRef.current && dataMutation?.content) {
       mutationInitializedRef.current = true;
-      if (dataMutationInfo.content.length > 0) {
-        setMutationDataInfo(dataMutationInfo.content.map((m, i) => ({ ...m, key: i + 1 })));
+      if (dataMutation.content.length > 0) {
+        setMutationDataInfo(dataMutation.content.map((m, i) => ({ ...m, key: i + 1 })));
       }
     }
-  }, [dataMutationInfo, type]);
+  }, [dataMutation, type]);
 
   const isPartialEdit = useMemo(() => {
     if (type !== "update" || !data_detail) return false;
@@ -281,6 +284,15 @@ const ListFormWarranty = (props) => {
       setCurrent(current + 1);
       return;
     }
+    if (current === 2) {
+      if (listDataAttachment.length === 0) {
+        dispatch(showModalError({ 
+          title: "Warning", 
+          description: "Attachment is mandatory. Please upload at least one attachment before proceeding." 
+        }));
+        return;
+      }
+    }
     setCurrent(current + 1);
   };
 
@@ -288,7 +300,7 @@ const ListFormWarranty = (props) => {
     if (current > 0) setCurrent(current - 1);
   };
 
-  const handleBack = () => {
+  const onBack = () => {
     if (Object.keys(form.getFieldsValue(true)).length === 0) {
       navigate(-1);
     } else {
@@ -297,11 +309,17 @@ const ListFormWarranty = (props) => {
   };
 
   const processSubmit = async (isDraft = false) => {
+    if (isSubmitting) {
+      message.warning('Submission is already in progress');
+      return;
+    }
+
     if (listDataAttachment.length === 0 && !data_detail?.isApprover && !isDraft) {
       dispatch(showModalError({ title: "Warning", description: "Attachment is mandatory.", return: false }));
       return;
     }
     
+    setIsSubmitting(true);
     try {
       const values = isDraft ? form.getFieldsValue(true) : await form.validateFields();
       
@@ -320,7 +338,7 @@ const ListFormWarranty = (props) => {
           rateAmount: parsedRateAmount,
           claimPeriodTermType: values.claimPeriodTermType ? values.claimPeriodTermType.toUpperCase() : "DATE",
           claimPeriodTermValue: values.claimPeriodTermValue ? parseInt(values.claimPeriodTermValue, 10) : null,
-          description: values.description || null,
+          description: DOMPurify.sanitize(values.description || null),
           isDraft: isDraft,
           appHierId: selectedHierarchy || null,
           saNumber: values.saNumber || null,
@@ -367,7 +385,16 @@ const ListFormWarranty = (props) => {
         setModalConfirm(true);
       }
     } catch (error) {
-        console.log(error);
+        console.error('Submit warranty error:', error);
+        
+        dispatch(showModalError({
+          title: "Submission Failed",
+          description: "An error occurred while submitting warranty. Please try again."
+        }));
+        
+        setModalConfirm(false);
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -506,12 +533,12 @@ const ListFormWarranty = (props) => {
             totalSteps={steps.length}
             onPrev={prev}
             onNext={next}
-            onCancel={handleBack}
+            onCancel={onBack}
             onClear={() => { form.resetFields(); setSelectedHierarchy(null); setListDataAttachment([]); setMutationDataInfo([]); }}
             onSaveDraft={handleSaveDraft}
             onSubmit={() => form.submit()}
             type={type}
-            isLoading={loadingSave}
+            isLoading={loadingSave || isSubmitting}
           />
         </Form>
       </Spin>
@@ -525,7 +552,7 @@ const ListFormWarranty = (props) => {
         footer={
           <div className="w-full flex justify-between gap-5 p-4">
             <ButtonComponent onClick={() => setModalConfirm(false)} type="default">Cancel</ButtonComponent>
-            <ButtonComponent isPrimary onClick={handleSave} loading={loadingSave}>Confirm</ButtonComponent>
+            <ButtonComponent isPrimary onClick={handleSave} loading={loadingSave || isSubmitting}>Confirm</ButtonComponent>
           </div>
         }
       >
@@ -582,6 +609,10 @@ const ListFormWarranty = (props) => {
       </ModalConfirm>
     </LayoutMenu>
   );
+};
+
+ListFormWarranty.propTypes = {
+  type: PropTypes.oneOf(['create', 'update']).isRequired,
 };
 
 export default ListFormWarranty;

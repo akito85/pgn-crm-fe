@@ -4,6 +4,12 @@ import { tokenHeader } from "../../utils/tokenHeader";
 import FileSaver from "file-saver";
 import { errorCode, hasValue } from "../../utils";
 
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+};
+
 const getAll = async (url) => {
   try {
     const response = await axios.get(configApp.PAYMENT_SERVICE + url, {
@@ -127,10 +133,12 @@ const activationWithRemarkPost = async (url, body) => {
 };
 const uploadImage = async (url, data) => {
   try {
+    const csrfToken = localStorage.getItem('csrfToken') || getCookie('XSRF-TOKEN');
     const response = await axios.post(configApp.PAYMENT_SERVICE + url, data, {
       headers: {
         ...tokenHeader(),
         "Content-Type": "multipart/form-data",
+        "X-CSRF-Token": csrfToken,
       },
     });
     return response?.data;

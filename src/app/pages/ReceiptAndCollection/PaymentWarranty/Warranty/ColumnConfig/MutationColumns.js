@@ -1,3 +1,5 @@
+import DOMPurify from "dompurify";
+import React from 'react';
 import moment from "moment";
 import { Tooltip, Popover, Space } from "antd";
 import { dateFormatting, renderColumn } from "../../../../../../utils";
@@ -37,7 +39,7 @@ export const columnMutation = (
       dataIndex: "documentNumber",
       sorter: true,
       ...getColumnSearchPropsPaging("documentNumber", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record.noDocumentMutation || record.mutationNumber || "",
+      render: (text, record) => DOMPurify.sanitize(text || record.noDocumentMutation || record.mutationNumber || ""),
     },
     {
       key: "source",
@@ -45,7 +47,7 @@ export const columnMutation = (
       dataIndex: "source",
       sorter: true,
       ...getColumnSearchPropsPaging("source", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record?.payWarranty?.documentNumber || "",
+      render: (text, record) => DOMPurify.sanitize(text || record?.payWarranty?.documentNumber || ""),
     },
     {
       key: "type",
@@ -53,7 +55,7 @@ export const columnMutation = (
       dataIndex: "type",
       sorter: true,
       ...getColumnSearchPropsPaging("type", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record?.type || "",
+      render: (text, record) => DOMPurify.sanitize(text || record?.type || ""),
     },
     {
       key: "category",
@@ -61,7 +63,7 @@ export const columnMutation = (
       dataIndex: "category",
       sorter: true,
       ...getColumnSearchPropsPaging("category", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => record?.category || "",
+      render: (text, record) => DOMPurify.sanitize(record?.category || ""),
     },
     {
       key: "date",
@@ -89,7 +91,7 @@ export const columnMutation = (
       dataIndex: "convertedCurrency",
       sorter: true,
       ...getColumnSearchPropsPaging("convertedCurrency", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => record.convertedCurrencyName || record.currency || (typeof text === 'string' && isNaN(Number(text)) ? text : "") || "",
+      render: (text, record) => DOMPurify.sanitize(record.convertedCurrencyName || record.currency || (typeof text === 'string' && isNaN(Number(text)) ? text : "") || ""),
     },
     {
       key: "rate",
@@ -111,11 +113,19 @@ export const columnMutation = (
       }
     },
     {
-      key: "description",
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      sorter: true,
-      ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch),
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        sorter: true,
+        ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch),
+        render: (text) => (
+            <div 
+                ref={(el) => {
+                    if (el) {
+                        el.textContent = text || "-";
+                    }
+                }}
+            />
+        )
     },
   ];
 
