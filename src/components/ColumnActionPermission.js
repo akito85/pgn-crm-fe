@@ -14,7 +14,7 @@ export const RenderContentActions = (
   sliceColumn = "View",
   stopClickPropagation = false,
 ) => {
-  if (totalLength > 2) {
+  if (totalLength > 3) {
     return (
       <div className="w-full flex justify-center items-center py-1 gap-4">
         <Popover
@@ -34,8 +34,8 @@ export const RenderContentActions = (
             </Space>
           }
         >
-          <div 
-            className="group" 
+          <div
+            className="group"
             onClick={(e) => {
               if (stopClickPropagation) e.stopPropagation();
             }}
