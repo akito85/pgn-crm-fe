@@ -327,10 +327,11 @@ export const getColumnSearchPropsUseFilteredValue = (
   handleSearch,
   excludeRender = false,
   typeFilter = "input",
-  selectOptions = [] // tambahkan parameter baru untuk options
+  selectOptions = [],
+  handleReset = null
 ) => {
   let obj = {
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => {
       const onDataChange = (value, dateString) => {
         setSelectedKeys(dateString ? [dateString] : null);
         handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
@@ -439,6 +440,16 @@ export const getColumnSearchPropsUseFilteredValue = (
               }}
               maxLength={3}
             />
+          ) : null}
+          {handleReset ? (
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+              <button
+                onClick={() => handleReset(clearFilters, dataIndex)}
+                style={{ cursor: "pointer", padding: "2px 8px", fontSize: 12 }}
+              >
+                Reset
+              </button>
+            </div>
           ) : null}
         </div>
       );

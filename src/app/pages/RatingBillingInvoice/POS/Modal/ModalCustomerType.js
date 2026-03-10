@@ -13,13 +13,16 @@ const ModalCustomerType = ({
   selectedType,
   setSelectedType,
   loading = false,
+  customerTypes = [], // <-- terima dari parent
 }) => {
   const [form] = Form.useForm();
 
-  const customerTypes = [
-    { label: "Customer", value: "customer" },
-    { label: "Prospective Customer", value: "prospective" },
-  ];
+  // Map data API ke format options: { label, value }
+  // code "1" => "customer", code "2" => "prospective"
+  const customerTypeOptions = customerTypes.map((item) => ({
+    label: item.text,
+    value: item.code === "1" ? "customer" : "prospective",
+  }));
 
   const handleConfirm = () => {
     form.validateFields().then((values) => {
@@ -68,25 +71,20 @@ const ModalCustomerType = ({
       loading={loading}
       closable={!loading}
     >
-      <BaseContainer
-        border
-        className="mb-0"
-      >
+      <BaseContainer border className="mb-0">
         <Form layout="vertical" form={form}>
-          <div className="space-y-0">
-            <Form.Item
-              label="Customer Type"
-              name="customerType"
-              rules={formMessageRequired("Customer Type")}
-              style={{ padding: 0 }}
-            >
-              <SelectComponent
-                placeholder="Choose Customer Type..."
-                options={customerTypes}
-                onChange={(value) => setSelectedType(value)}
-              />
-            </Form.Item>
-          </div>
+          <Form.Item
+            label="Customer Type"
+            name="customerType"
+            rules={formMessageRequired("Customer Type")}
+            style={{ padding: 0 }}
+          >
+            <SelectComponent
+              placeholder="Choose Customer Type..."
+              options={customerTypeOptions}
+              onChange={(value) => setSelectedType(value)}
+            />
+          </Form.Item>
         </Form>
       </BaseContainer>
     </ModalCustom>

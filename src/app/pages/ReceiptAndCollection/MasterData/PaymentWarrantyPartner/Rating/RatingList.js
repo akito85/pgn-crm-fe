@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import DOMPurify from "dompurify";
 import { 
   getPaginatePaymentWarrantyPartnerRating,
   inactivatePaymentWarrantyPartnerRating,
@@ -18,11 +19,12 @@ import ModalRating from "./ModalRating";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import ModalActiveInactive from "../../../../../../components/Modal/ModalActiveInactive";
 
-const RatingList = ({ partnerId, isApprover }) => {
+const RatingList = ({ partnerId, isApprover, partnerStatus }) => {
   const dispatch = useDispatch();
-  const { data_rating, data_history_rating } = useSelector((state) => state.paymentWarrantyPartner);
+  const { data_rating, data_history_rating, loading_rating, loading_detail } = useSelector((state) => state.paymentWarrantyPartner);
   
   const currentPartnerId = partnerId;
+  const isPartnerInactive = partnerStatus === RECORD_STATUS.INACTIVE;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -126,12 +128,12 @@ const RatingList = ({ partnerId, isApprover }) => {
       render: (text, record, index) => (page - 1) * pageSize + index + 1,
       width: 60
     },
-    { title: "RATING", dataIndex: "rating", key: "rating", sorter: true },
-    { title: "CRITERIA", dataIndex: "criteria", key: "criteria", sorter: true },
+    { title: "RATING", dataIndex: "rating", key: "rating", render: (text) => DOMPurify.sanitize(text), sorter: true },
+    { title: "CRITERIA", dataIndex: "criteria", key: "criteria", render: (text) => DOMPurify.sanitize(text), sorter: true },
     { title: "START DATE", dataIndex: "startDate", key: "startDate", render: (text) => renderDateConverter(text), sorter: true },
     { title: "END DATE", dataIndex: "endDate", key: "endDate", render: (text) => renderDateConverter(text), sorter: true },
     { title: "RATING DATE", dataIndex: "ratingDate", key: "ratingDate", render: (text) => renderDateConverter(text), sorter: true },
-    { title: "RATING ISSUER", dataIndex: "ratingIssuer", key: "ratingIssuer", sorter: true },
+    { title: "RATING ISSUER", dataIndex: "ratingIssuer", key: "ratingIssuer", render: (text) => DOMPurify.sanitize(text), sorter: true },
     { 
       title: "RBC min 120%", 
       dataIndex: "rbc", 
@@ -152,11 +154,11 @@ const RatingList = ({ partnerId, isApprover }) => {
       title: "10X COLLATERAL VALUE ASSET", 
       dataIndex: "collateralValueAsset", 
       key: "collateralValueAsset", 
-      render: (text) => (text ? `Rp ${text.toLocaleString("id-ID")}` : "-"),
+      render: (text) => (text ? text.toLocaleString("id-ID") : "-"),
       sorter: true,
       align: "right"
     },
-    { title: "DESCRIPTION", dataIndex: "description", key: "description", sorter: true },
+    { title: "DESCRIPTION", dataIndex: "description", key: "description", render: (text) => DOMPurify.sanitize(text), sorter: true },
     { 
       title: "STATUS", 
       dataIndex: "status", 
@@ -164,7 +166,7 @@ const RatingList = ({ partnerId, isApprover }) => {
       sorter: true,
       width: 120,
       render: (text) => (
-        <StatusComponent colour={text}>{text}</StatusComponent>
+        <StatusComponent colour={text}>{DOMPurify.sanitize(text)}</StatusComponent>
       )
     },
     { 
@@ -174,12 +176,12 @@ const RatingList = ({ partnerId, isApprover }) => {
       sorter: true,
       width: 150,
       render: (text) => (
-        <StatusComponent colour={text}>{text}</StatusComponent>
+        <StatusComponent colour={text}>{DOMPurify.sanitize(text)}</StatusComponent>
       )
     }
   ];
 
-  if (!isApprover) {
+  if (!loading_detail && !isApprover && !isPartnerInactive) {
     columns.push({
       title: "ACTION",
       key: "action",
@@ -242,7 +244,7 @@ const RatingList = ({ partnerId, isApprover }) => {
   return (
     <div className="flex flex-col">
       <div className="flex justify-end mb-4">
-        {!isApprover && (
+        {!loading_detail && !isApprover && !isPartnerInactive && (
           <Button 
             type="primary" 
             icon={<PlusOutlined />} 
@@ -257,6 +259,7 @@ const RatingList = ({ partnerId, isApprover }) => {
         idTable="rating-list-table"
         dataSource={data_rating?.content || []}
         columns={columns}
+        loading={loading_rating}
         pageSize={pageSize}
         current={page}
         totalData={data_rating?.page?.totalElements || 0}

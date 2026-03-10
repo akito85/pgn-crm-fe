@@ -1,7 +1,6 @@
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import {
-  currencyFormatting,
   numberFormatting,
 } from "../../../../../utils/formatCurrency";
 
@@ -157,6 +156,33 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "billCode",
+    title: "BILLING CODE",
+    dataIndex: "billCode",
+    isClassification: true,
+    width: 71,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "billCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "billCode",
+        hasValue(search["billCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
     key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
@@ -253,15 +279,8 @@ export const columnsBilling = (
       true,
       "datePeriod"
     ),
-    render: (text) =>
-      renderDateColumn(
-        "billingPeriod",
-        hasValue(search["billingPeriod"]),
-        searchText,
-        text,
-        "datePeriod",
-        search
-      ),
+    // billingPeriod sekarang berupa string "Dec 2025", bukan ISO date
+    render: (text) => text || "-",
   },
   {
     key: "accountRegistrationNumber",
@@ -818,16 +837,17 @@ export const columnsBilling = (
       return numberFormatting(text);
     },
   },
+  // PERUBAHAN: withHoldingTaxCode → withholdingTaxCode (sesuai response API terbaru)
   {
-    key: "withHoldingTaxCode",
+    key: "withholdingTaxCode",
     title: "WITHHOLDING TAX CODE",
-    dataIndex: "withHoldingTaxCode",
+    dataIndex: "withholdingTaxCode",
     width: 85,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "withHoldingTaxCode",
+      "withholdingTaxCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -836,8 +856,8 @@ export const columnsBilling = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTaxCode",
-        hasValue(search["withHoldingTaxCode"]),
+        "withholdingTaxCode",
+        hasValue(search["withholdingTaxCode"]),
         searchText,
         text,
         false,
@@ -845,16 +865,17 @@ export const columnsBilling = (
         search
       ),
   },
+  // PERUBAHAN: withHoldingTaxRate → withholdingTaxRate (sesuai response API terbaru)
   {
-    key: "withHoldingTaxRate",
+    key: "withholdingTaxRate",
     title: "WITHHOLDING TAX RATE",
-    dataIndex: "withHoldingTaxRate",
+    dataIndex: "withholdingTaxRate",
     width: 85,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "withHoldingTaxRate",
+      "withholdingTaxRate",
       searchInput,
       searchedColumn,
       searchText,
@@ -862,9 +883,9 @@ export const columnsBilling = (
       true
     ),
     render: (text) => {
-      if (hasValue(search["withHoldingTaxRate"])) {
+      if (hasValue(search["withholdingTaxRate"])) {
         return renderColumn(
-          "withHoldingTaxRate",
+          "withholdingTaxRate",
           true,
           searchText,
           text,
@@ -876,16 +897,17 @@ export const columnsBilling = (
       return numberFormatting(text);
     },
   },
+  // PERUBAHAN: withHoldingTax → withholdingTax (sesuai response API terbaru)
   {
-    key: "withHoldingTax",
+    key: "withholdingTax",
     title: "WITHHOLDING TAX",
     width: 70,
-    dataIndex: "withHoldingTax",
+    dataIndex: "withholdingTax",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "withHoldingTax",
+      "withholdingTax",
       searchInput,
       searchedColumn,
       searchText,
@@ -894,8 +916,8 @@ export const columnsBilling = (
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTax",
-        hasValue(search["withHoldingTax"]),
+        "withholdingTax",
+        hasValue(search["withholdingTax"]),
         searchText,
         text,
         false,
@@ -965,7 +987,7 @@ export const columnsBilling = (
       return numberFormatting(text);
     },
   },
-    {
+  {
     key: "totalAmount",
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
@@ -1154,16 +1176,17 @@ export const columnsBilling = (
         search
       ),
   },
+  // PERUBAHAN: accountDate → accountingDate (sesuai response API terbaru)
   {
-    key: "accountDate",
+    key: "accountingDate",
     title: "ACCOUNTING DATE",
     width: 70,
     sorter: true,
     isClassification: true,
-    dataIndex: "accountDate",
+    dataIndex: "accountingDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "accountDate",
+      "accountingDate",
       searchInput,
       searchedColumn,
       searchText,
@@ -1173,8 +1196,8 @@ export const columnsBilling = (
     ),
     render: (text) =>
       renderDateColumn(
-        "accountDate",
-        hasValue(search["accountDate"]),
+        "accountingDate",
+        hasValue(search["accountingDate"]),
         searchText,
         text,
         "date",
@@ -1512,6 +1535,7 @@ export const columnsBilling = (
       true,
       "select",
       [
+        { value: "DRAFT", label: "Draft" },
         { value: "APPROVED", label: "Approved" },
         { value: "NEED REVIEW", label: "Need Review" },
         { value: "WAITING APPROVAL", label: "Waiting Approval" },
@@ -1525,6 +1549,9 @@ export const columnsBilling = (
           break;
         case "NEED REVIEW":
           text = "Need Review";
+          break;
+        case "DRAFT":
+          text = "Draft";
           break;
         default:
           text = index

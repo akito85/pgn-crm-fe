@@ -36,15 +36,20 @@ export const columnsHoldInfo = (
       width: 150,
       fixed: "right",
       render: (_, record) => (
-        <InputNumber
-          style={{ width: '100%' }}
-          formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-          parser={value => value.replace(/\$\s?|(\.*)/g, '')}
-          value={holdAmountData[record.key]}
-          onChange={(val) => handleHoldAmountChange(val, record.key)}
-          controls={false}
-          disabled={disabled}
-        />
+        disabled ? (
+          <div style={{ textAlign: 'right' }}>
+            {((holdAmountData[record.key] || record.holdAmount) || 0).toLocaleString()}
+          </div>
+        ) : (
+          <InputNumber
+            style={{ width: '100%' }}
+            formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+            parser={value => value.replace(/\$\s?|(\.*)/g, '')}
+            value={holdAmountData[record.key]}
+            onChange={(val) => handleHoldAmountChange(val, record.key)}
+            controls={false}
+          />
+        )
       )
     }
   ];

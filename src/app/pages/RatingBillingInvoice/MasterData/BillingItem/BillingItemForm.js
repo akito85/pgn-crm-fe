@@ -43,6 +43,7 @@ import {
   getGLAccountList,
   getClassificationTypeList,
   getAccountTypeList,
+  resetApprovalState,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import {
   showModalError,
@@ -80,6 +81,10 @@ const BillingItemForm = (props) => {
     data_accountTypeList,
     loading,
   } = useSelector((state) => state.billing_item);
+
+  const currentPosition = useSelector(
+    (state) => state.auth?.currentPosition ?? state.user?.activePosition ?? null
+  );
 
   // Stepper States
   const [current, setCurrent] = useState(0);
@@ -154,12 +159,12 @@ const BillingItemForm = (props) => {
 
   const isLoading = loading || loadingForm;
 
+  // Initial data fetch
   useEffect(() => {
     dispatch(getBillingItemCategory());
     dispatch(getBillingItemCategoryDdl());
     dispatch(getBillType());
     dispatch(getAvailableApproval());
-    dispatch(getSelectedApproval());
     dispatch(getBillingItemTypeList());
     dispatch(getBillingItemCriteriaList());
     dispatch(getBillingItemCategoryList());
@@ -168,6 +173,16 @@ const BillingItemForm = (props) => {
     dispatch(getClassificationTypeList());
     dispatch(getAccountTypeList());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (currentPosition === null || currentPosition === undefined) return;
+    dispatch(resetApprovalState());
+    setAppHierDataDetail([]);
+    setAppHierOptions([]);
+    setSelectedHierarchy(undefined);
+    form.setFieldsValue({ apphierId: null });
+    dispatch(getAvailableApproval());
+  }, [currentPosition, dispatch, form]);
 
   useEffect(() => {
     if (type === "update" && id) {
@@ -209,6 +224,8 @@ const BillingItemForm = (props) => {
         value: appHier.appHierId,
       }));
       setAppHierOptions(tempAppHier);
+    } else {
+      setAppHierOptions([]);
     }
   }, [dataListAppHierId]);
 

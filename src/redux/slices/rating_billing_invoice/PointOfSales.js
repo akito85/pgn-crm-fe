@@ -43,6 +43,9 @@ const initialState = {
   data_cost_center_list: [],
   data_uom_codes: [],
   loading_prospective: false,
+  data_customer_type: [],
+  data_account_type: [],
+  data_classification_type: [],
 };
 
 export const getListPointOfSales = createAsyncThunk(
@@ -411,6 +414,24 @@ export const getGlobalTermsOfPaymentData = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error, action: "GET_GLOBAL_TERMS_OF_PAYMENT_DATA" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getCustomerType = createAsyncThunk(
+  "GET_CUSTOMER_TYPE_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/customer-type`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_CUSTOMER_TYPE_POS" }),
       );
       return thunkAPI.rejectWithValue(
         error.response.data.code === 419 ? null : error.response.data,
@@ -915,6 +936,60 @@ export const getUomCodes = createAsyncThunk(
   },
 );
 
+export const getAccountTypeList = createAsyncThunk(
+  "GET_ACCOUNT_TYPE_LIST_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/account-type`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const getClassificationTypeList = createAsyncThunk(
+  "GET_CLASSIFICATION_TYPE_LIST_POS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pos/classification-type`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 export const generateProformaInvoice = createAsyncThunk(
   "GENERATE_PROFORMA_INVOICE",
   async (posNumber, thunkAPI) => {
@@ -1056,6 +1131,18 @@ const pointOfSalesSlice = createSlice({
       state.data_detailPos = action.payload;
     },
 
+    [getCustomerType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getCustomerType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_customer_type = action.payload || [];
+    },
+    [getCustomerType.rejected]: (state) => {
+      state.loading = false;
+      state.data_customer_type = [];
+    },
+
     [getApprovalList.pending]: (state, action) => {
       state.loading = true;
       state.data_approvalList = action.payload;
@@ -1086,7 +1173,9 @@ const pointOfSalesSlice = createSlice({
       state.loading = true;
     },
     [getListApprovalPage.fulfilled]: (state, action) => {
-      state.dataApprovalListPage = Array.isArray(action.payload) ? action.payload : [];
+      state.dataApprovalListPage = Array.isArray(action.payload)
+        ? action.payload
+        : [];
       state.loading = false;
     },
     [getListApprovalPage.rejected]: (state) => {
@@ -1403,6 +1492,32 @@ const pointOfSalesSlice = createSlice({
     [getUomCodes.rejected]: (state) => {
       state.loading = false;
       state.data_uom_codes = [];
+    },
+
+    // Account Type
+    [getAccountTypeList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getAccountTypeList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_account_type = action.payload || [];
+    },
+    [getAccountTypeList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_account_type = [];
+    },
+
+    // Classification Type
+    [getClassificationTypeList.pending]: (state) => {
+      state.loading_prospective = true;
+    },
+    [getClassificationTypeList.fulfilled]: (state, action) => {
+      state.loading_prospective = false;
+      state.data_classification_type = action.payload || [];
+    },
+    [getClassificationTypeList.rejected]: (state) => {
+      state.loading_prospective = false;
+      state.data_classification_type = [];
     },
   },
 });

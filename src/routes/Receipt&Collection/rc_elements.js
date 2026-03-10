@@ -73,7 +73,7 @@ import ListFormTransferToCustomer from "../../app/pages/ReceiptAndCollection/Pay
 
 import ViewWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
 import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListDetailWarranty";
-import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListFormWarranty";
 
 import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/History/ListHistoryPaymentWarranty";
 

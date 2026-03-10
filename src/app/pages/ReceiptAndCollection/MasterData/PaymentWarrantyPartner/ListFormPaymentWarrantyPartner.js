@@ -34,6 +34,7 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { bytesConverter } from "../../../../../utils/bytesConverter";
+import { uploadAttachments } from "../../../../../utils/uploadHelper";
 
 const ListFormPaymentWarrantyPartner = (props) => {
   const { type } = props;
@@ -110,16 +111,12 @@ const ListFormPaymentWarrantyPartner = (props) => {
   useEffect(() => {
     if (id && data_detail) {
       const partner = data_detail?.partner || {};
-      const ratingData = data_detail?.ratings?.[0] || {};
       
       const formattedData = {
         ...partner,
         apphierId: partner.appHierId,
-        rating: ratingData?.rating || partner?.rating,
-        criteria: ratingData?.criteria || partner?.criteria,
-        ratingDate: partner?.ratingDate ? moment(partner.ratingDate) : null,
-        startDate: ratingData?.startDate ? moment(ratingData.startDate) : (partner?.startDate ? moment(partner.startDate) : null),
-        endDate: ratingData?.endDate ? moment(ratingData.endDate) : (partner?.endDate ? moment(partner.endDate) : null),
+        startDate: partner?.startDate ? moment(partner.startDate) : null,
+        endDate: partner?.endDate ? moment(partner.endDate) : null,
       };
       
       form.setFieldsValue(formattedData);
@@ -138,7 +135,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
     {
       value: "Partner", 
       paramValue: [
-        "partnerCode", "partnerGuaranteeIssuer", "partnerType", "rating", "criteria", "ratingDate", "startDate", "endDate"
+        "partnerCode", "partnerGuaranteeIssuer", "partnerType", "startDate", "endDate"
       ]
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -182,14 +179,11 @@ const ListFormPaymentWarrantyPartner = (props) => {
       }));
       return;
     }
-    const { startDate, endDate, rating, criteria, ratingDate, ...restForm } = formValue;
+    const { startDate, endDate, ...restForm } = formValue;
     const dataValue = {
       ...restForm,
       appHierId: selectedHierarchy,
       attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id),
-      ratingDate: ratingDate ? moment(ratingDate).format("YYYY-MM-DD") : null,
-      rating,
-      criteria,
       startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : null,
       endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : null,
     };
@@ -200,20 +194,28 @@ const ListFormPaymentWarrantyPartner = (props) => {
 
   const handleSaveDraft = () => {
     const values = form.getFieldsValue();
-    const { startDate, endDate, rating, criteria, ratingDate, ...restValues } = values;
+    const { startDate, endDate, ...restValues } = values;
     const dataValue = {
       ...restValues,
       id: id,
       appHierId: selectedHierarchy,
-      ratingDate: ratingDate ? moment(ratingDate).format("YYYY-MM-DD") : null,
-      rating,
-      criteria,
       startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : null,
       endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : null,
     };
     dispatch(saveDraftPaymentWarrantyPartner(dataValue))
       .unwrap()
-      .then(() => {
+      .then(async (res) => {
+        const referensiId = res.id || id;
+        const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+        
+        if (newAttachments.length > 0) {
+          await uploadAttachments(
+            newAttachments, 
+            referensiId, 
+            "PAYMENT_WARRANTY_PARTNER",
+            (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+          );
+        }
         navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_WARRANTY_PARTNER);
       });
   };
@@ -254,14 +256,14 @@ const ListFormPaymentWarrantyPartner = (props) => {
         const referensiId = res.id || id;
         const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
         
-        for (const element of newAttachments) {
-          const body = {
-            referensiId: referensiId,
-            files: element.file,
-            category: "PAYMENT_WARRANTY_PARTNER",
-            fileCategoryId: element.fileCategoryId,
-          };
-          await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body);
+        // Handle attachments using helper
+        if (newAttachments.length > 0) {
+          await uploadAttachments(
+            newAttachments, 
+            referensiId, 
+            "PAYMENT_WARRANTY_PARTNER",
+            (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+          );
         }
 
         setModalConfirm(false);
@@ -285,7 +287,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_WARRANTY_PARTNER,
-      breadcrumbName: "Payment Warranty Partner",
+      breadcrumbName: "Payment Guarantee Partner",
     },
     { path: "", breadcrumbName: `${type === "create" ? "Create" : "Update"}` },
   ];
@@ -297,7 +299,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         <Form layout="vertical" form={form} onFinish={handleSubmitForm}>
           <div style={{ display: current !== 0 ? "none" : undefined }}>
-            <PaymentWarrantyPartnerForm dataType={dataType} form={form} isApprover={data_detail?.isApprover} />
+            <PaymentWarrantyPartnerForm dataType={type} form={form} isApprover={data_detail?.isApprover} />
           </div>
           <div style={{ display: current !== 1 ? "none" : undefined }}>
             <BaseContainer header={"APPROVAL INFORMATION"}>

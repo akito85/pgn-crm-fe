@@ -502,6 +502,7 @@ const BillingItemView = () => {
       >
         <div className="my-0">
           <TableRBI
+            idTable="transaction-mapping"
             dataSource={currentList}
             columns={processedColumns}
             totalData={totalElements}
