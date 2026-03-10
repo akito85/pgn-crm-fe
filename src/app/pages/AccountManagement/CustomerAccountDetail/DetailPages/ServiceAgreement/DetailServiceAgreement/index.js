@@ -405,6 +405,7 @@ const DetailServiceAgreement = () => {
             <>
               <ButtonComponent
                 type={"menu"}
+                className="!w-fit"
                 onClick={() => navigate(-1)}
               >
                 Back

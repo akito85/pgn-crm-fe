@@ -2032,10 +2032,10 @@ const CreateServiceAgreement = ({ saType }) => {
       },
     };
 
+    setLoadingForm(true);
     dispatch(createServiceAgreement({ body: body }))
       .unwrap()
       .then(async (data) => {
-        setLoadingForm(true);
         const idServiceagreement = data.saId;
         for (let icon = 0; icon < listDataAttachment.length; icon++) {
           const element = listDataAttachment[icon];
@@ -2063,6 +2063,7 @@ const CreateServiceAgreement = ({ saType }) => {
           setBodyError({ message });
           setModalError(true);
         }
+        setLoadingForm(false);
         setModalConfirm(false);
       });
     dispatch(resetDataDetail());
@@ -2272,6 +2273,7 @@ const CreateServiceAgreement = ({ saType }) => {
             setModalConfirm={setModalConfirm}
             dataFinal={dataFinal}
             handleConfirm={handleConfirm}
+            loadingSubmit={loadingForm}
             listDataAttachment={listDataAttachment}
             saInfoObj={saInfoObj}
             saDetailObj={saDetailObj}
