@@ -370,7 +370,7 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     <div
       className="bg-white"
       style={{
-        marginLeft: "31px",
+        // marginLeft: "31px",
         overscrollBehaviorX: "contain",
       }}
       onWheel={handleWheel}

@@ -378,7 +378,7 @@ const RatingPage = () => {
       {pageDetail && (
         <div
           ref={detailRef}
-          className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
+          className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-0"
         >
           <RatingDetail
             calculationCode={calculationCode}
