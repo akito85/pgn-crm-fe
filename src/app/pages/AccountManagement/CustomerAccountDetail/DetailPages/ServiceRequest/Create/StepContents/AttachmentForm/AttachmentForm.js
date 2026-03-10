@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../../../../../components/TablePagination";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import { Input, Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import moment from "moment";
@@ -165,10 +165,10 @@ const AttachmentForm = ({
   // Declaration
   const searchInput = useRef(null);
 
+  const CHUNK_SIZE = 20;
+
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElement] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(CHUNK_SIZE);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -178,10 +178,6 @@ const AttachmentForm = ({
   const [loadingDownload, setLoadingDownload] = useState(false);
 
   // Use Effect
-  useEffect(() => {
-    setTotalElement(data.length);
-  }, [data]);
-
   useEffect(() => {
     dispatch(getCategoryAttachment());
   }, [dispatch]);
@@ -204,11 +200,7 @@ const AttachmentForm = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-  };
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+    setVisibleCount(CHUNK_SIZE);
   };
 
   const onSort = (_, __, sort) => {
@@ -219,6 +211,7 @@ const AttachmentForm = ({
       setFieldSort("");
       setOrderSort("");
     }
+    setVisibleCount(CHUNK_SIZE);
   };
   const handleDelete = (record) => {
     updateData((prevState) => {
@@ -231,14 +224,12 @@ const AttachmentForm = ({
     setModalUpload(true);
   };
 
-  const filterDataByPage = () => {
+  const getFilteredData = () => {
     let result = [...data];
     if (searchedColumn) {
-      result = result.filter((item) => {
-        return item[searchedColumn]
-          ?.toLowerCase()
-          .includes(searchText.toLowerCase());
-      });
+      result = result.filter((item) =>
+        item[searchedColumn]?.toLowerCase().includes(searchText.toLowerCase())
+      );
     }
     const handleDataSort = (obj) => {
       switch (fieldSort) {
@@ -258,16 +249,12 @@ const AttachmentForm = ({
       result.sort((a, b) => {
         let fa = handleDataSort(a);
         let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
+        if (fa < fb) return orderSort === "asc" ? -1 : 1;
+        if (fa > fb) return orderSort === "asc" ? 1 : -1;
         return 0;
       });
     }
-    return result.slice((page - 1) * pageSize, page * pageSize);
+    return result;
   };
 
   const handleShow = async (r) => {
@@ -318,24 +305,38 @@ const AttachmentForm = ({
             </div>
           </div>
         ) : null}
-        <TablePagination
-          dataSource={filterDataByPage()}
-          totalData={totalElements}
-          current={page}
-          pageSize={pageSize}
-          tableScrolled={{ y: 525, x: 1000 }}
-          onChange={handleChangeSize}
-          columns={columnAttachmentData(
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDelete,
-            type,
-            handleShow
-          )}
-          onSort={onSort}
-        />
+        {(() => {
+          const filteredData = getFilteredData();
+          const hasMore = visibleCount < filteredData.length;
+          const handleLoadMore = () =>
+            new Promise((resolve) => {
+              setVisibleCount((prev) => prev + CHUNK_SIZE);
+              resolve();
+            });
+          return (
+            <NxTable
+              idTable="service-request-attachment-table"
+              useSelect={false}
+              usePagination={false}
+              useInfiniteScroll
+              dataSource={filteredData.slice(0, visibleCount)}
+              totalData={filteredData.length}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              tableScrolled={{ y: 400, x: 1000 }}
+              columns={columnAttachmentData(
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                handleDelete,
+                type,
+                handleShow
+              )}
+              onSort={onSort}
+            />
+          );
+        })()}
         <ModalAttachment
           openUpload={modalUpload}
           updateData={updateData}

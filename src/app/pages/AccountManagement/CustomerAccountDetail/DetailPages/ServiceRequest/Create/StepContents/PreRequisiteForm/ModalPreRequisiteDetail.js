@@ -2,7 +2,7 @@ import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxCollapse from "../../../../../../../../../components/Nx/NxCollapse";
 
 const ModalPreRequisiteDetail = (props) => {
-  const { isOpen, footer, handleCancel, handleOk } = props;
+  const { isOpen, footer, handleCancel, handleOk, data = {} } = props;
 
   return (
     <NxModal
@@ -16,18 +16,18 @@ const ModalPreRequisiteDetail = (props) => {
     >
       <NxCollapse title={"Pre-Requisite Information"} defaultOpen={true}>
         <div className="w-full grid grid-cols-2 gap-5">
-          <div class="flex flex-col">
+          <div className="flex flex-col">
             <label className="mb-2 font-extrabold">Type</label>
-            <label className="mb-2 font-medium">Administrative</label>
+            <label className="mb-2 font-medium">{data?.type || "-"}</label>
           </div>
           <div className="flex flex-col">
             <label className="mb-2 font-extrabold">Name</label>
-            <label className="mb-2 font-medium">Penerbitan SPK</label>
+            <label className="mb-2 font-medium">{data?.name || "-"}</label>
           </div>
         </div>
         <div className="w-full flex flex-col mt-5">
           <label className="mb-2 font-extrabold">Description</label>
-          <label className="mb-2 font-medium">Description</label>
+          <label className="mb-2 font-medium">{data?.description || "-"}</label>
         </div>
       </NxCollapse>
       <div className="w-full mt-5 p-5 bg-sky-100 rounded-[10px] outline outline-1 outline-offset-[-1px] outline-slate-200 inline-flex flex-col justify-start items-start gap-5">
@@ -42,7 +42,7 @@ const ModalPreRequisiteDetail = (props) => {
               Record Id
             </div>
             <div className="self-stretch justify-start text-zinc-900 text-base font-normal">
-              491
+              {data?.id || "-"}
             </div>
           </div>
           <div className="flex-1 inline-flex flex-col justify-start items-start gap-2">
@@ -50,7 +50,7 @@ const ModalPreRequisiteDetail = (props) => {
               Created Date
             </div>
             <div className="self-stretch justify-start text-zinc-900 text-base font-normal">
-              21 Dec 2021 23:11:09
+              {data?.createdDate || "-"}
             </div>
           </div>
           <div className="flex-1 inline-flex flex-col justify-start items-start gap-2">
@@ -58,7 +58,7 @@ const ModalPreRequisiteDetail = (props) => {
               Created By
             </div>
             <div className="self-stretch justify-start text-zinc-900 text-base font-normal">
-              Annisa
+              {data?.createdBy || "-"}
             </div>
           </div>
           <div className="flex-1 inline-flex flex-col justify-start items-start gap-2">
@@ -66,7 +66,7 @@ const ModalPreRequisiteDetail = (props) => {
               Updated Date
             </div>
             <div className="self-stretch justify-start text-zinc-900 text-base font-normal">
-              28 Dec 2021 23:11:09
+              {data?.updatedDate || "-"}
             </div>
           </div>
           <div className="flex-1 inline-flex flex-col justify-start items-start gap-2">
@@ -74,7 +74,7 @@ const ModalPreRequisiteDetail = (props) => {
               Updated By
             </div>
             <div className="self-stretch justify-start text-zinc-900 text-base font-normal">
-              Aldri
+              {data?.updatedBy || "-"}
             </div>
           </div>
         </div>

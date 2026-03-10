@@ -290,7 +290,6 @@ export default function InfoDataRequirement({
 
         <NxTable
           idTable={"DataRequirement"}
-          className="border-[0.5px] border-[#c8cdd4] border-solid "
           usePagination={false}
           useSelect={true}
           dataMain={dataRequirement}
@@ -347,7 +346,7 @@ export default function InfoDataRequirement({
 
             <NxTable
               idTable={"DataRequirementValues"}
-              className="border-[0.5px] border-[#c8cdd4] border-solid mt-4"
+              className="mt-4"
               usePagination={false}
               useSelect={false}
               loading={loading_data_requirement_values}
