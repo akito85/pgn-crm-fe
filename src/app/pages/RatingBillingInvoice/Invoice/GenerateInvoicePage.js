@@ -675,7 +675,9 @@ const GenerateInvoicePage = () => {
             setSelectedRowKeys([]);
             setFilterRowSelected([]);
             setRemark("");
-            navigate(INVOICE_ROUTES.GENERATE_INVOICE_VIEW);
+            navigate(INVOICE_ROUTES.GENERATE_INVOICE_VIEW, {
+              state: { refresh: Date.now() },
+            });
           })
           .catch((error) => {
             setLoading(false);
@@ -694,7 +696,7 @@ const GenerateInvoicePage = () => {
     <LayoutMenu>
       <Form layout="vertical" form={form}>
         <CardContainer header="GENERATE INFORMATION">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <Form.Item label="Download Format">
               <Select value={exportFormat} onChange={setExportFormat} disabled>
                 <Option value="PDF">PDF</Option>
@@ -807,7 +809,7 @@ const GenerateInvoicePage = () => {
           </div>
         </CardContainer>
 
-        <div className="my-6 pb-5 flex justify-between gap-4">
+        <div className="bg-white rounded-md my-0 p-3 flex justify-between gap-4">
           <Button type="default" onClick={() => window.history.back()}>
             Back
           </Button>
