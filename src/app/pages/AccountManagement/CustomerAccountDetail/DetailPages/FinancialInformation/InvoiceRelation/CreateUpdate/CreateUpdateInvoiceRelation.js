@@ -233,8 +233,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate: NxDate.formatForAPI(startDate, false),
-              endDate: NxDate.formatForAPI(endDate, false),
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
           }
@@ -260,8 +260,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
         description,
-        startDate: NxDate.formatForAPI(startDate, false),
-        endDate: NxDate.formatForAPI(endDate, false),
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
@@ -413,8 +413,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
             subjectId: data_accountDetail?.accountInformation?.accountId, 
             objectId,
             description, 
-            startDate: NxDate.formatForAPI(startDate, false),
-            endDate: NxDate.formatForAPI(endDate, false),
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
           }
         }
@@ -471,8 +471,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
               subjectId: data_accountDetail?.accountInformation?.accountId, 
               objectId,
               description, 
-              startDate: NxDate.formatForAPI(startDate, false),
-              endDate: NxDate.formatForAPI(endDate, false),
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
           }
@@ -526,8 +526,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
       description,
-      startDate: NxDate.formatForAPI(startDate, false),
-      endDate: NxDate.formatForAPI(endDate, false),
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark
@@ -603,8 +603,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           objectId,
           accountName: relatedAccountName,
           accountNumber: relatedAccountNumber,
-          startDate: NxDate.formatForAPI(startDate, false),
-          endDate: NxDate.formatForAPI(endDate, false),
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           description,
           appHierId
         });

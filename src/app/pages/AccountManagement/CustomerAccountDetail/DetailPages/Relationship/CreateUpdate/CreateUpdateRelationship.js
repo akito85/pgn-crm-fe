@@ -1,5 +1,4 @@
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import moment from "moment";
 import { useEffect, useState, useRef } from "react";
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -30,6 +29,7 @@ import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { configApp } from "../../../../../../../constants/configApp";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import { dateFormat, dateFormatting } from "../../../../../../../utils";
 
 const CreateUpdateRelationship = ({
   accountType = "standard",
@@ -130,8 +130,8 @@ const CreateUpdateRelationship = ({
       form.setFieldsValue({
         relationshipType: detail.relationshipType,
         relationshipCategory: detail.relationshipCategory,
-        startDate: detail.startDate ? moment(detail.startDate) : null,
-        endDate: detail.endDate ? moment(detail.endDate) : null,
+        startDate: NxDate.formatForAPI(detail.startDate),
+        endDate: NxDate.formatForAPI(detail.endDate),
         description: detail.description || "",
         appHierId: detail.appHierId,
       });
@@ -179,7 +179,7 @@ const CreateUpdateRelationship = ({
         fileType: item.fileType,
         urlFile1: item.urlFile1,
         createdBy: item.createdBy,
-        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
+        createdDate: item.createdDate,
         dataType: "exist",
       }));
       setListDataAttachment(mapped);
