@@ -49,6 +49,84 @@ export const columnsInvoice = (
         ),
     },
     {
+      key: "invoiceName",
+      title: "INVOICE NAME",
+      dataIndex: "invoiceName",
+      isClassification: true,
+      width: 200,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "invoiceName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "invoiceName",
+          hasValue(search["invoiceName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "title",
+      title: "TITLE",
+      dataIndex: "title",
+      isClassification: true,
+      width: 180,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "title",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "title",
+          hasValue(search["title"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "billHeaderId",
+      title: "BILL HEADER ID",
+      dataIndex: "billHeaderId",
+      isClassification: true,
+      width: 150,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billHeaderId",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "billHeaderId",
+          hasValue(search["billHeaderId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
       key: "templateName",
       title: "TEMPLATE",
       dataIndex: "templateName",
@@ -101,29 +179,28 @@ export const columnsInvoice = (
         ),
     },
     {
-      key: "billingPeriodName",
+      key: "billingPeriod",
       title: "BILLING PERIOD",
       sorter: true,
       isClassification: true,
       width: 180,
-      dataIndex: "billingPeriodName",
+      dataIndex: "billingPeriod",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "billingPeriodName",
+        "billingPeriod",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        true,
-        "datePeriod"
+        handleSearch
       ),
       render: (text) =>
-        renderDateColumn(
-          "billingPeriodName",
-          hasValue(search["billingPeriodName"]),
+        renderColumn(
+          "billingPeriod",
+          hasValue(search["billingPeriod"]),
           searchText,
           text,
-          "datePeriod",
+          false,
+          "input",
           search
         ),
     },
@@ -258,6 +335,32 @@ export const columnsInvoice = (
         ),
     },
     {
+      key: "accountSegment",
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      isClassification: true,
+      width: 150,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountSegment",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountSegment",
+          hasValue(search["accountSegment"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
       key: "accountGroupType",
       title: "ACCOUNT GROUP TYPE",
       width: 180,
@@ -284,6 +387,58 @@ export const columnsInvoice = (
         ),
     },
     {
+      key: "accountType",
+      title: "ACCOUNT TYPE",
+      dataIndex: "accountType",
+      isClassification: true,
+      width: 150,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountType",
+          hasValue(search["accountType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "accountStatus",
+      title: "ACCOUNT STATUS",
+      dataIndex: "accountStatus",
+      isClassification: true,
+      width: 150,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountStatus",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountStatus",
+          hasValue(search["accountStatus"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
       key: "serviceType",
       title: "SERVICE TYPE",
       dataIndex: "serviceType",
@@ -302,6 +457,58 @@ export const columnsInvoice = (
         renderColumn(
           "serviceType",
           hasValue(search["serviceType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "product",
+      title: "PRODUCT",
+      dataIndex: "product",
+      isClassification: true,
+      width: 250,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "product",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "product",
+          hasValue(search["product"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "timeUnit",
+      title: "TIME UNIT",
+      dataIndex: "timeUnit",
+      isClassification: true,
+      width: 150,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "timeUnit",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "timeUnit",
+          hasValue(search["timeUnit"]),
           searchText,
           text,
           false,
@@ -340,7 +547,7 @@ export const columnsInvoice = (
       title: "COST CENTER",
       dataIndex: "costCenter",
       isClassification: true,
-      width: 180,
+      width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -362,37 +569,11 @@ export const columnsInvoice = (
         ),
     },
     {
-      key: "accountSegment",
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accountSegment",
-      isClassification: true,
-      width: 150,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountSegment",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) =>
-        renderColumn(
-          "accountSegment",
-          hasValue(search["accountSegment"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
       key: "meterReadingCode",
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
       isClassification: true,
-      width: 150,
+      width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -406,6 +587,165 @@ export const columnsInvoice = (
         renderColumn(
           "meterReadingCode",
           hasValue(search["meterReadingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "billingAddress",
+      title: "BILLING ADDRESS",
+      dataIndex: "billingAddress",
+      isClassification: true,
+      width: 250,
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingAddress",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "billingAddress",
+          hasValue(search["billingAddress"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "classificationType",
+      title: "CLASSIFICATION TYPE",
+      dataIndex: "classificationType",
+      isClassification: true,
+      width: 200,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "classificationType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "classificationType",
+          hasValue(search["classificationType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "customerManagement",
+      title: "CUSTOMER MANAGEMENT",
+      dataIndex: "customerManagement",
+      isClassification: true,
+      width: 200,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "customerManagement",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "customerManagement",
+          hasValue(search["customerManagement"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "corporateCustomer",
+      title: "CORPORATE CUSTOMER",
+      dataIndex: "corporateCustomer",
+      isClassification: true,
+      width: 200,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "corporateCustomer",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "corporateCustomer",
+          hasValue(search["corporateCustomer"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "entityId",
+      title: "ENTITY ID",
+      dataIndex: "entityId",
+      isClassification: true,
+      width: 120,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "entityId",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "entityId",
+          hasValue(search["entityId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "ccId",
+      title: "CC ID",
+      dataIndex: "ccId",
+      isClassification: true,
+      width: 120,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "ccId",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "ccId",
+          hasValue(search["ccId"]),
           searchText,
           text,
           false,
@@ -624,14 +964,14 @@ export const columnsInvoice = (
         ),
     },
     {
-      key: "termOfPayment",
+      key: "termsOfPayment",
       title: "TERMS OF PAYMENT",
-      dataIndex: "termOfPayment",
+      dataIndex: "termsOfPayment",
       width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "termOfPayment",
+        "termsOfPayment",
         searchInput,
         searchedColumn,
         searchText,
@@ -639,8 +979,8 @@ export const columnsInvoice = (
       ),
       render: (text) =>
         renderColumn(
-          "termOfPayment",
-          hasValue(search["termOfPayment"]),
+          "termsOfPayment",
+          hasValue(search["termsOfPayment"]),
           searchText,
           text,
           false,
@@ -653,7 +993,7 @@ export const columnsInvoice = (
       title: "TRANSACTION DATE",
       sorter: true,
       isClassification: true,
-      width: 180,
+      width: 200,
       dataIndex: "transactionDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -661,17 +1001,16 @@ export const columnsInvoice = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        true,
-        "date"
+        handleSearch
       ),
       render: (text) =>
-        renderDateColumn(
+        renderColumn(
           "transactionDate",
           hasValue(search["transactionDate"]),
           searchText,
           text,
-          "date",
+          false,
+          "input",
           search
         ),
     },
@@ -723,6 +1062,60 @@ export const columnsInvoice = (
         renderDateColumn(
           "dueDate",
           hasValue(search["dueDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
+    },
+    {
+      key: "planDate",
+      title: "PLAN DATE",
+      sorter: true,
+      isClassification: true,
+      width: 180,
+      dataIndex: "planDate",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "planDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        renderDateColumn(
+          "planDate",
+          hasValue(search["planDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
+    },
+    {
+      key: "successDate",
+      title: "SUCCESS DATE",
+      sorter: true,
+      isClassification: true,
+      width: 180,
+      dataIndex: "successDate",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "successDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        renderDateColumn(
+          "successDate",
+          hasValue(search["successDate"]),
           searchText,
           text,
           "date",
@@ -890,7 +1283,7 @@ export const columnsInvoice = (
       ellipsis: {
         showTitle: false,
       },
-      ...getColumnSearchPropsUseFilteredValue(search, "remark"),
+      ...getColumnSearchPropsUseFilteredValue(search, "remarkPaymentGw"),
       render: (text) =>
         renderColumn(
           "remarkPaymentGw",
@@ -901,6 +1294,74 @@ export const columnsInvoice = (
           "input",
           search
         ),
+    },
+    {
+      key: "stampingMeteraiStatus",
+      title: "STAMPING METERIAI STATUS",
+      dataIndex: "stampingMeteraiStatus",
+      width: 220,
+      isClassification: true,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "stampingMeteraiStatus",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) => <StatusComponent colour={text} size="small">{text}</StatusComponent>,
+    },
+    {
+      key: "einvoiceStatus",
+      title: "E-INVOICE STATUS",
+      dataIndex: "einvoiceStatus",
+      width: 180,
+      isClassification: true,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "einvoiceStatus",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) => <StatusComponent colour={text} size="small">{text}</StatusComponent>,
+    },
+    {
+      key: "signStatus",
+      title: "SIGN STATUS",
+      dataIndex: "signStatus",
+      width: 150,
+      isClassification: true,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "signStatus",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) => <StatusComponent colour={text} size="small">{text}</StatusComponent>,
+    },
+    {
+      key: "deliveryStatus",
+      title: "DELIVERY STATUS",
+      dataIndex: "deliveryStatus",
+      width: 180,
+      isClassification: true,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "deliveryStatus",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) => <StatusComponent colour={text} size="small">{text}</StatusComponent>,
     },
     {
       key: "statusPaymentGw",
