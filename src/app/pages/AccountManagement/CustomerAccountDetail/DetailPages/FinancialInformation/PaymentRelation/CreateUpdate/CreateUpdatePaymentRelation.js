@@ -259,8 +259,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             objectId,
             priority,
             description,
-            startDate: NxDate.formatForAPI(startDate, false),
-            endDate: NxDate.formatForAPI(endDate, false),
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
             validationType: validationTypes[current]
           };
@@ -287,8 +287,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         objectId,
         priority,
         description,
-        startDate: NxDate.formatForAPI(startDate, false),
-        endDate: NxDate.formatForAPI(endDate, false),
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
@@ -427,8 +427,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           objectId,
           priority,
           description,
-          startDate: NxDate.formatForAPI(startDate, false),
-          endDate: NxDate.formatForAPI(endDate, false),
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           appHierId,
           validationType: validationTypes[current]
         };
@@ -483,8 +483,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             objectId,
             priority,
             description,
-            startDate: NxDate.formatForAPI(startDate, false),
-            endDate: NxDate.formatForAPI(endDate, false),
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
             validationType: validationTypes[i]
           };
@@ -540,8 +540,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
       objectId,
       priority,
       description,
-      startDate: NxDate.formatForAPI(startDate, false),
-      endDate: NxDate.formatForAPI(endDate, false),
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark
