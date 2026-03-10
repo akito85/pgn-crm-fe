@@ -419,7 +419,6 @@ const MultiDestinationApprovalModal = ({
                       pagination_multiDestinationApproval?.totalElements || 0
                     }
                     tableScrolled={{
-                      y: 400,
                       x: dataSourceWithKeys.length ? "max-content" : 5000
                     }}
                     onSort={onSort}
@@ -466,7 +465,6 @@ const MultiDestinationApprovalModal = ({
                     pagination_multiDestinationApproval?.totalElements || 0
                   }
                   tableScrolled={{
-                    y: 400,
                     x: selectedRows.length ? "max-content" : 5000
                   }}
                   onSort={onSort}
