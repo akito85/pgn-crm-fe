@@ -290,7 +290,7 @@ export default function InfoPaymentRelation({
               dataSource={dataSourceWithKeys}
               totalData={pagination_prAccountStandard.totalElements || 0}
               current={page}
-              tableScrolled={{ y: 525, x: 3000 }}
+              tableScrolled={{ x: 3000 }}
               onSort={onSort}
               columns={allColumns}
               usePagination={false}
