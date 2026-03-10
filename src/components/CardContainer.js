@@ -26,6 +26,7 @@ const CardContainer = ({
             <div className="text-[16px] text-primary">{header}</div>
             <div className="text-primary text-sm">{subHeader}</div>
           </div>
+          <div style={{ padding: "12px 16px 0 16px" }}>{element}</div>
         </>
       ) : (
         <div
