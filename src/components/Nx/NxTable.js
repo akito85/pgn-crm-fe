@@ -119,7 +119,7 @@ const NxTable = ({
   onDelete,
   rowSelection,
   onRowClicked = () => { },
-  tableScrolled,
+  tableScrolled = { y: 37.7 },
   expandable,
   className,
   useSelect = true,
@@ -633,7 +633,7 @@ const NxTable = ({
 
             #${idTable} .ant-table-thead .ant-table-cell-fix-left,
             #${idTable} .ant-table-thead .ant-table-cell-fix-right {
-              z-index: 5;
+              z-index: 5 !important;
             }
 
             #${idTable} .ant-table-filter-trigger,
@@ -853,7 +853,7 @@ const NxTable = ({
           dataSource={resolvedDataSource}
           columns={displayedColumns}
           components={components}
-          scroll={tableScrolled}
+          scroll={tableScrolled.y === undefined ? {...tableScrolled, y: 380} : tableScrolled}
           bordered
           pagination={false}
           className={`w-full ${className}`}

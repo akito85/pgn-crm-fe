@@ -9,11 +9,11 @@ import {
 import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns";
 import { usePromo } from "../hooks/usePromo";
 import promoHistoryRepository from "../repository/promoHistoryRepository";
 import PopupDetailPromoHistory from "../Detail/PopupDetailPromoHistory";
 import PopupDetailPromoHistoryDetail from "../Detail/PopupDetailPromoHistoryDetail";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 /* =======================
  * COMPONENTS
@@ -246,6 +246,7 @@ const PromoHistoryViewData = ({
       setHasMore(true);
       setDataSource([]);
       setExpandedRows([]);
+      loadMoreData(true, mappedFilters);
     },
     [],
   );
@@ -253,7 +254,7 @@ const PromoHistoryViewData = ({
   /* =========================
      DATA LOADING
   ========================= */
-  const loadMoreData = async (reset = false) => {
+  const loadMoreData = async (reset = false, overrideFilters) => {
     if (loading) return;
 
     setLoading(true);
@@ -264,12 +265,13 @@ const PromoHistoryViewData = ({
       const currentPage = reset ? 1 : page;
       isFirstPageRef.current = reset;
 
+      const filters = overrideFilters !== undefined ? overrideFilters : activeFilters;
       const payload = {
         page: currentPage,
         size: pageSize,
         sort: "id~desc",
         searchs: {},
-        filters: activeFilters,
+        filters,
         filterRules: [],
       };
 
@@ -288,13 +290,6 @@ const PromoHistoryViewData = ({
     loadMoreData(true);
   }, []);
 
-  // Re-load data ketika filter berubah
-  useEffect(() => {
-    if (activeFilters.length > 0) {
-      loadMoreData(true);
-    }
-  }, [activeFilters]);
-
   const handleExpand = (expanded, record) => {
     if (!expanded) {
       setExpandedRows((prev) => prev.filter((k) => k !== record.key));
@@ -308,7 +303,7 @@ const PromoHistoryViewData = ({
   ========================= */
   const parentColumns = useMemo(
     () =>
-      applyFixedColumns(
+      nxApplyFixedColumns(
         promoHistoryRepository.getParentColumns((record) => {
           setSelectedHistoryData(record);
           setPopupDetailHistoryVisible(true);
@@ -320,10 +315,13 @@ const PromoHistoryViewData = ({
 
   const childColumns = useMemo(
     () =>
-      promoHistoryRepository.getChildColumns((record) => {
-        setSelectedHistoryDetailData(record);
-        setPopupDetailHistoryDetailVisible(true);
-      }),
+      nxApplyFixedColumns(
+        promoHistoryRepository.getChildColumns((record) => {
+          setSelectedHistoryDetailData(record);
+          setPopupDetailHistoryDetailVisible(true);
+        }),
+        { left: ["no"], right: ["action"] },
+      ),
     [setSelectedHistoryDetailData, setPopupDetailHistoryDetailVisible],
   );
 

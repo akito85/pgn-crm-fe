@@ -267,7 +267,7 @@ export default function InfoInvoiceRelation({
               dataSource={dataSourceWithKeys}
               totalData={pagination_irAccountStandard.totalElements || 0}
               current={page}
-              tableScrolled={{ y: 525, x: 3000 }}
+              tableScrolled={{ x: 3000 }}
               onSort={onSort}
               columns={allColumns}
               usePagination={false}

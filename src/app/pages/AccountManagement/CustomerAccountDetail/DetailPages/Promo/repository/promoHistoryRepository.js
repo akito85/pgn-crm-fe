@@ -42,7 +42,6 @@ const promoHistoryRepository = {
       dataIndex: "no",
       key: "no",
       width: 60,
-      fixed: "left",
       align: "center",
       render: (text, record, index) => index + 1,
     },
@@ -82,7 +81,6 @@ const promoHistoryRepository = {
       key: "action",
       width: 90,
       align: "center",
-      fixed: "right",
       render: (_, record) => {
         const hasDetails =
           Array.isArray(record.details) && record.details.length > 0;
@@ -178,7 +176,6 @@ const promoHistoryRepository = {
       key: "action",
       width: 90,
       align: "center",
-      fixed: "right",
       render: (_, record) => (
         <UnorderedListOutlined
           style={{

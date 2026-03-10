@@ -498,7 +498,6 @@ const RelationshipApprovalModal = ({
                     columns={processedColumns}
                     totalData={pagination_relationship?.totalElements || 0}
                     tableScrolled={{
-                      y: 400,
                       x: dataSourceWithKeys.length ? "max-content" : 2000,
                     }}
                     onSort={onSort}
@@ -547,7 +546,6 @@ const RelationshipApprovalModal = ({
                   columns={processedColumns}
                   totalData={selectedRows.length}
                   tableScrolled={{
-                    y: 400,
                     x: selectedRows.length ? "max-content" : 2000,
                   }}
                   onSort={onSort}
