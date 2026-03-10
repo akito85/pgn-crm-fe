@@ -5,7 +5,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import DetailText from "../../../../../../components/DetailText";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import {
-  getRelationshipListAdvanced,
+  getRelationshipApprovalList,
   approveOrRejectRelationship,
   approveOrRejectInactiveRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
@@ -89,7 +89,7 @@ const RelationshipApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_relationship, pagination_relationship, loading } = useSelector(
+  const { list_relationship, pagination_relationship, loading_listRelationshipApproval, loading_approveRejectRelationship } = useSelector(
     (state) => state.relationship
   );
 
@@ -129,11 +129,10 @@ const RelationshipApprovalModal = ({
         size: loadMoreSize,
         sort,
         searchs: search,
-        listType: "approval",
       };
 
       dispatch(
-        getRelationshipListAdvanced({
+        getRelationshipApprovalList({
           idAccount,
           page,
           pageSize: loadMoreSize,
@@ -181,11 +180,10 @@ const RelationshipApprovalModal = ({
         size: loadMoreSize,
         sort,
         searchs: search,
-        listType: "approval",
       };
 
       dispatch(
-        getRelationshipListAdvanced({
+        getRelationshipApprovalList({
           idAccount,
           page: nextPage,
           pageSize: loadMoreSize,
@@ -451,14 +449,14 @@ const RelationshipApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading}
+                    loading={loading_approveRejectRelationship}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading}
+                    loading={loading_approveRejectRelationship}
                   >
                     Approve
                   </Button>
@@ -500,14 +498,13 @@ const RelationshipApprovalModal = ({
                     columns={processedColumns}
                     totalData={pagination_relationship?.totalElements || 0}
                     tableScrolled={{
-                      y: 400,
                       x: dataSourceWithKeys.length ? "max-content" : 2000,
                     }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_listRelationshipApproval}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}
@@ -549,7 +546,6 @@ const RelationshipApprovalModal = ({
                   columns={processedColumns}
                   totalData={selectedRows.length}
                   tableScrolled={{
-                    y: 400,
                     x: selectedRows.length ? "max-content" : 2000,
                   }}
                   onSort={onSort}

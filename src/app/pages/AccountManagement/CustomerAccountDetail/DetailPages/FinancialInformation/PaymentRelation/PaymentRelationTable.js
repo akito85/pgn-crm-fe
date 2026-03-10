@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../../components/Toolbar";
@@ -29,12 +29,19 @@ const PaymentRelationTable = ({
   loading = false, 
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
     idAccount,
     idCustomer,
     handleView: (id) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION_ONETIME :
+        "",
       {
         state: {
           idAccount,
@@ -44,7 +51,11 @@ const PaymentRelationTable = ({
       }
     ),
     handleCreate: () => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION,
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION_ONETIME :
+        "",
       {
         state: {
           idAccount,
@@ -53,7 +64,11 @@ const PaymentRelationTable = ({
       }
     ),
     handleUpdate: (id) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION,
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION_ONETIME :
+        "",
       {
         state: {
           idAccount,
@@ -118,7 +133,7 @@ const PaymentRelationTable = ({
         dataSource={data}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: "max-content" }}
+        tableScrolled={{ x: "max-content" }}
         onSort={onSort}
         columns={processedColumns}
         usePagination={false}

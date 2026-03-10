@@ -18,6 +18,8 @@ const initialState = {
   data_priorities: [],
   data_channels: [],
   data_sources: [],
+  data_approval_hierarchy: [],
+  data_approval_hierarchy_detail: [],
   data_work_order_types: [],
   data_work_order_statuses: [],
   data_prerequisite_types: [],
@@ -377,6 +379,34 @@ export const getServiceRequestDataRequirements = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/dropdowns/servicerequests/datarequirements`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Approval Hierarchy List
+export const getServiceRequestApprovalHierarchies = createAsyncThunk(
+  "GET_SERVICE_REQUEST_APPROVAL_HIERARCHIES",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/approval-hierarchies`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Approval Hierarchy Detail
+export const getServiceRequestApprovalHierarchyDetail = createAsyncThunk(
+  "GET_SERVICE_REQUEST_APPROVAL_HIERARCHY_DETAIL",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/approval-hierarchy/${id}`;
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -873,6 +903,20 @@ const serviceRequestSlice = createSlice({
 
     [getServiceRequestSources.fulfilled]: (state, action) => {
       state.data_sources = action.payload;
+    },
+
+    [getServiceRequestApprovalHierarchies.fulfilled]: (state, action) => {
+      state.data_approval_hierarchy = action.payload;
+    },
+
+    [getServiceRequestApprovalHierarchyDetail.pending]: (state) => {
+      state.data_approval_hierarchy_detail = [];
+    },
+    [getServiceRequestApprovalHierarchyDetail.fulfilled]: (state, action) => {
+      state.data_approval_hierarchy_detail = action.payload;
+    },
+    [getServiceRequestApprovalHierarchyDetail.rejected]: (state) => {
+      state.data_approval_hierarchy_detail = [];
     },
 
     [getWorkOrderTypes.fulfilled]: (state, action) => {

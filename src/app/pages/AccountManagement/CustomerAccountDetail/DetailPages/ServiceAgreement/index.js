@@ -14,7 +14,7 @@ import {
 } from "../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import ModalDeleteDraft from "./Modal/ModalDeleteDraft";
-import ModalHistory from "../../../../../../components/Modal/ModalHistory";
+import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ServiceAgreementTable from "./ServiceAgreementTable";
 import ServiceAgreementApprovalModal from "./ServiceAgreementApprovalModal";
@@ -284,7 +284,9 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     const historyData = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(historyData);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
 
@@ -422,11 +424,10 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
       />
 
       {/* Modal Approval History */}
-      <ModalHistory
+      <NxHistoryModal
         isOpen={openModalHistory && dataApprovalHistoryFix}
         handleClose={() => setOpenModalHistory(false)}
         header="Approval History"
-        width={850}
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}

@@ -1,6 +1,4 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
-import { Button, Space } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
 import TasklistTable from "./TasklistTable";
 import TasklistErrorFallback from "./TasklistErrorFallback";
 import { useGetTasklistPaginationQuery } from "../../../../../redux/slices/tasklist/tasklistSlice";
@@ -126,34 +124,21 @@ const TasklistWidget = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <div className="flex justify-end items-center">
-        <Space>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-            loading={isFetching}
-          >
-            Refresh
-          </Button>
-        </Space>
-      </div>
-
-      <TasklistTable
-        data={dataSourceWithKeys}
-        totalElement={tasklistData?.TOTAL_ELEMENTS || 0}
-        page={page}
-        onSort={onSort}
-        handleSearch={handleSearch}
-        handleLoadMore={handleLoadMore}
-        hasMore={hasMore}
-        loading={isLoading || isFetching}
-        searchText={searchText}
-        search={search}
-        searchedColumn={searchedColumn}
-        searchInput={searchInput}
-      />
-    </div>
+    <TasklistTable
+      data={dataSourceWithKeys}
+      totalElement={tasklistData?.TOTAL_ELEMENTS || 0}
+      page={page}
+      onSort={onSort}
+      handleSearch={handleSearch}
+      handleLoadMore={handleLoadMore}
+      hasMore={hasMore}
+      loading={isLoading || isFetching}
+      searchText={searchText}
+      search={search}
+      searchedColumn={searchedColumn}
+      searchInput={searchInput}
+      onRefresh={handleRefresh}
+    />
   );
 };
 

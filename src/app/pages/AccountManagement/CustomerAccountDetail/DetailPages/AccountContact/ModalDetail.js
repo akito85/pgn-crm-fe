@@ -7,7 +7,7 @@ import moment from 'moment'
 import { dateFormatting, renderColumn} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../../components/Nx/NxTable";
 
 
 const ModalDetail = ({
@@ -15,8 +15,6 @@ const ModalDetail = ({
   closeModal = () => {} ,
   dataDetail
 }) => {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -33,9 +31,6 @@ const ModalDetail = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -47,7 +42,7 @@ const ModalDetail = ({
       title: "NO",
       width: 20,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "TYPE",
@@ -89,13 +84,6 @@ const ModalDetail = ({
   ];
 
 
-  const handleChangeDetail = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
-
   return (
     <ModalCustom
       header={"Detail Contact"}
@@ -126,16 +114,19 @@ const ModalDetail = ({
 
       <div className="mb-6">
         <div className="text-primary text-xs font-semibold uppercase py-[30px]">CONTACT DETAIL INFORMATION</div>
-        <TablePaginationNew
-          type='FE'
-          useSelect
-          pageSize={pageSize}
-          current={page}
-          dataSource={dataDetail?.contact?.contactDetail}
-          tableScrolled={{ y: 625 }}
-          onChange={handleChangeDetail}
-          columns={columns}
-        />
+        <div className="flex flex-col gap-y-4">
+          <NxTable
+            idTable="account-contact-detail-modal-table"
+            useSelect
+            usePagination={false}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            dataSource={dataDetail?.contact?.contactDetail}
+            totalData={dataDetail?.contact?.contactDetail?.length || 0}
+            tableScrolled={{ y: 400, x: "max-content" }}
+            columns={columns}
+          />
+        </div>
       </div>
 
       <CardComponent header={"CONTACT PURPOSE INFORMATION"} cols={2}>

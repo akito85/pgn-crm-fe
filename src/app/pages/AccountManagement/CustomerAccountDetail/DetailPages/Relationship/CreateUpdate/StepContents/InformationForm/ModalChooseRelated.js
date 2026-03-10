@@ -26,7 +26,7 @@ const ModalChooseRelated = ({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
 
-  const { list_relatedObject, pagination_relatedObject, loadingRelatedObject } =
+  const { list_relatedObject, pagination_relatedObject, loading_listRelatedObject } =
     useSelector((state) => state.relationship);
 
   // Normalize relationshipType for comparison (convert "Child Of" to "CHILD_OF")
@@ -164,11 +164,11 @@ const ModalChooseRelated = ({
         <NxBaseContainer border>
           <NxTable
             idTable="modal-choose-related"
-            loading={loadingRelatedObject}
+            loading={loading_listRelatedObject}
             dataSource={dataSourceWithKeys}
             totalData={pagination_relatedObject?.totalElements || 0}
             current={page}
-            tableScrolled={{ y: 525, x: tableScrolledX }}
+            tableScrolled={{ x: tableScrolledX }}
             onSort={onSort}
             columns={allColumns}
             usePagination={false}

@@ -1,20 +1,17 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, message, Form, Spin } from "antd";
-import {
-  LeftCircleOutlined,
-  RightCircleOutlined,
-  RightOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { Button, message, Form, Spin } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import HeaderDetail from "../../../HeaderDetail";
 
 // you fucking nasty using bulky moment lazy as fuck
 import moment from "moment";
@@ -57,6 +54,8 @@ import {
 
 import {
   getServiceRequestById,
+  getServiceRequestApprovalHierarchies,
+  getServiceRequestApprovalHierarchyDetail,
   getServiceRequestTypes,
   getServiceRequestCategories,
   getServiceRequestSubcategories,
@@ -65,16 +64,16 @@ import {
   getServiceRequestSources,
   getServiceRequestDataRequirements,
   getServiceRequestPrerequisites,
+  createCompleteServiceRequest,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 const CreateCustomerServiceRequest = (props) => {
-  const containerRef = useRef(null);
   const location = useLocation();
 
   // Restore step from location state if returning from prerequisite create
   const [current, setCurrent] = useState(location?.state?.returnToStep || 0);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const { type } = props;
+  const isUpdate = type === "update";
 
   const dispatch = useDispatch();
 
@@ -99,6 +98,8 @@ const CreateCustomerServiceRequest = (props) => {
     data_priorities,
     data_channels,
     data_sources,
+    data_approval_hierarchy,
+    data_approval_hierarchy_detail,
     data_prerequisite_types,
     data_data_requirement_types,
     data_detail: serviceRequestDetail,
@@ -185,6 +186,8 @@ const CreateCustomerServiceRequest = (props) => {
   const [contactsData, setContactsData] = useState([]); // Contacts table
   const [prerequisitesData, setPrerequisitesData] = useState([]); // Prerequisites table
   const [attachmentsData, setAttachmentsData] = useState([]); // Attachments
+  const [approvalOptions, setApprovalOptions] = useState([]);
+  const [approvalTableData, setApprovalTableData] = useState([]);
 
   const isLoading = loading || loadingForm || loadingAccount;
 
@@ -283,7 +286,54 @@ const CreateCustomerServiceRequest = (props) => {
     dispatch(getServiceRequestSources());
     dispatch(getServiceRequestPrerequisites());
     dispatch(getServiceRequestDataRequirements());
+    dispatch(getServiceRequestApprovalHierarchies());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (data_approval_hierarchy && data_approval_hierarchy.length > 0) {
+      setApprovalOptions(data_approval_hierarchy);
+      return;
+    }
+
+    setApprovalOptions([]);
+  }, [data_approval_hierarchy]);
+
+  useEffect(() => {
+    if (
+      data_approval_hierarchy_detail &&
+      data_approval_hierarchy_detail.length > 0
+    ) {
+      const normalizedData = data_approval_hierarchy_detail.map((item, index) => ({
+        ...item,
+        key: item.key || `approval-hierarchy-${index + 1}`,
+        employeeDetail: (item.employeeDetail || []).map((employee, employeeIndex) => ({
+          ...employee,
+          key:
+            employee.key ||
+            `approval-hierarchy-${index + 1}-employee-${employeeIndex + 1}`,
+        })),
+      }));
+
+      setApprovalTableData(normalizedData);
+      return;
+    }
+
+    setApprovalTableData([]);
+  }, [data_approval_hierarchy_detail]);
+
+  const handleSelectHiararchy = (value, label) => {
+    formCreate.setFieldsValue({
+      appHierId: value,
+      appHierName: label,
+    });
+
+    if (value) {
+      dispatch(getServiceRequestApprovalHierarchyDetail(value));
+      return;
+    }
+
+    setApprovalTableData([]);
+  };
 
   useEffect(() => {
     // Check if dropdowns are loaded - handle both response structures:
@@ -381,6 +431,7 @@ const CreateCustomerServiceRequest = (props) => {
         srFormAccountId: accountInfo?.accountId || "",
         srFormAccountSor: accountInfo?.sor || "",
         srFormAccountCostCenter: accountSums?.costCenter || "",
+        srFormAccountCostCenterId: accountInfo?.costCenterId || null,
         srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
         srFormAccountSegment: accountInfo?.segment || "",
         srFormAccountGroupType: accountInfo?.accountGroupType || "",
@@ -463,12 +514,9 @@ const CreateCustomerServiceRequest = (props) => {
       content: (
         <ApprovalForm
           form={formCreate}
-          account={data_accountDetail}
-          customer={data_customerDetail}
-          dropdowns={dropdowns}
-          contactsData={contactsData}
-          prerequisitesData={prerequisitesData}
-          attachmentsData={attachmentsData}
+          dataOption={approvalOptions}
+          dataTable={approvalTableData}
+          handleSelectHiararchy={handleSelectHiararchy}
         />
       ),
       disabled: false,
@@ -492,18 +540,13 @@ const CreateCustomerServiceRequest = (props) => {
   const prev = () => {
     setCurrent(current - 1);
   };
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
+
   const handleButtonNext = async () => {
     if (current === 0) {
       await formCreate
         .validateFields()
         .then(() => {
           next();
-          scrollRightHandler();
         })
         .catch((info) => {
           console.log("Validate Failed:", info);
@@ -513,29 +556,99 @@ const CreateCustomerServiceRequest = (props) => {
         console.log("Form Values at Step 1:", values);
     } else {
       next();
-      scrollRightHandler();
     }
   };
 
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
+  const handleSubmitForm = () => {
+    const values = formCreate.getFieldsValue(true);
 
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
+    const payload = {
+      // requestNumber: null → backend auto-generate dari DB id (SR00001, SR00002, ...)
+      requestType:        values.type        ? parseInt(values.type)        : null,
+      requestCategory:    values.category    ? parseInt(values.category)    : null,
+      requestSubCategory: values.subCategory ? parseInt(values.subCategory) : null,
+      priority:           values.priority    ? parseInt(values.priority)    : null,
+      description:        values.description || "",
+      requestedDate:      values.requestDate
+        ? (values.requestDate.toDate ? values.requestDate.toDate() : new Date(values.requestDate))
+        : new Date(),
+      reference: values.srr    || null,
+      apphierId: values.appHierId ? parseInt(values.appHierId) : null,
+      channel:   values.channel      ? parseInt(values.channel)      : null,
+      source:    values.requestSource ? parseInt(values.requestSource) : null,
+      costCenter: values.srFormAccountCostCenterId
+        ? parseInt(values.srFormAccountCostCenterId)
+        : null,
 
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
+      dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
+        requirementType:  dr.typeId ? parseInt(dr.typeId) : null,
+        requirementValue: dr.value  || null,
+        requirementDesc:  null,
+      })),
 
-  const handleSubmitForm = (value) => {
+      prerequisites: [],
+
+      attachments: attachmentsData.map((att) => ({
+        category:       "SERVICE_REQUEST",
+        fileName:       att.fileName        || null,
+        type:           att.type            || null,
+        fileSize:       att.size            || 0,
+        fileCategoryId: att.fileCategoryId  ? parseInt(att.fileCategoryId) : null,
+        base64Content:  att.base64          || null,
+        isDraft:        false,
+        isDeleted:      false,
+      })),
+    };
+
+    setDataSend(payload);
     setModalConfirm(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setModalConfirm(false);
+    setLoadingForm(true);
+    try {
+      await dispatch(
+        createCompleteServiceRequest({ accountId: idAccount, body: dataSend })
+      ).unwrap();
+      // thunk sudah dispatch showModalSuccess — langsung navigate
+      navigate(-1);
+    } catch (error) {
+      // thunk sudah dispatch showModalError
+    } finally {
+      setLoadingForm(false);
+    }
+  };
+
+  const handleClear = () => {
+    formCreate.resetFields();
+
+    if (data_accountDetail?.accountInformation) {
+      const accountInfo = data_accountDetail.accountInformation;
+      const accountSums = data_accountDetail.accountSummary;
+      const premiseAddress = data_account_address?.result?.find(
+        (item) => item?.premise?.bool === true
+      );
+
+      formCreate.setFieldsValue({
+        accountGroupType: accountInfo?.accountGroupType || "",
+        srFormAccountId: accountInfo?.accountId || "",
+        srFormAccountSor: accountInfo?.sor || "",
+        srFormAccountCostCenter: accountSums?.costCenter || "",
+        srFormAccountCostCenterId: accountInfo?.costCenterId || null,
+        srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
+        srFormAccountSegment: accountInfo?.segment || "",
+        srFormAccountGroupType: accountInfo?.accountGroupType || "",
+        srFormAccountType: accountInfo?.accountType || "",
+        srFormPremiseAddress: premiseAddress?.fullAddress || "",
+        srFormDistrict: premiseAddress?.district?.name || "",
+        srFormSubdistrict: premiseAddress?.subDistrict?.name || "",
+        srFormCity: premiseAddress?.city?.name || "",
+        srFormCountry: premiseAddress?.country?.name || "",
+        srFormLatitude: premiseAddress?.latitude || "",
+        srFormLongitude: premiseAddress?.longitude || "",
+      });
+    }
   };
 
   return (
@@ -549,78 +662,95 @@ const CreateCustomerServiceRequest = (props) => {
         // onFinishFailed={handleErrorSubmit}
         scrollToFirstError={true}
       >
-        {/* Step Contents */}
-        <div className="flex flex-row gap-x-6 justify-center">
-          <span className="mt-[10px]">
-            <LeftCircleOutlined
-              style={{ fontSize: "24px", color: "#0075bf" }}
-              onClick={scrollLeftHandler}
-            />
-          </span>
-          <div
-            onScroll={handleScroll}
-            ref={containerRef}
-            className="overflow-x-scroll scrollStepsCstm"
-          >
-            <Steps current={current} items={items} labelPlacement="vertical" />
-          </div>
-          <span className="mt-[10px]">
-            <RightCircleOutlined
-              style={{ fontSize: "24px", color: "#0075bf" }}
-              onClick={scrollRightHandler}
-            />
-          </span>
+        <HeaderDetail
+          data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+          dispatch={dispatch}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={accountType}
+        />
+
+        <div className="my-4">
+          <NxFormStepper
+            steps={steps}
+            current={current}
+            onPrev={prev}
+            onNext={handleButtonNext}
+          />
         </div>
 
         <div className="steps-content my-6">{steps[current].content}</div>
 
         {/* Section Action Steps */}
-        <div className="steps-action my-8 flex w-full justify-between gap-x-2">
-          <ButtonComponent
-            type={"submit"}
-            icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-            onClick={() => {
-              setModalBack(true);
-            }}
-          >
-            Back
-          </ButtonComponent>
-          <div className="flex w-full justify-end gap-x-4">
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+        <NxBaseContainer border>
+          <div className="flex justify-between">
+            <Button
+              type={"menu"}
+              onClick={() => {
+                setModalBack(true);
+              }}
+            >
+              Cancel
+            </Button>
+            <div className="flex w-full justify-end gap-x-2">
+              <Button
+                onClick={handleClear}
+                type={"reject"}
+                icon={<SVGIcon name="IconButtonClear" width={14} />}
+              >
+                {isUpdate ? "Reset" : "Clear"}
+              </Button>
+              <Button
+                onClick={() => message.success("Save as Draft")}
+                type={"secondary"}
+                disabled={current !== steps.length - 1}
+              >
+                Save as Draft
+              </Button>
+              <Button
+                onClick={prev}
+                type={"menu"}
+                disabled={current < 1}
               >
                 Previous
-              </ButtonComponent>
-            )}
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={handleButtonNext}
-                type={"submit"}
-                disabled={steps[current].disabled}
-                icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
-              >
-                Next
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => message.success("Processing complete!")}
-                type={"submit"}
-                htmlType={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
-              >
-                Save
-              </ButtonComponent>
-            )}
+              </Button>
+              {current < steps.length - 1 && (
+                <Button
+                  onClick={handleButtonNext}
+                  type={"submit"}
+                  disabled={steps[current].disabled}
+                >
+                  Next
+                </Button>
+              )}
+              {current === steps.length - 1 && (
+                <Button
+                  type={"submit"}
+                  htmlType={"submit"}
+                  loading={loadingForm}
+                >
+                  Save & Submit
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
+        </NxBaseContainer>
       </Form>
+
+      {/* Modal Submit Confirm */}
+      <ModalConfirm
+        isOpen={modalConfirm}
+        handleCancel={() => setModalConfirm(false)}
+        handleOk={handleConfirmSubmit}
+        width={400}
+      >
+        <div className="flex justify-center mt-5 gap-[20px]">
+          <WarningOutlined style={{ fontSize: "24px", color: "#0075bf" }} />
+          <p className="text-[18px] font-bold">
+            Are you sure you want to submit this Service Request?
+          </p>
+        </div>
+      </ModalConfirm>
 
       {/* Modal Back */}
       <ModalConfirm
@@ -636,6 +766,16 @@ const CreateCustomerServiceRequest = (props) => {
           </p>
         </div>
       </ModalConfirm>
+
+      {/* Modal Error */}
+      <ModalError
+        isOpen={modalError}
+        handleCancel={() => setModalError(false)}
+        handleOk={() => setModalError(false)}
+        width={400}
+        title={bodyError?.title || "Failed"}
+        description={bodyError?.description || "Failed to create service request. Please try again."}
+      />
     </LayoutMenu>
   );
 };

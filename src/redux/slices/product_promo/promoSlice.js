@@ -338,7 +338,7 @@ export const getAvailableApprovalPromo = createAsyncThunk(
 
 export const getSelectedApprovalPromo = createAsyncThunk(
   "GET_SELECTED_APPROVAL_PROMO",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/list-apphier/${id}`;
       const response = await productPromoHttpService.getDetail(url);
@@ -1264,27 +1264,27 @@ const promoSlice = createSlice({
     // Get Detail Promo
     [getDetailPromo.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
     },
     [getDetailPromo.fulfilled]: (state, action) => {
       state.data_promoDiscountDetail = action.payload;
       state.loading = false;
     },
     [getDetailPromo.rejected]: (state, action) => {
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
       state.loading = false;
     },
 
     [getDetailPromoDraft.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
     },
     [getDetailPromoDraft.fulfilled]: (state, action) => {
       state.data_promoDiscountDetailDraft = action.payload;
       state.loading = false;
     },
     [getDetailPromoDraft.rejected]: (state, action) => {
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
       state.loading = false;
     },
 
@@ -1304,6 +1304,7 @@ const promoSlice = createSlice({
     //GET AVAILABLE APPROVAL
     [getAvailableApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierId = [];
     },
     [getAvailableApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1311,10 +1312,12 @@ const promoSlice = createSlice({
     },
     [getAvailableApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierId = [];
     },
     //GET SELECTED APPROVAL
     [getSelectedApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierDetail = [];
     },
     [getSelectedApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1322,6 +1325,7 @@ const promoSlice = createSlice({
     },
     [getSelectedApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierDetail = [];
     },
 
     //LIST ATTAHCHMENT

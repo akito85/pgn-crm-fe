@@ -30,6 +30,9 @@ const NxAdvanceSearch = ({
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState("");
 
+  const getColumnKey = (col, index) =>
+    col?.key || col?.dataIndex || `${col?.title || "column"}-${index}`;
+
   // Available operators
   const operators = [
     "Equal to",
@@ -211,11 +214,14 @@ const NxAdvanceSearch = ({
                     borderRadius: 8,
                   }}
                 >
-                  {columns.map((col) => (
-                    <Option key={col.key} value={col.key}>
-                      {col.title}
+                  {columns.map((col, index) => {
+                    const columnKey = getColumnKey(col, index);
+                    return (
+                    <Option key={columnKey} value={columnKey}>
+                      {col.title || col.dataIndex || "Column"}
                     </Option>
-                  ))}
+                    );
+                  })}
                 </Select>
 
                 <Select
@@ -252,7 +258,7 @@ const NxAdvanceSearch = ({
               <div key={filter.id} className="mb-4">
                 <div className="mb-3">
                   <Dropdown
-                    overlay={getLogicMenu(filter.logic, (logic) =>
+                    menu={getLogicMenu(filter.logic, (logic) =>
                       updateFilter(filter.id, "logic", logic)
                     )}
                     trigger={["click"]}
@@ -280,11 +286,14 @@ const NxAdvanceSearch = ({
                     showSearch
                     size="large"
                   >
-                    {columns.map((col) => (
-                      <Option key={col.key} value={col.key}>
-                        {col.title}
+                    {columns.map((col, index) => {
+                      const columnKey = getColumnKey(col, index);
+                      return (
+                      <Option key={columnKey} value={columnKey}>
+                        {col.title || col.dataIndex || "Column"}
                       </Option>
-                    ))}
+                      );
+                    })}
                   </Select>
 
                   <Select
@@ -341,7 +350,7 @@ const NxAdvanceSearch = ({
             <div className="flex gap-5">
               <div className="mb-4">
                 <Dropdown
-                  overlay={getLogicMenu(rule.groupLogic, (logic) =>
+                  menu={getLogicMenu(rule.groupLogic, (logic) =>
                     updateRuleLogic(rule.id, logic)
                   )}
                   trigger={["click"]}
@@ -364,7 +373,7 @@ const NxAdvanceSearch = ({
                     {filterIndex > 0 && (
                       <div className="mb-3">
                         <Dropdown
-                          overlay={getLogicMenu(filter.logic, (logic) =>
+                          menu={getLogicMenu(filter.logic, (logic) =>
                             updateRuleFilter(rule.id, filter.id, "logic", logic)
                           )}
                           trigger={["click"]}
@@ -393,11 +402,14 @@ const NxAdvanceSearch = ({
                         showSearch
                         size="large"
                       >
-                        {columns.map((col) => (
-                          <Option key={col.key} value={col.key}>
-                            {col.title}
+                        {columns.map((col, index) => {
+                          const columnKey = getColumnKey(col, index);
+                          return (
+                          <Option key={columnKey} value={columnKey}>
+                            {col.title || col.dataIndex || "Column"}
                           </Option>
-                        ))}
+                          );
+                        })}
                       </Select>
 
                       <Select

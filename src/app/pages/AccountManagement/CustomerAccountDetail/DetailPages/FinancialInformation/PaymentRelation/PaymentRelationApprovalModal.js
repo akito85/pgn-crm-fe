@@ -18,7 +18,7 @@ const PaymentRelationApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading } = useSelector(
+  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approveRejectPr } = useSelector(
     (state) => state.financialInformation
   );
 
@@ -353,14 +353,14 @@ const PaymentRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading}
+                    loading={loading_approveRejectPr}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading}
+                    loading={loading_approveRejectPr}
                   >
                     Approve
                   </Button>
@@ -409,12 +409,12 @@ const PaymentRelationApprovalModal = ({
                     dataSource={dataSourceWithKeys}
                     columns={processedColumns}
                     totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                    tableScrolled={{ y: 400, x: "max-content" }}
+                    tableScrolled={{ x: "max-content" }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_listPrApproval}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}
@@ -457,7 +457,7 @@ const PaymentRelationApprovalModal = ({
                   dataSource={selectedRows}
                   columns={processedColumns}
                   totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                  tableScrolled={{ y: 400, x: "max-content" }}
+                  tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}

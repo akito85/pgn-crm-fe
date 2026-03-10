@@ -44,7 +44,7 @@ const PromoDiscountTable = ({
   );
 
   const actionCols = useColumnActionPermission(
-    ["View", "Update", "Activate", "History"],
+    ["View", "Update", "Inactivate", "History"],
     itemActions,
     "View",
   ).map((col) => ({

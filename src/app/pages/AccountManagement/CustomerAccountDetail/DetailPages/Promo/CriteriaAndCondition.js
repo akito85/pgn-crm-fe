@@ -108,7 +108,7 @@ const CriteriaConditionTabs = ({ selectedTab, onChangeTab }) => (
   </div>
 );
 
-const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
+const CriteriaAndCondition = ({ promoId, accountId, onRegisterDownload }) => {
   const [activeTab, setActiveTab] = useState("criteria");
 
   // Data state
@@ -153,7 +153,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
           setCriteriaDataSource(criteriaData);
           setConditionDataSource(conditionData);
         } else {
-          const pagingParams = { promoId, page: 1, size: 1000 };
+          const pagingParams = { promoId, accountId, page: 1, size: 1000 };
 
           // Criteria
           const criteriaRes =
@@ -234,7 +234,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
         // Panggil API dengan filter
         const fetchFilteredCriteria = async () => {
           try {
-            const pagingParams = { promoId, page: 1, size: 1000 };
+            const pagingParams = { promoId, accountId, page: 1, size: 1000 };
             const response = await promoCriteriaRepository.getPromoCriteriaList(
               pagingParams,
               searchData, // Kirim filter ke API
@@ -247,7 +247,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
         fetchFilteredCriteria();
       }
     },
-    [USE_DUMMY, originalCriteriaData, promoId],
+    [USE_DUMMY, originalCriteriaData, promoId, accountId],
   );
 
   // Fungsi serupa untuk condition
@@ -265,7 +265,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
       } else {
         const fetchFilteredCondition = async () => {
           try {
-            const pagingParams = { promoId, page: 1, size: 1000 };
+            const pagingParams = { promoId, accountId, page: 1, size: 1000 };
             const response =
               await promoConditionRepository.getPromoConditionList(
                 pagingParams,
@@ -279,7 +279,7 @@ const CriteriaAndCondition = ({ promoId, onRegisterDownload }) => {
         fetchFilteredCondition();
       }
     },
-    [USE_DUMMY, originalConditionData, promoId],
+    [USE_DUMMY, originalConditionData, promoId, accountId],
   );
 
   // Reset filter ketika tab berubah

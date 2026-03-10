@@ -170,7 +170,6 @@ const columnAttachmentData = (
             <Tooltip title="Preview">
               <Button
                 onClick={() => handleShow(r)}
-                disabled={r.dataType !== "exist"}
                 type="table-action"
               >
                 <SVGIcon name="IconEye" width={20} />
@@ -315,7 +314,7 @@ const AttachmentSectionForm = ({
           <NxTable
             dataSource={data}
             totalData={data.length}
-            tableScrolled={{ y: 300, x: 1500 }}
+            tableScrolled={{ x: 1500 }}
             columns={columnAttachmentData(
               searchInput,
               searchedColumn,

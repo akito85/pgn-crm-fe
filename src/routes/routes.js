@@ -12,6 +12,7 @@ import { debt_and_collection } from "./DebtAndCollection";
 import { invoice } from "./invoice";
 import report_setup from "./report";
 import { notification } from "./notification";
+import { job_management } from "./job_management";
 export const index = [
   {
     path: "/",
@@ -36,6 +37,7 @@ export const index = [
   },
   ...product_promo,
   ...user_management,
+  ...job_management,
   ...system_setup,
   ...account_management,
   ...receipt_and_collection,
