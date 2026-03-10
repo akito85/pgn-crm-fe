@@ -12,8 +12,9 @@ export const RenderContentActions = (
   totalLength,
   permissions = [],
   sliceColumn = "View",
+  stopClickPropagation = false,
 ) => {
-  if (totalLength > 2) {
+  if (totalLength > 3) {
     return (
       <div className="w-full flex justify-center items-center py-1 gap-4">
         <Popover
@@ -33,7 +34,12 @@ export const RenderContentActions = (
             </Space>
           }
         >
-          <div className="group">
+          <div
+            className="group"
+            onClick={(e) => {
+              if (stopClickPropagation) e.stopPropagation();
+            }}
+          >
             <MoreOutlined className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out" />
           </div>
         </Popover>
@@ -74,6 +80,7 @@ export const useColumnActionPermission = (
   itemsRender = [],
   sliceColumn = "View",
   type = "page",
+  stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
   // convert to lower case
@@ -131,6 +138,7 @@ export const useColumnActionPermission = (
               arrayActions?.length,
               arrayActions,
               sliceColumn,
+              stopClickPropagation,
             ),
         },
       ];

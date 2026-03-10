@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Tabs, Tooltip } from "antd";
+import { Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -23,7 +23,6 @@ import {
   resetBillingData,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBilling } from "./Table/TableViewBilling";
-import { columnsAllBilling } from "./Table/TableViewAllBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
@@ -53,7 +52,6 @@ const BillingPage = () => {
   const [sort, setSort] = useState(filters?.sort || "");
   const [search, setSearch] = useState(filters?.search || {});
 
-  const [valueTab, setValueTab] = useState("Billing Gas");
   const [pageDetail, setPageDetail] = useState(false);
   const [modalRequest, setModalRequest] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -128,12 +126,6 @@ const BillingPage = () => {
   const routes = [
     { path: "", breadcrumbName: "Rating & Billing" },
     { path: RBI_ROUTES.BILLING_VIEW, breadcrumbName: "Billing" },
-  ];
-
-  const tabBilling = [
-    { key: "All", label: "All" },
-    { key: "Billing Gas", label: "Billing Gas" },
-    { key: "Billing Non Gas", label: "Billing Non Gas", disabled: true },
   ];
 
   const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
@@ -219,38 +211,18 @@ const BillingPage = () => {
     setModalApprovalHistory(true);
   };
 
-  const onChangeTab = (key) => {
-    fetchIdRef.current = 0;
-    dispatch(resetBillingData());
-    setValueTab(key);
-    setSearch({});
-    setSearchText("");
-    setSearchedColumn("");
-    setPage(1);
-    setPageDetail(false);
-    setActiveRowKey(null);
-    setBillingCode("");
-    setBillHeaderId("");
-    setAccountNumberId("");
-    setSANumberId("");
-    setCalculationCodeId("");
-    setSelectedBillingData(null);
-  };
-
   const handleRefresh = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
 
-    if (valueTab === "Billing Gas" || valueTab === "All") {
-      dispatch(
-        getAllBillingPaginate({
-          search: reqSearch,
-          page: 1,
-          pageSize: initialPageSize,
-          sort,
-          isLoadMore: false,
-        }),
-      );
-    }
+    dispatch(
+      getAllBillingPaginate({
+        search: reqSearch,
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
 
     dispatch(
       getAllBillingRequestPaginate({
@@ -337,22 +309,11 @@ const BillingPage = () => {
     itemGrantAccess,
   ).map((col) => ({
     ...col,
-    width: valueTab === "All" ? 70 : 25,
+    width: 25,
     align: "center",
   }));
 
   const baseColumns = useMemo(() => {
-    if (valueTab === "All") {
-      return columnsAllBilling(
-        0,
-        0,
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        search,
-      );
-    }
     return columnsBilling(
       0,
       0,
@@ -362,7 +323,7 @@ const BillingPage = () => {
       handleSearch,
       search,
     );
-  }, [valueTab, searchInput, searchedColumn, searchText, handleSearch, search]);
+  }, [searchInput, searchedColumn, searchText, handleSearch, search]);
 
   const allColumns = useMemo(() => {
     return [...baseColumns, ...actionCols].map((col) => ({
@@ -402,48 +363,29 @@ const BillingPage = () => {
           </div>
         }
       >
-        <Tabs
-          activeKey={valueTab}
-          onChange={onChangeTab}
-          type="line"
-          size="small"
-          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-4"
-          items={tabBilling.map((tab) => ({
-            key: tab.key,
-            label: tab.label,
-            disabled: tab.disabled,
-            children: (
-              <div className="my-0">
-                <TableRBI
-                  idTable="billing-table"
-                  dataSource={dataSourceWithKeys}
-                  columns={processedColumns}
-                  totalData={data?.page?.totalElements || 0}
-                  tableScrolled={{
-                    x: valueTab === "All" ? 1000 : 11000,
-                    y: 525,
-                  }}
-                  onSort={onSort}
-                  handleDownload={handleDownload}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
-                  loading={loading}
-                  showExport={false}
-                  usePagination={false}
-                  useInfiniteScroll={true}
-                  onLoadMore={handleLoadMore}
-                  hasMore={hasMore}
-                  showRefresh={true}
-                  onRefresh={handleRefresh}
-                  loadMoreThreshold={20}
-                  enableRowClick={true}
-                  selectedRowKey={activeRowKey}
-                  onRowClick={handleDetail}
-                />
-              </div>
-            ),
-          }))}
+        <TableRBI
+          idTable="billing-table"
+          dataSource={dataSourceWithKeys}
+          columns={processedColumns}
+          totalData={data?.page?.totalElements || 0}
+          tableScrolled={{ x: 11000, y: 525 }}
+          onSort={onSort}
+          handleDownload={handleDownload}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={loading}
+          showExport={false}
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={hasMore}
+          showRefresh={true}
+          onRefresh={handleRefresh}
+          loadMoreThreshold={20}
+          enableRowClick={true}
+          selectedRowKey={activeRowKey}
+          onRowClick={handleDetail}
         />
       </CardContainer>
 
