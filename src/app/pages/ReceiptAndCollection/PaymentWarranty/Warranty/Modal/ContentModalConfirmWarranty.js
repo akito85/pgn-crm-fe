@@ -46,15 +46,21 @@ const ContentModalConfirmWarranty = ({
 
   const mutationColumns = [
     { title: "No", dataIndex: "key", width: 50, render: (t, r, i) => i + 1 },
-    { title: "REFF. DOCUMENT NUMBER", dataIndex: "mutationNumber", render: (text) => text || "-" },
+    { title: "REFF. DOCUMENT NUMBER", dataIndex: "mutationNumber", render: (text, record) => text || record.documentNumber || "-" },
     { title: "SOURCE", dataIndex: "source", render: (text, record) => text || record.sourceNumber || "-" },
     { title: "TYPE", dataIndex: "type", render: (text) => text || "-" },
     { title: "CATEGORY", dataIndex: "category", render: (text) => text || "-" },
-    { title: "DATE", dataIndex: "date", render: (text) => text ? moment(text).format("DD MMM YYYY") : "-" },
-    { title: "AMOUNT", dataIndex: "amount", align: "right", render: (val, record) => (record.currencyName || record.currency || "") + " " + (val?.toLocaleString() || "0") },
-    { title: "CONVERTED CURRENCY", dataIndex: "convertedCurrencyName", render: (text) => text || "-" },
+    { title: "DATE", dataIndex: "date", render: (text, record) => {
+      const dateVal = text || record.transactionDate;
+      return dateVal ? moment(dateVal).format("DD MMM YYYY") : "-";
+    }},
+    { title: "AMOUNT", dataIndex: "amount", align: "right", render: (val, record) => (val?.toLocaleString() || "0") },
+    { title: "CONVERTED CURRENCY", dataIndex: "convertedCurrencyName", render: (text, record) => text || record.convertedCurrency || "-" },
     { title: "RATE", dataIndex: "rate", align: "right", render: (val) => val?.toLocaleString() || "0" },
-    { title: "EQV AMOUNT", dataIndex: "eqvAmount", align: "right", render: (val, record) => (record.currencyName || record.currency || "") + " " + (val?.toLocaleString() || "0") },
+    { title: "EQV AMOUNT", dataIndex: "eqvAmount", align: "right", render: (val, record) => {
+      const eqv = val ?? record.equivalentAmount;
+      return (eqv?.toLocaleString() || "0");
+    }},
     { title: "DESCRIPTION", dataIndex: "description", render: (text) => text || "-" },
   ];
 
@@ -123,11 +129,11 @@ const ContentModalConfirmWarranty = ({
                 <DetailText label="Document Number">{DOMPurify.sanitize(data?.documentNumber) || "-"}</DetailText>
                 <DetailText label="Document Date">{data?.documentDate ? moment(data.documentDate).format("DD MMM YYYY") : "-"}</DetailText>
                 <DetailText label="Issuer Bank">{getPartnerName(data?.issuerBank)}</DetailText>
-                <DetailText label="Issuer Branch">{getPartnerName(data?.issuerBranch) || getBranchName(data?.issuerBranch)}</DetailText>
+                <DetailText label="Issuer Branch">{getBranchName(data?.issuerBranch)}</DetailText>
                 <DetailText label="Currency">{data?.currency || "-"}</DetailText>
                 <DetailText label="Rate Amount">{data?.rateAmount?.toLocaleString() || "-"}</DetailText>
-                <DetailText label="Eff Start Date">{data?.effStartDate ? moment(data.effStartDate).format("DD MMM YYYY") : "-"}</DetailText>
-                <DetailText label="Eff End Date">{data?.effEndDate ? moment(data.effEndDate).format("DD MMM YYYY") : "-"}</DetailText>
+                <DetailText label="Eff Start Date">{(data?.effStartDate || data?.effectiveStartDate) ? moment(data?.effStartDate || data?.effectiveStartDate).format("DD MMM YYYY") : "-"}</DetailText>
+                <DetailText label="Eff End Date">{(data?.effEndDate || data?.effectiveEndDate) ? moment(data?.effEndDate || data?.effectiveEndDate).format("DD MMM YYYY") : "-"}</DetailText>
                 <div className="col-span-4">
                   <DetailText label="Description">{DOMPurify.sanitize(data?.description) || "-"}</DetailText>
                 </div>

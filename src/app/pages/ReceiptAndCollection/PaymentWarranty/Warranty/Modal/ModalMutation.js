@@ -28,9 +28,11 @@ import { showModalSuccess } from "../../../../../../redux/slices/general_slice";
 import { uploadAttachments } from "../../../../../../utils/uploadHelper";
 import { bytesConverter } from "../../../../../../utils/bytesConverter";
 
+import PropTypes from 'prop-types';
+
 const ModalMutation = ({
   isOpen,
-  handleCancel = () => {},
+  onClose = () => {},
   modalType = "create",
   selectedRecord = null,
   warrantyId = null,
@@ -46,6 +48,7 @@ const ModalMutation = ({
   const { 
     dataListAppHierId, 
     dataListAppHierDetail, 
+    dataMutation,
     loadingMutation, 
     loadingApproval, 
     loadingCreate,
@@ -119,30 +122,35 @@ const ModalMutation = ({
   }, [dataListAppHierDetail]);
 
   useEffect(() => {
-    if (dataDetailMutation) {
-      const type = dataDetailMutation.type;
-      const source = dataDetailMutation.source;
-      
-      const convertedCurrency = dataDetailMutation.convertedCurrency;
+    if (dataDetailMutation?.data) {
+      const actualData = dataDetailMutation.data;
+      const type = actualData.type || selectedRecord?.type || selectedRecord?.mutationType;
+      const source = actualData.isManual ? "Manual" : (actualData.source || selectedRecord?.source || "Manual");
+      const convertedCurrency = actualData.convertedCurrency || actualData.currency || selectedRecord?.convertedCurrency;
 
       form.setFieldsValue({
-        ...dataDetailMutation,
+        ...selectedRecord,
+        ...actualData,
         type: type,
         source: source,
         convertedCurrency: convertedCurrency,
-        mutationNumber: dataDetailMutation.mutationNumber || dataDetailMutation.documentNumber,
-        eqvAmount: dataDetailMutation.eqvAmount || dataDetailMutation.equivalentAmount,
-        date: dataDetailMutation.transactionDate ? moment(dataDetailMutation.transactionDate) : null,
+        mutationNumber: actualData.mutationNumber || actualData.documentNumber || selectedRecord?.mutationNumber || selectedRecord?.documentNumber,
+        eqvAmount: actualData.eqvAmount ?? actualData.equivalentAmount ?? selectedRecord?.eqvAmount ?? selectedRecord?.equivalentAmount,
+        date: actualData.date 
+          ? moment(actualData.date) 
+          : actualData.transactionDate 
+            ? moment(actualData.transactionDate) 
+            : (selectedRecord?.date ? moment(selectedRecord.date) : selectedRecord?.transactionDate ? moment(selectedRecord.transactionDate) : null),
       });
 
-      const appHierId = dataDetailMutation.appHierId || dataDetailMutation.apphierId;
+      const appHierId = actualData.appHierId || actualData.apphierId || selectedRecord?.apphierId || selectedRecord?.appHierId;
       if (appHierId) {
         setSelectedHierarchy(appHierId);
         form.setFieldsValue({ appHierId: appHierId });
       }
 
-      if (dataDetailMutation.attachmentDtoList) {
-        setListDataAttachment(dataDetailMutation.attachmentDtoList.map(item => ({
+      if (actualData.attachmentDtoList) {
+        setListDataAttachment(actualData.attachmentDtoList.map(item => ({
           ...item,
           uid: item.uid || item.id,
           dataType: "exist"
@@ -188,7 +196,7 @@ const ModalMutation = ({
     setListDataAttachment([]);
     setIsSubmitting(false);
     setMutationData({});
-    handleCancel();
+    onClose();
   };
 
   const handleSubmit = async () => {
@@ -217,7 +225,7 @@ const ModalMutation = ({
           currency: values.convertedCurrency || "IDR",
           rate: parsedRate,
           equivalentAmount: parsedEqvAmount,
-          description: values.description,
+          description: DOMPurify.sanitize(values.description || ''),
           appHierId: selectedHierarchy,
           attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id),
         };
@@ -241,9 +249,26 @@ const ModalMutation = ({
         handleClose();
         if (fetchMutation) fetchMutation();
     } catch (error) {
-      console.error("Submission error:", error);
+      console.error("Mutation submission error:", error);
       setIsSubmitting(false);
-      message.error("Please fill all required fields correctly.");
+
+      if (error?.errorFields) {
+        const fieldNames = error.errorFields
+          .map(f => f.name.join(' '))
+          .join(', ');
+        
+        message.error(`Please fill required fields correctly: ${fieldNames}`);
+        
+        const firstErrorField = error.errorFields[0]?.name[0];
+        if (firstErrorField) {
+          const element = document.querySelector(`[name$="${firstErrorField}"]`);
+          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else if (error?.response?.data?.message) {
+        message.error(error.response.data.message);
+      } else {
+        message.error("An error occurred. Please try again.");
+      }
     }
   };
 
@@ -391,6 +416,27 @@ const ModalMutation = ({
       </Spin>
     </ModalCustom>
   );
+};
+
+ModalMutation.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  modalType: PropTypes.oneOf(['create', 'update', 'view']),
+  selectedRecord: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    noDocumentMutation: PropTypes.string,
+    type: PropTypes.string,
+    mutationType: PropTypes.string,
+    source: PropTypes.string,
+    convertedCurrency: PropTypes.string,
+    date: PropTypes.string,
+    transactionDate: PropTypes.string,
+  }),
+  warrantyId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  currencyDDL: PropTypes.shape({
+    data: PropTypes.array
+  }),
+  fetchMutation: PropTypes.func
 };
 
 export default ModalMutation;

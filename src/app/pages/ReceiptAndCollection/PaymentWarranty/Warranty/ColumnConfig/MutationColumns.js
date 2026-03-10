@@ -1,3 +1,5 @@
+import DOMPurify from "dompurify";
+import React from 'react';
 import moment from "moment";
 import { Tooltip, Popover, Space } from "antd";
 import { dateFormatting, renderColumn } from "../../../../../../utils";
@@ -37,7 +39,7 @@ export const columnMutation = (
       dataIndex: "documentNumber",
       sorter: true,
       ...getColumnSearchPropsPaging("documentNumber", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record.noDocumentMutation || "",
+      render: (text, record) => DOMPurify.sanitize(text || record.noDocumentMutation || record.mutationNumber || ""),
     },
     {
       key: "source",
@@ -45,7 +47,7 @@ export const columnMutation = (
       dataIndex: "source",
       sorter: true,
       ...getColumnSearchPropsPaging("source", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record?.payWarranty?.documentNumber || "",
+      render: (text, record) => DOMPurify.sanitize(text || record?.payWarranty?.documentNumber || ""),
     },
     {
       key: "type",
@@ -53,7 +55,7 @@ export const columnMutation = (
       dataIndex: "type",
       sorter: true,
       ...getColumnSearchPropsPaging("type", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record?.type || "",
+      render: (text, record) => DOMPurify.sanitize(text || record?.type || ""),
     },
     {
       key: "category",
@@ -61,7 +63,7 @@ export const columnMutation = (
       dataIndex: "category",
       sorter: true,
       ...getColumnSearchPropsPaging("category", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => record?.category || "",
+      render: (text, record) => DOMPurify.sanitize(record?.category || ""),
     },
     {
       key: "date",
@@ -80,8 +82,7 @@ export const columnMutation = (
       align: "right",
       sorter: true,
       render: (text, record) => {
-        //const currency = record.currency || record.currencyName;
-        return record.amount; //(currency ? `${currency} ` : "") + text?.toLocaleString();
+        return record.amount !== undefined && record.amount !== null ? record.amount.toLocaleString() : "";
       }
     },
     {
@@ -90,7 +91,7 @@ export const columnMutation = (
       dataIndex: "convertedCurrency",
       sorter: true,
       ...getColumnSearchPropsPaging("convertedCurrency", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => text || record.currency || "",
+      render: (text, record) => DOMPurify.sanitize(record.convertedCurrencyName || record.currency || (typeof text === 'string' && isNaN(Number(text)) ? text : "") || ""),
     },
     {
       key: "rate",
@@ -107,17 +108,24 @@ export const columnMutation = (
       align: "right",
       sorter: true,
       render: (text, record) => {
-        // const val = text || record.equivalentAmount;
-        // const currency = record.currency || record.equivalentAmount;
-        return record.equivalentAmount;//(currency ? `${currency} ` : "") + val?.toLocaleString();
+        const val = record.equivalentAmount !== undefined ? record.equivalentAmount : record.eqvAmount;
+        return val !== undefined && val !== null ? val.toLocaleString() : "";
       }
     },
     {
-      key: "description",
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      sorter: true,
-      ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch),
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        sorter: true,
+        ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch),
+        render: (text) => (
+            <div 
+                ref={(el) => {
+                    if (el) {
+                        el.textContent = text || "-";
+                    }
+                }}
+            />
+        )
     },
   ];
 
@@ -151,11 +159,16 @@ export const columnMutation = (
       fixed: "right",
       width: 120,
       render: (record) => {
-        const isPending = record.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
-        const isInactive = record.status === WARRANTY_STATUS.INACTIVE;
-        const isDisabled = isPending || isInactive;
-        const tooltipEdit = isPending ? WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL : isInactive ? WARRANTY_STATUS.INACTIVE : "Update";
-        const tooltipDelete = isPending ? WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL : isInactive ? WARRANTY_STATUS.INACTIVE : "Delete";
+        const isLocal = !record.id;
+        const isDraft = record.status === WARRANTY_STATUS.DRAFT;
+        const isApprDraft = record.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+        const isApprRejected = record.approvalStatus === WARRANTY_APPROVAL_STATUS.REJECTED;
+
+        const canEditOrDelete = isLocal || (isDraft && (isApprDraft || isApprRejected));
+        const isDisabled = !canEditOrDelete;
+        
+        const tooltipEdit = isDisabled ? "Update Not Allowed" : "Update";
+        const tooltipDelete = isDisabled ? "Delete Not Allowed" : "Delete";
 
         return (
           <div className="w-full flex justify-center items-center py-1 gap-2">
@@ -187,14 +200,6 @@ export const columnMutation = (
                     >
                       <SVGIcon name="IconLogHistory" width={20} color="#000000" />
                       <span className="text-sm">Approval History</span>
-                    </div>
-                    <div className="cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100">
-                      <SVGIcon name="IconHold" width={20} color="#000000" />
-                      <span className="text-sm">Hold</span>
-                    </div>
-                    <div className="cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100">
-                      <SVGIcon name="IconRefund" width={20} color="#000000" />
-                      <span className="text-sm">Refund</span>
                     </div>
                   </Space>
                 }

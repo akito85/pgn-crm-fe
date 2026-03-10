@@ -29,3 +29,7 @@ export const configApp = {
   REPORT_SERVICE: `/rpt`,
   NOTIFICATION_SERVICE: `/ntf`, // Notification REST API service
 };
+
+export const API_ENDPOINTS = {
+  UPLOAD_ATTACHMENT: '/v1/dbs/api/attachment/upload/v1',
+};

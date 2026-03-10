@@ -28,7 +28,7 @@ import { columnsHoldInfo } from "./Table/TableHoldInfo";
 import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 
 // Redux / Service
-import { configApp } from "../../../../../../constants/configApp";
+import { configApp, API_ENDPOINTS } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   getAllCustomerInfoPaginate,
@@ -324,7 +324,7 @@ const ModalHold = ({
               category: "PAYMENT_WARRANTY_TRANS",
               fileCategoryId: element.fileCategoryId,
             };
-            await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+            await receiptCollectionHttpService.uploadImage(API_ENDPOINTS.UPLOAD_ATTACHMENT, uploadBody);
           }
         }
       }
