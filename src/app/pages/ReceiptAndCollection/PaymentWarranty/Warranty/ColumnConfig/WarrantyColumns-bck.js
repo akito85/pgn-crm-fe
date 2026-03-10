@@ -484,7 +484,7 @@ export const columnWarranty = ({
     },
     {
       key: "paymentWarrantyCode",
-      title: "PAYMENT WARRANTY CODE",
+      title: "PAYMENT GUARANTEE CODE",
       dataIndex: "paymentWarrantyCode",
       width: 150,
       sorter: true,

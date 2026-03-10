@@ -23,7 +23,7 @@ export const columnWarranty = (
   },
   {
     key: "warrantyCode",
-    title: "PAYMENT WARRANTY CODE",
+    title: "PAYMENT GUARANTEE CODE",
     dataIndex: "warrantyCode",
     sorter: true,
     ...getColumnSearchPropsPaging(
