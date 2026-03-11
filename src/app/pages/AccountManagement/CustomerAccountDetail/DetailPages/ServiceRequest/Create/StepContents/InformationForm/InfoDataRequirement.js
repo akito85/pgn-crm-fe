@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { DownloadOutlined, FilterOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../../../assets/Icon";
@@ -156,7 +156,6 @@ export default function InfoDataRequirement({
     }
     modalForm.setFieldsValue({
       srFormDataRequirementType: record.typeId,
-      srFormDataRequirementValue: record.valueId,
     });
     setEditingRecord(record);
     setIsDataRequirement(true);
@@ -186,66 +185,51 @@ export default function InfoDataRequirement({
     setIsDataRequirement(false);
   }
 
-  const handleOk = () => {
-    modalForm.validateFields()
-      .then((values) => {
-        const typeLabel = getDropdownOptions('serviceRequestDataRequirements')
-          .find(opt => opt.value === values.srFormDataRequirementType)?.label;
+  const handleSelectValue = (valueRecord) => {
+    const typeLabel = getDropdownOptions('serviceRequestDataRequirements')
+      .find(opt => opt.value === selectedTypeId)?.label;
 
-        const currentValues = data_data_requirement_values[selectedTypeValue] || [];
-        const valueItem = currentValues.find(item => item.id === values.srFormDataRequirementValue);
-        const valueLabel = valueItem?.label || values.srFormDataRequirementValue;
+    let updatedData;
 
-        let updatedData;
-
-        if (editingRecord) {
-          updatedData = dataRequirement.map((item) =>
-            item.key === editingRecord.key
-              ? {
-                  ...item,
-                  type: typeLabel,
-                  typeId: values.srFormDataRequirementType,
-                  typeValue: selectedTypeValue,
-                  value: valueLabel,
-                  valueId: values.srFormDataRequirementValue,
-                }
-              : item
-          );
-        } else {
-          try {
-            const newRecord = {
-              key: Date.now(),
-              no: getNextNumber(),
+    if (editingRecord) {
+      updatedData = dataRequirement.map((item) =>
+        item.key === editingRecord.key
+          ? {
+              ...item,
               type: typeLabel,
-              typeId: values.srFormDataRequirementType,
+              typeId: selectedTypeId,
               typeValue: selectedTypeValue,
-              value: valueLabel,
-              valueId: values.srFormDataRequirementValue,
-            };
-            updatedData = [...dataRequirement, newRecord];
-          } catch (error) {
-            console.log(error.message);
-          }
-        }
+              value: valueRecord.label,
+              valueId: valueRecord.id,
+            }
+          : item
+      );
+    } else {
+      try {
+        const newRecord = {
+          key: Date.now(),
+          no: getNextNumber(),
+          type: typeLabel,
+          typeId: selectedTypeId,
+          typeValue: selectedTypeValue,
+          value: valueRecord.label,
+          valueId: valueRecord.id,
+        };
+        updatedData = [...dataRequirement, newRecord];
+      } catch (error) {
+        console.log(error.message);
+        return;
+      }
+    }
 
-        // Update table data
-        setDataRequirement(updatedData);
+    setDataRequirement(updatedData);
+    form.setFieldsValue({ srFormDataRequirements: updatedData });
 
-        // Update main form with the array
-        form.setFieldsValue({
-          srFormDataRequirements: updatedData
-        });
-
-        // Reset and close
-        modalForm.resetFields();
-        setEditingRecord(null);
-        setSelectedTypeId(null);
-        setSelectedTypeValue(null);
-        setIsDataRequirement(false);
-      })
-      .catch((errorInfo) => {
-        console.log('Validation failed:', errorInfo);
-      });
+    modalForm.resetFields();
+    setEditingRecord(null);
+    setSelectedTypeId(null);
+    setSelectedTypeValue(null);
+    setIsDataRequirement(false);
   }
 
   return(
@@ -306,8 +290,7 @@ export default function InfoDataRequirement({
 
         <NxTable
           idTable={"DataRequirement"}
-          className="border-[0.5px] border-[#c8cdd4] border-solid "
-          usePagination={true}
+          usePagination={false}
           useSelect={true}
           dataMain={dataRequirement}
           columnMain={columnMain}
@@ -319,27 +302,13 @@ export default function InfoDataRequirement({
       <NxModal
         isOpen={isDataRequirement}
         handleCancel={handleCancel}
-        handleOk={handleOk}
-        header={"ADD DATA REQUIREMENT"}
-        width={800}
+        handleOk={handleCancel}
+        header={"CHOOSE DATA REQUIREMENT"}
+        width={900}
         footer={
           <div className="w-full flex justify-end gap-5">
-            <Button key="cancel" className="" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button
-              key="save"
-              type="primary"
-              className=""
-              style={{
-                backgroundColor: "#0075bf",
-                borderColor: "#0075bf",
-                borderRadius: "5px",
-                color: "#ffffff"
-              }}
-              onClick={handleOk}
-            >
-              Save
+            <Button key="back" onClick={handleCancel}>
+              Back
             </Button>
           </div>
         }
@@ -350,58 +319,74 @@ export default function InfoDataRequirement({
               form={modalForm}
               layout="vertical"
             >
-              <div className="w-full flex flex-col gap-5">
-                <Form.Item
-                  key="srFormDataRequirementType"
-                  name="srFormDataRequirementType"
-                  label="Data Requirement Type"
-                  rules={[
-                    {
-                      message: requiredMessage("Data Requirement Type"),
-                      required: true,
-                    },
-                  ]}
-                  className="no-margin-form"
-                >
-                  <Select
-                    placeholder="Select Data Requirement Type"
-                    loading={!isDropdownLoaded('serviceRequestDataRequirements')}
-                    options={getDropdownItems('serviceRequestDataRequirements').map(item => ({
-                      value: item.glbTypeValId?.toString() || item.id?.toString(),
-                      label: item.name || item.glbValue,
-                      typeValue: item.glbValue,
-                    }))}
-                    onChange={handleTypeChange}
-                  />
-                </Form.Item>
-                <Form.Item
-                  key="srFormDataRequirementValue"
-                  name="srFormDataRequirementValue"
-                  label="Data Requirement Value"
-                  rules={[
-                    {
-                      message: requiredMessage("Data Requirement Value"),
-                      required: true,
-                    },
-                  ]}
-                  className="no-margin-form"
-                >
-                  <Select
-                    showSearch
-                    placeholder="Select Data Requirement Value"
-                    loading={loading_data_requirement_values}
-                    disabled={loading_data_requirement_values || !selectedTypeId}
-                    options={(data_data_requirement_values[selectedTypeValue] || []).map(item => ({
-                      value: item.id,
-                      label: item.label,
-                    }))}
-                    filterOption={(input, option) =>
-                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                    }
-                  />
-                </Form.Item>
-              </div>
+              <Form.Item
+                key="srFormDataRequirementType"
+                name="srFormDataRequirementType"
+                label="Type"
+                rules={[
+                  {
+                    message: requiredMessage("Type"),
+                    required: true,
+                  },
+                ]}
+                className="no-margin-form"
+              >
+                <Select
+                  placeholder="Select Data Requirement Type"
+                  loading={!isDropdownLoaded('serviceRequestDataRequirements')}
+                  options={getDropdownItems('serviceRequestDataRequirements').map(item => ({
+                    value: item.glbTypeValId?.toString() || item.id?.toString(),
+                    label: item.name || item.glbValue,
+                    typeValue: item.glbValue,
+                  }))}
+                  onChange={handleTypeChange}
+                />
+              </Form.Item>
             </Form>
+
+            <NxTable
+              idTable={"DataRequirementValues"}
+              className="mt-4"
+              usePagination={false}
+              useSelect={false}
+              loading={loading_data_requirement_values}
+              dataMain={(data_data_requirement_values[selectedTypeValue] || []).map((item, idx) => ({
+                ...item,
+                key: item.id,
+                no: idx + 1,
+              }))}
+              columnMain={[
+                {
+                  title: 'NO',
+                  dataIndex: 'no',
+                  key: 'no',
+                  align: 'center',
+                  width: 8,
+                },
+                {
+                  title: 'VALUE',
+                  dataIndex: 'label',
+                  key: 'label',
+                },
+                {
+                  title: 'ACTION',
+                  align: 'center',
+                  width: 15,
+                  fixed: 'right',
+                  render: (v, r) => (
+                    <Tooltip title="Add">
+                      <div className="flex justify-center cursor-pointer">
+                        <PlusCircleOutlined
+                          style={{ color: '#0075bf', fontSize: 22 }}
+                          onClick={() => handleSelectValue(r)}
+                        />
+                      </div>
+                    </Tooltip>
+                  ),
+                },
+              ]}
+              showAdvanceSearch={true}
+            />
           </NxBaseContainer>
         </div>
       </NxModal>

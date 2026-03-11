@@ -1,18 +1,15 @@
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Space, Button, Popconfirm, Form } from "antd";
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  PlusCircleOutlined,
-} from "@ant-design/icons";
+import { Button, Popconfirm, Tooltip } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
+import accountManagementService from "../../../../../../../../../redux/services/account_management/accountManagementService";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
 import ModalPreRequisiteDetail from "./ModalPreRequisiteDetail";
 
@@ -20,170 +17,95 @@ export default function PreRequisiteForm({
   form,
   account,
   customer,
+  dropdowns,
   currentStep,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedPrerequisite, setSelectedPrerequisite] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const PAGE_SIZE = 10;
+  const [prereqData, setPrereqData] = useState([]);
+  const [prereqPage, setPrereqPage] = useState(0);
+  const [prereqHasMore, setPrereqHasMore] = useState(true);
+  const [prereqLoading, setPrereqLoading] = useState(false);
+  const loadingRef = useRef(false);
 
-  const PREREQUISITE = [
-    {
-      no: 1,
-      type: "Administrative",
-      name: "Menerbitkan BBG",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 2,
-      type: "Administrative",
-      name: "Menerbitkan BBG yang telah disetujui oleh pimpinan sales and operation regional I",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 3,
-      type: "Administrative",
-      name: "Menerbitkan BBG",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 4,
-      type: "Technical",
-      name: "Verifikasi Dokumen Pelanggan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 5,
-      type: "Technical",
-      name: "Pemeriksaan Kelengkapan Formulir",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 6,
-      type: "Administrative",
-      name: "Validasi Data di Sistem",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 7,
-      type: "Financial",
-      name: "Verifikasi Pembayaran Awal",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 8,
-      type: "Administrative",
-      name: "Persetujuan dari Departemen Legal",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 9,
-      type: "Technical",
-      name: "Inspeksi Lokasi Pemasangan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 10,
-      type: "Technical",
-      name: "Pemeriksaan Kesiapan Peralatan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 11,
-      type: "Administrative",
-      name: "Penerbitan Surat Izin Operasi",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 12,
-      type: "Financial",
-      name: "Konfirmasi Asuransi",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 13,
-      type: "Administrative",
-      name: "Penyelesaian Kontrak Kerja",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 14,
-      type: "Technical",
-      name: "Kalibrasi Perangkat",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 15,
-      type: "Safety",
-      name: "Pemeriksaan Keselamatan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 16,
-      type: "Administrative",
-      name: "Arsip Digital Dokumen",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 17,
-      type: "Financial",
-      name: "Pembayaran Administrasi Akhir",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 18,
-      type: "Technical",
-      name: "Testing Sistem Integrasi",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 19,
-      type: "Administrative",
-      name: "Penandatanganan Berita Acara",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 20,
-      type: "Safety",
-      name: "Sertifikasi K3",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 21,
-      type: "Administrative",
-      name: "Penyerahan Dokumen ke Pelanggan",
-      description: "Desc",
-      status: "status",
-    },
-  ];
+  const getPrerequisiteOptions = useCallback(() => {
+    const source = dropdowns?.serviceRequestPrerequisites;
+    if (Array.isArray(source)) return source;
+    if (Array.isArray(source?.data)) return source.data;
+    return [];
+  }, [dropdowns]);
 
+  const getPrerequisiteLabel = useCallback(
+    (prerequisiteId) => {
+      const options = getPrerequisiteOptions();
+      const matched = options.find(
+        (item) =>
+          item?.glbTypeValId?.toString() === prerequisiteId?.toString() ||
+          item?.id?.toString() === prerequisiteId?.toString(),
+      );
 
-  const paginatedData = PREREQUISITE.slice(
-    (page - 1) * pageSize,
-    page * pageSize
+      return matched?.name || matched?.glbTypeValName || prerequisiteId || "-";
+    },
+    [getPrerequisiteOptions],
   );
+
+  // Spring Page → 0-based. page=0 adalah halaman pertama.
+  // Endpoint: GET /v1/dbs/api/prerequisites/lists?page={page}&size={size}
+  const fetchPrerequisites = useCallback(async (page) => {
+    const url = `/v1/dbs/api/prerequisites/lists?page=${page}&size=${PAGE_SIZE}`;
+    const response = await accountManagementService.getAll(url);
+    const payload = response?.data || response;
+    const content = payload?.content || [];
+    const items = content.map((item, idx) => ({
+      ...item,
+      key: item.id ?? `${page}-${idx}`,
+      type: getPrerequisiteLabel(item.prerequisiteId),
+      name: getPrerequisiteLabel(item.prerequisiteId),
+      description: item.prerequisiteComments || item.prerequisiteValue || "-",
+      status: item.prerequisiteStatus || "-",
+      dueDateLabel: item.dueDate || "-",
+      completedDateLabel: item.completedDate || "-",
+      assignedToLabel: item.assignedTo || "-",
+    }));
+    const total = payload?.totalElements ?? content.length;
+    const hasMore = (page + 1) * PAGE_SIZE < total;
+    return { items, hasMore };
+  }, [PAGE_SIZE, getPrerequisiteLabel]);
+
+  useEffect(() => {
+    setPrereqData([]);
+    setPrereqPage(0);
+    setPrereqHasMore(true);
+    setPrereqLoading(true);
+    loadingRef.current = false;
+    fetchPrerequisites(0)
+      .then(({ items, hasMore }) => {
+        setPrereqData(items);
+        setPrereqHasMore(hasMore);
+      })
+      .finally(() => {
+        setPrereqLoading(false);
+      });
+  }, [fetchPrerequisites]);
+
+  const handleLoadMore = useCallback(() => {
+    if (loadingRef.current || !prereqHasMore) return Promise.resolve();
+    loadingRef.current = true;
+    const nextPage = prereqPage + 1;
+    return fetchPrerequisites(nextPage)
+      .then(({ items, hasMore }) => {
+        setPrereqData((prev) => [...prev, ...items]);
+        setPrereqPage(nextPage);
+        setPrereqHasMore(hasMore);
+      })
+      .finally(() => {
+        loadingRef.current = false;
+      });
+  }, [prereqPage, prereqHasMore, fetchPrerequisites]);
 
   const columnMain = [
     {
@@ -203,13 +125,11 @@ export default function PreRequisiteForm({
         // Without pagination (just sequential):
         return index + 1;
       },
-      fixed: "left"
     },
     {
       title: "TYPE",
       dataIndex: "type",
       key: "type",
-      fixed: "left"
     },
     {
       title: "PREREQUISITE NAME",
@@ -225,52 +145,48 @@ export default function PreRequisiteForm({
       key: "description",
     },
     {
-      title: "STATUS0",
-      dataIndex: "status0",
+      title: "STATUS",
+      dataIndex: "status",
       key: "status",
     },
     {
-      title: "STATUS1",
-      dataIndex: "status1",
-      key: "status",
-    },    {
-      title: "STATUS2",
-      dataIndex: "status2",
-      key: "status",
-    },    {
-      title: "STATUS3",
-      dataIndex: "status3",
-      key: "status",
-    },    {
-      title: "STATUS4",
-      dataIndex: "status4",
-      key: "status",
-    },    {
-      title: "STATUS5",
-      dataIndex: "status5",
-      key: "status",
-    },    {
-      title: "STATUS6",
-      dataIndex: "status6",
-      key: "status",
-      fixed: "right"
-    },    {
+      title: "DUE DATE",
+      dataIndex: "dueDateLabel",
+      key: "dueDate",
+    },
+    {
+      title: "COMPLETED DATE",
+      dataIndex: "completedDateLabel",
+      key: "completedDate",
+    },
+    {
+      title: "ASSIGNED TO",
+      dataIndex: "assignedToLabel",
+      key: "assignedTo",
+    },
+    {
       title: "ACTIONS",
       key: "actions",
       width: 150,
       fixed: "right",
       render: (_, record) => (
-        <Space size="small">
-          <Button type="link" onClick={() => setIsOpen(true)}>
-            Detail
-          </Button>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => console.log("edit")}
-          >
-            Edit
-          </Button>
+        <div className="flex justify-center align-middle gap-2 py-1">
+          <Tooltip title="Detail">
+            <Button
+              type="table-action"
+              onClick={() => {
+                setSelectedPrerequisite(record);
+                setIsOpen(true);
+              }}
+            >
+              <SVGIcon name="IconDetail" width={20} />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button type="table-action" onClick={() => console.log("edit")}>
+              <SVGIcon name="IconEdit" width={20} />
+            </Button>
+          </Tooltip>
 
           <Popconfirm
             title="Are you sure?"
@@ -278,20 +194,16 @@ export default function PreRequisiteForm({
             okText="Yes"
             cancelText="No"
           >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
+            <Tooltip title="Delete">
+              <Button type="table-action">
+                <SVGIcon name="IconDelete" width={20} />
+              </Button>
+            </Tooltip>
           </Popconfirm>
-        </Space>
+        </div>
       ),
     },
   ];
-
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
 
   const handleCreateClick = () => {
     // Use getFieldsValue(true) to get ALL fields, not just touched ones
@@ -370,29 +282,19 @@ export default function PreRequisiteForm({
           </ButtonComponent>
         </div>
 
-        {/* Main Contact Table */}
+        {/* Prerequisite Table */}
         <NxTable
-          className="border-[0.5px] border-[#c8cdd4] border-solid "
-          usePagination={true}
+          idTable="prerequisite-table"
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={prereqHasMore}
           useSelect={true}
-          dataMain={paginatedData}
-          totalData={PREREQUISITE.length}
-          current={page}
-          pageSize={pageSize}
+          dataMain={prereqData}
           columnMain={columnMain}
           fontSize={"medium"}
-          dataExpand={null}
-          columnExpand={null}
-          useCheckbox={true}
-          rowKey={(PREREQUISITE) => PREREQUISITE.no}
-          onSelectionChange={(keys, rows) => {
-            console.log("Selected keys:", keys);
-            console.log("Full row data:", rows); // All props of selected rows
-          }}
-          onChange={handleChange}
-          getCheckboxProps={(record) => ({
-            disabled: record.status === "Inactive",
-          })}
+          loading={prereqLoading}
+          tableScrolled={{ x: "max-content", y: 400 }}
           border="true"
         />
         </NxBaseContainer>
@@ -400,6 +302,7 @@ export default function PreRequisiteForm({
 
       <ModalPreRequisiteDetail
         isOpen={isOpen}
+        data={selectedPrerequisite}
         footer={null}
         handleCancel={() => {
           setIsOpen(false);

@@ -121,7 +121,8 @@ const ModalCreateWarranty = ({
 
     // Format auto-filled Account Data
     useEffect(() => {
-        if (dataAccountNumber && dataAccountNumber.data) {
+        const currentAccountId = form.getFieldValue("accountId");
+        if (dataAccountNumber && dataAccountNumber.data && currentAccountId) {
             form.setFieldsValue({
                 accountName: dataAccountNumber.data.accountName,
                 cusNumber: dataAccountNumber.data.customerNumber,
@@ -142,11 +143,11 @@ const ModalCreateWarranty = ({
         } else {
             dispatch(getAllAccountNumberDDL());
             dispatch(resetDataAccountNumber());
-            form.resetFields([
-                "accountName", "cusNumber", "cusName",
-                "costCenterCode", "costCenterName", "segment",
-                "accountGroupType", "accountType", "classificationType"
-            ]);
+            form.setFieldsValue({
+                accountName: null, cusNumber: null, cusName: null,
+                costCenterCode: null, costCenterName: null, segment: null,
+                accountGroupType: null, accountType: null, classificationType: null
+            });
         }
     };
 
@@ -335,17 +336,21 @@ const ModalCreateWarranty = ({
                             <Col span={8}>
                                 <Form.Item name="accountId" label="Account Number" rules={[{ required: true }]}>
                                     <Select
-                                        placeholder="Select Account"
+                                        placeholder="Select Account Number"
                                         onChange={handleAccountChange}
                                         showSearch
                                         optionFilterProp="children"
-                                        options={
-                                            dataAccNumber?.data?.map((item) => ({
+                                        allowClear={true}
+                                        filterOption={(input, option) =>
+                                            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    >
+                                        {dataAccNumber?.data?.map((item) => ({
                                                 label: item.name,
                                                 value: item.id,
                                             })) || []
                                         }
-                                    />
+                                    </Select>
                                 </Form.Item>
                             </Col>
                             <Col span={8}>

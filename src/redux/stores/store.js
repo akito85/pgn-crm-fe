@@ -95,6 +95,7 @@ import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
+import taxExemptionReducer from "../slices/rating_billing_invoice/taxExemption";
 import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
 import activityNameReducer from "../slices/debt_and_collection/activityName";
 import templateRemindingReducer from "../slices/debt_and_collection/templateReminding";
@@ -127,6 +128,7 @@ import transferToCustomerReducer from "../slices/receipt_collection/transferToCu
 import restructureReducer from "../slices/receipt_collection/restructure";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
+import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice"
 import deductionReducer from "../slices/receipt_collection/deduction";
 import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
@@ -213,7 +215,9 @@ const reducer = combineReducers({
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
   relationship: relationshipReducer,
-
+  multiDestination: multiDestinationReducer,
+  gasDeposit: gasDepositReducer,
+  
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
 
@@ -226,7 +230,7 @@ const reducer = combineReducers({
   accounting_rules: accountingRulesReducer,
   tax_implication: taxImplicationReducer,
   assets: assetsReducer,
-
+  
   // Global reducer
   globalProp: globalPropReducer,
 
@@ -254,6 +258,7 @@ const reducer = combineReducers({
   top: termsofPaymentReducer,
   tax_code: taxCodeReducer,
   emeterai: emeteraiReducer,
+  taxExemption: taxExemptionReducer,
   managementDeliveryInvoice: managementDeliveryInvoiceReducer,
   masterEfakturCode: masterEfakturCodeReducer,
   digitalSignature: digitalSignatureReducer,
@@ -319,7 +324,6 @@ const reducer = combineReducers({
 
   // notifications
   notifications: notificationsReducer,
-  multiDestination: multiDestinationReducer,
 });
 
 // add throttle middlewares

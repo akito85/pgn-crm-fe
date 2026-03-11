@@ -897,6 +897,7 @@ const paymentWarrantyPartnerSlice = createSlice({
     },
     [createPaymentWarrantyPartner.fulfilled]: (state) => {
       state.loading = false;
+      state.partnerCode = "";
     },
     [createPaymentWarrantyPartner.rejected]: (state) => {
       state.loading = false;

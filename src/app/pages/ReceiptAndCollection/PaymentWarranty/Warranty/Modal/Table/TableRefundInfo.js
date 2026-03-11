@@ -1,4 +1,5 @@
 import { InputNumber } from "antd";
+import moment from "moment";
 import DateComponent from "../../../../../../../components/DateComponent";
 import { columnsWarrantyInfo } from "./TableWarrantyInfo";
 
@@ -36,12 +37,17 @@ export const columnsRefundInfo = (
       width: 150,
       fixed: "right",
       render: (_, record) => (
-        <DateComponent
-          style={{ width: '100%' }}
-          value={refundDateData[record.key]}
-          onChange={(val) => handleRefundDateChange(val, record.key)}
-          disabled={disabled}
-        />
+        disabled ? (
+          <div>
+            {(refundDateData[record.key] || record.refundDate || record.transactionDate) ? moment(refundDateData[record.key] || record.refundDate || record.transactionDate).format("DD MMM YYYY") : "-"}
+          </div>
+        ) : (
+          <DateComponent
+            style={{ width: '100%' }}
+            value={refundDateData[record.key]}
+            onChange={(val) => handleRefundDateChange(val, record.key)}
+          />
+        )
       )
     },
     {
@@ -51,15 +57,20 @@ export const columnsRefundInfo = (
       width: 150,
       fixed: "right",
       render: (_, record) => (
-        <InputNumber
-          style={{ width: '100%' }}
-          formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-          parser={value => value.replace(/\$\s?|(\.*)/g, '')}
-          value={refundAmountData[record.key]}
-          onChange={(val) => handleRefundAmountChange(val, record.key)}
-          controls={false}
-          disabled={disabled}
-        />
+        disabled ? (
+          <div style={{ textAlign: 'right' }}>
+            {((refundAmountData[record.key] || record.refundAmount || record.amount) || 0).toLocaleString()}
+          </div>
+        ) : (
+          <InputNumber
+            style={{ width: '100%' }}
+            formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+            parser={value => value.replace(/\$\s?|(\.*)/g, '')}
+            value={refundAmountData[record.key]}
+            onChange={(val) => handleRefundAmountChange(val, record.key)}
+            controls={false}
+          />
+        )
       )
     }
   ];

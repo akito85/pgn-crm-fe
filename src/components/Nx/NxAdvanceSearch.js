@@ -30,6 +30,9 @@ const NxAdvanceSearch = ({
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState("");
 
+  const getColumnKey = (col, index) =>
+    col?.key || col?.dataIndex || `${col?.title || "column"}-${index}`;
+
   // Available operators
   const operators = [
     "Equal to",
@@ -211,11 +214,14 @@ const NxAdvanceSearch = ({
                     borderRadius: 8,
                   }}
                 >
-                  {columns.map((col) => (
-                    <Option key={col.key} value={col.key}>
-                      {col.title}
+                  {columns.map((col, index) => {
+                    const columnKey = getColumnKey(col, index);
+                    return (
+                    <Option key={columnKey} value={columnKey}>
+                      {col.title || col.dataIndex || "Column"}
                     </Option>
-                  ))}
+                    );
+                  })}
                 </Select>
 
                 <Select
@@ -280,11 +286,14 @@ const NxAdvanceSearch = ({
                     showSearch
                     size="large"
                   >
-                    {columns.map((col) => (
-                      <Option key={col.key} value={col.key}>
-                        {col.title}
+                    {columns.map((col, index) => {
+                      const columnKey = getColumnKey(col, index);
+                      return (
+                      <Option key={columnKey} value={columnKey}>
+                        {col.title || col.dataIndex || "Column"}
                       </Option>
-                    ))}
+                      );
+                    })}
                   </Select>
 
                   <Select
@@ -393,11 +402,14 @@ const NxAdvanceSearch = ({
                         showSearch
                         size="large"
                       >
-                        {columns.map((col) => (
-                          <Option key={col.key} value={col.key}>
-                            {col.title}
+                        {columns.map((col, index) => {
+                          const columnKey = getColumnKey(col, index);
+                          return (
+                          <Option key={columnKey} value={columnKey}>
+                            {col.title || col.dataIndex || "Column"}
                           </Option>
-                        ))}
+                          );
+                        })}
                       </Select>
 
                       <Select

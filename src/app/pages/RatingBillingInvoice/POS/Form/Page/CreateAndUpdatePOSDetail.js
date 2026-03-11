@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState, useMemo } from "react";
+import React, { Fragment, useRef, useState, useMemo, useEffect } from "react";
 import InputComponent from "../../../../../../components/InputComponent";
 import { Form, Select, Spin } from "antd";
 import { requiredMessage } from "../../../../../../utils";
@@ -22,6 +22,9 @@ const CreateAndUpdatePOSDetail = ({
   data_globalCurrency = [],
   headerCurrency,
   onCurrencyChange = () => {},
+  form,
+  isOpen = false,
+  onResetState = () => {},
 }) => {
   const searchInput = useRef(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
@@ -32,6 +35,38 @@ const CreateAndUpdatePOSDetail = ({
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
 
+  useEffect(() => {
+    if (isOpen) {
+      setDisplayedRowCount(20);
+      setSearchedColumn("");
+      setSearchText("");
+      setSearch({});
+      setFixedColumns({ left: [], right: [] });
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && form) {
+      form.resetFields([
+        "type",
+        "item",
+        "quantity",
+        "price",
+        "amount",
+        "uom",
+        "currency",
+        "convertedCurrency",
+        "discount",
+        "total",
+        "totalAmountEqv",
+        "remark",
+      ]);
+      setType(undefined);
+      setItem(undefined);
+      onResetState();
+    }
+  }, [isOpen]);
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -40,11 +75,9 @@ const CreateAndUpdatePOSDetail = ({
       ...prevState,
       [dataIndex]: selectedKeys[0],
     }));
-    // Reset displayed rows saat search
     setDisplayedRowCount(20);
   };
 
-  // Handle load more untuk infinite scroll
   const handleLoadMore = async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -134,12 +167,9 @@ const CreateAndUpdatePOSDetail = ({
     return handleCompare(fa, fb);
   };
 
-  // Data yang ditampilkan (slice berdasarkan displayedRowCount)
   const displayedData = useMemo(() => {
     return data.slice(0, displayedRowCount);
   }, [data, displayedRowCount]);
-
-  // Check apakah masih ada data untuk di-load
   const hasMore = displayedRowCount < data.length;
 
   // Columns definition
@@ -276,13 +306,7 @@ const CreateAndUpdatePOSDetail = ({
           </Form.Item>
 
           <Form.Item name={"uom"} label={"UOM"}>
-            <SelectComponent disabled={loading}>
-              {(dataUomCodes || [])?.map((uom) => (
-                <Select.Option key={uom?.label} value={uom?.label}>
-                  {uom?.label}
-                </Select.Option>
-              ))}
-            </SelectComponent>
+            <InputComponent disabled />
           </Form.Item>
 
           <Form.Item
@@ -291,12 +315,12 @@ const CreateAndUpdatePOSDetail = ({
             rules={[
               {
                 message: requiredMessage("Currency"),
-                required: type === 2145 ? true : false, 
+                required: type === 2145 ? true : false,
               },
             ]}
           >
             <SelectComponent
-              disabled={type === 2144 ? true : loading} 
+              disabled={type === 2144 ? true : loading}
               onChange={(val) => onCurrencyChange(val)}
             >
               {(data_globalCurrency || [])?.map((item) => (
