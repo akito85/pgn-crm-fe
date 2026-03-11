@@ -44,7 +44,7 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION INVOICE RELATION"}
+      title={"CONFIRMATION INVOICE RELATION"}
       type={"confirmation"}
       hidePadding={{
         top: true,

@@ -41,7 +41,7 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION RELATIONSHIP"}
+      title={"CONFIRMATION RELATIONSHIP"}
       type={"confirmation"}
       loading={loading_createUpdateRelationship}
       hidePadding={{

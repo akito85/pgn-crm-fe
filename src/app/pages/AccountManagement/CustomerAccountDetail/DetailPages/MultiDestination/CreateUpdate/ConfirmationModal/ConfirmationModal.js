@@ -44,7 +44,7 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION MULTI DESTINATION"}
+      title={"CONFIRMATION MULTI DESTINATION"}
       type={"confirmation"}
       hidePadding={{
         top: true,

@@ -845,7 +845,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         <NxModal
           isOpen={modalConfirm}
           handleCancel={() => { setActiveTab(0); setModalConfirm(false); }}
-          header={"CONFIRMATION"}
+          title={"CONFIRMATION"}
           width={1200}
           footer={[
             <div className="w-full flex justify-between gap-x-4" key="footer">

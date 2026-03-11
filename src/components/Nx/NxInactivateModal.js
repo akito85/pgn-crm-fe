@@ -60,7 +60,7 @@ const NxInactivateModal = ({
     <NxModal
       isOpen={isOpen}
       handleCancel={handleCancelModalFinal}
-      header={`${header} information`}
+      title={`${header} INFORMATION`}
       width={width}
       type={"confirmation"}
       footer={

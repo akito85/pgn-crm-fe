@@ -317,7 +317,7 @@ const PaymentRelationApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Payment Relation Information"
+        title="APPROVAL PAYMENT RELATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}

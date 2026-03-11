@@ -648,7 +648,7 @@ export default function InfoServiceRequest({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        header={"CHOOSE SERVICE REQUEST REFERENCE"}
+        title={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
         footer={[
           <Button key="close" onClick={handleClose}>

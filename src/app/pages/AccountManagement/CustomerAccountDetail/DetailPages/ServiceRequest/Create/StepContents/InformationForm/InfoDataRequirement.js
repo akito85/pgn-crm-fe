@@ -303,7 +303,7 @@ export default function InfoDataRequirement({
         isOpen={isDataRequirement}
         handleCancel={handleCancel}
         handleOk={handleCancel}
-        header={"CHOOSE DATA REQUIREMENT"}
+        title={"CHOOSE DATA REQUIREMENT"}
         width={900}
         footer={
           <div className="w-full flex justify-end gap-5">

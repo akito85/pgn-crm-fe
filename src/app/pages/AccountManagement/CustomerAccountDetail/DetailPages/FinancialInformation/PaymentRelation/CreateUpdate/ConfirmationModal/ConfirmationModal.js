@@ -44,7 +44,7 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION PAYMENT RELATION"}
+      title={"CONFIRMATION PAYMENT RELATION"}
       type={"confirmation"}
       hidePadding={{
         top: true,

@@ -172,7 +172,6 @@ export default function ModalInformationContactDetail({
       isOpen={isOpen}
       handleCancel={onBack}
       handleOk={onSave}
-      header={"CONTACT INFORMATION"}
       width={1200}
       title={"CONTACT INFORMATION"}
       footer={[

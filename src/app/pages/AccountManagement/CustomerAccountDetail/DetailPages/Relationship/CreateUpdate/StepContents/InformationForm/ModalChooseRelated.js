@@ -149,7 +149,7 @@ const ModalChooseRelated = ({
   return (
     <NxModal
       isOpen={isOpen}
-      header={modalHeader}
+      title={modalHeader}
       handleCancel={() => handleCancel()}
       width={1100}
       footer={

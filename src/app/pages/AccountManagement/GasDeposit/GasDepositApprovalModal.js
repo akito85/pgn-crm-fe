@@ -324,7 +324,7 @@ const GasDepositApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Multi Destination Information"
+        title="APPROVAL MULTI DESTINATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
