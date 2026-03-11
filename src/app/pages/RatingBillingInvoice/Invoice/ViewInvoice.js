@@ -424,23 +424,43 @@ const ViewInvoice = () => {
       action: "Regenerate",
       type: "table",
       render: (record, data) => {
+        const isFailed = record?.status?.toLowerCase() === "failed";
         const Content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconReGenerate" width={20} />}
+              icon={
+                <SVGIcon
+                  name="IconReGenerate"
+                  width={20}
+                  color={isFailed ? undefined : "#8D91A0"}
+                />
+              }
               border={false}
-              onClick={() => handleReGenerate(record)}
+              disabled={!isFailed}
+              onClick={isFailed ? () => handleReGenerate(record) : undefined}
             >
-              <span className="text-black ml-3">Re-Generate</span>
+              <span
+                className={isFailed ? "text-black ml-3" : "text-gray-400 ml-3"}
+              >
+                Re-Generate
+              </span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Re-Generate" placement="left">
+            <Tooltip
+              title={
+                isFailed
+                  ? "Re-Generate"
+                  : "Re-Generate (only available when status is Failed)"
+              }
+              placement="left"
+            >
               <div
-                onClick={() => handleReGenerate(record)}
+                onClick={() => isFailed && handleReGenerate(record)}
                 style={{
-                  cursor: "pointer",
                   display: "inline-block",
                   lineHeight: 0,
+                  cursor: isFailed ? "pointer" : "not-allowed",
+                  opacity: isFailed ? 1 : 0.4,
                 }}
               >
                 <SVGIcon name="IconReGenerate" width={20} />

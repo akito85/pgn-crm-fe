@@ -1,9 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";
-import { RightOutlined } from "@ant-design/icons";
-import SVGIcon from "../../../../assets/Icon/index";
-import InputComponent from "../../../../components/InputComponent";
+import { Steps, Form } from "antd";import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
 import DetailText from "../../../../components/DetailText";
@@ -297,63 +294,61 @@ const ModalApprovalBilling = ({
         onFinish={handleSave}
         width={1000}
         footer={
-          <div className="flex w-full justify-end gap-5">
-            {current < steps.length - 1 && (
-              <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                Cancel
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              >
-                Previous
-              </ButtonComponent>
-            )}
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={handleButtonNext}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
+          <div className="flex w-full justify-between items-center">
+            {/* Kiri: Tombol Cancel */}
+            <div>
+              {current < steps.length - 1 && (
+                <ButtonComponent type={"default"} onClick={handleCancelForm}>
+                  Cancel
+                </ButtonComponent>
+              )}
+            </div>
+
+            {/* Kanan: Tombol Previous, Next, Reject, Approve */}
+            <div className="flex gap-x-3">
+              {current > 0 && (
+                <ButtonComponent
+                  onClick={() => {
+                    prev();
+                    scrollLeftHandler();
                   }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <>
-                <ButtonComponent
-                  type={"reject"}
-                  htmlType={"submit"}
-                  form={"formApprove"}
-                  onClick={() => setAction("REJECT")}
-                  loading={loading}
+                  type={"default"}
                 >
-                  Reject
+                  Previous
                 </ButtonComponent>
+              )}
+              {current < steps.length - 1 && (
                 <ButtonComponent
-                  type={"approve"}
-                  htmlType={"submit"}
-                  form={"formApprove"}
-                  onClick={() => setAction("APPROVE")}
-                  loading={loading}
+                  onClick={handleButtonNext}
+                  type={"submit"}
+                  disabled={steps[current].disabled}
                 >
-                  Approve
+                  Next
                 </ButtonComponent>
-              </>
-            )}
+              )}
+              {current === steps.length - 1 && (
+                <>
+                  <ButtonComponent
+                    type={"reject"}
+                    htmlType={"submit"}
+                    form={"formApprove"}
+                    onClick={() => setAction("REJECT")}
+                    loading={loading}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type={"approve"}
+                    htmlType={"submit"}
+                    form={"formApprove"}
+                    onClick={() => setAction("APPROVE")}
+                    loading={loading}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </>
+              )}
+            </div>
           </div>
         }
       >
