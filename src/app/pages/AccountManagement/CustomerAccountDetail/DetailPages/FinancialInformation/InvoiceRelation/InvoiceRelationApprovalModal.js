@@ -331,7 +331,7 @@ const InvoiceRelationApprovalModal = ({
               Cancel
             </Button>
 
-            <div className="flex gap-x-1">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();

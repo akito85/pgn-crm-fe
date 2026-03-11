@@ -333,8 +333,7 @@ const MultiDestinationApprovalModal = ({
             <Button type={"menu"} onClick={handleCancelForm}>
               Cancel
             </Button>
-
-            <div className="flex gap-x-2">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();

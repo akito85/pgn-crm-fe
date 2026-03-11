@@ -48,7 +48,7 @@ const ConfirmationModal = ({
         top: true,
       }}
       footer={[
-        <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
+        <div className={"flex justify-between"} key={`footer-1`}>
           <Button type={"menu"} disabled={loading_createUpdateRelationship} onClick={() => handleCancel()}>
             Cancel
           </Button>

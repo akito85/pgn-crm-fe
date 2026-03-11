@@ -138,7 +138,7 @@ const NxHistoryModal = ({
       closable={false}
       title={header}
       footer={
-        <div className="w-full flex justify-end">
+        <div className="flex justify-end">
           <ButtonComponent onClick={handleClose} type="default">
             Back
           </ButtonComponent>
