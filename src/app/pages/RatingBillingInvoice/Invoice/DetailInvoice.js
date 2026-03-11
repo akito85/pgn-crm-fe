@@ -1,18 +1,18 @@
 import React, { useState, useRef, useMemo } from "react";
-import { Tooltip } from "antd";
+import { Modal, Tooltip } from "antd";
 import axios from "axios";
 import SVGIcon from "../../../../assets/Icon/index";
 
 import TableRBI from "../../../../components/TableRBI";
+import BaseContainer from "../../../../components/BaseContainer";
+import StatusComponent from "../../../../components/StatusComponent";
+import ButtonComponent from "../../../../components/ButtonComponent";
 
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../utils/sorterFunction";
-import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
-import CardContainer from "../../../../components/CardContainer";
-import ButtonComponent from "../../../../components/ButtonComponent";
 
 export const columns = (
   search,
@@ -189,7 +189,7 @@ export const columns = (
     fixed: "right",
     isClassification: true,
     render: (_, record) => {
-      const isSuccess = record.status === "SUCCESS";
+      const isSuccess = record.status === "SUCCESS" && !!record.invoiceFile;
       return (
         <Tooltip title={isSuccess ? "Download" : "File not available"}>
           <ButtonComponent
@@ -197,7 +197,7 @@ export const columns = (
             border={false}
             icon={
               <SVGIcon
-                name="IconEye"
+                name="IconDownload"
                 width={20}
                 color={isSuccess ? undefined : "#d9d9d9"}
               />
@@ -211,23 +211,21 @@ export const columns = (
   },
 ];
 
-const DetailInvoice = ({ detail, invoiceNumber }) => {
+const DetailInvoice = ({ isOpen, onClose, detail }) => {
+  const logs = useMemo(() => detail?.logs ?? [], [detail?.logs]);
   const searchInput = useRef(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [displayedCount, setDisplayedCount] = useState(20);
 
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
 
-  // FIXED COLUMN SESUAI FORMAT STANDARD
   const [fixedColumns, setFixedColumns] = useState({
     left: [],
-    right: ["actionButtons"], // default
+    right: ["actionButtons"],
   });
 
-  // SEARCH HANDLER
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -236,13 +234,12 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
       ...prev,
       [dataIndex]: selectedKeys[0],
     }));
+    setDisplayedCount(20); // reset on new search
   };
 
-  // FILTERING DATA
   const filteredData = useMemo(() => {
-    if (!detail) return [];
-    let filtered = [...detail];
-
+    if (!logs) return [];
+    let filtered = [...logs];
     Object.keys(search).forEach((key) => {
       if (search[key]) {
         filtered = filtered.filter((item) =>
@@ -252,94 +249,125 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
         );
       }
     });
-
     return filtered;
-  }, [detail, search]);
+  }, [logs, search]);
 
-  // PAGINATION DATA
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, page, pageSize]);
+  const displayedData = useMemo(
+    () => filteredData.slice(0, displayedCount),
+    [filteredData, displayedCount],
+  );
 
-  // HANDLE FILE PREVIEW
+  const hasMore = displayedCount < filteredData.length;
+
+  const handleLoadMore = () => {
+    setDisplayedCount((prev) => prev + 20);
+  };
+
   const handlePreview = async (record) => {
     try {
-      const res = await axios.get(
-        `${configApp.RATING_BILLING_SERVICE}/v1/dbs/api/rbi/invoice/download/${record.id}`,
-        {
-          headers: tokenHeader(),
-          responseType: "arraybuffer",
-        },
-      );
-
-      const contentType = res.headers["content-type"];
-      const blob = new Blob([res.data], { type: contentType });
-      const url = URL.createObjectURL(blob);
-
-      window.open(url, "_blank");
+      const res = await axios.get(record.invoiceFile, {
+        headers: tokenHeader(),
+        responseType: "arraybuffer",
+      });
+      const blob = new Blob([res.data], {
+        type: res.headers["content-type"],
+      });
+      window.open(URL.createObjectURL(blob), "_blank");
     } catch (err) {
       console.error("Preview error:", err);
     }
   };
 
-  // BUILD FINAL COLUMNS
   const finalColumns = useMemo(() => {
-    const baseCols = columns(
+    return columns(
       search,
-      page,
-      pageSize,
+      1,
+      filteredData.length || 1,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       handlePreview,
-    );
-
-    // Pastikan semua ada key
-    return baseCols.map((col) => ({
+    ).map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-  }, [search, page, pageSize, searchedColumn, searchText]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, filteredData.length, searchedColumn, searchText]);
 
-  // COLUMN DEFINITIONS (untuk ColumnSettings)
-  const columnDefinitions = useMemo(() => {
-    return finalColumns.map((c) => ({
-      key: c.key,
-      title: c.title,
-      width: c.width,
-    }));
-  }, [finalColumns]);
+  const columnDefinitions = useMemo(
+    () =>
+      finalColumns.map((c) => ({ key: c.key, title: c.title, width: c.width })),
+    [finalColumns],
+  );
+
+  const infoItems = [
+    { label: "Invoice Number", value: detail?.invoiceNumber },
+    { label: "Customer Name", value: detail?.customerName },
+    { label: "Invoice Date", value: detail?.invoiceDate },
+    { label: "Due Date", value: detail?.dueDate },
+    { label: "Generate Status", value: detail?.status, isStatus: true },
+    {
+      label: "Stamping Meterai Status",
+      value: detail?.stampingMeteraiStatus,
+      isStatus: true,
+    },
+    { label: "Efaktur Status", value: detail?.einvoiceStatus, isStatus: true },
+    { label: "Sign Status", value: detail?.signStatus, isStatus: true },
+    { label: "Delivery Status", value: detail?.deliveryStatus, isStatus: true },
+    { label: "Billing Period", value: detail?.billingPeriod },
+  ];
 
   return (
-    <CardContainer
-      header={
-        <div className="flex -my-4 justify-between items-center">
-          <p className="w-full mt-[15px]">Invoice Log Information</p>
-          <p className="text-primary mt-[15px]">{invoiceNumber}</p>
-        </div>
-      }
+    <Modal
+      title="Invoice Detail"
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      width={1200}
+      destroyOnClose
+      styles={{
+        body: { maxHeight: "75vh", overflowY: "auto", padding: "16px" },
+      }}
     >
-      <div className="-pt-3">
-        <TableRBI
-          dataSource={paginatedData}
-          columns={finalColumns}
-          totalData={filteredData.length}
-          current={page}
-          pageSize={pageSize}
-          onChange={(p) => setPage(p)}
-          onSizeChanger={(p, s) => {
-            setPage(1);
-            setPageSize(s);
-          }}
-          tableScrolled={{ y: 500, x: "max-content" }}
-          columnDefinitions={columnDefinitions}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-        />
+      <BaseContainer border>
+        <div className="grid grid-cols-5 gap-x-4 gap-y-4 p-3">
+          {infoItems.map(({ label, value, isStatus }) => (
+            <div key={label} className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500">{label}</span>
+              {isStatus ? (
+                <StatusComponent colour={value} size="small">
+                  {value || ""}
+                </StatusComponent>
+              ) : (
+                <span className="text-sm font-semibold">{value ?? "-"}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </BaseContainer>
+
+      <div className="mt-4">
+        <BaseContainer border header="INVOICE LOG">
+          <div className="mt-3">
+            <TableRBI
+              dataSource={displayedData}
+              columns={finalColumns}
+              totalData={filteredData.length}
+              tableScrolled={{ y: 350, x: "max-content" }}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadMoreThreshold={20}
+            />
+          </div>
+        </BaseContainer>
       </div>
-    </CardContainer>
+    </Modal>
   );
 };
 
